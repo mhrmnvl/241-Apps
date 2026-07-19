@@ -64,7 +64,7 @@ const editable = computed(() => {
 const personal = ref({
   fullName: '',
   nickname: '',
-  gender: '' as '' | 'MALE' | 'FEMALE',
+  gender: '',
   birthPlace: '',
   birthDate: '',
   nik: '',

@@ -12,7 +12,15 @@ const API_BASE_URL = (
   'http://localhost:3000'
 ).replace(/\/+$/, '')
 
-const ACCESS_TOKEN_KEY = 'siakad_access_token'
+const USER_KEY = 'siakad_user'
+
+// The access token is kept in memory only — never in localStorage/sessionStorage.
+// This means an injected script (XSS) cannot read it from web storage and it is
+// not persisted to disk or shared across tabs. On a full page reload the token
+// is intentionally lost and silently re-minted from the HttpOnly refresh cookie
+// by the 401 interceptor below. The refresh token itself stays in an HttpOnly
+// cookie, unreachable by JavaScript.
+let accessToken: string | null = null
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -21,22 +29,18 @@ const api = axios.create({
 })
 
 function getAccessToken(): string | null {
-  for (const storage of [window.sessionStorage, window.localStorage]) {
-    const token = storage.getItem(ACCESS_TOKEN_KEY)
-    if (token?.trim()) return token
-  }
-  return null
+  return accessToken?.trim() ? accessToken : null
 }
 
 function setAccessToken(token: string) {
-  window.sessionStorage.setItem(ACCESS_TOKEN_KEY, token)
-  window.localStorage.setItem(ACCESS_TOKEN_KEY, token)
+  accessToken = token
 }
 
 function clearSession() {
-  window.sessionStorage.removeItem(ACCESS_TOKEN_KEY)
-  window.localStorage.removeItem(ACCESS_TOKEN_KEY)
-  window.localStorage.removeItem('siakad_user')
+  accessToken = null
+  if (typeof window !== 'undefined') {
+    window.localStorage.removeItem(USER_KEY)
+  }
 }
 
 api.interceptors.request.use((config) => {
@@ -47,7 +51,7 @@ api.interceptors.request.use((config) => {
 
   // Retrieve the school unit ID from local storage for multi-tenancy
   try {
-    const storedUser = window.localStorage.getItem('siakad_user')
+    const storedUser = window.localStorage.getItem(USER_KEY)
     if (storedUser) {
       const parsed = JSON.parse(storedUser)
       if (parsed?.schoolUnitId) {
@@ -164,4 +168,4 @@ api.interceptors.response.use(
 )
 
 export default api
-export { ACCESS_TOKEN_KEY, clearSession, getAccessToken, setAccessToken }
+export { clearSession, getAccessToken, setAccessToken }

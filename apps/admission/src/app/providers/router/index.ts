@@ -6,18 +6,6 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/features/platform/auth/stores/authStore'
 import { authSessionService } from '@/features/platform/auth/services/authSessionService'
 
-const ACCESS_TOKEN_KEY = 'siakad_access_token'
-
-function readStoredAccessToken() {
-  if (typeof window === 'undefined') return null
-
-  return (
-    window.sessionStorage.getItem(ACCESS_TOKEN_KEY) ??
-    window.localStorage.getItem(ACCESS_TOKEN_KEY) ??
-    null
-  )
-}
-
 function isAdminUser(roles: string[]) {
   return roles.includes('ADMIN') || roles.includes('SUPER_ADMIN')
 }
@@ -61,13 +49,17 @@ router.beforeEach((to) => {
     }
   }
 
-  const hasToken = Boolean(readStoredAccessToken())
+  // The access token now lives in memory only (see shared/utils/api), so it is
+  // gone after a reload. Use the persisted user (non-secret profile/roles) as the
+  // optimistic auth gate; real enforcement stays server-side — the API layer
+  // silently refreshes on 401 or logs out if the refresh cookie is invalid.
+  const hasSession = Boolean(store.user)
 
-  if (to.meta.requiresAuth && !hasToken) {
+  if (to.meta.requiresAuth && !hasSession) {
     return { name: 'login' }
   }
 
-  if (to.meta.guestOnly && hasToken) {
+  if (to.meta.guestOnly && hasSession) {
     return resolveHomeRoute(store.user?.roles ?? [])
   }
 

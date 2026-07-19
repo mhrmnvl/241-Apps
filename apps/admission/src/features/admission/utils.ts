@@ -42,6 +42,8 @@ export const STATUS_BADGE_VARIANTS: Record<
 }
 
 export function fileUrl(storageKey: string) {
-  const base = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:3000'
+  const base =
+    (import.meta.env.VITE_API_BASE_URL as string | undefined) ??
+    'http://localhost:3000'
   return `${base}/${storageKey}`
 }

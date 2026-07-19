@@ -1,6 +1,14 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
 
+/* Tailwind v4 auto-detects template sources from this app's root only. The
+   shared UI/platform/shared packages live outside it (packages/*), consumed as
+   source via aliases, so their utility classes (e.g. the sidebar) must be
+   registered here or Tailwind never generates them. */
+@source '../../../packages/ui/src';
+@source '../../../packages/platform/src';
+@source '../../../packages/shared/src';
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {

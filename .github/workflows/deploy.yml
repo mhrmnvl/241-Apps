@@ -6,11 +6,10 @@ on:
 
 jobs:
   deploy:
-    name: Deploy to Hostinger VPS
     runs-on: ubuntu-latest
 
     steps:
-      - name: Execute remote commands via SSH
+      - name: Deploy via SSH
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.HOST }}
@@ -19,28 +18,29 @@ jobs:
           port: ${{ secrets.PORT || 22 }}
           script: |
             set -e
+
             echo "Starting deployment..."
-            
-            # Pindah ke directory project
+
             cd /var/www/241-Apps
-            
-            # Pull updates
+
             git pull origin main
-            
-            # Install dependencies
+
             pnpm install --frozen-lockfile
-            
-            # Migrasi DB & Build Backend
+
             cd backend
+
             pnpm prisma:generate
             pnpm prisma:deploy
+
             pnpm build
-            
-            # Restart backend di PM2
-            pm2 restart backend-241 || pm2 start dist/src/main.js --name "backend-241"
-            
-            # Build Frontend Web Apps
+
+            pm2 restart backend-241 --update-env || pm2 start dist/src/main.js --name backend-241
+
+            pm2 save
+            pm2 status
+
             cd ..
+
             pnpm build
-            
+
             echo "Deployment completed successfully!"
