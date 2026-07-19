@@ -12,9 +12,11 @@ if (!databaseUrl) {
 
 export default defineConfig({
   schema: 'prisma',
+  // No `seed` command on purpose: production starts from an empty database.
+  // `prisma migrate reset` leaves the schema empty; seed the admin only, on
+  // demand, with `pnpm seed:admin-minimal`.
   migrations: {
     path: 'prisma/migrations',
-    seed: 'npx tsx prisma/seed.ts',
   },
   datasource: {
     url: databaseUrl,
