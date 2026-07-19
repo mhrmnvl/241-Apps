@@ -1,4 +1,16 @@
 -- CreateEnum
+CREATE TYPE "AdmissionStatus" AS ENUM ('DRAFT', 'SUBMITTED', 'REVISION_NEEDED', 'VERIFIED', 'ACCEPTED', 'REJECTED', 'ENROLLED');
+
+-- CreateEnum
+CREATE TYPE "AdmissionDocumentStatus" AS ENUM ('PENDING', 'APPROVED', 'REJECTED');
+
+-- CreateEnum
+CREATE TYPE "AdmissionPaymentStatus" AS ENUM ('UNPAID', 'PENDING', 'VERIFIED', 'REJECTED');
+
+-- CreateEnum
+CREATE TYPE "AdmissionNotificationType" AS ENUM ('STATUS_CHANGE', 'DOCUMENT', 'PAYMENT', 'ANNOUNCEMENT', 'GENERAL');
+
+-- CreateEnum
 CREATE TYPE "AssessmentType" AS ENUM ('DAILY', 'MIDTERM', 'FINAL', 'ASSIGNMENT', 'PRACTICAL');
 
 -- CreateEnum
@@ -34,13 +46,9 @@ CREATE TYPE "StudentStatus" AS ENUM ('ACTIVE', 'TRANSFERRED', 'DROPPED', 'GRADUA
 -- CreateEnum
 CREATE TYPE "Day" AS ENUM ('MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY');
 
--- CreateEnum
-CREATE TYPE "TenantStatus" AS ENUM ('TRIAL', 'ACTIVE', 'SUSPENDED', 'CANCELLED');
-
 -- CreateTable
 CREATE TABLE "academic_years" (
     "id" UUID NOT NULL,
-    "school_unit_id" UUID NOT NULL,
     "name" VARCHAR(50) NOT NULL,
     "is_active" BOOLEAN NOT NULL DEFAULT false,
     "deleted_at" TIMESTAMP(3),
@@ -80,7 +88,6 @@ CREATE TABLE "academic_calendars" (
 CREATE TABLE "curricula" (
     "id" UUID NOT NULL,
     "academic_year_id" UUID NOT NULL,
-    "school_unit_id" UUID NOT NULL,
     "name" VARCHAR(100) NOT NULL,
     "is_active" BOOLEAN NOT NULL DEFAULT true,
     "deleted_at" TIMESTAMP(3),
@@ -114,7 +121,6 @@ CREATE TABLE "addresses" (
     "student_id" UUID,
     "teacher_id" UUID,
     "parent_id" UUID,
-    "school_unit_id" UUID,
     "street" VARCHAR(255) NOT NULL,
     "rt" VARCHAR(5) NOT NULL,
     "rw" VARCHAR(5) NOT NULL,
@@ -128,6 +134,170 @@ CREATE TABLE "addresses" (
     "deleted_at" TIMESTAMP(3),
 
     CONSTRAINT "addresses_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "admission_waves" (
+    "id" UUID NOT NULL,
+    "name" VARCHAR(100) NOT NULL,
+    "code" VARCHAR(30) NOT NULL,
+    "academic_year_id" UUID NOT NULL,
+    "school_unit_id" UUID,
+    "start_date" DATE NOT NULL,
+    "end_date" DATE NOT NULL,
+    "quota" INTEGER NOT NULL,
+    "registration_fee" DECIMAL(12,2) NOT NULL,
+    "description" TEXT,
+    "is_active" BOOLEAN NOT NULL DEFAULT true,
+    "last_registration_seq" INTEGER NOT NULL DEFAULT 0,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+    "deleted_at" TIMESTAMP(3),
+
+    CONSTRAINT "admission_waves_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "admission_applications" (
+    "id" UUID NOT NULL,
+    "user_id" UUID NOT NULL,
+    "wave_id" UUID NOT NULL,
+    "registration_number" VARCHAR(30) NOT NULL,
+    "status" "AdmissionStatus" NOT NULL DEFAULT 'DRAFT',
+    "full_name" VARCHAR(100) NOT NULL,
+    "nickname" VARCHAR(50),
+    "gender" "UserGender",
+    "birth_place" VARCHAR(100),
+    "birth_date" DATE,
+    "nik" VARCHAR(16),
+    "nisn" VARCHAR(20),
+    "religion_id" UUID,
+    "phone" VARCHAR(15),
+    "email" VARCHAR(255),
+    "child_order" INTEGER,
+    "sibling_count" INTEGER,
+    "street" VARCHAR(255),
+    "rt" VARCHAR(5),
+    "rw" VARCHAR(5),
+    "village" VARCHAR(100),
+    "district" VARCHAR(100),
+    "city" VARCHAR(100),
+    "province" VARCHAR(100),
+    "postal_code" VARCHAR(10),
+    "previous_school_name" VARCHAR(200),
+    "previous_school_npsn" VARCHAR(20),
+    "previous_school_address" VARCHAR(255),
+    "graduation_year" INTEGER,
+    "submitted_at" TIMESTAMP(3),
+    "revision_note" TEXT,
+    "verified_by_id" UUID,
+    "verified_at" TIMESTAMP(3),
+    "decided_by_id" UUID,
+    "decided_at" TIMESTAMP(3),
+    "decision_note" TEXT,
+    "enrolled_student_id" UUID,
+    "enrolled_at" TIMESTAMP(3),
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+    "deleted_at" TIMESTAMP(3),
+
+    CONSTRAINT "admission_applications_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "admission_application_parents" (
+    "id" UUID NOT NULL,
+    "application_id" UUID NOT NULL,
+    "relation" "ParentRelation" NOT NULL,
+    "name" VARCHAR(100) NOT NULL,
+    "nik" VARCHAR(16),
+    "birth_place" VARCHAR(100),
+    "birth_date" DATE,
+    "phone" VARCHAR(15),
+    "occupation_id" UUID,
+    "education_id" UUID,
+    "income" "IncomeRange",
+    "is_primary" BOOLEAN NOT NULL DEFAULT false,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "admission_application_parents_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "admission_document_types" (
+    "id" UUID NOT NULL,
+    "code" VARCHAR(30) NOT NULL,
+    "name" VARCHAR(100) NOT NULL,
+    "is_required" BOOLEAN NOT NULL DEFAULT true,
+    "sort_order" INTEGER NOT NULL DEFAULT 0,
+    "is_active" BOOLEAN NOT NULL DEFAULT true,
+
+    CONSTRAINT "admission_document_types_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "admission_documents" (
+    "id" UUID NOT NULL,
+    "application_id" UUID NOT NULL,
+    "document_type_id" UUID NOT NULL,
+    "file_id" UUID NOT NULL,
+    "status" "AdmissionDocumentStatus" NOT NULL DEFAULT 'PENDING',
+    "note" TEXT,
+    "verified_by_id" UUID,
+    "verified_at" TIMESTAMP(3),
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "admission_documents_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "admission_payments" (
+    "id" UUID NOT NULL,
+    "application_id" UUID NOT NULL,
+    "amount" DECIMAL(12,2) NOT NULL,
+    "bank_name" VARCHAR(100),
+    "sender_account_name" VARCHAR(100),
+    "transfer_date" DATE,
+    "proof_file_id" UUID,
+    "status" "AdmissionPaymentStatus" NOT NULL DEFAULT 'UNPAID',
+    "note" TEXT,
+    "verified_by_id" UUID,
+    "verified_at" TIMESTAMP(3),
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "admission_payments_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "admission_announcements" (
+    "id" UUID NOT NULL,
+    "wave_id" UUID,
+    "title" VARCHAR(200) NOT NULL,
+    "content" TEXT NOT NULL,
+    "is_published" BOOLEAN NOT NULL DEFAULT false,
+    "published_at" TIMESTAMP(3),
+    "created_by_id" UUID,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+    "deleted_at" TIMESTAMP(3),
+
+    CONSTRAINT "admission_announcements_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "admission_notifications" (
+    "id" UUID NOT NULL,
+    "application_id" UUID NOT NULL,
+    "type" "AdmissionNotificationType" NOT NULL,
+    "title" VARCHAR(200) NOT NULL,
+    "message" TEXT NOT NULL,
+    "read_at" TIMESTAMP(3),
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "admission_notifications_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -209,8 +379,6 @@ CREATE TABLE "report_cards" (
 -- CreateTable
 CREATE TABLE "users" (
     "id" UUID NOT NULL,
-    "organization_id" UUID,
-    "school_unit_id" UUID,
     "identifier" VARCHAR(100) NOT NULL,
     "password_hash" VARCHAR(255) NOT NULL,
     "is_active" BOOLEAN NOT NULL DEFAULT true,
@@ -293,7 +461,6 @@ CREATE TABLE "classroom_structures" (
 -- CreateTable
 CREATE TABLE "employment_types" (
     "id" UUID NOT NULL,
-    "school_unit_id" UUID NOT NULL,
     "code" VARCHAR(20) NOT NULL,
     "name" VARCHAR(100) NOT NULL,
     "deleted_at" TIMESTAMP(3),
@@ -334,7 +501,6 @@ CREATE TABLE "student_graduations" (
 -- CreateTable
 CREATE TABLE "audience_groups" (
     "id" UUID NOT NULL,
-    "school_unit_id" UUID NOT NULL,
     "code" VARCHAR(30) NOT NULL,
     "name" VARCHAR(100) NOT NULL,
     "deleted_at" TIMESTAMP(3),
@@ -354,7 +520,6 @@ CREATE TABLE "event_audiences" (
 -- CreateTable
 CREATE TABLE "events" (
     "id" UUID NOT NULL,
-    "school_unit_id" UUID NOT NULL,
     "title" VARCHAR(200) NOT NULL,
     "description" TEXT NOT NULL,
     "start_time" TIMESTAMPTZ NOT NULL,
@@ -377,7 +542,6 @@ CREATE TABLE "event_classes" (
 -- CreateTable
 CREATE TABLE "file_categories" (
     "id" UUID NOT NULL,
-    "organization_id" UUID,
     "code" VARCHAR(50) NOT NULL,
     "name" VARCHAR(100) NOT NULL,
     "description" TEXT,
@@ -389,8 +553,6 @@ CREATE TABLE "file_categories" (
 -- CreateTable
 CREATE TABLE "files" (
     "id" UUID NOT NULL,
-    "organization_id" UUID NOT NULL,
-    "school_unit_id" UUID,
     "category_id" UUID,
     "uploaded_by" UUID,
     "filename" VARCHAR(255) NOT NULL,
@@ -418,7 +580,6 @@ CREATE TABLE "grades" (
 -- CreateTable
 CREATE TABLE "roles" (
     "id" UUID NOT NULL,
-    "organization_id" UUID,
     "name" VARCHAR(100) NOT NULL,
     "code" VARCHAR(50) NOT NULL,
     "description" TEXT,
@@ -461,7 +622,6 @@ CREATE TABLE "role_permissions" (
 -- CreateTable
 CREATE TABLE "audit_logs" (
     "id" UUID NOT NULL,
-    "organization_id" UUID,
     "user_id" UUID,
     "action" VARCHAR(100) NOT NULL,
     "resource" VARCHAR(100) NOT NULL,
@@ -475,30 +635,202 @@ CREATE TABLE "audit_logs" (
 );
 
 -- CreateTable
-CREATE TABLE "organization_types" (
+CREATE TABLE "inventory_assets" (
     "id" UUID NOT NULL,
-    "code" VARCHAR(50) NOT NULL,
-    "name" VARCHAR(100) NOT NULL,
-    "is_active" BOOLEAN NOT NULL DEFAULT true,
+    "asset_number" VARCHAR(50) NOT NULL,
+    "barcode" VARCHAR(100),
+    "name" VARCHAR(150) NOT NULL,
+    "category_id" UUID NOT NULL,
+    "brand" VARCHAR(100),
+    "model" VARCHAR(100),
+    "serial_number" VARCHAR(100),
+    "purchase_date" DATE NOT NULL,
+    "purchase_price" DECIMAL(15,2) NOT NULL,
+    "residual_value" DECIMAL(15,2) NOT NULL DEFAULT 0.00,
+    "useful_life_months" INTEGER NOT NULL DEFAULT 0,
+    "current_book_value" DECIMAL(15,2) NOT NULL,
+    "funding_source_id" UUID,
+    "image_url" TEXT,
+    "condition_id" UUID NOT NULL,
+    "status_id" UUID NOT NULL,
+    "location_id" UUID NOT NULL,
+    "custodian_id" UUID,
+    "notes" TEXT,
+    "version" INTEGER NOT NULL DEFAULT 1,
+    "created_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMPTZ NOT NULL,
+    "deleted_at" TIMESTAMPTZ,
 
-    CONSTRAINT "organization_types_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "inventory_assets_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "organizations" (
+CREATE TABLE "inventory_categories" (
     "id" UUID NOT NULL,
-    "tenant_id" UUID NOT NULL,
-    "type_id" UUID,
-    "name" VARCHAR(200) NOT NULL,
     "code" VARCHAR(50) NOT NULL,
-    "email" VARCHAR(255),
-    "phone_number" VARCHAR(15),
-    "is_active" BOOLEAN NOT NULL DEFAULT true,
-    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMP(3) NOT NULL,
-    "deleted_at" TIMESTAMP(3),
+    "name" VARCHAR(100) NOT NULL,
+    "parent_id" UUID,
+    "depreciation_rate_percent" DECIMAL(5,2) NOT NULL DEFAULT 0.00,
+    "created_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT "organizations_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "inventory_categories_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "inventory_locations" (
+    "id" UUID NOT NULL,
+    "code" VARCHAR(50) NOT NULL,
+    "name" VARCHAR(100) NOT NULL,
+    "building" VARCHAR(100),
+    "room" VARCHAR(100),
+    "rack" VARCHAR(50),
+    "description" TEXT,
+    "created_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "inventory_locations_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "inventory_conditions" (
+    "id" UUID NOT NULL,
+    "code" VARCHAR(50) NOT NULL,
+    "name" VARCHAR(50) NOT NULL,
+    "is_usable" BOOLEAN NOT NULL DEFAULT true,
+    "created_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "inventory_conditions_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "inventory_statuses" (
+    "id" UUID NOT NULL,
+    "code" VARCHAR(50) NOT NULL,
+    "name" VARCHAR(50) NOT NULL,
+    "allow_transactions" BOOLEAN NOT NULL DEFAULT true,
+    "created_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "inventory_statuses_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "inventory_funding_sources" (
+    "id" UUID NOT NULL,
+    "code" VARCHAR(50) NOT NULL,
+    "name" VARCHAR(100) NOT NULL,
+    "description" TEXT,
+    "created_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "inventory_funding_sources_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "inventory_histories" (
+    "id" UUID NOT NULL,
+    "asset_id" UUID NOT NULL,
+    "transaction_type_id" UUID NOT NULL,
+    "previous_condition_id" UUID,
+    "new_condition_id" UUID,
+    "previous_status_id" UUID,
+    "new_status_id" UUID,
+    "previous_location_id" UUID,
+    "new_location_id" UUID,
+    "previous_custodian_id" UUID,
+    "new_custodian_id" UUID,
+    "note" TEXT,
+    "changed_by_id" UUID NOT NULL,
+    "changed_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "inventory_histories_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "inventory_transaction_types" (
+    "id" UUID NOT NULL,
+    "code" VARCHAR(50) NOT NULL,
+    "name" VARCHAR(50) NOT NULL,
+    "direction" VARCHAR(10) NOT NULL,
+    "description" TEXT,
+    "created_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "inventory_transaction_types_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "inventory_loans" (
+    "id" UUID NOT NULL,
+    "loan_number" VARCHAR(50) NOT NULL,
+    "requester_id" UUID NOT NULL,
+    "expected_return_date" DATE NOT NULL,
+    "actual_return_date" DATE,
+    "purpose" TEXT NOT NULL,
+    "status_id" UUID NOT NULL,
+    "workflow_instance_id" UUID,
+    "created_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMPTZ NOT NULL,
+
+    CONSTRAINT "inventory_loans_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "inventory_loan_items" (
+    "id" UUID NOT NULL,
+    "loan_id" UUID NOT NULL,
+    "asset_id" UUID NOT NULL,
+    "returned_condition_id" UUID,
+    "notes" TEXT,
+
+    CONSTRAINT "inventory_loan_items_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "approval_workflows" (
+    "id" UUID NOT NULL,
+    "name" VARCHAR(100) NOT NULL,
+    "target_entity" VARCHAR(100) NOT NULL,
+    "description" TEXT,
+    "is_active" BOOLEAN NOT NULL DEFAULT true,
+    "created_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMPTZ NOT NULL,
+
+    CONSTRAINT "approval_workflows_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "approval_steps" (
+    "id" UUID NOT NULL,
+    "workflow_id" UUID NOT NULL,
+    "step_sequence" INTEGER NOT NULL,
+    "approver_role_id" VARCHAR(50) NOT NULL,
+    "is_mandatory" BOOLEAN NOT NULL DEFAULT true,
+    "created_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "approval_steps_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "approval_instances" (
+    "id" UUID NOT NULL,
+    "workflow_id" UUID NOT NULL,
+    "reference_id" UUID NOT NULL,
+    "current_step_sequence" INTEGER NOT NULL DEFAULT 1,
+    "status_id" UUID NOT NULL,
+    "created_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMPTZ NOT NULL,
+
+    CONSTRAINT "approval_instances_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "approval_logs" (
+    "id" UUID NOT NULL,
+    "instance_id" UUID NOT NULL,
+    "step_sequence" INTEGER NOT NULL,
+    "approver_id" UUID NOT NULL,
+    "action_id" UUID NOT NULL,
+    "note" TEXT,
+    "created_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "approval_logs_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -720,7 +1052,6 @@ CREATE TABLE "school_unit_types" (
 -- CreateTable
 CREATE TABLE "school_units" (
     "id" UUID NOT NULL,
-    "organization_id" UUID NOT NULL,
     "type_id" UUID,
     "name" VARCHAR(200) NOT NULL,
     "surname" VARCHAR(200) NOT NULL,
@@ -732,8 +1063,6 @@ CREATE TABLE "school_units" (
     "email" VARCHAR(255) NOT NULL,
     "website" VARCHAR(255) NOT NULL,
     "is_active" BOOLEAN NOT NULL DEFAULT true,
-    "subdomain" VARCHAR(100),
-    "custom_domain" VARCHAR(255),
     "deleted_at" TIMESTAMP(3),
 
     CONSTRAINT "school_units_pkey" PRIMARY KEY ("id")
@@ -755,7 +1084,6 @@ CREATE TABLE "students" (
 -- CreateTable
 CREATE TABLE "subjects" (
     "id" UUID NOT NULL,
-    "school_unit_id" UUID NOT NULL,
     "code" VARCHAR(20),
     "name" VARCHAR(100) NOT NULL,
     "deleted_at" TIMESTAMP(3),
@@ -790,7 +1118,6 @@ CREATE TABLE "teachers" (
 -- CreateTable
 CREATE TABLE "time_slot_types" (
     "id" UUID NOT NULL,
-    "school_unit_id" UUID NOT NULL,
     "code" VARCHAR(30) NOT NULL,
     "name" VARCHAR(100) NOT NULL,
     "deleted_at" TIMESTAMP(3),
@@ -801,7 +1128,6 @@ CREATE TABLE "time_slot_types" (
 -- CreateTable
 CREATE TABLE "time_slots" (
     "id" UUID NOT NULL,
-    "school_unit_id" UUID NOT NULL,
     "name" VARCHAR(100) NOT NULL,
     "start_time" TIME(0) NOT NULL,
     "end_time" TIME(0) NOT NULL,
@@ -836,43 +1162,8 @@ CREATE TABLE "schedules" (
     CONSTRAINT "schedules_pkey" PRIMARY KEY ("id")
 );
 
--- CreateTable
-CREATE TABLE "subscription_plans" (
-    "id" UUID NOT NULL,
-    "code" VARCHAR(50) NOT NULL,
-    "name" VARCHAR(100) NOT NULL,
-    "price" DECIMAL(12,2) NOT NULL,
-    "storage_limit" BIGINT NOT NULL,
-    "max_users" INTEGER NOT NULL,
-    "max_school_units" INTEGER NOT NULL,
-    "trial_days" INTEGER NOT NULL DEFAULT 14,
-    "is_active" BOOLEAN NOT NULL DEFAULT true,
-    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "subscription_plans_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "tenants" (
-    "id" UUID NOT NULL,
-    "slug" VARCHAR(100) NOT NULL,
-    "name" VARCHAR(200) NOT NULL,
-    "plan_id" UUID NOT NULL,
-    "status" "TenantStatus" NOT NULL DEFAULT 'TRIAL',
-    "trial_ends_at" TIMESTAMP(3),
-    "subscription_ends_at" TIMESTAMP(3),
-    "logo_url" VARCHAR(500),
-    "primary_color" VARCHAR(7),
-    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMP(3) NOT NULL,
-    "deleted_at" TIMESTAMP(3),
-
-    CONSTRAINT "tenants_pkey" PRIMARY KEY ("id")
-);
-
 -- CreateIndex
-CREATE UNIQUE INDEX "academic_years_school_unit_id_name_key" ON "academic_years"("school_unit_id", "name");
+CREATE UNIQUE INDEX "academic_years_name_key" ON "academic_years"("name");
 
 -- CreateIndex
 CREATE INDEX "semesters_is_active_idx" ON "semesters"("is_active");
@@ -884,19 +1175,55 @@ CREATE INDEX "semesters_start_date_end_date_idx" ON "semesters"("start_date", "e
 CREATE UNIQUE INDEX "semesters_academic_year_id_type_id_key" ON "semesters"("academic_year_id", "type_id");
 
 -- CreateIndex
-CREATE INDEX "curricula_school_unit_id_idx" ON "curricula"("school_unit_id");
+CREATE UNIQUE INDEX "curricula_name_key" ON "curricula"("name");
 
 -- CreateIndex
 CREATE INDEX "curricula_academic_year_id_idx" ON "curricula"("academic_year_id");
-
--- CreateIndex
-CREATE UNIQUE INDEX "curricula_school_unit_id_academic_year_id_name_key" ON "curricula"("school_unit_id", "academic_year_id", "name");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "academic_calendar_types_name_key" ON "academic_calendar_types"("name");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "semester_types_name_key" ON "semester_types"("name");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "admission_waves_code_key" ON "admission_waves"("code");
+
+-- CreateIndex
+CREATE INDEX "admission_waves_is_active_idx" ON "admission_waves"("is_active");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "admission_applications_user_id_key" ON "admission_applications"("user_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "admission_applications_registration_number_key" ON "admission_applications"("registration_number");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "admission_applications_enrolled_student_id_key" ON "admission_applications"("enrolled_student_id");
+
+-- CreateIndex
+CREATE INDEX "admission_applications_status_idx" ON "admission_applications"("status");
+
+-- CreateIndex
+CREATE INDEX "admission_applications_wave_id_idx" ON "admission_applications"("wave_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "admission_application_parents_application_id_relation_key" ON "admission_application_parents"("application_id", "relation");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "admission_document_types_code_key" ON "admission_document_types"("code");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "admission_documents_application_id_document_type_id_key" ON "admission_documents"("application_id", "document_type_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "admission_payments_application_id_key" ON "admission_payments"("application_id");
+
+-- CreateIndex
+CREATE INDEX "admission_announcements_is_published_idx" ON "admission_announcements"("is_published");
+
+-- CreateIndex
+CREATE INDEX "admission_notifications_application_id_read_at_idx" ON "admission_notifications"("application_id", "read_at");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "announcement_classes_announcement_id_classroom_id_key" ON "announcement_classes"("announcement_id", "classroom_id");
@@ -926,7 +1253,7 @@ CREATE UNIQUE INDEX "attendances_enrollment_id_date_schedule_id_key" ON "attenda
 CREATE UNIQUE INDEX "report_cards_enrollment_id_key" ON "report_cards"("enrollment_id");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "users_school_unit_id_identifier_key" ON "users"("school_unit_id", "identifier");
+CREATE UNIQUE INDEX "users_identifier_key" ON "users"("identifier");
 
 -- CreateIndex
 CREATE INDEX "auth_sessions_user_id_idx" ON "auth_sessions"("user_id");
@@ -959,7 +1286,7 @@ CREATE UNIQUE INDEX "classroom_supervisors_classroom_id_semester_id_key" ON "cla
 CREATE UNIQUE INDEX "classroom_structures_classroom_id_semester_id_key" ON "classroom_structures"("classroom_id", "semester_id");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "employment_types_school_unit_id_code_key" ON "employment_types"("school_unit_id", "code");
+CREATE UNIQUE INDEX "employment_types_code_key" ON "employment_types"("code");
 
 -- CreateIndex
 CREATE INDEX "student_enrollments_classroom_id_idx" ON "student_enrollments"("classroom_id");
@@ -980,7 +1307,7 @@ CREATE UNIQUE INDEX "student_graduations_student_id_key" ON "student_graduations
 CREATE INDEX "student_graduations_academic_year_id_idx" ON "student_graduations"("academic_year_id");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "audience_groups_school_unit_id_code_key" ON "audience_groups"("school_unit_id", "code");
+CREATE UNIQUE INDEX "audience_groups_code_key" ON "audience_groups"("code");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "event_audiences_event_id_audience_group_id_key" ON "event_audiences"("event_id", "audience_group_id");
@@ -989,13 +1316,7 @@ CREATE UNIQUE INDEX "event_audiences_event_id_audience_group_id_key" ON "event_a
 CREATE UNIQUE INDEX "event_classes_event_id_classroom_id_key" ON "event_classes"("event_id", "classroom_id");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "file_categories_organization_id_code_key" ON "file_categories"("organization_id", "code");
-
--- CreateIndex
-CREATE INDEX "files_organization_id_idx" ON "files"("organization_id");
-
--- CreateIndex
-CREATE INDEX "files_school_unit_id_idx" ON "files"("school_unit_id");
+CREATE UNIQUE INDEX "file_categories_code_key" ON "file_categories"("code");
 
 -- CreateIndex
 CREATE INDEX "files_category_id_idx" ON "files"("category_id");
@@ -1004,7 +1325,7 @@ CREATE INDEX "files_category_id_idx" ON "files"("category_id");
 CREATE UNIQUE INDEX "grades_level_key" ON "grades"("level");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "roles_organization_id_code_key" ON "roles"("organization_id", "code");
+CREATE UNIQUE INDEX "roles_code_key" ON "roles"("code");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "permissions_code_key" ON "permissions"("code");
@@ -1019,10 +1340,37 @@ CREATE INDEX "audit_logs_action_idx" ON "audit_logs"("action");
 CREATE INDEX "audit_logs_created_at_idx" ON "audit_logs"("created_at");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "organization_types_code_key" ON "organization_types"("code");
+CREATE UNIQUE INDEX "inventory_assets_asset_number_key" ON "inventory_assets"("asset_number");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "organizations_code_key" ON "organizations"("code");
+CREATE UNIQUE INDEX "inventory_assets_barcode_key" ON "inventory_assets"("barcode");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "inventory_categories_code_key" ON "inventory_categories"("code");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "inventory_locations_code_key" ON "inventory_locations"("code");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "inventory_conditions_code_key" ON "inventory_conditions"("code");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "inventory_statuses_code_key" ON "inventory_statuses"("code");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "inventory_funding_sources_code_key" ON "inventory_funding_sources"("code");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "inventory_transaction_types_code_key" ON "inventory_transaction_types"("code");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "inventory_loans_loan_number_key" ON "inventory_loans"("loan_number");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "approval_workflows_name_key" ON "approval_workflows"("name");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "approval_steps_workflow_id_step_sequence_key" ON "approval_steps"("workflow_id", "step_sequence");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "parents_nik_key" ON "parents"("nik");
@@ -1070,13 +1418,7 @@ CREATE UNIQUE INDEX "educations_name_key" ON "educations"("name");
 CREATE UNIQUE INDEX "school_unit_types_code_key" ON "school_unit_types"("code");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "school_units_subdomain_key" ON "school_units"("subdomain");
-
--- CreateIndex
-CREATE UNIQUE INDEX "school_units_custom_domain_key" ON "school_units"("custom_domain");
-
--- CreateIndex
-CREATE UNIQUE INDEX "school_units_organization_id_npsn_key" ON "school_units"("organization_id", "npsn");
+CREATE UNIQUE INDEX "school_units_npsn_key" ON "school_units"("npsn");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "students_user_id_key" ON "students"("user_id");
@@ -1094,13 +1436,10 @@ CREATE INDEX "students_status_idx" ON "students"("status");
 CREATE INDEX "students_grade_id_idx" ON "students"("grade_id");
 
 -- CreateIndex
-CREATE INDEX "subjects_school_unit_id_idx" ON "subjects"("school_unit_id");
+CREATE UNIQUE INDEX "subjects_code_key" ON "subjects"("code");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "subjects_school_unit_id_code_key" ON "subjects"("school_unit_id", "code");
-
--- CreateIndex
-CREATE UNIQUE INDEX "subjects_school_unit_id_name_key" ON "subjects"("school_unit_id", "name");
+CREATE UNIQUE INDEX "subjects_name_key" ON "subjects"("name");
 
 -- CreateIndex
 CREATE INDEX "curriculum_subjects_curriculum_id_idx" ON "curriculum_subjects"("curriculum_id");
@@ -1124,7 +1463,7 @@ CREATE UNIQUE INDEX "teachers_nip_key" ON "teachers"("nip");
 CREATE UNIQUE INDEX "teachers_nuptk_key" ON "teachers"("nuptk");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "time_slot_types_school_unit_id_code_key" ON "time_slot_types"("school_unit_id", "code");
+CREATE UNIQUE INDEX "time_slot_types_code_key" ON "time_slot_types"("code");
 
 -- CreateIndex
 CREATE INDEX "teaching_assignments_teacher_id_idx" ON "teaching_assignments"("teacher_id");
@@ -1150,18 +1489,6 @@ CREATE INDEX "schedules_time_slot_id_idx" ON "schedules"("time_slot_id");
 -- CreateIndex
 CREATE UNIQUE INDEX "schedules_teaching_assignment_id_day_time_slot_id_key" ON "schedules"("teaching_assignment_id", "day", "time_slot_id");
 
--- CreateIndex
-CREATE UNIQUE INDEX "subscription_plans_code_key" ON "subscription_plans"("code");
-
--- CreateIndex
-CREATE UNIQUE INDEX "tenants_slug_key" ON "tenants"("slug");
-
--- CreateIndex
-CREATE INDEX "tenants_slug_idx" ON "tenants"("slug");
-
--- AddForeignKey
-ALTER TABLE "academic_years" ADD CONSTRAINT "academic_years_school_unit_id_fkey" FOREIGN KEY ("school_unit_id") REFERENCES "school_units"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
 -- AddForeignKey
 ALTER TABLE "semesters" ADD CONSTRAINT "semesters_academic_year_id_fkey" FOREIGN KEY ("academic_year_id") REFERENCES "academic_years"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
@@ -1181,19 +1508,61 @@ ALTER TABLE "academic_calendars" ADD CONSTRAINT "academic_calendars_type_id_fkey
 ALTER TABLE "curricula" ADD CONSTRAINT "curricula_academic_year_id_fkey" FOREIGN KEY ("academic_year_id") REFERENCES "academic_years"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "curricula" ADD CONSTRAINT "curricula_school_unit_id_fkey" FOREIGN KEY ("school_unit_id") REFERENCES "school_units"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE "addresses" ADD CONSTRAINT "addresses_teacher_id_fkey" FOREIGN KEY ("teacher_id") REFERENCES "teachers"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "addresses" ADD CONSTRAINT "addresses_school_unit_id_fkey" FOREIGN KEY ("school_unit_id") REFERENCES "school_units"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "addresses" ADD CONSTRAINT "addresses_parent_id_fkey" FOREIGN KEY ("parent_id") REFERENCES "parents"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "addresses" ADD CONSTRAINT "addresses_student_id_fkey" FOREIGN KEY ("student_id") REFERENCES "students"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "admission_waves" ADD CONSTRAINT "admission_waves_academic_year_id_fkey" FOREIGN KEY ("academic_year_id") REFERENCES "academic_years"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "admission_waves" ADD CONSTRAINT "admission_waves_school_unit_id_fkey" FOREIGN KEY ("school_unit_id") REFERENCES "school_units"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "admission_applications" ADD CONSTRAINT "admission_applications_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "admission_applications" ADD CONSTRAINT "admission_applications_wave_id_fkey" FOREIGN KEY ("wave_id") REFERENCES "admission_waves"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "admission_applications" ADD CONSTRAINT "admission_applications_religion_id_fkey" FOREIGN KEY ("religion_id") REFERENCES "religions"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "admission_applications" ADD CONSTRAINT "admission_applications_enrolled_student_id_fkey" FOREIGN KEY ("enrolled_student_id") REFERENCES "students"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "admission_application_parents" ADD CONSTRAINT "admission_application_parents_application_id_fkey" FOREIGN KEY ("application_id") REFERENCES "admission_applications"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "admission_application_parents" ADD CONSTRAINT "admission_application_parents_occupation_id_fkey" FOREIGN KEY ("occupation_id") REFERENCES "occupations"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "admission_application_parents" ADD CONSTRAINT "admission_application_parents_education_id_fkey" FOREIGN KEY ("education_id") REFERENCES "educations"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "admission_documents" ADD CONSTRAINT "admission_documents_application_id_fkey" FOREIGN KEY ("application_id") REFERENCES "admission_applications"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "admission_documents" ADD CONSTRAINT "admission_documents_document_type_id_fkey" FOREIGN KEY ("document_type_id") REFERENCES "admission_document_types"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "admission_documents" ADD CONSTRAINT "admission_documents_file_id_fkey" FOREIGN KEY ("file_id") REFERENCES "files"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "admission_payments" ADD CONSTRAINT "admission_payments_application_id_fkey" FOREIGN KEY ("application_id") REFERENCES "admission_applications"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "admission_payments" ADD CONSTRAINT "admission_payments_proof_file_id_fkey" FOREIGN KEY ("proof_file_id") REFERENCES "files"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "admission_announcements" ADD CONSTRAINT "admission_announcements_wave_id_fkey" FOREIGN KEY ("wave_id") REFERENCES "admission_waves"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "admission_notifications" ADD CONSTRAINT "admission_notifications_application_id_fkey" FOREIGN KEY ("application_id") REFERENCES "admission_applications"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "announcement_classes" ADD CONSTRAINT "announcement_classes_announcement_id_fkey" FOREIGN KEY ("announcement_id") REFERENCES "announcements"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -1218,12 +1587,6 @@ ALTER TABLE "attendances" ADD CONSTRAINT "attendances_schedule_id_fkey" FOREIGN 
 
 -- AddForeignKey
 ALTER TABLE "report_cards" ADD CONSTRAINT "report_cards_enrollment_id_fkey" FOREIGN KEY ("enrollment_id") REFERENCES "student_enrollments"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "users" ADD CONSTRAINT "users_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "organizations"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "users" ADD CONSTRAINT "users_school_unit_id_fkey" FOREIGN KEY ("school_unit_id") REFERENCES "school_units"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "auth_sessions" ADD CONSTRAINT "auth_sessions_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -1268,9 +1631,6 @@ ALTER TABLE "classroom_structures" ADD CONSTRAINT "classroom_structures_secretar
 ALTER TABLE "classroom_structures" ADD CONSTRAINT "classroom_structures_treasurer_id_fkey" FOREIGN KEY ("treasurer_id") REFERENCES "students"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "employment_types" ADD CONSTRAINT "employment_types_school_unit_id_fkey" FOREIGN KEY ("school_unit_id") REFERENCES "school_units"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE "student_enrollments" ADD CONSTRAINT "student_enrollments_classroom_id_fkey" FOREIGN KEY ("classroom_id") REFERENCES "classrooms"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -1286,16 +1646,10 @@ ALTER TABLE "student_graduations" ADD CONSTRAINT "student_graduations_student_id
 ALTER TABLE "student_graduations" ADD CONSTRAINT "student_graduations_academic_year_id_fkey" FOREIGN KEY ("academic_year_id") REFERENCES "academic_years"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "audience_groups" ADD CONSTRAINT "audience_groups_school_unit_id_fkey" FOREIGN KEY ("school_unit_id") REFERENCES "school_units"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE "event_audiences" ADD CONSTRAINT "event_audiences_event_id_fkey" FOREIGN KEY ("event_id") REFERENCES "events"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "event_audiences" ADD CONSTRAINT "event_audiences_audience_group_id_fkey" FOREIGN KEY ("audience_group_id") REFERENCES "audience_groups"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "events" ADD CONSTRAINT "events_school_unit_id_fkey" FOREIGN KEY ("school_unit_id") REFERENCES "school_units"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "event_classes" ADD CONSTRAINT "event_classes_event_id_fkey" FOREIGN KEY ("event_id") REFERENCES "events"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -1304,22 +1658,10 @@ ALTER TABLE "event_classes" ADD CONSTRAINT "event_classes_event_id_fkey" FOREIGN
 ALTER TABLE "event_classes" ADD CONSTRAINT "event_classes_classroom_id_fkey" FOREIGN KEY ("classroom_id") REFERENCES "classrooms"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "file_categories" ADD CONSTRAINT "file_categories_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "organizations"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "files" ADD CONSTRAINT "files_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "organizations"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "files" ADD CONSTRAINT "files_school_unit_id_fkey" FOREIGN KEY ("school_unit_id") REFERENCES "school_units"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE "files" ADD CONSTRAINT "files_category_id_fkey" FOREIGN KEY ("category_id") REFERENCES "file_categories"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "files" ADD CONSTRAINT "files_uploaded_by_fkey" FOREIGN KEY ("uploaded_by") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "roles" ADD CONSTRAINT "roles_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "organizations"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "user_roles" ADD CONSTRAINT "user_roles_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -1337,13 +1679,43 @@ ALTER TABLE "role_permissions" ADD CONSTRAINT "role_permissions_permission_id_fk
 ALTER TABLE "audit_logs" ADD CONSTRAINT "audit_logs_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "audit_logs" ADD CONSTRAINT "audit_logs_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "organizations"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "inventory_assets" ADD CONSTRAINT "inventory_assets_category_id_fkey" FOREIGN KEY ("category_id") REFERENCES "inventory_categories"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "organizations" ADD CONSTRAINT "organizations_tenant_id_fkey" FOREIGN KEY ("tenant_id") REFERENCES "tenants"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "inventory_assets" ADD CONSTRAINT "inventory_assets_location_id_fkey" FOREIGN KEY ("location_id") REFERENCES "inventory_locations"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "organizations" ADD CONSTRAINT "organizations_type_id_fkey" FOREIGN KEY ("type_id") REFERENCES "organization_types"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "inventory_assets" ADD CONSTRAINT "inventory_assets_condition_id_fkey" FOREIGN KEY ("condition_id") REFERENCES "inventory_conditions"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "inventory_assets" ADD CONSTRAINT "inventory_assets_status_id_fkey" FOREIGN KEY ("status_id") REFERENCES "inventory_statuses"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "inventory_assets" ADD CONSTRAINT "inventory_assets_funding_source_id_fkey" FOREIGN KEY ("funding_source_id") REFERENCES "inventory_funding_sources"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "inventory_categories" ADD CONSTRAINT "inventory_categories_parent_id_fkey" FOREIGN KEY ("parent_id") REFERENCES "inventory_categories"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "inventory_histories" ADD CONSTRAINT "inventory_histories_asset_id_fkey" FOREIGN KEY ("asset_id") REFERENCES "inventory_assets"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "inventory_histories" ADD CONSTRAINT "inventory_histories_transaction_type_id_fkey" FOREIGN KEY ("transaction_type_id") REFERENCES "inventory_transaction_types"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "inventory_loan_items" ADD CONSTRAINT "inventory_loan_items_loan_id_fkey" FOREIGN KEY ("loan_id") REFERENCES "inventory_loans"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "inventory_loan_items" ADD CONSTRAINT "inventory_loan_items_asset_id_fkey" FOREIGN KEY ("asset_id") REFERENCES "inventory_assets"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "approval_steps" ADD CONSTRAINT "approval_steps_workflow_id_fkey" FOREIGN KEY ("workflow_id") REFERENCES "approval_workflows"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "approval_instances" ADD CONSTRAINT "approval_instances_workflow_id_fkey" FOREIGN KEY ("workflow_id") REFERENCES "approval_workflows"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "approval_logs" ADD CONSTRAINT "approval_logs_instance_id_fkey" FOREIGN KEY ("instance_id") REFERENCES "approval_instances"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "parents" ADD CONSTRAINT "parents_occupation_id_fkey" FOREIGN KEY ("occupation_id") REFERENCES "occupations"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -1400,9 +1772,6 @@ ALTER TABLE "profiles" ADD CONSTRAINT "profiles_blood_type_id_fkey" FOREIGN KEY 
 ALTER TABLE "profiles" ADD CONSTRAINT "profiles_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "school_units" ADD CONSTRAINT "school_units_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "organizations"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE "school_units" ADD CONSTRAINT "school_units_type_id_fkey" FOREIGN KEY ("type_id") REFERENCES "school_unit_types"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -1410,9 +1779,6 @@ ALTER TABLE "students" ADD CONSTRAINT "students_user_id_fkey" FOREIGN KEY ("user
 
 -- AddForeignKey
 ALTER TABLE "students" ADD CONSTRAINT "students_grade_id_fkey" FOREIGN KEY ("grade_id") REFERENCES "grades"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "subjects" ADD CONSTRAINT "subjects_school_unit_id_fkey" FOREIGN KEY ("school_unit_id") REFERENCES "school_units"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "curriculum_subjects" ADD CONSTRAINT "curriculum_subjects_curriculum_id_fkey" FOREIGN KEY ("curriculum_id") REFERENCES "curricula"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -1428,12 +1794,6 @@ ALTER TABLE "teachers" ADD CONSTRAINT "teachers_user_id_fkey" FOREIGN KEY ("user
 
 -- AddForeignKey
 ALTER TABLE "teachers" ADD CONSTRAINT "teachers_employment_type_id_fkey" FOREIGN KEY ("employment_type_id") REFERENCES "employment_types"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "time_slot_types" ADD CONSTRAINT "time_slot_types_school_unit_id_fkey" FOREIGN KEY ("school_unit_id") REFERENCES "school_units"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "time_slots" ADD CONSTRAINT "time_slots_school_unit_id_fkey" FOREIGN KEY ("school_unit_id") REFERENCES "school_units"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "time_slots" ADD CONSTRAINT "time_slots_type_id_fkey" FOREIGN KEY ("type_id") REFERENCES "time_slot_types"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -1455,6 +1815,3 @@ ALTER TABLE "schedules" ADD CONSTRAINT "schedules_teaching_assignment_id_fkey" F
 
 -- AddForeignKey
 ALTER TABLE "schedules" ADD CONSTRAINT "schedules_time_slot_id_fkey" FOREIGN KEY ("time_slot_id") REFERENCES "time_slots"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "tenants" ADD CONSTRAINT "tenants_plan_id_fkey" FOREIGN KEY ("plan_id") REFERENCES "subscription_plans"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

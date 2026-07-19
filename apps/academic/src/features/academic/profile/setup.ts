@@ -50,10 +50,9 @@ import {
 } from './state'
 
 export function setupProfileFeature() {
-  const { fetchSocialMedias, socialMedias } = useSocialMedia()
-
   configureProfile({
     socialMediaProvider: async () => {
+      const { fetchSocialMedias, socialMedias } = useSocialMedia()
       await fetchSocialMedias({ limit: 100 })
       return socialMedias.value
     },
