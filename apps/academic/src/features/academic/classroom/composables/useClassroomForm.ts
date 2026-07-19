@@ -1,0 +1,168 @@
+import { computed, ref, watch } from 'vue'
+import { storeToRefs } from 'pinia'
+import { toTypedSchema } from '@vee-validate/zod'
+import { useForm } from 'vee-validate'
+import * as z from 'zod'
+import { classroomService } from '../services/classroomService'
+import { useClassroomStore } from '../stores/classroomStore'
+import type {
+  Classroom,
+  ClassroomSavePayload,
+  Curricula,
+  AcademicYear,
+} from '../types'
+
+export function useClassroomForm(options?: {
+  curricula?: () => Curricula[]
+  academicYears?: () => AcademicYear[]
+  editData?: () => Classroom | null
+  onSuccess?: () => void | Promise<void>
+}) {
+  const store = useClassroomStore()
+  const { isSaving, formError } = storeToRefs(store)
+  const showConfirmAlert = ref(false)
+
+  const activeAcademicYears = computed(() =>
+    (options?.academicYears?.() ?? []).filter((ay) => ay.isActive),
+  )
+
+  const formSchema = toTypedSchema(
+    z.object({
+      curriculumId: z.string().min(1, 'Kurikulum wajib dipilih.'),
+      academicYearId: z.string().min(1, 'Tahun ajaran wajib dipilih.'),
+      classroomLevelId: z.string().min(1, 'Tingkat wajib dipilih.'),
+      code: z.string().min(1, 'Kode kelas wajib diisi.').max(20),
+      name: z
+        .string()
+        .max(100, 'Nama kelas tidak boleh lebih dari 100 karakter.')
+        .optional()
+        .nullable(),
+      capacity: z
+        .number({ invalid_type_error: 'Kapasitas harus berupa angka' })
+        .min(1, 'Kapasitas minimal 1.')
+        .max(100, 'Kapasitas tidak boleh lebih dari 100 siswa.'),
+      isActive: z.boolean().default(true),
+    }),
+  )
+
+  const form = useForm({
+    validationSchema: formSchema,
+    initialValues: {
+      curriculumId: '',
+      academicYearId: '',
+      classroomLevelId: '',
+      code: '',
+      name: '',
+      capacity: 30,
+      isActive: true,
+    },
+  })
+
+  const filteredCurricula = computed(() => {
+    const selectedAyId = form.values.academicYearId
+    const allCurricula = options?.curricula?.() ?? []
+    if (!selectedAyId) return allCurricula.filter((c) => c.isActive)
+    return allCurricula.filter(
+      (c) => c.academicYearId === selectedAyId && c.isActive,
+    )
+  })
+
+  function setDefaultAcademicYear() {
+    const years = options?.academicYears?.() ?? []
+    if (!form.values.academicYearId && years.length > 0) {
+      const activeAy = years.find((ay) => ay.isActive)
+      form.setValues({
+        academicYearId: activeAy ? activeAy.id : (years[0]?.id ?? ''),
+      })
+    }
+  }
+
+  watch(
+    () => options?.editData?.(),
+    (data) => {
+      if (data) {
+        form.setValues({
+          curriculumId: data.curriculumId ?? '',
+          academicYearId: data.academicYearId ?? '',
+          classroomLevelId: data.classroomLevelId ?? '',
+          code: data.code ?? '',
+          name: data.name ?? '',
+          capacity: Number(data.capacity) || 30,
+          isActive: data.isActive ?? false,
+        })
+      } else {
+        form.resetForm()
+        setDefaultAcademicYear()
+      }
+    },
+    { immediate: true },
+  )
+
+  watch(
+    () => options?.academicYears?.(),
+    (years) => {
+      if (years && years.length > 0 && !form.values.academicYearId) {
+        setDefaultAcademicYear()
+      }
+    },
+    { immediate: true },
+  )
+
+  const isEditing = computed(() => !!options?.editData?.())
+
+  const onSubmit = form.handleSubmit((values) => {
+    if (isEditing.value) {
+      showConfirmAlert.value = true
+    } else {
+      void executeSave(values)
+    }
+  })
+
+  async function executeSave(values: {
+    curriculumId: string
+    academicYearId: string
+    classroomLevelId: string
+    code: string
+    name?: string | null
+    capacity: number
+    isActive: boolean
+  }) {
+    const editItem = options?.editData?.()
+    const payload: ClassroomSavePayload = {
+      curriculumId: values.curriculumId,
+      academicYearId: values.academicYearId,
+      classroomLevelId: values.classroomLevelId,
+      code: values.code.trim(),
+      name: values.name ? values.name.trim() : null,
+      capacity: values.capacity,
+      isActive: values.isActive,
+    }
+    const result = await classroomService.saveClassroom(
+      editItem?.id ?? null,
+      payload,
+    )
+    if (result.success) {
+      if (options?.onSuccess) {
+        await options.onSuccess()
+      }
+      form.resetForm()
+    }
+  }
+
+  function confirmSave() {
+    showConfirmAlert.value = false
+    void form.handleSubmit(executeSave)()
+  }
+
+  return {
+    form,
+    isSaving,
+    formError,
+    isEditing,
+    showConfirmAlert,
+    filteredCurricula,
+    activeAcademicYears,
+    onSubmit,
+    confirmSave,
+  }
+}

@@ -1,0 +1,24 @@
+model Announcement {
+  id          String    @id @default(uuid()) @db.Uuid
+  title       String    @db.VarChar(200)
+  description String    @db.Text
+  date        DateTime  @db.Date
+  createdAt   DateTime  @default(now()) @map("created_at")
+  deletedAt   DateTime? @map("deleted_at")
+
+  classrooms AnnouncementClassroom[]
+
+  @@map("announcements")
+}
+
+model AnnouncementClassroom {
+  id             String @id @default(uuid()) @db.Uuid
+  announcementId String @map("announcement_id") @db.Uuid
+  classroomId    String @map("classroom_id") @db.Uuid
+
+  announcement Announcement @relation(fields: [announcementId], references: [id], onDelete: Cascade)
+  classroom    Classroom    @relation(fields: [classroomId], references: [id])
+
+  @@unique([announcementId, classroomId])
+  @@map("announcement_classes")
+}

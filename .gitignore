@@ -1,0 +1,49 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build outputs
+dist/
+build/
+.next/
+.turbo/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Testing / coverage
+coverage/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor & tooling
+.vscode/
+.idea/
+.agents/
+.eslintcache
+
+# TypeScript build info
+*.tsbuildinfo
+
+# Deploy
+.vercel/
+
+# Uploads / temp
+uploads/
+tmp/
+
+# Agent tooling / one-off docs (kept locally, not tracked)
+skills-lock.json
+MONOREPO-MIGRATION-PLAN.md

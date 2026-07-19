@@ -1,0 +1,85 @@
+enum AssessmentType {
+  DAILY
+  MIDTERM
+  FINAL
+  ASSIGNMENT
+  PRACTICAL
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+  EXCUSED
+  SICK
+}
+
+model AssessmentItem {
+  id                   String         @id @default(uuid()) @db.Uuid
+  teachingAssignmentId String         @map("teaching_assignment_id") @db.Uuid
+  name                 String         @db.VarChar(100)
+  type                 AssessmentType
+  weight               Float          @default(1)
+  maxScore             Float          @default(100) @map("max_score")
+  deletedAt            DateTime?      @map("deleted_at")
+
+  teachingAssignment TeachingAssignment @relation(fields: [teachingAssignmentId], references: [id])
+  studentScores      StudentScore[]
+
+  @@index([teachingAssignmentId])
+  @@map("assessment_items")
+}
+
+model StudentScore {
+  id               String    @id @default(uuid()) @db.Uuid
+  enrollmentId     String    @map("enrollment_id") @db.Uuid
+  assessmentItemId String    @map("assessment_item_id") @db.Uuid
+  score            Float?
+  note             String?   @db.Text
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+  deletedAt        DateTime? @map("deleted_at")
+
+  enrollment     StudentEnrollment @relation(fields: [enrollmentId], references: [id])
+  assessmentItem AssessmentItem    @relation(fields: [assessmentItemId], references: [id])
+
+  @@unique([enrollmentId, assessmentItemId])
+  @@index([enrollmentId])
+  @@index([assessmentItemId])
+  @@map("student_scores")
+}
+
+model Attendance {
+  id           String           @id @default(uuid()) @db.Uuid
+  enrollmentId String           @map("enrollment_id") @db.Uuid
+  scheduleId   String?          @map("schedule_id") @db.Uuid
+  date         DateTime         @db.Date
+  status       AttendanceStatus
+  note         String?          @db.Text
+  deletedAt    DateTime?        @map("deleted_at")
+
+  enrollment StudentEnrollment @relation(fields: [enrollmentId], references: [id])
+  schedule   Schedule?         @relation(fields: [scheduleId], references: [id])
+
+  @@unique([enrollmentId, date, scheduleId])
+  @@index([enrollmentId])
+  @@index([scheduleId])
+  @@map("attendances")
+}
+
+model ReportCard {
+  id           String    @id @default(uuid()) @db.Uuid
+  enrollmentId String    @unique @map("enrollment_id") @db.Uuid
+  totalAverage Float?    @map("total_average")
+  rank         Int?
+  teacherNote  String?   @map("teacher_note") @db.Text
+  isPublished  Boolean   @default(false) @map("is_published")
+  deletedAt    DateTime? @map("deleted_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  enrollment StudentEnrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+
+  @@map("report_cards")
+}

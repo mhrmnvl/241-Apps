@@ -1,0 +1,69 @@
+enum ScholarshipStatus {
+  ACTIVE
+  COMPLETED
+  REVOKED
+}
+
+enum EducationStatus {
+  GRADUATED
+  ACTIVE
+  TRANSFERRED
+  DROPPED
+}
+
+model Achievement {
+  id          String          @id @default(uuid()) @db.Uuid
+  profileId   String          @map("profile_id") @db.Uuid
+  name        String          @db.VarChar(200)
+  level       String          @db.VarChar(100)
+  typeId      String          @map("type_id") @db.Uuid
+  year        Int
+  description String?         @db.Text
+  deletedAt   DateTime?       @map("deleted_at")
+
+  profile Profile         @relation(fields: [profileId], references: [id])
+  type    AchievementType @relation(fields: [typeId], references: [id])
+
+  @@map("achievements")
+}
+
+model Scholarship {
+  id        String            @id @default(uuid()) @db.Uuid
+  profileId String            @map("profile_id") @db.Uuid
+  name      String            @db.VarChar(200)
+  provider  String            @db.VarChar(200)
+  year      Int
+  status    ScholarshipStatus @default(ACTIVE)
+  deletedAt DateTime?         @map("deleted_at")
+
+  profile Profile @relation(fields: [profileId], references: [id])
+
+  @@map("scholarships")
+}
+
+model EducationalHistory {
+  id          String          @id @default(uuid()) @db.Uuid
+  profileId   String          @map("profile_id") @db.Uuid
+  level       String          @db.VarChar(50)
+  institution String          @db.VarChar(200)
+  major       String?         @db.VarChar(100)
+  startYear   Int             @map("start_year")
+  endYear     Int?            @map("end_year")
+  status      EducationStatus @default(ACTIVE)
+  deletedAt   DateTime?       @map("deleted_at")
+
+  profile Profile @relation(fields: [profileId], references: [id])
+
+  @@map("educational_histories")
+}
+
+model AchievementType {
+  id        String    @id @default(uuid()) @db.Uuid
+  name      String    @unique @db.VarChar(50)
+  isActive  Boolean   @default(true) @map("is_active")
+  deletedAt DateTime? @map("deleted_at")
+
+  achievements Achievement[]
+
+  @@map("achievement_types")
+}

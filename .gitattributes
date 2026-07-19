@@ -1,0 +1,12 @@
+# Normalisasi line ending: paksa LF untuk semua file teks (konsisten dgn prettier endOfLine: lf)
+* text=auto eol=lf
+
+# Binary tetap apa adanya
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.excalidraw binary

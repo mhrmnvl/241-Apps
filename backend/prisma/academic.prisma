@@ -1,0 +1,93 @@
+model AcademicYear {
+  id        String    @id @default(uuid()) @db.Uuid
+  name      String    @unique @db.VarChar(50)
+  isActive  Boolean   @default(false) @map("is_active")
+  deletedAt DateTime? @map("deleted_at")
+
+  classrooms        Classroom[]
+  curricula         Curricula[]
+  semesters         Semester[]
+  academicCalendars AcademicCalendar[]
+  graduations       StudentGraduation[]
+  admissionWaves    AdmissionWave[]
+
+  @@map("academic_years")
+}
+
+model Semester {
+  id             String    @id @default(uuid()) @db.Uuid
+  academicYearId String    @map("academic_year_id") @db.Uuid
+  typeId         String    @map("type_id") @db.Uuid
+  startDate      DateTime? @map("start_date") @db.Date
+  endDate        DateTime? @map("end_date") @db.Date
+  isActive       Boolean   @default(false) @map("is_active")
+  deletedAt      DateTime? @map("deleted_at")
+
+  academicCalendars    AcademicCalendar[]
+  academicYear         AcademicYear          @relation(fields: [academicYearId], references: [id])
+  enrollments          StudentEnrollment[]
+  classroomSupervisors ClassroomSupervisor[]
+  classroomStructures  ClassroomStructure[]
+  teachingAssignments  TeachingAssignment[]
+  type                 SemesterType          @relation(fields: [typeId], references: [id])
+
+  @@unique([academicYearId, typeId])
+  @@index([isActive])
+  @@index([startDate, endDate])
+  @@map("semesters")
+}
+
+model AcademicCalendar {
+  id             String    @id @default(uuid()) @db.Uuid
+  academicYearId String    @map("academic_year_id") @db.Uuid
+  semesterId     String?   @map("semester_id") @db.Uuid
+  title          String    @db.VarChar(200)
+  typeId         String    @map("type_id") @db.Uuid
+  startDate      DateTime  @map("start_date") @db.Date
+  endDate        DateTime  @map("end_date") @db.Date
+  description    String?   @db.Text
+  deletedAt      DateTime? @map("deleted_at")
+
+  academicYear AcademicYear         @relation(fields: [academicYearId], references: [id])
+  semester     Semester?            @relation(fields: [semesterId], references: [id])
+  type         AcademicCalendarType @relation(fields: [typeId], references: [id])
+
+  @@map("academic_calendars")
+}
+
+model Curricula {
+  id             String    @id @default(uuid()) @db.Uuid
+  academicYearId String    @map("academic_year_id") @db.Uuid
+  name           String    @unique @db.VarChar(100)
+  isActive       Boolean   @default(true) @map("is_active")
+  deletedAt      DateTime? @map("deleted_at")
+
+  academicYear       AcademicYear        @relation(fields: [academicYearId], references: [id], onDelete: Cascade)
+  classrooms         Classroom[]
+  curriculumSubjects CurriculumSubject[]
+
+  @@index([academicYearId])
+  @@map("curricula")
+}
+
+model AcademicCalendarType {
+  id        String    @id @default(uuid()) @db.Uuid
+  name      String    @unique @db.VarChar(50)
+  isActive  Boolean   @default(true) @map("is_active")
+  deletedAt DateTime? @map("deleted_at")
+
+  academicCalendars AcademicCalendar[]
+
+  @@map("academic_calendar_types")
+}
+
+model SemesterType {
+  id        String    @id @default(uuid()) @db.Uuid
+  name      String    @unique @db.VarChar(50)
+  isActive  Boolean   @default(true) @map("is_active")
+  deletedAt DateTime? @map("deleted_at")
+
+  semesters Semester[]
+
+  @@map("semester_types")
+}

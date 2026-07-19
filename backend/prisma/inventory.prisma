@@ -1,0 +1,234 @@
+// =========================================================================
+// INVENTORY MODULE SCHEMA
+// =========================================================================
+
+model InventoryAsset {
+  id               String    @id @default(uuid()) @db.Uuid
+  assetNumber      String    @unique @map("asset_number") @db.VarChar(50)
+  barcode          String?   @unique @db.VarChar(100)
+  name             String    @db.VarChar(150)
+  categoryId       String    @map("category_id") @db.Uuid
+  brand            String?   @db.VarChar(100)
+  model            String?   @db.VarChar(100)
+  serialNumber     String?   @map("serial_number") @db.VarChar(100)
+  purchaseDate     DateTime  @map("purchase_date") @db.Date
+  purchasePrice    Decimal   @map("purchase_price") @db.Decimal(15, 2)
+  residualValue    Decimal   @default(0.00) @map("residual_value") @db.Decimal(15, 2)
+  usefulLifeMonths Int       @default(0) @map("useful_life_months")
+  currentBookValue Decimal   @map("current_book_value") @db.Decimal(15, 2)
+  fundingSourceId  String?   @map("funding_source_id") @db.Uuid
+  imageUrl         String?   @map("image_url") @db.Text
+  conditionId      String    @map("condition_id") @db.Uuid
+  statusId         String    @map("status_id") @db.Uuid
+  locationId       String    @map("location_id") @db.Uuid
+  custodianId      String?   @map("custodian_id") @db.Uuid
+  notes            String?   @db.Text
+  version          Int       @default(1)
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt        DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt        DateTime? @map("deleted_at") @db.Timestamptz
+
+  category      InventoryCategory      @relation(fields: [categoryId], references: [id])
+  location      InventoryLocation      @relation(fields: [locationId], references: [id])
+  condition     InventoryCondition     @relation(fields: [conditionId], references: [id])
+  status        InventoryStatus        @relation(fields: [statusId], references: [id])
+  fundingSource InventoryFundingSource? @relation(fields: [fundingSourceId], references: [id])
+
+  histories     InventoryHistory[]
+  loanItems     InventoryLoanItem[]
+
+  @@map("inventory_assets")
+}
+
+model InventoryCategory {
+  id                      String   @id @default(uuid()) @db.Uuid
+  code                    String   @unique @db.VarChar(50)
+  name                    String   @db.VarChar(100)
+  parentId                String?  @map("parent_id") @db.Uuid
+  depreciationRatePercent Decimal  @default(0.00) @map("depreciation_rate_percent") @db.Decimal(5, 2)
+  createdAt               DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  parent   InventoryCategory?  @relation("CategoryHierarchy", fields: [parentId], references: [id])
+  children InventoryCategory[] @relation("CategoryHierarchy")
+  assets   InventoryAsset[]
+
+  @@map("inventory_categories")
+}
+
+model InventoryLocation {
+  id          String   @id @default(uuid()) @db.Uuid
+  code        String   @unique @db.VarChar(50)
+  name        String   @db.VarChar(100)
+  building    String?  @db.VarChar(100)
+  room        String?  @db.VarChar(100)
+  rack        String?  @db.VarChar(50)
+  description String?  @db.Text
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  assets InventoryAsset[]
+
+  @@map("inventory_locations")
+}
+
+model InventoryCondition {
+  id        String   @id @default(uuid()) @db.Uuid
+  code      String   @unique @db.VarChar(50)
+  name      String   @db.VarChar(50)
+  isUsable  Boolean  @default(true) @map("is_usable")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  assets InventoryAsset[]
+
+  @@map("inventory_conditions")
+}
+
+model InventoryStatus {
+  id                String   @id @default(uuid()) @db.Uuid
+  code              String   @unique @db.VarChar(50)
+  name              String   @db.VarChar(50)
+  allowTransactions Boolean  @default(true) @map("allow_transactions")
+  createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  assets InventoryAsset[]
+
+  @@map("inventory_statuses")
+}
+
+model InventoryFundingSource {
+  id          String   @id @default(uuid()) @db.Uuid
+  code        String   @unique @db.VarChar(50)
+  name        String   @db.VarChar(100)
+  description String?  @db.Text
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  assets InventoryAsset[]
+
+  @@map("inventory_funding_sources")
+}
+
+
+
+model InventoryHistory {
+  id                  String   @id @default(uuid()) @db.Uuid
+  assetId             String   @map("asset_id") @db.Uuid
+  transactionTypeId   String   @map("transaction_type_id") @db.Uuid
+  previousConditionId String?  @map("previous_condition_id") @db.Uuid
+  newConditionId      String?  @map("new_condition_id") @db.Uuid
+  previousStatusId    String?  @map("previous_status_id") @db.Uuid
+  newStatusId         String?  @map("new_status_id") @db.Uuid
+  previousLocationId  String?  @map("previous_location_id") @db.Uuid
+  newLocationId       String?  @map("new_location_id") @db.Uuid
+  previousCustodianId String?  @map("previous_custodian_id") @db.Uuid
+  newCustodianId      String?  @map("new_custodian_id") @db.Uuid
+  note                String?  @db.Text
+  changedById         String   @map("changed_by_id") @db.Uuid
+  changedAt           DateTime @default(now()) @map("changed_at") @db.Timestamptz
+
+  asset           InventoryAsset           @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  transactionType InventoryTransactionType @relation(fields: [transactionTypeId], references: [id])
+
+  @@map("inventory_histories")
+}
+
+model InventoryTransactionType {
+  id          String   @id @default(uuid()) @db.Uuid
+  code        String   @unique @db.VarChar(50)
+  name        String   @db.VarChar(50)
+  direction   String   @db.VarChar(10) // 'IN', 'OUT', 'NONE'
+  description String?  @db.Text
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  histories InventoryHistory[]
+
+  @@map("inventory_transaction_types")
+}
+
+// Circulation / Loan Models
+model InventoryLoan {
+  id                 String    @id @default(uuid()) @db.Uuid
+  loanNumber         String    @unique @map("loan_number") @db.VarChar(50)
+  requesterId        String    @map("requester_id") @db.Uuid
+  expectedReturnDate DateTime  @map("expected_return_date") @db.Date
+  actualReturnDate   DateTime? @map("actual_return_date") @db.Date
+  purpose            String    @db.Text
+  statusId           String    @map("status_id") @db.Uuid
+  workflowInstanceId String?   @map("workflow_instance_id") @db.Uuid
+  createdAt          DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt          DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+
+  items InventoryLoanItem[]
+
+  @@map("inventory_loans")
+}
+
+model InventoryLoanItem {
+  id                  String  @id @default(uuid()) @db.Uuid
+  loanId              String  @map("loan_id") @db.Uuid
+  assetId             String  @map("asset_id") @db.Uuid
+  returnedConditionId String? @map("returned_condition_id") @db.Uuid
+  notes               String? @db.Text
+
+  loan  InventoryLoan  @relation(fields: [loanId], references: [id], onDelete: Cascade)
+  asset InventoryAsset @relation(fields: [assetId], references: [id])
+
+  @@map("inventory_loan_items")
+}
+
+// Generic Approval Engine Schema
+model ApprovalWorkflow {
+  id           String   @id @default(uuid()) @db.Uuid
+  name         String   @unique @db.VarChar(100)
+  targetEntity String   @map("target_entity") @db.VarChar(100)
+  description  String?  @db.Text
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  steps     ApprovalStep[]
+  instances ApprovalInstance[]
+
+  @@map("approval_workflows")
+}
+
+model ApprovalStep {
+  id             String   @id @default(uuid()) @db.Uuid
+  workflowId     String   @map("workflow_id") @db.Uuid
+  stepSequence   Int      @map("step_sequence")
+  approverRoleId String   @map("approver_role_id") @db.VarChar(50)
+  isMandatory    Boolean  @default(true) @map("is_mandatory")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  workflow ApprovalWorkflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+
+  @@unique([workflowId, stepSequence])
+  @@map("approval_steps")
+}
+
+model ApprovalInstance {
+  id                  String   @id @default(uuid()) @db.Uuid
+  workflowId          String   @map("workflow_id") @db.Uuid
+  referenceId         String   @map("reference_id") @db.Uuid
+  currentStepSequence Int      @default(1) @map("current_step_sequence")
+  statusId            String   @map("status_id") @db.Uuid
+  createdAt           DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt           DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  workflow ApprovalWorkflow @relation(fields: [workflowId], references: [id])
+  logs     ApprovalLog[]
+
+  @@map("approval_instances")
+}
+
+model ApprovalLog {
+  id           String   @id @default(uuid()) @db.Uuid
+  instanceId   String   @map("instance_id") @db.Uuid
+  stepSequence Int      @map("step_sequence")
+  approverId   String   @map("approver_id") @db.Uuid
+  actionId     String   @map("action_id") @db.Uuid
+  note         String?  @db.Text
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  instance     ApprovalInstance @relation(fields: [instanceId], references: [id], onDelete: Cascade)
+
+  @@map("approval_logs")
+}

@@ -1,0 +1,37 @@
+model SocialMedia {
+  id        String    @id @default(uuid()) @db.Uuid
+  name      String    @db.VarChar(50)
+  baseUrl   String    @default("") @map("base_url") @db.VarChar(255)
+  deletedAt DateTime? @map("deleted_at")
+
+  profileSocialMedias    ProfileSocialMedia[]
+  schoolUnitSocialMedias SchoolUnitSocialMedia[]
+
+  @@map("social_medias")
+}
+
+model ProfileSocialMedia {
+  id            String    @id @default(uuid()) @db.Uuid
+  socialMediaId String    @map("social_media_id") @db.Uuid
+  profileId     String    @map("profile_id") @db.Uuid
+  username      String?   @db.VarChar(100)
+  deletedAt     DateTime? @map("deleted_at")
+
+  socialMedia SocialMedia @relation(fields: [socialMediaId], references: [id])
+  profile     Profile     @relation(fields: [profileId], references: [id])
+
+  @@map("profile_social_medias")
+}
+
+model SchoolUnitSocialMedia {
+  id            String    @id @default(uuid()) @db.Uuid
+  socialMediaId String    @map("social_media_id") @db.Uuid
+  schoolUnitId  String    @map("school_unit_id") @db.Uuid
+  username      String?   @db.VarChar(100)
+  deletedAt     DateTime? @map("deleted_at")
+
+  socialMedia SocialMedia @relation(fields: [socialMediaId], references: [id])
+  schoolUnit  SchoolUnit  @relation(fields: [schoolUnitId], references: [id])
+
+  @@map("school_unit_social_medias")
+}

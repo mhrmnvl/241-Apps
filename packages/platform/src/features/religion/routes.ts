@@ -1,0 +1,14 @@
+import type { RouteRecordRaw } from 'vue-router'
+
+export const religionRoutes: RouteRecordRaw[] = [
+  {
+    path: '/pengaturan/religion',
+    name: 'ReligionList',
+    component: () => import('./views/ReligionListView.vue'),
+    meta: {
+      title: 'Agama',
+      requiresAuth: true,
+      allowedRoles: ['ADMIN'],
+    },
+  },
+]

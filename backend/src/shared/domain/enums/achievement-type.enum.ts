@@ -1,0 +1,7 @@
+export enum AchievementType {
+  DISTRICT = 'DISTRICT',
+  CITY = 'CITY',
+  PROVINCE = 'PROVINCE',
+  NATIONAL = 'NATIONAL',
+  INTERNATIONAL = 'INTERNATIONAL',
+}

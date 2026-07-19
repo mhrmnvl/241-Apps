@@ -1,0 +1,248 @@
+enum AdmissionStatus {
+  DRAFT
+  SUBMITTED
+  REVISION_NEEDED
+  VERIFIED
+  ACCEPTED
+  REJECTED
+  ENROLLED
+}
+
+enum AdmissionDocumentStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum AdmissionPaymentStatus {
+  UNPAID
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+enum AdmissionNotificationType {
+  STATUS_CHANGE
+  DOCUMENT
+  PAYMENT
+  ANNOUNCEMENT
+  GENERAL
+}
+
+model AdmissionWave {
+  id                  String    @id @default(uuid()) @db.Uuid
+  name                String    @db.VarChar(100)
+  code                String    @unique @db.VarChar(30)
+  academicYearId      String    @map("academic_year_id") @db.Uuid
+  schoolUnitId        String?   @map("school_unit_id") @db.Uuid
+  startDate           DateTime  @map("start_date") @db.Date
+  endDate             DateTime  @map("end_date") @db.Date
+  quota               Int
+  registrationFee     Decimal   @map("registration_fee") @db.Decimal(12, 2)
+  description         String?   @db.Text
+  isActive            Boolean   @default(true) @map("is_active")
+  lastRegistrationSeq Int       @default(0) @map("last_registration_seq")
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
+  deletedAt           DateTime? @map("deleted_at")
+
+  applications  AdmissionApplication[]
+  announcements AdmissionAnnouncement[]
+
+  academicYear AcademicYear @relation(fields: [academicYearId], references: [id])
+  schoolUnit   SchoolUnit?  @relation(fields: [schoolUnitId], references: [id])
+
+  @@index([isActive])
+  @@map("admission_waves")
+}
+
+// Applicant form data lives in this table (normalized columns), NOT in
+// Profile/Parent/Address: those tables carry unique constraints (e.g. nik)
+// that rejected/duplicate applicants would poison, and draft data must stay
+// freely editable during the revision loop. Data is copied to the student
+// tables only when the application reaches ENROLLED.
+// v1: one application per user (userId unique). To allow re-registration in
+// a later year, relax to @@unique([userId, waveId]).
+model AdmissionApplication {
+  id                 String          @id @default(uuid()) @db.Uuid
+  userId             String          @unique @map("user_id") @db.Uuid
+  waveId             String          @map("wave_id") @db.Uuid
+  registrationNumber String          @unique @map("registration_number") @db.VarChar(30)
+  status             AdmissionStatus @default(DRAFT)
+
+  // Personal data
+  fullName     String     @map("full_name") @db.VarChar(100)
+  nickname     String?    @db.VarChar(50)
+  gender       UserGender?
+  birthPlace   String?    @map("birth_place") @db.VarChar(100)
+  birthDate    DateTime?  @map("birth_date") @db.Date
+  nik          String?    @db.VarChar(16)
+  nisn         String?    @db.VarChar(20)
+  religionId   String?    @map("religion_id") @db.Uuid
+  phone        String?    @db.VarChar(15)
+  email        String?    @db.VarChar(255)
+  childOrder   Int?       @map("child_order")
+  siblingCount Int?       @map("sibling_count")
+
+  // Domicile address (embedded, mirrors Address fields)
+  street     String? @db.VarChar(255)
+  rt         String? @db.VarChar(5)
+  rw         String? @db.VarChar(5)
+  village    String? @db.VarChar(100)
+  district   String? @db.VarChar(100)
+  city       String? @db.VarChar(100)
+  province   String? @db.VarChar(100)
+  postalCode String? @map("postal_code") @db.VarChar(10)
+
+  // Previous school
+  previousSchoolName    String? @map("previous_school_name") @db.VarChar(200)
+  previousSchoolNpsn    String? @map("previous_school_npsn") @db.VarChar(20)
+  previousSchoolAddress String? @map("previous_school_address") @db.VarChar(255)
+  graduationYear        Int?    @map("graduation_year")
+
+  // Workflow
+  submittedAt       DateTime? @map("submitted_at")
+  revisionNote      String?   @map("revision_note") @db.Text
+  verifiedById      String?   @map("verified_by_id") @db.Uuid
+  verifiedAt        DateTime? @map("verified_at")
+  decidedById       String?   @map("decided_by_id") @db.Uuid
+  decidedAt         DateTime? @map("decided_at")
+  decisionNote      String?   @map("decision_note") @db.Text
+  enrolledStudentId String?   @unique @map("enrolled_student_id") @db.Uuid
+  enrolledAt        DateTime? @map("enrolled_at")
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  parents       AdmissionApplicationParent[]
+  documents     AdmissionDocument[]
+  payment       AdmissionPayment?
+  notifications AdmissionNotification[]
+
+  user            User          @relation(fields: [userId], references: [id])
+  wave            AdmissionWave @relation(fields: [waveId], references: [id])
+  religion        Religion?     @relation(fields: [religionId], references: [id])
+  enrolledStudent Student?      @relation(fields: [enrolledStudentId], references: [id])
+
+  @@index([status])
+  @@index([waveId])
+  @@map("admission_applications")
+}
+
+// FK references mirror Parent so enrollment provisioning is a plain copy.
+model AdmissionApplicationParent {
+  id            String         @id @default(uuid()) @db.Uuid
+  applicationId String         @map("application_id") @db.Uuid
+  relation      ParentRelation
+  name          String         @db.VarChar(100)
+  nik           String?        @db.VarChar(16)
+  birthPlace    String?        @map("birth_place") @db.VarChar(100)
+  birthDate     DateTime?      @map("birth_date") @db.Date
+  phone         String?        @db.VarChar(15)
+  occupationId  String?        @map("occupation_id") @db.Uuid
+  educationId   String?        @map("education_id") @db.Uuid
+  income        IncomeRange?
+  isPrimary     Boolean        @default(false) @map("is_primary")
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @updatedAt @map("updated_at")
+
+  application AdmissionApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  occupation  Occupation?          @relation(fields: [occupationId], references: [id])
+  education   Education?           @relation(fields: [educationId], references: [id])
+
+  @@unique([applicationId, relation])
+  @@map("admission_application_parents")
+}
+
+// Required-document configuration, seeded globally in v1.
+// Extension point: add waveId for per-wave requirements.
+model AdmissionDocumentType {
+  id         String  @id @default(uuid()) @db.Uuid
+  code       String  @unique @db.VarChar(30)
+  name       String  @db.VarChar(100)
+  isRequired Boolean @default(true) @map("is_required")
+  sortOrder  Int     @default(0) @map("sort_order")
+  isActive   Boolean @default(true) @map("is_active")
+
+  documents AdmissionDocument[]
+
+  @@map("admission_document_types")
+}
+
+model AdmissionDocument {
+  id             String                  @id @default(uuid()) @db.Uuid
+  applicationId  String                  @map("application_id") @db.Uuid
+  documentTypeId String                  @map("document_type_id") @db.Uuid
+  fileId         String                  @map("file_id") @db.Uuid
+  status         AdmissionDocumentStatus @default(PENDING)
+  note           String?                 @db.Text
+  verifiedById   String?                 @map("verified_by_id") @db.Uuid
+  verifiedAt     DateTime?               @map("verified_at")
+  createdAt      DateTime                @default(now()) @map("created_at")
+  updatedAt      DateTime                @updatedAt @map("updated_at")
+
+  application  AdmissionApplication  @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  documentType AdmissionDocumentType @relation(fields: [documentTypeId], references: [id])
+  file         File                  @relation(fields: [fileId], references: [id])
+
+  @@unique([applicationId, documentTypeId])
+  @@map("admission_documents")
+}
+
+model AdmissionPayment {
+  id                String                 @id @default(uuid()) @db.Uuid
+  applicationId     String                 @unique @map("application_id") @db.Uuid
+  amount            Decimal                @db.Decimal(12, 2)
+  bankName          String?                @map("bank_name") @db.VarChar(100)
+  senderAccountName String?                @map("sender_account_name") @db.VarChar(100)
+  transferDate      DateTime?              @map("transfer_date") @db.Date
+  proofFileId       String?                @map("proof_file_id") @db.Uuid
+  status            AdmissionPaymentStatus @default(UNPAID)
+  note              String?                @db.Text
+  verifiedById      String?                @map("verified_by_id") @db.Uuid
+  verifiedAt        DateTime?              @map("verified_at")
+  createdAt         DateTime               @default(now()) @map("created_at")
+  updatedAt         DateTime               @updatedAt @map("updated_at")
+
+  application AdmissionApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  proofFile   File?                @relation(fields: [proofFileId], references: [id])
+
+  @@map("admission_payments")
+}
+
+// The existing Announcement model targets classrooms, so admission gets its own.
+model AdmissionAnnouncement {
+  id          String    @id @default(uuid()) @db.Uuid
+  waveId      String?   @map("wave_id") @db.Uuid
+  title       String    @db.VarChar(200)
+  content     String    @db.Text
+  isPublished Boolean   @default(false) @map("is_published")
+  publishedAt DateTime? @map("published_at")
+  createdById String?   @map("created_by_id") @db.Uuid
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
+
+  wave AdmissionWave? @relation(fields: [waveId], references: [id])
+
+  @@index([isPublished])
+  @@map("admission_announcements")
+}
+
+// Written on every workflow transition; the call site doubles as the
+// extension point for future email/WA channels.
+model AdmissionNotification {
+  id            String                    @id @default(uuid()) @db.Uuid
+  applicationId String                    @map("application_id") @db.Uuid
+  type          AdmissionNotificationType
+  title         String                    @db.VarChar(200)
+  message       String                    @db.Text
+  readAt        DateTime?                 @map("read_at")
+  createdAt     DateTime                  @default(now()) @map("created_at")
+
+  application AdmissionApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@index([applicationId, readAt])
+  @@map("admission_notifications")
+}

@@ -1,0 +1,23 @@
+model Address {
+  id           String    @id @default(uuid()) @db.Uuid
+  studentId    String?   @map("student_id") @db.Uuid
+  teacherId    String?   @map("teacher_id") @db.Uuid
+  parentId     String?   @map("parent_id") @db.Uuid
+  street       String    @db.VarChar(255)
+  rt           String    @db.VarChar(5)
+  rw           String    @db.VarChar(5)
+  village      String    @db.VarChar(100)
+  district     String    @db.VarChar(100)
+  city         String    @db.VarChar(100)
+  province     String    @db.VarChar(100)
+  country      String    @default("Indonesia") @db.VarChar(100)
+  postalCode   String    @map("postal_code") @db.VarChar(10)
+  isPrimary    Boolean   @default(false) @map("is_primary")
+  deletedAt    DateTime? @map("deleted_at")
+
+  teacher Teacher? @relation(fields: [teacherId], references: [id])
+  parent  Parent?  @relation(fields: [parentId], references: [id])
+  student Student? @relation(fields: [studentId], references: [id])
+
+  @@map("addresses")
+}

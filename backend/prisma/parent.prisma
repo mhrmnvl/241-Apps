@@ -1,0 +1,50 @@
+enum IncomeRange {
+  BELOW_500K
+  BETWEEN_500K_1M
+  BETWEEN_1M_2M
+  BETWEEN_2M_3M
+  ABOVE_3M
+}
+
+enum ParentRelation {
+  FATHER
+  MOTHER
+  GUARDIAN
+}
+
+model Parent {
+  id           String    @id @default(uuid()) @db.Uuid
+  name         String    @db.VarChar(100)
+  nik          String    @unique @db.VarChar(16)
+  birthPlace   String    @map("birth_place") @db.VarChar(100)
+  birthDate    DateTime  @map("birth_date") @db.Date
+  email        String?   @db.VarChar(255)
+  phone        String?   @db.VarChar(15)
+  occupationId String    @map("occupation_id") @db.Uuid
+  educationId  String?   @map("education_id") @db.Uuid
+  income       IncomeRange? @map("income")
+  deletedAt    DateTime?    @map("deleted_at")
+
+  addresses      Address[]
+  studentParents StudentParent[]
+
+  occupation Occupation @relation(fields: [occupationId], references: [id])
+  education  Education? @relation(fields: [educationId], references: [id])
+
+  @@map("parents")
+}
+
+model StudentParent {
+  id        String         @id @default(uuid()) @db.Uuid
+  studentId String         @map("student_id") @db.Uuid
+  parentId  String         @map("parent_id") @db.Uuid
+  relation  ParentRelation
+  isPrimary Boolean        @default(false) @map("is_primary")
+  deletedAt DateTime?      @map("deleted_at")
+
+  student Student @relation(fields: [studentId], references: [id])
+  parent  Parent  @relation(fields: [parentId], references: [id])
+
+  @@unique([studentId, parentId])
+  @@map("student_parents")
+}

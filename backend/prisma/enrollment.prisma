@@ -1,0 +1,52 @@
+enum EnrollmentStatus {
+  ACTIVE
+  PROMOTED
+  REPEATED
+  TRANSFERRED
+  DROPPED
+  GRADUATED
+}
+
+model StudentEnrollment {
+  id          String           @id @default(uuid()) @db.Uuid
+  studentId   String           @map("student_id") @db.Uuid
+  classroomId String           @map("classroom_id") @db.Uuid
+  semesterId  String           @map("semester_id") @db.Uuid
+  status      EnrollmentStatus @default(ACTIVE)
+  enrolledAt  DateTime         @default(now()) @map("enrolled_at")
+  endedAt     DateTime?        @map("ended_at")
+  note        String?          @db.Text
+  deletedAt   DateTime?        @map("deleted_at")
+
+  classroom Classroom @relation(fields: [classroomId], references: [id])
+  semester  Semester  @relation(fields: [semesterId], references: [id])
+  student   Student   @relation(fields: [studentId], references: [id])
+
+  studentScores StudentScore[]
+  attendances   Attendance[]
+  reportCard    ReportCard?
+
+  @@unique([studentId, semesterId])
+  @@index([classroomId])
+  @@index([semesterId])
+  @@index([status])
+  @@map("student_enrollments")
+}
+
+model StudentGraduation {
+  id             String    @id @default(uuid()) @db.Uuid
+  studentId      String    @unique @map("student_id") @db.Uuid
+  academicYearId String    @map("academic_year_id") @db.Uuid
+  graduationDate DateTime? @map("graduation_date") @db.Date
+  certificateNo  String?   @map("certificate_no") @db.VarChar(100)
+  note           String?   @db.Text
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+  deletedAt      DateTime? @map("deleted_at")
+
+  student      Student      @relation(fields: [studentId], references: [id])
+  academicYear AcademicYear @relation(fields: [academicYearId], references: [id])
+
+  @@index([academicYearId])
+  @@map("student_graduations")
+}

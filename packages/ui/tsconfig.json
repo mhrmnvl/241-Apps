@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "baseUrl": ".",
+    "outDir": "./node_modules/.tmp",
+    "paths": {
+      "@/ui": ["./src/index.ts"],
+      "@/ui/*": ["./src/components/ui/*/index.ts"],
+      "@/ui/utils": ["./src/utils/index.ts"]
+    }
+  },
+  "include": ["src/**/*.ts", "src/**/*.vue"]
+}

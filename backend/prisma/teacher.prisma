@@ -1,0 +1,18 @@
+model Teacher {
+  id               String           @id @default(uuid()) @db.Uuid
+  userId           String           @unique @map("user_id") @db.Uuid
+  nip              String?          @unique @db.VarChar(20)
+  nuptk            String?          @unique @db.VarChar(20)
+  employmentTypeId String           @map("employment_type_id") @db.Uuid
+  deletedAt        DateTime?        @map("deleted_at")
+
+  addresses            Address[]
+  classroomSupervisors ClassroomSupervisor[]
+  teacherPositions     TeacherPosition[]
+  teachingAssignments  TeachingAssignment[]
+
+  user           User           @relation(fields: [userId], references: [id])
+  employmentType EmploymentType @relation(fields: [employmentTypeId], references: [id])
+
+  @@map("teachers")
+}

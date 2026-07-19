@@ -1,0 +1,8 @@
+export enum EnrollmentStatus {
+  ACTIVE = 'ACTIVE',
+  PROMOTED = 'PROMOTED',
+  REPEATED = 'REPEATED',
+  TRANSFERRED = 'TRANSFERRED',
+  DROPPED = 'DROPPED',
+  GRADUATED = 'GRADUATED',
+}

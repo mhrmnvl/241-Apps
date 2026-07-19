@@ -1,0 +1,64 @@
+model Classroom {
+  id             String    @id @default(uuid()) @db.Uuid
+  curriculumId   String    @map("curriculum_id") @db.Uuid
+  academicYearId String    @map("academic_year_id") @db.Uuid
+  gradeId        String    @map("grade_id") @db.Uuid
+  code           String    @db.VarChar(20)
+  name           String?   @db.VarChar(100)
+  capacity       Int
+  isActive       Boolean   @default(true) @map("is_active")
+  deletedAt      DateTime? @map("deleted_at")
+
+  announcementClassrooms AnnouncementClassroom[]
+  enrollments            StudentEnrollment[]
+  classroomSupervisors   ClassroomSupervisor[]
+  classroomStructures    ClassroomStructure[]
+  eventClassrooms        EventClassroom[]
+  teachingAssignments    TeachingAssignment[]
+
+  curricula    Curricula    @relation(fields: [curriculumId], references: [id])
+  academicYear AcademicYear @relation(fields: [academicYearId], references: [id])
+  grade        Grade        @relation(fields: [gradeId], references: [id])
+
+  @@unique([academicYearId, gradeId, code])
+  @@index([curriculumId])
+  @@index([academicYearId])
+  @@index([gradeId])
+  @@map("classrooms")
+}
+
+model ClassroomSupervisor {
+  id          String    @id @default(uuid()) @db.Uuid
+  classroomId String    @map("classroom_id") @db.Uuid
+  teacherId   String    @map("teacher_id") @db.Uuid
+  semesterId  String    @map("semester_id") @db.Uuid
+  deletedAt   DateTime? @map("deleted_at")
+
+  classroom Classroom @relation(fields: [classroomId], references: [id])
+  teacher   Teacher  @relation(fields: [teacherId], references: [id])
+  semester  Semester  @relation(fields: [semesterId], references: [id])
+
+  @@unique([classroomId, semesterId])
+  @@map("classroom_supervisors")
+}
+
+model ClassroomStructure {
+  id              String    @id @default(uuid()) @db.Uuid
+  classroomId     String    @map("classroom_id") @db.Uuid
+  semesterId      String    @map("semester_id") @db.Uuid
+  presidentId     String?   @map("president_id") @db.Uuid
+  vicePresidentId String?   @map("vice_president_id") @db.Uuid
+  secretaryId     String?   @map("secretary_id") @db.Uuid
+  treasurerId     String?   @map("treasurer_id") @db.Uuid
+  deletedAt       DateTime? @map("deleted_at")
+
+  classroom     Classroom @relation(fields: [classroomId], references: [id])
+  semester      Semester  @relation(fields: [semesterId], references: [id])
+  president     Student?  @relation("ClassroomPresident", fields: [presidentId], references: [id])
+  vicePresident Student?  @relation("ClassroomVicePresident", fields: [vicePresidentId], references: [id])
+  secretary     Student?  @relation("ClassroomSecretary", fields: [secretaryId], references: [id])
+  treasurer     Student?  @relation("ClassroomTreasurer", fields: [treasurerId], references: [id])
+
+  @@unique([classroomId, semesterId])
+  @@map("classroom_structures")
+}

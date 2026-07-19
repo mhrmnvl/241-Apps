@@ -1,0 +1,33 @@
+model FileCategory {
+  id          String    @id @default(uuid()) @db.Uuid
+  code        String    @unique @db.VarChar(50)
+  name        String    @db.VarChar(100)
+  description String?   @db.Text
+  isSystem    Boolean   @default(false) @map("is_system")
+
+  files File[]
+
+  @@map("file_categories")
+}
+
+model File {
+  id           String    @id @default(uuid()) @db.Uuid
+  categoryId   String?   @map("category_id") @db.Uuid
+  uploadedBy   String?   @map("uploaded_by") @db.Uuid
+  filename     String    @db.VarChar(255)
+  originalName String    @map("original_name") @db.VarChar(255)
+  mimeType     String    @map("mime_type") @db.VarChar(100)
+  sizeBytes    Int       @map("size_bytes")
+  storageKey   String    @map("storage_key") @db.VarChar(500)
+  createdAt    DateTime  @default(now()) @map("created_at")
+  deletedAt    DateTime? @map("deleted_at")
+
+  category FileCategory? @relation(fields: [categoryId], references: [id])
+  uploader User?         @relation(fields: [uploadedBy], references: [id])
+
+  admissionDocuments     AdmissionDocument[]
+  admissionPaymentProofs AdmissionPayment[]
+
+  @@index([categoryId])
+  @@map("files")
+}

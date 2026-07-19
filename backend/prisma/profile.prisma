@@ -1,0 +1,62 @@
+enum UserGender {
+  MALE
+  FEMALE
+}
+
+enum MaritalStatus {
+  SINGLE
+  MARRIED
+  DIVORCED
+  WIDOWED
+}
+
+model Profile {
+  id            String         @id @default(uuid()) @db.Uuid
+  userId        String         @unique @map("user_id") @db.Uuid
+  name          String         @db.VarChar(100)
+  nik           String         @unique @db.VarChar(16)
+  gender        UserGender
+  birthPlace    String         @map("birth_place") @db.VarChar(100)
+  birthDate     DateTime       @map("birth_date") @db.Date
+  email         String?        @unique @db.VarChar(255)
+  phone         String?        @unique @db.VarChar(15)
+  religionId    String?        @map("religion_id") @db.Uuid
+  bloodTypeId   String?        @map("blood_type_id") @db.Uuid
+  maritalStatus MaritalStatus? @map("marital_status")
+  noKk          String?        @map("no_kk") @db.VarChar(16)
+  npwp          String?        @db.VarChar(20)
+
+  religion             Religion?            @relation(fields: [religionId], references: [id])
+  bloodType            BloodType?           @relation(fields: [bloodTypeId], references: [id])
+  socialMedias         ProfileSocialMedia[]
+  achievements         Achievement[]
+  scholarships         Scholarship[]
+  educationalHistories EducationalHistory[]
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("profiles")
+}
+
+model Religion {
+  id        String    @id @default(uuid()) @db.Uuid
+  name      String    @unique @db.VarChar(50)
+  isActive  Boolean   @default(true) @map("is_active")
+  deletedAt DateTime? @map("deleted_at")
+
+  profiles              Profile[]
+  admissionApplications AdmissionApplication[]
+
+  @@map("religions")
+}
+
+model BloodType {
+  id        String    @id @default(uuid()) @db.Uuid
+  name      String    @unique @db.VarChar(10)
+  isActive  Boolean   @default(true) @map("is_active")
+  deletedAt DateTime? @map("deleted_at")
+
+  profiles Profile[]
+
+  @@map("blood_types")
+}

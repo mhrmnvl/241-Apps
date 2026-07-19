@@ -1,0 +1,210 @@
+import type {
+  Student,
+  ClassroomLevelOption,
+  StudentColumnActions,
+} from '../types'
+import { ActionCell } from '@/ui'
+
+import { Badge } from '@/ui/badge'
+import type { ColumnDef } from '@tanstack/vue-table'
+import { h } from 'vue'
+
+export const createColumns = (
+  actions: StudentColumnActions,
+  classroomLevels: ClassroomLevelOption[] = [],
+): ColumnDef<Student>[] => [
+  {
+    id: 'no',
+    header: 'No',
+    cell: ({ row }) => row.index + 1,
+    enableSorting: false,
+    enableHiding: false,
+  },
+  {
+    id: 'nis',
+    header: 'NIS',
+    cell: ({ row }) => row.original.nis,
+    accessorKey: 'nis',
+  },
+  {
+    id: 'nisn',
+    header: 'NISN',
+    cell: ({ row }) => row.original.nisn,
+    accessorKey: 'nisn',
+  },
+  {
+    id: 'name',
+    header: 'Nama Lengkap',
+    cell: ({ row }) => row.original.user?.profile?.name || '-',
+    accessorFn: (row) => row.user?.profile?.name,
+  },
+  {
+    id: 'gender',
+    header: 'L/P',
+    meta: { align: 'center' },
+    cell: ({ row }) => row.getValue<string>('gender'),
+    accessorFn: (row) => {
+      const gender = row.user?.profile?.gender
+      if (!gender) return '-'
+      const normalized = gender.toLowerCase()
+      return normalized === 'male'
+        ? 'L'
+        : normalized === 'female'
+          ? 'P'
+          : gender
+    },
+  },
+  {
+    id: 'level',
+    header: 'Tingkat',
+    meta: { align: 'center' },
+    cell: ({ row }) => {
+      const levelId =
+        row.original.classroomLevelId ??
+        row.original.enrollments?.[0]?.classroom?.classroomLevelId
+      return classroomLevels.find((l) => l.id === levelId)?.name ?? '-'
+    },
+    accessorFn: (row) =>
+      row.classroomLevelId ??
+      row.enrollments?.[0]?.classroom?.classroomLevelId ??
+      '',
+  },
+  {
+    id: 'class',
+    header: 'Rombel',
+    meta: { align: 'center' },
+    cell: ({ row }) => {
+      const enrollment = row.original.enrollments?.[0]
+      return enrollment?.classroom?.code ?? '-'
+    },
+    accessorFn: (row) => row.enrollments?.[0]?.classroom?.code ?? '',
+  },
+  {
+    id: 'status',
+    header: 'Status',
+    meta: { align: 'center' },
+    accessorFn: (row) => (row.user?.isActive ? 'active' : 'inactive'),
+    cell: ({ row }) => {
+      const isActive = row.original.user?.isActive
+      return h(Badge, { variant: isActive ? 'default' : 'secondary' }, () =>
+        isActive ? 'Aktif' : 'Nonaktif',
+      )
+    },
+  },
+  ...(actions.showActions !== false
+    ? [
+        {
+          id: 'actions',
+          header: 'Opsi',
+          cell: ({ row }: { row: { original: Student } }) => {
+            const student = row.original
+            return h(ActionCell, {
+              viewLabel: 'Lihat Detail',
+              hideEdit: true,
+              deleteTitle: 'Hapus Siswa?',
+              deleteDescription: `Yakin ingin menghapus data siswa "${student.user?.profile?.name || ''}"? Tindakan ini tidak dapat dibatalkan.`,
+              onView: () => {
+                if (actions.onViewDetail) actions.onViewDetail(student)
+              },
+              onDelete: (callbacks: {
+                closeAlert: () => void
+                setLoading: (v: boolean) => void
+              }) => {
+                if (actions.onDelete) {
+                  return actions.onDelete(student, callbacks)
+                }
+              },
+            })
+          },
+        },
+      ]
+    : []),
+]
+
+export const createAccountColumns = (
+  actions: StudentColumnActions,
+  classroomLevels: ClassroomLevelOption[] = [],
+): ColumnDef<Student>[] => [
+  {
+    id: 'no',
+    header: 'No',
+    cell: ({ row }) => row.index + 1,
+    enableSorting: false,
+    enableHiding: false,
+  },
+  {
+    id: 'name',
+    header: 'Nama Lengkap',
+    cell: ({ row }) => row.original.user?.profile?.name || '-',
+    accessorFn: (row) => row.user?.profile?.name,
+  },
+  {
+    id: 'identifier',
+    header: 'Username',
+    cell: ({ row }) => row.original.user?.identifier || '-',
+    accessorFn: (row) => row.user?.identifier,
+  },
+  {
+    id: 'level',
+    header: 'Tingkat',
+    meta: { align: 'center' },
+    cell: ({ row }) => {
+      const levelId =
+        row.original.classroomLevelId ??
+        row.original.enrollments?.[0]?.classroom?.classroomLevelId
+      return classroomLevels.find((l) => l.id === levelId)?.name ?? '-'
+    },
+    accessorFn: (row) =>
+      row.classroomLevelId ??
+      row.enrollments?.[0]?.classroom?.classroomLevelId ??
+      '',
+  },
+  {
+    id: 'class',
+    header: 'Rombel',
+    meta: { align: 'center' },
+    cell: ({ row }) => {
+      const enrollment = row.original.enrollments?.[0]
+      return enrollment?.classroom?.code ?? '-'
+    },
+    accessorFn: (row) => row.enrollments?.[0]?.classroom?.code ?? '',
+  },
+  {
+    id: 'status',
+    header: 'Status',
+    meta: { align: 'center' },
+    accessorFn: (row) => (row.user?.isActive ? 'active' : 'inactive'),
+    cell: ({ row }) => {
+      const isActive = row.original.user?.isActive
+      return h(Badge, { variant: isActive ? 'default' : 'secondary' }, () =>
+        isActive ? 'Aktif' : 'Nonaktif',
+      )
+    },
+  },
+  ...(actions.showActions !== false
+    ? [
+        {
+          id: 'actions',
+          header: 'Opsi',
+          cell: ({ row }: { row: { original: Student } }) => {
+            const student = row.original
+            return h(ActionCell, {
+              deleteTitle: 'Hapus Akun Siswa?',
+              deleteDescription: `Yakin ingin menghapus akun "${student.user?.identifier || ''}" milik ${student.user?.profile?.name || ''}? Tindakan ini tidak dapat dibatalkan.`,
+              onEdit: () => {
+                if (actions.onEdit) actions.onEdit(student)
+              },
+              onDelete: (callbacks: {
+                closeAlert: () => void
+                setLoading: (v: boolean) => void
+              }) => {
+                if (actions.onDelete) {
+                  return actions.onDelete(student, callbacks)
+                }
+              },
+            })
+          },
+        },
+      ]
+    : []),
+]

@@ -1,0 +1,13 @@
+model Grade {
+  id        String    @id @default(uuid()) @db.Uuid
+  level     Int       @unique
+  name      String    @db.VarChar(50)
+  isActive  Boolean   @default(true) @map("is_active")
+  deletedAt DateTime? @map("deleted_at")
+
+  students           Student[]
+  classrooms         Classroom[]
+  curriculumSubjects CurriculumSubject[]
+
+  @@map("grades")
+}

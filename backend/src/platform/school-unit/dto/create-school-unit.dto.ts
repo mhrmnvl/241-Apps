@@ -1,0 +1,71 @@
+import { ApiProperty } from '@nestjs/swagger';
+import { SchoolUnitStatus } from '@prisma/client';
+import {
+  IsEmail,
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  MaxLength,
+} from 'class-validator';
+
+export class CreateSchoolUnitDto {
+  @ApiProperty({ example: 'MTs Negeri 1 Kota Malang' })
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(200)
+  name: string;
+
+  @ApiProperty({ example: 'MTsN 1 Malang' })
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(200)
+  surname: string;
+
+  @ApiProperty({ example: '121235730001' })
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(20)
+  nsm: string;
+
+  @ApiProperty({ example: '20518057' })
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(20)
+  npsn: string;
+
+  @ApiProperty({ enum: SchoolUnitStatus, example: 'PUBLIC' })
+  @IsEnum(SchoolUnitStatus)
+  status: SchoolUnitStatus;
+
+  @ApiProperty({
+    example: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  typeId?: string;
+
+  @ApiProperty({ example: '01.234.567.8-901.000' })
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(30)
+  npwp: string;
+
+  @ApiProperty({ example: '0341123456' })
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(15)
+  phone: string;
+
+  @ApiProperty({ example: 'info@mtsn1malang.sch.id' })
+  @IsEmail()
+  @MaxLength(255)
+  email: string;
+
+  @ApiProperty({ example: 'https://mtsn1malang.sch.id' })
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(255)
+  website: string;
+}

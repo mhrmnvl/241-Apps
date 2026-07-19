@@ -1,0 +1,6 @@
+export enum StudentStatus {
+  ACTIVE = 'ACTIVE',
+  TRANSFERRED = 'TRANSFERRED',
+  DROPPED = 'DROPPED',
+  GRADUATED = 'GRADUATED',
+}

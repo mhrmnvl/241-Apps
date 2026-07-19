@@ -1,0 +1,199 @@
+import { BadRequestException } from '@nestjs/common';
+import { Test, TestingModule } from '@nestjs/testing';
+import ExcelJS from 'exceljs';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { IClassroomLevelsRepository } from '../../grade/domain/interfaces/classroom-levels-repository.interface.js';
+import { ClassroomRepository } from '../../classroom/index.js';
+import { StudentRepository } from '../repositories/student.repository.js';
+import { BulkImportStudentsUseCase } from './bulk-import-student.use-case.js';
+import { ExcelStudentParser } from '../infrastructure/parsers/excel-student.parser.js';
+import { StudentCreatedEvent } from '../domain/events/student.events.js';
+
+async function makeExcelBuffer(
+  rows: Record<string, ExcelJS.CellValue>[],
+): Promise<Buffer> {
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet('Sheet1');
+
+  if (rows.length > 0) {
+    const keys = Object.keys(rows[0]);
+    worksheet.columns = keys.map((key) => ({ header: key, key, width: 20 }));
+    worksheet.addRows(rows);
+  }
+
+  const arrayBuffer = await workbook.xlsx.writeBuffer();
+  return Buffer.from(arrayBuffer);
+}
+const validRow = {
+  NIS: '2024001',
+  NISN: '0012345678',
+  Nama: 'Ahmad Fauzi',
+  NIK: '3578010101080001',
+  'Jenis Kelamin': 'L',
+  'Tempat Lahir': 'Malang',
+  'Tanggal Lahir': '2008-01-01',
+  Email: 'ahmad@test.com',
+  Telepon: '081234567890',
+  Kelas: 'VII-A',
+  Username: 'siswa001',
+  Password: 'P@ssw0rd!',
+};
+
+describe('BulkImportStudentsUseCase', () => {
+  let useCase: BulkImportStudentsUseCase;
+
+  const mockStudentRepo = {
+    findByNis: jest.fn(),
+    findByNisn: jest.fn(),
+    create: jest.fn(),
+  };
+
+  const mockClassroomRepo = {
+    findByCode: jest.fn(),
+  };
+
+  const mockClassroomLevelRepo = {
+    findByLevel: jest.fn(),
+  };
+
+  const mockEventEmitter = {
+    emit: jest.fn(),
+  };
+
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        BulkImportStudentsUseCase,
+        { provide: StudentRepository, useValue: mockStudentRepo },
+        { provide: ClassroomRepository, useValue: mockClassroomRepo },
+        {
+          provide: IClassroomLevelsRepository,
+          useValue: mockClassroomLevelRepo,
+        },
+        { provide: EventEmitter2, useValue: mockEventEmitter },
+        ExcelStudentParser,
+      ],
+    }).compile();
+
+    useCase = module.get<BulkImportStudentsUseCase>(BulkImportStudentsUseCase);
+    jest.clearAllMocks();
+  });
+
+  it('should be defined', () => {
+    expect(useCase).toBeDefined();
+  });
+
+  describe('execute', () => {
+    it('should throw BadRequestException when file is empty', async () => {
+      const emptyBuffer = await makeExcelBuffer([]);
+
+      await expect(useCase.execute(emptyBuffer)).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+
+    it('should import a valid row with classroom code successfully and emit student.created event', async () => {
+      mockClassroomRepo.findByCode.mockResolvedValue({
+        id: 'cls-1',
+        code: 'VII-A',
+        gradeId: 'lvl-7',
+      });
+      mockStudentRepo.findByNis.mockResolvedValue(null);
+      mockStudentRepo.findByNisn.mockResolvedValue(null);
+      mockStudentRepo.create.mockResolvedValue({ student: { id: 'stu-1' } });
+
+      const buffer = await makeExcelBuffer([validRow]);
+      const result = await useCase.execute(buffer);
+
+      expect(result.total).toBe(1);
+      expect(result.success).toBe(1);
+      expect(result.failed).toBe(0);
+      expect(result.results[0].status).toBe('SUCCESS');
+      expect(mockClassroomRepo.findByCode).toHaveBeenCalledWith('VII-A');
+      expect(mockEventEmitter.emit).toHaveBeenCalledWith(
+        'student.created',
+        new StudentCreatedEvent('stu-1', 'cls-1'),
+      );
+    });
+
+    it('should import a PPDB student without classroom code and not emit event', async () => {
+      const ppdbRow = { ...validRow, Kelas: '' };
+      mockStudentRepo.findByNis.mockResolvedValue(null);
+      mockStudentRepo.findByNisn.mockResolvedValue(null);
+      mockStudentRepo.create.mockResolvedValue({ student: { id: 'stu-2' } });
+
+      const buffer = await makeExcelBuffer([ppdbRow]);
+      const result = await useCase.execute(buffer);
+
+      expect(result.success).toBe(1);
+      expect(mockClassroomRepo.findByCode).not.toHaveBeenCalled();
+      expect(mockEventEmitter.emit).not.toHaveBeenCalled();
+    });
+
+    it('should fail row when classroom code is not found', async () => {
+      mockClassroomRepo.findByCode.mockResolvedValue(null);
+
+      const buffer = await makeExcelBuffer([validRow]);
+      const result = await useCase.execute(buffer);
+
+      expect(result.failed).toBe(1);
+      expect(result.results[0].status).toBe('FAILED');
+      expect(result.results[0].error).toContain('tidak ditemukan');
+    });
+
+    it('should fail row when NIS is duplicated', async () => {
+      mockClassroomRepo.findByCode.mockResolvedValue({
+        id: 'cls-1',
+        code: 'VII-A',
+        gradeId: 'lvl-7',
+      });
+      mockStudentRepo.findByNis.mockResolvedValue({ id: 'stu-existing' });
+      mockStudentRepo.findByNisn.mockResolvedValue(null);
+
+      const buffer = await makeExcelBuffer([validRow]);
+      const result = await useCase.execute(buffer);
+
+      expect(result.failed).toBe(1);
+      expect(result.results[0].error).toContain('NIS');
+    });
+
+    it('should fail row when NISN is duplicated', async () => {
+      mockClassroomRepo.findByCode.mockResolvedValue({
+        id: 'cls-1',
+        code: 'VII-A',
+        gradeId: 'lvl-7',
+      });
+      mockStudentRepo.findByNis.mockResolvedValue(null);
+      mockStudentRepo.findByNisn.mockResolvedValue({ id: 'stu-existing' });
+
+      const buffer = await makeExcelBuffer([validRow]);
+      const result = await useCase.execute(buffer);
+
+      expect(result.failed).toBe(1);
+      expect(result.results[0].error).toContain('NISN');
+    });
+
+    it('should fail row when validation fails (missing required field)', async () => {
+      const invalidRow = { ...validRow, Nama: '' };
+      const buffer = await makeExcelBuffer([invalidRow]);
+
+      const result = await useCase.execute(buffer);
+
+      expect(result.failed).toBe(1);
+      expect(result.results[0].error).toContain('Validation failed');
+      expect(mockStudentRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('should correctly number rows starting at 2 (row 1 = header)', async () => {
+      const ppdbRow = { ...validRow, Kelas: '' };
+      mockStudentRepo.findByNis.mockResolvedValue(null);
+      mockStudentRepo.findByNisn.mockResolvedValue(null);
+      mockStudentRepo.create.mockResolvedValue({ student: { id: 'stu-1' } });
+
+      const buffer = await makeExcelBuffer([ppdbRow]);
+      const result = await useCase.execute(buffer);
+
+      expect(result.results[0].row).toBe(2);
+    });
+  });
+});

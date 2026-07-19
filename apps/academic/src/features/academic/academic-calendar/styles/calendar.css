@@ -1,0 +1,49 @@
+.calendar-override *:focus,
+.calendar-override *:focus-visible,
+.fc-event:focus,
+.fc-event:focus-visible,
+.fc-event::after {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+[data-slot='sheet-content']:focus,
+[data-slot='sheet-content']:focus-visible,
+[role='dialog']:focus,
+[role='dialog']:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+  border-color: inherit !important;
+}
+
+.calendar-override .fc-col-header-cell-cushion {
+  font-weight: 500 !important;
+  color: hsl(var(--foreground)) !important;
+  padding: 10px 0 !important;
+  display: block !important;
+  width: 100% !important;
+}
+
+.calendar-override th.fc-col-header-cell,
+.calendar-override .fc-theme-standard th {
+  background-color: hsl(var(--muted) / 0.5) !important;
+}
+
+.calendar-override .fc-event-main {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  text-align: center !important;
+  padding: 2px 0 !important;
+}
+
+.calendar-override .fc-event-title-container {
+  display: flex !important;
+  justify-content: center !important;
+  width: 100% !important;
+  text-align: center !important;
+}
+
+.month-year-only .flex.flex-col.gap-y-4 {
+  display: none !important;
+}
