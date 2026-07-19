@@ -43,6 +43,37 @@ function clearSession() {
   }
 }
 
+/**
+ * Restore the session once at app startup, before the router resolves.
+ *
+ * The access token lives in memory only, so on a fresh page load there is no
+ * token yet. This mints one from the HttpOnly refresh cookie up front:
+ *  - success → the first API calls already carry a token (no 401 flash), and
+ *    the optimistically-persisted user is confirmed valid.
+ *  - failure → the session is dead/absent, so the stale persisted user is
+ *    cleared (via clearSession) and the guard lands cleanly on /login instead
+ *    of bouncing dashboard ⇄ login.
+ *
+ * Uses a raw axios call so it bypasses the 401 interceptor (no recursion).
+ */
+async function restoreSession(): Promise<boolean> {
+  try {
+    const res = await axios.post<RefreshTokenResponse>(
+      `${API_BASE_URL}/auth/refresh`,
+      {},
+      { withCredentials: true },
+    )
+    const token: string | undefined =
+      res.data?.data?.accessToken ?? res.data?.accessToken
+    if (!token) throw new Error('No access token in refresh response')
+    setAccessToken(token)
+    return true
+  } catch {
+    clearSession()
+    return false
+  }
+}
+
 api.interceptors.request.use((config) => {
   const token = getAccessToken()
   if (token) {
@@ -168,4 +199,4 @@ api.interceptors.response.use(
 )
 
 export default api
-export { clearSession, getAccessToken, setAccessToken }
+export { clearSession, getAccessToken, restoreSession, setAccessToken }
