@@ -3,10 +3,23 @@ name: Deploy to VPS
 on:
   push:
     branches: [main]
+  workflow_dispatch: {} # allow manual re-runs from the Actions tab
+
+# Never run two deploys at once, and never cancel one mid-flight (a half-applied
+# deploy is worse than a queued one).
+concurrency:
+  group: deploy-vps
+  cancel-in-progress: false
+
+# Least privilege: this job only reads the repo (the real work happens over SSH).
+permissions:
+  contents: read
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: production # gate behind the "production" environment (add approvers/secrets there)
 
     steps:
       - name: Deploy via SSH
@@ -16,31 +29,35 @@ jobs:
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_KEY }}
           port: ${{ secrets.PORT || 22 }}
+          version: 1.8.2 # pin drone-ssh for reproducible runs (context7: appleboy/ssh-action)
+          timeout: 60s # connection timeout — fail fast if the host is unreachable
+          command_timeout: 30m # headroom for install + prisma + build
+          script_stop: true # abort on the first failing command
+          # debug: true       # ← uncomment temporarily to troubleshoot connection issues
           script: |
-            set -e
-
-            echo "Starting deployment..."
+            set -euo pipefail
+            echo "==> Starting deployment..."
 
             cd /var/www/241-Apps
 
-            git pull origin main
+            # Server working tree is disposable — reset to origin/main instead of
+            # `git pull` so a dirty tree or diverged history never blocks a deploy.
+            # .env / .env.* are gitignored, so real server secrets are untouched.
+            git fetch --all --prune
+            git reset --hard origin/main
 
             pnpm install --frozen-lockfile
 
-            cd backend
+            # Frontend: build all *-web apps (served statically by Nginx).
+            pnpm -r --filter "*-web" build
 
+            # Backend: migrate then build, run pm2 from backend/ so it loads backend/.env.
+            cd backend
             pnpm prisma:generate
             pnpm prisma:deploy
-
             pnpm build
-
             pm2 restart backend-241 --update-env || pm2 start dist/src/main.js --name backend-241
-
             pm2 save
             pm2 status
 
-            cd ..
-
-            pnpm build
-
-            echo "Deployment completed successfully!"
+            echo "==> Deployment completed successfully!"
