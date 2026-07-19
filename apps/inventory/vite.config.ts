@@ -14,6 +14,7 @@ const platformRoot = path.resolve(
 export default defineConfig({
   plugins: [vue(), tailwindcss(), tsconfigPaths()],
   resolve: {
+    dedupe: ['vue', 'pinia', 'vue-router'],
     alias: [
       { find: /^@\/ui\/utils$/, replacement: path.resolve(uiRoot, 'utils') },
       {
