@@ -97,10 +97,7 @@ async function main() {
   console.log('\n── Academic Structure ──');
   const academicYear = await seedAcademicYear(prisma, schoolUnit.id);
   const semesters = await seedSemesters(prisma, academicYear.id);
-  const curriculum = await seedCurricula(
-    prisma,
-    academicYear.id,
-  );
+  const curriculum = await seedCurricula(prisma, academicYear.id);
   await seedSubjects(prisma);
   await seedCurriculumSubjects(prisma, curriculum.id);
 

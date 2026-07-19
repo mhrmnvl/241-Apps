@@ -20,9 +20,12 @@ export class PrismaSchoolUnitAddressRepository extends ISchoolUnitAddressReposit
     });
   }
 
-  async create(dto: Prisma.AddressCreateInput): Promise<AddressPublic> {
+  async create(
+    dto: Prisma.AddressUncheckedCreateInput,
+    schoolUnitId: string,
+  ): Promise<AddressPublic> {
     return this.prisma.address.create({
-      data: { ...dto, isPrimary: true },
+      data: { ...dto, isPrimary: true, schoolUnitId },
       omit: ADDRESS_OMIT,
     });
   }

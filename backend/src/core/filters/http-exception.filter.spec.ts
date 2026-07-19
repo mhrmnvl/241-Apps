@@ -89,19 +89,52 @@ describe('HttpExceptionFilter', () => {
       expect(mockLogger.warn).not.toHaveBeenCalled();
     });
 
-    it('should mask 5xx error messages as "Internal server error"', () => {
-      const exception = new InternalServerErrorException('Secret DB error');
-      const host = createMockHost();
+    it('should mask 5xx error messages as "Internal server error" in production', () => {
+      const prev = process.env.NODE_ENV;
+      process.env.NODE_ENV = 'production';
+      try {
+        const prodFilter = new HttpExceptionFilter(
+          mockLogger as unknown as PinoLogger,
+        );
+        const exception = new InternalServerErrorException('Secret DB error');
+        const host = createMockHost();
 
-      filter.catch(exception, host);
+        prodFilter.catch(exception, host);
 
-      const mockJson = (host as ExtendedHost)._mockJson;
-      expect(mockJson).toHaveBeenCalledWith(
-        expect.objectContaining({
-          statusCode: 500,
-          message: 'Internal server error',
-        }),
-      );
+        const mockJson = (host as ExtendedHost)._mockJson;
+        expect(mockJson).toHaveBeenCalledWith(
+          expect.objectContaining({
+            statusCode: 500,
+            message: 'Internal server error',
+          }),
+        );
+      } finally {
+        process.env.NODE_ENV = prev;
+      }
+    });
+
+    it('should expose the real 5xx error message outside production (DX)', () => {
+      const prev = process.env.NODE_ENV;
+      process.env.NODE_ENV = 'development';
+      try {
+        const devFilter = new HttpExceptionFilter(
+          mockLogger as unknown as PinoLogger,
+        );
+        const exception = new InternalServerErrorException('Secret DB error');
+        const host = createMockHost();
+
+        devFilter.catch(exception, host);
+
+        const mockJson = (host as ExtendedHost)._mockJson;
+        expect(mockJson).toHaveBeenCalledWith(
+          expect.objectContaining({
+            statusCode: 500,
+            message: 'Secret DB error',
+          }),
+        );
+      } finally {
+        process.env.NODE_ENV = prev;
+      }
     });
 
     it('should handle validation errors with message array', () => {

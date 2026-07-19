@@ -29,7 +29,7 @@ export class SchoolUnitAddressUseCase {
   }
 
   async setAddress(dto: CreateAddressDto) {
-    await this.requireSchoolUnit();
+    const schoolUnit = await this.requireSchoolUnit();
     const existing = await this.repo.find();
     if (existing) {
       throw new ConflictException(
@@ -37,7 +37,7 @@ export class SchoolUnitAddressUseCase {
       );
     }
 
-    const address = await this.repo.create(dto);
+    const address = await this.repo.create(dto, schoolUnit.id);
     this.logger.log(`School unit address set`);
     return address;
   }

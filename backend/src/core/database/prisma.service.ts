@@ -1,7 +1,7 @@
 import {
+  BadRequestException,
   BeforeApplicationShutdown,
   Injectable,
-  InternalServerErrorException,
   Logger,
   OnModuleDestroy,
   OnModuleInit,
@@ -14,14 +14,16 @@ const ADDRESS_OWNER_FIELDS = [
   'studentId',
   'teacherId',
   'parentId',
-  'institutionId',
+  'schoolUnitId',
 ] as const;
 
 function assertAddressHasOwner(data: Record<string, unknown>): void {
   const hasOwner = ADDRESS_OWNER_FIELDS.some((field) => data[field] != null);
   if (!hasOwner) {
-    throw new InternalServerErrorException(
-      'Address must belong to at least one owner (student, teacher, parent, or institution).',
+    // A missing owner is a caller/data problem, not a server fault — throw a 4xx
+    // so the message reaches the client instead of being masked as a 500.
+    throw new BadRequestException(
+      'Address must belong to an owner (student, teacher, parent, or school unit).',
     );
   }
 }

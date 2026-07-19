@@ -13,6 +13,8 @@ import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 @Catch()
 @Injectable()
 export class HttpExceptionFilter implements ExceptionFilter {
+  private readonly isProduction = process.env.NODE_ENV === 'production';
+
   constructor(
     @InjectPinoLogger(HttpExceptionFilter.name)
     private readonly logger: PinoLogger,
@@ -27,27 +29,37 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const url = request.originalUrl || request.url;
     const errorText = Array.isArray(message) ? message.join('; ') : message;
 
-    response.status(statusCode).json({ statusCode, message, data: null });
-
     const responseTime = request._startTime
       ? Date.now() - request._startTime
       : undefined;
-
     const summary = `${request.method} ${url} - ${String(statusCode)} - ${errorText}`;
-
-    if (url === '/favicon.ico') return;
-
     const userId = request.user?.id;
+    const stack = exception instanceof Error ? exception.stack : undefined;
 
     if (statusCode >= 500) {
-      const stack = exception instanceof Error ? exception.stack : undefined;
       this.logger.error(
         { statusCode, responseTime, stack, details: exception, userId },
         summary,
       );
-    } else {
+
+      // DX: outside production, return the real error message + stack so a 500's
+      // cause is visible in the response instead of only in the server logs.
+      // Production keeps the generic "Internal server error" to avoid leaks.
+      if (!this.isProduction) {
+        response.status(statusCode).json({
+          statusCode,
+          message: exception instanceof Error ? exception.message : errorText,
+          error: 'Internal Server Error',
+          stack,
+          data: null,
+        });
+        return;
+      }
+    } else if (url !== '/favicon.ico') {
       this.logger.warn({ statusCode, responseTime, userId }, summary);
     }
+
+    response.status(statusCode).json({ statusCode, message, data: null });
   }
 
   private resolveException(exception: unknown): {
@@ -80,6 +92,20 @@ export class HttpExceptionFilter implements ExceptionFilter {
           statusCode: HttpStatus.NOT_FOUND,
           message:
             (exception.meta?.cause as string | undefined) ?? 'Record not found',
+        };
+      }
+
+      if (exception.code === 'P2003') {
+        return {
+          statusCode: HttpStatus.BAD_REQUEST,
+          message: 'Operation failed: a referenced record does not exist.',
+        };
+      }
+
+      if (exception.code === 'P2000' || exception.code === 'P2011') {
+        return {
+          statusCode: HttpStatus.BAD_REQUEST,
+          message: 'Invalid data: a required field is missing or too long.',
         };
       }
     }

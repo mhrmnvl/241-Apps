@@ -3,6 +3,7 @@ model Address {
   studentId    String?   @map("student_id") @db.Uuid
   teacherId    String?   @map("teacher_id") @db.Uuid
   parentId     String?   @map("parent_id") @db.Uuid
+  schoolUnitId String?   @map("school_unit_id") @db.Uuid
   street       String    @db.VarChar(255)
   rt           String    @db.VarChar(5)
   rw           String    @db.VarChar(5)
@@ -15,9 +16,10 @@ model Address {
   isPrimary    Boolean   @default(false) @map("is_primary")
   deletedAt    DateTime? @map("deleted_at")
 
-  teacher Teacher? @relation(fields: [teacherId], references: [id])
-  parent  Parent?  @relation(fields: [parentId], references: [id])
-  student Student? @relation(fields: [studentId], references: [id])
+  teacher    Teacher?    @relation(fields: [teacherId], references: [id])
+  parent     Parent?     @relation(fields: [parentId], references: [id])
+  student    Student?    @relation(fields: [studentId], references: [id])
+  schoolUnit SchoolUnit? @relation(fields: [schoolUnitId], references: [id])
 
   @@map("addresses")
 }
