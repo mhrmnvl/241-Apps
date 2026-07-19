@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { PositionController } from './controllers/position.controller.js';
+import { PositionController } from './presentation/position.controller.js';
 import { PositionRepository } from './repositories/position.repository.js';
 import { IPositionRepository } from './interfaces/position-repository.interface.js';
 import { CreatePositionUseCase } from './use-cases/create-position.use-case.js';

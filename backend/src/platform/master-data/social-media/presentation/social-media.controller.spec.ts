@@ -2,11 +2,11 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { CreateSocialMediaDto } from '../dto/create-social-media.dto.js';
 import { SocialMediaQueryDto } from '../dto/social-media-query.dto.js';
 import { UpdateSocialMediaDto } from '../dto/update-social-media.dto.js';
-import { CreateSocialMediaService } from '../services/create-social-media.service.js';
-import { DeleteSocialMediaService } from '../services/delete-social-media.service.js';
-import { GetSocialMediaByIdService } from '../services/get-social-media-by-id.service.js';
-import { GetSocialMediasService } from '../services/get-social-medias.service.js';
-import { UpdateSocialMediaService } from '../services/update-social-media.service.js';
+import { CreateSocialMediaUseCase } from '../use-cases/create-social-media.use-case.js';
+import { DeleteSocialMediaUseCase } from '../use-cases/delete-social-media.use-case.js';
+import { GetSocialMediaByIdUseCase } from '../use-cases/get-social-media-by-id.use-case.js';
+import { GetSocialMediasUseCase } from '../use-cases/get-social-medias.use-case.js';
+import { UpdateSocialMediaUseCase } from '../use-cases/update-social-media.use-case.js';
 import { SocialMediaController } from './social-media.controller.js';
 
 describe('SocialMediaController', () => {
@@ -22,21 +22,21 @@ describe('SocialMediaController', () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [SocialMediaController],
       providers: [
-        { provide: GetSocialMediasService, useValue: mockGetPlatformsService },
+        { provide: GetSocialMediasUseCase, useValue: mockGetPlatformsService },
         {
-          provide: GetSocialMediaByIdService,
+          provide: GetSocialMediaByIdUseCase,
           useValue: mockGetPlatformByIdService,
         },
         {
-          provide: CreateSocialMediaService,
+          provide: CreateSocialMediaUseCase,
           useValue: mockCreatePlatformService,
         },
         {
-          provide: UpdateSocialMediaService,
+          provide: UpdateSocialMediaUseCase,
           useValue: mockUpdatePlatformService,
         },
         {
-          provide: DeleteSocialMediaService,
+          provide: DeleteSocialMediaUseCase,
           useValue: mockDeletePlatformService,
         },
       ],
@@ -51,7 +51,7 @@ describe('SocialMediaController', () => {
   });
 
   describe('findAll', () => {
-    it('should delegate to GetSocialMediasService with query', async () => {
+    it('should delegate to GetSocialMediasUseCase with query', async () => {
       const query: SocialMediaQueryDto = { page: 1, limit: 10 };
       const expected = {
         data: [{ id: 'plt-1', name: 'Instagram' }],
@@ -67,7 +67,7 @@ describe('SocialMediaController', () => {
   });
 
   describe('findOne', () => {
-    it('should delegate to GetSocialMediaByIdService with id', async () => {
+    it('should delegate to GetSocialMediaByIdUseCase with id', async () => {
       const id = 'plt-1';
       const expected = { id: 'plt-1', name: 'Instagram' };
       mockGetPlatformByIdService.execute.mockResolvedValue(expected);
@@ -80,7 +80,7 @@ describe('SocialMediaController', () => {
   });
 
   describe('create', () => {
-    it('should delegate to CreateSocialMediaService with dto', async () => {
+    it('should delegate to CreateSocialMediaUseCase with dto', async () => {
       const dto: CreateSocialMediaDto = {
         name: 'TikTok',
         baseUrl: 'https://tiktok.com/',
@@ -100,7 +100,7 @@ describe('SocialMediaController', () => {
   });
 
   describe('update', () => {
-    it('should delegate to UpdateSocialMediaService with id and dto', async () => {
+    it('should delegate to UpdateSocialMediaUseCase with id and dto', async () => {
       const id = 'plt-1';
       const dto: UpdateSocialMediaDto = { name: 'Instagram Rebranded' };
       const expected = { id: 'plt-1', name: 'Instagram Rebranded' };
@@ -114,7 +114,7 @@ describe('SocialMediaController', () => {
   });
 
   describe('remove', () => {
-    it('should delegate to DeleteSocialMediaService with id', async () => {
+    it('should delegate to DeleteSocialMediaUseCase with id', async () => {
       const id = 'plt-1';
       mockDeletePlatformService.execute.mockResolvedValue(undefined);
 

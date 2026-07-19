@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { EducationController } from './controllers/education.controller.js';
+import { EducationController } from './presentation/education.controller.js';
 import { EducationRepository } from './repositories/education.repository.js';
 import { IEducationRepository } from './interfaces/education-repository.interface.js';
 import { CreateEducationUseCase } from './use-cases/create-education.use-case.js';

@@ -1,10 +1,10 @@
 ﻿import { Module } from '@nestjs/common';
-import { DashboardController } from './controllers/dashboard.controller.js';
+import { DashboardController } from './presentation/dashboard.controller.js';
 import { DashboardRepository } from './repositories/dashboard.repository.js';
-import { GetDashboardSummaryService } from './services/get-dashboard-summary.service.js';
+import { GetDashboardSummaryUseCase } from './use-cases/get-dashboard-summary.use-case.js';
 
 @Module({
   controllers: [DashboardController],
-  providers: [DashboardRepository, GetDashboardSummaryService],
+  providers: [DashboardRepository, GetDashboardSummaryUseCase],
 })
 export class DashboardModule {}

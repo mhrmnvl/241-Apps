@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { FileController } from './controllers/file.controller.js';
+import { FileController } from './presentation/file.controller.js';
 import { FileRepository } from './repositories/file.repository.js';
 
 // Use cases

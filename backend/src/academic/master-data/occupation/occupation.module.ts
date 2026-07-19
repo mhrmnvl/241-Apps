@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { OccupationController } from './controllers/occupation.controller.js';
+import { OccupationController } from './presentation/occupation.controller.js';
 import { OccupationRepository } from './repositories/occupation.repository.js';
 import { IOccupationRepository } from './interfaces/occupation-repository.interface.js';
 import { CreateOccupationUseCase } from './use-cases/create-occupation.use-case.js';

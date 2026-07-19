@@ -1,9 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { DashboardRepository } from '../repositories/dashboard.repository.js';
-import { GetDashboardSummaryService } from './get-dashboard-summary.service.js';
+import { GetDashboardSummaryUseCase } from './get-dashboard-summary.use-case.js';
 
-describe('GetDashboardSummaryService', () => {
-  let useCase: GetDashboardSummaryService;
+describe('GetDashboardSummaryUseCase', () => {
+  let useCase: GetDashboardSummaryUseCase;
   let repository: jest.Mocked<DashboardRepository>;
 
   const mockRepository: Partial<Record<keyof DashboardRepository, jest.Mock>> =
@@ -24,12 +24,12 @@ describe('GetDashboardSummaryService', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        GetDashboardSummaryService,
+        GetDashboardSummaryUseCase,
         { provide: DashboardRepository, useValue: mockRepository },
       ],
     }).compile();
 
-    useCase = module.get(GetDashboardSummaryService);
+    useCase = module.get(GetDashboardSummaryUseCase);
     repository = module.get(DashboardRepository);
   });
 

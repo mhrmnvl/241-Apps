@@ -3,7 +3,7 @@ import { SocialMediaQueryDto } from '../dto/social-media-query.dto.js';
 import { ISocialMediaRepository } from '../interfaces/social-media-repository.interface.js';
 
 @Injectable()
-export class GetSocialMediasService {
+export class GetSocialMediasUseCase {
   constructor(private readonly repo: ISocialMediaRepository) {}
 
   async execute(query: SocialMediaQueryDto) {

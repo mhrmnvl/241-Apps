@@ -8,8 +8,8 @@ import { UpdateSocialMediaDto } from '../dto/update-social-media.dto.js';
 import { ISocialMediaRepository } from '../interfaces/social-media-repository.interface.js';
 
 @Injectable()
-export class UpdateSocialMediaService {
-  private readonly logger = new Logger(UpdateSocialMediaService.name);
+export class UpdateSocialMediaUseCase {
+  private readonly logger = new Logger(UpdateSocialMediaUseCase.name);
 
   constructor(private readonly repo: ISocialMediaRepository) {}
 

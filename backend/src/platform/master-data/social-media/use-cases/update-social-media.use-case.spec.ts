@@ -2,10 +2,10 @@ import { ConflictException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { UpdateSocialMediaDto } from '../dto/update-social-media.dto.js';
 import { ISocialMediaRepository } from '../interfaces/social-media-repository.interface.js';
-import { UpdateSocialMediaService } from './update-social-media.service.js';
+import { UpdateSocialMediaUseCase } from './update-social-media.use-case.js';
 
-describe('UpdateSocialMediaService', () => {
-  let useCase: UpdateSocialMediaService;
+describe('UpdateSocialMediaUseCase', () => {
+  let useCase: UpdateSocialMediaUseCase;
 
   const mockRepo = {
     findById: jest.fn(),
@@ -16,12 +16,12 @@ describe('UpdateSocialMediaService', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        UpdateSocialMediaService,
+        UpdateSocialMediaUseCase,
         { provide: ISocialMediaRepository, useValue: mockRepo },
       ],
     }).compile();
 
-    useCase = module.get<UpdateSocialMediaService>(UpdateSocialMediaService);
+    useCase = module.get<UpdateSocialMediaUseCase>(UpdateSocialMediaUseCase);
     jest.clearAllMocks();
   });
 

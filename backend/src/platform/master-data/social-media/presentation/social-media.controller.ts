@@ -30,11 +30,11 @@ import {
   SocialMediaResponseDto,
 } from '../dto/social-media-response.dto.js';
 import { UpdateSocialMediaDto } from '../dto/update-social-media.dto.js';
-import { CreateSocialMediaService } from '../services/create-social-media.service.js';
-import { DeleteSocialMediaService } from '../services/delete-social-media.service.js';
-import { GetSocialMediaByIdService } from '../services/get-social-media-by-id.service.js';
-import { GetSocialMediasService } from '../services/get-social-medias.service.js';
-import { UpdateSocialMediaService } from '../services/update-social-media.service.js';
+import { CreateSocialMediaUseCase } from '../use-cases/create-social-media.use-case.js';
+import { DeleteSocialMediaUseCase } from '../use-cases/delete-social-media.use-case.js';
+import { GetSocialMediaByIdUseCase } from '../use-cases/get-social-media-by-id.use-case.js';
+import { GetSocialMediasUseCase } from '../use-cases/get-social-medias.use-case.js';
+import { UpdateSocialMediaUseCase } from '../use-cases/update-social-media.use-case.js';
 
 @ApiTags('Social Medias')
 @ApiBearerAuth()
@@ -42,11 +42,11 @@ import { UpdateSocialMediaService } from '../services/update-social-media.servic
 @Controller('social-medias')
 export class SocialMediaController {
   constructor(
-    private readonly getPlatformsService: GetSocialMediasService,
-    private readonly getPlatformByIdService: GetSocialMediaByIdService,
-    private readonly createPlatformService: CreateSocialMediaService,
-    private readonly updatePlatformService: UpdateSocialMediaService,
-    private readonly deletePlatformService: DeleteSocialMediaService,
+    private readonly getPlatformsService: GetSocialMediasUseCase,
+    private readonly getPlatformByIdService: GetSocialMediaByIdUseCase,
+    private readonly createPlatformService: CreateSocialMediaUseCase,
+    private readonly updatePlatformService: UpdateSocialMediaUseCase,
+    private readonly deletePlatformService: DeleteSocialMediaUseCase,
   ) {}
 
   @Get()

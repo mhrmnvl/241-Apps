@@ -1,6 +1,6 @@
 ﻿import { Module } from '@nestjs/common';
 import { PrismaModule } from '../../../core/database/prisma.module.js';
-import { EducationalHistoryController } from './controllers/educational-history.controller.js';
+import { EducationalHistoryController } from './presentation/educational-history.controller.js';
 import { EducationalHistoryRepository } from './repositories/educational-history.repository.js';
 import { CreateEducationalHistoryUseCase } from './use-cases/create-educational-history.use-case.js';
 import { GetEducationalHistoriesUseCase } from './use-cases/get-educational-histories.use-case.js';

@@ -8,7 +8,7 @@ import { ProfileSocialMediaRepository } from '../../../profile/index.js';
 import { ISocialMediaRepository } from '../interfaces/social-media-repository.interface.js';
 
 @Injectable()
-export class DeleteSocialMediaService {
+export class DeleteSocialMediaUseCase {
   constructor(
     private readonly repo: ISocialMediaRepository,
     private readonly schoolUnitSocialMediaRepo: SchoolUnitSocialMediaRepository,

@@ -1,10 +1,10 @@
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { ISocialMediaRepository } from '../interfaces/social-media-repository.interface.js';
-import { GetSocialMediaByIdService } from './get-social-media-by-id.service.js';
+import { GetSocialMediaByIdUseCase } from './get-social-media-by-id.use-case.js';
 
-describe('GetSocialMediaByIdService', () => {
-  let useCase: GetSocialMediaByIdService;
+describe('GetSocialMediaByIdUseCase', () => {
+  let useCase: GetSocialMediaByIdUseCase;
 
   const mockRepo = {
     findById: jest.fn(),
@@ -13,12 +13,12 @@ describe('GetSocialMediaByIdService', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        GetSocialMediaByIdService,
+        GetSocialMediaByIdUseCase,
         { provide: ISocialMediaRepository, useValue: mockRepo },
       ],
     }).compile();
 
-    useCase = module.get<GetSocialMediaByIdService>(GetSocialMediaByIdService);
+    useCase = module.get<GetSocialMediaByIdUseCase>(GetSocialMediaByIdUseCase);
     jest.clearAllMocks();
   });
 

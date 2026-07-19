@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { GetDashboardSummaryService } from '../services/get-dashboard-summary.service.js';
+import { GetDashboardSummaryUseCase } from '../use-cases/get-dashboard-summary.use-case.js';
 import { DashboardController } from './dashboard.controller.js';
 
 describe('DashboardController', () => {
@@ -11,7 +11,7 @@ describe('DashboardController', () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [DashboardController],
       providers: [
-        { provide: GetDashboardSummaryService, useValue: mockGetSummary },
+        { provide: GetDashboardSummaryUseCase, useValue: mockGetSummary },
       ],
     }).compile();
 
@@ -24,7 +24,7 @@ describe('DashboardController', () => {
   });
 
   describe('getSummary', () => {
-    it('should delegate to GetDashboardSummaryService', async () => {
+    it('should delegate to GetDashboardSummaryUseCase', async () => {
       const summary = { totalStudents: 100, totalTeachers: 20 };
       mockGetSummary.execute.mockResolvedValue(summary);
 

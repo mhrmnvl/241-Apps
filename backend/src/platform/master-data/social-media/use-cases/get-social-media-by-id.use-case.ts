@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { ISocialMediaRepository } from '../interfaces/social-media-repository.interface.js';
 
 @Injectable()
-export class GetSocialMediaByIdService {
+export class GetSocialMediaByIdUseCase {
   constructor(private readonly repo: ISocialMediaRepository) {}
 
   async execute(id: string) {

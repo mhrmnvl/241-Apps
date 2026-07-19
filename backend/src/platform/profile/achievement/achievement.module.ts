@@ -1,6 +1,6 @@
 ﻿import { Module } from '@nestjs/common';
 import { PrismaModule } from '../../../core/database/prisma.module.js';
-import { AchievementController } from './controllers/achievement.controller.js';
+import { AchievementController } from './presentation/achievement.controller.js';
 import { AchievementRepository } from './repositories/achievement.repository.js';
 import { CreateAchievementUseCase } from './use-cases/create-achievement.use-case.js';
 import { GetAchievementsUseCase } from './use-cases/get-achievements.use-case.js';

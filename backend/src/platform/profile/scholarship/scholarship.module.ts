@@ -1,6 +1,6 @@
 ﻿import { Module } from '@nestjs/common';
 import { PrismaModule } from '../../../core/database/prisma.module.js';
-import { ScholarshipController } from './controllers/scholarship.controller.js';
+import { ScholarshipController } from './presentation/scholarship.controller.js';
 import { ScholarshipRepository } from './repositories/scholarship.repository.js';
 import { CreateScholarshipUseCase } from './use-cases/create-scholarship.use-case.js';
 import { GetScholarshipsUseCase } from './use-cases/get-scholarships.use-case.js';

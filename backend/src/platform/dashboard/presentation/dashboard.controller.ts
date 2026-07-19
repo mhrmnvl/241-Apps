@@ -3,7 +3,7 @@ import { Controller, Get, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 import { JwtAuthGuard } from '../../auth/index.js';
-import { GetDashboardSummaryService } from '../services/get-dashboard-summary.service.js';
+import { GetDashboardSummaryUseCase } from '../use-cases/get-dashboard-summary.use-case.js';
 
 @ApiTags('Dashboard')
 @ApiBearerAuth()
@@ -11,7 +11,7 @@ import { GetDashboardSummaryService } from '../services/get-dashboard-summary.se
 @UseGuards(JwtAuthGuard)
 export class DashboardController {
   constructor(
-    private readonly getDashboardSummaryService: GetDashboardSummaryService,
+    private readonly getDashboardSummaryService: GetDashboardSummaryUseCase,
   ) {}
 
   @Get('summary')

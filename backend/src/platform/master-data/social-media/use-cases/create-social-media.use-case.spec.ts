@@ -2,10 +2,10 @@ import { ConflictException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { CreateSocialMediaDto } from '../dto/create-social-media.dto.js';
 import { ISocialMediaRepository } from '../interfaces/social-media-repository.interface.js';
-import { CreateSocialMediaService } from './create-social-media.service.js';
+import { CreateSocialMediaUseCase } from './create-social-media.use-case.js';
 
-describe('CreateSocialMediaService', () => {
-  let useCase: CreateSocialMediaService;
+describe('CreateSocialMediaUseCase', () => {
+  let useCase: CreateSocialMediaUseCase;
 
   const mockRepo = {
     findByName: jest.fn(),
@@ -15,12 +15,12 @@ describe('CreateSocialMediaService', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        CreateSocialMediaService,
+        CreateSocialMediaUseCase,
         { provide: ISocialMediaRepository, useValue: mockRepo },
       ],
     }).compile();
 
-    useCase = module.get<CreateSocialMediaService>(CreateSocialMediaService);
+    useCase = module.get<CreateSocialMediaUseCase>(CreateSocialMediaUseCase);
     jest.clearAllMocks();
   });
 

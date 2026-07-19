@@ -3,10 +3,10 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { SchoolUnitSocialMediaRepository } from '../../../school-unit/index.js';
 import { ProfileSocialMediaRepository } from '../../../profile/index.js';
 import { ISocialMediaRepository } from '../interfaces/social-media-repository.interface.js';
-import { DeleteSocialMediaService } from './delete-social-media.service.js';
+import { DeleteSocialMediaUseCase } from './delete-social-media.use-case.js';
 
-describe('DeleteSocialMediaService', () => {
-  let useCase: DeleteSocialMediaService;
+describe('DeleteSocialMediaUseCase', () => {
+  let useCase: DeleteSocialMediaUseCase;
 
   const mockRepo = {
     findById: jest.fn(),
@@ -24,7 +24,7 @@ describe('DeleteSocialMediaService', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        DeleteSocialMediaService,
+        DeleteSocialMediaUseCase,
         { provide: ISocialMediaRepository, useValue: mockRepo },
         {
           provide: SchoolUnitSocialMediaRepository,
@@ -37,7 +37,7 @@ describe('DeleteSocialMediaService', () => {
       ],
     }).compile();
 
-    useCase = module.get<DeleteSocialMediaService>(DeleteSocialMediaService);
+    useCase = module.get<DeleteSocialMediaUseCase>(DeleteSocialMediaUseCase);
     jest.clearAllMocks();
   });
 

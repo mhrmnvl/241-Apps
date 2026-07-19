@@ -1,10 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { SocialMediaQueryDto } from '../dto/social-media-query.dto.js';
 import { ISocialMediaRepository } from '../interfaces/social-media-repository.interface.js';
-import { GetSocialMediasService } from './get-social-medias.service.js';
+import { GetSocialMediasUseCase } from './get-social-medias.use-case.js';
 
-describe('GetSocialMediasService', () => {
-  let useCase: GetSocialMediasService;
+describe('GetSocialMediasUseCase', () => {
+  let useCase: GetSocialMediasUseCase;
 
   const mockRepo = {
     findAll: jest.fn(),
@@ -13,12 +13,12 @@ describe('GetSocialMediasService', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        GetSocialMediasService,
+        GetSocialMediasUseCase,
         { provide: ISocialMediaRepository, useValue: mockRepo },
       ],
     }).compile();
 
-    useCase = module.get<GetSocialMediasService>(GetSocialMediasService);
+    useCase = module.get<GetSocialMediasUseCase>(GetSocialMediasUseCase);
     jest.clearAllMocks();
   });
 

@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { DashboardRepository } from '../repositories/dashboard.repository.js';
 
 @Injectable()
-export class GetDashboardSummaryService {
+export class GetDashboardSummaryUseCase {
   constructor(private readonly dashboardRepository: DashboardRepository) {}
 
   async execute() {

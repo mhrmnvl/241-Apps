@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { PositionCategoryController } from './controllers/position-category.controller.js';
+import { PositionCategoryController } from './presentation/position-category.controller.js';
 import { PositionCategoryRepository } from './repositories/position-category.repository.js';
 import { IPositionCategoryRepository } from './interfaces/position-category-repository.interface.js';
 import { CreatePositionCategoryUseCase } from './use-cases/create-position-category.use-case.js';

@@ -1,25 +1,25 @@
 import { Module } from '@nestjs/common';
 import { SchoolUnitModule } from '../../school-unit/school-unit.module.js';
 import { ProfileModule } from '../../profile/profile.module.js';
-import { SocialMediaController } from './controllers/social-media.controller.js';
+import { SocialMediaController } from './presentation/social-media.controller.js';
 import { SocialMediaRepository } from './repositories/social-media.repository.js';
 import { ISocialMediaRepository } from './interfaces/social-media-repository.interface.js';
-import { CreateSocialMediaService } from './services/create-social-media.service.js';
-import { DeleteSocialMediaService } from './services/delete-social-media.service.js';
-import { GetSocialMediaByIdService } from './services/get-social-media-by-id.service.js';
-import { GetSocialMediasService } from './services/get-social-medias.service.js';
-import { UpdateSocialMediaService } from './services/update-social-media.service.js';
+import { CreateSocialMediaUseCase } from './use-cases/create-social-media.use-case.js';
+import { DeleteSocialMediaUseCase } from './use-cases/delete-social-media.use-case.js';
+import { GetSocialMediaByIdUseCase } from './use-cases/get-social-media-by-id.use-case.js';
+import { GetSocialMediasUseCase } from './use-cases/get-social-medias.use-case.js';
+import { UpdateSocialMediaUseCase } from './use-cases/update-social-media.use-case.js';
 
 @Module({
   imports: [SchoolUnitModule, ProfileModule],
   controllers: [SocialMediaController],
   providers: [
     { provide: ISocialMediaRepository, useClass: SocialMediaRepository },
-    GetSocialMediasService,
-    GetSocialMediaByIdService,
-    CreateSocialMediaService,
-    UpdateSocialMediaService,
-    DeleteSocialMediaService,
+    GetSocialMediasUseCase,
+    GetSocialMediaByIdUseCase,
+    CreateSocialMediaUseCase,
+    UpdateSocialMediaUseCase,
+    DeleteSocialMediaUseCase,
   ],
   exports: [ISocialMediaRepository],
 })

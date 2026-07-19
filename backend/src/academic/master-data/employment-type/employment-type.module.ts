@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { EmploymentTypeController } from './controllers/employment-type.controller.js';
+import { EmploymentTypeController } from './presentation/employment-type.controller.js';
 import { EmploymentTypeRepository } from './repositories/employment-type.repository.js';
 import { IEmploymentTypeRepository } from './interfaces/employment-type-repository.interface.js';
 import { CreateEmploymentTypeUseCase } from './use-cases/create-employment-type.use-case.js';
