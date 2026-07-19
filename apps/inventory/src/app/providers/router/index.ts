@@ -7,6 +7,7 @@ import { fileRoutes } from '@/features/platform/file'
 import { profileRoutes } from '@/features/platform/profile'
 import { userRoleRoutes } from '@/features/platform/user-role'
 import { rolesRoutes } from '@/features/platform/role'
+import { permissionsRoutes } from '@/features/platform/permission'
 import { auditLogsRoutes } from '@/features/platform/audit-log'
 import { schoolUnitTypeRoutes } from '@/features/platform/school-unit-type'
 import { religionRoutes } from '@/features/platform/religion'
@@ -31,6 +32,7 @@ const router = createRouter({
     ...fileRoutes,
     ...userRoleRoutes,
     ...rolesRoutes,
+    ...permissionsRoutes,
     ...auditLogsRoutes,
     ...profileRoutes,
     ...schoolUnitTypeRoutes,

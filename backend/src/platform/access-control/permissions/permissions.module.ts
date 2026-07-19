@@ -7,6 +7,9 @@ import { GetPermissionByIdUseCase } from './use-cases/get-permission-by-id.use-c
 import { AssignPermissionToRoleUseCase } from './use-cases/assign-permission-to-role.use-case.js';
 import { RemovePermissionFromRoleUseCase } from './use-cases/remove-permission-from-role.use-case.js';
 import { SyncPermissionsUseCase } from './use-cases/sync-permissions.use-case.js';
+import { CreatePermissionUseCase } from './use-cases/create-permission.use-case.js';
+import { UpdatePermissionUseCase } from './use-cases/update-permission.use-case.js';
+import { DeletePermissionUseCase } from './use-cases/delete-permission.use-case.js';
 import { PermissionsGuard } from './guards/permissions.guard.js';
 import { RoleModule } from '../role/role.module.js';
 import { AuthModule } from '../../auth/auth.module.js';
@@ -21,6 +24,9 @@ import { AuthModule } from '../../auth/auth.module.js';
     AssignPermissionToRoleUseCase,
     RemovePermissionFromRoleUseCase,
     SyncPermissionsUseCase,
+    CreatePermissionUseCase,
+    UpdatePermissionUseCase,
+    DeletePermissionUseCase,
     PermissionsGuard,
   ],
   exports: [IPermissionsRepository, PermissionsGuard],

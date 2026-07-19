@@ -1,0 +1,1 @@
+export { permissionsRoutes } from './routes'

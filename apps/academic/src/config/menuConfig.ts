@@ -211,6 +211,11 @@ export const menuSections: MenuSection[] = [
             allowedRoles: ['ADMIN'],
           },
           {
+            title: 'Manajemen Permission',
+            url: '/pengaturan/permissions',
+            allowedRoles: ['ADMIN'],
+          },
+          {
             title: 'Log Aktivitas',
             url: '/pengaturan/audit-logs',
             allowedRoles: ['ADMIN'],

@@ -19,6 +19,7 @@ import { profileRoutes } from '@/features/platform/profile'
 import { positionRoutes } from '@/features/academic/position'
 import { userRoleRoutes } from '@/features/platform/user-role'
 import { rolesRoutes } from '@/features/platform/role'
+import { permissionsRoutes } from '@/features/platform/permission'
 import { auditLogsRoutes } from '@/features/platform/audit-log'
 import { scheduleRoutes } from '@/features/academic/schedule'
 import { semesterRoutes } from '@/features/academic/semester'
@@ -76,6 +77,7 @@ const router = createRouter({
     ...socialMediaRoutes,
     ...userRoleRoutes,
     ...rolesRoutes,
+    ...permissionsRoutes,
     ...auditLogsRoutes,
     ...classroomRoutes,
     ...classroomLevelRoutes,

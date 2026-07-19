@@ -106,4 +106,21 @@ export class PrismaPermissionsRepository extends IPermissionsRepository {
       create: data,
     });
   }
+
+  async createPermission(data: {
+    module: string;
+    action: string;
+    code: string;
+    description: string;
+  }) {
+    return this.prisma.permission.create({ data });
+  }
+
+  async updatePermission(id: string, data: { description: string }) {
+    return this.prisma.permission.update({ where: { id }, data });
+  }
+
+  async deletePermission(id: string) {
+    return this.prisma.permission.delete({ where: { id } });
+  }
 }

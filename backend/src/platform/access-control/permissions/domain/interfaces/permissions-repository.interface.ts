@@ -28,4 +28,15 @@ export abstract class IPermissionsRepository {
     code: string;
     description: string;
   }): Promise<Permission>;
+  abstract createPermission(data: {
+    module: string;
+    action: string;
+    code: string;
+    description: string;
+  }): Promise<Permission>;
+  abstract updatePermission(
+    id: string,
+    data: { description: string },
+  ): Promise<Permission>;
+  abstract deletePermission(id: string): Promise<Permission>;
 }
