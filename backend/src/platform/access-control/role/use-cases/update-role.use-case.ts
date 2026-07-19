@@ -13,8 +13,13 @@ export class UpdateRoleUseCase {
   async execute(id: string, dto: UpdateRoleDto) {
     const role = await this.rolesRepo.findById(id);
     if (!role) throw new NotFoundException('Role not found');
-    if (role.isSystem)
-      throw new ForbiddenException('System roles cannot be edited');
+    // SUPER_ADMIN is all-powerful (it bypasses every permission check), so it is
+    // never editable. Other roles — including built-in system roles like ADMIN or
+    // TEACHER — can have their name, description, and permissions configured; only
+    // their immutable `code` is protected (it is not part of UpdateRoleDto).
+    if (role.code === 'SUPER_ADMIN') {
+      throw new ForbiddenException('The SUPER_ADMIN role cannot be modified');
+    }
     return this.rolesRepo.update(id, dto);
   }
 }

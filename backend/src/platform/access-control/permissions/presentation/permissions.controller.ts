@@ -21,8 +21,11 @@ import {
 
 import { JwtAuthGuard } from '../../../auth/index.js';
 import { AssignPermissionDto } from '../dto/assign-permission.dto.js';
+import { PermissionResponseDto } from '../dto/permission-response.dto.js';
 import { AssignPermissionToRoleUseCase } from '../use-cases/assign-permission-to-role.use-case.js';
 import { RemovePermissionFromRoleUseCase } from '../use-cases/remove-permission-from-role.use-case.js';
+import { GetPermissionsUseCase } from '../use-cases/get-permissions.use-case.js';
+import { SyncPermissionsUseCase } from '../use-cases/sync-permissions.use-case.js';
 
 @ApiTags('Permissions')
 @ApiBearerAuth()
@@ -30,9 +33,32 @@ import { RemovePermissionFromRoleUseCase } from '../use-cases/remove-permission-
 @Controller('permissions')
 export class PermissionsController {
   constructor(
+    private readonly getPermissionsUseCase: GetPermissionsUseCase,
+    private readonly syncPermissionsUseCase: SyncPermissionsUseCase,
     private readonly assignPermissionToRoleUseCase: AssignPermissionToRoleUseCase,
     private readonly removePermissionFromRoleUseCase: RemovePermissionFromRoleUseCase,
   ) {}
+
+  @Get()
+  @RequirePermissions('roles.read')
+  @ApiOperation({ summary: 'List the full permission catalog' })
+  @ApiResponse({ status: 200, type: [PermissionResponseDto] })
+  async findAll() {
+    return this.getPermissionsUseCase.execute();
+  }
+
+  @Post('sync')
+  @RequirePermissions('permissions.manage')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary:
+      'Sync the code-defined permission catalog (SYSTEM_PERMISSIONS) into the database',
+  })
+  @ApiResponse({ status: 200, description: 'Permission catalog synced' })
+  async sync() {
+    await this.syncPermissionsUseCase.execute();
+    return { message: 'Permission catalog synced successfully' };
+  }
 
   @Post('roles/:roleId')
   @RequirePermissions('permissions.manage')

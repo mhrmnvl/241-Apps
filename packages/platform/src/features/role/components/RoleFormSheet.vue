@@ -457,13 +457,13 @@ const togglePermission = (id: string, checked: boolean) => {
                       />
                       <div class="space-y-0.5 select-none">
                         <div class="text-xs font-semibold tracking-tight">
-                          {{ perm.name }}
+                          {{ perm.description ?? perm.code }}
                         </div>
                         <div
-                          class="text-[10px] text-muted-foreground line-clamp-2 leading-normal"
-                          :title="perm.description ?? perm.code"
+                          class="text-[10px] text-muted-foreground font-mono line-clamp-2 leading-normal"
+                          :title="perm.code"
                         >
-                          {{ perm.description ?? perm.code }}
+                          {{ perm.code }}
                         </div>
                       </div>
                     </div>

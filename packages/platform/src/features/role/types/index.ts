@@ -1,9 +1,9 @@
 export interface Permission {
   id: string
   code: string
-  name: string
-  description?: string | null
   module?: string | null
+  action?: string | null
+  description?: string | null
 }
 
 export interface Role {

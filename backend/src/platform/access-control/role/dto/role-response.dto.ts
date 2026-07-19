@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { PermissionResponseDto } from '../../permissions/dto/permission-response.dto.js';
 
 export class RoleResponseDto {
   @ApiProperty({
@@ -6,12 +7,6 @@ export class RoleResponseDto {
     example: 'd3b07384-d113-4ec2-a5d9-4d64bc86ef34',
   })
   id!: string;
-
-  @ApiProperty({
-    description: 'The institution unique identifier',
-    example: '978f8ba3-3cd2-46cc-9293-8ef2b89c8942',
-  })
-  institutionId!: string;
 
   @ApiProperty({ description: 'The name of the role', example: 'Teacher' })
   name!: string;
@@ -31,6 +26,12 @@ export class RoleResponseDto {
     example: false,
   })
   isSystem!: boolean;
+
+  @ApiProperty({
+    description: 'Permissions granted to this role',
+    type: [PermissionResponseDto],
+  })
+  permissions!: PermissionResponseDto[];
 
   @ApiProperty({ description: 'Creation date' })
   createdAt!: Date;
