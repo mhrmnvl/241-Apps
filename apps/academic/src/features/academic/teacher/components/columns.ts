@@ -89,8 +89,8 @@ export const createColumns = (
             return h(ActionCell, {
               viewLabel: 'Lihat Detail',
               editLabel: 'Edit Data',
-              deleteTitle: 'Hapus Pegawai?',
-              deleteDescription: `Yakin ingin menghapus data pegawai "${teacher.user?.profile?.name || ''}"? Tindakan ini tidak dapat dibatalkan.`,
+              deleteTitle: 'Hapus Guru?',
+              deleteDescription: `Yakin ingin menghapus data guru "${teacher.user?.profile?.name || ''}"? Tindakan ini tidak dapat dibatalkan.`,
               onView: () => {
                 if (actions.onViewDetail) actions.onViewDetail(teacher)
               },
@@ -155,7 +155,7 @@ export const createAccountColumns = (
           cell: ({ row }: { row: { original: Teacher } }) => {
             const teacher = row.original
             return h(ActionCell, {
-              deleteTitle: 'Hapus Akun Pegawai?',
+              deleteTitle: 'Hapus Akun Guru?',
               deleteDescription: `Yakin ingin menghapus akun "${teacher.user?.identifier || ''}"? Tindakan ini tidak dapat dibatalkan.`,
               onEdit: () => {
                 if (actions.onEdit) actions.onEdit(teacher)

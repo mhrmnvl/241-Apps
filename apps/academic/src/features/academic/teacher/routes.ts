@@ -8,7 +8,7 @@ export const teacherRoutes: RouteRecordRaw[] = [
     meta: {
       requiresAuth: true,
       allowedRoles: ['ADMIN', 'TEACHER'],
-      title: 'Daftar Pegawai',
+      title: 'Daftar Guru',
     },
   },
   {
@@ -18,7 +18,7 @@ export const teacherRoutes: RouteRecordRaw[] = [
     meta: {
       requiresAuth: true,
       allowedRoles: ['ADMIN', 'TEACHER'],
-      title: 'Akun Pegawai',
+      title: 'Akun Guru',
     },
   },
 ]

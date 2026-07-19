@@ -151,12 +151,12 @@ export const menuSections: MenuSection[] = [
         ],
       },
       {
-        title: 'Pegawai',
+        title: 'Guru',
         url: '#',
         icon: UserCheck,
         items: [
-          { title: 'Daftar Pegawai', url: '/teacher' },
-          { title: 'Akun Pegawai', url: '/teacher/accounts' },
+          { title: 'Daftar Guru', url: '/teacher' },
+          { title: 'Akun Guru', url: '/teacher/accounts' },
         ],
       },
     ],

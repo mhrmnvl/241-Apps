@@ -21,8 +21,8 @@ import { onMounted, ref } from 'vue'
 import { toast } from 'vue-sonner'
 
 const breadcrumbs = [
-  { title: 'Pegawai', href: '/teacher' },
-  { title: 'Akun Pegawai' },
+  { title: 'Guru', href: '/teacher' },
+  { title: 'Akun Guru' },
 ]
 
 const {
@@ -49,11 +49,11 @@ const tableColumns = createAccountColumns({
     setLoading(true)
     try {
       await deleteTeacher(teacher.id)
-      toast.success('Akun pegawai berhasil dihapus')
+      toast.success('Akun guru berhasil dihapus')
       await fetchTeachers()
       closeAlert()
     } catch (e: unknown) {
-      toast.error(getIndonesianErrorMessage(e, 'Gagal menghapus akun pegawai'))
+      toast.error(getIndonesianErrorMessage(e, 'Gagal menghapus akun guru'))
     } finally {
       setLoading(false)
     }
@@ -70,9 +70,7 @@ async function handleToggleActive(isActive: boolean) {
     isEditAccountModalOpen.value = false
     await fetchTeachers()
   } catch (e: unknown) {
-    toast.error(
-      getIndonesianErrorMessage(e, 'Gagal mengubah status akun pegawai'),
-    )
+    toast.error(getIndonesianErrorMessage(e, 'Gagal mengubah status akun guru'))
   }
 }
 
@@ -83,11 +81,11 @@ async function handleChangePassword(newPassword: string) {
       userId: accountToEdit.value.user.id,
       password: newPassword,
     })
-    toast.success('Password akun pegawai berhasil diperbarui')
+    toast.success('Password akun guru berhasil diperbarui')
     isEditAccountModalOpen.value = false
   } catch (e: unknown) {
     toast.error(
-      getIndonesianErrorMessage(e, 'Gagal mengubah password akun pegawai'),
+      getIndonesianErrorMessage(e, 'Gagal mengubah password akun guru'),
     )
   }
 }
@@ -114,7 +112,7 @@ onMounted(() => {
         >
           <div>
             <CardTitle class="text-2xl font-bold tracking-tight">
-              Akun Pegawai
+              Akun Guru
             </CardTitle>
           </div>
         </CardHeader>
@@ -162,7 +160,7 @@ onMounted(() => {
               />
               <Input
                 v-model="filters.keyword"
-                placeholder="Cari akun pegawai..."
+                placeholder="Cari akun guru..."
                 class="pl-9"
               />
             </div>
@@ -173,7 +171,7 @@ onMounted(() => {
             :data="filteredTeachers"
             :total-items="filteredTeachers.length"
             :is-loading="loading"
-            item-label="akun pegawai"
+            item-label="akun guru"
           />
         </div>
       </Card>

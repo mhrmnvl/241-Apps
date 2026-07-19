@@ -141,8 +141,7 @@ watch(
           Manajemen Data Excel
         </DialogTitle>
         <DialogDescription class="sr-only">
-          Dialog untuk mengelola data pegawai melalui impor dan ekspor file
-          Excel.
+          Dialog untuk mengelola data guru melalui impor dan ekspor file Excel.
         </DialogDescription>
       </DialogHeader>
 
@@ -151,7 +150,7 @@ watch(
         class="w-full px-6 pb-4"
       >
         <TabsList class="grid w-full grid-cols-2">
-          <TabsTrigger value="import"> Import pegawai </TabsTrigger>
+          <TabsTrigger value="import"> Import guru </TabsTrigger>
           <TabsTrigger value="export"> Export Data </TabsTrigger>
         </TabsList>
 
@@ -282,11 +281,11 @@ watch(
               >
                 <Inbox class="size-6" />
               </div>
-              <h3 class="font-medium">Export Detail pegawai</h3>
+              <h3 class="font-medium">Export Detail guru</h3>
               <p
                 class="text-xs text-muted-foreground leading-relaxed max-w-[300px] mx-auto"
               >
-                Semua data pegawai yang muncul di tabel saat ini (berdasarkan
+                Semua data guru yang muncul di tabel saat ini (berdasarkan
                 filter yang aktif) akan diekspor ke dalam format Excel.
               </p>
             </div>

@@ -32,10 +32,7 @@ export function useTeacherImportExport(options: {
       downloadArrayBuffer(response.data, 'template_import_pegawai.xlsx')
     } catch (err) {
       toast.error(
-        getIndonesianErrorMessage(
-          err,
-          'Gagal mengunduh template import pegawai',
-        ),
+        getIndonesianErrorMessage(err, 'Gagal mengunduh template import guru'),
       )
     }
   }
@@ -46,9 +43,7 @@ export function useTeacherImportExport(options: {
       const dateStr = new Date().toISOString().split('T')[0]
       downloadArrayBuffer(response.data, `Data_Pegawai_${dateStr}.xlsx`)
     } catch (err) {
-      toast.error(
-        getIndonesianErrorMessage(err, 'Gagal mengekspor data pegawai'),
-      )
+      toast.error(getIndonesianErrorMessage(err, 'Gagal mengekspor data guru'))
     }
   }
 
@@ -83,7 +78,7 @@ export function useTeacherImportExport(options: {
         isImportExportOpen.value = false
         options.onImportSuccess()
       } else {
-        toast.success(`Import berhasil: ${result.success} pegawai ditambahkan.`)
+        toast.success(`Import berhasil: ${result.success} guru ditambahkan.`)
         isImportExportOpen.value = false
         options.onImportSuccess()
       }

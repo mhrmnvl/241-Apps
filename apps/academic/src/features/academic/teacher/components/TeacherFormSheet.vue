@@ -136,18 +136,18 @@ const formSchema = toTypedSchema(
   z.object({
     name: z
       .string()
-      .min(1, 'Mohon masukkan nama lengkap pegawai.')
+      .min(1, 'Mohon masukkan nama lengkap guru.')
       .max(100, 'Nama tidak boleh lebih dari 100 karakter.'),
     nik: z
       .string()
       .min(1, 'Nomor Induk Kependudukan (NIK) wajib diisi.')
       .length(16, 'NIK harus berjumlah tepat 16 digit angka.'),
-    gender: z.string().min(1, 'Silakan pilih jenis kelamin pegawai.'),
+    gender: z.string().min(1, 'Silakan pilih jenis kelamin guru.'),
     birthPlace: z
       .string()
       .min(1, 'Kota tempat lahir wajib dicantumkan.')
       .max(100, 'Tempat lahir tidak boleh lebih dari 100 karakter.'),
-    birthDate: z.string().min(1, 'Mohon tentukan tanggal lahir pegawai.'),
+    birthDate: z.string().min(1, 'Mohon tentukan tanggal lahir guru.'),
     email: z
       .string()
       .max(255, 'Email tidak boleh lebih dari 255 karakter.')
@@ -342,7 +342,7 @@ function emitSave(values: Record<string, unknown>) {
     >
       <SheetHeader class="px-6 py-6 border-b shrink-0 bg-muted/20">
         <SheetTitle class="text-xl">
-          {{ isEditing ? 'Edit Data Kepegawaian' : 'Tambah Pegawai Baru' }}
+          {{ isEditing ? 'Edit Data Guru' : 'Tambah Guru Baru' }}
         </SheetTitle>
       </SheetHeader>
 
@@ -566,7 +566,7 @@ function emitSave(values: Record<string, unknown>) {
                   </label>
                   <Select v-model="kategori">
                     <SelectTrigger class="w-full">
-                      <SelectValue placeholder="Pilih kategori pegawai" />
+                      <SelectValue placeholder="Pilih kategori guru" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="guru"> Guru </SelectItem>
@@ -582,7 +582,10 @@ function emitSave(values: Record<string, unknown>) {
                 >
                   <FormItem class="content-start">
                     <FormLabel>
-                      Jabatan Utama <span class="text-destructive">*</span>
+                      Jabatan Utama
+                      <span class="text-xs font-normal text-muted-foreground"
+                        >(opsional)</span
+                      >
                     </FormLabel>
                     <Select
                       :model-value="value"
@@ -597,7 +600,7 @@ function emitSave(values: Record<string, unknown>) {
                                 ? 'Pilih kategori terlebih dahulu'
                                 : filteredPositions.length === 0
                                   ? 'Belum ada jabatan tersedia'
-                                  : 'Pilih jabatan pegawai'
+                                  : 'Pilih jabatan guru'
                             "
                           />
                         </SelectTrigger>
@@ -705,9 +708,8 @@ function emitSave(values: Record<string, unknown>) {
       <AlertDialogHeader>
         <AlertDialogTitle>Simpan Perubahan Data?</AlertDialogTitle>
         <AlertDialogDescription>
-          Apakah Anda yakin ingin memperbarui data profil kepegawaian ini?
-          Pastikan data yang dimasukkan sudah benar sebelum disimpan ke
-          database.
+          Apakah Anda yakin ingin memperbarui data guru ini? Pastikan data yang
+          dimasukkan sudah benar sebelum disimpan ke database.
         </AlertDialogDescription>
       </AlertDialogHeader>
       <AlertDialogFooter>

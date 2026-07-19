@@ -217,6 +217,18 @@ export class PrismaTeacherRepository extends ITeacherRepository {
           nip: dto.nip,
           nuptk: dto.nuptk,
           employmentTypeId: dto.employmentTypeId,
+          // Optionally set the primary position at creation time.
+          ...(dto.positionId
+            ? {
+                teacherPositions: {
+                  create: {
+                    positionId: dto.positionId,
+                    hireDate: new Date(),
+                    isPrimary: true,
+                  },
+                },
+              }
+            : {}),
         },
         include: TEACHER_DETAIL_INCLUDE,
       });

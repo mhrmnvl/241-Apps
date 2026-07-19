@@ -74,7 +74,7 @@ export const createPositionColumns = (
         const item = row.original
         return h(ActionCell, {
           deleteTitle: 'Hapus Jabatan?',
-          deleteDescription: `Jabatan "${item.position?.name}" akan dihapus dari pegawai ini.`,
+          deleteDescription: `Jabatan "${item.position?.name}" akan dihapus dari guru ini.`,
           onEdit: () => handlers.onEdit(item),
           onDelete: ({
             closeAlert,

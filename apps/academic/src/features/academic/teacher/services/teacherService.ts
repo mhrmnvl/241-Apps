@@ -24,9 +24,7 @@ export const teacherService = {
       store.teachers = res.data.data
       store.totalTeachers = res.data.meta?.total ?? res.data.data.length
     } catch (error: unknown) {
-      toast.error(
-        getIndonesianErrorMessage(error, 'Gagal memuat data pegawai.'),
-      )
+      toast.error(getIndonesianErrorMessage(error, 'Gagal memuat data guru.'))
     } finally {
       store.loading = false
     }
@@ -61,7 +59,7 @@ export const teacherService = {
     } catch (error: unknown) {
       store.formError = getIndonesianErrorMessage(
         error,
-        'Gagal menyimpan data pegawai.',
+        'Gagal menyimpan data guru.',
       )
       return { success: false, error: store.formError }
     } finally {

@@ -84,4 +84,13 @@ export class CreateTeacherDto {
   @IsUUID()
   @IsNotEmpty()
   employmentTypeId: string;
+
+  @ApiPropertyOptional({
+    example: '550e8400-e29b-41d4-a716-446655440099',
+    description:
+      'Jabatan utama (opsional). Jika diisi, dibuat sebagai TeacherPosition primer.',
+  })
+  @IsOptional()
+  @IsUUID()
+  positionId?: string;
 }

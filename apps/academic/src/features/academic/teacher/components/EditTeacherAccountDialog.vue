@@ -101,10 +101,10 @@ const onSubmit = handleSubmit((values) => {
   <Dialog v-model:open="open">
     <DialogContent class="sm:max-w-[425px]">
       <DialogHeader>
-        <DialogTitle>Kelola Akun Pegawai</DialogTitle>
+        <DialogTitle>Kelola Akun Guru</DialogTitle>
         <DialogDescription>
           Perbarui status akses atau atur ulang kata sandi untuk
-          <strong>{{ editData?.user?.profile?.name || 'Pegawai' }}</strong
+          <strong>{{ editData?.user?.profile?.name || 'Guru' }}</strong
           >. Biarkan kolom kata sandi kosong jika tidak ingin mengubahnya.
         </DialogDescription>
       </DialogHeader>

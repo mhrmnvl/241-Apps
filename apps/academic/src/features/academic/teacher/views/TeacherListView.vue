@@ -29,10 +29,7 @@ import type {
   TeacherUpdatePayload,
 } from '../types'
 
-const breadcrumbs = [
-  { title: 'Pegawai', href: '#' },
-  { title: 'Daftar Pegawai' },
-]
+const breadcrumbs = [{ title: 'Guru', href: '#' }, { title: 'Daftar Guru' }]
 const router = useRouter()
 
 const {
@@ -74,8 +71,8 @@ async function handleSaveTeacher(
   if (result.success) {
     toast.success(
       editingItem.value
-        ? 'Data pegawai berhasil diperbarui'
-        : 'Pegawai baru berhasil ditambahkan',
+        ? 'Data guru berhasil diperbarui'
+        : 'Guru baru berhasil ditambahkan',
     )
     isModalOpen.value = false
     await fetchTeachers()
@@ -97,7 +94,7 @@ async function handleSavePosition(
     isPrimary: true,
   })
   if (result.success) {
-    toast.success('Jabatan pegawai berhasil diperbarui')
+    toast.success('Jabatan guru berhasil diperbarui')
     await fetchTeachers()
   }
 }
@@ -119,11 +116,11 @@ const tableColumns = createColumns({
     setLoading(true)
     try {
       await deleteTeacher(teacher.id)
-      toast.success('Pegawai berhasil dihapus')
+      toast.success('Guru berhasil dihapus')
       await fetchTeachers()
       closeAlert()
     } catch (e: unknown) {
-      toast.error(getIndonesianErrorMessage(e, 'Gagal menghapus data pegawai'))
+      toast.error(getIndonesianErrorMessage(e, 'Gagal menghapus data guru'))
     } finally {
       setLoading(false)
     }
@@ -160,7 +157,7 @@ onMounted(() => {
         >
           <div>
             <CardTitle class="text-2xl font-bold tracking-tight">
-              Daftar Pegawai
+              Daftar Guru
             </CardTitle>
           </div>
           <div class="flex flex-col sm:flex-row w-full sm:w-auto gap-2">
@@ -179,7 +176,7 @@ onMounted(() => {
               @click="isModalOpen = true"
             >
               <Plus class="size-4 mr-2" />
-              Tambah Pegawai
+              Tambah Guru
             </Button>
           </div>
         </CardHeader>
@@ -228,7 +225,7 @@ onMounted(() => {
               />
               <Input
                 v-model="filters.keyword"
-                placeholder="Cari pegawai..."
+                placeholder="Cari guru..."
                 class="pl-9"
               />
             </div>
@@ -240,7 +237,7 @@ onMounted(() => {
               :data="filteredTeachers"
               :total-items="filteredTeachers.length"
               :is-loading="loading"
-              item-label="pegawai"
+              item-label="guru"
             />
           </div>
         </div>

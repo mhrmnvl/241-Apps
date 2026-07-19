@@ -159,7 +159,7 @@ const onSubmit = form.handleSubmit(async (values) => {
                   <FormLabel>NIP</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="Nomor Induk Pegawai"
+                      placeholder="Nomor Induk Guru"
                       maxlength="50"
                       v-bind="componentField"
                     />
