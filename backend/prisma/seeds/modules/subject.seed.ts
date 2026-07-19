@@ -36,41 +36,28 @@ const DEFAULT_SUBJECTS: { code: string; name: string }[] = [
 export async function seedSubjects(prisma: PrismaClient) {
   let created = 0;
 
-  const schoolUnits = await prisma.schoolUnit.findMany({
-    select: { id: true },
-  });
+  for (const subject of DEFAULT_SUBJECTS) {
+    const exists = await prisma.subject.findUnique({
+      where: {
+        name: subject.name,
+      },
+    });
 
-  for (const schoolUnit of schoolUnits) {
-    for (const subject of DEFAULT_SUBJECTS) {
-      const exists = await prisma.subject.findUnique({
-        where: {
-          schoolUnitId_name: {
-            schoolUnitId: schoolUnit.id,
-            name: subject.name,
-          },
+    if (!exists) {
+      await prisma.subject.create({
+        data: {
+          code: subject.code,
+          name: subject.name,
         },
       });
-
-      if (!exists) {
-        await prisma.subject.create({
-          data: {
-            schoolUnitId: schoolUnit.id,
-            code: subject.code,
-            name: subject.name,
-          },
-        });
-        created++;
-      } else if (!exists.code) {
-        await prisma.subject.update({
-          where: {
-            schoolUnitId_name: {
-              schoolUnitId: schoolUnit.id,
-              name: subject.name,
-            },
-          },
-          data: { code: subject.code },
-        });
-      }
+      created++;
+    } else if (!exists.code) {
+      await prisma.subject.update({
+        where: {
+          name: subject.name,
+        },
+        data: { code: subject.code },
+      });
     }
   }
 

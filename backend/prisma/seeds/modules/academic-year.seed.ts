@@ -9,16 +9,16 @@ export async function seedAcademicYear(
   const name = e('SEED_ACADEMIC_YEAR_NAME', '2024/2025');
 
   let ay = await prisma.academicYear.findFirst({
-    where: { schoolUnitId, name, deletedAt: null },
+    where: { name, deletedAt: null },
   });
 
   if (!ay) {
     await prisma.academicYear.updateMany({
-      where: { schoolUnitId, isActive: true },
+      where: { isActive: true },
       data: { isActive: false },
     });
     ay = await prisma.academicYear.create({
-      data: { schoolUnitId, name, isActive: true },
+      data: { name, isActive: true },
     });
     console.log(`  [academic-year] created: ${name} (active)`);
   } else {

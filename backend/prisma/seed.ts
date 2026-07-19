@@ -100,7 +100,6 @@ async function main() {
   const curriculum = await seedCurricula(
     prisma,
     academicYear.id,
-    schoolUnit.id,
   );
   await seedSubjects(prisma);
   await seedCurriculumSubjects(prisma, curriculum.id);
