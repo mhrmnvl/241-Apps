@@ -196,8 +196,8 @@ export class PrismaStudentRepository extends IStudentRepository {
               nis: dto.nis,
               nisn: dto.nisn,
               status: StudentStatus.ACTIVE,
-              ...(dto.gradeId && {
-                gradeId: dto.gradeId,
+              ...(dto.classroomLevelId && {
+                gradeId: dto.classroomLevelId,
               }),
             },
           },

@@ -18,7 +18,7 @@ export class CreateCurriculumSubjectDto {
   @ApiProperty({ description: 'Classroom Level ID (UUID)' })
   @IsUUID()
   @IsNotEmpty()
-  gradeId: string;
+  classroomLevelId: string;
 
   @ApiProperty({ description: 'Subject ID (UUID)' })
   @IsUUID()

@@ -22,7 +22,13 @@ export class PrismaClassroomRepository extends IClassroomRepository {
   ): Promise<PaginatedResult<ClassroomWithDetails>> {
     const page = Number(query.page ?? 1);
     const limit = Number(query.limit ?? 10);
-    const { curriculumId, academicYearId, gradeId, search, isActive } = query;
+    const {
+      curriculumId,
+      academicYearId,
+      classroomLevelId: gradeId,
+      search,
+      isActive,
+    } = query;
     const skip = (page - 1) * limit;
 
     const resolvedAcademicYearId = await resolveAcademicYearId(

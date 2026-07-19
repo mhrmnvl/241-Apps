@@ -12,7 +12,7 @@ export class CreateClassroomUseCase {
   async execute(dto: CreateClassroomDto) {
     const existing = await this.repository.findDuplicate(
       dto.academicYearId,
-      dto.gradeId,
+      dto.classroomLevelId,
       dto.code,
     );
     if (existing) {
@@ -24,7 +24,7 @@ export class CreateClassroomUseCase {
     const newClassroom = await this.repository.create({
       curriculumId: dto.curriculumId,
       academicYearId: dto.academicYearId,
-      gradeId: dto.gradeId,
+      gradeId: dto.classroomLevelId,
       code: dto.code,
       name: dto.name ?? null,
       capacity: dto.capacity,

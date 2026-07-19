@@ -73,7 +73,7 @@ export class CreateStudentDto {
   })
   @IsOptional()
   @IsUUID()
-  gradeId?: string;
+  classroomLevelId?: string;
 
   @ApiPropertyOptional({
     description: 'Class ID — for auto-enrollment to the active semester',

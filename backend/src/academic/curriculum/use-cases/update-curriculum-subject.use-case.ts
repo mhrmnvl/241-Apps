@@ -16,7 +16,7 @@ export class UpdateCurriculumSubjectUseCase {
       throw new NotFoundException(`CurriculumSubject with ID ${id} not found`);
 
     const curriculumId = dto.curriculumId ?? current.curriculumId;
-    const gradeId = dto.gradeId ?? current.gradeId;
+    const gradeId = dto.classroomLevelId ?? current.gradeId;
     const subjectId = dto.subjectId ?? current.subjectId;
 
     if (

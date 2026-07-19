@@ -21,7 +21,7 @@ export class UpdateClassroomUseCase {
     }
 
     const academicYearId = dto.academicYearId ?? current.academicYearId;
-    const gradeId = dto.gradeId ?? current.gradeId;
+    const gradeId = dto.classroomLevelId ?? current.gradeId;
     const code = dto.code ?? current.code;
 
     const hasChanged =

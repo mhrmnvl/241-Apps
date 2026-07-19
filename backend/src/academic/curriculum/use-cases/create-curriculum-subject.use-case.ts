@@ -9,7 +9,7 @@ export class CreateCurriculumSubjectUseCase {
   async execute(dto: CreateCurriculumSubjectDto) {
     const existing = await this.repository.findDuplicate(
       dto.curriculumId,
-      dto.gradeId,
+      dto.classroomLevelId,
       dto.subjectId,
     );
     if (existing) {
@@ -20,7 +20,7 @@ export class CreateCurriculumSubjectUseCase {
 
     const softDeleted = await this.repository.findSoftDeleted(
       dto.curriculumId,
-      dto.gradeId,
+      dto.classroomLevelId,
       dto.subjectId,
     );
     if (softDeleted) {
@@ -29,6 +29,11 @@ export class CreateCurriculumSubjectUseCase {
       });
     }
 
-    return this.repository.create(dto);
+    return this.repository.create({
+      curriculumId: dto.curriculumId,
+      gradeId: dto.classroomLevelId,
+      subjectId: dto.subjectId,
+      hoursPerWeek: dto.hoursPerWeek,
+    });
   }
 }

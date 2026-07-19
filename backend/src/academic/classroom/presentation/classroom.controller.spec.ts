@@ -75,7 +75,7 @@ describe('ClassroomController', () => {
       const dto = {
         curriculumId: 'c',
         academicYearId: 'a',
-        gradeId: 'lvl-7',
+        classroomLevelId: 'lvl-7',
         code: 'VII-A',
         name: 'Awesome',
         capacity: 30,

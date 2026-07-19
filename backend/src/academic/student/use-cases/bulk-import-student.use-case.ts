@@ -120,7 +120,7 @@ export class BulkImportStudentsUseCase {
           birthDate: dto.birthDate,
           email: dto.email,
           phone: dto.phone,
-          gradeId: resolvedClassroomLevelId,
+          classroomLevelId: resolvedClassroomLevelId,
           nis: dto.nis,
           nisn: dto.nisn,
         };

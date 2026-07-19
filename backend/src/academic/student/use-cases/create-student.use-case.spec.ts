@@ -46,7 +46,7 @@ describe('CreateStudentUseCase', () => {
       gender: UserGender.MALE,
       birthPlace: 'Malang',
       birthDate: '2008-01-01',
-      gradeId: '550e8400-e29b-41d4-a716-446655440099',
+      classroomLevelId: '550e8400-e29b-41d4-a716-446655440099',
       classroomId: '550e8400-e29b-41d4-a716-446655440004',
       nis: '2024001',
       nisn: '0012345678',
