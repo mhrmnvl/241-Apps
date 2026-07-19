@@ -13,16 +13,16 @@ jobs:
       - name: Execute remote commands via SSH
         uses: appleboy/ssh-action@v1
         with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          port: ${{ secrets.VPS_PORT || 22 }}
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.PORT || 22 }}
           script: |
             set -e
             echo "Starting deployment..."
             
             # Pindah ke directory project
-            cd /var/www/241-apps
+            cd /var/www/241-Apps
             
             # Pull updates
             git pull origin main
