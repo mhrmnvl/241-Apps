@@ -26,7 +26,10 @@ jobs:
       - name: Setup pnpm via Corepack
         run: |
           corepack enable
-          corepack prepare pnpm@9.x --activate
+          # Match the version that wrote the lockfile (see package.json
+          # "packageManager"). pnpm 10+ reads `overrides` from pnpm-workspace.yaml;
+          # pnpm 9 reads it from package.json, which mismatches the lockfile.
+          corepack prepare pnpm@11.11.0 --activate
 
       - name: Set up Node.js
         uses: actions/setup-node@v4

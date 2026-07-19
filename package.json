@@ -2,9 +2,10 @@
   "name": "241-apps",
   "private": true,
   "version": "0.0.0",
+  "packageManager": "pnpm@11.11.0",
   "engines": {
     "node": ">=20",
-    "pnpm": ">=9"
+    "pnpm": ">=10"
   },
   "scripts": {
     "dev:academic": "pnpm --filter academic-web dev",
