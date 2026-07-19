@@ -3,6 +3,13 @@ packages:
   - packages/*
   - backend
 
+# Force a single TypeScript version across the workspace. Two TS versions make
+# pnpm create two peer-flavored copies of vue/pinia/vue-router, which can lead to
+# duplicate runtime instances (e.g. Pinia's "reading '_s' of undefined"). One TS
+# ⇒ one flavor. (pnpm 11 reads overrides here, not from package.json.)
+overrides:
+  typescript: 5.8.3
+
 allowBuilds:
   esbuild: true
   vue-demi: true

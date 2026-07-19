@@ -10,7 +10,6 @@
     "./lib/*": "./src/lib/*"
   },
   "dependencies": {
-    "vue": "^3.5.35",
     "reka-ui": "^2.9.8",
     "@vueuse/core": "^14.3.0",
     "clsx": "^2.1.1",
@@ -21,5 +20,8 @@
     "@internationalized/date": "^3.12.2",
     "vee-validate": "^4.15.1",
     "vue-sonner": "^2.0.9"
+  },
+  "peerDependencies": {
+    "vue": "^3.5.35"
   }
 }
