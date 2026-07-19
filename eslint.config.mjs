@@ -11,7 +11,10 @@ export default tseslint.config(
       '**/dist/',
       '**/node_modules/',
       '**/public/',
-      'backend/',
+      // Backend has its own ESLint config/tooling — keep it out of the root
+      // (frontend) lint entirely. A trailing-slash pattern does not match nested
+      // files in flat config, so use the recursive glob.
+      'backend/**',
       'eslint.config.mjs',
       'eslint.typecheck.config.mjs',
     ],
@@ -89,7 +92,10 @@ export default tseslint.config(
           varsIgnorePattern: '^_',
         },
       ],
-      '@typescript-eslint/consistent-type-imports': ['error', { prefer: 'type-imports' }],
+      '@typescript-eslint/consistent-type-imports': [
+        'error',
+        { prefer: 'type-imports' },
+      ],
       '@typescript-eslint/no-empty-object-type': 'error',
 
       'no-console': ['error', { allow: ['warn', 'error'] }],
