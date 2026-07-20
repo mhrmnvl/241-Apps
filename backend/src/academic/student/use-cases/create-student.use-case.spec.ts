@@ -2,7 +2,7 @@ import { ConflictException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserGender } from '@prisma/client';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { CreateStudentDto } from '../dto/create-student.dto.js';
+import { CreateStudentDto } from '../dto/request/create-student.dto.js';
 import { StudentRepository } from '../repositories/student.repository.js';
 import { CreateStudentUseCase } from './create-student.use-case.js';
 import { StudentCreatedEvent } from '../domain/events/student.events.js';

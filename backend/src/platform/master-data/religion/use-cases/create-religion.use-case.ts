@@ -1,5 +1,5 @@
 import { ConflictException, Injectable, Logger } from '@nestjs/common';
-import { CreateReligionDto } from '../dto/create-religion.dto.js';
+import { CreateReligionDto } from '../dto/request/create-religion.dto.js';
 import { IReligionRepository } from '../domain/interfaces/religion-repository.interface.js';
 
 @Injectable()

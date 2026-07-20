@@ -23,13 +23,13 @@ import {
 
 import { JwtAuthGuard } from '../../../auth/index.js';
 
-import { EducationQueryDto } from '../dto/education-query.dto.js';
+import { EducationQueryDto } from '../dto/request/education-query.dto.js';
 import {
   EducationListResponseDto,
   EducationResponseDto,
-} from '../dto/education-response.dto.js';
-import { CreateEducationDto } from '../dto/create-education.dto.js';
-import { UpdateEducationDto } from '../dto/update-education.dto.js';
+} from '../dto/response/education-response.dto.js';
+import { CreateEducationDto } from '../dto/request/create-education.dto.js';
+import { UpdateEducationDto } from '../dto/request/update-education.dto.js';
 import { CreateEducationUseCase } from '../use-cases/create-education.use-case.js';
 import { DeleteEducationUseCase } from '../use-cases/delete-education.use-case.js';
 import { GetEducationByIdUseCase } from '../use-cases/get-education-by-id.use-case.js';

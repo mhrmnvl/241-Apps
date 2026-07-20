@@ -1,9 +1,9 @@
 ﻿import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
-import { CreateEducationalHistoryDto } from '../dto/create-educational-history.dto.js';
-import { EducationalHistoryQueryDto } from '../dto/educational-history-query.dto.js';
-import { UpdateEducationalHistoryDto } from '../dto/update-educational-history.dto.js';
+import { CreateEducationalHistoryDto } from '../dto/request/create-educational-history.dto.js';
+import { EducationalHistoryQueryDto } from '../dto/request/educational-history-query.dto.js';
+import { UpdateEducationalHistoryDto } from '../dto/request/update-educational-history.dto.js';
 
 export const EDUCATIONAL_HISTORY_INCLUDE = {
   profile: {

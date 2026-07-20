@@ -23,13 +23,13 @@ import {
 
 import { JwtAuthGuard } from '../../../../platform/auth/index.js';
 
-import { PositionQueryDto } from '../dto/position-query.dto.js';
+import { PositionQueryDto } from '../dto/request/position-query.dto.js';
 import {
   PositionListResponseDto,
   PositionResponseDto,
-} from '../dto/position-response.dto.js';
-import { CreatePositionDto } from '../dto/create-position.dto.js';
-import { UpdatePositionDto } from '../dto/update-position.dto.js';
+} from '../dto/response/position-response.dto.js';
+import { CreatePositionDto } from '../dto/request/create-position.dto.js';
+import { UpdatePositionDto } from '../dto/request/update-position.dto.js';
 import { CreatePositionUseCase } from '../use-cases/create-position.use-case.js';
 import { DeletePositionUseCase } from '../use-cases/delete-position.use-case.js';
 import { GetPositionByIdUseCase } from '../use-cases/get-position-by-id.use-case.js';

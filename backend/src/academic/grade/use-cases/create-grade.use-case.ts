@@ -1,5 +1,5 @@
 import { ConflictException, Injectable, Logger } from '@nestjs/common';
-import { CreateGradeDto } from '../dto/create-grade.dto.js';
+import { CreateGradeDto } from '../dto/request/create-grade.dto.js';
 import { IGradeRepository } from '../domain/interfaces/grade-repository.interface.js';
 
 @Injectable()

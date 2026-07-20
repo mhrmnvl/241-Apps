@@ -22,7 +22,7 @@ import { DeleteConditionUseCase } from '../use-cases/delete-condition.use-case.j
 import {
   CreateConditionDto,
   UpdateConditionDto,
-} from '../dto/condition.dto.js';
+} from '../dto/request/condition.dto.js';
 
 @ApiTags('Inventory Conditions')
 @ApiBearerAuth()

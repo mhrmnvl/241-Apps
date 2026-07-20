@@ -4,7 +4,7 @@
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { CreateParentDto } from '../dto/create-parent.dto.js';
+import { CreateParentDto } from '../dto/request/create-parent.dto.js';
 import { ParentRepository } from '../repositories/parent.repository.js';
 
 @Injectable()

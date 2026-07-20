@@ -1,5 +1,5 @@
 import { InventoryAsset, Prisma } from '@prisma/client';
-import { AssetQueryDto } from '../../dto/asset-query.dto.js';
+import { AssetQueryDto } from '../../dto/request/asset-query.dto.js';
 import { PaginatedResult } from '../../../../shared/domain/interfaces/repository.interface.js';
 
 export abstract class IAssetRepository {

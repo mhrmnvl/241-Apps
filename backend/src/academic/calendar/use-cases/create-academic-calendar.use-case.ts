@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { IAcademicYearRepository } from '../../academic-year/index.js';
 import { ISemesterRepository } from '../../semester/index.js';
-import { CreateAcademicCalendarDto } from '../dto/create-academic-calendar.dto.js';
+import { CreateAcademicCalendarDto } from '../dto/request/create-academic-calendar.dto.js';
 import { IAcademicCalendarRepository } from '../domain/interfaces/academic-calendar-repository.interface.js';
 
 @Injectable()

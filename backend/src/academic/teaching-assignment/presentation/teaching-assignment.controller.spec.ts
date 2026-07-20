@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { CreateTeachingAssignmentDto } from '../dto/create-teaching-assignment.dto.js';
-import { UpdateTeachingAssignmentDto } from '../dto/update-teaching-assignment.dto.js';
+import { CreateTeachingAssignmentDto } from '../dto/request/create-teaching-assignment.dto.js';
+import { UpdateTeachingAssignmentDto } from '../dto/request/update-teaching-assignment.dto.js';
 import { CreateTeachingAssignmentUseCase } from '../use-cases/create-teaching-assignment.use-case.js';
 import { DeleteTeachingAssignmentUseCase } from '../use-cases/delete-teaching-assignment.use-case.js';
 import { GetTeachingAssignmentByIdUseCase } from '../use-cases/get-teaching-assignment-by-id.use-case.js';

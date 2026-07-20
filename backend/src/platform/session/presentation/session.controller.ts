@@ -18,7 +18,7 @@ import {
 } from '@nestjs/swagger';
 
 import { JwtAuthGuard } from '../../auth/index.js';
-import { SessionResponseDto } from '../dto/session-response.dto.js';
+import { SessionResponseDto } from '../dto/response/session-response.dto.js';
 import { GetUserSessionsUseCase } from '../use-cases/get-user-sessions.use-case.js';
 import { RevokeSessionUseCase } from '../use-cases/revoke-session.use-case.js';
 import { RevokeAllSessionsUseCase } from '../use-cases/revoke-all-session.use-case.js';

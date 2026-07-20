@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { IApprovalRepository } from '../domain/interfaces/approval-repository.interface.js';
-import { ApproveActionDto } from '../dto/approve-action.dto.js';
+import { ApproveActionDto } from '../dto/request/approve-action.dto.js';
 import { PrismaService } from '../../../core/database/prisma.service.js';
 
 const ACTION_APPROVE = '00000000-0000-0000-0000-000000000001';

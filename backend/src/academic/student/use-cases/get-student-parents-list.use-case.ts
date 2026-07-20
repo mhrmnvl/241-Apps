@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { StudentParentQueryDto } from '../dto/student-parent-query.dto.js';
+import { StudentParentQueryDto } from '../dto/request/student-parent-query.dto.js';
 import { StudentParentRepository } from '../repositories/student-parent.repository.js';
 import { StudentParentWithDetails } from '../domain/interfaces/student-parent-repository.interface.js';
 

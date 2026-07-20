@@ -1,6 +1,6 @@
 import { ConflictException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { UpdateEducationDto } from '../dto/update-education.dto.js';
+import { UpdateEducationDto } from '../dto/request/update-education.dto.js';
 import { IEducationRepository } from '../interfaces/education-repository.interface.js';
 import { UpdateEducationUseCase } from './update-education.use-case.js';
 

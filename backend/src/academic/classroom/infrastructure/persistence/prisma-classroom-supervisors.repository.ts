@@ -12,7 +12,7 @@ import {
   UpdateClassroomSupervisorRepositoryInput,
   RestoreClassroomSupervisorRepositoryInput,
 } from '../../domain/interfaces/classroom-supervisors-repository.interface.js';
-import { ClassroomSupervisorQueryDto } from '../../dto/classroom-supervisor-query.dto.js';
+import { ClassroomSupervisorQueryDto } from '../../dto/request/classroom-supervisor-query.dto.js';
 import { PaginatedResult } from '../../../../shared/domain/interfaces/repository.interface.js';
 
 @Injectable()

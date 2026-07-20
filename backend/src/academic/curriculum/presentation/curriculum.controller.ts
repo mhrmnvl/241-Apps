@@ -25,13 +25,13 @@ import { JwtAuthGuard } from '../../../platform/auth/index.js';
 import { CurrentUser } from '../../../core/decorators/current-user.decorator.js';
 import type { AuthenticatedUser } from '../../../core/types/authenticated-user.type.js';
 
-import { CurriculaQueryDto } from '../dto/curriculum-query.dto.js';
+import { CurriculaQueryDto } from '../dto/request/curriculum-query.dto.js';
 import {
   CurriculaListResponseDto,
   CurriculaResponseDto,
-} from '../dto/curriculum-response.dto.js';
-import { CreateCurriculaDto } from '../dto/create-curriculum.dto.js';
-import { UpdateCurriculaDto } from '../dto/update-curriculum.dto.js';
+} from '../dto/response/curriculum-response.dto.js';
+import { CreateCurriculaDto } from '../dto/request/create-curriculum.dto.js';
+import { UpdateCurriculaDto } from '../dto/request/update-curriculum.dto.js';
 import { CreateCurriculaUseCase } from '../use-cases/create-curriculum.use-case.js';
 import { DeleteCurriculaUseCase } from '../use-cases/delete-curriculum.use-case.js';
 import { GetCurriculaByIdUseCase } from '../use-cases/get-curricula-by-id.use-case.js';

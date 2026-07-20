@@ -6,7 +6,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { IAcademicYearRepository } from '../../academic-year/index.js';
-import { CreateSemesterDto } from '../dto/create-semester.dto.js';
+import { CreateSemesterDto } from '../dto/request/create-semester.dto.js';
 import { ISemesterRepository } from '../domain/interfaces/semester-repository.interface.js';
 
 @Injectable()

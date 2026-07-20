@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { ReportCardQueryDto } from '../dto/report-card-query.dto.js';
+import { ReportCardQueryDto } from '../dto/request/report-card-query.dto.js';
 import { IReportCardRepository } from '../domain/interfaces/report-card-repository.interface.js';
 
 @Injectable()

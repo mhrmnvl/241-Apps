@@ -27,8 +27,8 @@ import {
   RequestRevisionDto,
   VerifyDocumentDto,
   VerifyPaymentDto,
-} from '../dto/admin-actions.dto.js';
-import { AdmissionApplicationQueryDto } from '../dto/admission-query.dto.js';
+} from '../dto/request/admin-actions.dto.js';
+import { AdmissionApplicationQueryDto } from '../dto/request/admission-query.dto.js';
 import { AcceptApplicationUseCase } from '../use-cases/accept-application.use-case.js';
 import { EnrollApplicantUseCase } from '../use-cases/enroll-applicant.use-case.js';
 import { GetAdmissionStatsUseCase } from '../use-cases/get-admission-stats.use-case.js';

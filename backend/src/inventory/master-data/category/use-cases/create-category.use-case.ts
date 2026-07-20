@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ICategoryRepository } from '../domain/interfaces/category-repository.interface.js';
-import { CreateCategoryDto } from '../dto/category.dto.js';
+import { CreateCategoryDto } from '../dto/request/category.dto.js';
 
 @Injectable()
 export class CreateCategoryUseCase {

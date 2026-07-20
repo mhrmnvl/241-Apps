@@ -22,7 +22,7 @@ import { DeleteFundingSourceUseCase } from '../use-cases/delete-funding-source.u
 import {
   CreateFundingSourceDto,
   UpdateFundingSourceDto,
-} from '../dto/funding-source.dto.js';
+} from '../dto/request/funding-source.dto.js';
 
 @ApiTags('Inventory Funding Sources')
 @ApiBearerAuth()

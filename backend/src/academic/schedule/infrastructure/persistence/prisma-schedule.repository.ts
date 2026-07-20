@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Day, Prisma, Schedule } from '@prisma/client';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
-import { ScheduleQueryDto } from '../../dto/schedule.dto.js';
+import { ScheduleQueryDto } from '../../dto/request/schedule.dto.js';
 import {
   IScheduleRepository,
   SCHEDULE_INCLUDE,

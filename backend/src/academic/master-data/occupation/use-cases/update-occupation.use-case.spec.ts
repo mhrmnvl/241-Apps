@@ -1,6 +1,6 @@
 import { ConflictException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { UpdateOccupationDto } from '../dto/update-occupation.dto.js';
+import { UpdateOccupationDto } from '../dto/request/update-occupation.dto.js';
 import { IOccupationRepository } from '../interfaces/occupation-repository.interface.js';
 import { UpdateOccupationUseCase } from './update-occupation.use-case.js';
 

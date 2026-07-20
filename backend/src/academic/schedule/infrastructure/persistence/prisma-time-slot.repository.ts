@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { TimeSlot } from '@prisma/client';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
-import { CreateTimeSlotDto } from '../../dto/create-time-slot.dto.js';
-import { UpdateTimeSlotDto } from '../../dto/update-time-slot.dto.js';
+import { CreateTimeSlotDto } from '../../dto/request/create-time-slot.dto.js';
+import { UpdateTimeSlotDto } from '../../dto/request/update-time-slot.dto.js';
 import {
   ITimeSlotRepository,
   TIME_SLOT_INCLUDE,

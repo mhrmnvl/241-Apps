@@ -1,6 +1,6 @@
 ﻿import { Injectable } from '@nestjs/common';
 import { AchievementRepository } from '../repositories/achievement.repository.js';
-import { CreateAchievementDto } from '../dto/create-achievement.dto.js';
+import { CreateAchievementDto } from '../dto/request/create-achievement.dto.js';
 
 @Injectable()
 export class CreateAchievementUseCase {

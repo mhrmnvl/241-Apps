@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ICirculationRepository } from '../domain/interfaces/circulation-repository.interface.js';
-import { LoanQueryDto } from '../dto/loan-query.dto.js';
+import { LoanQueryDto } from '../dto/request/loan-query.dto.js';
 
 @Injectable()
 export class GetLoansUseCase {

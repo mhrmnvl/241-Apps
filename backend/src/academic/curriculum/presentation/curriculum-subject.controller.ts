@@ -25,9 +25,9 @@ import { JwtAuthGuard } from '../../../platform/auth/index.js';
 import { CurrentUser } from '../../../core/decorators/current-user.decorator.js';
 import type { AuthenticatedUser } from '../../../core/types/authenticated-user.type.js';
 
-import { CurriculumSubjectQueryDto } from '../dto/curriculum-subject-query.dto.js';
-import { CreateCurriculumSubjectDto } from '../dto/create-curriculum-subject.dto.js';
-import { UpdateCurriculumSubjectDto } from '../dto/update-curriculum-subject.dto.js';
+import { CurriculumSubjectQueryDto } from '../dto/request/curriculum-subject-query.dto.js';
+import { CreateCurriculumSubjectDto } from '../dto/request/create-curriculum-subject.dto.js';
+import { UpdateCurriculumSubjectDto } from '../dto/request/update-curriculum-subject.dto.js';
 import { GetCurriculumSubjectsUseCase } from '../use-cases/get-curriculum-subjects.use-case.js';
 import { GetCurriculumSubjectByIdUseCase } from '../use-cases/get-curriculum-subject-by-id.use-case.js';
 import { CreateCurriculumSubjectUseCase } from '../use-cases/create-curriculum-subject.use-case.js';

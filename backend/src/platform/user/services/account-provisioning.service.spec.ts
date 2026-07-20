@@ -70,4 +70,18 @@ describe('AccountProvisioningService', () => {
     expect(tx.role.findUnique).not.toHaveBeenCalled();
     expect(tx.userRole.create).not.toHaveBeenCalled();
   });
+
+  it('creates the account without a profile when none is given', async () => {
+    const tx = makeTx({ id: 'r-1' });
+
+    await service.provision(tx, {
+      identifier: 'applicant01',
+      passwordHash: 'hashed',
+      roleCode: 'APPLICANT',
+    });
+
+    expect(tx.user.create).toHaveBeenCalledWith({
+      data: { identifier: 'applicant01', passwordHash: 'hashed' },
+    });
+  });
 });

@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { ILocationRepository } from '../domain/interfaces/location-repository.interface.js';
-import { UpdateLocationDto } from '../dto/location.dto.js';
+import { UpdateLocationDto } from '../dto/request/location.dto.js';
 
 @Injectable()
 export class UpdateLocationUseCase {

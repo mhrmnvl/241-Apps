@@ -4,8 +4,8 @@ import { PrismaService } from '../../../../core/database/prisma.service.js';
 import {
   CreatePositionCategoryDto,
   UpdatePositionCategoryDto,
-} from '../dto/create-position-category.dto.js';
-import { PositionCategoryQueryDto } from '../dto/position-category-query.dto.js';
+} from '../dto/request/create-position-category.dto.js';
+import { PositionCategoryQueryDto } from '../dto/request/position-category-query.dto.js';
 import { IPositionCategoryRepository } from '../interfaces/position-category-repository.interface.js';
 
 @Injectable()

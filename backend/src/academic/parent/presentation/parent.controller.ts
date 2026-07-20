@@ -25,13 +25,13 @@ import { JwtAuthGuard } from '../../../platform/auth/index.js';
 import { CurrentUser } from '../../../core/decorators/current-user.decorator.js';
 import type { AuthenticatedUser } from '../../../core/types/authenticated-user.type.js';
 
-import { ParentQueryDto } from '../dto/parent-query.dto.js';
-import { CreateParentDto } from '../dto/create-parent.dto.js';
-import { UpdateParentDto } from '../dto/update-parent.dto.js';
+import { ParentQueryDto } from '../dto/request/parent-query.dto.js';
+import { CreateParentDto } from '../dto/request/create-parent.dto.js';
+import { UpdateParentDto } from '../dto/request/update-parent.dto.js';
 import {
   ParentListResponseDto,
   ParentResponseDto,
-} from '../dto/parent-response.dto.js';
+} from '../dto/response/parent-response.dto.js';
 import { CreateParentUseCase } from '../use-cases/create-parent.use-case.js';
 import { DeleteParentUseCase } from '../use-cases/delete-parent.use-case.js';
 import { GetParentByIdUseCase } from '../use-cases/get-parent-by-id.use-case.js';

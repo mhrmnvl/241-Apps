@@ -5,7 +5,7 @@ import {
   CreateAcademicYearRepositoryInput,
   IAcademicYearRepository,
 } from '../../domain/interfaces/academic-year-repository.interface.js';
-import { AcademicYearQueryDto } from '../../dto/academic-year-query.dto.js';
+import { AcademicYearQueryDto } from '../../dto/request/academic-year-query.dto.js';
 import { PaginatedResult } from '../../../../shared/domain/interfaces/repository.interface.js';
 
 @Injectable()

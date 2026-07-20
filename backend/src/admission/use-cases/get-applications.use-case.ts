@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { IAdmissionApplicationRepository } from '../domain/interfaces/admission-application-repository.interface.js';
-import { AdmissionApplicationQueryDto } from '../dto/admission-query.dto.js';
+import { AdmissionApplicationQueryDto } from '../dto/request/admission-query.dto.js';
 
 @Injectable()
 export class GetApplicationsUseCase {

@@ -7,6 +7,7 @@ import {
   User,
 } from '@prisma/client';
 import { PrismaService } from '../../../core/database/prisma.service.js';
+import { AccountProvisioningService } from '../../../platform/user/index.js';
 import {
   applicationDetailInclude,
   ApplicationDetail,
@@ -29,7 +30,10 @@ import type { Prisma } from '@prisma/client';
 
 @Injectable()
 export class PrismaAdmissionApplicantRepository extends IAdmissionApplicantRepository {
-  constructor(private readonly prisma: PrismaService) {
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly accountProvisioning: AccountProvisioningService,
+  ) {
     super();
   }
 
@@ -65,16 +69,10 @@ export class PrismaAdmissionApplicantRepository extends IAdmissionApplicantRepos
     input: RegisterApplicantInput,
   ): Promise<AdmissionApplication> {
     return this.prisma.$transaction(async (tx) => {
-      const user = await tx.user.create({
-        data: {
-          identifier: input.identifier,
-          passwordHash: input.passwordHash,
-          isActive: true,
-        },
-      });
-
-      await tx.userRole.create({
-        data: { userId: user.id, roleId: input.applicantRoleId },
+      const user = await this.accountProvisioning.provision(tx, {
+        identifier: input.identifier,
+        passwordHash: input.passwordHash,
+        roleCode: 'APPLICANT',
       });
 
       const updatedWave = await tx.admissionWave.update({

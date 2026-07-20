@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
-import { CreateOccupationDto } from '../dto/create-occupation.dto.js';
-import { UpdateOccupationDto } from '../dto/update-occupation.dto.js';
-import { OccupationQueryDto } from '../dto/occupation-query.dto.js';
+import { CreateOccupationDto } from '../dto/request/create-occupation.dto.js';
+import { UpdateOccupationDto } from '../dto/request/update-occupation.dto.js';
+import { OccupationQueryDto } from '../dto/request/occupation-query.dto.js';
 import {
   IOccupationRepository,
   OCCUPATION_INCLUDE,

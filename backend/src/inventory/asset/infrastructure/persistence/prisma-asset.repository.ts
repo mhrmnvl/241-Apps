@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InventoryAsset, Prisma } from '@prisma/client';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
-import { AssetQueryDto } from '../../dto/asset-query.dto.js';
+import { AssetQueryDto } from '../../dto/request/asset-query.dto.js';
 import { IAssetRepository } from '../../domain/interfaces/asset-repository.interface.js';
 import { PaginatedResult } from '../../../../shared/domain/interfaces/repository.interface.js';
 

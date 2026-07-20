@@ -1,7 +1,7 @@
 import { ConflictException, Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { CreateStudentDto } from '../dto/create-student.dto.js';
-import { StudentResponseDto } from '../dto/student-response.dto.js';
+import { CreateStudentDto } from '../dto/request/create-student.dto.js';
+import { StudentResponseDto } from '../dto/response/student-response.dto.js';
 import { StudentRepository } from '../repositories/student.repository.js';
 import { StudentCreatedEvent } from '../domain/events/student.events.js';
 import { hashPassword } from '../../../shared/utils/hash.helper.js';

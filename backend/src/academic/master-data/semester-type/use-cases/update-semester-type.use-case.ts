@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { SemesterType } from '@prisma/client';
-import { UpdateSemesterTypeDto } from '../dto/update-semester-type.dto.js';
+import { UpdateSemesterTypeDto } from '../dto/request/update-semester-type.dto.js';
 import { ISemesterTypeRepository } from '../domain/interfaces/semester-type-repository.interface.js';
 
 @Injectable()

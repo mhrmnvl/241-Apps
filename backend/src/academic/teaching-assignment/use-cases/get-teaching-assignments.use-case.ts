@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { TeachingAssignmentQueryDto } from '../dto/teaching-assignment-query.dto.js';
+import { TeachingAssignmentQueryDto } from '../dto/request/teaching-assignment-query.dto.js';
 import { ITeachingAssignmentRepository } from '../domain/interfaces/teaching-assignment-repository.interface.js';
 
 @Injectable()

@@ -1,5 +1,5 @@
 import { Prisma } from '@prisma/client';
-import { PromotionAction } from '../../dto/promotion.dto.js';
+import { PromotionAction } from '../../dto/request/promotion.dto.js';
 
 export const SEMESTER_WITH_ACADEMIC_YEAR_SELECT = {
   id: true,

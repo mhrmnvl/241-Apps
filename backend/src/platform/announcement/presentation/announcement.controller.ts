@@ -24,13 +24,13 @@ import {
 import { JwtAuthGuard } from '../../auth/index.js';
 import { CurrentUser } from '../../../core/decorators/current-user.decorator.js';
 import type { AuthenticatedUser } from '../../../core/types/authenticated-user.type.js';
-import { AnnouncementQueryDto } from '../dto/announcement-query.dto.js';
+import { AnnouncementQueryDto } from '../dto/request/announcement-query.dto.js';
 import {
   AnnouncementListResponseDto,
   AnnouncementResponseDto,
-} from '../dto/announcement-response.dto.js';
-import { CreateAnnouncementDto } from '../dto/create-announcement.dto.js';
-import { UpdateAnnouncementDto } from '../dto/update-announcement.dto.js';
+} from '../dto/response/announcement-response.dto.js';
+import { CreateAnnouncementDto } from '../dto/request/create-announcement.dto.js';
+import { UpdateAnnouncementDto } from '../dto/request/update-announcement.dto.js';
 import { CreateAnnouncementUseCase } from '../use-cases/create-announcement.use-case.js';
 import { DeleteAnnouncementUseCase } from '../use-cases/delete-announcement.use-case.js';
 import { GetAnnouncementByIdUseCase } from '../use-cases/get-announcement-by-id.use-case.js';

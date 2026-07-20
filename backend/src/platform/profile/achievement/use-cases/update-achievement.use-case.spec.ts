@@ -1,6 +1,6 @@
 ﻿import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { UpdateAchievementDto } from '../dto/update-achievement.dto.js';
+import { UpdateAchievementDto } from '../dto/request/update-achievement.dto.js';
 import { AchievementRepository } from '../repositories/achievement.repository.js';
 import { UpdateAchievementUseCase } from './update-achievement.use-case.js';
 

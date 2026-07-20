@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma, StudentParent } from '@prisma/client';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
-import { CreateStudentParentDto } from '../../dto/create-student-parent.dto.js';
-import { StudentParentQueryDto } from '../../dto/student-parent-query.dto.js';
-import { UpdateStudentParentDto } from '../../dto/update-student-parent.dto.js';
+import { CreateStudentParentDto } from '../../dto/request/create-student-parent.dto.js';
+import { StudentParentQueryDto } from '../../dto/request/student-parent-query.dto.js';
+import { UpdateStudentParentDto } from '../../dto/request/update-student-parent.dto.js';
 import {
   IStudentParentRepository,
   STUDENT_PARENT_INCLUDE,

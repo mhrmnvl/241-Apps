@@ -9,7 +9,7 @@ import {
   AdmissionWaveQueryDto,
   CreateAdmissionWaveDto,
   UpdateAdmissionWaveDto,
-} from '../dto/admission-wave.dto.js';
+} from '../dto/request/admission-wave.dto.js';
 
 @Injectable()
 export class GetAdmissionWavesUseCase {

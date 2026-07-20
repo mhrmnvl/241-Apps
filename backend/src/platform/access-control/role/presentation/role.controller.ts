@@ -23,10 +23,10 @@ import {
 import { JwtAuthGuard } from '../../../auth/index.js';
 import { CurrentUser } from '../../../../core/decorators/current-user.decorator.js';
 import type { AuthenticatedUser } from '../../../../core/types/authenticated-user.type.js';
-import { CreateRoleDto } from '../dto/create-role.dto.js';
-import { UpdateRoleDto } from '../dto/update-role.dto.js';
-import { AssignRoleDto } from '../dto/assign-role.dto.js';
-import { RoleResponseDto } from '../dto/role-response.dto.js';
+import { CreateRoleDto } from '../dto/request/create-role.dto.js';
+import { UpdateRoleDto } from '../dto/request/update-role.dto.js';
+import { AssignRoleDto } from '../dto/request/assign-role.dto.js';
+import { RoleResponseDto } from '../dto/response/role-response.dto.js';
 import { CreateRoleUseCase } from '../use-cases/create-role.use-case.js';
 import { GetRolesUseCase } from '../use-cases/get-roles.use-case.js';
 import { GetRoleByIdUseCase } from '../use-cases/get-role-by-id.use-case.js';

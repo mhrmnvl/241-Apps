@@ -1,5 +1,5 @@
 import { ConflictException, Injectable, Logger } from '@nestjs/common';
-import { CreateClassroomDto } from '../dto/create-classroom.dto.js';
+import { CreateClassroomDto } from '../dto/request/create-classroom.dto.js';
 import { ClassroomRepository } from '../repositories/classroom.repository.js';
 import { withDisplayName } from '../../../shared/utils/classroom-display-name.helper.js';
 

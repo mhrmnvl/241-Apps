@@ -1,5 +1,5 @@
 import { ConflictException, Injectable } from '@nestjs/common';
-import { CreateStudentGraduationDto } from '../dto/create-student-graduation.dto.js';
+import { CreateStudentGraduationDto } from '../dto/request/create-student-graduation.dto.js';
 import { IGraduationRepository } from '../domain/interfaces/graduation-repository.interface.js';
 
 @Injectable()

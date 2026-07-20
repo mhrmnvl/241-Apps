@@ -4,7 +4,7 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { UpdatePositionDto } from '../dto/update-position.dto.js';
+import { UpdatePositionDto } from '../dto/request/update-position.dto.js';
 import { IPositionRepository } from '../interfaces/position-repository.interface.js';
 
 @Injectable()

@@ -23,13 +23,13 @@ import {
 
 import { JwtAuthGuard } from '../../../../platform/auth/index.js';
 
-import { AchievementTypeQueryDto } from '../dto/achievement-type-query.dto.js';
+import { AchievementTypeQueryDto } from '../dto/request/achievement-type-query.dto.js';
 import {
   AchievementTypesListResponseDto,
   AchievementTypeResponseDto,
-} from '../dto/achievement-type-response.dto.js';
-import { CreateAchievementTypeDto } from '../dto/create-achievement-type.dto.js';
-import { UpdateAchievementTypeDto } from '../dto/update-achievement-type.dto.js';
+} from '../dto/response/achievement-type-response.dto.js';
+import { CreateAchievementTypeDto } from '../dto/request/create-achievement-type.dto.js';
+import { UpdateAchievementTypeDto } from '../dto/request/update-achievement-type.dto.js';
 import { CreateAchievementTypeUseCase } from '../use-cases/create-achievement-type.use-case.js';
 import { DeleteAchievementTypeUseCase } from '../use-cases/delete-achievement-type.use-case.js';
 import { GetAchievementTypeByIdUseCase } from '../use-cases/get-achievement-type-by-id.use-case.js';

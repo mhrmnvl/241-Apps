@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { serializePayment } from '../domain/admission.serializers.js';
 import { IAdmissionApplicationRepository } from '../domain/interfaces/admission-application-repository.interface.js';
-import { VerifyPaymentDto } from '../dto/admin-actions.dto.js';
+import { VerifyPaymentDto } from '../dto/request/admin-actions.dto.js';
 import { AdmissionNotificationService } from '../services/admission-notification.service.js';
 
 @Injectable()

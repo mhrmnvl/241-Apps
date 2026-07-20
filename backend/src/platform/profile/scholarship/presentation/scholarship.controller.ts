@@ -15,9 +15,9 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { JwtAuthGuard } from '../../../auth/index.js';
 
-import { CreateScholarshipDto } from '../dto/create-scholarship.dto.js';
-import { ScholarshipQueryDto } from '../dto/scholarship-query.dto.js';
-import { UpdateScholarshipDto } from '../dto/update-scholarship.dto.js';
+import { CreateScholarshipDto } from '../dto/request/create-scholarship.dto.js';
+import { ScholarshipQueryDto } from '../dto/request/scholarship-query.dto.js';
+import { UpdateScholarshipDto } from '../dto/request/update-scholarship.dto.js';
 import { CreateScholarshipUseCase } from '../use-cases/create-scholarship.use-case.js';
 import { DeleteScholarshipUseCase } from '../use-cases/delete-scholarship.use-case.js';
 import { GetScholarshipByIdUseCase } from '../use-cases/get-scholarship-by-id.use-case.js';

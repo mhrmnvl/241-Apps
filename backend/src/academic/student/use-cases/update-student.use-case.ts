@@ -4,7 +4,7 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { UpdateStudentDto } from '../dto/update-student.dto.js';
+import { UpdateStudentDto } from '../dto/request/update-student.dto.js';
 import { StudentRepository } from '../repositories/student.repository.js';
 import { StudentWithDetails } from '../domain/interfaces/student-repository.interface.js';
 

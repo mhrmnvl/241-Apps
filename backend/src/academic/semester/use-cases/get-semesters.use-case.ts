@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { SemesterQueryDto } from '../dto/semester-query.dto.js';
+import { SemesterQueryDto } from '../dto/request/semester-query.dto.js';
 import { ISemesterRepository } from '../domain/interfaces/semester-repository.interface.js';
 
 @Injectable()

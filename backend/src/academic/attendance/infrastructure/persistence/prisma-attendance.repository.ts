@@ -5,7 +5,7 @@ import {
   AttendanceQueryDto,
   AttendanceRecapQueryDto,
   BulkAttendanceRecordDto,
-} from '../../dto/attendance.dto.js';
+} from '../../dto/request/attendance.dto.js';
 import { resolveSemesterId } from '../../../../shared/utils/active-academic-year.helper.js';
 import {
   IAttendanceRepository,

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { CurriculaQueryDto } from '../dto/curriculum-query.dto.js';
+import { CurriculaQueryDto } from '../dto/request/curriculum-query.dto.js';
 import { ICurriculumRepository } from '../domain/interfaces/curriculum-repository.interface.js';
 
 @Injectable()

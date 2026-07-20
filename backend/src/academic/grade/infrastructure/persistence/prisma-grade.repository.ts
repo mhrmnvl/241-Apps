@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
-import { GradeQueryDto } from '../../dto/grade-query.dto.js';
-import { CreateGradeDto } from '../../dto/create-grade.dto.js';
-import { UpdateGradeDto } from '../../dto/update-grade.dto.js';
+import { GradeQueryDto } from '../../dto/request/grade-query.dto.js';
+import { CreateGradeDto } from '../../dto/request/create-grade.dto.js';
+import { UpdateGradeDto } from '../../dto/request/update-grade.dto.js';
 import { IGradeRepository } from '../../domain/interfaces/grade-repository.interface.js';
 
 @Injectable()

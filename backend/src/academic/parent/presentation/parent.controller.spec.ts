@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { CreateParentDto } from '../dto/create-parent.dto.js';
-import { ParentQueryDto } from '../dto/parent-query.dto.js';
-import { UpdateParentDto } from '../dto/update-parent.dto.js';
+import { CreateParentDto } from '../dto/request/create-parent.dto.js';
+import { ParentQueryDto } from '../dto/request/parent-query.dto.js';
+import { UpdateParentDto } from '../dto/request/update-parent.dto.js';
 import { CreateParentUseCase } from '../use-cases/create-parent.use-case.js';
 import { DeleteParentUseCase } from '../use-cases/delete-parent.use-case.js';
 import { GetParentByIdUseCase } from '../use-cases/get-parent-by-id.use-case.js';

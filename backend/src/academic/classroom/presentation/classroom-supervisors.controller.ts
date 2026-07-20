@@ -23,13 +23,13 @@ import {
 
 import { JwtAuthGuard } from '../../../platform/auth/index.js';
 
-import { ClassroomSupervisorQueryDto } from '../dto/classroom-supervisor-query.dto.js';
+import { ClassroomSupervisorQueryDto } from '../dto/request/classroom-supervisor-query.dto.js';
 import {
   ClassroomSupervisorListResponseDto,
   ClassroomSupervisorResponseDto,
-} from '../dto/classroom-supervisor-response.dto.js';
-import { CreateClassroomSupervisorDto } from '../dto/create-classroom-supervisor.dto.js';
-import { UpdateClassroomSupervisorDto } from '../dto/update-classroom-supervisor.dto.js';
+} from '../dto/response/classroom-supervisor-response.dto.js';
+import { CreateClassroomSupervisorDto } from '../dto/request/create-classroom-supervisor.dto.js';
+import { UpdateClassroomSupervisorDto } from '../dto/request/update-classroom-supervisor.dto.js';
 import { CreateClassroomSupervisorUseCase } from '../use-cases/create-classroom-supervisor.use-case.js';
 import { DeleteClassroomSupervisorUseCase } from '../use-cases/delete-classroom-supervisor.use-case.js';
 import { GetClassroomSupervisorByIdUseCase } from '../use-cases/get-classroom-supervisor-by-id.use-case.js';

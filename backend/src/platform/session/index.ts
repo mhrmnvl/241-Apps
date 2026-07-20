@@ -1,2 +1,2 @@
 export { SessionModule } from './session.module.js';
-export { SessionResponseDto } from './dto/session-response.dto.js';
+export { SessionResponseDto } from './dto/response/session-response.dto.js';

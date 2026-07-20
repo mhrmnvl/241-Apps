@@ -1,5 +1,5 @@
 import { SemesterType } from '@prisma/client';
-import { SemesterTypeQueryDto } from '../../dto/semester-type-query.dto.js';
+import { SemesterTypeQueryDto } from '../../dto/request/semester-type-query.dto.js';
 import { Prisma } from '@prisma/client';
 
 export abstract class ISemesterTypeRepository {

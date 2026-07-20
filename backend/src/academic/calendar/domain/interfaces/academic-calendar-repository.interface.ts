@@ -1,7 +1,7 @@
 import { AcademicCalendar, Prisma } from '@prisma/client';
-import type { AcademicCalendarQueryDto } from '../../dto/academic-calendar-query.dto.js';
-import type { CreateAcademicCalendarDto } from '../../dto/create-academic-calendar.dto.js';
-import type { UpdateAcademicCalendarDto } from '../../dto/update-academic-calendar.dto.js';
+import type { AcademicCalendarQueryDto } from '../../dto/request/academic-calendar-query.dto.js';
+import type { CreateAcademicCalendarDto } from '../../dto/request/create-academic-calendar.dto.js';
+import type { UpdateAcademicCalendarDto } from '../../dto/request/update-academic-calendar.dto.js';
 import { PaginatedResult } from '../../../../shared/domain/interfaces/repository.interface.js';
 
 export const ACADEMIC_CALENDAR_INCLUDE = {

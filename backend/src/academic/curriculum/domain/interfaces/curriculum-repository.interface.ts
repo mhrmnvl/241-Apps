@@ -1,5 +1,5 @@
 import { Curricula, Prisma } from '@prisma/client';
-import { CurriculaQueryDto } from '../../dto/curriculum-query.dto.js';
+import { CurriculaQueryDto } from '../../dto/request/curriculum-query.dto.js';
 import { PaginatedResult } from '../../../../shared/domain/interfaces/repository.interface.js';
 
 export const CURRICULUM_INCLUDE = {

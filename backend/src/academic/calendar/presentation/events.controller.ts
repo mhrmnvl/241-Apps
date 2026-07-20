@@ -28,10 +28,10 @@ import type { AuthenticatedUser } from '../../../core/types/authenticated-user.t
 import {
   EventListResponseDto,
   EventResponseDto,
-} from '../dto/event-response.dto.js';
-import { CreateEventDto } from '../dto/create-event.dto.js';
-import { UpdateEventDto } from '../dto/update-event.dto.js';
-import { EventQueryDto } from '../dto/event-query.dto.js';
+} from '../dto/response/event-response.dto.js';
+import { CreateEventDto } from '../dto/request/create-event.dto.js';
+import { UpdateEventDto } from '../dto/request/update-event.dto.js';
+import { EventQueryDto } from '../dto/request/event-query.dto.js';
 import { CreateEventUseCase } from '../use-cases/create-event.use-case.js';
 import { DeleteEventUseCase } from '../use-cases/delete-event.use-case.js';
 import { GetEventByIdUseCase } from '../use-cases/get-event-by-id.use-case.js';

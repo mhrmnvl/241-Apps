@@ -1,6 +1,6 @@
 import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import * as crypto from 'node:crypto';
-import { LoginDto } from '../dto/login.dto.js';
+import { LoginDto } from '../dto/request/login.dto.js';
 import { IAuthRepository } from '../domain/interfaces/auth-repository.interface.js';
 import { PasswordManagerService } from '../services/password-manager.service.js';
 import { TokenManagerService } from '../services/token-manager.service.js';

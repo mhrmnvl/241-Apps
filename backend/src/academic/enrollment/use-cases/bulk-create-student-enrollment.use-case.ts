@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { BulkCreateStudentEnrollmentDto } from '../dto/bulk-create-student-enrollment.dto.js';
-import { CreateStudentEnrollmentDto } from '../dto/create-student-enrollment.dto.js';
+import { BulkCreateStudentEnrollmentDto } from '../dto/request/bulk-create-student-enrollment.dto.js';
+import { CreateStudentEnrollmentDto } from '../dto/request/create-student-enrollment.dto.js';
 import { IEnrollmentRepository } from '../domain/interfaces/enrollment-repository.interface.js';
 
 @Injectable()

@@ -2,8 +2,8 @@ import { EmploymentType } from '@prisma/client';
 import {
   CreateEmploymentTypeDto,
   UpdateEmploymentTypeDto,
-} from '../dto/create-employment-type.dto.js';
-import { EmploymentTypeQueryDto } from '../dto/employment-type-query.dto.js';
+} from '../dto/request/create-employment-type.dto.js';
+import { EmploymentTypeQueryDto } from '../dto/request/employment-type-query.dto.js';
 import { PaginatedResult } from '../../../../shared/domain/interfaces/repository.interface.js';
 
 export abstract class IEmploymentTypeRepository {

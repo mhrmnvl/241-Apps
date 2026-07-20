@@ -1,5 +1,5 @@
 import { ConflictException, Injectable, Logger } from '@nestjs/common';
-import { CreateSchoolUnitTypeDto } from '../dto/create-school-unit-type.dto.js';
+import { CreateSchoolUnitTypeDto } from '../dto/request/create-school-unit-type.dto.js';
 import { SchoolUnitTypesRepository } from '../repositories/school-unit-types.repository.js';
 
 @Injectable()

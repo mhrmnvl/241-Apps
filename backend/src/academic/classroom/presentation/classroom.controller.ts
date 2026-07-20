@@ -24,14 +24,14 @@ import {
 import { JwtAuthGuard } from '../../../platform/auth/index.js';
 import { CurrentUser } from '../../../core/decorators/current-user.decorator.js';
 import type { AuthenticatedUser } from '../../../core/types/authenticated-user.type.js';
-import { CreateClassroomDto } from '../dto/create-classroom.dto.js';
-import { ClassroomQueryDto } from '../dto/classroom-query.dto.js';
+import { CreateClassroomDto } from '../dto/request/create-classroom.dto.js';
+import { ClassroomQueryDto } from '../dto/request/classroom-query.dto.js';
 import {
   ClassroomListResponseDto,
   ClassroomResponseDto,
-} from '../dto/classroom-response.dto.js';
+} from '../dto/response/classroom-response.dto.js';
 import { ClassroomWithDetails } from '../domain/interfaces/classroom-repository.interface.js';
-import { UpdateClassroomDto } from '../dto/update-classroom.dto.js';
+import { UpdateClassroomDto } from '../dto/request/update-classroom.dto.js';
 import { CreateClassroomUseCase } from '../use-cases/create-classroom.use-case.js';
 import { DeleteClassroomUseCase } from '../use-cases/delete-classroom.use-case.js';
 import { GetClassroomByIdUseCase } from '../use-cases/get-classroom-by-id.use-case.js';

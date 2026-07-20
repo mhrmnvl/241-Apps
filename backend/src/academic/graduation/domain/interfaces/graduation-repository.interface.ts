@@ -1,7 +1,7 @@
 import { Prisma, StudentGraduation } from '@prisma/client';
-import { CreateStudentGraduationDto } from '../../dto/create-student-graduation.dto.js';
-import { StudentGraduationQueryDto } from '../../dto/student-graduation-query.dto.js';
-import { UpdateStudentGraduationDto } from '../../dto/update-student-graduation.dto.js';
+import { CreateStudentGraduationDto } from '../../dto/request/create-student-graduation.dto.js';
+import { StudentGraduationQueryDto } from '../../dto/request/student-graduation-query.dto.js';
+import { UpdateStudentGraduationDto } from '../../dto/request/update-student-graduation.dto.js';
 import { PaginatedResult } from '../../../../shared/domain/interfaces/repository.interface.js';
 
 export const GRADUATION_INCLUDE = {

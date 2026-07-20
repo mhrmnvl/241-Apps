@@ -1,6 +1,6 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { ClassroomRepository } from '../../../academic/classroom/index.js';
-import { UpdateAnnouncementDto } from '../dto/update-announcement.dto.js';
+import { UpdateAnnouncementDto } from '../dto/request/update-announcement.dto.js';
 import { AnnouncementRepository } from '../repositories/announcement.repository.js';
 
 @Injectable()

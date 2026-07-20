@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { PositionQueryDto } from '../dto/position-query.dto.js';
+import { PositionQueryDto } from '../dto/request/position-query.dto.js';
 import { IPositionRepository } from '../interfaces/position-repository.interface.js';
 
 @Injectable()

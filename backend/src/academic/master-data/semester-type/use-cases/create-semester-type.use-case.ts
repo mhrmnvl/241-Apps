@@ -1,6 +1,6 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 import { SemesterType } from '@prisma/client';
-import { CreateSemesterTypeDto } from '../dto/create-semester-type.dto.js';
+import { CreateSemesterTypeDto } from '../dto/request/create-semester-type.dto.js';
 import { ISemesterTypeRepository } from '../domain/interfaces/semester-type-repository.interface.js';
 
 @Injectable()

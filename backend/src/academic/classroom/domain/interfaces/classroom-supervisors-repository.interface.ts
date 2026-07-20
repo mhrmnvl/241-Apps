@@ -1,5 +1,5 @@
 import { ClassroomSupervisor, Prisma, Teacher } from '@prisma/client';
-import { ClassroomSupervisorQueryDto } from '../../dto/classroom-supervisor-query.dto.js';
+import { ClassroomSupervisorQueryDto } from '../../dto/request/classroom-supervisor-query.dto.js';
 import { PaginatedResult } from '../../../../shared/domain/interfaces/repository.interface.js';
 
 export const CLASS_SUPERVISOR_INCLUDE = {

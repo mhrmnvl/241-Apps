@@ -4,7 +4,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { UpdateTeachingAssignmentDto } from '../dto/update-teaching-assignment.dto.js';
+import { UpdateTeachingAssignmentDto } from '../dto/request/update-teaching-assignment.dto.js';
 import { ITeachingAssignmentRepository } from '../domain/interfaces/teaching-assignment-repository.interface.js';
 
 @Injectable()

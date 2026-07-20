@@ -1,5 +1,5 @@
 import { Day, Prisma, Schedule } from '@prisma/client';
-import { ScheduleQueryDto } from '../../dto/schedule.dto.js';
+import { ScheduleQueryDto } from '../../dto/request/schedule.dto.js';
 import { PaginatedResult } from '../../../../shared/domain/interfaces/repository.interface.js';
 
 export const SCHEDULE_INCLUDE = {

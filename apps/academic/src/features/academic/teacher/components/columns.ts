@@ -15,22 +15,15 @@ export const createColumns = (
   actions: TeacherColumnActions,
 ): ColumnDef<Teacher>[] => [
   {
-    id: 'no',
-    header: 'No',
-    cell: ({ row }) => row.index + 1,
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
-    id: 'nip',
-    header: 'NIP',
-    cell: ({ row }) => row.original.nip ?? '-',
-    accessorKey: 'nip',
+    id: 'nik',
+    header: 'NIK',
+    cell: ({ row }) => row.original.user?.profile?.nik ?? '-',
+    accessorFn: (row) => row.user?.profile?.nik,
   },
   {
     id: 'name',
     header: 'Nama Lengkap',
-    cell: ({ row }) => row.original.user?.profile?.name || '-',
+    cell: ({ row }) => row.original.user?.profile?.name ?? '-',
     accessorFn: (row) => row.user?.profile?.name,
   },
   {

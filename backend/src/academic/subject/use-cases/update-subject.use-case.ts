@@ -4,7 +4,7 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { UpdateSubjectDto } from '../dto/update-subject.dto.js';
+import { UpdateSubjectDto } from '../dto/request/update-subject.dto.js';
 import { ISubjectRepository } from '../domain/interfaces/subject-repository.interface.js';
 
 @Injectable()

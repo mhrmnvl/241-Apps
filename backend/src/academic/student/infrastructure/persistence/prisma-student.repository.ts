@@ -2,10 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { Prisma, Student, User, Profile, StudentStatus } from '@prisma/client';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
 import { AccountProvisioningService } from '../../../../platform/user/index.js';
-import { CreateStudentDto } from '../../dto/create-student.dto.js';
-import { ExportStudentQueryDto } from '../../dto/export-student-query.dto.js';
-import { StudentQueryDto } from '../../dto/student-query.dto.js';
-import { UpdateStudentDto } from '../../dto/update-student.dto.js';
+import { CreateStudentDto } from '../../dto/request/create-student.dto.js';
+import { ExportStudentQueryDto } from '../../dto/request/export-student-query.dto.js';
+import { StudentQueryDto } from '../../dto/request/student-query.dto.js';
+import { UpdateStudentDto } from '../../dto/request/update-student.dto.js';
 import {
   IStudentRepository,
   STUDENT_INCLUDE,

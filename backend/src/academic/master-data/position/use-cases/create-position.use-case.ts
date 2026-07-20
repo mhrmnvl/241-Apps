@@ -1,5 +1,5 @@
 import { ConflictException, Injectable, Logger } from '@nestjs/common';
-import { CreatePositionDto } from '../dto/create-position.dto.js';
+import { CreatePositionDto } from '../dto/request/create-position.dto.js';
 import { IPositionRepository } from '../interfaces/position-repository.interface.js';
 
 @Injectable()

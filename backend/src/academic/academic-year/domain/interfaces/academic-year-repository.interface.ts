@@ -1,5 +1,5 @@
 import { AcademicYear, Prisma } from '@prisma/client';
-import { AcademicYearQueryDto } from '../../dto/academic-year-query.dto.js';
+import { AcademicYearQueryDto } from '../../dto/request/academic-year-query.dto.js';
 import { PaginatedResult } from '../../../../shared/domain/interfaces/repository.interface.js';
 
 export interface CreateAcademicYearRepositoryInput {

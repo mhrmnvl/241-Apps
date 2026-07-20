@@ -1,6 +1,6 @@
 import { ConflictException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { CreateAcademicYearDto } from '../dto/create-academic-year.dto.js';
+import { CreateAcademicYearDto } from '../dto/request/create-academic-year.dto.js';
 import { IAcademicYearRepository } from '../domain/interfaces/academic-year-repository.interface.js';
 import { CreateAcademicYearUseCase } from './create-academic-year.use-case.js';
 

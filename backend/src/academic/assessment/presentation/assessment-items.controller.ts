@@ -28,7 +28,7 @@ import {
   CreateAssessmentItemDto,
   UpdateAssessmentItemDto,
   AssessmentItemQueryDto,
-} from '../dto/assessment-item.dto.js';
+} from '../dto/request/assessment-item.dto.js';
 import {
   GetAssessmentItemsUseCase,
   GetAssessmentItemByIdUseCase,

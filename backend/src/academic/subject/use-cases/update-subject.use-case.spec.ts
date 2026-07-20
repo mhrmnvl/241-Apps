@@ -1,6 +1,6 @@
 import { ConflictException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { UpdateSubjectDto } from '../dto/update-subject.dto.js';
+import { UpdateSubjectDto } from '../dto/request/update-subject.dto.js';
 import { ISubjectRepository } from '../domain/interfaces/subject-repository.interface.js';
 import { UpdateSubjectUseCase } from './update-subject.use-case.js';
 

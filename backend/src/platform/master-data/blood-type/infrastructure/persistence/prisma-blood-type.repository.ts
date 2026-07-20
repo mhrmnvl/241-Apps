@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { BloodType, Prisma } from '@prisma/client';
 import { PrismaService } from '../../../../../core/database/prisma.service.js';
-import { BloodTypeQueryDto } from '../../dto/blood-type-query.dto.js';
+import { BloodTypeQueryDto } from '../../dto/request/blood-type-query.dto.js';
 import { IBloodTypeRepository } from '../../domain/interfaces/blood-type-repository.interface.js';
 import { PaginatedResult } from '../../../../../shared/domain/interfaces/repository.interface.js';
 

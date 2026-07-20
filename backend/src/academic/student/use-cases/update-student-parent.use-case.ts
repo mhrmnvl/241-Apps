@@ -1,5 +1,5 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { UpdateStudentParentDto } from '../dto/update-student-parent.dto.js';
+import { UpdateStudentParentDto } from '../dto/request/update-student-parent.dto.js';
 import { StudentParentRepository } from '../repositories/student-parent.repository.js';
 import { StudentParentWithDetails } from '../domain/interfaces/student-parent-repository.interface.js';
 

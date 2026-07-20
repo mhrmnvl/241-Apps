@@ -1,7 +1,7 @@
 import { ConflictException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { IAcademicYearRepository } from '../../academic-year/index.js';
-import { UpdateCurriculaDto } from '../dto/update-curriculum.dto.js';
+import { UpdateCurriculaDto } from '../dto/request/update-curriculum.dto.js';
 import { ICurriculumRepository } from '../domain/interfaces/curriculum-repository.interface.js';
 import { UpdateCurriculaUseCase } from './update-curriculum.use-case.js';
 

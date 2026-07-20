@@ -26,7 +26,7 @@ import {
   AdmissionAnnouncementQueryDto,
   CreateAdmissionAnnouncementDto,
   UpdateAdmissionAnnouncementDto,
-} from '../dto/admission-announcement.dto.js';
+} from '../dto/request/admission-announcement.dto.js';
 import {
   CreateAdmissionAnnouncementUseCase,
   DeleteAdmissionAnnouncementUseCase,

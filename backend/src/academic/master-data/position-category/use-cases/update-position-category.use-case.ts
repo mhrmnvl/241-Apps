@@ -1,5 +1,5 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { UpdatePositionCategoryDto } from '../dto/create-position-category.dto.js';
+import { UpdatePositionCategoryDto } from '../dto/request/create-position-category.dto.js';
 import { IPositionCategoryRepository } from '../interfaces/position-category-repository.interface.js';
 
 @Injectable()

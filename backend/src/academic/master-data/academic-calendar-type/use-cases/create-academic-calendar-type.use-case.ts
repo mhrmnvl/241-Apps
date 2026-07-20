@@ -1,5 +1,5 @@
 import { ConflictException, Injectable, Logger } from '@nestjs/common';
-import { CreateAcademicCalendarTypeDto } from '../dto/create-academic-calendar-type.dto.js';
+import { CreateAcademicCalendarTypeDto } from '../dto/request/create-academic-calendar-type.dto.js';
 import { IAcademicCalendarTypeRepository } from '../domain/interfaces/academic-calendar-type-repository.interface.js';
 
 @Injectable()

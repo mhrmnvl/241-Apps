@@ -1,5 +1,5 @@
 import { ConflictException, Injectable, Logger } from '@nestjs/common';
-import { CreatePositionCategoryDto } from '../dto/create-position-category.dto.js';
+import { CreatePositionCategoryDto } from '../dto/request/create-position-category.dto.js';
 import { IPositionCategoryRepository } from '../interfaces/position-category-repository.interface.js';
 
 @Injectable()

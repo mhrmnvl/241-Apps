@@ -3,7 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { UpdateRoleDto } from '../dto/update-role.dto.js';
+import { UpdateRoleDto } from '../dto/request/update-role.dto.js';
 import { IRoleRepository } from '../domain/interfaces/role-repository.interface.js';
 
 @Injectable()

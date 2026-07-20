@@ -1,7 +1,7 @@
 import { Prisma, Subject } from '@prisma/client';
-import { CreateSubjectDto } from '../../dto/create-subject.dto.js';
-import { SubjectQueryDto } from '../../dto/subject-query.dto.js';
-import { UpdateSubjectDto } from '../../dto/update-subject.dto.js';
+import { CreateSubjectDto } from '../../dto/request/create-subject.dto.js';
+import { SubjectQueryDto } from '../../dto/request/subject-query.dto.js';
+import { UpdateSubjectDto } from '../../dto/request/update-subject.dto.js';
 import { PaginatedResult } from '../../../../shared/domain/interfaces/repository.interface.js';
 
 export const SUBJECT_LIST_INCLUDE = {

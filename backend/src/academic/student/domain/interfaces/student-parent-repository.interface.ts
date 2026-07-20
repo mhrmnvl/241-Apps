@@ -1,7 +1,7 @@
 import { Prisma, StudentParent } from '@prisma/client';
-import { StudentParentQueryDto } from '../../dto/student-parent-query.dto.js';
-import { CreateStudentParentDto } from '../../dto/create-student-parent.dto.js';
-import { UpdateStudentParentDto } from '../../dto/update-student-parent.dto.js';
+import { StudentParentQueryDto } from '../../dto/request/student-parent-query.dto.js';
+import { CreateStudentParentDto } from '../../dto/request/create-student-parent.dto.js';
+import { UpdateStudentParentDto } from '../../dto/request/update-student-parent.dto.js';
 import { PaginatedResult } from '../../../../shared/domain/interfaces/repository.interface.js';
 
 export const STUDENT_PARENT_INCLUDE = {

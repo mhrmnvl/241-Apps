@@ -23,13 +23,13 @@ import {
 
 import { JwtAuthGuard } from '../../../platform/auth/index.js';
 
-import { StudentParentQueryDto } from '../dto/student-parent-query.dto.js';
-import { CreateStudentParentDto } from '../dto/create-student-parent.dto.js';
-import { UpdateStudentParentDto } from '../dto/update-student-parent.dto.js';
+import { StudentParentQueryDto } from '../dto/request/student-parent-query.dto.js';
+import { CreateStudentParentDto } from '../dto/request/create-student-parent.dto.js';
+import { UpdateStudentParentDto } from '../dto/request/update-student-parent.dto.js';
 import {
   StudentParentListResponseDto,
   StudentParentResponseDto,
-} from '../dto/student-parent-response.dto.js';
+} from '../dto/response/student-parent-response.dto.js';
 import { CreateStudentParentUseCase } from '../use-cases/create-student-parent.use-case.js';
 import { DeleteStudentParentUseCase } from '../use-cases/delete-student-parent.use-case.js';
 import { GetStudentParentByIdUseCase } from '../use-cases/get-student-parent-by-id.use-case.js';

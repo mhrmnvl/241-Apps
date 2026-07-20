@@ -1,6 +1,6 @@
 ﻿import { Injectable } from '@nestjs/common';
 import { ScholarshipRepository } from '../repositories/scholarship.repository.js';
-import { ScholarshipQueryDto } from '../dto/scholarship-query.dto.js';
+import { ScholarshipQueryDto } from '../dto/request/scholarship-query.dto.js';
 
 @Injectable()
 export class GetScholarshipsUseCase {

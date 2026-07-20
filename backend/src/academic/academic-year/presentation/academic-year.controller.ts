@@ -26,13 +26,13 @@ import { JwtAuthGuard } from '../../../platform/auth/index.js';
 import { CurrentUser } from '../../../core/decorators/current-user.decorator.js';
 import type { AuthenticatedUser } from '../../../core/types/authenticated-user.type.js';
 
-import { AcademicYearQueryDto } from '../dto/academic-year-query.dto.js';
+import { AcademicYearQueryDto } from '../dto/request/academic-year-query.dto.js';
 import {
   AcademicYearListResponseDto,
   AcademicYearResponseDto,
-} from '../dto/academic-year-response.dto.js';
-import { CreateAcademicYearDto } from '../dto/create-academic-year.dto.js';
-import { UpdateAcademicYearDto } from '../dto/update-academic-year.dto.js';
+} from '../dto/response/academic-year-response.dto.js';
+import { CreateAcademicYearDto } from '../dto/request/create-academic-year.dto.js';
+import { UpdateAcademicYearDto } from '../dto/request/update-academic-year.dto.js';
 import { ActivateAcademicYearUseCase } from '../use-cases/activate-academic-year.use-case.js';
 import { CreateAcademicYearUseCase } from '../use-cases/create-academic-year.use-case.js';
 import { DeactivateAcademicYearUseCase } from '../use-cases/deactivate-academic-year.use-case.js';

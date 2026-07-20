@@ -1,5 +1,5 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { UpdateReportCardDto } from '../dto/update-report-card.dto.js';
+import { UpdateReportCardDto } from '../dto/request/update-report-card.dto.js';
 import { IReportCardRepository } from '../domain/interfaces/report-card-repository.interface.js';
 
 @Injectable()

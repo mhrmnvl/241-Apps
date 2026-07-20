@@ -1,6 +1,6 @@
 import { ConflictException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { UpdateGradeDto } from '../dto/update-grade.dto.js';
+import { UpdateGradeDto } from '../dto/request/update-grade.dto.js';
 import { IGradeRepository } from '../domain/interfaces/grade-repository.interface.js';
 import { UpdateGradeUseCase } from './update-grade.use-case.js';
 

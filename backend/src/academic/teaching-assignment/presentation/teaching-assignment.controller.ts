@@ -25,9 +25,9 @@ import {
 import { JwtAuthGuard } from '../../../platform/auth/index.js';
 import { CurrentUser } from '../../../core/decorators/current-user.decorator.js';
 import type { AuthenticatedUser } from '../../../core/types/authenticated-user.type.js';
-import { CreateTeachingAssignmentDto } from '../dto/create-teaching-assignment.dto.js';
-import { TeachingAssignmentQueryDto } from '../dto/teaching-assignment-query.dto.js';
-import { UpdateTeachingAssignmentDto } from '../dto/update-teaching-assignment.dto.js';
+import { CreateTeachingAssignmentDto } from '../dto/request/create-teaching-assignment.dto.js';
+import { TeachingAssignmentQueryDto } from '../dto/request/teaching-assignment-query.dto.js';
+import { UpdateTeachingAssignmentDto } from '../dto/request/update-teaching-assignment.dto.js';
 import { GetTeachingAssignmentsUseCase } from '../use-cases/get-teaching-assignments.use-case.js';
 import { GetTeachingAssignmentByIdUseCase } from '../use-cases/get-teaching-assignment-by-id.use-case.js';
 import { CreateTeachingAssignmentUseCase } from '../use-cases/create-teaching-assignment.use-case.js';

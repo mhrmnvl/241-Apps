@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../../../../core/database/prisma.service.js';
-import { AcademicCalendarTypeQueryDto } from '../../dto/academic-calendar-type-query.dto.js';
+import { AcademicCalendarTypeQueryDto } from '../../dto/request/academic-calendar-type-query.dto.js';
 import { IAcademicCalendarTypeRepository } from '../../domain/interfaces/academic-calendar-type-repository.interface.js';
 
 @Injectable()

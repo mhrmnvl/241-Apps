@@ -15,9 +15,9 @@ import {
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../../platform/auth/index.js';
 import { RequirePermissions } from '../../../platform/access-control/permissions/decorators/require-permissions.decorator.js';
-import { CreateAssetDto } from '../dto/create-asset.dto.js';
-import { UpdateAssetDto } from '../dto/update-asset.dto.js';
-import { AssetQueryDto } from '../dto/asset-query.dto.js';
+import { CreateAssetDto } from '../dto/request/create-asset.dto.js';
+import { UpdateAssetDto } from '../dto/request/update-asset.dto.js';
+import { AssetQueryDto } from '../dto/request/asset-query.dto.js';
 import { CreateAssetUseCase } from '../use-cases/create-asset.use-case.js';
 import { UpdateAssetUseCase } from '../use-cases/update-asset.use-case.js';
 import { DeleteAssetUseCase } from '../use-cases/delete-asset.use-case.js';

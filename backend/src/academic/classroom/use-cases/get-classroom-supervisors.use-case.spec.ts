@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ClassroomSupervisorQueryDto } from '../dto/classroom-supervisor-query.dto.js';
+import { ClassroomSupervisorQueryDto } from '../dto/request/classroom-supervisor-query.dto.js';
 import { ClassroomSupervisorsRepository } from '../repositories/classroom-supervisors.repository.js';
 import { GetClassroomSupervisorsUseCase } from './get-classroom-supervisors.use-case.js';
 

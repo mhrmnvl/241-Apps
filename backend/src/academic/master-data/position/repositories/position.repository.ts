@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
-import { CreatePositionDto } from '../dto/create-position.dto.js';
-import { UpdatePositionDto } from '../dto/update-position.dto.js';
-import { PositionQueryDto } from '../dto/position-query.dto.js';
+import { CreatePositionDto } from '../dto/request/create-position.dto.js';
+import { UpdatePositionDto } from '../dto/request/update-position.dto.js';
+import { PositionQueryDto } from '../dto/request/position-query.dto.js';
 import {
   IPositionRepository,
   POSITION_INCLUDE,

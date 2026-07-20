@@ -1,6 +1,6 @@
 ﻿import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
-import { UpdateScholarshipDto } from '../dto/update-scholarship.dto.js';
+import { UpdateScholarshipDto } from '../dto/request/update-scholarship.dto.js';
 import { ScholarshipRepository } from '../repositories/scholarship.repository.js';
 import { UpdateScholarshipUseCase } from './update-scholarship.use-case.js';
 

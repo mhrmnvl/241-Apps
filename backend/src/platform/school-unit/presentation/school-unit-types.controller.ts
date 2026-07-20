@@ -14,9 +14,9 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { JwtAuthGuard } from '../../auth/index.js';
 
-import { CreateSchoolUnitTypeDto } from '../dto/create-school-unit-type.dto.js';
-import { UpdateSchoolUnitTypeDto } from '../dto/update-school-unit-type.dto.js';
-import { SchoolUnitTypeQueryDto } from '../dto/school-unit-type-query.dto.js';
+import { CreateSchoolUnitTypeDto } from '../dto/request/create-school-unit-type.dto.js';
+import { UpdateSchoolUnitTypeDto } from '../dto/request/update-school-unit-type.dto.js';
+import { SchoolUnitTypeQueryDto } from '../dto/request/school-unit-type-query.dto.js';
 
 import { CreateSchoolUnitTypeUseCase } from '../use-cases/create-school-unit-type.use-case.js';
 import { UpdateSchoolUnitTypeUseCase } from '../use-cases/update-school-unit-type.use-case.js';

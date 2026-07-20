@@ -1,5 +1,5 @@
 import { Prisma, TeachingAssignment } from '@prisma/client';
-import { TeachingAssignmentQueryDto } from '../../dto/teaching-assignment-query.dto.js';
+import { TeachingAssignmentQueryDto } from '../../dto/request/teaching-assignment-query.dto.js';
 import { PaginatedResult } from '../../../../shared/domain/interfaces/repository.interface.js';
 
 export const TEACHING_ASSIGNMENT_INCLUDE = {

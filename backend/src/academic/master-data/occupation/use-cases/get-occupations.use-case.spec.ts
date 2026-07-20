@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { OccupationQueryDto } from '../dto/occupation-query.dto.js';
+import { OccupationQueryDto } from '../dto/request/occupation-query.dto.js';
 import { IOccupationRepository } from '../interfaces/occupation-repository.interface.js';
 import { GetOccupationsUseCase } from './get-occupations.use-case.js';
 

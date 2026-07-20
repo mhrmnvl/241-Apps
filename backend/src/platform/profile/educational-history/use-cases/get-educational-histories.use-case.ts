@@ -1,6 +1,6 @@
 ﻿import { Injectable } from '@nestjs/common';
 import { EducationalHistoryRepository } from '../repositories/educational-history.repository.js';
-import { EducationalHistoryQueryDto } from '../dto/educational-history-query.dto.js';
+import { EducationalHistoryQueryDto } from '../dto/request/educational-history-query.dto.js';
 
 @Injectable()
 export class GetEducationalHistoriesUseCase {

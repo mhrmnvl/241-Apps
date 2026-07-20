@@ -26,9 +26,9 @@ import { JwtAuthGuard } from '../../../platform/auth/index.js';
 import { CurrentUser } from '../../../core/decorators/current-user.decorator.js';
 import type { AuthenticatedUser } from '../../../core/types/authenticated-user.type.js';
 
-import { GenerateReportCardDto } from '../dto/generate-report-card.dto.js';
-import { ReportCardQueryDto } from '../dto/report-card-query.dto.js';
-import { UpdateReportCardDto } from '../dto/update-report-card.dto.js';
+import { GenerateReportCardDto } from '../dto/request/generate-report-card.dto.js';
+import { ReportCardQueryDto } from '../dto/request/report-card-query.dto.js';
+import { UpdateReportCardDto } from '../dto/request/update-report-card.dto.js';
 import { DeleteReportCardUseCase } from '../use-cases/delete-report-card.use-case.js';
 import { GenerateReportCardUseCase } from '../use-cases/generate-report-card.use-case.js';
 import { GetReportCardByIdUseCase } from '../use-cases/get-report-card-by-id.use-case.js';

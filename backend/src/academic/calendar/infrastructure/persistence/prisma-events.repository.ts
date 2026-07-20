@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
-import { CreateEventDto } from '../../dto/create-event.dto.js';
-import { EventQueryDto } from '../../dto/event-query.dto.js';
-import { UpdateEventDto } from '../../dto/update-event.dto.js';
+import { CreateEventDto } from '../../dto/request/create-event.dto.js';
+import { EventQueryDto } from '../../dto/request/event-query.dto.js';
+import { UpdateEventDto } from '../../dto/request/update-event.dto.js';
 import {
   IEventsRepository,
   EVENT_INCLUDE,

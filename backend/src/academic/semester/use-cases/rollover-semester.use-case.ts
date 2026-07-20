@@ -7,7 +7,7 @@ import {
 import {
   RolloverSemesterDto,
   RolloverSummaryDto,
-} from '../dto/rollover-semester.dto.js';
+} from '../dto/request/rollover-semester.dto.js';
 import { IRolloverRepository } from '../domain/interfaces/rollover-repository.interface.js';
 
 @Injectable()

@@ -1,6 +1,6 @@
 ﻿import { Injectable, NotFoundException } from '@nestjs/common';
 import { ScholarshipRepository } from '../repositories/scholarship.repository.js';
-import { UpdateScholarshipDto } from '../dto/update-scholarship.dto.js';
+import { UpdateScholarshipDto } from '../dto/request/update-scholarship.dto.js';
 
 @Injectable()
 export class UpdateScholarshipUseCase {

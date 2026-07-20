@@ -2,7 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import * as crypto from 'node:crypto';
 import { IAuthRepository } from '../domain/interfaces/auth-repository.interface.js';
 import { PasswordManagerService } from '../services/password-manager.service.js';
-import { ResetPasswordDto } from '../dto/reset-password.dto.js';
+import { ResetPasswordDto } from '../dto/request/reset-password.dto.js';
 
 @Injectable()
 export class ResetPasswordUseCase {

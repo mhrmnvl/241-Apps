@@ -24,26 +24,26 @@ import { JwtAuthGuard } from '../../../platform/auth/index.js';
 import { CurrentUser } from '../../../core/decorators/current-user.decorator.js';
 import type { AuthenticatedUser } from '../../../core/types/authenticated-user.type.js';
 
-import { CreateSemesterDto } from '../dto/create-semester.dto.js';
+import { CreateSemesterDto } from '../dto/request/create-semester.dto.js';
 import {
   GenerateRecommendationDto,
   PromotionRecommendationDto,
-} from '../dto/generate-recommendation.dto.js';
+} from '../dto/request/generate-recommendation.dto.js';
 import {
   PromotionDto,
   PromotionPreviewDto,
   PromotionResultDto,
-} from '../dto/promotion.dto.js';
+} from '../dto/request/promotion.dto.js';
 import {
   RolloverSemesterDto,
   RolloverSummaryDto,
-} from '../dto/rollover-semester.dto.js';
-import { SemesterQueryDto } from '../dto/semester-query.dto.js';
+} from '../dto/request/rollover-semester.dto.js';
+import { SemesterQueryDto } from '../dto/request/semester-query.dto.js';
 import {
   SemesterListResponseDto,
   SemesterResponseDto,
-} from '../dto/semester-response.dto.js';
-import { UpdateSemesterDto } from '../dto/update-semester.dto.js';
+} from '../dto/response/semester-response.dto.js';
+import { UpdateSemesterDto } from '../dto/request/update-semester.dto.js';
 import { ActivateSemesterUseCase } from '../use-cases/activate-semester.use-case.js';
 import { CreateSemesterUseCase } from '../use-cases/create-semester.use-case.js';
 import { DeactivateSemesterUseCase } from '../use-cases/deactivate-semester.use-case.js';

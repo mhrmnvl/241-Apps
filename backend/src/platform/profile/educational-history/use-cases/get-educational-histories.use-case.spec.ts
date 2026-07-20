@@ -1,6 +1,6 @@
 ﻿import { Test, TestingModule } from '@nestjs/testing';
 import { EducationStatus } from '@prisma/client';
-import { EducationalHistoryQueryDto } from '../dto/educational-history-query.dto.js';
+import { EducationalHistoryQueryDto } from '../dto/request/educational-history-query.dto.js';
 import { EducationalHistoryRepository } from '../repositories/educational-history.repository.js';
 import { GetEducationalHistoriesUseCase } from './get-educational-histories.use-case.js';
 

@@ -5,7 +5,7 @@ import {
   InventoryTransactionType,
   Prisma,
 } from '@prisma/client';
-import { LoanQueryDto } from '../../dto/loan-query.dto.js';
+import { LoanQueryDto } from '../../dto/request/loan-query.dto.js';
 import { PaginatedResult } from '../../../../shared/domain/interfaces/repository.interface.js';
 
 /**

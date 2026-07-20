@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ClassroomSupervisorQueryDto } from '../dto/classroom-supervisor-query.dto.js';
-import { CreateClassroomSupervisorDto } from '../dto/create-classroom-supervisor.dto.js';
-import { UpdateClassroomSupervisorDto } from '../dto/update-classroom-supervisor.dto.js';
+import { ClassroomSupervisorQueryDto } from '../dto/request/classroom-supervisor-query.dto.js';
+import { CreateClassroomSupervisorDto } from '../dto/request/create-classroom-supervisor.dto.js';
+import { UpdateClassroomSupervisorDto } from '../dto/request/update-classroom-supervisor.dto.js';
 import { CreateClassroomSupervisorUseCase } from '../use-cases/create-classroom-supervisor.use-case.js';
 import { DeleteClassroomSupervisorUseCase } from '../use-cases/delete-classroom-supervisor.use-case.js';
 import { GetClassroomSupervisorByIdUseCase } from '../use-cases/get-classroom-supervisor-by-id.use-case.js';

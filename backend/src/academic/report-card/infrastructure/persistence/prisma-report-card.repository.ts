@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma, ReportCard } from '@prisma/client';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
-import { ReportCardQueryDto } from '../../dto/report-card-query.dto.js';
+import { ReportCardQueryDto } from '../../dto/request/report-card-query.dto.js';
 import { resolveSemesterId } from '../../../../shared/utils/active-academic-year.helper.js';
 import {
   IReportCardRepository,

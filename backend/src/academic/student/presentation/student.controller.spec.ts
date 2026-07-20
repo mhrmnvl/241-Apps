@@ -1,9 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserGender } from '@prisma/client';
-import { CreateStudentDto } from '../dto/create-student.dto.js';
-import { ExportStudentQueryDto } from '../dto/export-student-query.dto.js';
-import { StudentQueryDto } from '../dto/student-query.dto.js';
-import { UpdateStudentDto } from '../dto/update-student.dto.js';
+import { CreateStudentDto } from '../dto/request/create-student.dto.js';
+import { ExportStudentQueryDto } from '../dto/request/export-student-query.dto.js';
+import { StudentQueryDto } from '../dto/request/student-query.dto.js';
+import { UpdateStudentDto } from '../dto/request/update-student.dto.js';
 import { BulkImportStudentsUseCase } from '../use-cases/bulk-import-student.use-case.js';
 import { CreateStudentUseCase } from '../use-cases/create-student.use-case.js';
 import { DeleteStudentUseCase } from '../use-cases/delete-student.use-case.js';

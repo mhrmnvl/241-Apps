@@ -10,7 +10,7 @@ import {
   AdmissionApplicationParentInput,
   IAdmissionApplicantRepository,
 } from '../domain/interfaces/admission-applicant-repository.interface.js';
-import { UpdateMyApplicationDto } from '../dto/update-my-application.dto.js';
+import { UpdateMyApplicationDto } from '../dto/request/update-my-application.dto.js';
 
 @Injectable()
 export class UpdateMyApplicationUseCase {

@@ -23,13 +23,13 @@ import {
 
 import { JwtAuthGuard } from '../../../platform/auth/index.js';
 
-import { ClassroomStructureQueryDto } from '../dto/classroom-structure-query.dto.js';
+import { ClassroomStructureQueryDto } from '../dto/request/classroom-structure-query.dto.js';
 import {
   ClassroomStructureListResponseDto,
   ClassroomStructureResponseDto,
-} from '../dto/classroom-structure-response.dto.js';
-import { CreateClassroomStructureDto } from '../dto/create-classroom-structure.dto.js';
-import { UpdateClassroomStructureDto } from '../dto/update-classroom-structure.dto.js';
+} from '../dto/response/classroom-structure-response.dto.js';
+import { CreateClassroomStructureDto } from '../dto/request/create-classroom-structure.dto.js';
+import { UpdateClassroomStructureDto } from '../dto/request/update-classroom-structure.dto.js';
 import { CreateClassroomStructureUseCase } from '../use-cases/create-classroom-structure.use-case.js';
 import { DeleteClassroomStructureUseCase } from '../use-cases/delete-classroom-structure.use-case.js';
 import { GetClassroomStructuresUseCase } from '../use-cases/get-classroom-structures.use-case.js';

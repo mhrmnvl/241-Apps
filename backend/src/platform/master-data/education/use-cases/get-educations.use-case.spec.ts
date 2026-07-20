@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { EducationQueryDto } from '../dto/education-query.dto.js';
+import { EducationQueryDto } from '../dto/request/education-query.dto.js';
 import { IEducationRepository } from '../interfaces/education-repository.interface.js';
 import { GetEducationsUseCase } from './get-educations.use-case.js';
 

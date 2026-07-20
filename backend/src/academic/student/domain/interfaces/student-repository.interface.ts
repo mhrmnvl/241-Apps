@@ -1,8 +1,8 @@
 import { Prisma, Student, User, Profile, StudentStatus } from '@prisma/client';
-import { StudentQueryDto } from '../../dto/student-query.dto.js';
-import { ExportStudentQueryDto } from '../../dto/export-student-query.dto.js';
-import { CreateStudentDto } from '../../dto/create-student.dto.js';
-import { UpdateStudentDto } from '../../dto/update-student.dto.js';
+import { StudentQueryDto } from '../../dto/request/student-query.dto.js';
+import { ExportStudentQueryDto } from '../../dto/request/export-student-query.dto.js';
+import { CreateStudentDto } from '../../dto/request/create-student.dto.js';
+import { UpdateStudentDto } from '../../dto/request/update-student.dto.js';
 import { UpdateProfileDto } from '../../../../platform/profile/index.js';
 import { PaginatedResult } from '../../../../shared/domain/interfaces/repository.interface.js';
 

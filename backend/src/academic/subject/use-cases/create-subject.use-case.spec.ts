@@ -1,6 +1,6 @@
 import { ConflictException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { CreateSubjectDto } from '../dto/create-subject.dto.js';
+import { CreateSubjectDto } from '../dto/request/create-subject.dto.js';
 import { ISubjectRepository } from '../domain/interfaces/subject-repository.interface.js';
 import { CreateSubjectUseCase } from './create-subject.use-case.js';
 

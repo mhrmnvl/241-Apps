@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { IAuthRepository } from '../domain/interfaces/auth-repository.interface.js';
 import { PasswordManagerService } from '../services/password-manager.service.js';
-import { ChangePasswordDto } from '../dto/change-password.dto.js';
+import { ChangePasswordDto } from '../dto/request/change-password.dto.js';
 
 @Injectable()
 export class ChangePasswordUseCase {

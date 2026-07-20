@@ -1,5 +1,5 @@
 import { Classroom, Prisma } from '@prisma/client';
-import { ClassroomQueryDto } from '../../dto/classroom-query.dto.js';
+import { ClassroomQueryDto } from '../../dto/request/classroom-query.dto.js';
 import { PaginatedResult } from '../../../../shared/domain/interfaces/repository.interface.js';
 
 export const CLASS_INCLUDE = {

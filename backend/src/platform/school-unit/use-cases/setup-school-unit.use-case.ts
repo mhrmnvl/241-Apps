@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { CreateSchoolUnitDto } from '../dto/create-school-unit.dto.js';
+import { CreateSchoolUnitDto } from '../dto/request/create-school-unit.dto.js';
 import { SchoolUnitRepository } from '../repositories/school-unit.repository.js';
 
 @Injectable()

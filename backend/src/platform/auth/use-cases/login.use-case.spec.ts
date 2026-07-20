@@ -4,7 +4,7 @@ import { IAuthRepository } from '../domain/interfaces/auth-repository.interface.
 import { PasswordManagerService } from '../services/password-manager.service.js';
 import { TokenManagerService } from '../services/token-manager.service.js';
 import { LoginUseCase } from './login.use-case.js';
-import { LoginDto } from '../dto/login.dto.js';
+import { LoginDto } from '../dto/request/login.dto.js';
 
 describe('LoginUseCase', () => {
   let useCase: LoginUseCase;

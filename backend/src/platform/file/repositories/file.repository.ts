@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../core/database/prisma.service.js';
-import { CreateFileDto } from '../dto/create-file.dto.js';
+import { CreateFileDto } from '../dto/request/create-file.dto.js';
 
 @Injectable()
 export class FileRepository {

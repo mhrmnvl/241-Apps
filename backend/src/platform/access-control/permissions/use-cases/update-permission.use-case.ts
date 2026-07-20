@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { UpdatePermissionDto } from '../dto/update-permission.dto.js';
+import { UpdatePermissionDto } from '../dto/request/update-permission.dto.js';
 import { IPermissionsRepository } from '../interfaces/permissions-repository.interface.js';
 
 @Injectable()

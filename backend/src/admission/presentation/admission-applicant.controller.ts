@@ -23,8 +23,8 @@ import {
 import { CurrentUser } from '../../core/decorators/current-user.decorator.js';
 import type { AuthenticatedUser } from '../../core/types/authenticated-user.type.js';
 import { JwtAuthGuard } from '../../platform/auth/index.js';
-import { UpdateMyApplicationDto } from '../dto/update-my-application.dto.js';
-import { UploadPaymentProofDto } from '../dto/upload-payment-proof.dto.js';
+import { UpdateMyApplicationDto } from '../dto/request/update-my-application.dto.js';
+import { UploadPaymentProofDto } from '../dto/request/upload-payment-proof.dto.js';
 import { GetMyApplicationUseCase } from '../use-cases/get-my-application.use-case.js';
 import { GetMyNotificationsUseCase } from '../use-cases/get-my-notifications.use-case.js';
 import { GetPublishedAnnouncementsUseCase } from '../use-cases/get-published-announcements.use-case.js';

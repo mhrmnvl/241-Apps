@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { IStatusRepository } from '../domain/interfaces/status-repository.interface.js';
-import { UpdateStatusDto } from '../dto/status.dto.js';
+import { UpdateStatusDto } from '../dto/request/status.dto.js';
 
 @Injectable()
 export class UpdateStatusUseCase {

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { ReligionQueryDto } from '../dto/religion-query.dto.js';
+import { ReligionQueryDto } from '../dto/request/religion-query.dto.js';
 import { IReligionRepository } from '../domain/interfaces/religion-repository.interface.js';
 
 @Injectable()

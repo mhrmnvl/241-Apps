@@ -1,7 +1,7 @@
 import { Position, Prisma } from '@prisma/client';
-import { CreatePositionDto } from '../dto/create-position.dto.js';
-import { UpdatePositionDto } from '../dto/update-position.dto.js';
-import { PositionQueryDto } from '../dto/position-query.dto.js';
+import { CreatePositionDto } from '../dto/request/create-position.dto.js';
+import { UpdatePositionDto } from '../dto/request/update-position.dto.js';
+import { PositionQueryDto } from '../dto/request/position-query.dto.js';
 import { PaginatedResult } from '../../../../shared/domain/interfaces/repository.interface.js';
 
 export const POSITION_INCLUDE = {

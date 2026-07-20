@@ -10,7 +10,7 @@ import {
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../../platform/auth/index.js';
 import { RequirePermissions } from '../../../platform/access-control/permissions/decorators/require-permissions.decorator.js';
-import { CreateWorkflowDto } from '../dto/create-workflow.dto.js';
+import { CreateWorkflowDto } from '../dto/request/create-workflow.dto.js';
 import { CreateWorkflowUseCase } from '../use-cases/create-workflow.use-case.js';
 import { GetWorkflowsUseCase } from '../use-cases/get-workflows.use-case.js';
 import { GetWorkflowByIdUseCase } from '../use-cases/get-workflow-by-id.use-case.js';

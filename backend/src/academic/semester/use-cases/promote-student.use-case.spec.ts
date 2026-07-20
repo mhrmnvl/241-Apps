@@ -1,6 +1,6 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { PromotionAction, PromotionDto } from '../dto/promotion.dto.js';
+import { PromotionAction, PromotionDto } from '../dto/request/promotion.dto.js';
 import { IPromotionRepository } from '../domain/interfaces/promotion-repository.interface.js';
 import { PromoteStudentsUseCase } from './promote-student.use-case.js';
 

@@ -15,9 +15,9 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { JwtAuthGuard } from '../../../auth/index.js';
 
-import { AchievementQueryDto } from '../dto/achievement-query.dto.js';
-import { CreateAchievementDto } from '../dto/create-achievement.dto.js';
-import { UpdateAchievementDto } from '../dto/update-achievement.dto.js';
+import { AchievementQueryDto } from '../dto/request/achievement-query.dto.js';
+import { CreateAchievementDto } from '../dto/request/create-achievement.dto.js';
+import { UpdateAchievementDto } from '../dto/request/update-achievement.dto.js';
 import { CreateAchievementUseCase } from '../use-cases/create-achievement.use-case.js';
 import { DeleteAchievementUseCase } from '../use-cases/delete-achievement.use-case.js';
 import { GetAchievementByIdUseCase } from '../use-cases/get-achievement-by-id.use-case.js';

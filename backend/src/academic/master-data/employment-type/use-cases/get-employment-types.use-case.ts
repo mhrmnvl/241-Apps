@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { EmploymentTypeQueryDto } from '../dto/employment-type-query.dto.js';
+import { EmploymentTypeQueryDto } from '../dto/request/employment-type-query.dto.js';
 import { IEmploymentTypeRepository } from '../interfaces/employment-type-repository.interface.js';
 
 @Injectable()

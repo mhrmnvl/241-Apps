@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { CreateAcademicCalendarDto } from '../dto/create-academic-calendar.dto.js';
-import { UpdateAcademicCalendarDto } from '../dto/update-academic-calendar.dto.js';
+import { CreateAcademicCalendarDto } from '../dto/request/create-academic-calendar.dto.js';
+import { UpdateAcademicCalendarDto } from '../dto/request/update-academic-calendar.dto.js';
 import { CreateAcademicCalendarUseCase } from '../use-cases/create-academic-calendar.use-case.js';
 import { DeleteAcademicCalendarUseCase } from '../use-cases/delete-academic-calendar.use-case.js';
 import { GetAcademicCalendarByIdUseCase } from '../use-cases/get-academic-calendar-by-id.use-case.js';

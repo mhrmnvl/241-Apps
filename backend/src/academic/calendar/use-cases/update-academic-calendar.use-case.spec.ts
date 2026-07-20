@@ -1,7 +1,7 @@
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { ISemesterRepository } from '../../semester/index.js';
-import { UpdateAcademicCalendarDto } from '../dto/update-academic-calendar.dto.js';
+import { UpdateAcademicCalendarDto } from '../dto/request/update-academic-calendar.dto.js';
 import { IAcademicCalendarRepository } from '../domain/interfaces/academic-calendar-repository.interface.js';
 import { UpdateAcademicCalendarUseCase } from './update-academic-calendar.use-case.js';
 

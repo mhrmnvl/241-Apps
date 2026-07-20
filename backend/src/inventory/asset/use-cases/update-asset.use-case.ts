@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { IAssetRepository } from '../domain/interfaces/asset-repository.interface.js';
-import { UpdateAssetDto } from '../dto/update-asset.dto.js';
+import { UpdateAssetDto } from '../dto/request/update-asset.dto.js';
 
 @Injectable()
 export class UpdateAssetUseCase {

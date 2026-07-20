@@ -1,5 +1,5 @@
 import { ConflictException, Injectable, Logger } from '@nestjs/common';
-import { CreateOccupationDto } from '../dto/create-occupation.dto.js';
+import { CreateOccupationDto } from '../dto/request/create-occupation.dto.js';
 import { IOccupationRepository } from '../interfaces/occupation-repository.interface.js';
 
 @Injectable()

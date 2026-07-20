@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { CreateAchievementDto } from '../dto/create-achievement.dto.js';
+import { CreateAchievementDto } from '../dto/request/create-achievement.dto.js';
 import { AchievementRepository } from '../repositories/achievement.repository.js';
 import { CreateAchievementUseCase } from './create-achievement.use-case.js';
 

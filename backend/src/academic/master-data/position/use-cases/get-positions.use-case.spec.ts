@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { PositionQueryDto } from '../dto/position-query.dto.js';
+import { PositionQueryDto } from '../dto/request/position-query.dto.js';
 import { IPositionRepository } from '../interfaces/position-repository.interface.js';
 import { GetPositionsUseCase } from './get-positions.use-case.js';
 

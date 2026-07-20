@@ -7,8 +7,8 @@ import {
   GenerateRecommendationDto,
   PromotionRecommendationDto,
   PromotionRecommendationItemDto,
-} from '../dto/generate-recommendation.dto.js';
-import { PromotionAction } from '../dto/promotion.dto.js';
+} from '../dto/request/generate-recommendation.dto.js';
+import { PromotionAction } from '../dto/request/promotion.dto.js';
 import { IPromotionRepository } from '../domain/interfaces/promotion-repository.interface.js';
 
 @Injectable()

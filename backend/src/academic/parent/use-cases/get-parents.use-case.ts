@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { ParentQueryDto } from '../dto/parent-query.dto.js';
+import { ParentQueryDto } from '../dto/request/parent-query.dto.js';
 import { ParentRepository } from '../repositories/parent.repository.js';
 
 @Injectable()

@@ -1,5 +1,5 @@
 import { AcademicCalendarType, Prisma } from '@prisma/client';
-import { AcademicCalendarTypeQueryDto } from '../../dto/academic-calendar-type-query.dto.js';
+import { AcademicCalendarTypeQueryDto } from '../../dto/request/academic-calendar-type-query.dto.js';
 import { PaginatedResult } from '../../../../../shared/domain/interfaces/repository.interface.js';
 
 export abstract class IAcademicCalendarTypeRepository {

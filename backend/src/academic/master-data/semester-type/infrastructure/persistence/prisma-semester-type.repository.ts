@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Prisma, SemesterType } from '@prisma/client';
 import { PrismaService } from '../../../../../core/database/prisma.service.js';
 import { ISemesterTypeRepository } from '../../domain/interfaces/semester-type-repository.interface.js';
-import { SemesterTypeQueryDto } from '../../dto/semester-type-query.dto.js';
+import { SemesterTypeQueryDto } from '../../dto/request/semester-type-query.dto.js';
 
 @Injectable()
 export class PrismaSemesterTypeRepository extends ISemesterTypeRepository {

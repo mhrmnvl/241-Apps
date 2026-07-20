@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../../../core/database/prisma.service.js';
-import { GetSchoolUnitUseCase } from '../../../platform/school-unit/use-cases/get-school-unit.use-case.js';
+import { GetSchoolUnitUseCase } from '../../../platform/school-unit/index.js';
 import { IReportCardRepository } from '../domain/interfaces/report-card-repository.interface.js';
 import { PdfService } from '../services/pdf.service.js';
 

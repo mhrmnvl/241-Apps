@@ -21,10 +21,10 @@ import {
 } from '@nestjs/swagger';
 
 import { JwtAuthGuard } from '../../../auth/index.js';
-import { AssignPermissionDto } from '../dto/assign-permission.dto.js';
-import { CreatePermissionDto } from '../dto/create-permission.dto.js';
-import { UpdatePermissionDto } from '../dto/update-permission.dto.js';
-import { PermissionResponseDto } from '../dto/permission-response.dto.js';
+import { AssignPermissionDto } from '../dto/request/assign-permission.dto.js';
+import { CreatePermissionDto } from '../dto/request/create-permission.dto.js';
+import { UpdatePermissionDto } from '../dto/request/update-permission.dto.js';
+import { PermissionResponseDto } from '../dto/response/permission-response.dto.js';
 import { AssignPermissionToRoleUseCase } from '../use-cases/assign-permission-to-role.use-case.js';
 import { RemovePermissionFromRoleUseCase } from '../use-cases/remove-permission-from-role.use-case.js';
 import { GetPermissionsUseCase } from '../use-cases/get-permissions.use-case.js';

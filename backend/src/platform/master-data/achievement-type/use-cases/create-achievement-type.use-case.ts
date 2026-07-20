@@ -1,5 +1,5 @@
 import { ConflictException, Injectable, Logger } from '@nestjs/common';
-import { CreateAchievementTypeDto } from '../dto/create-achievement-type.dto.js';
+import { CreateAchievementTypeDto } from '../dto/request/create-achievement-type.dto.js';
 import { IAchievementTypeRepository } from '../domain/interfaces/achievement-type-repository.interface.js';
 
 @Injectable()

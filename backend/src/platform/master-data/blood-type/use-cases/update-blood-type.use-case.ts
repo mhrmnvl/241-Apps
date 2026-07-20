@@ -4,7 +4,7 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { UpdateBloodTypeDto } from '../dto/update-blood-type.dto.js';
+import { UpdateBloodTypeDto } from '../dto/request/update-blood-type.dto.js';
 import { IBloodTypeRepository } from '../domain/interfaces/blood-type-repository.interface.js';
 
 @Injectable()

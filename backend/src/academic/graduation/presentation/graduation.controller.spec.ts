@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { CreateStudentGraduationDto } from '../dto/create-student-graduation.dto.js';
-import { StudentGraduationQueryDto } from '../dto/student-graduation-query.dto.js';
-import { UpdateStudentGraduationDto } from '../dto/update-student-graduation.dto.js';
+import { CreateStudentGraduationDto } from '../dto/request/create-student-graduation.dto.js';
+import { StudentGraduationQueryDto } from '../dto/request/student-graduation-query.dto.js';
+import { UpdateStudentGraduationDto } from '../dto/request/update-student-graduation.dto.js';
 import { CreateStudentGraduationUseCase } from '../use-cases/create-student-graduation.use-case.js';
 import { DeleteStudentGraduationUseCase } from '../use-cases/delete-student-graduation.use-case.js';
 import { GetStudentGraduationByIdUseCase } from '../use-cases/get-student-graduation-by-id.use-case.js';

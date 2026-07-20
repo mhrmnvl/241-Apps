@@ -10,14 +10,6 @@ export const createCurriculumSubjectColumns = (
   actions: CurriculumSubjectColumnActions,
 ): ColumnDef<CurriculumSubject>[] => [
   {
-    id: 'no',
-    header: 'No',
-    meta: { align: 'center' },
-    cell: ({ row }) => row.index + 1,
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
     id: 'code',
     header: 'Kode',
     meta: { align: 'center' },

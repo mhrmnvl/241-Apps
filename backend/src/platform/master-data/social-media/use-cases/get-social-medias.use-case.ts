@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { SocialMediaQueryDto } from '../dto/social-media-query.dto.js';
+import { SocialMediaQueryDto } from '../dto/request/social-media-query.dto.js';
 import { ISocialMediaRepository } from '../interfaces/social-media-repository.interface.js';
 
 @Injectable()

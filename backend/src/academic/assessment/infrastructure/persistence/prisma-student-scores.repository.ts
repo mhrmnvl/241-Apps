@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
-import { StudentScoreQueryDto } from '../../dto/student-score.dto.js';
+import { StudentScoreQueryDto } from '../../dto/request/student-score.dto.js';
 import {
   IStudentScoresRepository,
   STUDENT_SCORE_INCLUDE,

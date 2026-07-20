@@ -8,8 +8,8 @@ import {
 } from '@nestjs/swagger';
 
 import { JwtAuthGuard } from '../../auth/index.js';
-import { AuditLogQueryDto } from '../dto/audit-log-query.dto.js';
-import { AuditLogResponseDto } from '../dto/audit-log-response.dto.js';
+import { AuditLogQueryDto } from '../dto/request/audit-log-query.dto.js';
+import { AuditLogResponseDto } from '../dto/response/audit-log-response.dto.js';
 import { GetAuditLogsUseCase } from '../use-cases/get-audit-logs.use-case.js';
 
 @ApiTags('Audit Logs')

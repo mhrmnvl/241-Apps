@@ -22,13 +22,13 @@ import {
 } from '@nestjs/swagger';
 import { SemesterType } from '@prisma/client';
 import { JwtAuthGuard } from '../../../../platform/auth/index.js';
-import { CreateSemesterTypeDto } from '../dto/create-semester-type.dto.js';
-import { SemesterTypeQueryDto } from '../dto/semester-type-query.dto.js';
+import { CreateSemesterTypeDto } from '../dto/request/create-semester-type.dto.js';
+import { SemesterTypeQueryDto } from '../dto/request/semester-type-query.dto.js';
 import {
   SemesterTypeListResponseDto,
   SemesterTypeResponseDto,
-} from '../dto/semester-type-response.dto.js';
-import { UpdateSemesterTypeDto } from '../dto/update-semester-type.dto.js';
+} from '../dto/response/semester-type-response.dto.js';
+import { UpdateSemesterTypeDto } from '../dto/request/update-semester-type.dto.js';
 import { CreateSemesterTypeUseCase } from '../use-cases/create-semester-type.use-case.js';
 import { DeleteSemesterTypeUseCase } from '../use-cases/delete-semester-type.use-case.js';
 import { GetSemesterTypeByIdUseCase } from '../use-cases/get-semester-type-by-id.use-case.js';

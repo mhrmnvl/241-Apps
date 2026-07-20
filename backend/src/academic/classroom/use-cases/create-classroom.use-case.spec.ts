@@ -1,6 +1,6 @@
 import { ConflictException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { CreateClassroomDto } from '../dto/create-classroom.dto.js';
+import { CreateClassroomDto } from '../dto/request/create-classroom.dto.js';
 import { ClassroomRepository } from '../repositories/classroom.repository.js';
 import { CreateClassroomUseCase } from './create-classroom.use-case.js';
 

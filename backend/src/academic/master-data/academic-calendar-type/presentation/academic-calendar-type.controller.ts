@@ -23,13 +23,13 @@ import {
 
 import { JwtAuthGuard } from '../../../../platform/auth/index.js';
 
-import { AcademicCalendarTypeQueryDto } from '../dto/academic-calendar-type-query.dto.js';
+import { AcademicCalendarTypeQueryDto } from '../dto/request/academic-calendar-type-query.dto.js';
 import {
   AcademicCalendarTypesListResponseDto,
   AcademicCalendarTypeResponseDto,
-} from '../dto/academic-calendar-type-response.dto.js';
-import { CreateAcademicCalendarTypeDto } from '../dto/create-academic-calendar-type.dto.js';
-import { UpdateAcademicCalendarTypeDto } from '../dto/update-academic-calendar-type.dto.js';
+} from '../dto/response/academic-calendar-type-response.dto.js';
+import { CreateAcademicCalendarTypeDto } from '../dto/request/create-academic-calendar-type.dto.js';
+import { UpdateAcademicCalendarTypeDto } from '../dto/request/update-academic-calendar-type.dto.js';
 import { CreateAcademicCalendarTypeUseCase } from '../use-cases/create-academic-calendar-type.use-case.js';
 import { DeleteAcademicCalendarTypeUseCase } from '../use-cases/delete-academic-calendar-type.use-case.js';
 import { GetAcademicCalendarTypeByIdUseCase } from '../use-cases/get-academic-calendar-type-by-id.use-case.js';

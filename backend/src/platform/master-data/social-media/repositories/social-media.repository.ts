@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
-import { CreateSocialMediaDto } from '../dto/create-social-media.dto.js';
-import { UpdateSocialMediaDto } from '../dto/update-social-media.dto.js';
+import { CreateSocialMediaDto } from '../dto/request/create-social-media.dto.js';
+import { UpdateSocialMediaDto } from '../dto/request/update-social-media.dto.js';
 import { ISocialMediaRepository } from '../interfaces/social-media-repository.interface.js';
 
 @Injectable()

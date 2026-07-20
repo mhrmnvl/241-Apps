@@ -6,7 +6,7 @@ import {
 import { isEditable } from '../domain/admission-status.transitions.js';
 import { serializePayment } from '../domain/admission.serializers.js';
 import { IAdmissionApplicantRepository } from '../domain/interfaces/admission-applicant-repository.interface.js';
-import { UploadPaymentProofDto } from '../dto/upload-payment-proof.dto.js';
+import { UploadPaymentProofDto } from '../dto/request/upload-payment-proof.dto.js';
 import {
   assertValidAdmissionFile,
   saveAdmissionFile,

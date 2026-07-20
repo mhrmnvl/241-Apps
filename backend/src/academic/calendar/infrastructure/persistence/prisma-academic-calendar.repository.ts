@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
-import { AcademicCalendarQueryDto } from '../../dto/academic-calendar-query.dto.js';
-import { CreateAcademicCalendarDto } from '../../dto/create-academic-calendar.dto.js';
-import { UpdateAcademicCalendarDto } from '../../dto/update-academic-calendar.dto.js';
+import { AcademicCalendarQueryDto } from '../../dto/request/academic-calendar-query.dto.js';
+import { CreateAcademicCalendarDto } from '../../dto/request/create-academic-calendar.dto.js';
+import { UpdateAcademicCalendarDto } from '../../dto/request/update-academic-calendar.dto.js';
 import { resolveAcademicYearId } from '../../../../shared/utils/active-academic-year.helper.js';
 import {
   IAcademicCalendarRepository,

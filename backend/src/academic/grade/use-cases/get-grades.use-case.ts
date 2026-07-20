@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { GradeQueryDto } from '../dto/grade-query.dto.js';
+import { GradeQueryDto } from '../dto/request/grade-query.dto.js';
 import { IGradeRepository } from '../domain/interfaces/grade-repository.interface.js';
 
 @Injectable()

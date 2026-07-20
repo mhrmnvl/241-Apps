@@ -1,5 +1,5 @@
 import { Education, Prisma } from '@prisma/client';
-import { EducationQueryDto } from '../dto/education-query.dto.js';
+import { EducationQueryDto } from '../dto/request/education-query.dto.js';
 import { PaginatedResult } from '../../../../shared/domain/interfaces/repository.interface.js';
 
 export abstract class IEducationRepository {

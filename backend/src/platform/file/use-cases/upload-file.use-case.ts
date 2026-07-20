@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { FileRepository } from '../repositories/file.repository.js';
-import { CreateFileDto } from '../dto/create-file.dto.js';
+import { CreateFileDto } from '../dto/request/create-file.dto.js';
 import * as fs from 'fs';
 import * as path from 'path';
 

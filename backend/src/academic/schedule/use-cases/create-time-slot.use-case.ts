@@ -1,5 +1,5 @@
 import { ConflictException, Injectable, Logger } from '@nestjs/common';
-import { CreateTimeSlotDto } from '../dto/create-time-slot.dto.js';
+import { CreateTimeSlotDto } from '../dto/request/create-time-slot.dto.js';
 import { ITimeSlotRepository } from '../domain/interfaces/time-slot-repository.interface.js';
 
 @Injectable()

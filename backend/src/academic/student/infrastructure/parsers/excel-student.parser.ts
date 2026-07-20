@@ -1,6 +1,6 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import ExcelJS from 'exceljs';
-import { BulkImportStudentRowDto } from '../../dto/bulk-import-student.dto.js';
+import { BulkImportStudentRowDto } from '../../dto/request/bulk-import-student.dto.js';
 
 type ExcelRow = Record<string, ExcelJS.CellValue>;
 type MappedRow = Record<string, string | number | undefined>;

@@ -16,7 +16,7 @@ import {
   CreateClassroomStructureRepositoryInput,
   UpdateClassroomStructureRepositoryInput,
 } from '../../domain/interfaces/classroom-structures-repository.interface.js';
-import { ClassroomStructureQueryDto } from '../../dto/classroom-structure-query.dto.js';
+import { ClassroomStructureQueryDto } from '../../dto/request/classroom-structure-query.dto.js';
 import { PaginatedResult } from '../../../../shared/domain/interfaces/repository.interface.js';
 
 @Injectable()

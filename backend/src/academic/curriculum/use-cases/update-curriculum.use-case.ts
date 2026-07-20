@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { IAcademicYearRepository } from '../../academic-year/index.js';
-import { UpdateCurriculaDto } from '../dto/update-curriculum.dto.js';
+import { UpdateCurriculaDto } from '../dto/request/update-curriculum.dto.js';
 import { ICurriculumRepository } from '../domain/interfaces/curriculum-repository.interface.js';
 
 @Injectable()

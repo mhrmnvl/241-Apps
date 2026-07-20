@@ -8,7 +8,7 @@ import {
   PromotionDto,
   PromotionPreviewDto,
   PromotionPreviewItemDto,
-} from '../dto/promotion.dto.js';
+} from '../dto/request/promotion.dto.js';
 import { IPromotionRepository } from '../domain/interfaces/promotion-repository.interface.js';
 
 @Injectable()

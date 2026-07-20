@@ -8,7 +8,7 @@ import {
   ClassroomWithDetails,
   CreateClassroomRepositoryInput,
 } from '../../domain/interfaces/classroom-repository.interface.js';
-import { ClassroomQueryDto } from '../../dto/classroom-query.dto.js';
+import { ClassroomQueryDto } from '../../dto/request/classroom-query.dto.js';
 import { PaginatedResult } from '../../../../shared/domain/interfaces/repository.interface.js';
 
 @Injectable()

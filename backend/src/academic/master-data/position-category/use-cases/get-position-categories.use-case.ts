@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { PositionCategoryQueryDto } from '../dto/position-category-query.dto.js';
+import { PositionCategoryQueryDto } from '../dto/request/position-category-query.dto.js';
 import { IPositionCategoryRepository } from '../interfaces/position-category-repository.interface.js';
 
 @Injectable()

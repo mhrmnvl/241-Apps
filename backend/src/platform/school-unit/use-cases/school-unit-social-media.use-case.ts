@@ -7,7 +7,7 @@ import {
 import {
   CreateSchoolUnitSocialMediaDto,
   UpdateSchoolUnitSocialMediaDto,
-} from '../dto/school-unit-social-media.dto.js';
+} from '../dto/request/school-unit-social-media.dto.js';
 import { SchoolUnitSocialMediaRepository } from '../repositories/school-unit-social-media.repository.js';
 import { SchoolUnitRepository } from '../repositories/school-unit.repository.js';
 

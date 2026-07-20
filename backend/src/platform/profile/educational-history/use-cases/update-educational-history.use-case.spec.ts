@@ -1,6 +1,6 @@
 ﻿import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
-import { UpdateEducationalHistoryDto } from '../dto/update-educational-history.dto.js';
+import { UpdateEducationalHistoryDto } from '../dto/request/update-educational-history.dto.js';
 import { EducationalHistoryRepository } from '../repositories/educational-history.repository.js';
 import { UpdateEducationalHistoryUseCase } from './update-educational-history.use-case.js';
 

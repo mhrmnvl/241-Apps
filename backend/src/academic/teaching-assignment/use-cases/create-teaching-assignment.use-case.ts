@@ -3,7 +3,7 @@ import {
   ConflictException,
   Injectable,
 } from '@nestjs/common';
-import { CreateTeachingAssignmentDto } from '../dto/create-teaching-assignment.dto.js';
+import { CreateTeachingAssignmentDto } from '../dto/request/create-teaching-assignment.dto.js';
 import { ITeachingAssignmentRepository } from '../domain/interfaces/teaching-assignment-repository.interface.js';
 
 @Injectable()

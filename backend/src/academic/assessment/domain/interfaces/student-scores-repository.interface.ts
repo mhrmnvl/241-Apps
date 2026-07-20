@@ -1,5 +1,5 @@
 import { StudentScore, Prisma } from '@prisma/client';
-import type { StudentScoreQueryDto } from '../../dto/student-score.dto.js';
+import type { StudentScoreQueryDto } from '../../dto/request/student-score.dto.js';
 import { PaginatedResult } from '../../../../shared/domain/interfaces/repository.interface.js';
 
 export const STUDENT_SCORE_INCLUDE = {

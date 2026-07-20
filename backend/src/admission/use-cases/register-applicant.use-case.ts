@@ -5,9 +5,9 @@ import {
   InternalServerErrorException,
   Logger,
 } from '@nestjs/common';
-import { PasswordManagerService } from '../../platform/auth/services/password-manager.service.js';
+import { PasswordManagerService } from '../../platform/auth/index.js';
 import { IAdmissionApplicantRepository } from '../domain/interfaces/admission-applicant-repository.interface.js';
-import { RegisterApplicantDto } from '../dto/register-applicant.dto.js';
+import { RegisterApplicantDto } from '../dto/request/register-applicant.dto.js';
 
 @Injectable()
 export class RegisterApplicantUseCase {
@@ -50,7 +50,6 @@ export class RegisterApplicantUseCase {
       wave,
       identifier,
       passwordHash,
-      applicantRoleId,
       fullName: dto.fullName,
       phone: dto.phone ?? null,
     });

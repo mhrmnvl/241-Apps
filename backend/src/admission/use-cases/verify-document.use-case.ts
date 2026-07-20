@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { IAdmissionApplicationRepository } from '../domain/interfaces/admission-application-repository.interface.js';
-import { VerifyDocumentDto } from '../dto/admin-actions.dto.js';
+import { VerifyDocumentDto } from '../dto/request/admin-actions.dto.js';
 import { AdmissionNotificationService } from '../services/admission-notification.service.js';
 
 @Injectable()

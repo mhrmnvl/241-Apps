@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { SchoolUnitTypeQueryDto } from '../dto/school-unit-type-query.dto.js';
+import { SchoolUnitTypeQueryDto } from '../dto/request/school-unit-type-query.dto.js';
 import { SchoolUnitTypesRepository } from '../repositories/school-unit-types.repository.js';
 
 @Injectable()

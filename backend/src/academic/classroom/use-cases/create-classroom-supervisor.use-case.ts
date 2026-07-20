@@ -5,7 +5,7 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { CreateClassroomSupervisorDto } from '../dto/create-classroom-supervisor.dto.js';
+import { CreateClassroomSupervisorDto } from '../dto/request/create-classroom-supervisor.dto.js';
 import { ClassroomSupervisorsRepository } from '../repositories/classroom-supervisors.repository.js';
 
 @Injectable()

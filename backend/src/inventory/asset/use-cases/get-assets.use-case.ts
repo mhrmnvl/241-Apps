@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { IAssetRepository } from '../domain/interfaces/asset-repository.interface.js';
-import { AssetQueryDto } from '../dto/asset-query.dto.js';
+import { AssetQueryDto } from '../dto/request/asset-query.dto.js';
 
 @Injectable()
 export class GetAssetsUseCase {

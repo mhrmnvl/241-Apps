@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { IConditionRepository } from '../domain/interfaces/condition-repository.interface.js';
-import { UpdateConditionDto } from '../dto/condition.dto.js';
+import { UpdateConditionDto } from '../dto/request/condition.dto.js';
 
 @Injectable()
 export class UpdateConditionUseCase {

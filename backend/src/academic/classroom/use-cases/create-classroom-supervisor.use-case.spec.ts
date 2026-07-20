@@ -1,6 +1,6 @@
 import { ConflictException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { CreateClassroomSupervisorDto } from '../dto/create-classroom-supervisor.dto.js';
+import { CreateClassroomSupervisorDto } from '../dto/request/create-classroom-supervisor.dto.js';
 import { ClassroomSupervisorsRepository } from '../repositories/classroom-supervisors.repository.js';
 import { CreateClassroomSupervisorUseCase } from './create-classroom-supervisor.use-case.js';
 

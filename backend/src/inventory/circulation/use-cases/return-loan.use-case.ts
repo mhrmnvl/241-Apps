@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { ICirculationRepository } from '../domain/interfaces/circulation-repository.interface.js';
-import { ReturnLoanDto } from '../dto/return-loan.dto.js';
+import { ReturnLoanDto } from '../dto/request/return-loan.dto.js';
 import { PrismaService } from '../../../core/database/prisma.service.js';
 
 @Injectable()

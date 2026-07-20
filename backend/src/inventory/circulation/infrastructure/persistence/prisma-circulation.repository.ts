@@ -7,7 +7,7 @@ import {
   Prisma,
 } from '@prisma/client';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
-import { LoanQueryDto } from '../../dto/loan-query.dto.js';
+import { LoanQueryDto } from '../../dto/request/loan-query.dto.js';
 import {
   ICirculationRepository,
   LoanWithRelations,

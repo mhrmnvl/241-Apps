@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { CurriculumSubjectQueryDto } from '../dto/curriculum-subject-query.dto.js';
+import { CurriculumSubjectQueryDto } from '../dto/request/curriculum-subject-query.dto.js';
 import { ICurriculumSubjectRepository } from '../domain/interfaces/curriculum-subject-repository.interface.js';
 import { GetCurriculumSubjectsUseCase } from './get-curriculum-subjects.use-case.js';
 

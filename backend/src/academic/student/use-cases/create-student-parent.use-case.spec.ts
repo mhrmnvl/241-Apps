@@ -1,7 +1,7 @@
 ﻿import { ConflictException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { ParentRelation } from '@prisma/client';
-import { CreateStudentParentDto } from '../dto/create-student-parent.dto.js';
+import { CreateStudentParentDto } from '../dto/request/create-student-parent.dto.js';
 import { StudentParentRepository } from '../repositories/student-parent.repository.js';
 import { CreateStudentParentUseCase } from './create-student-parent.use-case.js';
 

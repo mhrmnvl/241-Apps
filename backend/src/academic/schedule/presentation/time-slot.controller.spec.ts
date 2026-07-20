@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { CreateTimeSlotDto } from '../dto/create-time-slot.dto.js';
-import { UpdateTimeSlotDto } from '../dto/update-time-slot.dto.js';
+import { CreateTimeSlotDto } from '../dto/request/create-time-slot.dto.js';
+import { UpdateTimeSlotDto } from '../dto/request/update-time-slot.dto.js';
 import { CreateTimeSlotUseCase } from '../use-cases/create-time-slot.use-case.js';
 import { DeleteTimeSlotUseCase } from '../use-cases/delete-time-slot.use-case.js';
 import { GetTimeSlotByIdUseCase } from '../use-cases/get-time-slot-by-id.use-case.js';

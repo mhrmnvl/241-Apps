@@ -10,13 +10,6 @@ export const createColumns = (
   grades: GradeOption[] = [],
 ): ColumnDef<Student>[] => [
   {
-    id: 'no',
-    header: 'No',
-    cell: ({ row }) => row.index + 1,
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
     id: 'nis',
     header: 'NIS',
     cell: ({ row }) => row.original.nis,

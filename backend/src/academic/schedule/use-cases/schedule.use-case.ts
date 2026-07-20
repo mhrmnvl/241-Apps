@@ -10,7 +10,7 @@ import {
   CreateScheduleDto,
   ScheduleQueryDto,
   UpdateScheduleDto,
-} from '../dto/schedule.dto.js';
+} from '../dto/request/schedule.dto.js';
 import { IScheduleRepository } from '../domain/interfaces/schedule-repository.interface.js';
 
 @Injectable()

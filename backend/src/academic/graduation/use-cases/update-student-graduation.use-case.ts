@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { UpdateStudentGraduationDto } from '../dto/update-student-graduation.dto.js';
+import { UpdateStudentGraduationDto } from '../dto/request/update-student-graduation.dto.js';
 import { IGraduationRepository } from '../domain/interfaces/graduation-repository.interface.js';
 
 @Injectable()

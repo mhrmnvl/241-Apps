@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { BloodTypeQueryDto } from '../dto/blood-type-query.dto.js';
+import { BloodTypeQueryDto } from '../dto/request/blood-type-query.dto.js';
 import { IBloodTypeRepository } from '../domain/interfaces/blood-type-repository.interface.js';
 
 @Injectable()

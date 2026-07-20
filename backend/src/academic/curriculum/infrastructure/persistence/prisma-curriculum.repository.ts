@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
-import { CurriculaQueryDto } from '../../dto/curriculum-query.dto.js';
+import { CurriculaQueryDto } from '../../dto/request/curriculum-query.dto.js';
 import { resolveAcademicYearId } from '../../../../shared/utils/active-academic-year.helper.js';
 import {
   ICurriculumRepository,

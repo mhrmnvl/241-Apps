@@ -1,7 +1,7 @@
 import { Event, Prisma } from '@prisma/client';
-import type { CreateEventDto } from '../../dto/create-event.dto.js';
-import type { EventQueryDto } from '../../dto/event-query.dto.js';
-import type { UpdateEventDto } from '../../dto/update-event.dto.js';
+import type { CreateEventDto } from '../../dto/request/create-event.dto.js';
+import type { EventQueryDto } from '../../dto/request/event-query.dto.js';
+import type { UpdateEventDto } from '../../dto/request/update-event.dto.js';
 import { PaginatedResult } from '../../../../shared/domain/interfaces/repository.interface.js';
 
 export const EVENT_INCLUDE = {

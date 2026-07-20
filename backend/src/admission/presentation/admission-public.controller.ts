@@ -2,7 +2,7 @@ import { Body, Controller, Get, Post } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import { Public } from '../../core/decorators/public.decorator.js';
-import { RegisterApplicantDto } from '../dto/register-applicant.dto.js';
+import { RegisterApplicantDto } from '../dto/request/register-applicant.dto.js';
 import { GetActiveWavesUseCase } from '../use-cases/get-active-waves.use-case.js';
 import { RegisterApplicantUseCase } from '../use-cases/register-applicant.use-case.js';
 

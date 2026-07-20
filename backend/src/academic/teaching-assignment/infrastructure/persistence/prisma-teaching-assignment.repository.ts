@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma, TeachingAssignment } from '@prisma/client';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
-import { TeachingAssignmentQueryDto } from '../../dto/teaching-assignment-query.dto.js';
+import { TeachingAssignmentQueryDto } from '../../dto/request/teaching-assignment-query.dto.js';
 import { resolveSemesterId } from '../../../../shared/utils/active-academic-year.helper.js';
 import {
   ITeachingAssignmentRepository,

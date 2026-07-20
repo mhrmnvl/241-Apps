@@ -1,7 +1,7 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { IEnrollmentRepository } from '../../enrollment/domain/interfaces/enrollment-repository.interface.js';
 import { IStudentScoresRepository } from '../../assessment/domain/interfaces/student-scores-repository.interface.js';
-import { GenerateReportCardDto } from '../dto/generate-report-card.dto.js';
+import { GenerateReportCardDto } from '../dto/request/generate-report-card.dto.js';
 import { IReportCardRepository } from '../domain/interfaces/report-card-repository.interface.js';
 
 @Injectable()

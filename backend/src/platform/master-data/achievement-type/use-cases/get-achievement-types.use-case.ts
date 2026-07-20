@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { AchievementTypeQueryDto } from '../dto/achievement-type-query.dto.js';
+import { AchievementTypeQueryDto } from '../dto/request/achievement-type-query.dto.js';
 import { IAchievementTypeRepository } from '../domain/interfaces/achievement-type-repository.interface.js';
 
 @Injectable()

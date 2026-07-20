@@ -5,7 +5,7 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { UpdateClassroomStructureDto } from '../dto/update-classroom-structure.dto.js';
+import { UpdateClassroomStructureDto } from '../dto/request/update-classroom-structure.dto.js';
 import { ClassroomStructuresRepository } from '../repositories/classroom-structures.repository.js';
 
 @Injectable()

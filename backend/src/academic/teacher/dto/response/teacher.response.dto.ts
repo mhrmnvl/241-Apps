@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { EmploymentTypeResponseDto } from '../../../master-data/employment-type/dto/employment-type-response.dto.js';
+import { EmploymentTypeResponseDto } from '../../../master-data/employment-type/dto/response/employment-type-response.dto.js';
 import { ProfileResponseDto } from '../../../../platform/profile/index.js';
 
 export class TeacherResponseDto {

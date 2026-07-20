@@ -4,7 +4,7 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { UpdateTimeSlotDto } from '../dto/update-time-slot.dto.js';
+import { UpdateTimeSlotDto } from '../dto/request/update-time-slot.dto.js';
 import { ITimeSlotRepository } from '../domain/interfaces/time-slot-repository.interface.js';
 
 @Injectable()

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { ClassroomQueryDto } from '../dto/classroom-query.dto.js';
+import { ClassroomQueryDto } from '../dto/request/classroom-query.dto.js';
 import { ClassroomRepository } from '../repositories/classroom.repository.js';
 import { withDisplayName } from '../../../shared/utils/classroom-display-name.helper.js';
 

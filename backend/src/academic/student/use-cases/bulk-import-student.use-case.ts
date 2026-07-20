@@ -7,9 +7,9 @@ import { ClassroomRepository } from '../../classroom/index.js';
 import {
   BulkImportRowResultDto,
   BulkImportStudentsResponseDto,
-} from '../dto/bulk-import-student-response.dto.js';
-import { BulkImportStudentRowDto } from '../dto/bulk-import-student.dto.js';
-import { CreateStudentDto } from '../dto/create-student.dto.js';
+} from '../dto/response/bulk-import-student-response.dto.js';
+import { BulkImportStudentRowDto } from '../dto/request/bulk-import-student.dto.js';
+import { CreateStudentDto } from '../dto/request/create-student.dto.js';
 import { StudentRepository } from '../repositories/student.repository.js';
 import { ExcelStudentParser } from '../infrastructure/parsers/excel-student.parser.js';
 import { StudentCreatedEvent } from '../domain/events/student.events.js';

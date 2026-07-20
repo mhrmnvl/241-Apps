@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { IApprovalRepository } from '../domain/interfaces/approval-repository.interface.js';
-import { CreateWorkflowDto } from '../dto/create-workflow.dto.js';
+import { CreateWorkflowDto } from '../dto/request/create-workflow.dto.js';
 
 @Injectable()
 export class CreateWorkflowUseCase {

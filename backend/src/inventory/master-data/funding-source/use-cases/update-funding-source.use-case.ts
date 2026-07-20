@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { IFundingSourceRepository } from '../domain/interfaces/funding-source-repository.interface.js';
-import { UpdateFundingSourceDto } from '../dto/funding-source.dto.js';
+import { UpdateFundingSourceDto } from '../dto/request/funding-source.dto.js';
 
 @Injectable()
 export class UpdateFundingSourceUseCase {

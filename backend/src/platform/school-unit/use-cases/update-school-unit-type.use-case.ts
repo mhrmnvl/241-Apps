@@ -1,5 +1,5 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { UpdateSchoolUnitTypeDto } from '../dto/update-school-unit-type.dto.js';
+import { UpdateSchoolUnitTypeDto } from '../dto/request/update-school-unit-type.dto.js';
 import { SchoolUnitTypesRepository } from '../repositories/school-unit-types.repository.js';
 
 @Injectable()

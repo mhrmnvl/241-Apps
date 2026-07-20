@@ -28,7 +28,7 @@ import { CurrentUser } from '../../../core/decorators/current-user.decorator.js'
 import { RequirePermissions } from '../../access-control/permissions/decorators/require-permissions.decorator.js';
 import type { AuthenticatedUser } from '../../../core/types/authenticated-user.type.js';
 
-import { FileResponseDto } from '../dto/file-response.dto.js';
+import { FileResponseDto } from '../dto/response/file-response.dto.js';
 import { UploadFileUseCase } from '../use-cases/upload-file.use-case.js';
 import { GetFilesUseCase } from '../use-cases/get-files.use-case.js';
 import { DeleteFileUseCase } from '../use-cases/delete-file.use-case.js';

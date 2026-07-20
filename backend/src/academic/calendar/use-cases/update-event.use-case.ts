@@ -1,6 +1,6 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { ClassroomRepository } from '../../classroom/index.js';
-import { UpdateEventDto } from '../dto/update-event.dto.js';
+import { UpdateEventDto } from '../dto/request/update-event.dto.js';
 import { IEventsRepository } from '../domain/interfaces/events-repository.interface.js';
 
 @Injectable()

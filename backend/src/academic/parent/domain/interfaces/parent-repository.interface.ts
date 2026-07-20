@@ -1,7 +1,7 @@
 import { Occupation, Parent, Prisma } from '@prisma/client';
-import { CreateParentDto } from '../../dto/create-parent.dto.js';
-import { ParentQueryDto } from '../../dto/parent-query.dto.js';
-import { UpdateParentDto } from '../../dto/update-parent.dto.js';
+import { CreateParentDto } from '../../dto/request/create-parent.dto.js';
+import { ParentQueryDto } from '../../dto/request/parent-query.dto.js';
+import { UpdateParentDto } from '../../dto/request/update-parent.dto.js';
 import { PaginatedResult } from '../../../../shared/domain/interfaces/repository.interface.js';
 
 export const ADDRESS_OMIT = {

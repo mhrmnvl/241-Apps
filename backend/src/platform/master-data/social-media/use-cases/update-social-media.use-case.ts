@@ -4,7 +4,7 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { UpdateSocialMediaDto } from '../dto/update-social-media.dto.js';
+import { UpdateSocialMediaDto } from '../dto/request/update-social-media.dto.js';
 import { ISocialMediaRepository } from '../interfaces/social-media-repository.interface.js';
 
 @Injectable()

@@ -1,5 +1,5 @@
 import { AdmissionAnnouncement, Prisma } from '@prisma/client';
-import { AdmissionAnnouncementQueryDto } from '../../dto/admission-announcement.dto.js';
+import { AdmissionAnnouncementQueryDto } from '../../dto/request/admission-announcement.dto.js';
 import { PaginatedResult } from '../../../shared/domain/interfaces/repository.interface.js';
 
 export type AdmissionAnnouncementWithWave =

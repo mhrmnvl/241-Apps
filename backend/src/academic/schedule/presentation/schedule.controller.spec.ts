@@ -1,6 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { Day } from '@prisma/client';
-import { CreateScheduleDto, UpdateScheduleDto } from '../dto/schedule.dto.js';
+import {
+  CreateScheduleDto,
+  UpdateScheduleDto,
+} from '../dto/request/schedule.dto.js';
 import {
   CreateScheduleUseCase,
   DeleteScheduleUseCase,

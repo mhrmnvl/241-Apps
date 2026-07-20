@@ -1,6 +1,6 @@
 ﻿import { ConflictException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { CreateParentDto } from '../dto/create-parent.dto.js';
+import { CreateParentDto } from '../dto/request/create-parent.dto.js';
 import { ParentRepository } from '../repositories/parent.repository.js';
 import { CreateParentUseCase } from './create-parent.use-case.js';
 

@@ -23,13 +23,13 @@ import {
 
 import { JwtAuthGuard } from '../../../../platform/auth/index.js';
 
-import { BloodTypeQueryDto } from '../dto/blood-type-query.dto.js';
+import { BloodTypeQueryDto } from '../dto/request/blood-type-query.dto.js';
 import {
   BloodTypesListResponseDto,
   BloodTypeResponseDto,
-} from '../dto/blood-type-response.dto.js';
-import { CreateBloodTypeDto } from '../dto/create-blood-type.dto.js';
-import { UpdateBloodTypeDto } from '../dto/update-blood-type.dto.js';
+} from '../dto/response/blood-type-response.dto.js';
+import { CreateBloodTypeDto } from '../dto/request/create-blood-type.dto.js';
+import { UpdateBloodTypeDto } from '../dto/request/update-blood-type.dto.js';
 import { CreateBloodTypeUseCase } from '../use-cases/create-blood-type.use-case.js';
 import { DeleteBloodTypeUseCase } from '../use-cases/delete-blood-type.use-case.js';
 import { GetBloodTypeByIdUseCase } from '../use-cases/get-blood-type-by-id.use-case.js';

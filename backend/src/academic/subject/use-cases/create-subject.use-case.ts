@@ -1,5 +1,5 @@
 import { ConflictException, Injectable, Logger } from '@nestjs/common';
-import { CreateSubjectDto } from '../dto/create-subject.dto.js';
+import { CreateSubjectDto } from '../dto/request/create-subject.dto.js';
 import { ISubjectRepository } from '../domain/interfaces/subject-repository.interface.js';
 
 @Injectable()

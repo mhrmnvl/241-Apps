@@ -1,7 +1,7 @@
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { ClassroomRepository } from '../../../academic/classroom/index.js';
-import { UpdateAnnouncementDto } from '../dto/update-announcement.dto.js';
+import { UpdateAnnouncementDto } from '../dto/request/update-announcement.dto.js';
 import { AnnouncementRepository } from '../repositories/announcement.repository.js';
 import { UpdateAnnouncementUseCase } from './update-announcement.use-case.js';
 

@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { EventQueryDto } from '../dto/event-query.dto.js';
+import { EventQueryDto } from '../dto/request/event-query.dto.js';
 import { IEventsRepository } from '../domain/interfaces/events-repository.interface.js';
 import { GetEventsUseCase } from './get-events.use-case.js';
 

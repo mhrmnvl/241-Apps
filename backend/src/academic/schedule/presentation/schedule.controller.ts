@@ -30,7 +30,7 @@ import {
   CreateScheduleDto,
   UpdateScheduleDto,
   ScheduleQueryDto,
-} from '../dto/schedule.dto.js';
+} from '../dto/request/schedule.dto.js';
 import {
   GetSchedulesUseCase,
   GetScheduleByIdUseCase,

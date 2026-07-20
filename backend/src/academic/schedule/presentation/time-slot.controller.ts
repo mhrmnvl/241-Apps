@@ -24,9 +24,9 @@ import { JwtAuthGuard } from '../../../platform/auth/index.js';
 import { CurrentUser } from '../../../core/decorators/current-user.decorator.js';
 import type { AuthenticatedUser } from '../../../core/types/authenticated-user.type.js';
 
-import { TimeSlotResponseDto } from '../dto/time-slot-response.dto.js';
-import { CreateTimeSlotDto } from '../dto/create-time-slot.dto.js';
-import { UpdateTimeSlotDto } from '../dto/update-time-slot.dto.js';
+import { TimeSlotResponseDto } from '../dto/response/time-slot-response.dto.js';
+import { CreateTimeSlotDto } from '../dto/request/create-time-slot.dto.js';
+import { UpdateTimeSlotDto } from '../dto/request/update-time-slot.dto.js';
 import { CreateTimeSlotUseCase } from '../use-cases/create-time-slot.use-case.js';
 import { DeleteTimeSlotUseCase } from '../use-cases/delete-time-slot.use-case.js';
 import { GetTimeSlotByIdUseCase } from '../use-cases/get-time-slot-by-id.use-case.js';

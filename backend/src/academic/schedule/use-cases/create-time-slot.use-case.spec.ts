@@ -1,6 +1,6 @@
 import { ConflictException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { CreateTimeSlotDto } from '../dto/create-time-slot.dto.js';
+import { CreateTimeSlotDto } from '../dto/request/create-time-slot.dto.js';
 import { ITimeSlotRepository } from '../domain/interfaces/time-slot-repository.interface.js';
 import { CreateTimeSlotUseCase } from './create-time-slot.use-case.js';
 

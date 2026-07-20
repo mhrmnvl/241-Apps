@@ -1,5 +1,5 @@
 import { Prisma, StudentEnrollment, EnrollmentStatus } from '@prisma/client';
-import type { StudentEnrollmentQueryDto } from '../../dto/student-enrollment-query.dto.js';
+import type { StudentEnrollmentQueryDto } from '../../dto/request/student-enrollment-query.dto.js';
 import { PaginatedResult } from '../../../../shared/domain/interfaces/repository.interface.js';
 
 export const ENROLLMENT_INCLUDE = {

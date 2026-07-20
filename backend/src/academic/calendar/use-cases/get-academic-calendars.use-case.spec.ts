@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { AcademicCalendarQueryDto } from '../dto/academic-calendar-query.dto.js';
+import { AcademicCalendarQueryDto } from '../dto/request/academic-calendar-query.dto.js';
 import { IAcademicCalendarRepository } from '../domain/interfaces/academic-calendar-repository.interface.js';
 import { GetAcademicCalendarsUseCase } from './get-academic-calendars.use-case.js';
 

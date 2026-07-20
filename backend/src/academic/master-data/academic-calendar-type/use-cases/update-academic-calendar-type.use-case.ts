@@ -4,7 +4,7 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { UpdateAcademicCalendarTypeDto } from '../dto/update-academic-calendar-type.dto.js';
+import { UpdateAcademicCalendarTypeDto } from '../dto/request/update-academic-calendar-type.dto.js';
 import { IAcademicCalendarTypeRepository } from '../domain/interfaces/academic-calendar-type-repository.interface.js';
 
 @Injectable()

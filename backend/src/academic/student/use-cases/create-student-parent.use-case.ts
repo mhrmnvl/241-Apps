@@ -4,7 +4,7 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { CreateStudentParentDto } from '../dto/create-student-parent.dto.js';
+import { CreateStudentParentDto } from '../dto/request/create-student-parent.dto.js';
 import { StudentParentRepository } from '../repositories/student-parent.repository.js';
 import { StudentParentWithDetails } from '../domain/interfaces/student-parent-repository.interface.js';
 

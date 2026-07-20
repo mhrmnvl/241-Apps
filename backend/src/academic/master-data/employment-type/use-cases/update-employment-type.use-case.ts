@@ -1,5 +1,5 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { UpdateEmploymentTypeDto } from '../dto/create-employment-type.dto.js';
+import { UpdateEmploymentTypeDto } from '../dto/request/create-employment-type.dto.js';
 import { IEmploymentTypeRepository } from '../interfaces/employment-type-repository.interface.js';
 
 @Injectable()

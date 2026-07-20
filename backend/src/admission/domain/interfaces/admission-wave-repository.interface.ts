@@ -1,5 +1,5 @@
 import { AdmissionWave, Prisma } from '@prisma/client';
-import { AdmissionWaveQueryDto } from '../../dto/admission-wave.dto.js';
+import { AdmissionWaveQueryDto } from '../../dto/request/admission-wave.dto.js';
 import { PaginatedResult } from '../../../shared/domain/interfaces/repository.interface.js';
 
 export type AdmissionWaveWithRelations = Prisma.AdmissionWaveGetPayload<{

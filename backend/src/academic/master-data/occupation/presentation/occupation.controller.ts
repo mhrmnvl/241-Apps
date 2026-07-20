@@ -23,13 +23,13 @@ import {
 
 import { JwtAuthGuard } from '../../../../platform/auth/index.js';
 
-import { OccupationQueryDto } from '../dto/occupation-query.dto.js';
+import { OccupationQueryDto } from '../dto/request/occupation-query.dto.js';
 import {
   OccupationListResponseDto,
   OccupationResponseDto,
-} from '../dto/occupation-response.dto.js';
-import { CreateOccupationDto } from '../dto/create-occupation.dto.js';
-import { UpdateOccupationDto } from '../dto/update-occupation.dto.js';
+} from '../dto/response/occupation-response.dto.js';
+import { CreateOccupationDto } from '../dto/request/create-occupation.dto.js';
+import { UpdateOccupationDto } from '../dto/request/update-occupation.dto.js';
 import { CreateOccupationUseCase } from '../use-cases/create-occupation.use-case.js';
 import { DeleteOccupationUseCase } from '../use-cases/delete-occupation.use-case.js';
 import { GetOccupationByIdUseCase } from '../use-cases/get-occupation-by-id.use-case.js';

@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { EnrollmentStatus } from '@prisma/client';
-import { DropStudentDto } from '../dto/drop-student.dto.js';
+import { DropStudentDto } from '../dto/request/drop-student.dto.js';
 import { IEnrollmentRepository } from '../domain/interfaces/enrollment-repository.interface.js';
 
 @Injectable()

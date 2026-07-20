@@ -3,7 +3,7 @@ import type {
   AttendanceQueryDto,
   AttendanceRecapQueryDto,
   BulkAttendanceRecordDto,
-} from '../../dto/attendance.dto.js';
+} from '../../dto/request/attendance.dto.js';
 import { PaginatedResult } from '../../../../shared/domain/interfaces/repository.interface.js';
 
 export const ATTENDANCE_INCLUDE = {

@@ -23,13 +23,13 @@ import {
 
 import { JwtAuthGuard } from '../../../../platform/auth/index.js';
 
-import { ReligionQueryDto } from '../dto/religion-query.dto.js';
+import { ReligionQueryDto } from '../dto/request/religion-query.dto.js';
 import {
   ReligionsListResponseDto,
   ReligionResponseDto,
-} from '../dto/religion-response.dto.js';
-import { CreateReligionDto } from '../dto/create-religion.dto.js';
-import { UpdateReligionDto } from '../dto/update-religion.dto.js';
+} from '../dto/response/religion-response.dto.js';
+import { CreateReligionDto } from '../dto/request/create-religion.dto.js';
+import { UpdateReligionDto } from '../dto/request/update-religion.dto.js';
 import { CreateReligionUseCase } from '../use-cases/create-religion.use-case.js';
 import { DeleteReligionUseCase } from '../use-cases/delete-religion.use-case.js';
 import { GetReligionByIdUseCase } from '../use-cases/get-religion-by-id.use-case.js';

@@ -22,11 +22,11 @@ import {
 
 import { JwtAuthGuard } from '../../auth/index.js';
 
-import { SchoolUnitSocialMediaResponseDto } from '../dto/school-unit-social-media-response.dto.js';
+import { SchoolUnitSocialMediaResponseDto } from '../dto/response/school-unit-social-media-response.dto.js';
 import {
   CreateSchoolUnitSocialMediaDto,
   UpdateSchoolUnitSocialMediaDto,
-} from '../dto/school-unit-social-media.dto.js';
+} from '../dto/request/school-unit-social-media.dto.js';
 import { SchoolUnitSocialMediaUseCase } from '../use-cases/school-unit-social-media.use-case.js';
 
 @ApiTags('School Unit Social Media')

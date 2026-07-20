@@ -25,9 +25,9 @@ import { JwtAuthGuard } from '../../../platform/auth/index.js';
 import { CurrentUser } from '../../../core/decorators/current-user.decorator.js';
 import type { AuthenticatedUser } from '../../../core/types/authenticated-user.type.js';
 
-import { AcademicCalendarQueryDto } from '../dto/academic-calendar-query.dto.js';
-import { CreateAcademicCalendarDto } from '../dto/create-academic-calendar.dto.js';
-import { UpdateAcademicCalendarDto } from '../dto/update-academic-calendar.dto.js';
+import { AcademicCalendarQueryDto } from '../dto/request/academic-calendar-query.dto.js';
+import { CreateAcademicCalendarDto } from '../dto/request/create-academic-calendar.dto.js';
+import { UpdateAcademicCalendarDto } from '../dto/request/update-academic-calendar.dto.js';
 import { CreateAcademicCalendarUseCase } from '../use-cases/create-academic-calendar.use-case.js';
 import { DeleteAcademicCalendarUseCase } from '../use-cases/delete-academic-calendar.use-case.js';
 import { GetAcademicCalendarByIdUseCase } from '../use-cases/get-academic-calendar-by-id.use-case.js';

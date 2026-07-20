@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { IStatusRepository } from '../domain/interfaces/status-repository.interface.js';
-import { CreateStatusDto } from '../dto/status.dto.js';
+import { CreateStatusDto } from '../dto/request/status.dto.js';
 
 @Injectable()
 export class CreateStatusUseCase {

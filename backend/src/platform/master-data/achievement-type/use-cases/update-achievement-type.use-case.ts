@@ -4,7 +4,7 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { UpdateAchievementTypeDto } from '../dto/update-achievement-type.dto.js';
+import { UpdateAchievementTypeDto } from '../dto/request/update-achievement-type.dto.js';
 import { IAchievementTypeRepository } from '../domain/interfaces/achievement-type-repository.interface.js';
 
 @Injectable()

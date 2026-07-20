@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { UserModule } from '../../platform/user/index.js';
+import { UserModule } from '../../platform/user/user.module.js';
 import { TeacherController } from './presentation/teacher.controller.js';
 import { TeacherAddressController } from './presentation/teacher-address.controller.js';
 import { TeacherPositionsController } from './presentation/teacher-position.controller.js';

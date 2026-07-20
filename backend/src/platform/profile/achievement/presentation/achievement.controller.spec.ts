@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { CreateAchievementDto } from '../dto/create-achievement.dto.js';
-import { UpdateAchievementDto } from '../dto/update-achievement.dto.js';
+import { CreateAchievementDto } from '../dto/request/create-achievement.dto.js';
+import { UpdateAchievementDto } from '../dto/request/update-achievement.dto.js';
 import { CreateAchievementUseCase } from '../use-cases/create-achievement.use-case.js';
 import { GetAchievementsUseCase } from '../use-cases/get-achievements.use-case.js';
 import { GetAchievementByIdUseCase } from '../use-cases/get-achievement-by-id.use-case.js';

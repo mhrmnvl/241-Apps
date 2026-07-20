@@ -23,13 +23,13 @@ import {
 
 import { JwtAuthGuard } from '../../../auth/index.js';
 
-import { CreateSocialMediaDto } from '../dto/create-social-media.dto.js';
-import { SocialMediaQueryDto } from '../dto/social-media-query.dto.js';
+import { CreateSocialMediaDto } from '../dto/request/create-social-media.dto.js';
+import { SocialMediaQueryDto } from '../dto/request/social-media-query.dto.js';
 import {
   SocialMediaListResponseDto,
   SocialMediaResponseDto,
-} from '../dto/social-media-response.dto.js';
-import { UpdateSocialMediaDto } from '../dto/update-social-media.dto.js';
+} from '../dto/response/social-media-response.dto.js';
+import { UpdateSocialMediaDto } from '../dto/request/update-social-media.dto.js';
 import { CreateSocialMediaUseCase } from '../use-cases/create-social-media.use-case.js';
 import { DeleteSocialMediaUseCase } from '../use-cases/delete-social-media.use-case.js';
 import { GetSocialMediaByIdUseCase } from '../use-cases/get-social-media-by-id.use-case.js';

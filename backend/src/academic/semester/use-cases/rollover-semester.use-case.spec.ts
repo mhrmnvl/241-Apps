@@ -1,6 +1,6 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { RolloverSemesterDto } from '../dto/rollover-semester.dto.js';
+import { RolloverSemesterDto } from '../dto/request/rollover-semester.dto.js';
 import { IRolloverRepository } from '../domain/interfaces/rollover-repository.interface.js';
 import { RolloverSemesterUseCase } from './rollover-semester.use-case.js';
 

@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AuthModule } from '../platform/auth/auth.module.js';
+import { UserModule } from '../platform/user/user.module.js';
 import { IAdmissionAnnouncementRepository } from './domain/interfaces/admission-announcement-repository.interface.js';
 import { IAdmissionApplicantRepository } from './domain/interfaces/admission-applicant-repository.interface.js';
 import { IAdmissionApplicationRepository } from './domain/interfaces/admission-application-repository.interface.js';
@@ -50,7 +51,7 @@ import { VerifyDocumentUseCase } from './use-cases/verify-document.use-case.js';
 import { VerifyPaymentUseCase } from './use-cases/verify-payment.use-case.js';
 
 @Module({
-  imports: [AuthModule],
+  imports: [AuthModule, UserModule],
   controllers: [
     // Registration order matters: 'waves/active' must match before 'waves/:id'.
     AdmissionPublicController,

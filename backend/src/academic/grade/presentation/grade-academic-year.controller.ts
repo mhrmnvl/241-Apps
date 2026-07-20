@@ -21,7 +21,7 @@ import {
 import { JwtAuthGuard } from '../../../platform/auth/index.js';
 import { CurrentUser } from '../../../core/decorators/current-user.decorator.js';
 import type { AuthenticatedUser } from '../../../core/types/authenticated-user.type.js';
-import { AssignCurriculumToGradeDto } from '../dto/assign-curriculum-to-grade.dto.js';
+import { AssignCurriculumToGradeDto } from '../dto/request/assign-curriculum-to-grade.dto.js';
 import { AssignCurriculumToGradeUseCase } from '../use-cases/assign-curriculum-to-grade.use-case.js';
 import { GetGradeAcademicYearsUseCase } from '../use-cases/get-grade-academic-years.use-case.js';
 import { RemoveCurriculumFromGradeUseCase } from '../use-cases/remove-curriculum-from-grade.use-case.js';

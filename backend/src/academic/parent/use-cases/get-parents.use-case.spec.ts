@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ParentQueryDto } from '../dto/parent-query.dto.js';
+import { ParentQueryDto } from '../dto/request/parent-query.dto.js';
 import { ParentRepository } from '../repositories/parent.repository.js';
 import { GetParentsUseCase } from './get-parents.use-case.js';
 

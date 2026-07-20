@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { CreateAcademicYearDto } from '../dto/create-academic-year.dto.js';
-import { UpdateAcademicYearDto } from '../dto/update-academic-year.dto.js';
-import { AcademicYearQueryDto } from '../dto/academic-year-query.dto.js';
+import { CreateAcademicYearDto } from '../dto/request/create-academic-year.dto.js';
+import { UpdateAcademicYearDto } from '../dto/request/update-academic-year.dto.js';
+import { AcademicYearQueryDto } from '../dto/request/academic-year-query.dto.js';
 import { CreateAcademicYearUseCase } from '../use-cases/create-academic-year.use-case.js';
 import { DeleteAcademicYearUseCase } from '../use-cases/delete-academic-year.use-case.js';
 import { GetAcademicYearByIdUseCase } from '../use-cases/get-academic-year-by-id.use-case.js';

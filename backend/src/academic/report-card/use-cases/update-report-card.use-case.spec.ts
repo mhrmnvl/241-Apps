@@ -1,6 +1,6 @@
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { UpdateReportCardDto } from '../dto/update-report-card.dto.js';
+import { UpdateReportCardDto } from '../dto/request/update-report-card.dto.js';
 import { IReportCardRepository } from '../domain/interfaces/report-card-repository.interface.js';
 import { UpdateReportCardUseCase } from './update-report-card.use-case.js';
 

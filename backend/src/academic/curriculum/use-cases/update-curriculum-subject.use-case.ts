@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { ICurriculumSubjectRepository } from '../domain/interfaces/curriculum-subject-repository.interface.js';
-import { UpdateCurriculumSubjectDto } from '../dto/update-curriculum-subject.dto.js';
+import { UpdateCurriculumSubjectDto } from '../dto/request/update-curriculum-subject.dto.js';
 
 @Injectable()
 export class UpdateCurriculumSubjectUseCase {

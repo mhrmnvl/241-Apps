@@ -1,5 +1,5 @@
 import { ConflictException, Injectable, Logger } from '@nestjs/common';
-import { CreateAcademicYearDto } from '../dto/create-academic-year.dto.js';
+import { CreateAcademicYearDto } from '../dto/request/create-academic-year.dto.js';
 import { IAcademicYearRepository } from '../domain/interfaces/academic-year-repository.interface.js';
 
 @Injectable()

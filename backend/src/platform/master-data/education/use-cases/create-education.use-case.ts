@@ -1,5 +1,5 @@
 import { ConflictException, Injectable, Logger } from '@nestjs/common';
-import { CreateEducationDto } from '../dto/create-education.dto.js';
+import { CreateEducationDto } from '../dto/request/create-education.dto.js';
 import { IEducationRepository } from '../interfaces/education-repository.interface.js';
 
 @Injectable()

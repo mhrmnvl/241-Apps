@@ -1,5 +1,5 @@
 import { ConflictException, Injectable, Logger } from '@nestjs/common';
-import { CreateEmploymentTypeDto } from '../dto/create-employment-type.dto.js';
+import { CreateEmploymentTypeDto } from '../dto/request/create-employment-type.dto.js';
 import { IEmploymentTypeRepository } from '../interfaces/employment-type-repository.interface.js';
 
 @Injectable()

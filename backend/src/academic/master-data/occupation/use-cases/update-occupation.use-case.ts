@@ -4,7 +4,7 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { UpdateOccupationDto } from '../dto/update-occupation.dto.js';
+import { UpdateOccupationDto } from '../dto/request/update-occupation.dto.js';
 import { IOccupationRepository } from '../interfaces/occupation-repository.interface.js';
 
 @Injectable()

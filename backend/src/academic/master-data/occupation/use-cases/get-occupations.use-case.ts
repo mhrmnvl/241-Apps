@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { OccupationQueryDto } from '../dto/occupation-query.dto.js';
+import { OccupationQueryDto } from '../dto/request/occupation-query.dto.js';
 import { IOccupationRepository } from '../interfaces/occupation-repository.interface.js';
 
 @Injectable()

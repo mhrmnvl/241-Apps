@@ -1,6 +1,6 @@
 ﻿import { Test, TestingModule } from '@nestjs/testing';
-import { CreateScholarshipDto } from '../dto/create-scholarship.dto.js';
-import { UpdateScholarshipDto } from '../dto/update-scholarship.dto.js';
+import { CreateScholarshipDto } from '../dto/request/create-scholarship.dto.js';
+import { UpdateScholarshipDto } from '../dto/request/update-scholarship.dto.js';
 import { CreateScholarshipUseCase } from '../use-cases/create-scholarship.use-case.js';
 import { GetScholarshipsUseCase } from '../use-cases/get-scholarships.use-case.js';
 import { GetScholarshipByIdUseCase } from '../use-cases/get-scholarship-by-id.use-case.js';

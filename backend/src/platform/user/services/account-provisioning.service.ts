@@ -15,7 +15,7 @@ export interface ProvisionAccountInput {
   identifier: string;
   passwordHash: string;
   roleCode?: string;
-  profile: ProvisionAccountProfileInput;
+  profile?: ProvisionAccountProfileInput;
 }
 
 @Injectable()
@@ -28,7 +28,7 @@ export class AccountProvisioningService {
       data: {
         identifier: input.identifier,
         passwordHash: input.passwordHash,
-        profile: { create: input.profile },
+        ...(input.profile && { profile: { create: input.profile } }),
       },
     });
 

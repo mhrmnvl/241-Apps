@@ -9,9 +9,9 @@ import {
 
 import { JwtAuthGuard } from '../../auth/index.js';
 
-import { SchoolUnitResponseDto } from '../dto/school-unit-response.dto.js';
-import { CreateSchoolUnitDto } from '../dto/create-school-unit.dto.js';
-import { UpdateSchoolUnitDto } from '../dto/update-school-unit.dto.js';
+import { SchoolUnitResponseDto } from '../dto/response/school-unit-response.dto.js';
+import { CreateSchoolUnitDto } from '../dto/request/create-school-unit.dto.js';
+import { UpdateSchoolUnitDto } from '../dto/request/update-school-unit.dto.js';
 import { GetSchoolUnitUseCase } from '../use-cases/get-school-unit.use-case.js';
 import { SetupSchoolUnitUseCase } from '../use-cases/setup-school-unit.use-case.js';
 import { UpdateSchoolUnitUseCase } from '../use-cases/update-school-unit.use-case.js';

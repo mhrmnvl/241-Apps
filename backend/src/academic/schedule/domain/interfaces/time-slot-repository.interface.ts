@@ -1,6 +1,6 @@
 import { Prisma, TimeSlot } from '@prisma/client';
-import { CreateTimeSlotDto } from '../../dto/create-time-slot.dto.js';
-import { UpdateTimeSlotDto } from '../../dto/update-time-slot.dto.js';
+import { CreateTimeSlotDto } from '../../dto/request/create-time-slot.dto.js';
+import { UpdateTimeSlotDto } from '../../dto/request/update-time-slot.dto.js';
 
 export const TIME_SLOT_INCLUDE = {
   type: true,

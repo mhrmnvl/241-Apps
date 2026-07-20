@@ -1,7 +1,7 @@
 import { Occupation, Prisma } from '@prisma/client';
-import { CreateOccupationDto } from '../dto/create-occupation.dto.js';
-import { UpdateOccupationDto } from '../dto/update-occupation.dto.js';
-import { OccupationQueryDto } from '../dto/occupation-query.dto.js';
+import { CreateOccupationDto } from '../dto/request/create-occupation.dto.js';
+import { UpdateOccupationDto } from '../dto/request/update-occupation.dto.js';
+import { OccupationQueryDto } from '../dto/request/occupation-query.dto.js';
 import { PaginatedResult } from '../../../../shared/domain/interfaces/repository.interface.js';
 
 export const OCCUPATION_INCLUDE = {

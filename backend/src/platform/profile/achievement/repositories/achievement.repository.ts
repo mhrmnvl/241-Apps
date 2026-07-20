@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
-import { AchievementQueryDto } from '../dto/achievement-query.dto.js';
-import { CreateAchievementDto } from '../dto/create-achievement.dto.js';
-import { UpdateAchievementDto } from '../dto/update-achievement.dto.js';
+import { AchievementQueryDto } from '../dto/request/achievement-query.dto.js';
+import { CreateAchievementDto } from '../dto/request/create-achievement.dto.js';
+import { UpdateAchievementDto } from '../dto/request/update-achievement.dto.js';
 
 export const ACHIEVEMENT_INCLUDE = {
   profile: {

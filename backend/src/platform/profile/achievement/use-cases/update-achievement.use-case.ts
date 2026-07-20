@@ -1,6 +1,6 @@
 ﻿import { Injectable, NotFoundException } from '@nestjs/common';
 import { AchievementRepository } from '../repositories/achievement.repository.js';
-import { UpdateAchievementDto } from '../dto/update-achievement.dto.js';
+import { UpdateAchievementDto } from '../dto/request/update-achievement.dto.js';
 
 @Injectable()
 export class UpdateAchievementUseCase {

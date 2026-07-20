@@ -25,15 +25,15 @@ import { JwtAuthGuard } from '../../../../platform/auth/index.js';
 import { CurrentUser } from '../../../../core/decorators/current-user.decorator.js';
 import type { AuthenticatedUser } from '../../../../core/types/authenticated-user.type.js';
 
-import { EmploymentTypeQueryDto } from '../dto/employment-type-query.dto.js';
+import { EmploymentTypeQueryDto } from '../dto/request/employment-type-query.dto.js';
 import {
   EmploymentTypeListResponseDto,
   EmploymentTypeResponseDto,
-} from '../dto/employment-type-response.dto.js';
+} from '../dto/response/employment-type-response.dto.js';
 import {
   CreateEmploymentTypeDto,
   UpdateEmploymentTypeDto,
-} from '../dto/create-employment-type.dto.js';
+} from '../dto/request/create-employment-type.dto.js';
 
 import { CreateEmploymentTypeUseCase } from '../use-cases/create-employment-type.use-case.js';
 import { GetEmploymentTypesUseCase } from '../use-cases/get-employment-types.use-case.js';

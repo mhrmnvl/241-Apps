@@ -4,7 +4,7 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { UpdateClassroomDto } from '../dto/update-classroom.dto.js';
+import { UpdateClassroomDto } from '../dto/request/update-classroom.dto.js';
 import { ClassroomRepository } from '../repositories/classroom.repository.js';
 import { withDisplayName } from '../../../shared/utils/classroom-display-name.helper.js';
 

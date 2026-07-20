@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { SubjectQueryDto } from '../dto/subject-query.dto.js';
+import { SubjectQueryDto } from '../dto/request/subject-query.dto.js';
 import { ISubjectRepository } from '../domain/interfaces/subject-repository.interface.js';
 import { GetSubjectsUseCase } from './get-subjects.use-case.js';
 

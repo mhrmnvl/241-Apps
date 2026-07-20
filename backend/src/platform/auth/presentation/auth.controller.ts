@@ -28,11 +28,11 @@ import {
   AuthResponseDto,
   LogoutResponseDto,
   UserInfoDto,
-} from '../dto/auth-response.dto.js';
-import { LoginDto } from '../dto/login.dto.js';
-import { ChangePasswordDto } from '../dto/change-password.dto.js';
-import { ForgotPasswordDto } from '../dto/forgot-password.dto.js';
-import { ResetPasswordDto } from '../dto/reset-password.dto.js';
+} from '../dto/response/auth-response.dto.js';
+import { LoginDto } from '../dto/request/login.dto.js';
+import { ChangePasswordDto } from '../dto/request/change-password.dto.js';
+import { ForgotPasswordDto } from '../dto/request/forgot-password.dto.js';
+import { ResetPasswordDto } from '../dto/request/reset-password.dto.js';
 import { GetProfileUseCase } from '../use-cases/get-profile.use-case.js';
 import { LoginUseCase } from '../use-cases/login.use-case.js';
 import { LogoutUseCase } from '../use-cases/logout.use-case.js';

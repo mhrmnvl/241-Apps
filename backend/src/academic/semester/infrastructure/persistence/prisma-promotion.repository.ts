@@ -6,7 +6,7 @@ import {
   StudentPromotionInput,
   PromotionResult,
 } from '../../domain/interfaces/promotion-repository.interface.js';
-import { PromotionAction } from '../../dto/promotion.dto.js';
+import { PromotionAction } from '../../dto/request/promotion.dto.js';
 
 @Injectable()
 export class PrismaPromotionRepository implements IPromotionRepository {

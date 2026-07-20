@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { StudentQueryDto } from '../dto/student-query.dto.js';
+import { StudentQueryDto } from '../dto/request/student-query.dto.js';
 import { StudentRepository } from '../repositories/student.repository.js';
 import { GetStudentsUseCase } from './get-students.use-case.js';
 

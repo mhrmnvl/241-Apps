@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { StudentEnrollmentQueryDto } from '../dto/student-enrollment-query.dto.js';
+import { StudentEnrollmentQueryDto } from '../dto/request/student-enrollment-query.dto.js';
 import { IEnrollmentRepository } from '../domain/interfaces/enrollment-repository.interface.js';
 
 @Injectable()

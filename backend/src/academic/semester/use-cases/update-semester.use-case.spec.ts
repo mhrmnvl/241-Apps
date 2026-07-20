@@ -3,7 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ISemesterRepository } from '../domain/interfaces/semester-repository.interface.js';
 import { IAcademicYearRepository } from '../../academic-year/index.js';
 import { UpdateSemesterUseCase } from './update-semester.use-case.js';
-import { UpdateSemesterDto } from '../dto/update-semester.dto.js';
+import { UpdateSemesterDto } from '../dto/request/update-semester.dto.js';
 
 describe('UpdateSemesterUseCase', () => {
   let useCase: UpdateSemesterUseCase;

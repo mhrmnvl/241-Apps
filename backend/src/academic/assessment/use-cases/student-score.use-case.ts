@@ -10,7 +10,7 @@ import {
   CreateStudentScoreDto,
   UpdateStudentScoreDto,
   StudentScoreQueryDto,
-} from '../dto/student-score.dto.js';
+} from '../dto/request/student-score.dto.js';
 
 @Injectable()
 export class GetStudentScoresUseCase {

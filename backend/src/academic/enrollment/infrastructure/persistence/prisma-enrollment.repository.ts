@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { EnrollmentStatus, Prisma, StudentEnrollment } from '@prisma/client';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
-import { StudentEnrollmentQueryDto } from '../../dto/student-enrollment-query.dto.js';
+import { StudentEnrollmentQueryDto } from '../../dto/request/student-enrollment-query.dto.js';
 import { resolveSemesterId } from '../../../../shared/utils/active-academic-year.helper.js';
 import {
   IEnrollmentRepository,

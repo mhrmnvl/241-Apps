@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { AnnouncementQueryDto } from '../dto/announcement-query.dto.js';
+import { AnnouncementQueryDto } from '../dto/request/announcement-query.dto.js';
 import { AnnouncementRepository } from '../repositories/announcement.repository.js';
 import { GetAnnouncementsUseCase } from './get-announcements.use-case.js';
 

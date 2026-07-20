@@ -1,5 +1,5 @@
 ﻿import { Injectable } from '@nestjs/common';
-import { AnnouncementQueryDto } from '../dto/announcement-query.dto.js';
+import { AnnouncementQueryDto } from '../dto/request/announcement-query.dto.js';
 import { AnnouncementRepository } from '../repositories/announcement.repository.js';
 
 @Injectable()

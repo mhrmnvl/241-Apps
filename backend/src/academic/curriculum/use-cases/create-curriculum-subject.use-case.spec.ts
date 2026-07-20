@@ -1,6 +1,6 @@
 import { ConflictException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { CreateCurriculumSubjectDto } from '../dto/create-curriculum-subject.dto.js';
+import { CreateCurriculumSubjectDto } from '../dto/request/create-curriculum-subject.dto.js';
 import { ICurriculumSubjectRepository } from '../domain/interfaces/curriculum-subject-repository.interface.js';
 import { CreateCurriculumSubjectUseCase } from './create-curriculum-subject.use-case.js';
 

@@ -1,6 +1,6 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 import { ICurriculumSubjectRepository } from '../domain/interfaces/curriculum-subject-repository.interface.js';
-import { CreateCurriculumSubjectDto } from '../dto/create-curriculum-subject.dto.js';
+import { CreateCurriculumSubjectDto } from '../dto/request/create-curriculum-subject.dto.js';
 
 @Injectable()
 export class CreateCurriculumSubjectUseCase {

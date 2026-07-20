@@ -25,13 +25,13 @@ import { JwtAuthGuard } from '../../../platform/auth/index.js';
 import { CurrentUser } from '../../../core/decorators/current-user.decorator.js';
 import type { AuthenticatedUser } from '../../../core/types/authenticated-user.type.js';
 
-import { SubjectQueryDto } from '../dto/subject-query.dto.js';
-import { CreateSubjectDto } from '../dto/create-subject.dto.js';
-import { UpdateSubjectDto } from '../dto/update-subject.dto.js';
+import { SubjectQueryDto } from '../dto/request/subject-query.dto.js';
+import { CreateSubjectDto } from '../dto/request/create-subject.dto.js';
+import { UpdateSubjectDto } from '../dto/request/update-subject.dto.js';
 import {
   SubjectListResponseDto,
   SubjectResponseDto,
-} from '../dto/subject-response.dto.js';
+} from '../dto/response/subject-response.dto.js';
 import { CreateSubjectUseCase } from '../use-cases/create-subject.use-case.js';
 import { DeleteSubjectUseCase } from '../use-cases/delete-subject.use-case.js';
 import { GetSubjectByIdUseCase } from '../use-cases/get-subject-by-id.use-case.js';

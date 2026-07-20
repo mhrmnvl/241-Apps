@@ -15,9 +15,9 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { JwtAuthGuard } from '../../../auth/index.js';
 
-import { CreateEducationalHistoryDto } from '../dto/create-educational-history.dto.js';
-import { EducationalHistoryQueryDto } from '../dto/educational-history-query.dto.js';
-import { UpdateEducationalHistoryDto } from '../dto/update-educational-history.dto.js';
+import { CreateEducationalHistoryDto } from '../dto/request/create-educational-history.dto.js';
+import { EducationalHistoryQueryDto } from '../dto/request/educational-history-query.dto.js';
+import { UpdateEducationalHistoryDto } from '../dto/request/update-educational-history.dto.js';
 import { CreateEducationalHistoryUseCase } from '../use-cases/create-educational-history.use-case.js';
 import { DeleteEducationalHistoryUseCase } from '../use-cases/delete-educational-history.use-case.js';
 import { GetEducationalHistoriesUseCase } from '../use-cases/get-educational-histories.use-case.js';

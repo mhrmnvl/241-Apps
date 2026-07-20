@@ -1,5 +1,5 @@
 import { Prisma, ReportCard } from '@prisma/client';
-import { ReportCardQueryDto } from '../../dto/report-card-query.dto.js';
+import { ReportCardQueryDto } from '../../dto/request/report-card-query.dto.js';
 import { PaginatedResult } from '../../../../shared/domain/interfaces/repository.interface.js';
 
 export const RAPOR_INCLUDE = {

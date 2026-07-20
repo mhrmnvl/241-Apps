@@ -1,9 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma, StudentGraduation, StudentStatus } from '@prisma/client';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
-import { CreateStudentGraduationDto } from '../../dto/create-student-graduation.dto.js';
-import { StudentGraduationQueryDto } from '../../dto/student-graduation-query.dto.js';
-import { UpdateStudentGraduationDto } from '../../dto/update-student-graduation.dto.js';
+import { CreateStudentGraduationDto } from '../../dto/request/create-student-graduation.dto.js';
+import { StudentGraduationQueryDto } from '../../dto/request/student-graduation-query.dto.js';
+import { UpdateStudentGraduationDto } from '../../dto/request/update-student-graduation.dto.js';
 import { resolveAcademicYearId } from '../../../../shared/utils/active-academic-year.helper.js';
 import {
   IGraduationRepository,

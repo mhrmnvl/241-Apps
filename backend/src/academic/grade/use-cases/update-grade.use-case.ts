@@ -4,7 +4,7 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { UpdateGradeDto } from '../dto/update-grade.dto.js';
+import { UpdateGradeDto } from '../dto/request/update-grade.dto.js';
 import { IGradeRepository } from '../domain/interfaces/grade-repository.interface.js';
 
 @Injectable()

@@ -1,5 +1,5 @@
 import { Prisma, Semester, SemesterType } from '@prisma/client';
-import { SemesterQueryDto } from '../../dto/semester-query.dto.js';
+import { SemesterQueryDto } from '../../dto/request/semester-query.dto.js';
 import { PaginatedResult } from '../../../../shared/domain/interfaces/repository.interface.js';
 
 export const SEMESTER_INCLUDE = {

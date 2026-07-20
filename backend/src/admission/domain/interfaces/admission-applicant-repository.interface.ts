@@ -26,7 +26,6 @@ export interface RegisterApplicantInput {
   wave: AdmissionWave;
   identifier: string;
   passwordHash: string;
-  applicantRoleId: string;
   fullName: string;
   phone: string | null;
 }

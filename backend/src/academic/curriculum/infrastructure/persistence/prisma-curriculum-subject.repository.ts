@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
-import { CurriculumSubjectQueryDto } from '../../dto/curriculum-subject-query.dto.js';
+import { CurriculumSubjectQueryDto } from '../../dto/request/curriculum-subject-query.dto.js';
 import {
   ICurriculumSubjectRepository,
   CURRICULUM_SUBJECT_INCLUDE,

@@ -1,5 +1,5 @@
 import { AchievementType, Prisma } from '@prisma/client';
-import { AchievementTypeQueryDto } from '../../dto/achievement-type-query.dto.js';
+import { AchievementTypeQueryDto } from '../../dto/request/achievement-type-query.dto.js';
 import { PaginatedResult } from '../../../../../shared/domain/interfaces/repository.interface.js';
 
 export abstract class IAchievementTypeRepository {

@@ -21,10 +21,10 @@ import {
 import { JwtAuthGuard } from '../../../platform/auth/index.js';
 import { CurrentUser } from '../../../core/decorators/current-user.decorator.js';
 import type { AuthenticatedUser } from '../../../core/types/authenticated-user.type.js';
-import { GradeQueryDto } from '../dto/grade-query.dto.js';
-import { GradeResponseDto } from '../dto/grade-response.dto.js';
-import { CreateGradeDto } from '../dto/create-grade.dto.js';
-import { UpdateGradeDto } from '../dto/update-grade.dto.js';
+import { GradeQueryDto } from '../dto/request/grade-query.dto.js';
+import { GradeResponseDto } from '../dto/response/grade-response.dto.js';
+import { CreateGradeDto } from '../dto/request/create-grade.dto.js';
+import { UpdateGradeDto } from '../dto/request/update-grade.dto.js';
 import { CreateGradeUseCase } from '../use-cases/create-grade.use-case.js';
 import { DeleteGradeUseCase } from '../use-cases/delete-grade.use-case.js';
 import { GetGradeByIdUseCase } from '../use-cases/get-grade-by-id.use-case.js';

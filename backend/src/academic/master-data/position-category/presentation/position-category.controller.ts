@@ -23,15 +23,15 @@ import {
 
 import { JwtAuthGuard } from '../../../../platform/auth/index.js';
 
-import { PositionCategoryQueryDto } from '../dto/position-category-query.dto.js';
+import { PositionCategoryQueryDto } from '../dto/request/position-category-query.dto.js';
 import {
   PositionCategoryListResponseDto,
   PositionCategoryResponseDto,
-} from '../dto/position-category-response.dto.js';
+} from '../dto/response/position-category-response.dto.js';
 import {
   CreatePositionCategoryDto,
   UpdatePositionCategoryDto,
-} from '../dto/create-position-category.dto.js';
+} from '../dto/request/create-position-category.dto.js';
 
 import { CreatePositionCategoryUseCase } from '../use-cases/create-position-category.use-case.js';
 import { GetPositionCategoriesUseCase } from '../use-cases/get-position-categories.use-case.js';

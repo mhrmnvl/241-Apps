@@ -8,7 +8,7 @@ import {
   SemesterWithDetails,
   CreateSemesterRepositoryInput,
 } from '../../domain/interfaces/semester-repository.interface.js';
-import { SemesterQueryDto } from '../../dto/semester-query.dto.js';
+import { SemesterQueryDto } from '../../dto/request/semester-query.dto.js';
 import { PaginatedResult } from '../../../../shared/domain/interfaces/repository.interface.js';
 
 @Injectable()

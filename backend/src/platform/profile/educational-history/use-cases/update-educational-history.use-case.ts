@@ -1,6 +1,6 @@
 ﻿import { Injectable, NotFoundException } from '@nestjs/common';
 import { EducationalHistoryRepository } from '../repositories/educational-history.repository.js';
-import { UpdateEducationalHistoryDto } from '../dto/update-educational-history.dto.js';
+import { UpdateEducationalHistoryDto } from '../dto/request/update-educational-history.dto.js';
 
 @Injectable()
 export class UpdateEducationalHistoryUseCase {

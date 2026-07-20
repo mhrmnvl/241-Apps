@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
-import { EducationQueryDto } from '../dto/education-query.dto.js';
+import { EducationQueryDto } from '../dto/request/education-query.dto.js';
 import { IEducationRepository } from '../interfaces/education-repository.interface.js';
 
 @Injectable()

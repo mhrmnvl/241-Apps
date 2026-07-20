@@ -12,7 +12,7 @@ import {
   AttendanceQueryDto,
   BulkUpsertAttendanceDto,
   AttendanceRecapQueryDto,
-} from '../dto/attendance.dto.js';
+} from '../dto/request/attendance.dto.js';
 
 @Injectable()
 export class GetAttendancesUseCase {

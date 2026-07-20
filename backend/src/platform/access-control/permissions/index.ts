@@ -5,6 +5,6 @@ export {
   RequirePermissions,
   PERMISSIONS_KEY,
 } from './decorators/require-permissions.decorator.js';
-export { PermissionResponseDto } from './dto/permission-response.dto.js';
-export { AssignPermissionDto } from './dto/assign-permission.dto.js';
+export { PermissionResponseDto } from './dto/response/permission-response.dto.js';
+export { AssignPermissionDto } from './dto/request/assign-permission.dto.js';
 export type { SystemPermission } from './types/system-permission.type.js';

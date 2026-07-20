@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { IConditionRepository } from '../domain/interfaces/condition-repository.interface.js';
-import { CreateConditionDto } from '../dto/condition.dto.js';
+import { CreateConditionDto } from '../dto/request/condition.dto.js';
 
 @Injectable()
 export class CreateConditionUseCase {

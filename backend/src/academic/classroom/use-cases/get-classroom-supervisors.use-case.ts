@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { ClassroomSupervisorQueryDto } from '../dto/classroom-supervisor-query.dto.js';
+import { ClassroomSupervisorQueryDto } from '../dto/request/classroom-supervisor-query.dto.js';
 import { ClassroomSupervisorsRepository } from '../repositories/classroom-supervisors.repository.js';
 
 @Injectable()

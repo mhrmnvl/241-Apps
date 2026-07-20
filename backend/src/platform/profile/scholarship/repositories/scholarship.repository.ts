@@ -1,9 +1,9 @@
 ﻿import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
-import { CreateScholarshipDto } from '../dto/create-scholarship.dto.js';
-import { ScholarshipQueryDto } from '../dto/scholarship-query.dto.js';
-import { UpdateScholarshipDto } from '../dto/update-scholarship.dto.js';
+import { CreateScholarshipDto } from '../dto/request/create-scholarship.dto.js';
+import { ScholarshipQueryDto } from '../dto/request/scholarship-query.dto.js';
+import { UpdateScholarshipDto } from '../dto/request/update-scholarship.dto.js';
 
 export const SCHOLARSHIP_INCLUDE = {
   profile: {

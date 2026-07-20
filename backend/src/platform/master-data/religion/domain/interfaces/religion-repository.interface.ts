@@ -1,5 +1,5 @@
 import { Religion, Prisma } from '@prisma/client';
-import { ReligionQueryDto } from '../../dto/religion-query.dto.js';
+import { ReligionQueryDto } from '../../dto/request/religion-query.dto.js';
 import { PaginatedResult } from '../../../../../shared/domain/interfaces/repository.interface.js';
 
 export abstract class IReligionRepository {

@@ -4,7 +4,7 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { UpdateReligionDto } from '../dto/update-religion.dto.js';
+import { UpdateReligionDto } from '../dto/request/update-religion.dto.js';
 import { IReligionRepository } from '../domain/interfaces/religion-repository.interface.js';
 
 @Injectable()

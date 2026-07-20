@@ -1,5 +1,5 @@
 import { ConflictException, Injectable } from '@nestjs/common';
-import { CreateStudentEnrollmentDto } from '../dto/create-student-enrollment.dto.js';
+import { CreateStudentEnrollmentDto } from '../dto/request/create-student-enrollment.dto.js';
 import { IEnrollmentRepository } from '../domain/interfaces/enrollment-repository.interface.js';
 
 @Injectable()

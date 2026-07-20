@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { IFundingSourceRepository } from '../domain/interfaces/funding-source-repository.interface.js';
-import { CreateFundingSourceDto } from '../dto/funding-source.dto.js';
+import { CreateFundingSourceDto } from '../dto/request/funding-source.dto.js';
 
 @Injectable()
 export class CreateFundingSourceUseCase {

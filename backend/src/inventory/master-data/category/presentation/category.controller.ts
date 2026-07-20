@@ -19,7 +19,10 @@ import { GetCategoriesUseCase } from '../use-cases/get-categories.use-case.js';
 import { CreateCategoryUseCase } from '../use-cases/create-category.use-case.js';
 import { UpdateCategoryUseCase } from '../use-cases/update-category.use-case.js';
 import { DeleteCategoryUseCase } from '../use-cases/delete-category.use-case.js';
-import { CreateCategoryDto, UpdateCategoryDto } from '../dto/category.dto.js';
+import {
+  CreateCategoryDto,
+  UpdateCategoryDto,
+} from '../dto/request/category.dto.js';
 
 @ApiTags('Inventory Categories')
 @ApiBearerAuth()

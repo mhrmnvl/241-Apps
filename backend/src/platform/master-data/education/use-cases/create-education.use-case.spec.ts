@@ -1,6 +1,6 @@
 import { ConflictException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { CreateEducationDto } from '../dto/create-education.dto.js';
+import { CreateEducationDto } from '../dto/request/create-education.dto.js';
 import { IEducationRepository } from '../interfaces/education-repository.interface.js';
 import { CreateEducationUseCase } from './create-education.use-case.js';
 

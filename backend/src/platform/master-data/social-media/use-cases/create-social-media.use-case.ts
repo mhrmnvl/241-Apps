@@ -1,5 +1,5 @@
 import { ConflictException, Injectable, Logger } from '@nestjs/common';
-import { CreateSocialMediaDto } from '../dto/create-social-media.dto.js';
+import { CreateSocialMediaDto } from '../dto/request/create-social-media.dto.js';
 import { ISocialMediaRepository } from '../interfaces/social-media-repository.interface.js';
 
 @Injectable()

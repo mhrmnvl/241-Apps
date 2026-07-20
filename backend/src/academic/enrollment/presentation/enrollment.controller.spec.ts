@@ -1,10 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { BulkCreateStudentEnrollmentDto } from '../dto/bulk-create-student-enrollment.dto.js';
-import { CreateStudentEnrollmentDto } from '../dto/create-student-enrollment.dto.js';
-import { StudentEnrollmentQueryDto } from '../dto/student-enrollment-query.dto.js';
-import { UpdateStudentEnrollmentDto } from '../dto/update-student-enrollment.dto.js';
-import { TransferStudentDto } from '../dto/transfer-student.dto.js';
-import { DropStudentDto } from '../dto/drop-student.dto.js';
+import { BulkCreateStudentEnrollmentDto } from '../dto/request/bulk-create-student-enrollment.dto.js';
+import { CreateStudentEnrollmentDto } from '../dto/request/create-student-enrollment.dto.js';
+import { StudentEnrollmentQueryDto } from '../dto/request/student-enrollment-query.dto.js';
+import { UpdateStudentEnrollmentDto } from '../dto/request/update-student-enrollment.dto.js';
+import { TransferStudentDto } from '../dto/request/transfer-student.dto.js';
+import { DropStudentDto } from '../dto/request/drop-student.dto.js';
 import { BulkCreateStudentEnrollmentUseCase } from '../use-cases/bulk-create-student-enrollment.use-case.js';
 import { BulkTransferStudentUseCase } from '../use-cases/bulk-transfer-student.use-case.js';
 import { CreateStudentEnrollmentUseCase } from '../use-cases/create-student-enrollment.use-case.js';

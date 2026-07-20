@@ -8,8 +8,8 @@ import {
   Prisma,
 } from '@prisma/client';
 import { PrismaService } from '../../../core/database/prisma.service.js';
-import { AdmissionApplicationQueryDto } from '../../dto/admission-query.dto.js';
-import { EnrollApplicantDto } from '../../dto/admin-actions.dto.js';
+import { AdmissionApplicationQueryDto } from '../../dto/request/admission-query.dto.js';
+import { EnrollApplicantDto } from '../../dto/request/admin-actions.dto.js';
 import { PaginatedResult } from '../../../shared/domain/interfaces/repository.interface.js';
 import {
   applicationAdminDetailInclude,

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Religion, Prisma } from '@prisma/client';
 import { PrismaService } from '../../../../../core/database/prisma.service.js';
-import { ReligionQueryDto } from '../../dto/religion-query.dto.js';
+import { ReligionQueryDto } from '../../dto/request/religion-query.dto.js';
 import { IReligionRepository } from '../../domain/interfaces/religion-repository.interface.js';
 import { PaginatedResult } from '../../../../../shared/domain/interfaces/repository.interface.js';
 

@@ -1,6 +1,6 @@
 ﻿import { Test, TestingModule } from '@nestjs/testing';
 import { ScholarshipStatus } from '@prisma/client';
-import { CreateScholarshipDto } from '../dto/create-scholarship.dto.js';
+import { CreateScholarshipDto } from '../dto/request/create-scholarship.dto.js';
 import { ScholarshipRepository } from '../repositories/scholarship.repository.js';
 import { CreateScholarshipUseCase } from './create-scholarship.use-case.js';
 

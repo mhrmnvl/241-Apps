@@ -1,5 +1,5 @@
 export { StudentRepository } from './repositories/student.repository.js';
-export { StudentResponseDto } from './dto/student-response.dto.js';
+export { StudentResponseDto } from './dto/response/student-response.dto.js';
 export type { RequestUser } from './types/student.types.js';
 
 // Barrel export - no cross-feature public API
