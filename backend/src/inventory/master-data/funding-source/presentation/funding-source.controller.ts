@@ -19,10 +19,8 @@ import { GetFundingSourcesUseCase } from '../use-cases/get-funding-sources.use-c
 import { CreateFundingSourceUseCase } from '../use-cases/create-funding-source.use-case.js';
 import { UpdateFundingSourceUseCase } from '../use-cases/update-funding-source.use-case.js';
 import { DeleteFundingSourceUseCase } from '../use-cases/delete-funding-source.use-case.js';
-import {
-  CreateFundingSourceDto,
-  UpdateFundingSourceDto,
-} from '../dto/request/funding-source.dto.js';
+import { CreateFundingSourceDto } from '../dto/request/create-funding-source.dto.js';
+import { UpdateFundingSourceDto } from '../dto/request/update-funding-source.dto.js';
 
 @ApiTags('Inventory Funding Sources')
 @ApiBearerAuth()

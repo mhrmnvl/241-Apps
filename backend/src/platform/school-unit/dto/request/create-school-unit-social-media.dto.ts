@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsNotEmpty,
   IsOptional,
@@ -28,7 +28,3 @@ export class CreateSchoolUnitSocialMediaDto {
   @MaxLength(255)
   url?: string;
 }
-
-export class UpdateSchoolUnitSocialMediaDto extends PartialType(
-  CreateSchoolUnitSocialMediaDto,
-) {}

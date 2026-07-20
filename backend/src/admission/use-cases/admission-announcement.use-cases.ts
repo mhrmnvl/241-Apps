@@ -1,10 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { IAdmissionAnnouncementRepository } from '../domain/interfaces/admission-announcement-repository.interface.js';
-import {
-  AdmissionAnnouncementQueryDto,
-  CreateAdmissionAnnouncementDto,
-  UpdateAdmissionAnnouncementDto,
-} from '../dto/request/admission-announcement.dto.js';
+import { AdmissionAnnouncementQueryDto } from '../dto/request/admission-announcement-query.dto.js';
+import { CreateAdmissionAnnouncementDto } from '../dto/request/create-admission-announcement.dto.js';
+import { UpdateAdmissionAnnouncementDto } from '../dto/request/update-admission-announcement.dto.js';
 
 @Injectable()
 export class GetAdmissionAnnouncementsUseCase {

@@ -1,5 +1,5 @@
 import { AssessmentItem, AssessmentType, Prisma } from '@prisma/client';
-import type { AssessmentItemQueryDto } from '../../dto/request/assessment-item.dto.js';
+import type { AssessmentItemQueryDto } from '../../dto/request/assessment-item-query.dto.js';
 import { PaginatedResult } from '../../../../shared/domain/interfaces/repository.interface.js';
 
 export const ASSESSMENT_ITEM_INCLUDE = {

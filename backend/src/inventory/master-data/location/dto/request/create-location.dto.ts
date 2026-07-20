@@ -1,4 +1,4 @@
-import { ApiProperty, PartialType } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
 
 export class CreateLocationDto {
@@ -37,5 +37,3 @@ export class CreateLocationDto {
   @IsOptional()
   description?: string;
 }
-
-export class UpdateLocationDto extends PartialType(CreateLocationDto) {}

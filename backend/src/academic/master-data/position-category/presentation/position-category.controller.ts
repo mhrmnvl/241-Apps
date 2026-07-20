@@ -28,10 +28,8 @@ import {
   PositionCategoryListResponseDto,
   PositionCategoryResponseDto,
 } from '../dto/response/position-category-response.dto.js';
-import {
-  CreatePositionCategoryDto,
-  UpdatePositionCategoryDto,
-} from '../dto/request/create-position-category.dto.js';
+import { CreatePositionCategoryDto } from '../dto/request/create-position-category.dto.js';
+import { UpdatePositionCategoryDto } from '../dto/request/update-position-category.dto.js';
 
 import { CreatePositionCategoryUseCase } from '../use-cases/create-position-category.use-case.js';
 import { GetPositionCategoriesUseCase } from '../use-cases/get-position-categories.use-case.js';

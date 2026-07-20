@@ -1,4 +1,4 @@
-import { ApiProperty, PartialType } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
 
 export class CreateFundingSourceDto {
@@ -19,7 +19,3 @@ export class CreateFundingSourceDto {
   @IsOptional()
   description?: string;
 }
-
-export class UpdateFundingSourceDto extends PartialType(
-  CreateFundingSourceDto,
-) {}

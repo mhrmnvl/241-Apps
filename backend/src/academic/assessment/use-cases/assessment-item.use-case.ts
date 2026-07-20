@@ -5,11 +5,9 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../../../core/database/prisma.service.js';
 import { IAssessmentItemsRepository } from '../domain/interfaces/assessment-items-repository.interface.js';
-import {
-  CreateAssessmentItemDto,
-  UpdateAssessmentItemDto,
-  AssessmentItemQueryDto,
-} from '../dto/request/assessment-item.dto.js';
+import { CreateAssessmentItemDto } from '../dto/request/create-assessment-item.dto.js';
+import { UpdateAssessmentItemDto } from '../dto/request/update-assessment-item.dto.js';
+import { AssessmentItemQueryDto } from '../dto/request/assessment-item-query.dto.js';
 
 @Injectable()
 export class GetAssessmentItemsUseCase {

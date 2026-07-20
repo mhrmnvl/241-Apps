@@ -19,10 +19,8 @@ import { GetConditionsUseCase } from '../use-cases/get-conditions.use-case.js';
 import { CreateConditionUseCase } from '../use-cases/create-condition.use-case.js';
 import { UpdateConditionUseCase } from '../use-cases/update-condition.use-case.js';
 import { DeleteConditionUseCase } from '../use-cases/delete-condition.use-case.js';
-import {
-  CreateConditionDto,
-  UpdateConditionDto,
-} from '../dto/request/condition.dto.js';
+import { CreateConditionDto } from '../dto/request/create-condition.dto.js';
+import { UpdateConditionDto } from '../dto/request/update-condition.dto.js';
 
 @ApiTags('Inventory Conditions')
 @ApiBearerAuth()

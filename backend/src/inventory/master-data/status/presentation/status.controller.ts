@@ -19,7 +19,8 @@ import { GetStatusesUseCase } from '../use-cases/get-statuses.use-case.js';
 import { CreateStatusUseCase } from '../use-cases/create-status.use-case.js';
 import { UpdateStatusUseCase } from '../use-cases/update-status.use-case.js';
 import { DeleteStatusUseCase } from '../use-cases/delete-status.use-case.js';
-import { CreateStatusDto, UpdateStatusDto } from '../dto/request/status.dto.js';
+import { CreateStatusDto } from '../dto/request/create-status.dto.js';
+import { UpdateStatusDto } from '../dto/request/update-status.dto.js';
 
 @ApiTags('Inventory Statuses')
 @ApiBearerAuth()

@@ -1,5 +1,4 @@
-import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
-import { Transform, Type } from 'class-transformer';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsBoolean,
   IsDateString,
@@ -12,8 +11,6 @@ import {
   MaxLength,
   Min,
 } from 'class-validator';
-import { PaginationQueryDto } from '../../../shared/dto/pagination.dto.js';
-import { toBooleanFromTransform } from '../../../shared/validators/boolean.transformer.js';
 
 export class CreateAdmissionWaveDto {
   @ApiProperty({ example: 'Gelombang 1 — 2026/2027' })
@@ -64,32 +61,4 @@ export class CreateAdmissionWaveDto {
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
-}
-
-export class UpdateAdmissionWaveDto extends PartialType(
-  CreateAdmissionWaveDto,
-) {}
-
-export class AdmissionWaveQueryDto extends PaginationQueryDto {
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  search?: string;
-
-  @ApiPropertyOptional({ format: 'uuid' })
-  @IsOptional()
-  @IsUUID()
-  academicYearId?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @Transform(toBooleanFromTransform)
-  @IsBoolean()
-  isActive?: boolean;
-}
-
-export class AdmissionWaveIdsDto {
-  @ApiProperty({ type: [String] })
-  @Type(() => String)
-  ids: string[];
 }

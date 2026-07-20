@@ -24,11 +24,9 @@ import { JwtAuthGuard } from '../../../platform/auth/index.js';
 import { CurrentUser } from '../../../core/decorators/current-user.decorator.js';
 import type { AuthenticatedUser } from '../../../core/types/authenticated-user.type.js';
 
-import {
-  CreateAssessmentItemDto,
-  UpdateAssessmentItemDto,
-  AssessmentItemQueryDto,
-} from '../dto/request/assessment-item.dto.js';
+import { CreateAssessmentItemDto } from '../dto/request/create-assessment-item.dto.js';
+import { UpdateAssessmentItemDto } from '../dto/request/update-assessment-item.dto.js';
+import { AssessmentItemQueryDto } from '../dto/request/assessment-item-query.dto.js';
 import {
   GetAssessmentItemsUseCase,
   GetAssessmentItemByIdUseCase,

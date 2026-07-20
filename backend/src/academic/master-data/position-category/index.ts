@@ -8,3 +8,4 @@ export * from './use-cases/delete-position-category.use-case.js';
 export * from './dto/request/create-position-category.dto.js';
 export * from './dto/response/position-category-response.dto.js';
 export * from './dto/request/position-category-query.dto.js';
+export * from './dto/request/update-position-category.dto.js';

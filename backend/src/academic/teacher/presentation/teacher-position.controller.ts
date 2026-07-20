@@ -25,10 +25,8 @@ import {
 import { JwtAuthGuard } from '../../../platform/auth/index.js';
 import { CurrentUser } from '../../../core/decorators/current-user.decorator.js';
 import type { AuthenticatedUser } from '../../../core/types/authenticated-user.type.js';
-import {
-  CreateTeacherPositionDto,
-  UpdateTeacherPositionDto,
-} from '../dto/request/teacher-position.dto.js';
+import { CreateTeacherPositionDto } from '../dto/request/create-teacher-position.dto.js';
+import { UpdateTeacherPositionDto } from '../dto/request/update-teacher-position.dto.js';
 import { TeacherPositionResponseDto } from '../dto/response/teacher-position-response.dto.js';
 import { TeacherPositionUseCase } from '../use-cases/teacher-position.use-case.js';
 

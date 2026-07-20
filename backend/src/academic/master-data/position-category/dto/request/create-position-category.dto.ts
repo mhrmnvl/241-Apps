@@ -14,11 +14,3 @@ export class CreatePositionCategoryDto {
   @MaxLength(100)
   name: string;
 }
-
-export class UpdatePositionCategoryDto {
-  @ApiProperty({ example: 'Management Updated', required: false })
-  @IsString()
-  @IsNotEmpty()
-  @MaxLength(100)
-  name?: string;
-}

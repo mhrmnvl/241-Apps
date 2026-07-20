@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { AdmissionAnnouncement, Prisma } from '@prisma/client';
 import { PrismaService } from '../../../core/database/prisma.service.js';
-import { AdmissionAnnouncementQueryDto } from '../../dto/request/admission-announcement.dto.js';
+import { AdmissionAnnouncementQueryDto } from '../../dto/request/admission-announcement-query.dto.js';
 import { PaginatedResult } from '../../../shared/domain/interfaces/repository.interface.js';
 import {
   AdmissionAnnouncementWithWave,

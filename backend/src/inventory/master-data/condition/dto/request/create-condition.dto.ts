@@ -1,4 +1,4 @@
-import { ApiProperty, PartialType } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 import {
   IsBoolean,
   IsNotEmpty,
@@ -25,5 +25,3 @@ export class CreateConditionDto {
   @IsOptional()
   isUsable?: boolean;
 }
-
-export class UpdateConditionDto extends PartialType(CreateConditionDto) {}

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { AssessmentType, Prisma } from '@prisma/client';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
-import { AssessmentItemQueryDto } from '../../dto/request/assessment-item.dto.js';
+import { AssessmentItemQueryDto } from '../../dto/request/assessment-item-query.dto.js';
 import {
   IAssessmentItemsRepository,
   ASSESSMENT_ITEM_INCLUDE,

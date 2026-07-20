@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { ICategoryRepository } from '../domain/interfaces/category-repository.interface.js';
-import { UpdateCategoryDto } from '../dto/request/category.dto.js';
+import { UpdateCategoryDto } from '../dto/request/update-category.dto.js';
 
 @Injectable()
 export class UpdateCategoryUseCase {

@@ -1,8 +1,6 @@
 import { PositionCategory } from '@prisma/client';
-import {
-  CreatePositionCategoryDto,
-  UpdatePositionCategoryDto,
-} from '../dto/request/create-position-category.dto.js';
+import { CreatePositionCategoryDto } from '../dto/request/create-position-category.dto.js';
+import { UpdatePositionCategoryDto } from '../dto/request/update-position-category.dto.js';
 import { PositionCategoryQueryDto } from '../dto/request/position-category-query.dto.js';
 import { PaginatedResult } from '../../../../shared/domain/interfaces/repository.interface.js';
 

@@ -19,10 +19,8 @@ import { GetLocationsUseCase } from '../use-cases/get-locations.use-case.js';
 import { CreateLocationUseCase } from '../use-cases/create-location.use-case.js';
 import { UpdateLocationUseCase } from '../use-cases/update-location.use-case.js';
 import { DeleteLocationUseCase } from '../use-cases/delete-location.use-case.js';
-import {
-  CreateLocationDto,
-  UpdateLocationDto,
-} from '../dto/request/location.dto.js';
+import { CreateLocationDto } from '../dto/request/create-location.dto.js';
+import { UpdateLocationDto } from '../dto/request/update-location.dto.js';
 
 @ApiTags('Inventory Locations')
 @ApiBearerAuth()

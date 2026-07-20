@@ -9,7 +9,6 @@ import {
   Max,
   Min,
 } from 'class-validator';
-import { PaginationQueryDto } from '../../../../shared/dto/pagination.dto.js';
 
 export class CreateStudentScoreDto {
   @ApiProperty() @IsUUID() @IsNotEmpty() enrollmentId: string;
@@ -22,20 +21,4 @@ export class CreateStudentScoreDto {
   @Max(1000)
   score?: number;
   @ApiPropertyOptional() @IsOptional() @IsString() note?: string;
-}
-
-export class UpdateStudentScoreDto {
-  @ApiPropertyOptional()
-  @IsOptional()
-  @Type(() => Number)
-  @IsNumber()
-  @Min(0)
-  @Max(1000)
-  score?: number;
-  @ApiPropertyOptional() @IsOptional() @IsString() note?: string;
-}
-
-export class StudentScoreQueryDto extends PaginationQueryDto {
-  @ApiPropertyOptional() @IsOptional() @IsUUID() enrollmentId?: string;
-  @ApiPropertyOptional() @IsOptional() @IsUUID() assessmentItemId?: string;
 }

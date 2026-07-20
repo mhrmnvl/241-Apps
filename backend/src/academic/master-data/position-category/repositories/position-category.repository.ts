@@ -1,10 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
-import {
-  CreatePositionCategoryDto,
-  UpdatePositionCategoryDto,
-} from '../dto/request/create-position-category.dto.js';
+import { CreatePositionCategoryDto } from '../dto/request/create-position-category.dto.js';
+import { UpdatePositionCategoryDto } from '../dto/request/update-position-category.dto.js';
 import { PositionCategoryQueryDto } from '../dto/request/position-category-query.dto.js';
 import { IPositionCategoryRepository } from '../interfaces/position-category-repository.interface.js';
 

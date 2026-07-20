@@ -30,10 +30,8 @@ import {
   EmploymentTypeListResponseDto,
   EmploymentTypeResponseDto,
 } from '../dto/response/employment-type-response.dto.js';
-import {
-  CreateEmploymentTypeDto,
-  UpdateEmploymentTypeDto,
-} from '../dto/request/create-employment-type.dto.js';
+import { CreateEmploymentTypeDto } from '../dto/request/create-employment-type.dto.js';
+import { UpdateEmploymentTypeDto } from '../dto/request/update-employment-type.dto.js';
 
 import { CreateEmploymentTypeUseCase } from '../use-cases/create-employment-type.use-case.js';
 import { GetEmploymentTypesUseCase } from '../use-cases/get-employment-types.use-case.js';

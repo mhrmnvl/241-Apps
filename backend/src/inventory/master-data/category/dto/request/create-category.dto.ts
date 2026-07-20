@@ -1,4 +1,4 @@
-import { ApiProperty, PartialType } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 import {
   IsNotEmpty,
   IsNumber,
@@ -27,5 +27,3 @@ export class CreateCategoryDto {
   @Max(100)
   depreciationRatePercent: number;
 }
-
-export class UpdateCategoryDto extends PartialType(CreateCategoryDto) {}

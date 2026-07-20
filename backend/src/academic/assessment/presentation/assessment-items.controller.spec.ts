@@ -1,9 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AssessmentType } from '@prisma/client';
-import {
-  CreateAssessmentItemDto,
-  UpdateAssessmentItemDto,
-} from '../dto/request/assessment-item.dto.js';
+import { CreateAssessmentItemDto } from '../dto/request/create-assessment-item.dto.js';
+import { UpdateAssessmentItemDto } from '../dto/request/update-assessment-item.dto.js';
 import {
   CreateAssessmentItemUseCase,
   DeleteAssessmentItemUseCase,

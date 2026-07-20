@@ -14,11 +14,3 @@ export class CreateEmploymentTypeDto {
   @MaxLength(100)
   name: string;
 }
-
-export class UpdateEmploymentTypeDto {
-  @ApiProperty({ example: 'Civil Servant Update', required: false })
-  @IsString()
-  @IsNotEmpty()
-  @MaxLength(100)
-  name?: string;
-}

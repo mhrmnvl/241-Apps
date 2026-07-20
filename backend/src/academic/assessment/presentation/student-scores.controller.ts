@@ -24,11 +24,9 @@ import { JwtAuthGuard } from '../../../platform/auth/index.js';
 import { CurrentUser } from '../../../core/decorators/current-user.decorator.js';
 import type { AuthenticatedUser } from '../../../core/types/authenticated-user.type.js';
 
-import {
-  CreateStudentScoreDto,
-  UpdateStudentScoreDto,
-  StudentScoreQueryDto,
-} from '../dto/request/student-score.dto.js';
+import { CreateStudentScoreDto } from '../dto/request/create-student-score.dto.js';
+import { UpdateStudentScoreDto } from '../dto/request/update-student-score.dto.js';
+import { StudentScoreQueryDto } from '../dto/request/student-score-query.dto.js';
 import {
   GetStudentScoresUseCase,
   GetStudentScoreByIdUseCase,

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ILocationRepository } from '../domain/interfaces/location-repository.interface.js';
-import { CreateLocationDto } from '../dto/request/location.dto.js';
+import { CreateLocationDto } from '../dto/request/create-location.dto.js';
 
 @Injectable()
 export class CreateLocationUseCase {

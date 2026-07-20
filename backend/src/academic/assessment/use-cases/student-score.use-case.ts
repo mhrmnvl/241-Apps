@@ -6,11 +6,9 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../../../core/database/prisma.service.js';
 import { IStudentScoresRepository } from '../domain/interfaces/student-scores-repository.interface.js';
-import {
-  CreateStudentScoreDto,
-  UpdateStudentScoreDto,
-  StudentScoreQueryDto,
-} from '../dto/request/student-score.dto.js';
+import { CreateStudentScoreDto } from '../dto/request/create-student-score.dto.js';
+import { UpdateStudentScoreDto } from '../dto/request/update-student-score.dto.js';
+import { StudentScoreQueryDto } from '../dto/request/student-score-query.dto.js';
 
 @Injectable()
 export class GetStudentScoresUseCase {

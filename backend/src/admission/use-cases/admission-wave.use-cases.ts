@@ -5,11 +5,9 @@ import {
 } from '@nestjs/common';
 import { serializeWave } from '../domain/admission.serializers.js';
 import { IAdmissionWaveRepository } from '../domain/interfaces/admission-wave-repository.interface.js';
-import {
-  AdmissionWaveQueryDto,
-  CreateAdmissionWaveDto,
-  UpdateAdmissionWaveDto,
-} from '../dto/request/admission-wave.dto.js';
+import { AdmissionWaveQueryDto } from '../dto/request/admission-wave-query.dto.js';
+import { CreateAdmissionWaveDto } from '../dto/request/create-admission-wave.dto.js';
+import { UpdateAdmissionWaveDto } from '../dto/request/update-admission-wave.dto.js';
 
 @Injectable()
 export class GetAdmissionWavesUseCase {

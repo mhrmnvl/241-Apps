@@ -1,10 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
-import {
-  CreateEmploymentTypeDto,
-  UpdateEmploymentTypeDto,
-} from '../dto/request/create-employment-type.dto.js';
+import { CreateEmploymentTypeDto } from '../dto/request/create-employment-type.dto.js';
+import { UpdateEmploymentTypeDto } from '../dto/request/update-employment-type.dto.js';
 import { EmploymentTypeQueryDto } from '../dto/request/employment-type-query.dto.js';
 import { IEmploymentTypeRepository } from '../interfaces/employment-type-repository.interface.js';
 

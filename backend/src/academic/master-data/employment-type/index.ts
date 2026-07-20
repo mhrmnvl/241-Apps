@@ -8,3 +8,4 @@ export * from './use-cases/delete-employment-type.use-case.js';
 export * from './dto/request/create-employment-type.dto.js';
 export * from './dto/response/employment-type-response.dto.js';
 export * from './dto/request/employment-type-query.dto.js';
+export * from './dto/request/update-employment-type.dto.js';

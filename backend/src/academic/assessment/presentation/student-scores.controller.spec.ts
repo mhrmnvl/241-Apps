@@ -1,8 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import {
-  CreateStudentScoreDto,
-  UpdateStudentScoreDto,
-} from '../dto/request/student-score.dto.js';
+import { CreateStudentScoreDto } from '../dto/request/create-student-score.dto.js';
+import { UpdateStudentScoreDto } from '../dto/request/update-student-score.dto.js';
 import {
   CreateStudentScoreUseCase,
   DeleteStudentScoreUseCase,

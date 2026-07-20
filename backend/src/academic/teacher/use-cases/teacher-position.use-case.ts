@@ -5,10 +5,8 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import {
-  CreateTeacherPositionDto,
-  UpdateTeacherPositionDto,
-} from '../dto/request/teacher-position.dto.js';
+import { CreateTeacherPositionDto } from '../dto/request/create-teacher-position.dto.js';
+import { UpdateTeacherPositionDto } from '../dto/request/update-teacher-position.dto.js';
 import { TeacherPositionsRepository } from '../repositories/teacher-position.repository.js';
 import { TeacherRepository } from '../index.js';
 

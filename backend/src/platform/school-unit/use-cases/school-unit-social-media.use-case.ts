@@ -4,10 +4,8 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import {
-  CreateSchoolUnitSocialMediaDto,
-  UpdateSchoolUnitSocialMediaDto,
-} from '../dto/request/school-unit-social-media.dto.js';
+import { CreateSchoolUnitSocialMediaDto } from '../dto/request/create-school-unit-social-media.dto.js';
+import { UpdateSchoolUnitSocialMediaDto } from '../dto/request/update-school-unit-social-media.dto.js';
 import { SchoolUnitSocialMediaRepository } from '../repositories/school-unit-social-media.repository.js';
 import { SchoolUnitRepository } from '../repositories/school-unit.repository.js';
 
