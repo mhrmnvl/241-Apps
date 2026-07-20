@@ -84,7 +84,6 @@ export class PrismaRolloverRepository extends IRolloverRepository {
           } else {
             const created = await tx.classroom.create({
               data: {
-                curriculumId: classroom.curriculumId,
                 academicYearId: targetAcademicYearId,
                 gradeId: classroom.gradeId,
                 code: classroom.code,

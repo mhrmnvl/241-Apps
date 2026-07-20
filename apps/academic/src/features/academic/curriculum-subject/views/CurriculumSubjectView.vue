@@ -5,11 +5,8 @@ import { createCurriculumSubjectColumns } from '../components/columns'
 import { useCurriculumSubject } from '../composables/useCurriculumSubject'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { DataTable } from '@/ui'
-import { AppCombobox } from '@/ui'
-import type { ComboboxOption } from '@/ui'
 import { Button } from '@/ui/button'
 import { Card, CardHeader, CardTitle, CardDescription } from '@/ui/card'
-import { Label } from '@/ui/label'
 import { useRoleGuard } from '@/shared/composables/useRoleGuard'
 import { ArrowLeft, Plus } from 'lucide-vue-next'
 import { onMounted, ref, watch, computed } from 'vue'
@@ -25,8 +22,6 @@ const {
   loading,
   isSaving,
   formError,
-  grades,
-  selectedGradeId,
   curriculumName,
   curriculumAcademicYear,
   fetchReferenceData,
@@ -45,14 +40,6 @@ const breadcrumbs = computed(() => [
 const isAddModalOpen = ref(false)
 const editingItem = ref<CurriculumSubject | null>(null)
 const { isAdmin } = useRoleGuard()
-
-const gradeFilterOptions = computed<ComboboxOption[]>(() => [
-  { value: '', label: 'Semua Tingkat Kelas' },
-  ...grades.value.map((c) => ({
-    value: c.id,
-    label: c.name ?? '-',
-  })),
-])
 
 const tableColumns = createCurriculumSubjectColumns({
   showActions: isAdmin.value,
@@ -91,12 +78,7 @@ watch(isAddModalOpen, (isOpen) => {
   }
 })
 
-watch(selectedGradeId, () => {
-  void fetchCurriculumSubjects(curriculumId)
-})
-
 onMounted(async () => {
-  selectedGradeId.value = ''
   await Promise.all([
     fetchReferenceData(),
     fetchCurriculumInfo(curriculumId),
@@ -142,21 +124,6 @@ onMounted(async () => {
         </CardHeader>
 
         <div class="p-6 space-y-6">
-          <div class="rounded-lg border bg-muted/20 p-4">
-            <div class="grid items-end gap-4 sm:grid-cols-1">
-              <div class="grid gap-2 max-w-xs">
-                <Label>Tingkat Kelas</Label>
-                <AppCombobox
-                  v-model="selectedGradeId"
-                  :options="gradeFilterOptions"
-                  placeholder="Pilih Tingkat Kelas"
-                  search-placeholder="Cari tingkat kelas..."
-                  empty-text="Tingkat kelas tidak ditemukan."
-                />
-              </div>
-            </div>
-          </div>
-
           <DataTable
             :columns="tableColumns"
             :data="items"

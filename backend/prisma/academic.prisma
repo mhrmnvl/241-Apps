@@ -4,12 +4,13 @@ model AcademicYear {
   isActive  Boolean   @default(false) @map("is_active")
   deletedAt DateTime? @map("deleted_at")
 
-  classrooms        Classroom[]
-  curricula         Curricula[]
-  semesters         Semester[]
-  academicCalendars AcademicCalendar[]
-  graduations       StudentGraduation[]
-  admissionWaves    AdmissionWave[]
+  classrooms          Classroom[]
+  curricula           Curricula[]
+  semesters           Semester[]
+  academicCalendars   AcademicCalendar[]
+  graduations         StudentGraduation[]
+  admissionWaves      AdmissionWave[]
+  gradeAcademicYears  GradeAcademicYear[]
 
   @@map("academic_years")
 }
@@ -63,8 +64,8 @@ model Curricula {
   deletedAt      DateTime? @map("deleted_at")
 
   academicYear       AcademicYear        @relation(fields: [academicYearId], references: [id], onDelete: Cascade)
-  classrooms         Classroom[]
   curriculumSubjects CurriculumSubject[]
+  gradeAcademicYears GradeAcademicYear[]
 
   @@index([academicYearId])
   @@map("curricula")

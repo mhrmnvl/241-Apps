@@ -5,15 +5,9 @@ import { useForm } from 'vee-validate'
 import * as z from 'zod'
 import { classroomService } from '../services/classroomService'
 import { useClassroomStore } from '../stores/classroomStore'
-import type {
-  Classroom,
-  ClassroomSavePayload,
-  Curricula,
-  AcademicYear,
-} from '../types'
+import type { Classroom, ClassroomSavePayload, AcademicYear } from '../types'
 
 export function useClassroomForm(options?: {
-  curricula?: () => Curricula[]
   academicYears?: () => AcademicYear[]
   editData?: () => Classroom | null
   onSuccess?: () => void | Promise<void>
@@ -28,7 +22,6 @@ export function useClassroomForm(options?: {
 
   const formSchema = toTypedSchema(
     z.object({
-      curriculumId: z.string().min(1, 'Kurikulum wajib dipilih.'),
       academicYearId: z.string().min(1, 'Tahun ajaran wajib dipilih.'),
       gradeId: z.string().min(1, 'Tingkat wajib dipilih.'),
       code: z.string().min(1, 'Kode kelas wajib diisi.').max(20),
@@ -48,7 +41,6 @@ export function useClassroomForm(options?: {
   const form = useForm({
     validationSchema: formSchema,
     initialValues: {
-      curriculumId: '',
       academicYearId: '',
       gradeId: '',
       code: '',
@@ -56,15 +48,6 @@ export function useClassroomForm(options?: {
       capacity: 30,
       isActive: true,
     },
-  })
-
-  const filteredCurricula = computed(() => {
-    const selectedAyId = form.values.academicYearId
-    const allCurricula = options?.curricula?.() ?? []
-    if (!selectedAyId) return allCurricula.filter((c) => c.isActive)
-    return allCurricula.filter(
-      (c) => c.academicYearId === selectedAyId && c.isActive,
-    )
   })
 
   function setDefaultAcademicYear() {
@@ -82,7 +65,6 @@ export function useClassroomForm(options?: {
     (data) => {
       if (data) {
         form.setValues({
-          curriculumId: data.curriculumId ?? '',
           academicYearId: data.academicYearId ?? '',
           gradeId: data.gradeId ?? data.classroomLevelId ?? '',
           code: data.code ?? '',
@@ -119,7 +101,6 @@ export function useClassroomForm(options?: {
   })
 
   async function executeSave(values: {
-    curriculumId: string
     academicYearId: string
     gradeId: string
     code: string
@@ -129,7 +110,6 @@ export function useClassroomForm(options?: {
   }) {
     const editItem = options?.editData?.()
     const payload: ClassroomSavePayload = {
-      curriculumId: values.curriculumId,
       academicYearId: values.academicYearId,
       gradeId: values.gradeId,
       code: values.code.trim(),
@@ -160,7 +140,6 @@ export function useClassroomForm(options?: {
     formError,
     isEditing,
     showConfirmAlert,
-    filteredCurricula,
     activeAcademicYears,
     onSubmit,
     confirmSave,

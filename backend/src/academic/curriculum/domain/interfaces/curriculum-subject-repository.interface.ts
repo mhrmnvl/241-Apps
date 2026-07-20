@@ -5,7 +5,6 @@ import { PaginatedResult } from '../../../../shared/domain/interfaces/repository
 export const CURRICULUM_SUBJECT_INCLUDE = {
   curricula: { include: { academicYear: true } },
   subject: true,
-  grade: true,
 } satisfies Prisma.CurriculumSubjectInclude;
 
 export type CurriculumSubjectWithDetails = Prisma.CurriculumSubjectGetPayload<{
@@ -21,14 +20,12 @@ export abstract class ICurriculumSubjectRepository {
 
   abstract findDuplicate(
     curriculumId: string,
-    gradeId: string,
     subjectId: string,
     excludeId?: string,
   ): Promise<CurriculumSubject | null>;
 
   abstract create(data: {
     curriculumId: string;
-    gradeId: string;
     subjectId: string;
     hoursPerWeek?: number;
   }): Promise<CurriculumSubjectWithDetails>;
@@ -40,7 +37,6 @@ export abstract class ICurriculumSubjectRepository {
 
   abstract findSoftDeleted(
     curriculumId: string,
-    gradeId: string,
     subjectId: string,
   ): Promise<CurriculumSubject | null>;
 

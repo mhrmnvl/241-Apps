@@ -8,7 +8,6 @@ export function useClassroomList() {
   const {
     classrooms,
     grades,
-    curricula,
     academicYears,
     semesters,
     totalClassrooms,
@@ -18,13 +17,11 @@ export function useClassroomList() {
   return {
     classrooms,
     grades,
-    curricula,
     academicYears,
     semesters,
     totalClassrooms,
     loading,
     fetchClassrooms: classroomService.fetchClassrooms,
-    fetchCurricula: classroomReferenceService.fetchCurricula,
     fetchAcademicYears: classroomReferenceService.fetchAcademicYears,
     fetchGrades: classroomReferenceService.fetchGrades,
     fetchSemesters: classroomReferenceService.fetchSemesters,

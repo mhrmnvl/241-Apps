@@ -11,8 +11,6 @@ export function useCurriculumSubject() {
     isSaving,
     formError,
     subjects,
-    grades,
-    selectedGradeId,
     curriculumName,
     curriculumAcademicYear,
   } = storeToRefs(store)
@@ -24,8 +22,6 @@ export function useCurriculumSubject() {
     isSaving,
     formError,
     subjects,
-    grades,
-    selectedGradeId,
     curriculumName,
     curriculumAcademicYear,
     fetchReferenceData: curriculumSubjectService.fetchReferenceData,

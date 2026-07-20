@@ -5,7 +5,6 @@ import type {
   ClassroomSupervisorAssignment,
   ClassroomEnrollment,
   AvailableStudent,
-  Curricula,
   AcademicYear,
   TeacherOption,
   Semester,
@@ -16,7 +15,6 @@ import type {
 export const useClassroomStore = defineStore('classroom', () => {
   const classrooms = ref<Classroom[]>([])
   const grades = ref<Grade[]>([])
-  const curricula = ref<Curricula[]>([])
   const academicYears = ref<AcademicYear[]>([])
   const teachers = ref<TeacherOption[]>([])
   const semesters = ref<Semester[]>([])
@@ -41,7 +39,6 @@ export const useClassroomStore = defineStore('classroom', () => {
   return {
     classrooms,
     grades,
-    curricula,
     academicYears,
     teachers,
     semesters,

@@ -1,5 +1,4 @@
 import type { AcademicYear } from '@/features/academic/academic-year'
-import type { Curricula } from '@/features/academic/curriculum'
 import type { Semester } from '@/features/academic/semester'
 
 export interface Grade {
@@ -27,20 +26,18 @@ export interface ClassroomSupervisor {
 
 export interface Classroom {
   id: string
-  curriculumId: string
   academicYearId: string
   gradeId: string
-  classroomLevelId?: string // backwards compatibility
+  classroomLevelId?: string
   code: string
   name: string | null
   displayName: string
   capacity: number
   isActive: boolean
   deletedAt?: string | null
-  curriculum?: Curricula & { academicYear?: AcademicYear }
   academicYear?: AcademicYear
   grade?: Grade
-  classroomLevel?: Grade // backwards compatibility
+  classroomLevel?: Grade
   supervisor?: ClassroomSupervisor
   supervisorAssignment?: ClassroomSupervisorAssignment
 }

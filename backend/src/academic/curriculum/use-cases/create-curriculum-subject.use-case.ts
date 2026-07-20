@@ -9,18 +9,16 @@ export class CreateCurriculumSubjectUseCase {
   async execute(dto: CreateCurriculumSubjectDto) {
     const existing = await this.repository.findDuplicate(
       dto.curriculumId,
-      dto.gradeId,
       dto.subjectId,
     );
     if (existing) {
       throw new ConflictException(
-        'This subject is already assigned to this curriculum and grade level',
+        'This subject is already assigned to this curriculum',
       );
     }
 
     const softDeleted = await this.repository.findSoftDeleted(
       dto.curriculumId,
-      dto.gradeId,
       dto.subjectId,
     );
     if (softDeleted) {
@@ -31,7 +29,6 @@ export class CreateCurriculumSubjectUseCase {
 
     return this.repository.create({
       curriculumId: dto.curriculumId,
-      gradeId: dto.gradeId,
       subjectId: dto.subjectId,
       hoursPerWeek: dto.hoursPerWeek,
     });

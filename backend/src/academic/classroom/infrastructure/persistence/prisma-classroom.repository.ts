@@ -22,7 +22,7 @@ export class PrismaClassroomRepository extends IClassroomRepository {
   ): Promise<PaginatedResult<ClassroomWithDetails>> {
     const page = Number(query.page ?? 1);
     const limit = Number(query.limit ?? 10);
-    const { curriculumId, academicYearId, gradeId, search, isActive } = query;
+    const { academicYearId, gradeId, search, isActive } = query;
     const skip = (page - 1) * limit;
 
     const resolvedAcademicYearId = academicYearId
@@ -31,7 +31,6 @@ export class PrismaClassroomRepository extends IClassroomRepository {
 
     const where: Prisma.ClassroomWhereInput = {
       deletedAt: null,
-      ...(curriculumId && { curriculumId }),
       ...(resolvedAcademicYearId && { academicYearId: resolvedAcademicYearId }),
       ...(gradeId && { gradeId }),
       ...(isActive !== undefined && { isActive }),
@@ -41,7 +40,6 @@ export class PrismaClassroomRepository extends IClassroomRepository {
           { name: { contains: search, mode: 'insensitive' } },
         ],
       }),
-      curricula: { deletedAt: null },
     };
 
     const [data, total] = await Promise.all([

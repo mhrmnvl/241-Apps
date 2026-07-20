@@ -13,18 +13,15 @@ model Subject {
 model CurriculumSubject {
   id           String    @id @default(uuid()) @db.Uuid
   curriculumId String    @map("curriculum_id") @db.Uuid
-  gradeId      String    @map("grade_id") @db.Uuid
   subjectId    String    @map("subject_id") @db.Uuid
   hoursPerWeek Int       @default(2) @map("hours_per_week")
   deletedAt    DateTime? @map("deleted_at")
 
   curricula Curricula @relation(fields: [curriculumId], references: [id])
   subject   Subject   @relation(fields: [subjectId], references: [id])
-  grade     Grade     @relation(fields: [gradeId], references: [id])
 
-  @@unique([curriculumId, gradeId, subjectId])
+  @@unique([curriculumId, subjectId])
   @@index([curriculumId])
   @@index([subjectId])
-  @@index([gradeId])
   @@map("curriculum_subjects")
 }

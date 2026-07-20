@@ -22,7 +22,6 @@ export class CreateClassroomUseCase {
     }
 
     const newClassroom = await this.repository.create({
-      curriculumId: dto.curriculumId,
       academicYearId: dto.academicYearId,
       gradeId: dto.gradeId,
       code: dto.code,

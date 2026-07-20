@@ -30,12 +30,10 @@ const classroomId = computed(() => route.params.id as string)
 const {
   classrooms,
   semesters,
-  curricula,
   academicYears,
   grades,
   fetchClassrooms,
   fetchSemesters,
-  fetchCurricula,
   fetchAcademicYears,
   fetchGrades,
 } = useClassroomList()
@@ -199,7 +197,6 @@ async function reloadData() {
     fetchSemesters(),
     fetchTeachers(),
     fetchClassroomSupervisors(classroomId.value),
-    fetchCurricula(),
     fetchAcademicYears(),
     fetchGrades(),
   ])
@@ -308,7 +305,6 @@ onMounted(async () => {
       <ClassroomFormSheet
         v-if="isAdmin && isEditInfoOpen"
         v-model:open="isEditInfoOpen"
-        :curricula="curricula"
         :academic-years="academicYears"
         :grades="grades"
         :edit-data="currentClassroom"

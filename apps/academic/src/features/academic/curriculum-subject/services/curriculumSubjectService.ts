@@ -3,7 +3,6 @@ import { useCurriculumSubjectStore } from '../stores/curriculumSubjectStore'
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
 import { toast } from 'vue-sonner'
 import { subjectApi } from '@/features/academic/subject'
-import { gradeApi } from '@/features/academic/grade'
 import { curriculaApi } from '@/features/academic/curriculum'
 import type {
   CurriculumSubjectSavePayload,
@@ -14,12 +13,8 @@ export const curriculumSubjectService = {
   fetchReferenceData: async () => {
     const store = useCurriculumSubjectStore()
     try {
-      const [subjectRes, gradeRes] = await Promise.all([
-        subjectApi.getSubjects({ limit: 100 }),
-        gradeApi.getGrades({ limit: 100 }),
-      ])
-      store.subjects = subjectRes.data?.data ?? []
-      store.grades = gradeRes.data?.data ?? []
+      const res = await subjectApi.getSubjects({ limit: 100 })
+      store.subjects = res.data?.data ?? []
     } catch (error: unknown) {
       toast.error(
         getIndonesianErrorMessage(error, 'Gagal memuat data referensi.'),
@@ -34,7 +29,6 @@ export const curriculumSubjectService = {
       const params: CurriculumSubjectQueryParams = {
         curriculumId,
         limit: 100,
-        ...(store.selectedGradeId ? { gradeId: store.selectedGradeId } : {}),
       }
 
       const res = await curriculumSubjectApi.getCurriculumSubjects(params)

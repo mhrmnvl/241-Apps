@@ -16,7 +16,6 @@ describe('UpdateCurriculumSubjectUseCase', () => {
   const existing = {
     id: 'cs-1',
     curriculumId: 'cur-1',
-    gradeId: 'lvl-7',
     subjectId: 'sub-1',
     hoursPerWeek: 4,
   };

@@ -13,11 +13,6 @@ import {
 } from 'class-validator';
 
 export class CreateClassroomDto {
-  @ApiProperty({ description: 'Curriculum ID (UUID)' })
-  @IsUUID()
-  @IsNotEmpty()
-  curriculumId: string;
-
   @ApiProperty({ description: 'Academic Year ID (UUID)' })
   @IsUUID()
   @IsNotEmpty()

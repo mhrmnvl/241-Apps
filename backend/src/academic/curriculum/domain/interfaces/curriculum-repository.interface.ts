@@ -4,13 +4,9 @@ import { PaginatedResult } from '../../../../shared/domain/interfaces/repository
 
 export const CURRICULUM_INCLUDE = {
   academicYear: true,
-  classrooms: {
-    where: { deletedAt: null },
-    orderBy: [{ grade: { level: 'asc' } }, { code: 'asc' }],
-  },
   curriculumSubjects: {
     where: { deletedAt: null },
-    orderBy: [{ grade: { level: 'asc' } }],
+    orderBy: [{ subject: { name: 'asc' } }],
     include: { subject: true },
   },
 } satisfies Prisma.CurriculaInclude;

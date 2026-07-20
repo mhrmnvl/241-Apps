@@ -1,5 +1,4 @@
 export interface ClassroomSavePayload {
-  curriculumId: string
   academicYearId: string
   gradeId: string
   code: string
@@ -11,7 +10,6 @@ export interface ClassroomSavePayload {
 export interface ClassroomQueryParams {
   page?: number
   limit?: number
-  curriculumId?: string
   academicYearId?: string
   gradeId?: string
   classroomLevelId?: string

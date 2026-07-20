@@ -30,7 +30,6 @@ describe('CreateClassroomUseCase', () => {
 
   describe('execute', () => {
     const dto: CreateClassroomDto = {
-      curriculumId: 'cur-1',
       academicYearId: 'ay-1',
       gradeId: 'lvl-7',
       code: 'VII-A',
@@ -64,7 +63,6 @@ describe('CreateClassroomUseCase', () => {
       const result = await useCase.execute(dtoWithoutName);
 
       expect(mockRepository.create).toHaveBeenCalledWith({
-        curriculumId: dto.curriculumId,
         academicYearId: dto.academicYearId,
         gradeId: dto.gradeId,
         code: dto.code,

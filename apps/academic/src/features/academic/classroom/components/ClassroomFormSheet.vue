@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, toRefs } from 'vue'
 import { useClassroomForm } from '../composables/useClassroomForm'
-import type { AcademicYear, Classroom, Curricula, Grade } from '../types'
+import type { AcademicYear, Classroom, Grade } from '../types'
 import { Alert, AlertDescription, AlertTitle } from '@/ui/alert'
 import {
   AlertDialog,
@@ -42,7 +42,6 @@ import {
 
 const props = defineProps<{
   open: boolean
-  curricula: Curricula[]
   academicYears: AcademicYear[]
   grades?: Grade[]
   editData?: Classroom | null
@@ -58,10 +57,9 @@ const open = computed({
   set: (value: boolean) => emit('update:open', value),
 })
 
-const { editData, curricula, academicYears } = toRefs(props)
+const { editData, academicYears } = toRefs(props)
 
 const classroomForm = useClassroomForm({
-  curricula: () => curricula.value,
   academicYears: () => academicYears.value,
   editData: () => editData.value ?? null,
   onSuccess: () => {
@@ -109,12 +107,11 @@ const classroomForm = useClassroomForm({
                 >
                 <Select
                   :model-value="value"
-                  disabled
                   @update:model-value="handleChange"
                 >
                   <FormControl>
                     <SelectTrigger class="h-9 w-full">
-                      <SelectValue placeholder="Memuat..." />
+                      <SelectValue placeholder="Pilih tahun ajaran" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -124,37 +121,6 @@ const classroomForm = useClassroomForm({
                       :value="ay.id"
                     >
                       {{ ay.name }}
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            </FormField>
-
-            <FormField
-              v-slot="{ value, handleChange }"
-              name="curriculumId"
-            >
-              <FormItem>
-                <FormLabel
-                  >Kurikulum <span class="text-destructive">*</span></FormLabel
-                >
-                <Select
-                  :model-value="value"
-                  @update:model-value="handleChange"
-                >
-                  <FormControl>
-                    <SelectTrigger class="h-9 w-full">
-                      <SelectValue placeholder="Pilih kurikulum" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem
-                      v-for="c in classroomForm.filteredCurricula.value"
-                      :key="c.id"
-                      :value="c.id"
-                    >
-                      {{ c.name }}
                     </SelectItem>
                   </SelectContent>
                 </Select>

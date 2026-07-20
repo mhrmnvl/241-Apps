@@ -116,7 +116,6 @@ export class DashboardRepository {
       where: {
         isActive: true,
         deletedAt: null,
-        curricula: { isActive: true, deletedAt: null },
         academicYear: { isActive: true, deletedAt: null },
       },
       select: {

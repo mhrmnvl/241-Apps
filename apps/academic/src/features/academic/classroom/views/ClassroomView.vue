@@ -22,12 +22,10 @@ const breadcrumbs = [
 const {
   classrooms,
   grades,
-  curricula,
   academicYears,
   totalClassrooms,
   loading,
   fetchClassrooms,
-  fetchCurricula,
   fetchAcademicYears,
   fetchGrades,
   fetchSemesters,
@@ -55,12 +53,7 @@ const tableColumns = createClassroomColumns({
 
 onMounted(async () => {
   await fetchSemesters()
-  await Promise.all([
-    fetchClassrooms(),
-    fetchCurricula(),
-    fetchAcademicYears(),
-    fetchGrades(),
-  ])
+  await Promise.all([fetchClassrooms(), fetchAcademicYears(), fetchGrades()])
 })
 </script>
 
@@ -99,7 +92,6 @@ onMounted(async () => {
           <ClassroomFormSheet
             v-if="isAdmin && isAddModalOpen"
             v-model:open="isAddModalOpen"
-            :curricula="curricula"
             :academic-years="academicYears"
             :grades="grades"
             @save-success="fetchClassrooms"

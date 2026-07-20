@@ -14,13 +14,12 @@ export class PrismaCurriculumSubjectRepository extends ICurriculumSubjectReposit
   }
 
   async findAll(query: CurriculumSubjectQueryDto) {
-    const { page = 1, limit = 10, curriculumId, gradeId, subjectId } = query;
+    const { page = 1, limit = 10, curriculumId, subjectId } = query;
     const skip = (page - 1) * limit;
 
     const where: Prisma.CurriculumSubjectWhereInput = {
       deletedAt: null,
       ...(curriculumId && { curriculumId }),
-      ...(gradeId && { gradeId }),
       ...(subjectId && { subjectId }),
     };
 
@@ -30,7 +29,7 @@ export class PrismaCurriculumSubjectRepository extends ICurriculumSubjectReposit
         include: CURRICULUM_SUBJECT_INCLUDE,
         skip,
         take: limit,
-        orderBy: [{ grade: { level: 'asc' } }, { subject: { name: 'asc' } }],
+        orderBy: [{ subject: { name: 'asc' } }],
       }),
       this.prisma.curriculumSubject.count({ where }),
     ]);
@@ -47,14 +46,12 @@ export class PrismaCurriculumSubjectRepository extends ICurriculumSubjectReposit
 
   async findDuplicate(
     curriculumId: string,
-    gradeId: string,
     subjectId: string,
     excludeId?: string,
   ) {
     return this.prisma.curriculumSubject.findFirst({
       where: {
         curriculumId,
-        gradeId,
         subjectId,
         deletedAt: null,
         ...(excludeId && { NOT: { id: excludeId } }),
@@ -64,7 +61,6 @@ export class PrismaCurriculumSubjectRepository extends ICurriculumSubjectReposit
 
   async create(data: {
     curriculumId: string;
-    gradeId: string;
     subjectId: string;
     hoursPerWeek?: number;
   }) {
@@ -82,15 +78,10 @@ export class PrismaCurriculumSubjectRepository extends ICurriculumSubjectReposit
     });
   }
 
-  async findSoftDeleted(
-    curriculumId: string,
-    gradeId: string,
-    subjectId: string,
-  ) {
+  async findSoftDeleted(curriculumId: string, subjectId: string) {
     return this.prisma.curriculumSubject.findFirst({
       where: {
         curriculumId,
-        gradeId,
         subjectId,
         deletedAt: { not: null },
       },

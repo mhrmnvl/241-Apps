@@ -3,7 +3,6 @@ import { ClassroomQueryDto } from '../../dto/classroom-query.dto.js';
 import { PaginatedResult } from '../../../../shared/domain/interfaces/repository.interface.js';
 
 export const CLASS_INCLUDE = {
-  curricula: { include: { academicYear: true } },
   academicYear: true,
   grade: true,
 } satisfies Prisma.ClassroomInclude;
@@ -13,7 +12,6 @@ export type ClassroomWithDetails = Prisma.ClassroomGetPayload<{
 }>;
 
 export interface CreateClassroomRepositoryInput {
-  curriculumId: string;
   academicYearId: string;
   gradeId: string;
   code: string;

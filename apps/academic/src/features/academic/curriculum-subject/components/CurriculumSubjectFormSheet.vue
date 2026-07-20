@@ -60,14 +60,7 @@ const open = computed({
 const { editData } = toRefs(props)
 const isEditing = computed(() => !!editData?.value)
 
-const { subjects, grades } = useCurriculumSubject()
-
-const gradeOptions = computed<ComboboxOption[]>(() =>
-  grades.value.map((c) => ({
-    value: c.id,
-    label: c.name ?? '-',
-  })),
-)
+const { subjects } = useCurriculumSubject()
 
 const subjectOptions = computed<ComboboxOption[]>(() =>
   subjects.value.map((s) => ({
@@ -78,7 +71,6 @@ const subjectOptions = computed<ComboboxOption[]>(() =>
 
 const formSchema = toTypedSchema(
   z.object({
-    gradeId: z.string().min(1, 'Tingkat kelas wajib dipilih.'),
     subjectId: z.string().min(1, 'Mata pelajaran wajib dipilih.'),
     hoursPerWeek: z.coerce
       .number()
@@ -90,7 +82,6 @@ const formSchema = toTypedSchema(
 const { handleSubmit, resetForm, setValues } = useForm({
   validationSchema: formSchema,
   initialValues: {
-    gradeId: '',
     subjectId: '',
     hoursPerWeek: 2,
   },
@@ -103,7 +94,6 @@ watch(
       const data = editData?.value
       if (data) {
         setValues({
-          gradeId: data.gradeId || data.classroomLevelId || '',
           subjectId: data.subjectId || '',
           hoursPerWeek: data.hoursPerWeek ?? 2,
         })
@@ -118,13 +108,11 @@ watch(
 const showConfirmAlert = ref(false)
 
 function buildPayload(values: {
-  gradeId: string
   subjectId: string
   hoursPerWeek: number
 }): CurriculumSubjectSavePayload {
   return {
     curriculumId: props.curriculumId,
-    gradeId: values.gradeId,
     subjectId: values.subjectId,
     hoursPerWeek: values.hoursPerWeek,
   }
@@ -172,29 +160,6 @@ function confirmSave() {
           class="space-y-4 px-6 py-4"
           @submit.prevent="onSubmit"
         >
-          <FormField
-            v-slot="{ value, handleChange }"
-            name="gradeId"
-          >
-            <FormItem>
-              <FormLabel>
-                Tingkat Kelas
-                <span class="text-destructive">*</span>
-              </FormLabel>
-              <FormControl>
-                <AppCombobox
-                  :model-value="value"
-                  :options="gradeOptions"
-                  placeholder="Pilih Tingkat Kelas"
-                  search-placeholder="Cari tingkat kelas..."
-                  empty-text="Tingkat kelas tidak ditemukan."
-                  @update:model-value="(val) => handleChange(val)"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          </FormField>
-
           <FormField
             v-slot="{ value, handleChange }"
             name="subjectId"

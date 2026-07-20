@@ -65,12 +65,6 @@ const emit = defineEmits<{
         }}</span>
       </div>
       <div class="flex items-center justify-between gap-2">
-        <span class="text-muted-foreground">Kurikulum</span>
-        <span class="font-medium text-right">{{
-          currentClassroom?.curriculum?.name ?? '-'
-        }}</span>
-      </div>
-      <div class="flex items-center justify-between gap-2">
         <span class="text-muted-foreground">Tahun Ajaran</span>
         <span class="font-medium text-right">{{
           currentClassroom?.academicYear?.name ?? '-'

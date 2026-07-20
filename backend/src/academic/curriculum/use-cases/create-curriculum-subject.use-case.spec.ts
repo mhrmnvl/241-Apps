@@ -35,7 +35,6 @@ describe('CreateCurriculumSubjectUseCase', () => {
   describe('execute', () => {
     const dto: CreateCurriculumSubjectDto = {
       curriculumId: 'cur-1',
-      gradeId: 'lvl-7',
       subjectId: 'sub-1',
       hoursPerWeek: 4,
     };
@@ -50,12 +49,10 @@ describe('CreateCurriculumSubjectUseCase', () => {
 
       expect(mockRepository.findDuplicate).toHaveBeenCalledWith(
         dto.curriculumId,
-        dto.gradeId,
         dto.subjectId,
       );
       expect(mockRepository.create).toHaveBeenCalledWith({
         curriculumId: dto.curriculumId,
-        gradeId: dto.gradeId,
         subjectId: dto.subjectId,
         hoursPerWeek: dto.hoursPerWeek,
       });

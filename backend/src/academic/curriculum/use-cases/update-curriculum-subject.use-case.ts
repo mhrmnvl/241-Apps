@@ -16,23 +16,20 @@ export class UpdateCurriculumSubjectUseCase {
       throw new NotFoundException(`CurriculumSubject with ID ${id} not found`);
 
     const curriculumId = dto.curriculumId ?? current.curriculumId;
-    const gradeId = dto.gradeId ?? current.gradeId;
     const subjectId = dto.subjectId ?? current.subjectId;
 
     if (
       curriculumId !== current.curriculumId ||
-      gradeId !== current.gradeId ||
       subjectId !== current.subjectId
     ) {
       const duplicate = await this.repository.findDuplicate(
         curriculumId,
-        gradeId,
         subjectId,
         id,
       );
       if (duplicate)
         throw new ConflictException(
-          'This subject is already assigned to this curriculum and classroom level',
+          'This subject is already assigned to this curriculum',
         );
     }
 
