@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { storeToRefs } from 'pinia'
 import { toast } from 'vue-sonner'
 import { Button } from '@/ui/button'
 import { Checkbox } from '@/ui/checkbox'
@@ -13,8 +12,8 @@ import {
   DialogTitle,
 } from '@/ui/dialog'
 import { ShieldCheck } from 'lucide-vue-next'
-import { userRoleService } from '../services/userRoleService'
-import { useUserRoleStore } from '../stores/userRoleStore'
+import { useUserRole } from '../composables/useUserRole'
+import { useAuthSession } from '@/features/platform/auth'
 import type { UserWithRoles } from '../types'
 
 const props = defineProps<{
@@ -22,21 +21,10 @@ const props = defineProps<{
   allRoles: { id: string; code: string; name: string }[]
 }>()
 
-const store = useUserRoleStore()
-const { isUpdating } = storeToRefs(store)
+const { isUpdating, syncUserRoles } = useUserRole()
+const { user: currentUser } = useAuthSession()
 
-const isSelf = computed(() => {
-  const stored = window.localStorage.getItem('siakad_user')
-  if (stored) {
-    try {
-      const user = JSON.parse(stored) as { id?: string }
-      return user.id === props.user.id
-    } catch {
-      return false
-    }
-  }
-  return false
-})
+const isSelf = computed(() => currentUser.value?.id === props.user.id)
 
 const open = ref(false)
 const selectedIds = ref<string[]>([])
@@ -75,7 +63,7 @@ const handleSave = async () => {
     toast.warning('Pengguna harus memiliki minimal satu role.')
     return
   }
-  const ok = await userRoleService.syncUserRoles(
+  const ok = await syncUserRoles(
     props.user.id,
     originalIds.value,
     selectedIds.value,

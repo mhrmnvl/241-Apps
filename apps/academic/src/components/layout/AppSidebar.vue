@@ -2,6 +2,7 @@
 import type { SidebarProps } from '@/ui/sidebar'
 
 import { useAuthSession } from '@/features/platform/auth'
+import { useMenuVisibility } from '@/composables/useMenuVisibility'
 import { academicYearApi } from '@/features/academic/academic-year/api/academicYearApi'
 import { semesterApi } from '@/features/academic/semester/api/semesterApi'
 import type { AcademicYear } from '@/features/academic/academic-year'
@@ -16,9 +17,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/ui/sidebar'
-import { menuSections } from '@/config/menuConfig'
-import type { MenuSection, MenuItem, SubMenuItem } from '@/config/menuConfig'
-import { computed, onMounted, ref } from 'vue'
+import { onMounted, ref } from 'vue'
 
 const props = withDefaults(defineProps<SidebarProps>(), {
   variant: 'sidebar',
@@ -26,65 +25,8 @@ const props = withDefaults(defineProps<SidebarProps>(), {
 })
 
 const { user, syncAuthenticatedUserProfile } = useAuthSession()
+const { filteredSections } = useMenuVisibility()
 const activeAcademicInfo = ref({ academicYear: 'Memuat...', semester: '' })
-
-const userRoles = computed(() => user.value?.roles ?? [])
-const isSuperAdmin = computed(() => userRoles.value.includes('SUPER_ADMIN'))
-const isStaff = computed(
-  () =>
-    userRoles.value.length > 0 &&
-    !userRoles.value.every((r) => r === 'STUDENT'),
-)
-
-const filteredSections = computed(() => {
-  if (isSuperAdmin.value) return menuSections
-
-  const roles = userRoles.value
-  const hasRole = (r: string) => roles.includes(r)
-
-  // Role custom (non-sistem) tidak ada di allowedRoles → perlakukan seperti ADMIN
-  const effectiveHasRole = (r: string) => {
-    if (hasRole(r)) return true
-    // Kalau r adalah role staff (ADMIN/TEACHER) dan user adalah staff → izinkan
-    if (
-      isStaff.value &&
-      (r === 'ADMIN' || r === 'TEACHER') &&
-      !roles.includes('STUDENT')
-    )
-      return true
-    return false
-  }
-
-  return menuSections
-    .filter((section: MenuSection) => {
-      if (!section.allowedRoles || section.allowedRoles.length === 0)
-        return true
-      return section.allowedRoles.some(effectiveHasRole)
-    })
-    .map((section: MenuSection) => {
-      const filteredItems = section.items
-        .filter((item: MenuItem) => {
-          if (!item.allowedRoles || item.allowedRoles.length === 0) return true
-          return item.allowedRoles.some(effectiveHasRole)
-        })
-        .map((item: MenuItem): MenuItem | null => {
-          if (!item.items) return item
-          const filteredSubs = item.items.filter((sub: SubMenuItem) => {
-            if (!sub.allowedRoles || sub.allowedRoles.length === 0) return true
-            return sub.allowedRoles.some(effectiveHasRole)
-          })
-          if (filteredSubs.length === 0 && item.items.length > 0) return null
-          return { ...item, items: filteredSubs }
-        })
-        .filter((item: MenuItem | null): item is MenuItem => item !== null)
-
-      if (filteredItems.length === 0) return null
-      return { ...section, items: filteredItems }
-    })
-    .filter(
-      (section: MenuSection | null): section is MenuSection => section !== null,
-    )
-})
 
 onMounted(() => {
   if (user.value) {
