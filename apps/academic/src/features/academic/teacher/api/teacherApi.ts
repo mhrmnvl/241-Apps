@@ -81,9 +81,8 @@ export const teacherApi = {
   },
 
   createPosition: (teacherId: string, payload: TeacherPositionSavePayload) => {
-    return api.post<ApiSingleResponse<Teacher>>(`/teacher-positions`, {
-      ...payload,
-      teacherId,
+    return api.post<ApiSingleResponse<Teacher>>(`/teacher-positions`, payload, {
+      params: { teacherId },
     })
   },
 
@@ -94,7 +93,8 @@ export const teacherApi = {
   ) => {
     return api.patch<ApiSingleResponse<Teacher>>(
       `/teacher-positions/${positionId}`,
-      { ...payload, teacherId },
+      payload,
+      { params: { teacherId } },
     )
   },
 

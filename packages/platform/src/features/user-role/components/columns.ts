@@ -77,11 +77,9 @@ export const getColumns = (
     header: 'Opsi',
     cell: ({ row }) => {
       const item = row.original
-      const store = useUserRoleStore()
       return h(UserRoleActionCell, {
         user: item,
         allRoles,
-        isUpdating: store.isUpdating,
       })
     },
   },

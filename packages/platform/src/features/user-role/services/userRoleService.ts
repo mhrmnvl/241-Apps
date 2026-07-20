@@ -100,4 +100,47 @@ export const userRoleService = {
       store.isUpdating = false
     }
   },
+
+  /**
+   * Reconcile a user's roles against a target selection in one action.
+   * Diffs the target against the original set, then assigns/unassigns only
+   * the roles that changed. The backend exposes no bulk endpoint, so the
+   * calls are issued sequentially.
+   */
+  syncUserRoles: async (
+    userId: string,
+    originalRoleIds: string[],
+    targetRoleIds: string[],
+  ) => {
+    const toAdd = targetRoleIds.filter((id) => !originalRoleIds.includes(id))
+    const toRemove = originalRoleIds.filter((id) => !targetRoleIds.includes(id))
+
+    if (toAdd.length === 0 && toRemove.length === 0) {
+      return true
+    }
+
+    const store = useUserRoleStore()
+    store.isUpdating = true
+
+    try {
+      for (const roleId of toAdd) {
+        await userRoleApi.assignRole(roleId, userId)
+      }
+      for (const roleId of toRemove) {
+        await userRoleApi.unassignRole(roleId, userId)
+      }
+      toast.success('Berhasil memperbarui role pengguna')
+      void userRoleService.fetchTableData()
+      return true
+    } catch (error) {
+      toast.error(
+        getIndonesianErrorMessage(error, 'Gagal memperbarui role pengguna.'),
+      )
+      // Refresh so the UI reflects whatever changes did land before the error.
+      void userRoleService.fetchTableData()
+      return false
+    } finally {
+      store.isUpdating = false
+    }
+  },
 }
