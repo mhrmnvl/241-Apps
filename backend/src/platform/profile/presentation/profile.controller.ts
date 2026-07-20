@@ -36,7 +36,6 @@ export class ProfileController {
   ) {}
 
   @Get('me')
-  @RequirePermissions('profiles.read')
   @ApiOperation({ summary: "Get current user's profile with all relations" })
   @ApiResponse({ status: 200 })
   async getOwnProfile(@CurrentUser('id') userId: string) {
@@ -44,7 +43,6 @@ export class ProfileController {
   }
 
   @Patch('me')
-  @RequirePermissions('profiles.update')
   @ApiOperation({ summary: "Update current user's profile" })
   @ApiResponse({ status: 200, type: ProfileResponseDto })
   @ApiResponse({ status: 409, description: 'Duplicate NIK / email / phone' })

@@ -2,7 +2,7 @@ export interface UserWithRoles {
   id: string
   identifier: string
   isActive: boolean
-  roles: { id: string; code: string; name: string }[]
+  userRoles: { role: { id: string; code: string; name: string } }[]
   createdAt: string
   updatedAt: string
 }

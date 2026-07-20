@@ -41,7 +41,9 @@ const isSelf = computed(() => {
 const open = ref(false)
 const selectedIds = ref<string[]>([])
 
-const originalIds = computed(() => props.user.roles?.map((r) => r.id) ?? [])
+const originalIds = computed(
+  () => props.user.userRoles?.map((ur) => ur.role.id) ?? [],
+)
 
 // Seed the local selection from the user's current roles each time the
 // dialog opens so it always reflects the latest server state.

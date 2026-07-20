@@ -30,7 +30,7 @@ export const getColumns = (
     id: 'roles',
     header: 'Role',
     cell: ({ row }) => {
-      const roles = row.original.roles ?? []
+      const roles = (row.original.userRoles ?? []).map((ur) => ur.role)
       return h(
         'div',
         { class: 'flex flex-wrap gap-1.5' },
