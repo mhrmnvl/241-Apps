@@ -2,17 +2,21 @@ import type { LucideIcon } from 'lucide-vue-next'
 import {
   BookOpen,
   BookText,
-  Building2,
   CalendarDays,
+  CalendarRange,
   ClipboardList,
   FileSpreadsheet,
+  FolderOpen,
+  GraduationCap,
   LayoutDashboard,
+  Link2,
   ListChecks,
   Megaphone,
+  School,
   Settings,
   UserCheck,
+  UserRound,
   Users,
-  FolderOpen,
 } from 'lucide-vue-next'
 import type { UserRole } from '@/shared/types/router'
 
@@ -48,26 +52,10 @@ export const menuSections: MenuSection[] = [
         icon: LayoutDashboard,
       },
       {
-        title: 'Pengumuman',
-        url: '/pengumuman',
-        icon: Megaphone,
+        title: 'Unit Sekolah',
+        url: '/school-unit',
+        icon: School,
         allowedRoles: ['ADMIN', 'TEACHER'],
-      },
-      {
-        title: 'Berkas & Dokumen',
-        url: '/files',
-        icon: FolderOpen,
-        allowedRoles: ['ADMIN', 'TEACHER'],
-      },
-      {
-        title: 'Kelembagaan',
-        url: '#',
-        icon: Building2,
-        allowedRoles: ['ADMIN', 'TEACHER'],
-        items: [
-          { title: 'Profil Yayasan', url: '/organization' },
-          { title: 'Unit Sekolah', url: '/school-unit' },
-        ],
       },
     ],
   },
@@ -84,12 +72,7 @@ export const menuSections: MenuSection[] = [
         items: [
           { title: 'Tahun Ajaran', url: '/akademik/tahun-ajaran' },
           { title: 'Semester', url: '/akademik/semester' },
-          { title: 'Kenaikan Kelas', url: '/akademik/semester/kenaikan-kelas' },
           { title: 'Kurikulum', url: '/akademik/kurikulum' },
-          {
-            title: 'Kalender Pendidikan',
-            url: '/akademik/kalender-pendidikan',
-          },
         ],
       },
       {
@@ -99,7 +82,6 @@ export const menuSections: MenuSection[] = [
         items: [
           { title: 'Tingkat Kelas', url: '/akademik/tingkat-kelas' },
           { title: 'Daftar Kelas', url: '/akademik/kelas' },
-          { title: 'Kalender Kegiatan', url: '/akademik/kalender-kegiatan' },
         ],
       },
     ],
@@ -146,8 +128,6 @@ export const menuSections: MenuSection[] = [
           { title: 'Daftar Siswa', url: '/students' },
           { title: 'Akun Siswa', url: '/students/accounts' },
           { title: 'Daftar Alumni', url: '/alumni' },
-          { title: 'Data Orang Tua', url: '/data-master/orang-tua' },
-          { title: 'Relasi Orang Tua', url: '/data-master/relasi-orang-tua' },
         ],
       },
       {
@@ -221,6 +201,49 @@ export const menuSections: MenuSection[] = [
             allowedRoles: ['ADMIN'],
           },
         ],
+      },
+    ],
+  },
+
+  // ──────────────────── COMING SOON ────────────────────
+  {
+    label: 'Segera Hadir',
+    allowedRoles: ['ADMIN', 'TEACHER'],
+    items: [
+      {
+        title: 'Pengumuman',
+        url: '/pengumuman',
+        icon: Megaphone,
+      },
+      {
+        title: 'Berkas & Dokumen',
+        url: '/files',
+        icon: FolderOpen,
+      },
+      {
+        title: 'Kenaikan Kelas',
+        url: '/akademik/semester/kenaikan-kelas',
+        icon: GraduationCap,
+      },
+      {
+        title: 'Kalender Pendidikan',
+        url: '/akademik/kalender-pendidikan',
+        icon: CalendarDays,
+      },
+      {
+        title: 'Kalender Kegiatan',
+        url: '/akademik/kalender-kegiatan',
+        icon: CalendarRange,
+      },
+      {
+        title: 'Data Orang Tua',
+        url: '/data-master/orang-tua',
+        icon: UserRound,
+      },
+      {
+        title: 'Relasi Orang Tua',
+        url: '/data-master/relasi-orang-tua',
+        icon: Link2,
       },
     ],
   },

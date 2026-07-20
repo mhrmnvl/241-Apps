@@ -28,10 +28,7 @@ const {
   deleteTenant,
 } = useTenant()
 
-const breadcrumbs = [
-  { title: 'Dasbor', href: '/' },
-  { title: 'Manajemen Tenant', href: '/tenants' },
-]
+const breadcrumbs = [{ title: 'Manajemen Tenant', href: '/tenants' }]
 
 const isSheetOpen = ref(false)
 const isEditing = ref(false)

@@ -89,6 +89,36 @@ export const curriculumSubjectService = {
     }
   },
 
+  bulkCreateCurriculumSubjects: async (
+    curriculumId: string,
+    subjectIds: string[],
+  ) => {
+    const store = useCurriculumSubjectStore()
+    store.isSaving = true
+    store.formError = null
+    try {
+      await Promise.all(
+        subjectIds.map((subjectId) =>
+          curriculumSubjectApi.createCurriculumSubject({
+            curriculumId,
+            subjectId,
+          }),
+        ),
+      )
+      toast.success(`${subjectIds.length} mata pelajaran berhasil ditambahkan`)
+      return { success: true }
+    } catch (error: unknown) {
+      store.formError = getIndonesianErrorMessage(
+        error,
+        'Gagal menambahkan mata pelajaran kurikulum.',
+      )
+      toast.error(store.formError ?? '')
+      return { success: false, error: store.formError }
+    } finally {
+      store.isSaving = false
+    }
+  },
+
   deleteCurriculumSubject: async (id: string) => {
     try {
       await curriculumSubjectApi.deleteCurriculumSubject(id)

@@ -30,13 +30,9 @@ export const EMPTY_ADDRESS: SchoolUnitAddress = {
   postalCode: '',
 }
 
-export const breadcrumbs = [
-  { title: 'Dasbor', href: '/' },
-  { title: 'Unit Sekolah', href: '/school-unit' },
-]
+export const breadcrumbs = [{ title: 'Unit Sekolah', href: '/school-unit' }]
 
 export const editBreadcrumbs = [
-  { title: 'Dasbor', href: '/' },
   { title: 'Unit Sekolah', href: '/school-unit' },
   { title: 'Ubah Data', href: '/school-unit/edit' },
 ]

@@ -2,13 +2,12 @@
 import type { Grade } from '../types'
 import { createGradeColumns } from '../components/columns'
 import GradeFormSheet from '../components/GradeFormSheet.vue'
-import GradeCurriculumSheet from '../components/GradeCurriculumSheet.vue'
 import { useGradeList } from '../composables/useGradeList'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { DataTable } from '@/ui'
 import { Button } from '@/ui/button'
 import { Card, CardHeader, CardTitle } from '@/ui/card'
-import { BookOpen, Plus } from 'lucide-vue-next'
+import { Plus } from 'lucide-vue-next'
 import { useRoleGuard } from '@/shared/composables/useRoleGuard'
 import { onMounted, ref, watch } from 'vue'
 
@@ -20,7 +19,6 @@ const breadcrumbs = [
 const { items, totalItems, loading, fetchGrades, deleteGrade } = useGradeList()
 
 const isAddModalOpen = ref(false)
-const isCurriculumSheetOpen = ref(false)
 const editingItem = ref<Grade | null>(null)
 const { isAdmin } = useRoleGuard()
 
@@ -64,22 +62,13 @@ onMounted(() => {
           <CardTitle class="text-2xl font-bold tracking-tight">
             Tingkat Kelas
           </CardTitle>
-          <div class="flex items-center gap-2">
-            <Button
-              variant="outline"
-              @click="isCurriculumSheetOpen = true"
-            >
-              <BookOpen class="size-4 mr-2" />
-              Kurikulum
-            </Button>
-            <Button
-              v-if="isAdmin"
-              @click="isAddModalOpen = true"
-            >
-              <Plus class="size-4 mr-2" />
-              Tambah
-            </Button>
-          </div>
+          <Button
+            v-if="isAdmin"
+            @click="isAddModalOpen = true"
+          >
+            <Plus class="size-4 mr-2" />
+            Tambah
+          </Button>
         </CardHeader>
 
         <div class="p-6 space-y-4">
@@ -94,7 +83,7 @@ onMounted(() => {
           />
 
           <GradeFormSheet
-            v-if="isAdmin && isAddModalOpen"
+            v-if="isAddModalOpen"
             v-model:open="isAddModalOpen"
             :edit-data="editingItem"
             @save-success="fetchGrades"
@@ -102,10 +91,5 @@ onMounted(() => {
         </div>
       </Card>
     </div>
-
-    <GradeCurriculumSheet
-      v-model:open="isCurriculumSheetOpen"
-      :grades="items"
-    />
   </AppLayout>
 </template>

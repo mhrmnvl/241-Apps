@@ -25,10 +25,7 @@ const {
   deleteFile,
 } = useFiles()
 
-const breadcrumbs = [
-  { title: 'Dasbor', href: '/' },
-  { title: 'Berkas & Dokumen', href: '/files' },
-]
+const breadcrumbs = [{ title: 'Berkas & Dokumen', href: '/files' }]
 
 const fileInput = ref<HTMLInputElement | null>(null)
 const isDragging = ref(false)

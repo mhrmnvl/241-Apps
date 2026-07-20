@@ -7,13 +7,9 @@ export const EMPTY_ORGANIZATION: Organization = {
   phoneNumber: '',
 }
 
-export const breadcrumbs = [
-  { title: 'Dasbor', href: '/' },
-  { title: 'Profil Yayasan', href: '/organization' },
-]
+export const breadcrumbs = [{ title: 'Profil Yayasan', href: '/organization' }]
 
 export const editBreadcrumbs = [
-  { title: 'Dasbor', href: '/' },
   { title: 'Profil Yayasan', href: '/organization' },
   { title: 'Ubah Data', href: '/organization/edit' },
 ]
