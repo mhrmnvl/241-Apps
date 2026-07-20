@@ -393,8 +393,8 @@ function formatScore(score: number | null | undefined) {
           <tr class="border-b shadow-sm">
             <th class="p-4 w-[40px]">
               <Checkbox
-                :checked="allVisibleSelected"
-                @update:checked="toggleSelectAll"
+                :model-value="allVisibleSelected"
+                @update:model-value="toggleSelectAll"
               />
             </th>
             <th class="p-4 text-left font-semibold text-muted-foreground">
@@ -437,8 +437,8 @@ function formatScore(score: number | null | undefined) {
           >
             <td class="p-4">
               <Checkbox
-                :checked="selectedIds.has(row.studentId)"
-                @update:checked="toggleSelect(row.studentId)"
+                :model-value="selectedIds.has(row.studentId)"
+                @update:model-value="toggleSelect(row.studentId)"
               />
             </td>
             <td class="p-4">

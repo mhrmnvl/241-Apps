@@ -155,9 +155,9 @@ const onSubmit = handleSubmit((values) => {
                 </div>
                 <FormControl>
                   <Switch
-                    :checked="value"
+                    :model-value="value"
                     :disabled="isSaving"
-                    @update:checked="handleChange"
+                    @update:model-value="handleChange"
                   />
                 </FormControl>
               </FormItem>

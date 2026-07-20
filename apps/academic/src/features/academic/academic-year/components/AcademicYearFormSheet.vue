@@ -146,8 +146,8 @@ const academicYearForm = useAcademicYearForm({
             <FormItem class="flex items-center gap-3 rounded-lg border p-3">
               <FormControl>
                 <Checkbox
-                  :checked="value"
-                  @update:checked="handleChange"
+                  :model-value="value"
+                  @update:model-value="handleChange"
                 />
               </FormControl>
               <div class="grid gap-0.5">

@@ -296,8 +296,8 @@ function confirmSave() {
                         @click="toggleClassroomSelection(classroom.id)"
                       >
                         <Checkbox
-                          :checked="isSelectedClassroom(classroom.id)"
-                          @update:checked="
+                          :model-value="isSelectedClassroom(classroom.id)"
+                          @update:model-value="
                             () => toggleClassroomSelection(classroom.id)
                           "
                           @click.stop
