@@ -4,15 +4,15 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { PrismaService } from '../../core/database/prisma.service.js';
 import { serializePayment } from '../domain/admission.serializers.js';
+import { IAdmissionApplicationRepository } from '../domain/interfaces/admission-application-repository.interface.js';
 import { VerifyPaymentDto } from '../dto/admin-actions.dto.js';
 import { AdmissionNotificationService } from '../services/admission-notification.service.js';
 
 @Injectable()
 export class VerifyPaymentUseCase {
   constructor(
-    private readonly prisma: PrismaService,
+    private readonly repository: IAdmissionApplicationRepository,
     private readonly notifications: AdmissionNotificationService,
   ) {}
 
@@ -21,9 +21,7 @@ export class VerifyPaymentUseCase {
       throw new BadRequestException('Alasan penolakan pembayaran wajib diisi');
     }
 
-    const payment = await this.prisma.admissionPayment.findFirst({
-      where: { applicationId },
-    });
+    const payment = await this.repository.findPayment(applicationId);
     if (!payment) {
       throw new NotFoundException('Data pembayaran tidak ditemukan');
     }
@@ -31,31 +29,23 @@ export class VerifyPaymentUseCase {
       throw new ConflictException('Bukti pembayaran belum diunggah');
     }
 
-    return this.prisma.$transaction(async (tx) => {
-      const updated = await tx.admissionPayment.update({
-        where: { id: payment.id },
-        data: {
-          status: dto.status,
-          note: dto.note ?? null,
-          verifiedById: adminId,
-          verifiedAt: new Date(),
-        },
-        include: { proofFile: true },
-      });
-
-      await this.notifications.notify(
-        applicationId,
-        'PAYMENT',
-        dto.status === 'VERIFIED'
-          ? 'Pembayaran terverifikasi'
-          : 'Bukti pembayaran ditolak',
-        dto.status === 'VERIFIED'
-          ? 'Bukti pembayaran Anda telah diverifikasi.'
-          : `Bukti pembayaran Anda ditolak. Catatan: ${dto.note}. Silakan unggah ulang.`,
-        tx,
-      );
-
-      return serializePayment(updated);
+    const updated = await this.repository.updatePaymentStatus(payment.id, {
+      status: dto.status,
+      note: dto.note ?? null,
+      adminId,
     });
+
+    await this.notifications.notify(
+      applicationId,
+      'PAYMENT',
+      dto.status === 'VERIFIED'
+        ? 'Pembayaran terverifikasi'
+        : 'Bukti pembayaran ditolak',
+      dto.status === 'VERIFIED'
+        ? 'Bukti pembayaran Anda telah diverifikasi.'
+        : `Bukti pembayaran Anda ditolak. Catatan: ${dto.note}. Silakan unggah ulang.`,
+    );
+
+    return serializePayment(updated);
   }
 }

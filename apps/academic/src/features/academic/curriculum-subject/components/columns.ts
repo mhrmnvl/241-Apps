@@ -18,10 +18,11 @@ export const createCurriculumSubjectColumns = (
     enableHiding: false,
   },
   {
-    id: 'classroomLevel',
+    id: 'grade',
     header: 'Tingkat Kelas',
     meta: { align: 'center' },
-    cell: ({ row }) => row.original.classroomLevel?.name ?? '-',
+    cell: ({ row }) =>
+      row.original.grade?.name ?? row.original.classroomLevel?.name ?? '-',
   },
   {
     id: 'subject',

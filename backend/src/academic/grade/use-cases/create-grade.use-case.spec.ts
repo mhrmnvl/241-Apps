@@ -1,10 +1,10 @@
 import { ConflictException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { IClassroomLevelsRepository } from '../domain/interfaces/classroom-levels-repository.interface.js';
-import { CreateClassroomLevelUseCase } from './create-grade.use-case.js';
+import { IGradeRepository } from '../domain/interfaces/grade-repository.interface.js';
+import { CreateGradeUseCase } from './create-grade.use-case.js';
 
-describe('CreateClassroomLevelUseCase', () => {
-  let useCase: CreateClassroomLevelUseCase;
+describe('CreateGradeUseCase', () => {
+  let useCase: CreateGradeUseCase;
 
   const mockRepository = {
     findByLevel: jest.fn(),
@@ -15,14 +15,12 @@ describe('CreateClassroomLevelUseCase', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        CreateClassroomLevelUseCase,
-        { provide: IClassroomLevelsRepository, useValue: mockRepository },
+        CreateGradeUseCase,
+        { provide: IGradeRepository, useValue: mockRepository },
       ],
     }).compile();
 
-    useCase = module.get<CreateClassroomLevelUseCase>(
-      CreateClassroomLevelUseCase,
-    );
+    useCase = module.get<CreateGradeUseCase>(CreateGradeUseCase);
     jest.clearAllMocks();
   });
 

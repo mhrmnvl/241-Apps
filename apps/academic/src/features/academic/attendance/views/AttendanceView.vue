@@ -51,7 +51,7 @@ const semesterFilterOptions = computed<ComboboxOption[]>(() =>
 const classroomFilterOptions = computed<ComboboxOption[]>(() =>
   classrooms.value.map((c) => ({
     value: c.id,
-    label: c.name ?? '-',
+    label: c.code ?? '-',
   })),
 )
 

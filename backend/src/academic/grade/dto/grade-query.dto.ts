@@ -4,7 +4,7 @@ import { IsBoolean, IsOptional, IsString } from 'class-validator';
 import { PaginationQueryDto } from '../../../shared/dto/pagination.dto.js';
 import { toBooleanFromTransform } from '../../../shared/validators/boolean.transformer.js';
 
-export class ClassroomLevelQueryDto extends PaginationQueryDto {
+export class GradeQueryDto extends PaginationQueryDto {
   @ApiPropertyOptional({ description: 'Search by name' })
   @IsOptional()
   @IsString()

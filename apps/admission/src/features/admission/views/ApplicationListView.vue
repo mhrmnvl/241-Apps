@@ -2,7 +2,6 @@
 import { computed, h, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { watchDebounced } from '@vueuse/core'
-import { toast } from 'vue-sonner'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { DataTable } from '@/ui'
 import { Button } from '@/ui/button'
@@ -17,28 +16,22 @@ import {
 } from '@/ui/select'
 import { Search } from 'lucide-vue-next'
 import type { ColumnDef } from '@tanstack/vue-table'
-import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
-import { admissionApi } from '../api/admissionApi'
+import { useApplicationList } from '../composables/useApplicationList'
 import StatusBadge from '../components/StatusBadge.vue'
-import type {
-  AdmissionApplicationListItem,
-  AdmissionStatus,
-  AdmissionWaveSummary,
-} from '../types'
+import type { AdmissionApplicationListItem, AdmissionStatus } from '../types'
 import { PAYMENT_STATUS_LABELS, STATUS_LABELS } from '../types'
 import { formatDateTime } from '../utils'
 
 const router = useRouter()
 
-const applications = ref<AdmissionApplicationListItem[]>([])
-const waves = ref<AdmissionWaveSummary[]>([])
-const loading = ref(false)
+const { applications, waves, total, loading, fetchApplications, fetchWaves } =
+  useApplicationList()
+
 const searchQuery = ref('')
 const statusFilter = ref<'ALL' | AdmissionStatus>('ALL')
 const waveFilter = ref<string>('ALL')
 const page = ref(1)
 const limit = 20
-const total = ref(0)
 
 const breadcrumbs = [
   { title: 'Admin PSB', href: '/admin' },
@@ -100,36 +93,18 @@ const columns = computed<ColumnDef<AdmissionApplicationListItem>[]>(() => [
   },
 ])
 
-async function fetchApplications() {
-  loading.value = true
-  try {
-    const response = await admissionApi.getApplications({
-      page: page.value,
-      limit,
-      search: searchQuery.value.trim() || undefined,
-      status: statusFilter.value === 'ALL' ? undefined : statusFilter.value,
-      waveId: waveFilter.value === 'ALL' ? undefined : waveFilter.value,
-    })
-    applications.value = response.data.data ?? []
-    total.value = response.data.meta?.total ?? 0
-  } catch (e) {
-    toast.error(getIndonesianErrorMessage(e, 'Gagal memuat daftar pendaftar.'))
-  } finally {
-    loading.value = false
-  }
-}
-
-async function fetchWaves() {
-  try {
-    const response = await admissionApi.getWaves({ limit: 100 })
-    waves.value = response.data.data ?? []
-  } catch {
-    waves.value = []
-  }
+function loadApplications() {
+  void fetchApplications({
+    page: page.value,
+    limit,
+    search: searchQuery.value.trim() || undefined,
+    status: statusFilter.value === 'ALL' ? undefined : statusFilter.value,
+    waveId: waveFilter.value === 'ALL' ? undefined : waveFilter.value,
+  })
 }
 
 onMounted(() => {
-  void fetchApplications()
+  loadApplications()
   void fetchWaves()
 })
 
@@ -137,21 +112,21 @@ watchDebounced(
   searchQuery,
   () => {
     page.value = 1
-    void fetchApplications()
+    loadApplications()
   },
   { debounce: 400 },
 )
 
 function onFilterChange() {
   page.value = 1
-  void fetchApplications()
+  loadApplications()
 }
 
 const totalPages = computed(() => Math.max(Math.ceil(total.value / limit), 1))
 
 function goToPage(target: number) {
   page.value = Math.min(Math.max(target, 1), totalPages.value)
-  void fetchApplications()
+  loadApplications()
 }
 </script>
 

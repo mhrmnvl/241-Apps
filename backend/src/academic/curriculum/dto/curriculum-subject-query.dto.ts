@@ -8,10 +8,10 @@ export class CurriculumSubjectQueryDto extends PaginationQueryDto {
   @IsUUID()
   curriculumId?: string;
 
-  @ApiPropertyOptional({ description: 'Filter by Classroom Level ID' })
+  @ApiPropertyOptional({ description: 'Filter by Grade ID' })
   @IsOptional()
   @IsUUID()
-  classroomLevelId?: string;
+  gradeId?: string;
 
   @ApiPropertyOptional({ description: 'Filter by Subject ID' })
   @IsOptional()

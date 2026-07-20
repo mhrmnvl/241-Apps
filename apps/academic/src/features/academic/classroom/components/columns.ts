@@ -35,7 +35,8 @@ export const createClassroomColumns = (
       h(
         Badge,
         { variant: 'outline' },
-        () => row.original.classroomLevel?.name ?? '-',
+        () =>
+          row.original.grade?.name ?? row.original.classroomLevel?.name ?? '-',
       ),
   },
   {

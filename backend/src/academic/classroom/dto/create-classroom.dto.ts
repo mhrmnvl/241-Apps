@@ -23,10 +23,10 @@ export class CreateClassroomDto {
   @IsNotEmpty()
   academicYearId: string;
 
-  @ApiProperty({ description: 'Classroom Level ID (UUID)' })
+  @ApiProperty({ description: 'Grade ID (UUID)' })
   @IsUUID()
   @IsNotEmpty()
-  classroomLevelId: string;
+  gradeId: string;
 
   @ApiProperty({ description: 'Classroom code', example: 'VIII-A' })
   @IsString()

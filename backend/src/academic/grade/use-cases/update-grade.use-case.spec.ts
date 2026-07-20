@@ -1,11 +1,11 @@
 import { ConflictException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { UpdateGradeDto } from '../dto/update-grade.dto.js';
-import { IClassroomLevelsRepository } from '../domain/interfaces/classroom-levels-repository.interface.js';
-import { UpdateClassroomLevelUseCase } from './update-grade.use-case.js';
+import { IGradeRepository } from '../domain/interfaces/grade-repository.interface.js';
+import { UpdateGradeUseCase } from './update-grade.use-case.js';
 
-describe('UpdateClassroomLevelUseCase', () => {
-  let useCase: UpdateClassroomLevelUseCase;
+describe('UpdateGradeUseCase', () => {
+  let useCase: UpdateGradeUseCase;
 
   const mockRepository = {
     findById: jest.fn(),
@@ -19,14 +19,12 @@ describe('UpdateClassroomLevelUseCase', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        UpdateClassroomLevelUseCase,
-        { provide: IClassroomLevelsRepository, useValue: mockRepository },
+        UpdateGradeUseCase,
+        { provide: IGradeRepository, useValue: mockRepository },
       ],
     }).compile();
 
-    useCase = module.get<UpdateClassroomLevelUseCase>(
-      UpdateClassroomLevelUseCase,
-    );
+    useCase = module.get<UpdateGradeUseCase>(UpdateGradeUseCase);
     jest.clearAllMocks();
   });
 

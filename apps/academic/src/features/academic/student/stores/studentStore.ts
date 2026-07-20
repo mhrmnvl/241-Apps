@@ -1,12 +1,12 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import type { Student, ClassroomLevelOption } from '../types'
+import type { Student, GradeOption } from '../types'
 import type { Classroom } from '@/features/academic/classroom'
 
 export const useStudentStore = defineStore('student', () => {
   const students = ref<Student[]>([])
   const classrooms = ref<Classroom[]>([])
-  const classroomLevels = ref<ClassroomLevelOption[]>([])
+  const grades = ref<GradeOption[]>([])
   const totalStudents = ref(0)
 
   const loading = ref(false)
@@ -14,22 +14,22 @@ export const useStudentStore = defineStore('student', () => {
   const formError = ref<string | null>(null)
 
   const filters = ref({
-    classroomLevelId: 'all',
+    gradeId: 'all',
     classroomId: 'all',
     keyword: '',
   })
 
   const filteredStudents = computed(() => {
-    if (filters.value.classroomLevelId === 'all') return students.value
+    if (filters.value.gradeId === 'all') return students.value
     return students.value.filter(
-      (s: Student) => s.classroomLevelId === filters.value.classroomLevelId,
+      (s: Student) => s.gradeId === filters.value.gradeId,
     )
   })
 
   return {
     students,
     classrooms,
-    classroomLevels,
+    grades,
     totalStudents,
     loading,
     isSaving,

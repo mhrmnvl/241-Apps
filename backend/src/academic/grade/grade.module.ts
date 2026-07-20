@@ -1,26 +1,26 @@
 import { Module } from '@nestjs/common';
-import { ClassroomLevelsController } from './presentation/grade.controller.js';
-import { PrismaClassroomLevelsRepository } from './infrastructure/persistence/prisma-classroom-levels.repository.js';
-import { CreateClassroomLevelUseCase } from './use-cases/create-grade.use-case.js';
-import { DeleteClassroomLevelUseCase } from './use-cases/delete-grade.use-case.js';
-import { GetClassroomLevelByIdUseCase } from './use-cases/get-grade-by-id.use-case.js';
-import { GetClassroomLevelsUseCase } from './use-cases/get-grades.use-case.js';
-import { UpdateClassroomLevelUseCase } from './use-cases/update-grade.use-case.js';
-import { IClassroomLevelsRepository } from './domain/interfaces/classroom-levels-repository.interface.js';
+import { GradesController } from './presentation/grade.controller.js';
+import { PrismaGradeRepository } from './infrastructure/persistence/prisma-grade.repository.js';
+import { CreateGradeUseCase } from './use-cases/create-grade.use-case.js';
+import { DeleteGradeUseCase } from './use-cases/delete-grade.use-case.js';
+import { GetGradeByIdUseCase } from './use-cases/get-grade-by-id.use-case.js';
+import { GetGradesUseCase } from './use-cases/get-grades.use-case.js';
+import { UpdateGradeUseCase } from './use-cases/update-grade.use-case.js';
+import { IGradeRepository } from './domain/interfaces/grade-repository.interface.js';
 
 @Module({
-  controllers: [ClassroomLevelsController],
+  controllers: [GradesController],
   providers: [
     {
-      provide: IClassroomLevelsRepository,
-      useClass: PrismaClassroomLevelsRepository,
+      provide: IGradeRepository,
+      useClass: PrismaGradeRepository,
     },
-    GetClassroomLevelsUseCase,
-    GetClassroomLevelByIdUseCase,
-    CreateClassroomLevelUseCase,
-    UpdateClassroomLevelUseCase,
-    DeleteClassroomLevelUseCase,
+    GetGradesUseCase,
+    GetGradeByIdUseCase,
+    CreateGradeUseCase,
+    UpdateGradeUseCase,
+    DeleteGradeUseCase,
   ],
-  exports: [IClassroomLevelsRepository],
+  exports: [IGradeRepository],
 })
 export class GradeModule {}

@@ -28,7 +28,8 @@ export interface AvailableStudent {
   id: string
   nis: string
   nisn: string
-  classroomLevelId: string | null
+  gradeId: string | null
+  classroomLevelId?: string | null
   user: {
     profile: {
       name: string
@@ -41,7 +42,8 @@ export interface StudentWithEnrollments {
   id: string
   nis: string
   nisn: string
-  classroomLevelId: string | null
+  gradeId: string | null
+  classroomLevelId?: string | null
   enrollments: { semesterId: string }[]
   user: { profile: { name: string; gender: string } }
 }
@@ -50,7 +52,8 @@ export interface EnrollmentStudent {
   id: string
   nis: string
   nisn: string
-  classroomLevelId: string | null
+  gradeId: string | null
+  classroomLevelId?: string | null
   user: {
     profile: {
       name: string
@@ -63,7 +66,8 @@ export interface EnrollmentClassroom {
   id: string
   name: string | null
   displayName: string
-  classroomLevelId: string
+  gradeId: string
+  classroomLevelId?: string
   capacity: number
 }
 

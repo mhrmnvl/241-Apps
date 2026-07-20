@@ -15,10 +15,10 @@ export class CreateCurriculumSubjectDto {
   @IsNotEmpty()
   curriculumId: string;
 
-  @ApiProperty({ description: 'Classroom Level ID (UUID)' })
+  @ApiProperty({ description: 'Grade ID (UUID)' })
   @IsUUID()
   @IsNotEmpty()
-  classroomLevelId: string;
+  gradeId: string;
 
   @ApiProperty({ description: 'Subject ID (UUID)' })
   @IsUUID()

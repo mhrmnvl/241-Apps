@@ -1,1 +1,4 @@
-export { ClassroomLevelsRepository } from './repositories/grade.repository.js';
+export {
+  GradeRepository,
+  IGradeRepository,
+} from './repositories/grade.repository.js';

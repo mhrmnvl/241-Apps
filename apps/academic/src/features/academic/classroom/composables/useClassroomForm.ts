@@ -30,7 +30,7 @@ export function useClassroomForm(options?: {
     z.object({
       curriculumId: z.string().min(1, 'Kurikulum wajib dipilih.'),
       academicYearId: z.string().min(1, 'Tahun ajaran wajib dipilih.'),
-      classroomLevelId: z.string().min(1, 'Tingkat wajib dipilih.'),
+      gradeId: z.string().min(1, 'Tingkat wajib dipilih.'),
       code: z.string().min(1, 'Kode kelas wajib diisi.').max(20),
       name: z
         .string()
@@ -50,7 +50,7 @@ export function useClassroomForm(options?: {
     initialValues: {
       curriculumId: '',
       academicYearId: '',
-      classroomLevelId: '',
+      gradeId: '',
       code: '',
       name: '',
       capacity: 30,
@@ -84,7 +84,7 @@ export function useClassroomForm(options?: {
         form.setValues({
           curriculumId: data.curriculumId ?? '',
           academicYearId: data.academicYearId ?? '',
-          classroomLevelId: data.classroomLevelId ?? '',
+          gradeId: data.gradeId ?? data.classroomLevelId ?? '',
           code: data.code ?? '',
           name: data.name ?? '',
           capacity: Number(data.capacity) || 30,
@@ -121,7 +121,7 @@ export function useClassroomForm(options?: {
   async function executeSave(values: {
     curriculumId: string
     academicYearId: string
-    classroomLevelId: string
+    gradeId: string
     code: string
     name?: string | null
     capacity: number
@@ -131,7 +131,7 @@ export function useClassroomForm(options?: {
     const payload: ClassroomSavePayload = {
       curriculumId: values.curriculumId,
       academicYearId: values.academicYearId,
-      classroomLevelId: values.classroomLevelId,
+      gradeId: values.gradeId,
       code: values.code.trim(),
       name: values.name ? values.name.trim() : null,
       capacity: values.capacity,

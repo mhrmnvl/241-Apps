@@ -35,7 +35,7 @@ const breadcrumbs = [
 const {
   students,
   classrooms,
-  classroomLevels,
+  grades,
   totalStudents,
   loading,
   isSaving,
@@ -43,7 +43,7 @@ const {
   filters,
   fetchStudents,
   fetchClassrooms,
-  fetchClassroomLevels,
+  fetchGrades,
   saveStudent,
   deleteStudent,
   filteredStudents,
@@ -72,7 +72,7 @@ const tableColumns = computed(() =>
       },
       showActions: isAdmin.value,
     },
-    classroomLevels.value,
+    grades.value,
   ),
 )
 
@@ -102,10 +102,10 @@ async function handleSaveStudent(payload: StudentSavePayload) {
 }
 
 watch(
-  () => filters.value.classroomLevelId,
-  async (newLevelId) => {
+  () => filters.value.gradeId,
+  async (newGradeId) => {
     filters.value.classroomId = 'all'
-    await fetchClassrooms(newLevelId === 'all' ? undefined : newLevelId)
+    await fetchClassrooms(newGradeId === 'all' ? undefined : newGradeId)
     await fetchStudents()
   },
 )
@@ -122,11 +122,7 @@ watchDebounced(
 )
 
 onMounted(async () => {
-  await Promise.all([
-    fetchStudents(),
-    fetchClassrooms(),
-    fetchClassroomLevels(),
-  ])
+  await Promise.all([fetchStudents(), fetchClassrooms(), fetchGrades()])
 })
 </script>
 
@@ -167,10 +163,11 @@ onMounted(async () => {
         <div class="p-6">
           <div class="mb-6 flex flex-col gap-3 lg:flex-row lg:items-center">
             <Select
-              :model-value="filters.classroomLevelId"
+              :model-value="filters.gradeId"
               @update:model-value="
-                filters.classroomLevelId =
-                  typeof $event === 'string' ? $event : 'all'
+                (val) => {
+                  filters.gradeId = typeof val === 'string' ? val : 'all'
+                }
               "
             >
               <SelectTrigger
@@ -181,7 +178,7 @@ onMounted(async () => {
               <SelectContent>
                 <SelectItem value="all"> Semua Tingkat </SelectItem>
                 <SelectItem
-                  v-for="lvl in classroomLevels"
+                  v-for="lvl in grades"
                   :key="lvl.id"
                   :value="lvl.id"
                 >
@@ -193,8 +190,9 @@ onMounted(async () => {
             <Select
               :model-value="filters.classroomId"
               @update:model-value="
-                filters.classroomId =
-                  typeof $event === 'string' ? $event : 'all'
+                (val) => {
+                  filters.classroomId = typeof val === 'string' ? val : 'all'
+                }
               "
             >
               <SelectTrigger
@@ -241,7 +239,7 @@ onMounted(async () => {
       v-if="isAdmin"
       v-model:open="isAddModalOpen"
       :classrooms="classrooms"
-      :classroom-levels="classroomLevels"
+      :grades="grades"
       :form-error="formError"
       :is-saving="isSaving"
       @save="handleSaveStudent"

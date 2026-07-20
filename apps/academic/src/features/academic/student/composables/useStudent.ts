@@ -11,7 +11,7 @@ export function useStudent() {
 
     fetchStudents: studentService.fetchStudents,
     fetchClassrooms: studentService.fetchClassrooms,
-    fetchClassroomLevels: studentService.fetchClassroomLevels,
+    fetchGrades: studentService.fetchGrades,
     saveStudent: studentService.saveStudent,
     deleteStudent: studentService.deleteStudent,
     toggleActive: studentService.toggleActive,

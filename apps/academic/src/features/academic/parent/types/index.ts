@@ -63,7 +63,7 @@ export const INCOME_RANGE_LABELS: Record<IncomeRange, string> = {
   ABOVE_3M: '> Rp 3.000.000',
 }
 
-export const getIncomeRangeLabel = (income: IncomeRange | null | undefined) => {
+export const getIncomeRangeLabel = (income?: IncomeRange | null) => {
   if (!income) return '-'
   return INCOME_RANGE_LABELS[income] ?? income
 }

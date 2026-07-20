@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import type { CurriculumSubject } from '../types'
 import type { Subject } from '@/features/academic/subject'
-import type { ClassroomLevel } from '@/features/academic/classroom-level'
+import type { Grade } from '@/features/academic/grade'
 
 export const useCurriculumSubjectStore = defineStore(
   'curriculumSubject',
@@ -14,9 +14,9 @@ export const useCurriculumSubjectStore = defineStore(
     const formError = ref<string | null>(null)
 
     const subjects = ref<Subject[]>([])
-    const classroomLevels = ref<ClassroomLevel[]>([])
+    const grades = ref<Grade[]>([])
 
-    const selectedClassroomLevelId = ref<string>('')
+    const selectedGradeId = ref<string>('')
 
     const curriculumName = ref<string>('')
     const curriculumAcademicYear = ref<string>('')
@@ -28,8 +28,8 @@ export const useCurriculumSubjectStore = defineStore(
       isSaving,
       formError,
       subjects,
-      classroomLevels,
-      selectedClassroomLevelId,
+      grades,
+      selectedGradeId,
       curriculumName,
       curriculumAcademicYear,
     }

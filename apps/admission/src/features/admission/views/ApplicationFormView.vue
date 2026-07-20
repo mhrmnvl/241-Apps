@@ -21,8 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/ui/select'
-import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
-import { admissionApi } from '../api/admissionApi'
+import { useMyApplication } from '../composables/useMyApplication'
 import StatusBadge from '../components/StatusBadge.vue'
 import type { AdmissionApplication, ParentRelation } from '../types'
 import {
@@ -33,6 +32,14 @@ import {
 import { formatIDR } from '../utils'
 
 const router = useRouter()
+
+const {
+  fetchMyApplication,
+  updateStep,
+  uploadDocument: uploadDocumentReq,
+  uploadPaymentProof: uploadPaymentProofReq,
+  submit: submitReq,
+} = useMyApplication()
 
 const application = ref<AdmissionApplication | null>(null)
 const loading = ref(true)
@@ -176,14 +183,9 @@ function hydrate(app: AdmissionApplication) {
 }
 
 onMounted(async () => {
-  try {
-    const response = await admissionApi.getMyApplication()
-    hydrate(response.data.data)
-  } catch (e) {
-    toast.error(getIndonesianErrorMessage(e, 'Gagal memuat formulir.'))
-  } finally {
-    loading.value = false
-  }
+  const data = await fetchMyApplication()
+  if (data) hydrate(data)
+  loading.value = false
 })
 
 function documentFor(typeId: string) {
@@ -244,16 +246,12 @@ async function saveStep(): Promise<boolean> {
   if (!payload) return true
 
   isSaving.value = true
-  try {
-    const response = await admissionApi.updateMyApplication(payload)
-    hydrate(response.data.data)
-    return true
-  } catch (e) {
-    toast.error(getIndonesianErrorMessage(e, 'Gagal menyimpan formulir.'))
-    return false
-  } finally {
-    isSaving.value = false
+  const result = await updateStep(payload)
+  if (result.success && result.data) {
+    hydrate(result.data)
   }
+  isSaving.value = false
+  return result.success
 }
 
 async function nextStep() {
@@ -297,17 +295,14 @@ async function uploadDocument(typeCode: string) {
     return
   }
   uploadingDoc.value = typeCode
-  try {
-    await admissionApi.uploadDocument(typeCode, file)
-    const response = await admissionApi.getMyApplication()
-    hydrate(response.data.data)
+  const result = await uploadDocumentReq(typeCode, file)
+  if (result.success) {
+    const data = await fetchMyApplication()
+    if (data) hydrate(data)
     documentFiles.value[typeCode] = null
     toast.success('Berkas berhasil diunggah.')
-  } catch (e) {
-    toast.error(getIndonesianErrorMessage(e, 'Gagal mengunggah berkas.'))
-  } finally {
-    uploadingDoc.value = null
   }
+  uploadingDoc.value = null
 }
 
 function onPaymentFileChange(event: Event) {
@@ -325,39 +320,31 @@ async function uploadPayment() {
     return
   }
   uploadingPayment.value = true
-  try {
-    await admissionApi.uploadPaymentProof(
-      {
-        bankName: payment.value.bankName,
-        senderAccountName: payment.value.senderAccountName,
-        transferDate: payment.value.transferDate || undefined,
-      },
-      paymentFile.value,
-    )
-    const response = await admissionApi.getMyApplication()
-    hydrate(response.data.data)
+  const result = await uploadPaymentProofReq(
+    {
+      bankName: payment.value.bankName,
+      senderAccountName: payment.value.senderAccountName,
+      transferDate: payment.value.transferDate || undefined,
+    },
+    paymentFile.value,
+  )
+  if (result.success) {
+    const data = await fetchMyApplication()
+    if (data) hydrate(data)
     paymentFile.value = null
     toast.success('Bukti pembayaran berhasil diunggah.')
-  } catch (e) {
-    toast.error(
-      getIndonesianErrorMessage(e, 'Gagal mengunggah bukti pembayaran.'),
-    )
-  } finally {
-    uploadingPayment.value = false
   }
+  uploadingPayment.value = false
 }
 
 async function submitApplication() {
   isSubmitting.value = true
-  try {
-    await admissionApi.submitMyApplication()
+  const result = await submitReq()
+  if (result.success) {
     toast.success('Formulir berhasil dikirim! Menunggu verifikasi admin.')
     await router.push('/pendaftaran')
-  } catch (e) {
-    toast.error(getIndonesianErrorMessage(e, 'Gagal mengirim formulir.'))
-  } finally {
-    isSubmitting.value = false
   }
+  isSubmitting.value = false
 }
 </script>
 

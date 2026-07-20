@@ -15,7 +15,7 @@ export interface CurriculumSubjectSubject {
   code?: string | null
 }
 
-export interface CurriculumSubjectClassroomLevel {
+export interface CurriculumSubjectGrade {
   id: string
   name: string
   level: number
@@ -24,17 +24,19 @@ export interface CurriculumSubjectClassroomLevel {
 export interface CurriculumSubject {
   id: string
   curriculumId: string
-  classroomLevelId: string
+  gradeId: string
+  classroomLevelId?: string
   subjectId: string
   hoursPerWeek: number
   curriculum?: CurriculumSubjectCurriculum
   subject?: CurriculumSubjectSubject
-  classroomLevel?: CurriculumSubjectClassroomLevel
+  grade?: CurriculumSubjectGrade
+  classroomLevel?: CurriculumSubjectGrade
 }
 
 export interface CurriculumSubjectSavePayload {
   curriculumId: string
-  classroomLevelId: string
+  gradeId: string
   subjectId: string
   hoursPerWeek?: number
 }
@@ -43,7 +45,7 @@ export interface CurriculumSubjectQueryParams {
   page?: number
   limit?: number
   curriculumId?: string
-  classroomLevelId?: string
+  gradeId?: string
   subjectId?: string
 }
 

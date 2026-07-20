@@ -51,7 +51,11 @@ const emit = defineEmits<{
         <Badge
           variant="outline"
           class="text-right"
-          >{{ currentClassroom?.classroomLevel?.name ?? '-' }}</Badge
+          >{{
+            currentClassroom?.grade?.name ??
+            currentClassroom?.classroomLevel?.name ??
+            '-'
+          }}</Badge
         >
       </div>
       <div class="flex items-center justify-between gap-2">

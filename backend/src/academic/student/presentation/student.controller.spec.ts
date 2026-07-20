@@ -107,7 +107,7 @@ describe('StudentController', () => {
         gender: UserGender.MALE,
         birthPlace: 'Malang',
         birthDate: '2008-01-01',
-        classroomLevelId: 'GRADE_7',
+        gradeId: 'GRADE_7',
         nis: '2024001',
         nisn: '0012345678',
       };

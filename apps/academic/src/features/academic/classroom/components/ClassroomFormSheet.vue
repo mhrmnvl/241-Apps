@@ -1,12 +1,7 @@
 <script setup lang="ts">
 import { computed, toRefs } from 'vue'
 import { useClassroomForm } from '../composables/useClassroomForm'
-import type {
-  AcademicYear,
-  Classroom,
-  ClassroomLevel,
-  Curricula,
-} from '../types'
+import type { AcademicYear, Classroom, Curricula, Grade } from '../types'
 import { Alert, AlertDescription, AlertTitle } from '@/ui/alert'
 import {
   AlertDialog,
@@ -49,7 +44,7 @@ const props = defineProps<{
   open: boolean
   curricula: Curricula[]
   academicYears: AcademicYear[]
-  classroomLevels?: ClassroomLevel[]
+  grades?: Grade[]
   editData?: Classroom | null
 }>()
 
@@ -169,7 +164,7 @@ const classroomForm = useClassroomForm({
 
             <FormField
               v-slot="{ value, handleChange }"
-              name="classroomLevelId"
+              name="gradeId"
             >
               <FormItem>
                 <FormLabel
@@ -186,7 +181,7 @@ const classroomForm = useClassroomForm({
                   </FormControl>
                   <SelectContent>
                     <SelectItem
-                      v-for="lvl in classroomLevels"
+                      v-for="lvl in grades"
                       :key="lvl.id"
                       :value="lvl.id"
                     >

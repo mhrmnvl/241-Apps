@@ -2,7 +2,7 @@ import { useClassroomStore } from '../stores/classroomStore'
 import { academicYearApi } from '@/features/academic/academic-year'
 import { curriculaApi } from '@/features/academic/curriculum'
 import { teacherApi } from '@/features/academic/teacher'
-import { classroomLevelApi } from '@/features/academic/classroom-level'
+import { gradeApi } from '@/features/academic/grade'
 import { semesterApi } from '@/features/academic/semester'
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
 import { toast } from 'vue-sonner'
@@ -32,11 +32,11 @@ export const classroomReferenceService = {
     }
   },
 
-  fetchClassroomLevels: async () => {
+  fetchGrades: async () => {
     const store = useClassroomStore()
     try {
-      const res = await classroomLevelApi.getClassroomLevels({ limit: 100 })
-      store.classroomLevels = res.data.data ?? []
+      const res = await gradeApi.getGrades({ limit: 100 })
+      store.grades = res.data.data ?? []
     } catch (error: unknown) {
       toast.error(
         getIndonesianErrorMessage(error, 'Gagal memuat data tingkat kelas.'),

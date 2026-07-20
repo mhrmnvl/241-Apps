@@ -14,13 +14,7 @@ export class PrismaCurriculumSubjectRepository extends ICurriculumSubjectReposit
   }
 
   async findAll(query: CurriculumSubjectQueryDto) {
-    const {
-      page = 1,
-      limit = 10,
-      curriculumId,
-      classroomLevelId: gradeId,
-      subjectId,
-    } = query;
+    const { page = 1, limit = 10, curriculumId, gradeId, subjectId } = query;
     const skip = (page - 1) * limit;
 
     const where: Prisma.CurriculumSubjectWhereInput = {

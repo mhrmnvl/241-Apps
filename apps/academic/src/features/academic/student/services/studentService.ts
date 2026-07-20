@@ -12,7 +12,7 @@ import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
 import { toast } from 'vue-sonner'
 import api from '@/shared/utils/api'
 import type { ApiPaginatedResponse } from '@/shared/types/api'
-import type { ClassroomLevelOption } from '../types'
+import type { GradeOption } from '../types'
 
 export const studentService = {
   fetchStudents: async () => {
@@ -35,15 +35,13 @@ export const studentService = {
     }
   },
 
-  fetchClassrooms: async (classroomLevelId?: string) => {
+  fetchClassrooms: async (gradeId?: string) => {
     const store = useStudentStore()
     try {
       const res = await classroomApi.getClassrooms({
         limit: 100,
         isActive: true,
-        ...(classroomLevelId && classroomLevelId !== 'all'
-          ? { classroomLevelId }
-          : {}),
+        ...(gradeId && gradeId !== 'all' ? { gradeId } : {}),
       })
       store.classrooms = res.data.data
     } catch (error: unknown) {
@@ -51,14 +49,13 @@ export const studentService = {
     }
   },
 
-  fetchClassroomLevels: async () => {
+  fetchGrades: async () => {
     const store = useStudentStore()
     try {
-      const res = await api.get<ApiPaginatedResponse<ClassroomLevelOption>>(
-        '/classroom-levels',
-        { params: { limit: 100, isActive: true } },
-      )
-      store.classroomLevels = res.data.data
+      const res = await api.get<ApiPaginatedResponse<GradeOption>>('/grades', {
+        params: { limit: 100, isActive: true },
+      })
+      store.grades = res.data.data
     } catch (error: unknown) {
       toast.error(
         getIndonesianErrorMessage(error, 'Gagal memuat tingkat kelas.'),
@@ -123,9 +120,9 @@ export const studentService = {
 
   updateStudentCredentials: async (
     studentId: string,
-    userId: string | undefined,
     payload: StudentAccountUpdatePayload,
-    currentIsActive: boolean | undefined,
+    userId?: string,
+    currentIsActive?: boolean,
   ) => {
     if (payload.isActive !== currentIsActive) {
       await studentApi.toggleActive(studentId, payload.isActive)

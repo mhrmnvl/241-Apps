@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed, h, onMounted, ref } from 'vue'
-import { toast } from 'vue-sonner'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { DataTable, ActionCell } from '@/ui'
 import { Button } from '@/ui/button'
@@ -8,20 +7,22 @@ import { Card, CardHeader, CardTitle } from '@/ui/card'
 import { Badge } from '@/ui/badge'
 import { Plus } from 'lucide-vue-next'
 import type { ColumnDef } from '@tanstack/vue-table'
-import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
-import { admissionApi } from '../api/admissionApi'
+import { useAnnouncementList } from '../composables/useAnnouncementList'
 import AnnouncementFormSheet from '../components/AnnouncementFormSheet.vue'
-import type {
-  AdmissionAnnouncement,
-  AdmissionWaveSummary,
-  AnnouncementSavePayload,
-} from '../types'
+import type { AdmissionAnnouncement, AnnouncementSavePayload } from '../types'
 import { formatDateTime } from '../utils'
 
-const announcements = ref<AdmissionAnnouncement[]>([])
-const waves = ref<AdmissionWaveSummary[]>([])
-const loading = ref(false)
-const isSaving = ref(false)
+const {
+  announcements,
+  waves,
+  loading,
+  isSaving,
+  fetchData,
+  saveAnnouncement,
+  publishAnnouncement,
+  deleteAnnouncement,
+} = useAnnouncementList()
+
 const isFormOpen = ref(false)
 const selected = ref<AdmissionAnnouncement | null>(null)
 
@@ -69,7 +70,7 @@ const columns = computed<ColumnDef<AdmissionAnnouncement>[]>(() => [
             {
               size: 'sm',
               variant: 'outline',
-              onClick: () => publish(row.original.id),
+              onClick: () => handlePublish(row.original.id),
             },
             () => 'Terbitkan',
           ),
@@ -81,27 +82,11 @@ const columns = computed<ColumnDef<AdmissionAnnouncement>[]>(() => [
     cell: ({ row }) =>
       h(ActionCell, {
         onEdit: () => openEditForm(row.original),
-        onDelete: () => remove(row.original.id),
+        onDelete: () => handleDelete(row.original.id),
       }),
     enableSorting: false,
   },
 ])
-
-async function fetchData() {
-  loading.value = true
-  try {
-    const [annRes, waveRes] = await Promise.all([
-      admissionApi.getManageAnnouncements({ limit: 100 }),
-      admissionApi.getWaves({ limit: 100 }),
-    ])
-    announcements.value = annRes.data.data ?? []
-    waves.value = waveRes.data.data ?? []
-  } catch (e) {
-    toast.error(getIndonesianErrorMessage(e, 'Gagal memuat pengumuman.'))
-  } finally {
-    loading.value = false
-  }
-}
 
 onMounted(fetchData)
 
@@ -115,26 +100,15 @@ function openEditForm(announcement: AdmissionAnnouncement) {
   isFormOpen.value = true
 }
 
-async function save(payload: AnnouncementSavePayload) {
-  isSaving.value = true
-  try {
-    if (selected.value) {
-      await admissionApi.updateAnnouncement(selected.value.id, payload)
-      toast.success('Pengumuman diperbarui.')
-    } else {
-      await admissionApi.createAnnouncement(payload)
-      toast.success('Pengumuman dibuat (draft).')
-    }
+async function handleSave(payload: AnnouncementSavePayload) {
+  const result = await saveAnnouncement(selected.value?.id ?? null, payload)
+  if (result.success) {
     isFormOpen.value = false
     await fetchData()
-  } catch (e) {
-    toast.error(getIndonesianErrorMessage(e, 'Gagal menyimpan pengumuman.'))
-  } finally {
-    isSaving.value = false
   }
 }
 
-async function publish(id: string) {
+async function handlePublish(id: string) {
   if (
     !window.confirm(
       'Terbitkan pengumuman ini? Semua pendaftar dalam cakupan akan menerima notifikasi.',
@@ -142,23 +116,17 @@ async function publish(id: string) {
   ) {
     return
   }
-  try {
-    await admissionApi.publishAnnouncement(id)
-    toast.success('Pengumuman diterbitkan dan notifikasi dikirim.')
+  const result = await publishAnnouncement(id)
+  if (result.success) {
     await fetchData()
-  } catch (e) {
-    toast.error(getIndonesianErrorMessage(e, 'Gagal menerbitkan pengumuman.'))
   }
 }
 
-async function remove(id: string) {
+async function handleDelete(id: string) {
   if (!window.confirm('Hapus pengumuman ini?')) return
-  try {
-    await admissionApi.deleteAnnouncement(id)
-    toast.success('Pengumuman dihapus.')
+  const result = await deleteAnnouncement(id)
+  if (result.success) {
     await fetchData()
-  } catch (e) {
-    toast.error(getIndonesianErrorMessage(e, 'Gagal menghapus pengumuman.'))
   }
 }
 </script>
@@ -196,7 +164,7 @@ async function remove(id: string) {
         :announcement="selected"
         :is-saving="isSaving"
         :waves="waves"
-        @save="save"
+        @save="handleSave"
       />
     </div>
   </AppLayout>

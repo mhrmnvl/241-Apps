@@ -20,10 +20,7 @@ export class PrismaAcademicCalendarRepository extends IAcademicCalendarRepositor
     const { page = 1, limit = 50, academicYearId, semesterId, typeId } = query;
     const skip = (page - 1) * limit;
 
-    let resolvedAcademicYearId = academicYearId;
-    if (!resolvedAcademicYearId && !semesterId) {
-      resolvedAcademicYearId = await resolveAcademicYearId(this.prisma);
-    }
+    const resolvedAcademicYearId = academicYearId;
 
     const where: Prisma.AcademicCalendarWhereInput = {
       deletedAt: null,

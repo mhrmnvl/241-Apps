@@ -1,14 +1,14 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { CreateClassroomLevelUseCase } from '../use-cases/create-grade.use-case.js';
-import { DeleteClassroomLevelUseCase } from '../use-cases/delete-grade.use-case.js';
-import { GetClassroomLevelByIdUseCase } from '../use-cases/get-grade-by-id.use-case.js';
-import { GetClassroomLevelsUseCase } from '../use-cases/get-grades.use-case.js';
-import { UpdateClassroomLevelUseCase } from '../use-cases/update-grade.use-case.js';
-import { ClassroomLevelsController } from './grade.controller.js';
+import { CreateGradeUseCase } from '../use-cases/create-grade.use-case.js';
+import { DeleteGradeUseCase } from '../use-cases/delete-grade.use-case.js';
+import { GetGradeByIdUseCase } from '../use-cases/get-grade-by-id.use-case.js';
+import { GetGradesUseCase } from '../use-cases/get-grades.use-case.js';
+import { UpdateGradeUseCase } from '../use-cases/update-grade.use-case.js';
+import { GradesController } from './grade.controller.js';
 import type { AuthenticatedUser } from '../../../core/types/authenticated-user.type.js';
 
-describe('ClassroomLevelsController', () => {
-  let controller: ClassroomLevelsController;
+describe('GradesController', () => {
+  let controller: GradesController;
 
   const mockGetAll = { execute: jest.fn() };
   const mockGetById = { execute: jest.fn() };
@@ -18,19 +18,17 @@ describe('ClassroomLevelsController', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [ClassroomLevelsController],
+      controllers: [GradesController],
       providers: [
-        { provide: GetClassroomLevelsUseCase, useValue: mockGetAll },
-        { provide: GetClassroomLevelByIdUseCase, useValue: mockGetById },
-        { provide: CreateClassroomLevelUseCase, useValue: mockCreate },
-        { provide: UpdateClassroomLevelUseCase, useValue: mockUpdate },
-        { provide: DeleteClassroomLevelUseCase, useValue: mockDelete },
+        { provide: GetGradesUseCase, useValue: mockGetAll },
+        { provide: GetGradeByIdUseCase, useValue: mockGetById },
+        { provide: CreateGradeUseCase, useValue: mockCreate },
+        { provide: UpdateGradeUseCase, useValue: mockUpdate },
+        { provide: DeleteGradeUseCase, useValue: mockDelete },
       ],
     }).compile();
 
-    controller = module.get<ClassroomLevelsController>(
-      ClassroomLevelsController,
-    );
+    controller = module.get<GradesController>(GradesController);
     jest.clearAllMocks();
   });
 

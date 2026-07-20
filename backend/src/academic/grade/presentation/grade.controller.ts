@@ -21,27 +21,27 @@ import {
 import { JwtAuthGuard } from '../../../platform/auth/index.js';
 import { CurrentUser } from '../../../core/decorators/current-user.decorator.js';
 import type { AuthenticatedUser } from '../../../core/types/authenticated-user.type.js';
-import { ClassroomLevelQueryDto } from '../dto/grade-query.dto.js';
+import { GradeQueryDto } from '../dto/grade-query.dto.js';
 import { GradeResponseDto } from '../dto/grade-response.dto.js';
 import { CreateGradeDto } from '../dto/create-grade.dto.js';
 import { UpdateGradeDto } from '../dto/update-grade.dto.js';
-import { CreateClassroomLevelUseCase } from '../use-cases/create-grade.use-case.js';
-import { DeleteClassroomLevelUseCase } from '../use-cases/delete-grade.use-case.js';
-import { GetClassroomLevelByIdUseCase } from '../use-cases/get-grade-by-id.use-case.js';
-import { GetClassroomLevelsUseCase } from '../use-cases/get-grades.use-case.js';
-import { UpdateClassroomLevelUseCase } from '../use-cases/update-grade.use-case.js';
+import { CreateGradeUseCase } from '../use-cases/create-grade.use-case.js';
+import { DeleteGradeUseCase } from '../use-cases/delete-grade.use-case.js';
+import { GetGradeByIdUseCase } from '../use-cases/get-grade-by-id.use-case.js';
+import { GetGradesUseCase } from '../use-cases/get-grades.use-case.js';
+import { UpdateGradeUseCase } from '../use-cases/update-grade.use-case.js';
 
 @ApiTags('Grades')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @Controller('grades')
-export class ClassroomLevelsController {
+export class GradesController {
   constructor(
-    private readonly getClassroomLevelsService: GetClassroomLevelsUseCase,
-    private readonly getClassroomLevelByIdService: GetClassroomLevelByIdUseCase,
-    private readonly createClassroomLevelService: CreateClassroomLevelUseCase,
-    private readonly updateClassroomLevelService: UpdateClassroomLevelUseCase,
-    private readonly deleteClassroomLevelService: DeleteClassroomLevelUseCase,
+    private readonly getGradesService: GetGradesUseCase,
+    private readonly getGradeByIdService: GetGradeByIdUseCase,
+    private readonly createGradeService: CreateGradeUseCase,
+    private readonly updateGradeService: UpdateGradeUseCase,
+    private readonly deleteGradeService: DeleteGradeUseCase,
   ) {}
 
   @Get()
@@ -49,9 +49,9 @@ export class ClassroomLevelsController {
   @ApiResponse({ status: 200, type: [GradeResponseDto] })
   async findAll(
     @CurrentUser() user: AuthenticatedUser,
-    @Query() query: ClassroomLevelQueryDto,
+    @Query() query: GradeQueryDto,
   ) {
-    return this.getClassroomLevelsService.execute(query);
+    return this.getGradesService.execute(query);
   }
 
   @Get(':id')
@@ -62,7 +62,7 @@ export class ClassroomLevelsController {
     @CurrentUser() user: AuthenticatedUser,
     @Param('id', ParseUUIDPipe) id: string,
   ) {
-    return this.getClassroomLevelByIdService.execute(id);
+    return this.getGradeByIdService.execute(id);
   }
 
   @Post()
@@ -73,7 +73,7 @@ export class ClassroomLevelsController {
     @CurrentUser() user: AuthenticatedUser,
     @Body() dto: CreateGradeDto,
   ) {
-    return this.createClassroomLevelService.execute(dto);
+    return this.createGradeService.execute(dto);
   }
 
   @Patch(':id')
@@ -86,7 +86,7 @@ export class ClassroomLevelsController {
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateGradeDto,
   ) {
-    return this.updateClassroomLevelService.execute(id, dto);
+    return this.updateGradeService.execute(id, dto);
   }
 
   @Delete(':id')
@@ -98,6 +98,6 @@ export class ClassroomLevelsController {
     @CurrentUser() user: AuthenticatedUser,
     @Param('id', ParseUUIDPipe) id: string,
   ) {
-    return this.deleteClassroomLevelService.execute(id);
+    return this.deleteGradeService.execute(id);
   }
 }

@@ -24,10 +24,9 @@ export class PrismaGraduationRepository extends IGraduationRepository {
     const { page = 1, limit = 10, academicYearId, search } = query;
     const skip = (page - 1) * limit;
 
-    const resolvedAcademicYearId = await resolveAcademicYearId(
-      this.prisma,
-      academicYearId,
-    );
+    const resolvedAcademicYearId = academicYearId
+      ? await resolveAcademicYearId(this.prisma, academicYearId)
+      : undefined;
 
     const where: Prisma.StudentGraduationWhereInput = {
       deletedAt: null,

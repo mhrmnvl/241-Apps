@@ -1,9 +1,11 @@
-export interface ClassroomLevelOption {
+export interface GradeOption {
   id: string
   level: number
   name: string
   isActive: boolean
 }
+
+export type ClassroomLevelOption = GradeOption
 
 export interface StudentProfile {
   id: string
@@ -29,7 +31,7 @@ export interface StudentClassroom {
   id: string
   code: string
   name: string
-  classroomLevelId: string
+  gradeId: string
   capacity: number
   isActive: boolean
 }
@@ -39,7 +41,8 @@ export interface Student {
   nis: string
   nisn: string
   status: string
-  classroomLevelId: string | null
+  gradeId: string | null
+  classroomLevelId?: string | null
   user: StudentUser
   enrollments?: StudentEnrollmentRef[]
 }
@@ -74,14 +77,14 @@ export interface StudentSavePayload {
   birthDate: string
   email?: string
   phone?: string
-  classroomLevelId?: string
+  gradeId?: string
   classroomId?: string
   nis: string
   nisn: string
 }
 
 export interface StudentUpdatePayload {
-  classroomLevelId?: string
+  gradeId?: string
   classroomId?: string
   nis?: string
   nisn?: string

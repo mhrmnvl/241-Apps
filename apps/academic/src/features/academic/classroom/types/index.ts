@@ -3,6 +3,7 @@ export type { Curricula } from '@/features/academic/curriculum'
 export type { Semester } from '@/features/academic/semester'
 
 export type {
+  Grade,
   ClassroomLevel,
   ClassroomSupervisorProfile,
   ClassroomSupervisorUser,

@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted } from 'vue'
 import { RouterLink } from 'vue-router'
-import { toast } from 'vue-sonner'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { Button } from '@/ui/button'
 import {
@@ -13,23 +12,21 @@ import {
 } from '@/ui/card'
 import { Badge } from '@/ui/badge'
 import { Bell, CheckCircle2, Circle, Megaphone } from 'lucide-vue-next'
-import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
-import { admissionApi } from '../api/admissionApi'
+import { useMyApplication } from '../composables/useMyApplication'
 import StatusBadge from '../components/StatusBadge.vue'
-import type {
-  AdmissionAnnouncement,
-  AdmissionApplication,
-  AdmissionNotification,
-  AdmissionStatus,
-} from '../types'
+import type { AdmissionStatus } from '../types'
 import { PAYMENT_STATUS_LABELS, STATUS_LABELS } from '../types'
 import { formatDateTime, formatIDR } from '../utils'
 
-const application = ref<AdmissionApplication | null>(null)
-const notifications = ref<AdmissionNotification[]>([])
-const unreadCount = ref(0)
-const announcements = ref<AdmissionAnnouncement[]>([])
-const loading = ref(true)
+const {
+  application,
+  notifications,
+  unreadCount,
+  announcements,
+  loading,
+  fetchDashboard,
+  markAllRead,
+} = useMyApplication()
 
 const breadcrumbs = [{ title: 'Status Pendaftaran' }]
 
@@ -61,36 +58,9 @@ const requiredDocsUploaded = computed(() => {
   return { done, total: requiredTypes.length }
 })
 
-onMounted(async () => {
-  try {
-    const [appRes, notifRes, annRes] = await Promise.all([
-      admissionApi.getMyApplication(),
-      admissionApi.getMyNotifications(),
-      admissionApi.getAnnouncements(),
-    ])
-    application.value = appRes.data.data
-    notifications.value = notifRes.data.data.data
-    unreadCount.value = notifRes.data.data.unreadCount
-    announcements.value = annRes.data.data
-  } catch (e) {
-    toast.error(getIndonesianErrorMessage(e, 'Gagal memuat data pendaftaran.'))
-  } finally {
-    loading.value = false
-  }
+onMounted(() => {
+  void fetchDashboard()
 })
-
-async function markAllRead() {
-  try {
-    await admissionApi.markAllNotificationsRead()
-    notifications.value = notifications.value.map((n) => ({
-      ...n,
-      readAt: n.readAt ?? new Date().toISOString(),
-    }))
-    unreadCount.value = 0
-  } catch (e) {
-    toast.error(getIndonesianErrorMessage(e, 'Gagal menandai notifikasi.'))
-  }
-}
 </script>
 
 <template>

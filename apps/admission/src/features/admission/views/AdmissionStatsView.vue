@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
-import { toast } from 'vue-sonner'
+import { onMounted } from 'vue'
 import AppLayout from '@/layouts/AppLayout.vue'
 import {
   Card,
@@ -9,14 +8,11 @@ import {
   CardHeader,
   CardTitle,
 } from '@/ui/card'
-import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
-import { admissionApi } from '../api/admissionApi'
-import type { AdmissionStats } from '../types'
+import { useAdmissionStats } from '../composables/useAdmissionStats'
 import { STATUS_LABELS } from '../types'
 import type { AdmissionStatus } from '../types'
 
-const stats = ref<AdmissionStats | null>(null)
-const loading = ref(true)
+const { stats, loading, fetchStats } = useAdmissionStats()
 
 const breadcrumbs = [{ title: 'Dashboard PSB' }]
 
@@ -30,15 +26,8 @@ const STATUS_ORDER: AdmissionStatus[] = [
   'ENROLLED',
 ]
 
-onMounted(async () => {
-  try {
-    const response = await admissionApi.getStats()
-    stats.value = response.data.data
-  } catch (e) {
-    toast.error(getIndonesianErrorMessage(e, 'Gagal memuat statistik PSB.'))
-  } finally {
-    loading.value = false
-  }
+onMounted(() => {
+  void fetchStats()
 })
 </script>
 

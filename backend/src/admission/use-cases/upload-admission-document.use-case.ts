@@ -6,8 +6,8 @@ import {
 } from '@nestjs/common';
 import * as fs from 'fs';
 import * as path from 'path';
-import { PrismaService } from '../../core/database/prisma.service.js';
 import { isEditable } from '../domain/admission-status.transitions.js';
+import { IAdmissionApplicantRepository } from '../domain/interfaces/admission-applicant-repository.interface.js';
 
 export const ADMISSION_ALLOWED_MIME_TYPES = [
   'image/jpeg',
@@ -41,7 +41,7 @@ export function saveAdmissionFile(
 
 @Injectable()
 export class UploadAdmissionDocumentUseCase {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly repository: IAdmissionApplicantRepository) {}
 
   async execute(
     userId: string,
@@ -50,9 +50,7 @@ export class UploadAdmissionDocumentUseCase {
   ) {
     assertValidAdmissionFile(file);
 
-    const application = await this.prisma.admissionApplication.findFirst({
-      where: { userId, deletedAt: null },
-    });
+    const application = await this.repository.findMyApplication(userId);
     if (!application) {
       throw new NotFoundException('Data pendaftaran tidak ditemukan');
     }
@@ -62,9 +60,8 @@ export class UploadAdmissionDocumentUseCase {
       );
     }
 
-    const documentType = await this.prisma.admissionDocumentType.findFirst({
-      where: { code: documentTypeCode, isActive: true },
-    });
+    const documentType =
+      await this.repository.findDocumentTypeByCode(documentTypeCode);
     if (!documentType) {
       throw new NotFoundException(
         `Jenis berkas '${documentTypeCode}' tidak dikenal`,
@@ -73,41 +70,17 @@ export class UploadAdmissionDocumentUseCase {
 
     const { filename, storageKey } = saveAdmissionFile(file, application.id);
 
-    return this.prisma.$transaction(async (tx) => {
-      const fileRow = await tx.file.create({
-        data: {
-          filename,
-          originalName: file.originalname,
-          mimeType: file.mimetype,
-          sizeBytes: file.size,
-          storageKey,
-          uploadedBy: userId,
-        },
-      });
-
-      // Re-upload replaces the file and resets verification to PENDING.
-      return tx.admissionDocument.upsert({
-        where: {
-          applicationId_documentTypeId: {
-            applicationId: application.id,
-            documentTypeId: documentType.id,
-          },
-        },
-        update: {
-          fileId: fileRow.id,
-          status: 'PENDING',
-          note: null,
-          verifiedById: null,
-          verifiedAt: null,
-        },
-        create: {
-          applicationId: application.id,
-          documentTypeId: documentType.id,
-          fileId: fileRow.id,
-          status: 'PENDING',
-        },
-        include: { documentType: true, file: true },
-      });
+    return this.repository.saveDocument({
+      applicationId: application.id,
+      documentTypeId: documentType.id,
+      file: {
+        filename,
+        originalName: file.originalname,
+        mimeType: file.mimetype,
+        sizeBytes: file.size,
+        storageKey,
+        uploadedBy: userId,
+      },
     });
   }
 }

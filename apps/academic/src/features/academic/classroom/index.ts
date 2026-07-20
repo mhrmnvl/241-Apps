@@ -16,6 +16,7 @@ export type {
   AcademicYear,
   Curricula,
   Semester,
+  Grade,
   ClassroomLevel,
   ClassroomSupervisorProfile,
   ClassroomSupervisorUser,

@@ -3,7 +3,7 @@ import * as bcrypt from 'bcrypt';
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { IClassroomLevelsRepository } from '../../grade/domain/interfaces/classroom-levels-repository.interface.js';
+import { IGradeRepository } from '../../grade/domain/interfaces/grade-repository.interface.js';
 import { ClassroomRepository } from '../../classroom/index.js';
 import {
   BulkImportRowResultDto,
@@ -20,7 +20,7 @@ export class BulkImportStudentsUseCase {
   constructor(
     private readonly repo: StudentRepository,
     private readonly classroomRepo: ClassroomRepository,
-    private readonly gradeRepo: IClassroomLevelsRepository,
+    private readonly gradeRepo: IGradeRepository,
     private readonly eventEmitter: EventEmitter2,
     private readonly excelParser: ExcelStudentParser,
   ) {}
@@ -53,7 +53,7 @@ export class BulkImportStudentsUseCase {
       }
 
       try {
-        let resolvedClassroomLevelId: string | undefined;
+        let resolvedGradeId: string | undefined;
         if (dto.grade) {
           const level = await this.gradeRepo.findByLevel(dto.grade);
           if (!level) {
@@ -65,7 +65,7 @@ export class BulkImportStudentsUseCase {
             });
             continue;
           }
-          resolvedClassroomLevelId = level.id;
+          resolvedGradeId = level.id;
         }
 
         let resolvedClassroomId: string | undefined;
@@ -120,7 +120,7 @@ export class BulkImportStudentsUseCase {
           birthDate: dto.birthDate,
           email: dto.email,
           phone: dto.phone,
-          classroomLevelId: resolvedClassroomLevelId,
+          gradeId: resolvedGradeId,
           nis: dto.nis,
           nisn: dto.nisn,
         };

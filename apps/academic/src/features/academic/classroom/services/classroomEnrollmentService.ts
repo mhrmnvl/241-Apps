@@ -69,7 +69,8 @@ export const classroomEnrollmentService = {
           id: s.id,
           nis: s.nis,
           nisn: s.nisn,
-          classroomLevelId: s.classroomLevelId ?? null,
+          gradeId: s.gradeId ?? null,
+          classroomLevelId: s.gradeId ?? null,
           user: {
             profile: {
               name: s.user.profile.name,

@@ -24,10 +24,8 @@ import {
   DialogTitle,
 } from '@/ui/dialog'
 import { ExternalLink } from 'lucide-vue-next'
-import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
-import { admissionApi } from '../api/admissionApi'
+import { useApplicationDetail } from '../composables/useApplicationDetail'
 import StatusBadge from '../components/StatusBadge.vue'
-import type { AdmissionApplication } from '../types'
 import {
   DOCUMENT_STATUS_LABELS,
   PAYMENT_STATUS_LABELS,
@@ -39,9 +37,21 @@ const route = useRoute()
 const router = useRouter()
 const applicationId = route.params.id as string
 
-const application = ref<AdmissionApplication | null>(null)
-const loading = ref(true)
-const acting = ref(false)
+const {
+  application,
+  loading,
+  acting,
+  fetchDetail,
+  approveDocument,
+  rejectDocument,
+  verifyPaymentApprove,
+  rejectPayment,
+  requestRevision,
+  verifyApplication,
+  accept,
+  reject,
+  enroll,
+} = useApplicationDetail()
 
 const breadcrumbs = [
   { title: 'Admin PSB', href: '/admin' },
@@ -75,19 +85,9 @@ const documentRows = computed(() =>
   })),
 )
 
-async function fetchDetail() {
-  loading.value = true
-  try {
-    const response = await admissionApi.getApplicationById(applicationId)
-    application.value = response.data.data
-  } catch (e) {
-    toast.error(getIndonesianErrorMessage(e, 'Gagal memuat detail pendaftar.'))
-  } finally {
-    loading.value = false
-  }
-}
-
-onMounted(fetchDetail)
+onMounted(() => {
+  void fetchDetail(applicationId)
+})
 
 function openDialog(kind: DialogKind, docId?: string) {
   dialogKind.value = kind
@@ -95,115 +95,65 @@ function openDialog(kind: DialogKind, docId?: string) {
   dialogDocId.value = docId ?? null
 }
 
-async function runAction(
-  action: () => Promise<unknown>,
-  successMessage: string,
-) {
-  acting.value = true
-  try {
-    await action()
-    toast.success(successMessage)
-    dialogKind.value = null
-    await fetchDetail()
-  } catch (e) {
-    toast.error(getIndonesianErrorMessage(e, 'Aksi gagal dijalankan.'))
-  } finally {
-    acting.value = false
-  }
+async function handleApproveDocument(docId: string) {
+  await approveDocument(applicationId, docId)
 }
 
-function approveDocument(docId: string) {
-  void runAction(
-    () =>
-      admissionApi.verifyDocument(applicationId, docId, {
-        status: 'APPROVED',
-      }),
-    'Berkas disetujui.',
-  )
+async function handleVerifyPayment() {
+  await verifyPaymentApprove(applicationId)
 }
 
-function confirmDialog() {
+async function handleVerifyApplication() {
+  await verifyApplication(applicationId)
+}
+
+async function confirmDialog() {
   if (dialogKind.value === 'revision') {
     if (!dialogNote.value.trim()) {
       toast.error('Catatan revisi wajib diisi.')
       return
     }
-    void runAction(
-      () => admissionApi.requestRevision(applicationId, dialogNote.value),
-      'Pendaftaran dikembalikan untuk revisi.',
-    )
+    const r = await requestRevision(applicationId, dialogNote.value)
+    if (r.success) dialogKind.value = null
   } else if (dialogKind.value === 'reject') {
     if (!dialogNote.value.trim()) {
       toast.error('Alasan penolakan wajib diisi.')
       return
     }
-    void runAction(
-      () => admissionApi.rejectApplication(applicationId, dialogNote.value),
-      'Pendaftaran ditolak.',
-    )
+    const r = await reject(applicationId, dialogNote.value)
+    if (r.success) dialogKind.value = null
   } else if (dialogKind.value === 'accept') {
-    void runAction(async () => {
-      const response = await admissionApi.acceptApplication(
-        applicationId,
-        dialogNote.value || undefined,
-      )
-      const warning = response.data.data.quotaWarning
-      if (warning) toast.warning(warning)
-    }, 'Pendaftar dinyatakan DITERIMA.')
+    const r = await accept(applicationId, dialogNote.value || undefined)
+    if (r.success) dialogKind.value = null
   } else if (dialogKind.value === 'enroll') {
     if (!enrollForm.value.nis.trim() || !enrollForm.value.nisn.trim()) {
       toast.error('NIS dan NISN wajib diisi.')
       return
     }
-    void runAction(
-      () =>
-        admissionApi.enrollApplicant(applicationId, {
-          nis: enrollForm.value.nis.trim(),
-          nisn: enrollForm.value.nisn.trim(),
-        }),
-      'Pendaftar berhasil diproses menjadi santri.',
-    )
+    const r = await enroll(applicationId, {
+      nis: enrollForm.value.nis.trim(),
+      nisn: enrollForm.value.nisn.trim(),
+    })
+    if (r.success) dialogKind.value = null
   } else if (dialogKind.value === 'reject-doc' && dialogDocId.value) {
     if (!dialogNote.value.trim()) {
       toast.error('Alasan penolakan berkas wajib diisi.')
       return
     }
-    void runAction(
-      () =>
-        admissionApi.verifyDocument(applicationId, dialogDocId.value!, {
-          status: 'REJECTED',
-          note: dialogNote.value,
-        }),
-      'Berkas ditolak.',
+    const r = await rejectDocument(
+      applicationId,
+      dialogDocId.value,
+      dialogNote.value,
     )
+    if (r.success) dialogKind.value = null
   } else if (dialogKind.value === 'reject-payment') {
     if (!dialogNote.value.trim()) {
       toast.error('Alasan penolakan pembayaran wajib diisi.')
       return
     }
-    void runAction(
-      () =>
-        admissionApi.verifyPayment(applicationId, {
-          status: 'REJECTED',
-          note: dialogNote.value,
-        }),
-      'Bukti pembayaran ditolak.',
-    )
+    const r = await rejectPayment(applicationId, dialogNote.value)
+    if (r.success) dialogKind.value = null
   }
-}
-
-function verifyPaymentApprove() {
-  void runAction(
-    () => admissionApi.verifyPayment(applicationId, { status: 'VERIFIED' }),
-    'Pembayaran diverifikasi.',
-  )
-}
-
-function verifyApplication() {
-  void runAction(
-    () => admissionApi.verifyApplication(applicationId),
-    'Aplikasi diverifikasi.',
-  )
 }
 
 const dialogTitles: Record<Exclude<DialogKind, null>, string> = {
@@ -264,7 +214,7 @@ const dialogTitles: Record<Exclude<DialogKind, null>, string> = {
             </Button>
             <Button
               v-if="status === 'SUBMITTED'"
-              @click="verifyApplication"
+              @click="handleVerifyApplication"
             >
               Verifikasi Aplikasi
             </Button>
@@ -448,7 +398,7 @@ const dialogTitles: Record<Exclude<DialogKind, null>, string> = {
                 <Button
                   size="sm"
                   :disabled="acting"
-                  @click="approveDocument(row.doc.id)"
+                  @click="handleApproveDocument(row.doc.id)"
                 >
                   Setujui
                 </Button>
@@ -521,7 +471,7 @@ const dialogTitles: Record<Exclude<DialogKind, null>, string> = {
                   :disabled="
                     acting || application.payment.status === 'REJECTED'
                   "
-                  @click="verifyPaymentApprove"
+                  @click="handleVerifyPayment"
                 >
                   Verifikasi
                 </Button>

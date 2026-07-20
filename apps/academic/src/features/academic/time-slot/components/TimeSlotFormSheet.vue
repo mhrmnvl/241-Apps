@@ -64,7 +64,7 @@ const open = computed({
 const { editData } = toRefs(props)
 const isEditing = computed(() => !!editData?.value)
 
-function isoToHHMM(isoOrTime: string | undefined): string {
+function isoToHHMM(isoOrTime?: string): string {
   if (!isoOrTime) return ''
   try {
     const d = new Date(isoOrTime)

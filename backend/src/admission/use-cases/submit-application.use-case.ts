@@ -4,10 +4,9 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { PrismaService } from '../../core/database/prisma.service.js';
 import { assertTransition } from '../domain/admission-status.transitions.js';
-import { applicationDetailInclude } from '../domain/admission.includes.js';
 import { serializeApplicationDetail } from '../domain/admission.serializers.js';
+import { IAdmissionApplicantRepository } from '../domain/interfaces/admission-applicant-repository.interface.js';
 import { AdmissionNotificationService } from '../services/admission-notification.service.js';
 
 const REQUIRED_FIELDS = [
@@ -41,15 +40,12 @@ const FIELD_LABELS: Record<string, string> = {
 @Injectable()
 export class SubmitApplicationUseCase {
   constructor(
-    private readonly prisma: PrismaService,
+    private readonly repository: IAdmissionApplicantRepository,
     private readonly notifications: AdmissionNotificationService,
   ) {}
 
   async execute(userId: string) {
-    const application = await this.prisma.admissionApplication.findFirst({
-      where: { userId, deletedAt: null },
-      include: applicationDetailInclude,
-    });
+    const application = await this.repository.findMyDetail(userId);
     if (!application) {
       throw new NotFoundException('Data pendaftaran tidak ditemukan');
     }
@@ -68,9 +64,8 @@ export class SubmitApplicationUseCase {
       missing.push('Data orang tua/wali (minimal satu)');
     }
 
-    const requiredTypes = await this.prisma.admissionDocumentType.findMany({
-      where: { isActive: true, isRequired: true },
-    });
+    const requiredTypes =
+      await this.repository.findRequiredActiveDocumentTypes();
     for (const type of requiredTypes) {
       const doc = application.documents.find(
         (d) => d.documentTypeId === type.id,
@@ -98,21 +93,14 @@ export class SubmitApplicationUseCase {
       );
     }
 
-    const updated = await this.prisma.$transaction(async (tx) => {
-      const app = await tx.admissionApplication.update({
-        where: { id: application.id },
-        data: { status: 'SUBMITTED', submittedAt: new Date() },
-        include: applicationDetailInclude,
-      });
-      await this.notifications.notify(
-        application.id,
-        'STATUS_CHANGE',
-        'Formulir terkirim',
-        'Formulir pendaftaran Anda telah dikirim dan sedang menunggu verifikasi admin.',
-        tx,
-      );
-      return app;
-    });
+    const updated = await this.repository.submitApplication(application.id);
+
+    await this.notifications.notify(
+      application.id,
+      'STATUS_CHANGE',
+      'Formulir terkirim',
+      'Formulir pendaftaran Anda telah dikirim dan sedang menunggu verifikasi admin.',
+    );
 
     return serializeApplicationDetail(updated);
   }

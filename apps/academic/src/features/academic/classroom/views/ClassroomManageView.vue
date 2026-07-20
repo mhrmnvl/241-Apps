@@ -32,12 +32,12 @@ const {
   semesters,
   curricula,
   academicYears,
-  classroomLevels,
+  grades,
   fetchClassrooms,
   fetchSemesters,
   fetchCurricula,
   fetchAcademicYears,
-  fetchClassroomLevels,
+  fetchGrades,
 } = useClassroomList()
 
 const { isAdmin } = useRoleGuard()
@@ -201,7 +201,7 @@ async function reloadData() {
     fetchClassroomSupervisors(classroomId.value),
     fetchCurricula(),
     fetchAcademicYears(),
-    fetchClassroomLevels(),
+    fetchGrades(),
   ])
 
   const semId =
@@ -310,7 +310,7 @@ onMounted(async () => {
         v-model:open="isEditInfoOpen"
         :curricula="curricula"
         :academic-years="academicYears"
-        :classroom-levels="classroomLevels"
+        :grades="grades"
         :edit-data="currentClassroom"
         @save-success="reloadData"
       />

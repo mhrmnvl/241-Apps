@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed, h, onMounted, ref } from 'vue'
-import { toast } from 'vue-sonner'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { DataTable, ActionCell } from '@/ui'
 import { Button } from '@/ui/button'
@@ -8,20 +7,22 @@ import { Card, CardHeader, CardTitle } from '@/ui/card'
 import { Badge } from '@/ui/badge'
 import { Plus } from 'lucide-vue-next'
 import type { ColumnDef } from '@tanstack/vue-table'
-import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
-import { admissionApi } from '../api/admissionApi'
+import { useWaveList } from '../composables/useWaveList'
 import WaveFormSheet from '../components/WaveFormSheet.vue'
-import type {
-  AdmissionAcademicYear,
-  AdmissionWaveSummary,
-  WaveSavePayload,
-} from '../types'
+import type { AdmissionWaveSummary, WaveSavePayload } from '../types'
 import { formatDate, formatIDR } from '../utils'
 
-const waves = ref<AdmissionWaveSummary[]>([])
-const academicYears = ref<AdmissionAcademicYear[]>([])
-const loading = ref(false)
-const isSaving = ref(false)
+const {
+  waves,
+  academicYears,
+  loading,
+  isSaving,
+  fetchWaves,
+  fetchAcademicYears,
+  saveWave,
+  deleteWave,
+} = useWaveList()
+
 const isFormOpen = ref(false)
 const selectedWave = ref<AdmissionWaveSummary | null>(null)
 
@@ -72,32 +73,11 @@ const columns = computed<ColumnDef<AdmissionWaveSummary>[]>(() => [
     cell: ({ row }) =>
       h(ActionCell, {
         onEdit: () => openEditForm(row.original),
-        onDelete: () => deleteWave(row.original.id),
+        onDelete: () => handleDelete(row.original.id),
       }),
     enableSorting: false,
   },
 ])
-
-async function fetchWaves() {
-  loading.value = true
-  try {
-    const response = await admissionApi.getWaves({ limit: 100 })
-    waves.value = response.data.data ?? []
-  } catch (e) {
-    toast.error(getIndonesianErrorMessage(e, 'Gagal memuat gelombang.'))
-  } finally {
-    loading.value = false
-  }
-}
-
-async function fetchAcademicYears() {
-  try {
-    const response = await admissionApi.getAcademicYears()
-    academicYears.value = response.data.data ?? []
-  } catch {
-    academicYears.value = []
-  }
-}
 
 onMounted(() => {
   void fetchWaves()
@@ -114,33 +94,19 @@ function openEditForm(wave: AdmissionWaveSummary) {
   isFormOpen.value = true
 }
 
-async function saveWave(payload: WaveSavePayload) {
-  isSaving.value = true
-  try {
-    if (selectedWave.value) {
-      await admissionApi.updateWave(selectedWave.value.id, payload)
-      toast.success('Gelombang berhasil diperbarui.')
-    } else {
-      await admissionApi.createWave(payload)
-      toast.success('Gelombang baru berhasil dibuat.')
-    }
+async function handleSave(payload: WaveSavePayload) {
+  const result = await saveWave(selectedWave.value?.id ?? null, payload)
+  if (result.success) {
     isFormOpen.value = false
     await fetchWaves()
-  } catch (e) {
-    toast.error(getIndonesianErrorMessage(e, 'Gagal menyimpan gelombang.'))
-  } finally {
-    isSaving.value = false
   }
 }
 
-async function deleteWave(id: string) {
+async function handleDelete(id: string) {
   if (!window.confirm('Hapus gelombang ini?')) return
-  try {
-    await admissionApi.deleteWave(id)
-    toast.success('Gelombang dihapus.')
+  const result = await deleteWave(id)
+  if (result.success) {
     await fetchWaves()
-  } catch (e) {
-    toast.error(getIndonesianErrorMessage(e, 'Gagal menghapus gelombang.'))
   }
 }
 </script>
@@ -178,7 +144,7 @@ async function deleteWave(id: string) {
         :wave="selectedWave"
         :is-saving="isSaving"
         :academic-years="academicYears"
-        @save="saveWave"
+        @save="handleSave"
       />
     </div>
   </AppLayout>

@@ -19,12 +19,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/ui/select'
-import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
-import { admissionApi } from '../api/admissionApi'
+import { usePublicAdmission } from '../composables/usePublicAdmission'
 import type { ActiveWave } from '../types'
 import { formatIDR } from '../utils'
 
 const router = useRouter()
+
+const { fetchActiveWaves, register } = usePublicAdmission()
 
 const waves = ref<ActiveWave[]>([])
 const loadingWaves = ref(true)
@@ -44,17 +45,14 @@ const selectedWave = computed(() =>
 )
 
 onMounted(async () => {
-  try {
-    const response = await admissionApi.getActiveWaves()
-    waves.value = response.data.data.waves
+  const data = await fetchActiveWaves()
+  if (data) {
+    waves.value = data.waves
     if (waves.value.length === 1) {
       form.value.waveId = waves.value[0]?.id ?? ''
     }
-  } catch {
-    waves.value = []
-  } finally {
-    loadingWaves.value = false
   }
+  loadingWaves.value = false
 })
 
 function validate(): string | null {
@@ -85,7 +83,7 @@ async function handleSubmit() {
 
   isSubmitting.value = true
   try {
-    const response = await admissionApi.register({
+    const result = await register({
       fullName: form.value.fullName.trim(),
       email: form.value.email.trim(),
       phone: form.value.phone.trim() || undefined,
@@ -93,13 +91,14 @@ async function handleSubmit() {
       passwordConfirm: form.value.passwordConfirm,
       waveId: form.value.waveId,
     })
-    const registrationNumber = response.data.data.registrationNumber
-    toast.success(
-      `Pendaftaran berhasil! Nomor pendaftaran Anda: ${registrationNumber}. Silakan masuk.`,
-    )
-    await router.push({ name: 'login' })
-  } catch (e) {
-    toast.error(getIndonesianErrorMessage(e, 'Gagal membuat akun pendaftaran.'))
+    if (result.success) {
+      toast.success(
+        `Pendaftaran berhasil! Nomor pendaftaran Anda: ${result.data.registrationNumber}. Silakan masuk.`,
+      )
+      await router.push({ name: 'login' })
+    } else {
+      toast.error(result.error)
+    }
   } finally {
     isSubmitting.value = false
   }

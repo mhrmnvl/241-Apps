@@ -1,10 +1,10 @@
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { IClassroomLevelsRepository } from '../domain/interfaces/classroom-levels-repository.interface.js';
-import { DeleteClassroomLevelUseCase } from './delete-grade.use-case.js';
+import { IGradeRepository } from '../domain/interfaces/grade-repository.interface.js';
+import { DeleteGradeUseCase } from './delete-grade.use-case.js';
 
-describe('DeleteClassroomLevelUseCase', () => {
-  let useCase: DeleteClassroomLevelUseCase;
+describe('DeleteGradeUseCase', () => {
+  let useCase: DeleteGradeUseCase;
 
   const mockRepository = {
     findById: jest.fn(),
@@ -14,14 +14,12 @@ describe('DeleteClassroomLevelUseCase', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        DeleteClassroomLevelUseCase,
-        { provide: IClassroomLevelsRepository, useValue: mockRepository },
+        DeleteGradeUseCase,
+        { provide: IGradeRepository, useValue: mockRepository },
       ],
     }).compile();
 
-    useCase = module.get<DeleteClassroomLevelUseCase>(
-      DeleteClassroomLevelUseCase,
-    );
+    useCase = module.get<DeleteGradeUseCase>(DeleteGradeUseCase);
     jest.clearAllMocks();
   });
 

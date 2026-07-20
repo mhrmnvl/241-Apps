@@ -7,7 +7,7 @@ export function useClassroomList() {
   const store = useClassroomStore()
   const {
     classrooms,
-    classroomLevels,
+    grades,
     curricula,
     academicYears,
     semesters,
@@ -17,7 +17,7 @@ export function useClassroomList() {
 
   return {
     classrooms,
-    classroomLevels,
+    grades,
     curricula,
     academicYears,
     semesters,
@@ -26,7 +26,7 @@ export function useClassroomList() {
     fetchClassrooms: classroomService.fetchClassrooms,
     fetchCurricula: classroomReferenceService.fetchCurricula,
     fetchAcademicYears: classroomReferenceService.fetchAcademicYears,
-    fetchClassroomLevels: classroomReferenceService.fetchClassroomLevels,
+    fetchGrades: classroomReferenceService.fetchGrades,
     fetchSemesters: classroomReferenceService.fetchSemesters,
     deleteClassroom: classroomService.deleteClassroom,
   }

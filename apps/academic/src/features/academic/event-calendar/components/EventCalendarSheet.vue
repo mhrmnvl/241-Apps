@@ -121,7 +121,7 @@ function handleRangeUpdate(val: DateRange) {
   if (val.start && val.end) dateRangeOpen.value = false
 }
 
-function formatDateLabel(dv: DateValue | undefined): string {
+function formatDateLabel(dv?: DateValue): string {
   if (!dv) return ''
   return format(new Date(dv.toString()), 'dd MMM yyyy', { locale: idLocale })
 }

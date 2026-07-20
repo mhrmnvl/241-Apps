@@ -1,9 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { IClassroomLevelsRepository } from '../domain/interfaces/classroom-levels-repository.interface.js';
+import { IGradeRepository } from '../domain/interfaces/grade-repository.interface.js';
 
 @Injectable()
-export class GetClassroomLevelByIdUseCase {
-  constructor(private readonly repository: IClassroomLevelsRepository) {}
+export class GetGradeByIdUseCase {
+  constructor(private readonly repository: IGradeRepository) {}
 
   async execute(id: string) {
     const level = await this.repository.findById(id);

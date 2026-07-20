@@ -56,7 +56,7 @@ export const PARENT_RELATIONS: Record<string, string> = {
   GUARDIAN: 'Wali',
 }
 
-export const getParentRelationLabel = (relation: string | undefined | null) => {
+export const getParentRelationLabel = (relation?: string | null) => {
   if (!relation) return '-'
   return PARENT_RELATIONS[relation] ?? relation
 }

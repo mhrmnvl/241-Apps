@@ -17,24 +17,23 @@ import {
   UserPlus,
   Wallet,
 } from 'lucide-vue-next'
-import { admissionApi } from '../api/admissionApi'
+import { usePublicAdmission } from '../composables/usePublicAdmission'
 import type { ActiveWave, AdmissionDocumentType } from '../types'
 import { formatDate, formatIDR } from '../utils'
+
+const { fetchActiveWaves } = usePublicAdmission()
 
 const waves = ref<ActiveWave[]>([])
 const documentTypes = ref<AdmissionDocumentType[]>([])
 const loading = ref(true)
 
 onMounted(async () => {
-  try {
-    const response = await admissionApi.getActiveWaves()
-    waves.value = response.data.data.waves
-    documentTypes.value = response.data.data.documentTypes
-  } catch {
-    waves.value = []
-  } finally {
-    loading.value = false
+  const data = await fetchActiveWaves()
+  if (data) {
+    waves.value = data.waves
+    documentTypes.value = data.documentTypes
   }
+  loading.value = false
 })
 
 const steps = [

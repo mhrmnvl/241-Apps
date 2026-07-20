@@ -70,9 +70,7 @@ const {
   },
 })
 
-const findStudentEnrollmentId = (
-  studentId: string | null | undefined,
-): string => {
+const findStudentEnrollmentId = (studentId?: string | null): string => {
   if (!studentId) return ''
   const enrollment = props.enrollments.find((e) => e.student.id === studentId)
   return enrollment?.id ?? ''

@@ -178,7 +178,11 @@ function handleOpenChange(val: boolean) {
                           variant="outline"
                           class="text-xs"
                         >
-                          {{ classroom.classroomLevel?.name ?? '-' }}
+                          {{
+                            classroom.grade?.name ??
+                            classroom.classroomLevel?.name ??
+                            '-'
+                          }}
                         </Badge>
                         <span>{{ classroom.displayName }}</span>
                       </div>

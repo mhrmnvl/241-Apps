@@ -1,7 +1,7 @@
 import '@/shared/types/router'
 import { authRoutes } from '@/features/platform/auth'
 import { profileRoutes } from '@/features/platform/profile'
-import { admissionRoutes } from '@/features/admission/routes'
+import { admissionRoutes } from '@/features/admission'
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/features/platform/auth/stores/authStore'
 import { authSessionService } from '@/features/platform/auth/services/authSessionService'

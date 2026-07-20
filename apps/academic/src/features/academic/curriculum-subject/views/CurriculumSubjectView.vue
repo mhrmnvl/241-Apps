@@ -25,8 +25,8 @@ const {
   loading,
   isSaving,
   formError,
-  classroomLevels,
-  selectedClassroomLevelId,
+  grades,
+  selectedGradeId,
   curriculumName,
   curriculumAcademicYear,
   fetchReferenceData,
@@ -46,9 +46,9 @@ const isAddModalOpen = ref(false)
 const editingItem = ref<CurriculumSubject | null>(null)
 const { isAdmin } = useRoleGuard()
 
-const classroomLevelFilterOptions = computed<ComboboxOption[]>(() => [
+const gradeFilterOptions = computed<ComboboxOption[]>(() => [
   { value: '', label: 'Semua Tingkat Kelas' },
-  ...classroomLevels.value.map((c) => ({
+  ...grades.value.map((c) => ({
     value: c.id,
     label: c.name ?? '-',
   })),
@@ -91,12 +91,12 @@ watch(isAddModalOpen, (isOpen) => {
   }
 })
 
-watch(selectedClassroomLevelId, () => {
+watch(selectedGradeId, () => {
   void fetchCurriculumSubjects(curriculumId)
 })
 
 onMounted(async () => {
-  selectedClassroomLevelId.value = ''
+  selectedGradeId.value = ''
   await Promise.all([
     fetchReferenceData(),
     fetchCurriculumInfo(curriculumId),
@@ -147,8 +147,8 @@ onMounted(async () => {
               <div class="grid gap-2 max-w-xs">
                 <Label>Tingkat Kelas</Label>
                 <AppCombobox
-                  v-model="selectedClassroomLevelId"
-                  :options="classroomLevelFilterOptions"
+                  v-model="selectedGradeId"
+                  :options="gradeFilterOptions"
                   placeholder="Pilih Tingkat Kelas"
                   search-placeholder="Cari tingkat kelas..."
                   empty-text="Tingkat kelas tidak ditemukan."

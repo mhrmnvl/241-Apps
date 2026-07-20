@@ -13,7 +13,8 @@ export interface RaporEnrollment {
     id: string
     name: string
     displayName: string
-    classroomLevelId: string
+    gradeId: string
+    classroomLevelId?: string
   }
   semester: {
     id: string

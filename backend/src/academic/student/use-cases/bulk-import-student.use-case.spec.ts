@@ -2,7 +2,7 @@ import { BadRequestException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import ExcelJS from 'exceljs';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { IClassroomLevelsRepository } from '../../grade/domain/interfaces/classroom-levels-repository.interface.js';
+import { IGradeRepository } from '../../grade/domain/interfaces/grade-repository.interface.js';
 import { ClassroomRepository } from '../../classroom/index.js';
 import { StudentRepository } from '../repositories/student.repository.js';
 import { BulkImportStudentsUseCase } from './bulk-import-student.use-case.js';
@@ -67,7 +67,7 @@ describe('BulkImportStudentsUseCase', () => {
         { provide: StudentRepository, useValue: mockStudentRepo },
         { provide: ClassroomRepository, useValue: mockClassroomRepo },
         {
-          provide: IClassroomLevelsRepository,
+          provide: IGradeRepository,
           useValue: mockClassroomLevelRepo,
         },
         { provide: EventEmitter2, useValue: mockEventEmitter },

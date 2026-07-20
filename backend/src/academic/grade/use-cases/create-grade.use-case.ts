@@ -1,12 +1,12 @@
 import { ConflictException, Injectable, Logger } from '@nestjs/common';
 import { CreateGradeDto } from '../dto/create-grade.dto.js';
-import { IClassroomLevelsRepository } from '../domain/interfaces/classroom-levels-repository.interface.js';
+import { IGradeRepository } from '../domain/interfaces/grade-repository.interface.js';
 
 @Injectable()
-export class CreateClassroomLevelUseCase {
-  private readonly logger = new Logger(CreateClassroomLevelUseCase.name);
+export class CreateGradeUseCase {
+  private readonly logger = new Logger(CreateGradeUseCase.name);
 
-  constructor(private readonly repository: IClassroomLevelsRepository) {}
+  constructor(private readonly repository: IGradeRepository) {}
 
   async execute(dto: CreateGradeDto) {
     const existingLevel = await this.repository.findByLevel(dto.level);

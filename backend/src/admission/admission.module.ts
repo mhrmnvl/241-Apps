@@ -1,5 +1,13 @@
 import { Module } from '@nestjs/common';
 import { AuthModule } from '../platform/auth/auth.module.js';
+import { IAdmissionAnnouncementRepository } from './domain/interfaces/admission-announcement-repository.interface.js';
+import { IAdmissionApplicantRepository } from './domain/interfaces/admission-applicant-repository.interface.js';
+import { IAdmissionApplicationRepository } from './domain/interfaces/admission-application-repository.interface.js';
+import { IAdmissionWaveRepository } from './domain/interfaces/admission-wave-repository.interface.js';
+import { PrismaAdmissionAnnouncementRepository } from './infrastructure/persistence/prisma-admission-announcement.repository.js';
+import { PrismaAdmissionApplicantRepository } from './infrastructure/persistence/prisma-admission-applicant.repository.js';
+import { PrismaAdmissionApplicationRepository } from './infrastructure/persistence/prisma-admission-application.repository.js';
+import { PrismaAdmissionWaveRepository } from './infrastructure/persistence/prisma-admission-wave.repository.js';
 import { AdmissionAdminController } from './presentation/admission-admin.controller.js';
 import { AdmissionAnnouncementController } from './presentation/admission-announcement.controller.js';
 import { AdmissionApplicantController } from './presentation/admission-applicant.controller.js';
@@ -52,6 +60,22 @@ import { VerifyPaymentUseCase } from './use-cases/verify-payment.use-case.js';
     AdmissionAnnouncementController,
   ],
   providers: [
+    {
+      provide: IAdmissionWaveRepository,
+      useClass: PrismaAdmissionWaveRepository,
+    },
+    {
+      provide: IAdmissionAnnouncementRepository,
+      useClass: PrismaAdmissionAnnouncementRepository,
+    },
+    {
+      provide: IAdmissionApplicationRepository,
+      useClass: PrismaAdmissionApplicationRepository,
+    },
+    {
+      provide: IAdmissionApplicantRepository,
+      useClass: PrismaAdmissionApplicantRepository,
+    },
     AdmissionNotificationService,
     GetActiveWavesUseCase,
     RegisterApplicantUseCase,

@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { ClassroomLevelQueryDto } from '../dto/grade-query.dto.js';
-import { IClassroomLevelsRepository } from '../domain/interfaces/classroom-levels-repository.interface.js';
+import { GradeQueryDto } from '../dto/grade-query.dto.js';
+import { IGradeRepository } from '../domain/interfaces/grade-repository.interface.js';
 
 @Injectable()
-export class GetClassroomLevelsUseCase {
-  constructor(private readonly repository: IClassroomLevelsRepository) {}
+export class GetGradesUseCase {
+  constructor(private readonly repository: IGradeRepository) {}
 
-  async execute(query: ClassroomLevelQueryDto) {
+  async execute(query: GradeQueryDto) {
     return this.repository.findAll(query);
   }
 }

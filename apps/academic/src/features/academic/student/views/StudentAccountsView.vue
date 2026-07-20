@@ -50,7 +50,7 @@ const tableColumns = computed(() =>
         }
       },
     },
-    classroomLevels.value,
+    grades.value,
   ),
 )
 
@@ -63,7 +63,7 @@ async function handleSaveAccount(payload: StudentAccountUpdatePayload) {
     const userId = selectedStudent.value.user?.id
     const currentIsActive = selectedStudent.value.user?.isActive
 
-    await updateStudentCredentials(studentId, userId, payload, currentIsActive)
+    await updateStudentCredentials(studentId, payload, userId, currentIsActive)
 
     toast.success('Pembaruan akun berhasil disimpan')
     isEditModalOpen.value = false
@@ -86,13 +86,13 @@ const breadcrumbs = [
 const {
   students,
   classrooms,
-  classroomLevels,
+  grades,
   totalStudents,
   loading,
   filters,
   fetchStudents,
   fetchClassrooms,
-  fetchClassroomLevels,
+  fetchGrades,
   deleteStudent,
   updateStudentCredentials,
 } = useStudent()
@@ -110,10 +110,10 @@ const filteredData = computed(() => {
 })
 
 watch(
-  () => filters.value.classroomLevelId,
-  async (newLevelId) => {
+  () => filters.value.gradeId,
+  async (newGradeId) => {
     filters.value.classroomId = 'all'
-    await fetchClassrooms(newLevelId === 'all' ? undefined : newLevelId)
+    await fetchClassrooms(newGradeId === 'all' ? undefined : newGradeId)
     await fetchStudents()
   },
 )
@@ -132,11 +132,7 @@ watchDebounced(
 )
 
 onMounted(async () => {
-  await Promise.all([
-    fetchStudents(),
-    fetchClassrooms(),
-    fetchClassroomLevels(),
-  ])
+  await Promise.all([fetchStudents(), fetchClassrooms(), fetchGrades()])
   window.addEventListener('reload-student-account-data', () => {
     void fetchStudents()
   })
@@ -157,10 +153,11 @@ onMounted(async () => {
         <div class="p-6">
           <div class="mb-6 flex flex-col gap-3 lg:flex-row lg:items-center">
             <Select
-              :model-value="filters.classroomLevelId"
+              :model-value="filters.gradeId"
               @update:model-value="
-                filters.classroomLevelId =
-                  typeof $event === 'string' ? $event : 'all'
+                (val) => {
+                  filters.gradeId = typeof val === 'string' ? val : 'all'
+                }
               "
             >
               <SelectTrigger
@@ -171,7 +168,7 @@ onMounted(async () => {
               <SelectContent>
                 <SelectItem value="all"> Semua Tingkat </SelectItem>
                 <SelectItem
-                  v-for="lvl in classroomLevels"
+                  v-for="lvl in grades"
                   :key="lvl.id"
                   :value="lvl.id"
                 >
@@ -183,8 +180,9 @@ onMounted(async () => {
             <Select
               :model-value="filters.classroomId"
               @update:model-value="
-                filters.classroomId =
-                  typeof $event === 'string' ? $event : 'all'
+                (val) => {
+                  filters.classroomId = typeof val === 'string' ? val : 'all'
+                }
               "
             >
               <SelectTrigger

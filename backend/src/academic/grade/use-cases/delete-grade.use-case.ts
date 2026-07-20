@@ -1,11 +1,11 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { IClassroomLevelsRepository } from '../domain/interfaces/classroom-levels-repository.interface.js';
+import { IGradeRepository } from '../domain/interfaces/grade-repository.interface.js';
 
 @Injectable()
-export class DeleteClassroomLevelUseCase {
-  private readonly logger = new Logger(DeleteClassroomLevelUseCase.name);
+export class DeleteGradeUseCase {
+  private readonly logger = new Logger(DeleteGradeUseCase.name);
 
-  constructor(private readonly repository: IClassroomLevelsRepository) {}
+  constructor(private readonly repository: IGradeRepository) {}
 
   async execute(id: string) {
     const level = await this.repository.findById(id);

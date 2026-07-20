@@ -1,8 +1,4 @@
-import type {
-  Student,
-  ClassroomLevelOption,
-  StudentColumnActions,
-} from '../types'
+import type { Student, GradeOption, StudentColumnActions } from '../types'
 import { ActionCell } from '@/ui'
 
 import { Badge } from '@/ui/badge'
@@ -11,7 +7,7 @@ import { h } from 'vue'
 
 export const createColumns = (
   actions: StudentColumnActions,
-  classroomLevels: ClassroomLevelOption[] = [],
+  grades: GradeOption[] = [],
 ): ColumnDef<Student>[] => [
   {
     id: 'no',
@@ -60,14 +56,12 @@ export const createColumns = (
     meta: { align: 'center' },
     cell: ({ row }) => {
       const levelId =
-        row.original.classroomLevelId ??
-        row.original.enrollments?.[0]?.classroom?.classroomLevelId
-      return classroomLevels.find((l) => l.id === levelId)?.name ?? '-'
+        row.original.gradeId ??
+        row.original.enrollments?.[0]?.classroom?.gradeId
+      return grades.find((l) => l.id === levelId)?.name ?? '-'
     },
     accessorFn: (row) =>
-      row.classroomLevelId ??
-      row.enrollments?.[0]?.classroom?.classroomLevelId ??
-      '',
+      row.gradeId ?? row.enrollments?.[0]?.classroom?.gradeId ?? '',
   },
   {
     id: 'class',
@@ -123,7 +117,7 @@ export const createColumns = (
 
 export const createAccountColumns = (
   actions: StudentColumnActions,
-  classroomLevels: ClassroomLevelOption[] = [],
+  grades: GradeOption[] = [],
 ): ColumnDef<Student>[] => [
   {
     id: 'no',
@@ -150,14 +144,12 @@ export const createAccountColumns = (
     meta: { align: 'center' },
     cell: ({ row }) => {
       const levelId =
-        row.original.classroomLevelId ??
-        row.original.enrollments?.[0]?.classroom?.classroomLevelId
-      return classroomLevels.find((l) => l.id === levelId)?.name ?? '-'
+        row.original.gradeId ??
+        row.original.enrollments?.[0]?.classroom?.gradeId
+      return grades.find((l) => l.id === levelId)?.name ?? '-'
     },
     accessorFn: (row) =>
-      row.classroomLevelId ??
-      row.enrollments?.[0]?.classroom?.classroomLevelId ??
-      '',
+      row.gradeId ?? row.enrollments?.[0]?.classroom?.gradeId ?? '',
   },
   {
     id: 'class',

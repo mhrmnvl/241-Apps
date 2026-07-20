@@ -5,13 +5,13 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { UpdateGradeDto } from '../dto/update-grade.dto.js';
-import { IClassroomLevelsRepository } from '../domain/interfaces/classroom-levels-repository.interface.js';
+import { IGradeRepository } from '../domain/interfaces/grade-repository.interface.js';
 
 @Injectable()
-export class UpdateClassroomLevelUseCase {
-  private readonly logger = new Logger(UpdateClassroomLevelUseCase.name);
+export class UpdateGradeUseCase {
+  private readonly logger = new Logger(UpdateGradeUseCase.name);
 
-  constructor(private readonly repository: IClassroomLevelsRepository) {}
+  constructor(private readonly repository: IGradeRepository) {}
 
   async execute(id: string, dto: UpdateGradeDto) {
     const current = await this.repository.findById(id);

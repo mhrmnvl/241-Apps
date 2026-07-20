@@ -1,7 +1,7 @@
 export interface ClassroomSavePayload {
   curriculumId: string
   academicYearId: string
-  classroomLevelId: string
+  gradeId: string
   code: string
   name?: string | null
   capacity: number
@@ -13,6 +13,7 @@ export interface ClassroomQueryParams {
   limit?: number
   curriculumId?: string
   academicYearId?: string
+  gradeId?: string
   classroomLevelId?: string
   search?: string
   isActive?: boolean

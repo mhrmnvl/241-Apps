@@ -1,9 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { IClassroomLevelsRepository } from '../domain/interfaces/classroom-levels-repository.interface.js';
-import { GetClassroomLevelsUseCase } from './get-grades.use-case.js';
+import { IGradeRepository } from '../domain/interfaces/grade-repository.interface.js';
+import { GetGradesUseCase } from './get-grades.use-case.js';
 
-describe('GetClassroomLevelsUseCase', () => {
-  let useCase: GetClassroomLevelsUseCase;
+describe('GetGradesUseCase', () => {
+  let useCase: GetGradesUseCase;
 
   const mockRepository = {
     findAll: jest.fn(),
@@ -12,12 +12,12 @@ describe('GetClassroomLevelsUseCase', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        GetClassroomLevelsUseCase,
-        { provide: IClassroomLevelsRepository, useValue: mockRepository },
+        GetGradesUseCase,
+        { provide: IGradeRepository, useValue: mockRepository },
       ],
     }).compile();
 
-    useCase = module.get<GetClassroomLevelsUseCase>(GetClassroomLevelsUseCase);
+    useCase = module.get<GetGradesUseCase>(GetGradesUseCase);
     jest.clearAllMocks();
   });
 

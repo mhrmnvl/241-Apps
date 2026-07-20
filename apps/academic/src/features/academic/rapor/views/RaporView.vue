@@ -76,7 +76,10 @@ const raporSemesterOptions = computed<ComboboxOption[]>(() =>
   activeSemesters.value.map((s) => ({ value: s.id, label: s.name })),
 )
 const raporClassroomOptions = computed<ComboboxOption[]>(() =>
-  classrooms.value.map((c) => ({ value: c.id, label: c.displayName })),
+  classrooms.value.map((c) => ({
+    value: c.id,
+    label: c.code ?? c.displayName,
+  })),
 )
 
 const stats = computed(() => {

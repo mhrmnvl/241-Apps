@@ -1,28 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../../core/database/prisma.service.js';
+import { IAdmissionApplicantRepository } from '../domain/interfaces/admission-applicant-repository.interface.js';
 
 @Injectable()
 export class GetPublishedAnnouncementsUseCase {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly repository: IAdmissionApplicantRepository) {}
 
   async execute(userId: string) {
-    const application = await this.prisma.admissionApplication.findFirst({
-      where: { userId, deletedAt: null },
-      select: { waveId: true },
-    });
-
-    return this.prisma.admissionAnnouncement.findMany({
-      where: {
-        isPublished: true,
-        deletedAt: null,
-        OR: [
-          { waveId: null },
-          ...(application ? [{ waveId: application.waveId }] : []),
-        ],
-      },
-      include: { wave: { select: { id: true, name: true, code: true } } },
-      orderBy: { publishedAt: 'desc' },
-      take: 20,
-    });
+    return this.repository.findPublishedAnnouncementsForUser(userId);
   }
 }

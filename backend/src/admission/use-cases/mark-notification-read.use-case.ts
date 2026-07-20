@@ -1,32 +1,27 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../../core/database/prisma.service.js';
+import { IAdmissionApplicantRepository } from '../domain/interfaces/admission-applicant-repository.interface.js';
 
 @Injectable()
 export class MarkNotificationReadUseCase {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly repository: IAdmissionApplicantRepository) {}
 
   async executeOne(userId: string, notificationId: string) {
-    const notification = await this.prisma.admissionNotification.findFirst({
-      where: {
-        id: notificationId,
-        application: { userId, deletedAt: null },
-      },
-    });
+    const notification = await this.repository.findMyNotification(
+      userId,
+      notificationId,
+    );
     if (!notification) {
       throw new NotFoundException('Notifikasi tidak ditemukan');
     }
 
-    return this.prisma.admissionNotification.update({
-      where: { id: notification.id },
-      data: { readAt: notification.readAt ?? new Date() },
-    });
+    return this.repository.markNotificationRead(
+      notification.id,
+      notification.readAt ?? new Date(),
+    );
   }
 
   async executeAll(userId: string) {
-    await this.prisma.admissionNotification.updateMany({
-      where: { application: { userId, deletedAt: null }, readAt: null },
-      data: { readAt: new Date() },
-    });
+    await this.repository.markAllNotificationsRead(userId);
     return { success: true };
   }
 }

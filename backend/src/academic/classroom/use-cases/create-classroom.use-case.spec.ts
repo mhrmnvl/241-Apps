@@ -32,7 +32,7 @@ describe('CreateClassroomUseCase', () => {
     const dto: CreateClassroomDto = {
       curriculumId: 'cur-1',
       academicYearId: 'ay-1',
-      classroomLevelId: 'lvl-7',
+      gradeId: 'lvl-7',
       code: 'VII-A',
       name: 'Awesome',
       capacity: 30,
@@ -47,7 +47,7 @@ describe('CreateClassroomUseCase', () => {
 
       expect(mockRepository.findDuplicate).toHaveBeenCalledWith(
         dto.academicYearId,
-        dto.classroomLevelId,
+        dto.gradeId,
         dto.code,
       );
       expect(mockRepository.create).toHaveBeenCalled();
@@ -66,7 +66,7 @@ describe('CreateClassroomUseCase', () => {
       expect(mockRepository.create).toHaveBeenCalledWith({
         curriculumId: dto.curriculumId,
         academicYearId: dto.academicYearId,
-        gradeId: dto.classroomLevelId,
+        gradeId: dto.gradeId,
         code: dto.code,
         name: null,
         capacity: dto.capacity,

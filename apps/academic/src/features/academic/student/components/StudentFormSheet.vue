@@ -4,7 +4,7 @@ import { toTypedSchema } from '@vee-validate/zod'
 import { useForm } from 'vee-validate'
 import * as z from 'zod'
 import type { Classroom } from '@/features/academic/classroom'
-import type { StudentSavePayload, ClassroomLevelOption } from '../types'
+import type { StudentSavePayload, GradeOption } from '../types'
 import { DatePicker } from '@/ui'
 import { Button } from '@/ui/button'
 import { Input } from '@/ui/input'
@@ -38,7 +38,7 @@ const props = defineProps<{
   formError: string | null
   isSaving: boolean
   classrooms: Classroom[]
-  classroomLevels: ClassroomLevelOption[]
+  grades: GradeOption[]
 }>()
 
 const emit = defineEmits<{
@@ -111,7 +111,7 @@ const formSchema = toTypedSchema(
       .string()
       .min(1, 'Nomor Induk Siswa Nasional (NISN) wajib diisi.')
       .max(20, 'NISN tidak boleh lebih dari 20 karakter.'),
-    classroomLevelId: z.string().optional().default(''),
+    gradeId: z.string().optional().default(''),
     classroomId: z.string().optional().default(''),
   }),
 )
@@ -135,7 +135,7 @@ const {
     phone: '',
     nis: '',
     nisn: '',
-    classroomLevelId: '',
+    gradeId: '',
     classroomId: '',
   },
 })
@@ -153,9 +153,11 @@ watch(
 
 const filteredClassrooms = computed(() => {
   if (!props.classrooms) return []
-  if (!formValues.classroomLevelId) return props.classrooms
+  if (!formValues.gradeId) return props.classrooms
   return props.classrooms.filter(
-    (c) => c.classroomLevelId === formValues.classroomLevelId,
+    (c) =>
+      c.gradeId === formValues.gradeId ||
+      c.classroomLevelId === formValues.gradeId,
   )
 })
 
@@ -183,8 +185,7 @@ function handleNext() {
         phone: values.phone === '' ? undefined : values.phone,
         nis: values.nis,
         nisn: values.nisn,
-        classroomLevelId:
-          values.classroomLevelId === '' ? undefined : values.classroomLevelId,
+        gradeId: values.gradeId === '' ? undefined : values.gradeId,
         classroomId: values.classroomId === '' ? undefined : values.classroomId,
         identifier: values.nis,
         password: values.nis,
@@ -413,7 +414,7 @@ function handleBack() {
                 </FormField>
                 <FormField
                   v-slot="{ value, handleChange }"
-                  name="classroomLevelId"
+                  name="gradeId"
                 >
                   <FormItem class="content-start">
                     <FormLabel>Tingkat</FormLabel>
@@ -433,7 +434,7 @@ function handleBack() {
                       </FormControl>
                       <SelectContent>
                         <SelectItem
-                          v-for="lvl in props.classroomLevels"
+                          v-for="lvl in props.grades"
                           :key="lvl.id"
                           :value="lvl.id"
                         >

@@ -60,10 +60,10 @@ const open = computed({
 const { editData } = toRefs(props)
 const isEditing = computed(() => !!editData?.value)
 
-const { subjects, classroomLevels } = useCurriculumSubject()
+const { subjects, grades } = useCurriculumSubject()
 
-const classroomLevelOptions = computed<ComboboxOption[]>(() =>
-  classroomLevels.value.map((c) => ({
+const gradeOptions = computed<ComboboxOption[]>(() =>
+  grades.value.map((c) => ({
     value: c.id,
     label: c.name ?? '-',
   })),
@@ -78,7 +78,7 @@ const subjectOptions = computed<ComboboxOption[]>(() =>
 
 const formSchema = toTypedSchema(
   z.object({
-    classroomLevelId: z.string().min(1, 'Tingkat kelas wajib dipilih.'),
+    gradeId: z.string().min(1, 'Tingkat kelas wajib dipilih.'),
     subjectId: z.string().min(1, 'Mata pelajaran wajib dipilih.'),
     hoursPerWeek: z.coerce
       .number()
@@ -90,7 +90,7 @@ const formSchema = toTypedSchema(
 const { handleSubmit, resetForm, setValues } = useForm({
   validationSchema: formSchema,
   initialValues: {
-    classroomLevelId: '',
+    gradeId: '',
     subjectId: '',
     hoursPerWeek: 2,
   },
@@ -103,7 +103,7 @@ watch(
       const data = editData?.value
       if (data) {
         setValues({
-          classroomLevelId: data.classroomLevelId || '',
+          gradeId: data.gradeId || data.classroomLevelId || '',
           subjectId: data.subjectId || '',
           hoursPerWeek: data.hoursPerWeek ?? 2,
         })
@@ -118,13 +118,13 @@ watch(
 const showConfirmAlert = ref(false)
 
 function buildPayload(values: {
-  classroomLevelId: string
+  gradeId: string
   subjectId: string
   hoursPerWeek: number
 }): CurriculumSubjectSavePayload {
   return {
     curriculumId: props.curriculumId,
-    classroomLevelId: values.classroomLevelId,
+    gradeId: values.gradeId,
     subjectId: values.subjectId,
     hoursPerWeek: values.hoursPerWeek,
   }
@@ -174,7 +174,7 @@ function confirmSave() {
         >
           <FormField
             v-slot="{ value, handleChange }"
-            name="classroomLevelId"
+            name="gradeId"
           >
             <FormItem>
               <FormLabel>
@@ -184,7 +184,7 @@ function confirmSave() {
               <FormControl>
                 <AppCombobox
                   :model-value="value"
-                  :options="classroomLevelOptions"
+                  :options="gradeOptions"
                   placeholder="Pilih Tingkat Kelas"
                   search-placeholder="Cari tingkat kelas..."
                   empty-text="Tingkat kelas tidak ditemukan."

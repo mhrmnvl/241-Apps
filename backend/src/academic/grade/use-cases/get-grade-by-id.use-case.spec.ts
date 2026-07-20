@@ -1,10 +1,10 @@
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { IClassroomLevelsRepository } from '../domain/interfaces/classroom-levels-repository.interface.js';
-import { GetClassroomLevelByIdUseCase } from './get-grade-by-id.use-case.js';
+import { IGradeRepository } from '../domain/interfaces/grade-repository.interface.js';
+import { GetGradeByIdUseCase } from './get-grade-by-id.use-case.js';
 
-describe('GetClassroomLevelByIdUseCase', () => {
-  let useCase: GetClassroomLevelByIdUseCase;
+describe('GetGradeByIdUseCase', () => {
+  let useCase: GetGradeByIdUseCase;
 
   const mockRepository = {
     findById: jest.fn(),
@@ -13,14 +13,12 @@ describe('GetClassroomLevelByIdUseCase', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        GetClassroomLevelByIdUseCase,
-        { provide: IClassroomLevelsRepository, useValue: mockRepository },
+        GetGradeByIdUseCase,
+        { provide: IGradeRepository, useValue: mockRepository },
       ],
     }).compile();
 
-    useCase = module.get<GetClassroomLevelByIdUseCase>(
-      GetClassroomLevelByIdUseCase,
-    );
+    useCase = module.get<GetGradeByIdUseCase>(GetGradeByIdUseCase);
     jest.clearAllMocks();
   });
 

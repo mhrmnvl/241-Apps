@@ -71,7 +71,7 @@ describe('CurriculumSubjectController', () => {
     it('should delegate to CreateCurriculumSubjectUseCase', async () => {
       const dto = {
         curriculumId: 'c',
-        classroomLevelId: 'lvl-7',
+        gradeId: 'lvl-7',
         subjectId: 's',
         hoursPerWeek: 4,
       };

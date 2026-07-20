@@ -28,7 +28,7 @@ const {
 const scheduleClassroomOptions = computed(() =>
   classrooms.value.map((cls) => ({
     value: cls.id,
-    label: formatEntityName(cls.code ?? cls.name ?? ''),
+    label: formatEntityName(cls.code ?? ''),
   })),
 )
 

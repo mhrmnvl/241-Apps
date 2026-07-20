@@ -279,7 +279,7 @@ function getActionVariant(action: PromotionAction) {
   }
 }
 
-function formatScore(score: number | null | undefined) {
+function formatScore(score?: number | null) {
   if (score == null) return '-'
   return score.toFixed(1)
 }

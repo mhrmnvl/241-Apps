@@ -13,7 +13,12 @@ export const useStudentScoreStore = defineStore('studentScore', () => {
   const formError = ref<string | null>(null)
 
   const classrooms = ref<
-    { id: string; name: string | null; classroomLevel?: { name: string } }[]
+    {
+      id: string
+      name: string | null
+      code?: string
+      classroomLevel?: { name: string }
+    }[]
   >([])
   const subjects = ref<
     { id: string; name: string; gradeLevel?: string | number }[]

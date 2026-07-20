@@ -6,7 +6,7 @@ export { useStudentImportExport } from './composables/useStudentImportExport'
 export { studentRoutes } from './routes'
 export { default as EditStudentIdentitySheet } from './components/EditStudentIdentitySheet.vue'
 export type {
-  ClassroomLevelOption,
+  GradeOption,
   StudentProfile,
   StudentUser,
   StudentClassroom,

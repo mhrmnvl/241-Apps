@@ -21,7 +21,7 @@ const breadcrumbs = [
 
 const {
   classrooms,
-  classroomLevels,
+  grades,
   curricula,
   academicYears,
   totalClassrooms,
@@ -29,7 +29,7 @@ const {
   fetchClassrooms,
   fetchCurricula,
   fetchAcademicYears,
-  fetchClassroomLevels,
+  fetchGrades,
   fetchSemesters,
   deleteClassroom,
 } = useClassroomList()
@@ -59,7 +59,7 @@ onMounted(async () => {
     fetchClassrooms(),
     fetchCurricula(),
     fetchAcademicYears(),
-    fetchClassroomLevels(),
+    fetchGrades(),
   ])
 })
 </script>
@@ -101,7 +101,7 @@ onMounted(async () => {
             v-model:open="isAddModalOpen"
             :curricula="curricula"
             :academic-years="academicYears"
-            :classroom-levels="classroomLevels"
+            :grades="grades"
             @save-success="fetchClassrooms"
           />
         </div>

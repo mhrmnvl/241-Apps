@@ -3,9 +3,9 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { PrismaService } from '../../core/database/prisma.service.js';
 import { isEditable } from '../domain/admission-status.transitions.js';
 import { serializePayment } from '../domain/admission.serializers.js';
+import { IAdmissionApplicantRepository } from '../domain/interfaces/admission-applicant-repository.interface.js';
 import { UploadPaymentProofDto } from '../dto/upload-payment-proof.dto.js';
 import {
   assertValidAdmissionFile,
@@ -14,7 +14,7 @@ import {
 
 @Injectable()
 export class UploadPaymentProofUseCase {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly repository: IAdmissionApplicantRepository) {}
 
   async execute(
     userId: string,
@@ -23,10 +23,8 @@ export class UploadPaymentProofUseCase {
   ) {
     assertValidAdmissionFile(file);
 
-    const application = await this.prisma.admissionApplication.findFirst({
-      where: { userId, deletedAt: null },
-      include: { payment: true },
-    });
+    const application =
+      await this.repository.findMyApplicationWithPayment(userId);
     if (!application?.payment) {
       throw new NotFoundException('Data pendaftaran tidak ditemukan');
     }
@@ -41,33 +39,21 @@ export class UploadPaymentProofUseCase {
 
     const { filename, storageKey } = saveAdmissionFile(file, application.id);
 
-    return this.prisma.$transaction(async (tx) => {
-      const fileRow = await tx.file.create({
-        data: {
-          filename,
-          originalName: file.originalname,
-          mimeType: file.mimetype,
-          sizeBytes: file.size,
-          storageKey,
-          uploadedBy: userId,
-        },
-      });
-
-      const payment = await tx.admissionPayment.update({
-        where: { id: application.payment!.id },
-        data: {
-          bankName: dto.bankName,
-          senderAccountName: dto.senderAccountName,
-          transferDate: dto.transferDate ? new Date(dto.transferDate) : null,
-          proofFileId: fileRow.id,
-          status: 'PENDING',
-          note: null,
-          verifiedById: null,
-          verifiedAt: null,
-        },
-        include: { proofFile: true },
-      });
-      return serializePayment(payment);
+    const payment = await this.repository.savePaymentProof({
+      paymentId: application.payment.id,
+      file: {
+        filename,
+        originalName: file.originalname,
+        mimeType: file.mimetype,
+        sizeBytes: file.size,
+        storageKey,
+        uploadedBy: userId,
+      },
+      bankName: dto.bankName,
+      senderAccountName: dto.senderAccountName,
+      transferDate: dto.transferDate ? new Date(dto.transferDate) : null,
     });
+
+    return serializePayment(payment);
   }
 }

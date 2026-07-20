@@ -80,7 +80,7 @@ const subjectOptions = computed<ComboboxOption[]>(() =>
 const classroomOptions = computed<ComboboxOption[]>(() =>
   classrooms.value.map((c) => ({
     value: c.id,
-    label: c.name ?? '-',
+    label: c.code ?? '-',
   })),
 )
 

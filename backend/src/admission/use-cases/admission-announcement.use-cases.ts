@@ -1,41 +1,17 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
-import { PrismaService } from '../../core/database/prisma.service.js';
+import { IAdmissionAnnouncementRepository } from '../domain/interfaces/admission-announcement-repository.interface.js';
 import {
   AdmissionAnnouncementQueryDto,
   CreateAdmissionAnnouncementDto,
   UpdateAdmissionAnnouncementDto,
 } from '../dto/admission-announcement.dto.js';
+
 @Injectable()
 export class GetAdmissionAnnouncementsUseCase {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly repository: IAdmissionAnnouncementRepository) {}
 
   async execute(query: AdmissionAnnouncementQueryDto) {
-    const { page = 1, limit = 10, search, waveId, isPublished } = query;
-    const skip = (page - 1) * limit;
-
-    const where: Prisma.AdmissionAnnouncementWhereInput = {
-      deletedAt: null,
-      ...(waveId && { waveId }),
-      ...(isPublished !== undefined && { isPublished }),
-      ...(search && {
-        OR: [
-          { title: { contains: search, mode: 'insensitive' } },
-          { content: { contains: search, mode: 'insensitive' } },
-        ],
-      }),
-    };
-
-    const [data, total] = await Promise.all([
-      this.prisma.admissionAnnouncement.findMany({
-        where,
-        skip,
-        take: limit,
-        include: { wave: { select: { id: true, name: true, code: true } } },
-        orderBy: { createdAt: 'desc' },
-      }),
-      this.prisma.admissionAnnouncement.count({ where }),
-    ]);
+    const { data, total, page, limit } = await this.repository.findAll(query);
 
     return {
       data,
@@ -46,31 +22,26 @@ export class GetAdmissionAnnouncementsUseCase {
 
 @Injectable()
 export class CreateAdmissionAnnouncementUseCase {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly repository: IAdmissionAnnouncementRepository) {}
 
   async execute(dto: CreateAdmissionAnnouncementDto, createdById: string) {
-    return this.prisma.admissionAnnouncement.create({
-      data: {
-        title: dto.title,
-        content: dto.content,
-        waveId: dto.waveId ?? null,
-        isPublished: dto.isPublished ?? false,
-        publishedAt: dto.isPublished ? new Date() : null,
-        createdById,
-      },
-      include: { wave: { select: { id: true, name: true, code: true } } },
+    return this.repository.create({
+      title: dto.title,
+      content: dto.content,
+      waveId: dto.waveId ?? null,
+      isPublished: dto.isPublished ?? false,
+      publishedAt: dto.isPublished ? new Date() : null,
+      createdById,
     });
   }
 }
 
 @Injectable()
 export class UpdateAdmissionAnnouncementUseCase {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly repository: IAdmissionAnnouncementRepository) {}
 
   async execute(id: string, dto: UpdateAdmissionAnnouncementDto) {
-    const announcement = await this.prisma.admissionAnnouncement.findFirst({
-      where: { id, deletedAt: null },
-    });
+    const announcement = await this.repository.findActiveById(id);
     if (!announcement) {
       throw new NotFoundException('Pengumuman tidak ditemukan');
     }
@@ -78,53 +49,31 @@ export class UpdateAdmissionAnnouncementUseCase {
     const becomingPublished =
       dto.isPublished === true && !announcement.isPublished;
 
-    return this.prisma.admissionAnnouncement.update({
-      where: { id },
-      data: {
-        ...dto,
-        ...(becomingPublished && { publishedAt: new Date() }),
-      },
-      include: { wave: { select: { id: true, name: true, code: true } } },
+    return this.repository.update(id, {
+      ...dto,
+      ...(becomingPublished && { publishedAt: new Date() }),
     });
   }
 }
 
 @Injectable()
 export class PublishAdmissionAnnouncementUseCase {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly repository: IAdmissionAnnouncementRepository) {}
 
   async execute(id: string) {
-    const announcement = await this.prisma.admissionAnnouncement.findFirst({
-      where: { id, deletedAt: null },
-    });
+    const announcement = await this.repository.findActiveById(id);
     if (!announcement) {
       throw new NotFoundException('Pengumuman tidak ditemukan');
     }
 
-    const updated = await this.prisma.admissionAnnouncement.update({
-      where: { id },
-      data: { isPublished: true, publishedAt: new Date() },
-      include: { wave: { select: { id: true, name: true, code: true } } },
-    });
+    const updated = await this.repository.publish(id);
 
-    // Fan out an in-app notification to all (non-terminal) applications in scope.
-    const applications = await this.prisma.admissionApplication.findMany({
-      where: {
-        deletedAt: null,
-        ...(announcement.waveId && { waveId: announcement.waveId }),
-      },
-      select: { id: true },
-    });
-    if (applications.length > 0) {
-      await this.prisma.admissionNotification.createMany({
-        data: applications.map((app) => ({
-          applicationId: app.id,
-          type: 'ANNOUNCEMENT' as const,
-          title: announcement.title,
-          message: announcement.content,
-        })),
-      });
-    }
+    // Fan out an in-app notification to all applications in scope.
+    await this.repository.notifyScope(
+      announcement.waveId,
+      announcement.title,
+      announcement.content,
+    );
 
     return updated;
   }
@@ -132,19 +81,14 @@ export class PublishAdmissionAnnouncementUseCase {
 
 @Injectable()
 export class DeleteAdmissionAnnouncementUseCase {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly repository: IAdmissionAnnouncementRepository) {}
 
   async execute(id: string) {
-    const announcement = await this.prisma.admissionAnnouncement.findFirst({
-      where: { id, deletedAt: null },
-    });
+    const announcement = await this.repository.findActiveById(id);
     if (!announcement) {
       throw new NotFoundException('Pengumuman tidak ditemukan');
     }
 
-    return this.prisma.admissionAnnouncement.update({
-      where: { id },
-      data: { deletedAt: new Date(), isPublished: false },
-    });
+    return this.repository.softDelete(id);
   }
 }

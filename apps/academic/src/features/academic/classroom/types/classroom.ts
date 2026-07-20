@@ -2,12 +2,14 @@ import type { AcademicYear } from '@/features/academic/academic-year'
 import type { Curricula } from '@/features/academic/curriculum'
 import type { Semester } from '@/features/academic/semester'
 
-export interface ClassroomLevel {
+export interface Grade {
   id: string
   level: number
   name: string
   isActive: boolean
 }
+
+export type ClassroomLevel = Grade
 
 export interface ClassroomSupervisorProfile {
   name?: string | null
@@ -27,7 +29,8 @@ export interface Classroom {
   id: string
   curriculumId: string
   academicYearId: string
-  classroomLevelId: string
+  gradeId: string
+  classroomLevelId?: string // backwards compatibility
   code: string
   name: string | null
   displayName: string
@@ -36,7 +39,8 @@ export interface Classroom {
   deletedAt?: string | null
   curriculum?: Curricula & { academicYear?: AcademicYear }
   academicYear?: AcademicYear
-  classroomLevel?: ClassroomLevel
+  grade?: Grade
+  classroomLevel?: Grade // backwards compatibility
   supervisor?: ClassroomSupervisor
   supervisorAssignment?: ClassroomSupervisorAssignment
 }

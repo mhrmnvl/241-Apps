@@ -1,1 +1,2 @@
-export { PrismaClassroomLevelsRepository as ClassroomLevelsRepository } from '../infrastructure/persistence/prisma-classroom-levels.repository.js';
+export { PrismaGradeRepository as GradeRepository } from '../infrastructure/persistence/prisma-grade.repository.js';
+export { IGradeRepository } from '../domain/interfaces/grade-repository.interface.js';

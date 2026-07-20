@@ -69,11 +69,11 @@ export class CreateStudentDto {
   phone?: string;
 
   @ApiPropertyOptional({
-    description: 'Classroom Level ID (UUID)',
+    description: 'Grade ID (UUID)',
   })
   @IsOptional()
   @IsUUID()
-  classroomLevelId?: string;
+  gradeId?: string;
 
   @ApiPropertyOptional({
     description: 'Class ID — for auto-enrollment to the active semester',
