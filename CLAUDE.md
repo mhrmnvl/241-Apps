@@ -162,9 +162,13 @@ Lucide · Axios · FullCalendar.
 ## Backend architecture
 
 NestJS modular monolith, Prisma ORM, PostgreSQL, RBAC + permission-based
-authorization. Full rules: `backend/docs/NESTJS-RULES.md` (coding rules) and
-`backend/docs/IAM.md` (auth/roles/permissions design) — read these before making
-non-trivial backend changes.
+authorization. Authoritative backend docs: `backend/docs/NESTJS-RULES.md` (coding
+rules — kept in sync with the code) and `backend/docs/IAM.md` (auth/roles/permissions
+design) — read these before making non-trivial backend changes. Earlier planning
+artifacts (PROJECT_STRUCTURE, Backend-Structure, DATABASE_ARCHITECTURE, prismaSchemaV2,
+REFACTOR, API_DOCUMENTATION, audit_iam, custom_domain, logical-erd) have been moved to
+`backend/docs/_archive/` — they are historical and may be outdated; treat the code and
+this file as the source of truth, not those.
 
 Top-level domains under `backend/src/`: `core/` (infra: config, database, guards,
 filters, interceptors, logger, storage, health, cache, events), `shared/` (helpers,
@@ -206,7 +210,13 @@ Core rules from `NESTJS-RULES.md` (enforced by convention, not by lint):
   as `{ data: [], meta: {} }` (see `core/interceptors/response.interceptor.ts`).
 
 Import style: backend uses NodeNext ESM — relative imports include the `.js`
-extension (e.g. `from './app.module.js'`) even though the source is `.ts`.
+extension (e.g. `from './app.module.js'`) even though the source is `.ts`. A
+feature's `index.ts` barrel is its public API, but **never import a NestJS Module
+class or a cross-module DTO through a barrel** — import the `.module.js` / the DTO
+file directly. A barrel also re-exports the feature's Module + use-cases, so a DTO
+that imports it closes an ESM import cycle and crashes boot (`Nest cannot create the
+<X>Module instance … the module at index [0] of the imports array is undefined`).
+This matches the official NestJS guidance and is spelled out in `NESTJS-RULES.md`.
 
 Prisma schema is split per domain under `backend/prisma/*.prisma` (e.g.
 `student.prisma`, `academic.prisma`, `iam.prisma`, `inventory.prisma`,

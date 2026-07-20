@@ -2,7 +2,10 @@
 
 # BACKEND CODING RULES
 
-Version: 1.0
+Version: 1.1
+
+Module system:
+NodeNext ESM (relative imports carry the `.js` extension)
 
 Framework:
 NestJS
@@ -53,8 +56,8 @@ src
 ├── shared
 ├── platform
 ├── academic
-├── future
-└── integrations
+├── inventory
+└── admission
 
 ---
 
@@ -64,17 +67,19 @@ platform
 
 academic
 
-future
+inventory
 
-Each domain owns:
+admission
 
-- controllers
-- services
-- repositories
-- dto
-- entities
-- mappers
-- policies
+Each domain owns (actual layering):
+
+- presentation (controllers — thin, HTTP only)
+- use-cases (one class per business operation)
+- repositories (abstract repository interface — the port/token)
+- infrastructure (persistence: Prisma repo impl, mappers, parsers)
+- domain (entities, enums, events, interfaces)
+- dto (request/ and response/ — one DTO per file)
+- types
 
 ---
 
@@ -82,20 +87,17 @@ Each domain owns:
 
 Example
 
-academic/students
+academic/student
 
-students
-
-├── controllers
-├── services
-├── repositories
-├── dto
-├── entities
-├── policies
-├── mappers
-├── constants
-├── validators
-└── students.module.ts
+student
+├── presentation/       # controllers (thin, HTTP only)
+├── use-cases/          # CreateStudentUseCase, UpdateStudentUseCase, ...
+├── repositories/       # abstract repository interface (port + injection token)
+├── infrastructure/     # persistence/ (PrismaStudentRepository), mappers, parsers
+├── domain/             # entities, enums, events, interfaces
+├── dto/                # request/ and response/ — one DTO per file
+├── types/
+└── student.module.ts
 
 ---
 
@@ -276,21 +278,32 @@ Prisma
 
 One DTO per file.
 
+Split by direction into subfolders:
+
+dto/request/   (create / update / query)
+
+dto/response/  (response DTOs)
+
 ---
 
 Allowed
 
-create-student.dto.ts
+dto/request/create-student.dto.ts
 
-update-student.dto.ts
+dto/request/update-student.dto.ts   (UpdateDto = PartialType of the Create DTO,
+unless a field set is intentionally restricted, e.g. immutable code/FK excluded)
 
-student-query.dto.ts
+dto/request/student-query.dto.ts
+
+dto/response/student-response.dto.ts
 
 ---
 
 Forbidden
 
 20 DTOs in one file
+
+A response DTO living under dto/request/ (or vice versa)
 
 ---
 
@@ -406,29 +419,24 @@ user,
 
 ---
 
-# POLICY RULES
+# AUTHORIZATION ENFORCEMENT
 
-Each module owns policies.
+Authorization is permission-based, enforced at the controller via the
+`@RequirePermissions(...)` decorator + guard — not per-module policy files.
 
 Example
 
-students
+@RequirePermissions('students.create')
 
-policies
+@RequirePermissions('students.read')
 
-student.policy.ts
+@RequirePermissions('students.update')
+
+@RequirePermissions('students.delete')
 
 ---
 
-Examples
-
-canReadStudent
-
-canCreateStudent
-
-canUpdateStudent
-
-canDeleteStudent
+Permission strings, roles, and their design live in `IAM.md`.
 
 ---
 
@@ -561,21 +569,51 @@ max 300 lines
 
 # IMPORT RULES
 
-Use aliases.
+Backend is NodeNext ESM. No path aliases — use relative imports, and every
+relative import MUST carry the `.js` extension (source is `.ts`).
 
 Allowed
 
-@/academic/students
+import { AppModule } from './app.module.js'
 
-@/platform/users
-
-@/shared/utils
+import { StudentRepository } from '../repositories/student.repository.js'
 
 ---
 
-Forbidden
+# BARREL & MODULE IMPORT RULES
 
-../../../../../../
+A feature's `index.ts` barrel = its PUBLIC API (DTOs, tokens, use-cases, guards)
+for outside consumers.
+
+NestJS Module classes:
+import via `x.module.js` DIRECTLY — never through a barrel.
+
+Cross-module DTO → DTO:
+import the DTO FILE directly — never through the other feature's barrel.
+
+Why:
+a feature barrel also re-exports runtime-heavy symbols (its Module, use-cases,
+repositories). A lightweight DTO importing that barrel drags the whole graph in
+and closes an ESM import cycle, crashing boot with:
+
+"Nest cannot create the <X>Module instance.
+ The module at index [0] of the imports array is undefined."
+
+(Official NestJS: barrel files must be omitted when importing module or provider
+classes — https://docs.nestjs.com/faq/common-errors)
+
+Bad
+
+// role-response.dto.ts
+import { PermissionResponseDto } from '../../../permissions/index.js'
+
+Good
+
+// role-response.dto.ts
+import { PermissionResponseDto }
+  from '../../../permissions/dto/response/permission-response.dto.js'
+
+For a genuine mutual module/provider dependency, use forwardRef() on both sides.
 
 ---
 
@@ -643,25 +681,22 @@ Report Card Published
 
 # MODULE DEPENDENCY RULES
 
+Domains: platform, academic, inventory, admission.
+
 Platform
 
-may be used by everyone
+may be used by everyone (supplier)
 
 ---
 
-Academic
+academic / inventory / admission
 
-must not access Finance
-
----
-
-Finance
-
-must not access Academic internals
+may consume platform, but must not reach into each other's internals
 
 ---
 
-Communication through contracts only
+Cross-domain access only through a module's public API (its barrel / exported
+tokens / domain events) — never deep-import another domain's internals.
 
 ---
 
