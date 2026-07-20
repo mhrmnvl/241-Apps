@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma, Student, User, Profile, StudentStatus } from '@prisma/client';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
+import { AccountProvisioningService } from '../../../../platform/user/index.js';
 import { CreateStudentDto } from '../../dto/create-student.dto.js';
 import { ExportStudentQueryDto } from '../../dto/export-student-query.dto.js';
 import { StudentQueryDto } from '../../dto/student-query.dto.js';
@@ -16,7 +17,10 @@ import { PaginatedResult } from '../../../../shared/domain/interfaces/repository
 
 @Injectable()
 export class PrismaStudentRepository extends IStudentRepository {
-  constructor(private readonly prisma: PrismaService) {
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly accountProvisioning: AccountProvisioningService,
+  ) {
     super();
   }
 
@@ -170,51 +174,35 @@ export class PrismaStudentRepository extends IStudentRepository {
     passwordHash: string,
   ): Promise<CreateStudentResult> {
     return this.prisma.$transaction(async (tx) => {
-      const role = await tx.role.findFirst({
-        where: {
-          code: 'STUDENT',
+      const user = await this.accountProvisioning.provision(tx, {
+        identifier: dto.identifier!,
+        passwordHash,
+        roleCode: 'STUDENT',
+        profile: {
+          name: dto.name,
+          nik: dto.nik,
+          gender: dto.gender,
+          birthPlace: dto.birthPlace,
+          birthDate: new Date(dto.birthDate),
+          email: dto.email,
+          phone: dto.phone,
         },
       });
 
-      const user = await tx.user.create({
+      const student = await tx.student.create({
         data: {
-          identifier: dto.identifier!,
-          passwordHash,
-          profile: {
-            create: {
-              name: dto.name,
-              nik: dto.nik,
-              gender: dto.gender,
-              birthPlace: dto.birthPlace,
-              birthDate: new Date(dto.birthDate),
-              email: dto.email,
-              phone: dto.phone,
-            },
-          },
-          student: {
-            create: {
-              nis: dto.nis,
-              nisn: dto.nisn,
-              status: StudentStatus.ACTIVE,
-              ...(dto.gradeId && {
-                gradeId: dto.gradeId,
-              }),
-            },
-          },
+          userId: user.id,
+          nis: dto.nis,
+          nisn: dto.nisn,
+          status: StudentStatus.ACTIVE,
+          ...(dto.gradeId && {
+            gradeId: dto.gradeId,
+          }),
         },
-        include: { student: { include: STUDENT_INCLUDE } },
+        include: STUDENT_INCLUDE,
       });
 
-      if (role) {
-        await tx.userRole.create({
-          data: {
-            userId: user.id,
-            roleId: role.id,
-          },
-        });
-      }
-
-      return user;
+      return { ...user, student };
     });
   }
 

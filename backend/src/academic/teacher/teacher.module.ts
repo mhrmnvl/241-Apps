@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { UserModule } from '../../platform/user/index.js';
 import { TeacherController } from './presentation/teacher.controller.js';
 import { TeacherAddressController } from './presentation/teacher-address.controller.js';
 import { TeacherPositionsController } from './presentation/teacher-position.controller.js';
@@ -21,6 +22,7 @@ import { TeacherAddressUseCase } from './use-cases/teacher-address.use-case.js';
 import { TeacherPositionUseCase } from './use-cases/teacher-position.use-case.js';
 
 @Module({
+  imports: [UserModule],
   controllers: [
     TeacherController,
     TeacherAddressController,

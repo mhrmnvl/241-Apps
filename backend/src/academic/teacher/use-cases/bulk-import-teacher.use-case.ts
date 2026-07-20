@@ -1,5 +1,4 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import * as bcrypt from 'bcrypt';
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 import ExcelJS from 'exceljs';
@@ -10,6 +9,7 @@ import {
 import { BulkImportTeacherRowDto } from '../dto/bulk-import-teacher.dto.js';
 import { CreateTeacherDto } from '../dto/request/create-teacher.request.dto.js';
 import { TeacherRepository } from '../repositories/teacher.repository.js';
+import { hashPassword } from '../../../shared/utils/hash.helper.js';
 
 type ExcelRow = Record<string, ExcelJS.CellValue>;
 type MappedRow = Record<string, string | undefined>;
@@ -109,7 +109,7 @@ export class BulkImportTeachersUseCase {
           employmentTypeId,
         };
 
-        const hashedPassword = await bcrypt.hash(dto.password, 10);
+        const hashedPassword = await hashPassword(dto.password);
         await this.repo.create(createDto, hashedPassword);
 
         results.push({

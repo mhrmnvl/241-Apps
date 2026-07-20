@@ -1,10 +1,10 @@
 import { ConflictException, Injectable, Logger } from '@nestjs/common';
-import * as bcrypt from 'bcrypt';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { CreateStudentDto } from '../dto/create-student.dto.js';
 import { StudentResponseDto } from '../dto/student-response.dto.js';
 import { StudentRepository } from '../repositories/student.repository.js';
 import { StudentCreatedEvent } from '../domain/events/student.events.js';
+import { hashPassword } from '../../../shared/utils/hash.helper.js';
 
 @Injectable()
 export class CreateStudentUseCase {
@@ -28,7 +28,7 @@ export class CreateStudentUseCase {
     if (dupNisn)
       throw new ConflictException(`NISN "${dto.nisn}" is already registered`);
 
-    const passwordHash = await bcrypt.hash(dto.password, 10);
+    const passwordHash = await hashPassword(dto.password);
 
     const userWithStudent = await this.repo.create(dto, passwordHash);
     const student = userWithStudent.student;

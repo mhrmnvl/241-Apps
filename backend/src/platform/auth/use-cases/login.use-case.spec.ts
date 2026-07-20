@@ -84,6 +84,7 @@ describe('LoginUseCase', () => {
           id: mockUser.id,
           identifier: mockUser.identifier,
           isActive: mockUser.isActive,
+          roles: [],
         },
       });
     });

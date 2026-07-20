@@ -1,7 +1,7 @@
 import { ConflictException, Injectable, Logger } from '@nestjs/common';
-import * as bcrypt from 'bcrypt';
 import { CreateTeacherDto } from '../dto/request/create-teacher.request.dto.js';
 import { TeacherRepository } from '../repositories/teacher.repository.js';
+import { hashPassword } from '../../../shared/utils/hash.helper.js';
 
 @Injectable()
 export class CreateTeacherUseCase {
@@ -33,7 +33,7 @@ export class CreateTeacherUseCase {
     if (existingNuptk)
       throw new ConflictException(`NUPTK "${dto.nuptk}" is already registered`);
 
-    const hashedPassword = await bcrypt.hash(dto.password, 10);
+    const hashedPassword = await hashPassword(dto.password);
     const teacher = await this.repository.create(dto, hashedPassword);
 
     this.logger.log(`Teacher created: ${dto.name}`);

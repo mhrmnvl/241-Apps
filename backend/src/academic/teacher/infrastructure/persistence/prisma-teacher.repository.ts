@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma, Teacher, User, Profile } from '@prisma/client';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
+import { AccountProvisioningService } from '../../../../platform/user/index.js';
 import { resolveAcademicYearId } from '../../../../shared/utils/active-academic-year.helper.js';
 import {
   ITeacherRepository,
@@ -17,7 +18,10 @@ import { PaginatedResult } from '../../../../shared/domain/interfaces/repository
 
 @Injectable()
 export class PrismaTeacherRepository extends ITeacherRepository {
-  constructor(private readonly prisma: PrismaService) {
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly accountProvisioning: AccountProvisioningService,
+  ) {
     super();
   }
 
@@ -177,38 +181,20 @@ export class PrismaTeacherRepository extends ITeacherRepository {
     hashedPassword: string,
   ): Promise<TeacherWithDetails> {
     return this.prisma.$transaction(async (tx) => {
-      const role = await tx.role.findFirst({
-        where: {
-          code: 'TEACHER',
+      const user = await this.accountProvisioning.provision(tx, {
+        identifier: dto.identifier ?? dto.nip ?? dto.nuptk ?? dto.nik,
+        passwordHash: hashedPassword,
+        roleCode: 'TEACHER',
+        profile: {
+          name: dto.name,
+          nik: dto.nik,
+          gender: dto.gender,
+          birthPlace: dto.birthPlace,
+          birthDate: new Date(dto.birthDate),
+          email: dto.email,
+          phone: dto.phone,
         },
       });
-
-      const user = await tx.user.create({
-        data: {
-          identifier: dto.identifier ?? dto.nip ?? dto.nuptk ?? dto.nik,
-          passwordHash: hashedPassword,
-          profile: {
-            create: {
-              name: dto.name,
-              nik: dto.nik,
-              gender: dto.gender,
-              birthPlace: dto.birthPlace,
-              birthDate: new Date(dto.birthDate),
-              email: dto.email,
-              phone: dto.phone,
-            },
-          },
-        },
-      });
-
-      if (role) {
-        await tx.userRole.create({
-          data: {
-            userId: user.id,
-            roleId: role.id,
-          },
-        });
-      }
 
       return tx.teacher.create({
         data: {
@@ -216,7 +202,6 @@ export class PrismaTeacherRepository extends ITeacherRepository {
           nip: dto.nip,
           nuptk: dto.nuptk,
           employmentTypeId: dto.employmentTypeId,
-          // Optionally set the primary position at creation time.
           ...(dto.positionId
             ? {
                 teacherPositions: {

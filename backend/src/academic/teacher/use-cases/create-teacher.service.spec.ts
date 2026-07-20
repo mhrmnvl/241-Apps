@@ -4,9 +4,10 @@ import { UserGender } from '@prisma/client';
 import { CreateTeacherDto } from '../dto/request/create-teacher.request.dto.js';
 import { TeacherRepository } from '../repositories/teacher.repository.js';
 import { CreateTeacherUseCase } from './create-teacher.use-case.js';
+import { hashPassword } from '../../../shared/utils/hash.helper.js';
 
-jest.mock('bcrypt', () => ({
-  hash: jest.fn().mockResolvedValue('hashed-password'),
+jest.mock('../../../shared/utils/hash.helper.js', () => ({
+  hashPassword: jest.fn(),
 }));
 
 describe('CreateTeacherUseCase', () => {
@@ -30,6 +31,7 @@ describe('CreateTeacherUseCase', () => {
 
     useCase = module.get<CreateTeacherUseCase>(CreateTeacherUseCase);
     jest.clearAllMocks();
+    (hashPassword as jest.Mock).mockResolvedValue('hashed-password');
   });
 
   it('should be defined', () => {

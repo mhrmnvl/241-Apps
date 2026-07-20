@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { UserModule } from '../../platform/user/index.js';
 import { GradeModule } from '../grade/grade.module.js';
 import { ClassroomModule } from '../classroom/classroom.module.js';
 import { StudentController } from './presentation/student.controller.js';
@@ -32,7 +33,7 @@ import { DeleteStudentParentUseCase } from './use-cases/delete-student-parent.us
 import { UpdateStudentProfileUseCase } from './use-cases/update-student-profile.use-case.js';
 
 @Module({
-  imports: [GradeModule, ClassroomModule],
+  imports: [UserModule, GradeModule, ClassroomModule],
   controllers: [
     StudentController,
     StudentAddressController,

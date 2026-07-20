@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import * as bcrypt from 'bcrypt';
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -14,6 +13,7 @@ import { CreateStudentDto } from '../dto/create-student.dto.js';
 import { StudentRepository } from '../repositories/student.repository.js';
 import { ExcelStudentParser } from '../infrastructure/parsers/excel-student.parser.js';
 import { StudentCreatedEvent } from '../domain/events/student.events.js';
+import { hashPassword } from '../../../shared/utils/hash.helper.js';
 
 @Injectable()
 export class BulkImportStudentsUseCase {
@@ -125,7 +125,7 @@ export class BulkImportStudentsUseCase {
           nisn: dto.nisn,
         };
 
-        const passwordHash = await bcrypt.hash(createDto.password!, 10);
+        const passwordHash = await hashPassword(createDto.password!);
         const userWithStudent = await this.repo.create(createDto, passwordHash);
         const student = userWithStudent.student;
         if (!student) {
