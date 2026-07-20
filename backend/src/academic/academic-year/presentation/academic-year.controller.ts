@@ -20,7 +20,7 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { AcademicYear, Semester } from '@prisma/client';
+import { AcademicYear } from '@prisma/client';
 
 import { JwtAuthGuard } from '../../../platform/auth/index.js';
 import { CurrentUser } from '../../../core/decorators/current-user.decorator.js';
@@ -145,11 +145,7 @@ export class AcademicYearController {
   async create(
     @CurrentUser() user: AuthenticatedUser,
     @Body() dto: CreateAcademicYearDto,
-  ): Promise<{
-    academicYear: AcademicYear;
-    semesters: Semester[];
-    classroomsCreated: number;
-  }> {
+  ): Promise<AcademicYear> {
     return this.createAcademicYearService.execute(dto);
   }
 

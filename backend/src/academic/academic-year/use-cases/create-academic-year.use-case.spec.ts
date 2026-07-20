@@ -10,16 +10,14 @@ describe('CreateAcademicYearUseCase', () => {
   const mockRepository: Record<string, jest.Mock> = {
     findByName: jest.fn(),
     deactivateAll: jest.fn(),
-    createWithSemestersAndClasses: jest.fn(),
+    create: jest.fn(),
   };
 
-  const mockResult = {
-    academicYear: { id: 'ay-1', name: '2025/2026', isActive: false },
-    semesters: [
-      { id: 'sem-1', type: 'ODD', isActive: false },
-      { id: 'sem-2', type: 'EVEN', isActive: false },
-    ],
-    classroomsCreated: 3,
+  const mockAcademicYear = {
+    id: 'ay-1',
+    name: '2025/2026',
+    isActive: false,
+    deletedAt: null,
   };
 
   beforeEach(async () => {
@@ -41,22 +39,18 @@ describe('CreateAcademicYearUseCase', () => {
   describe('execute', () => {
     const dto: CreateAcademicYearDto = { name: '2025/2026' };
 
-    it('should create academic year with semesters and copied classes', async () => {
+    it('should create academic year', async () => {
       mockRepository.findByName.mockResolvedValue(null);
-      mockRepository.createWithSemestersAndClasses.mockResolvedValue(
-        mockResult,
-      );
+      mockRepository.create.mockResolvedValue(mockAcademicYear);
 
       const result = await useCase.execute(dto);
 
       expect(mockRepository.findByName).toHaveBeenCalledWith('2025/2026');
-      expect(mockRepository.createWithSemestersAndClasses).toHaveBeenCalledWith(
-        { name: '2025/2026', isActive: false },
-        true,
-      );
-      expect(result.academicYear.name).toBe('2025/2026');
-      expect(result.semesters).toHaveLength(2);
-      expect(result.classroomsCreated).toBe(3);
+      expect(mockRepository.create).toHaveBeenCalledWith({
+        name: '2025/2026',
+        isActive: false,
+      });
+      expect(result.name).toBe('2025/2026');
     });
 
     it('should throw ConflictException when name already exists', async () => {
@@ -66,9 +60,7 @@ describe('CreateAcademicYearUseCase', () => {
       });
 
       await expect(useCase.execute(dto)).rejects.toThrow(ConflictException);
-      expect(
-        mockRepository.createWithSemestersAndClasses,
-      ).not.toHaveBeenCalled();
+      expect(mockRepository.create).not.toHaveBeenCalled();
     });
 
     it('should deactivate all others when isActive is true', async () => {
@@ -79,64 +71,27 @@ describe('CreateAcademicYearUseCase', () => {
 
       mockRepository.findByName.mockResolvedValue(null);
       mockRepository.deactivateAll.mockResolvedValue({ count: 1 });
-      mockRepository.createWithSemestersAndClasses.mockResolvedValue({
-        ...mockResult,
-        academicYear: { ...mockResult.academicYear, isActive: true },
+      mockRepository.create.mockResolvedValue({
+        ...mockAcademicYear,
+        isActive: true,
       });
 
       await useCase.execute(activeDto);
 
       expect(mockRepository.deactivateAll).toHaveBeenCalledWith();
-      expect(mockRepository.createWithSemestersAndClasses).toHaveBeenCalledWith(
-        { name: '2025/2026', isActive: true },
-        true,
-      );
+      expect(mockRepository.create).toHaveBeenCalledWith({
+        name: '2025/2026',
+        isActive: true,
+      });
     });
 
     it('should NOT deactivate others when isActive is false/undefined', async () => {
       mockRepository.findByName.mockResolvedValue(null);
-      mockRepository.createWithSemestersAndClasses.mockResolvedValue(
-        mockResult,
-      );
+      mockRepository.create.mockResolvedValue(mockAcademicYear);
 
       await useCase.execute(dto);
 
       expect(mockRepository.deactivateAll).not.toHaveBeenCalled();
-    });
-
-    it('should skip class copy when copyClassesFromPreviousYear is false', async () => {
-      const noCopyDto: CreateAcademicYearDto = {
-        name: '2025/2026',
-        copyClassesFromPreviousYear: false,
-      };
-
-      mockRepository.findByName.mockResolvedValue(null);
-      mockRepository.createWithSemestersAndClasses.mockResolvedValue({
-        ...mockResult,
-        classroomsCreated: 0,
-      });
-
-      const result = await useCase.execute(noCopyDto);
-
-      expect(mockRepository.createWithSemestersAndClasses).toHaveBeenCalledWith(
-        { name: '2025/2026', isActive: false },
-        false,
-      );
-      expect(result.classroomsCreated).toBe(0);
-    });
-
-    it('should default copyClasses to true when not specified', async () => {
-      mockRepository.findByName.mockResolvedValue(null);
-      mockRepository.createWithSemestersAndClasses.mockResolvedValue(
-        mockResult,
-      );
-
-      await useCase.execute(dto);
-
-      expect(mockRepository.createWithSemestersAndClasses).toHaveBeenCalledWith(
-        expect.any(Object),
-        true,
-      );
     });
   });
 });

@@ -33,8 +33,6 @@ const originalIds = computed(
   () => props.user.userRoles?.map((ur) => ur.role.id) ?? [],
 )
 
-// Seed the local selection from the user's current roles each time the
-// dialog opens so it always reflects the latest server state.
 watch(open, (isOpen) => {
   if (isOpen) {
     selectedIds.value = [...originalIds.value]

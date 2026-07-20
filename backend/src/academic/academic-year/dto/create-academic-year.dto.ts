@@ -25,12 +25,4 @@ export class CreateAcademicYearDto {
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
-
-  @ApiPropertyOptional({
-    description: 'Copy classes from previous academic year? Defaults to true.',
-    default: true,
-  })
-  @IsOptional()
-  @IsBoolean()
-  copyClassesFromPreviousYear?: boolean;
 }

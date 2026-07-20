@@ -94,11 +94,6 @@ export function useUserRole() {
     }
   }
 
-  /**
-   * Reconcile a user's roles against a target selection in one action.
-   * Diffs the target against the original set, then assigns/unassigns only
-   * the roles that changed.
-   */
   async function syncUserRoles(
     userId: string,
     originalRoleIds: string[],

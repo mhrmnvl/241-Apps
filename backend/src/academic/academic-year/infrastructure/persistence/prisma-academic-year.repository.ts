@@ -2,10 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { AcademicYear, Prisma } from '@prisma/client';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
 import {
-  IAcademicYearRepository,
-  CopiedClassroomFields,
   CreateAcademicYearRepositoryInput,
-  CreateAcademicYearWithRelationsResult,
+  IAcademicYearRepository,
 } from '../../domain/interfaces/academic-year-repository.interface.js';
 import { AcademicYearQueryDto } from '../../dto/academic-year-query.dto.js';
 import { PaginatedResult } from '../../../../shared/domain/interfaces/repository.interface.js';
@@ -59,117 +57,12 @@ export class PrismaAcademicYearRepository extends IAcademicYearRepository {
     });
   }
 
-  async findClassesByAcademicYear(
-    academicYearId: string,
-  ): Promise<CopiedClassroomFields[]> {
-    const classrooms = await this.prisma.classroom.findMany({
-      where: { academicYearId, deletedAt: null },
-      select: {
-        gradeId: true,
-        code: true,
-        name: true,
-        capacity: true,
-        curriculumId: true,
-        isActive: true,
-      },
-    });
-    return classrooms;
-  }
-
   async create(data: CreateAcademicYearRepositoryInput): Promise<AcademicYear> {
     return this.prisma.academicYear.create({
       data: {
         name: data.name,
         isActive: data.isActive,
       },
-    });
-  }
-
-  async createWithSemestersAndClasses(
-    ayData: CreateAcademicYearRepositoryInput,
-    copyClasses: boolean,
-  ): Promise<CreateAcademicYearWithRelationsResult> {
-    return this.prisma.$transaction(async (tx) => {
-      const academicYear = await tx.academicYear.create({
-        data: {
-          name: ayData.name,
-          isActive: ayData.isActive,
-        },
-      });
-
-      const semesterTypes = await tx.semesterType.findMany({
-        where: { isActive: true, deletedAt: null },
-      });
-      const oddType = semesterTypes.find((t) => t.name === 'ODD');
-      const evenType = semesterTypes.find((t) => t.name === 'EVEN');
-
-      if (!oddType || !evenType) {
-        throw new Error('Default Semester Types (ODD, EVEN) must exist');
-      }
-
-      const [semesterGanjil, semesterGenap] = await Promise.all([
-        tx.semester.create({
-          data: {
-            academicYearId: academicYear.id,
-            typeId: oddType.id,
-            isActive: false,
-          },
-        }),
-        tx.semester.create({
-          data: {
-            academicYearId: academicYear.id,
-            typeId: evenType.id,
-            isActive: false,
-          },
-        }),
-      ]);
-
-      let classroomsCreated = 0;
-
-      if (copyClasses) {
-        const previousAy = await tx.academicYear.findFirst({
-          where: {
-            deletedAt: null,
-            id: { not: academicYear.id },
-          },
-          orderBy: { name: 'desc' },
-        });
-
-        if (previousAy) {
-          const previousClasses = await tx.classroom.findMany({
-            where: { academicYearId: previousAy.id, deletedAt: null },
-            select: {
-              gradeId: true,
-              code: true,
-              name: true,
-              capacity: true,
-              curriculumId: true,
-              isActive: true,
-            },
-          });
-
-          if (previousClasses.length > 0) {
-            await tx.classroom.createMany({
-              data: previousClasses.map((classroom) => ({
-                academicYearId: academicYear.id,
-                gradeId: classroom.gradeId,
-                code: classroom.code,
-                name: classroom.name,
-                capacity: classroom.capacity,
-                curriculumId: classroom.curriculumId,
-                isActive: classroom.isActive,
-              })),
-            });
-            classroomsCreated = previousClasses.length;
-          }
-        }
-      }
-
-      return {
-        academicYear,
-        semesters: [semesterGanjil, semesterGenap],
-        classroomsCreated,
-      };
     });
   }
 

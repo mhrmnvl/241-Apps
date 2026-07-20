@@ -12,17 +12,11 @@ export function useAuthSession() {
 
   const roles = computed(() => user.value?.roles ?? [])
 
-  /** Cek apakah user punya tepat satu role tertentu */
   const hasRole = (role: string) => roles.value.includes(role)
 
-  /** Cek apakah user punya salah satu dari beberapa role */
   const hasAnyRole = (...targetRoles: string[]) =>
     targetRoles.some((r) => roles.value.includes(r))
 
-  /**
-   * User adalah "staff" jika punya minimal 1 role dan bukan murni STUDENT.
-   * Role custom (dibuat manual) akan masuk kategori staff.
-   */
   const isStaff = computed(
     () => roles.value.length > 0 && !roles.value.every((r) => r === 'STUDENT'),
   )
