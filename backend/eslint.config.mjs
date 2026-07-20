@@ -18,6 +18,11 @@ export default tseslint.config(
   ...tseslint.configs.stylistic,
   prettier,
   {
+    languageOptions: {
+      parserOptions: {
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-unused-vars': 'off',
