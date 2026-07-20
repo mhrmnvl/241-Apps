@@ -18,13 +18,15 @@ export const createCurriculumSubjectColumns = (
     enableHiding: false,
   },
   {
+    id: 'code',
+    header: 'Kode',
+    meta: { align: 'center' },
+    cell: ({ row }) => row.original.subject?.code ?? '-',
+  },
+  {
     id: 'subject',
     header: 'Mata Pelajaran',
-    cell: ({ row }) => {
-      const subj = row.original.subject
-      if (!subj) return '-'
-      return subj.code ? `${subj.name} (${subj.code})` : subj.name
-    },
+    cell: ({ row }) => row.original.subject?.name ?? '-',
   },
   {
     id: 'hoursPerWeek',
