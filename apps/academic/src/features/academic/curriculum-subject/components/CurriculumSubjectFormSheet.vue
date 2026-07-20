@@ -3,7 +3,6 @@ import { computed, toRefs, ref, watch } from 'vue'
 import { toTypedSchema } from '@vee-validate/zod'
 import { useForm } from 'vee-validate'
 import * as z from 'zod'
-import { useCurriculumSubject } from '../composables/useCurriculumSubject'
 import { Alert, AlertDescription, AlertTitle } from '@/ui/alert'
 import {
   AlertDialog,
@@ -31,8 +30,6 @@ import {
   FormMessage,
 } from '@/ui/form'
 import { Input } from '@/ui/input'
-import { AppCombobox } from '@/ui'
-import type { ComboboxOption } from '@/ui'
 import { AlertCircle } from 'lucide-vue-next'
 import type { CurriculumSubject, CurriculumSubjectSavePayload } from '../types'
 
@@ -59,15 +56,6 @@ const open = computed({
 
 const { editData } = toRefs(props)
 const isEditing = computed(() => !!editData?.value)
-
-const { subjects } = useCurriculumSubject()
-
-const subjectOptions = computed<ComboboxOption[]>(() =>
-  subjects.value.map((s) => ({
-    value: s.id,
-    label: s.code ? `${s.name} (${s.code})` : s.name,
-  })),
-)
 
 const formSchema = toTypedSchema(
   z.object({
@@ -160,23 +148,19 @@ function confirmSave() {
           class="space-y-4 px-6 py-4"
           @submit.prevent="onSubmit"
         >
-          <FormField
-            v-slot="{ value, handleChange }"
-            name="subjectId"
-          >
+          <FormField name="subjectId">
             <FormItem>
-              <FormLabel>
-                Mata Pelajaran
-                <span class="text-destructive">*</span>
-              </FormLabel>
+              <FormLabel> Mata Pelajaran </FormLabel>
               <FormControl>
-                <AppCombobox
-                  :model-value="value"
-                  :options="subjectOptions"
-                  placeholder="Pilih Mata Pelajaran"
-                  search-placeholder="Cari mata pelajaran..."
-                  empty-text="Mata pelajaran tidak ditemukan."
-                  @update:model-value="(val) => handleChange(val)"
+                <Input
+                  :model-value="
+                    editData?.subject
+                      ? editData.subject.code
+                        ? `${editData.subject.name} (${editData.subject.code})`
+                        : editData.subject.name
+                      : ''
+                  "
+                  disabled
                 />
               </FormControl>
               <FormMessage />

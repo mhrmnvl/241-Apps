@@ -28,6 +28,8 @@ export function useCurriculumSubject() {
     fetchCurriculumSubjects: curriculumSubjectService.fetchCurriculumSubjects,
     fetchCurriculumInfo: curriculumSubjectService.fetchCurriculumInfo,
     saveCurriculumSubject: curriculumSubjectService.saveCurriculumSubject,
+    bulkCreateCurriculumSubjects:
+      curriculumSubjectService.bulkCreateCurriculumSubjects,
     deleteCurriculumSubject: curriculumSubjectService.deleteCurriculumSubject,
   }
 }

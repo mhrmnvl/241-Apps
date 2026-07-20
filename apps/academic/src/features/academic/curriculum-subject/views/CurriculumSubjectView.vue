@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { CurriculumSubject, CurriculumSubjectSavePayload } from '../types'
 import CurriculumSubjectFormSheet from '../components/CurriculumSubjectFormSheet.vue'
+import AddCurriculumSubjectDialog from '../components/AddCurriculumSubjectDialog.vue'
 import { createCurriculumSubjectColumns } from '../components/columns'
 import { useCurriculumSubject } from '../composables/useCurriculumSubject'
 import AppLayout from '@/layouts/AppLayout.vue'
@@ -24,10 +25,12 @@ const {
   formError,
   curriculumName,
   curriculumAcademicYear,
+  subjects,
   fetchReferenceData,
   fetchCurriculumSubjects,
   fetchCurriculumInfo,
   saveCurriculumSubject,
+  bulkCreateCurriculumSubjects,
   deleteCurriculumSubject,
 } = useCurriculumSubject()
 
@@ -37,15 +40,20 @@ const breadcrumbs = computed(() => [
   { title: curriculumName.value || 'Detail', href: route.path },
 ])
 
-const isAddModalOpen = ref(false)
+const isAddDialogOpen = ref(false)
+const isEditSheetOpen = ref(false)
 const editingItem = ref<CurriculumSubject | null>(null)
 const { isAdmin } = useRoleGuard()
+
+const existingSubjectIds = computed(() =>
+  items.value.map((item) => item.subjectId),
+)
 
 const tableColumns = createCurriculumSubjectColumns({
   showActions: isAdmin.value,
   onEdit: (item: CurriculumSubject) => {
     editingItem.value = item
-    isAddModalOpen.value = true
+    isEditSheetOpen.value = true
   },
   onDelete: async (item: CurriculumSubject, { closeAlert, setLoading }) => {
     setLoading(true)
@@ -66,12 +74,20 @@ async function handleSaveCurriculumSubject(
     payload,
   )
   if (result.success) {
-    isAddModalOpen.value = false
+    isEditSheetOpen.value = false
     void fetchCurriculumSubjects(curriculumId)
   }
 }
 
-watch(isAddModalOpen, (isOpen) => {
+async function handleBulkSave(subjectIds: string[]) {
+  const result = await bulkCreateCurriculumSubjects(curriculumId, subjectIds)
+  if (result.success) {
+    isAddDialogOpen.value = false
+    void fetchCurriculumSubjects(curriculumId)
+  }
+}
+
+watch(isEditSheetOpen, (isOpen) => {
   if (!isOpen) {
     editingItem.value = null
     formError.value = null
@@ -116,7 +132,7 @@ onMounted(async () => {
           </div>
           <Button
             v-if="isAdmin"
-            @click="isAddModalOpen = true"
+            @click="isAddDialogOpen = true"
           >
             <Plus class="size-4 mr-2" />
             Tambah
@@ -135,13 +151,22 @@ onMounted(async () => {
           />
 
           <CurriculumSubjectFormSheet
-            v-if="isAdmin && isAddModalOpen"
-            v-model:open="isAddModalOpen"
+            v-if="isAdmin && isEditSheetOpen"
+            v-model:open="isEditSheetOpen"
             :form-error="formError"
             :is-saving="isSaving"
             :curriculum-id="curriculumId"
             :edit-data="editingItem"
             @save="handleSaveCurriculumSubject"
+          />
+
+          <AddCurriculumSubjectDialog
+            v-if="isAdmin && isAddDialogOpen"
+            v-model:open="isAddDialogOpen"
+            :subjects="subjects"
+            :existing-subject-ids="existingSubjectIds"
+            :saving="isSaving"
+            @save="handleBulkSave"
           />
         </div>
       </Card>
