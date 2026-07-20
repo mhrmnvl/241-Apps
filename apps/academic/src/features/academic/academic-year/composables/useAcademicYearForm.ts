@@ -22,7 +22,6 @@ export function useAcademicYearForm(options?: {
         .min(1, 'Nama tahun ajaran wajib diisi.')
         .min(3, 'Nama tahun ajaran minimal 3 karakter.'),
       isActive: z.boolean().default(true),
-      copyClassesFromPreviousYear: z.boolean().default(true),
     }),
   )
 
@@ -31,7 +30,6 @@ export function useAcademicYearForm(options?: {
     initialValues: {
       name: '',
       isActive: true,
-      copyClassesFromPreviousYear: true,
     },
   })
 
@@ -42,7 +40,6 @@ export function useAcademicYearForm(options?: {
         form.setValues({
           name: data.name ?? '',
           isActive: data.isActive ?? true,
-          copyClassesFromPreviousYear: true,
         })
       } else {
         form.resetForm()
@@ -56,16 +53,11 @@ export function useAcademicYearForm(options?: {
   function buildPayload(values: {
     name: string
     isActive: boolean
-    copyClassesFromPreviousYear: boolean
   }): AcademicYearSavePayload {
-    const payload: AcademicYearSavePayload = {
+    return {
       name: values.name,
       isActive: values.isActive,
     }
-    if (!isEditing.value) {
-      payload.copyClassesFromPreviousYear = values.copyClassesFromPreviousYear
-    }
-    return payload
   }
 
   const onSubmit = form.handleSubmit((values) => {
@@ -76,11 +68,7 @@ export function useAcademicYearForm(options?: {
     }
   })
 
-  async function executeSubmit(values: {
-    name: string
-    isActive: boolean
-    copyClassesFromPreviousYear: boolean
-  }) {
+  async function executeSubmit(values: { name: string; isActive: boolean }) {
     const editItem = options?.editData?.()
     const payload = buildPayload(values)
     const result = await academicYearService.saveAcademicYear(

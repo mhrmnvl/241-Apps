@@ -233,6 +233,12 @@ export interface WaveSavePayload {
   isActive?: boolean
 }
 
+export interface AdmissionAcademicYear {
+  id: string
+  name: string
+  isActive?: boolean
+}
+
 export interface AnnouncementSavePayload {
   title: string
   content: string

@@ -6,5 +6,4 @@ export interface AcademicYearEditData {
 export interface AcademicYearSavePayload {
   name: string
   isActive?: boolean
-  copyClassesFromPreviousYear?: boolean
 }

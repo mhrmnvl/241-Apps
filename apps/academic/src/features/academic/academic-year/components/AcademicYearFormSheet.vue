@@ -13,7 +13,6 @@ import {
 import { ScrollArea } from '@/ui/scroll-area'
 import { Loader2, AlertCircle } from 'lucide-vue-next'
 import { Input } from '@/ui/input'
-import { Checkbox } from '@/ui/checkbox'
 import {
   Select,
   SelectContent,
@@ -135,26 +134,6 @@ const academicYearForm = useAcademicYearForm({
                   <SelectItem value="false">Tidak Aktif</SelectItem>
                 </SelectContent>
               </Select>
-            </FormItem>
-          </FormField>
-
-          <FormField
-            v-if="!academicYearForm.isEditing.value"
-            v-slot="{ value, handleChange }"
-            name="copyClassesFromPreviousYear"
-          >
-            <FormItem class="flex items-center gap-3 rounded-lg border p-3">
-              <FormControl>
-                <Checkbox
-                  :model-value="value"
-                  @update:model-value="handleChange"
-                />
-              </FormControl>
-              <div class="grid gap-0.5">
-                <FormLabel class="cursor-pointer text-sm font-medium">
-                  Salin kelas dari tahun sebelumnya
-                </FormLabel>
-              </div>
             </FormItem>
           </FormField>
 

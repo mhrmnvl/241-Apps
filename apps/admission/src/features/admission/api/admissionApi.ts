@@ -5,6 +5,7 @@ import type {
 } from '@/shared/types/api'
 import type {
   ActiveWave,
+  AdmissionAcademicYear,
   AdmissionAnnouncement,
   AdmissionApplication,
   AdmissionApplicationListItem,
@@ -185,6 +186,12 @@ export const admissionApi = {
       `/admissions/applications/${applicationId}/enroll`,
       payload,
     ),
+
+  // ── Academic Years (admin, for wave form) ──
+  getAcademicYears: () =>
+    api.get<ApiPaginatedResponse<AdmissionAcademicYear>>('/academic-years', {
+      params: { limit: 100 },
+    }),
 
   // ── Waves (admin) ──
   getWaves: (params?: { page?: number; limit?: number; search?: string }) =>

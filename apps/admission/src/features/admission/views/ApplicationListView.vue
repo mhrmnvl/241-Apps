@@ -157,11 +157,15 @@ function goToPage(target: number) {
 
 <template>
   <AppLayout :breadcrumbs="breadcrumbs">
-    <div class="space-y-4 p-4 sm:p-6">
-      <Card>
-        <CardHeader>
+    <div class="p-4 sm:p-6">
+      <Card
+        class="overflow-hidden rounded-2xl shadow-sm shadow-black/5 ring-1 ring-black/4"
+      >
+        <CardHeader class="border-b px-6 py-5">
           <div class="flex flex-wrap items-center justify-between gap-3">
-            <CardTitle>Daftar Pendaftar ({{ total }})</CardTitle>
+            <CardTitle class="text-xl font-bold tracking-tight"
+              >Daftar Pendaftar ({{ total }})</CardTitle
+            >
             <div class="flex flex-wrap items-center gap-2">
               <div class="relative">
                 <Search
@@ -212,33 +216,37 @@ function goToPage(target: number) {
             </div>
           </div>
         </CardHeader>
+
+        <div class="p-6 space-y-4">
+          <DataTable
+            :columns="columns"
+            :data="applications"
+            :is-loading="loading"
+            hide-pagination
+            item-label="pendaftar"
+          />
+
+          <div class="flex items-center justify-end gap-2 text-sm">
+            <Button
+              variant="outline"
+              size="sm"
+              :disabled="page <= 1"
+              @click="goToPage(page - 1)"
+            >
+              Sebelumnya
+            </Button>
+            <span>Hal. {{ page }} / {{ totalPages }}</span>
+            <Button
+              variant="outline"
+              size="sm"
+              :disabled="page >= totalPages"
+              @click="goToPage(page + 1)"
+            >
+              Berikutnya
+            </Button>
+          </div>
+        </div>
       </Card>
-
-      <DataTable
-        :columns="columns"
-        :data="applications"
-        :loading="loading"
-      />
-
-      <div class="flex items-center justify-end gap-2 text-sm">
-        <Button
-          variant="outline"
-          size="sm"
-          :disabled="page <= 1"
-          @click="goToPage(page - 1)"
-        >
-          Sebelumnya
-        </Button>
-        <span>Hal. {{ page }} / {{ totalPages }}</span>
-        <Button
-          variant="outline"
-          size="sm"
-          :disabled="page >= totalPages"
-          @click="goToPage(page + 1)"
-        >
-          Berikutnya
-        </Button>
-      </div>
     </div>
   </AppLayout>
 </template>
