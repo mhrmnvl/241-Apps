@@ -1,6 +1,6 @@
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { UpdateProfileSocialMediaDto } from '../dto/request/update-profile-social-media.request.dto.js';
+import { UpdateProfileSocialMediaDto } from '../dto/request/update-profile-social-media.dto.js';
 import { ProfileSocialMediaRepository } from '../repositories/profile-social-media.repository.js';
 import { ProfileRepository } from '../index.js';
 import { UpdateProfileSocialMediaUseCase } from './update-profile-social-media.use-case.js';

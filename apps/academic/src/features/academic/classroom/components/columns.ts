@@ -9,13 +9,6 @@ export const createClassroomColumns = (
   actions: ClassroomColumnActions,
 ): ColumnDef<Classroom>[] => [
   {
-    id: 'no',
-    header: 'No',
-    cell: ({ row }) => row.index + 1,
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
     id: 'displayName',
     header: 'Nama Kelas',
     meta: { align: 'center' },

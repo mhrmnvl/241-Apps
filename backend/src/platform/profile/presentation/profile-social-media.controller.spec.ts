@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { CreateProfileSocialMediaDto } from '../dto/request/create-profile-social-media.request.dto.js';
-import { ProfileSocialMediaQueryDto } from '../dto/request/profile-social-media-query.request.dto.js';
-import { UpdateProfileSocialMediaDto } from '../dto/request/update-profile-social-media.request.dto.js';
+import { CreateProfileSocialMediaDto } from '../dto/request/create-profile-social-media.dto.js';
+import { ProfileSocialMediaQueryDto } from '../dto/request/profile-social-media-query.dto.js';
+import { UpdateProfileSocialMediaDto } from '../dto/request/update-profile-social-media.dto.js';
 import { AddProfileSocialMediaUseCase } from '../use-cases/add-profile-social-media.use-case.js';
 import { GetAllProfileSocialMediasUseCase } from '../use-cases/get-all-profile-social-medias.use-case.js';
 import { GetProfileSocialMediasUseCase } from '../use-cases/get-profile-social-medias.use-case.js';

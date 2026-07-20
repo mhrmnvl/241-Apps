@@ -1,7 +1,7 @@
 import { ConflictException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserGender } from '@prisma/client';
-import { CreateTeacherDto } from '../dto/request/create-teacher.request.dto.js';
+import { CreateTeacherDto } from '../dto/request/create-teacher.dto.js';
 import { TeacherRepository } from '../repositories/teacher.repository.js';
 import { CreateTeacherUseCase } from './create-teacher.use-case.js';
 import { hashPassword } from '../../../shared/utils/hash.helper.js';

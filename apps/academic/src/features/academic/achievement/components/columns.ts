@@ -9,13 +9,6 @@ export const createAchievementColumns = (
 ): ColumnDef<Achievement>[] => {
   const baseColumns: ColumnDef<Achievement>[] = [
     {
-      id: 'no',
-      header: 'No',
-      cell: ({ row }) => row.index + 1,
-      enableSorting: false,
-      enableHiding: false,
-    },
-    {
       accessorKey: 'year',
       header: 'Tahun',
       meta: { align: 'center' },

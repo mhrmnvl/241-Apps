@@ -1,5 +1,5 @@
 import { PartialType } from '@nestjs/swagger';
-import { CreateProfileSocialMediaDto } from './create-profile-social-media.request.dto.js';
+import { CreateProfileSocialMediaDto } from './create-profile-social-media.dto.js';
 
 export class UpdateProfileSocialMediaDto extends PartialType(
   CreateProfileSocialMediaDto,

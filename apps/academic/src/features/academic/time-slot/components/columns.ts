@@ -27,14 +27,6 @@ export const createTimeSlotColumns = (
   actions: TimeSlotColumnActions,
 ): ColumnDef<TimeSlot>[] => [
   {
-    id: 'no',
-    header: 'No',
-    meta: { align: 'center' },
-    cell: ({ row }) => row.index + 1,
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
     id: 'name',
     header: 'Nama Jam',
     meta: { align: 'center' },

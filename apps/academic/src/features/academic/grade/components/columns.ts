@@ -8,13 +8,6 @@ export const createGradeColumns = (
   actions: GradeColumnActions,
 ): ColumnDef<Grade>[] => [
   {
-    id: 'no',
-    header: 'No',
-    cell: ({ row }) => row.index + 1,
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
     id: 'level',
     header: 'Tingkat',
     meta: { align: 'center' },

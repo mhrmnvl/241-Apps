@@ -9,13 +9,6 @@ export const createParentColumns = (
   actions: ParentColumnActions,
 ): ColumnDef<Parent>[] => [
   {
-    id: 'no',
-    header: 'No',
-    cell: ({ row }) => row.index + 1,
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
     id: 'name',
     header: 'Nama',
     cell: ({ row }) => h('div', { class: 'font-medium' }, row.original.name),

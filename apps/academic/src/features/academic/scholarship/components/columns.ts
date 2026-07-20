@@ -9,13 +9,6 @@ export const createScholarshipColumns = (
 ): ColumnDef<Scholarship>[] => {
   const baseColumns: ColumnDef<Scholarship>[] = [
     {
-      id: 'no',
-      header: 'No',
-      cell: ({ row }) => row.index + 1,
-      enableSorting: false,
-      enableHiding: false,
-    },
-    {
       accessorKey: 'name',
       header: 'Nama Program Beasiswa',
       cell: ({ row }) => row.original.name,

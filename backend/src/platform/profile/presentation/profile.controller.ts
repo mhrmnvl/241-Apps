@@ -20,8 +20,8 @@ import { CurrentUser } from '../../../core/decorators/current-user.decorator.js'
 
 import { JwtAuthGuard } from '../../auth/index.js';
 
-import { ProfileResponseDto } from '../dto/response/profile.response.dto.js';
-import { UpdateProfileDto } from '../dto/request/update-profile.request.dto.js';
+import { ProfileResponseDto } from '../dto/response/profile-response.dto.js';
+import { UpdateProfileDto } from '../dto/request/update-profile.dto.js';
 import { GetProfileUseCase } from '../use-cases/get-profile.use-case.js';
 import { UpdateProfileUseCase } from '../use-cases/update-profile.use-case.js';
 

@@ -7,13 +7,6 @@ export const createAnnouncementColumns = (
   actions: AnnouncementColumnActions,
 ): ColumnDef<Announcement>[] => [
   {
-    id: 'no',
-    header: 'No',
-    cell: ({ row }) => row.index + 1,
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
     id: 'title',
     header: 'Judul',
     cell: ({ row }) => h('div', { class: 'font-medium' }, row.original.title),

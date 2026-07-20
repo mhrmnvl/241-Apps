@@ -13,13 +13,6 @@ export const createEducationalHistoryColumns = (
 ): ColumnDef<EducationalHistory>[] => {
   const baseTeacherColumns: ColumnDef<EducationalHistory>[] = [
     {
-      id: 'no',
-      header: 'No',
-      cell: ({ row }) => row.index + 1,
-      enableSorting: false,
-      enableHiding: false,
-    },
-    {
       accessorKey: 'level',
       header: 'Jenjang',
       meta: { align: 'center' },
@@ -45,13 +38,6 @@ export const createEducationalHistoryColumns = (
   ]
 
   const baseStudentColumns: ColumnDef<EducationalHistory>[] = [
-    {
-      id: 'no',
-      header: 'No',
-      cell: ({ row }) => row.index + 1,
-      enableSorting: false,
-      enableHiding: false,
-    },
     {
       accessorKey: 'level',
       header: 'Tingkat',

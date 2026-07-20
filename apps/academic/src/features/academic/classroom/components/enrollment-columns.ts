@@ -6,13 +6,6 @@ import { formatEntityName } from '@/shared/utils/utils'
 
 export const baseColumns: ColumnDef<ClassroomEnrollment>[] = [
   {
-    id: 'no',
-    header: 'No',
-    cell: ({ row }) => row.index + 1,
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
     id: 'nis',
     header: 'NIS',
     accessorFn: (row) => row.student.nis,

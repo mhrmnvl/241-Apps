@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserGender } from '@prisma/client';
-import { UpdateProfileDto } from '../dto/request/update-profile.request.dto.js';
+import { UpdateProfileDto } from '../dto/request/update-profile.dto.js';
 import { GetProfileUseCase } from '../use-cases/get-profile.use-case.js';
 import { UpdateProfileUseCase } from '../use-cases/update-profile.use-case.js';
 import { ProfileController } from './profile.controller.js';

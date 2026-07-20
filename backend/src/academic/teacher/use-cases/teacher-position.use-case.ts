@@ -8,7 +8,7 @@ import {
 import {
   CreateTeacherPositionDto,
   UpdateTeacherPositionDto,
-} from '../dto/request/teacher-position.request.dto.js';
+} from '../dto/request/teacher-position.dto.js';
 import { TeacherPositionsRepository } from '../repositories/teacher-position.repository.js';
 import { TeacherRepository } from '../index.js';
 

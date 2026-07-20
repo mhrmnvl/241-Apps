@@ -10,14 +10,6 @@ export const createStudentGraduationColumns = (
   actions: StudentGraduationColumnActions,
 ): ColumnDef<StudentGraduation>[] => [
   {
-    id: 'no',
-    header: 'No',
-    meta: { align: 'center' },
-    cell: ({ row }) => row.index + 1,
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
     id: 'nis',
     header: 'NIS',
     meta: { align: 'center' },

@@ -1,5 +1,5 @@
 import { User, Prisma } from '@prisma/client';
-import { UserQueryDto } from '../../dto/request/user-query.request.dto.js';
+import { UserQueryDto } from '../../dto/request/user-query.dto.js';
 import { PaginatedResult } from '../../../../shared/domain/interfaces/repository.interface.js';
 
 export const PUBLIC_USER_SELECT = {

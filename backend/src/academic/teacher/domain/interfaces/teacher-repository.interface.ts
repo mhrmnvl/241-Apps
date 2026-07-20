@@ -1,8 +1,8 @@
 import { Prisma, Teacher, User, Profile } from '@prisma/client';
-import { TeacherQueryDto } from '../../dto/request/teacher-query.request.dto.js';
-import { ExportTeacherQueryDto } from '../../dto/request/export-teacher-query.request.dto.js';
-import { CreateTeacherDto } from '../../dto/request/create-teacher.request.dto.js';
-import { UpdateTeacherDto } from '../../dto/request/update-teacher.request.dto.js';
+import { TeacherQueryDto } from '../../dto/request/teacher-query.dto.js';
+import { ExportTeacherQueryDto } from '../../dto/request/export-teacher-query.dto.js';
+import { CreateTeacherDto } from '../../dto/request/create-teacher.dto.js';
+import { UpdateTeacherDto } from '../../dto/request/update-teacher.dto.js';
 import { PaginatedResult } from '../../../../shared/domain/interfaces/repository.interface.js';
 
 export const USER_SELECT = {

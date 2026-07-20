@@ -7,20 +7,6 @@ import { useSocialMediaStore } from '../stores/socialMediaStore'
 
 export const getColumns = (showActions = true): ColumnDef<SocialMedia>[] => [
   {
-    id: 'no',
-    header: 'No',
-    cell: ({ row }) => {
-      const store = useSocialMediaStore()
-      return (
-        (store.paginationMeta.page - 1) * store.paginationMeta.limit +
-        row.index +
-        1
-      )
-    },
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
     accessorKey: 'name',
     header: 'Nama SocialMedia',
   },

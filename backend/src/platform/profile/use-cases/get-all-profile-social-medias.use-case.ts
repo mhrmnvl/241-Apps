@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { ProfileSocialMediaQueryDto } from '../dto/request/profile-social-media-query.request.dto.js';
+import { ProfileSocialMediaQueryDto } from '../dto/request/profile-social-media-query.dto.js';
 import {
   ProfileSocialMediaListDto,
   ProfileSocialMediaListResponseDto,
-} from '../dto/response/profile-social-media.response.dto.js';
+} from '../dto/response/profile-social-media-response.dto.js';
 import { ProfileRepository } from '../index.js';
 
 @Injectable()

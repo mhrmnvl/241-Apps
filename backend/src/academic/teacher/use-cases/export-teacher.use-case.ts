@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import ExcelJS from 'exceljs';
-import { ExportTeacherQueryDto } from '../dto/request/export-teacher-query.request.dto.js';
+import { ExportTeacherQueryDto } from '../dto/request/export-teacher-query.dto.js';
 import { TeacherRepository } from '../repositories/teacher.repository.js';
 
 type ExcelRow = Record<string, ExcelJS.CellValue>;

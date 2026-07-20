@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
-import { UserQueryDto } from '../../dto/request/user-query.request.dto.js';
+import { UserQueryDto } from '../../dto/request/user-query.dto.js';
 import {
   IUserRepository,
   PUBLIC_USER_SELECT,

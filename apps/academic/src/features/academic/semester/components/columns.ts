@@ -17,13 +17,6 @@ export const createSemesterColumns = (
   actions: SemesterColumnActions,
 ): ColumnDef<Semester>[] => [
   {
-    id: 'no',
-    header: 'No',
-    cell: ({ row }) => row.index + 1,
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
     id: 'academicYear',
     header: 'Tahun Ajaran',
     accessorFn: (row) => row.academicYear?.name ?? '-',

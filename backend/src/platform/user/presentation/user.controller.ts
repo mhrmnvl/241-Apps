@@ -26,13 +26,13 @@ import { JwtAuthGuard } from '../../auth/index.js';
 import { CurrentUser } from '../../../core/decorators/current-user.decorator.js';
 import type { AuthenticatedUser } from '../../../core/types/authenticated-user.type.js';
 
-import { CreateUserDto } from '../dto/request/create-user.request.dto.js';
-import { UpdateUserDto } from '../dto/request/update-user.request.dto.js';
-import { UserQueryDto } from '../dto/request/user-query.request.dto.js';
+import { CreateUserDto } from '../dto/request/create-user.dto.js';
+import { UpdateUserDto } from '../dto/request/update-user.dto.js';
+import { UserQueryDto } from '../dto/request/user-query.dto.js';
 import {
   UserListResponseDto,
   UserResponseDto,
-} from '../dto/response/user.response.dto.js';
+} from '../dto/response/user-response.dto.js';
 
 import { CreateUserUseCase } from '../use-cases/create-user.use-case.js';
 import { DeleteUserUseCase } from '../use-cases/delete-user.use-case.js';

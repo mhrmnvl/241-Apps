@@ -7,13 +7,6 @@ export const createSubjectColumns = (
   actions: SubjectColumnActions,
 ): ColumnDef<Subject>[] => [
   {
-    id: 'no',
-    header: 'No',
-    cell: ({ row }) => row.index + 1,
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
     id: 'code',
     header: 'Kode',
     accessorKey: 'code',

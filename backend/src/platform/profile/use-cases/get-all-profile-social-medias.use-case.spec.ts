@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ProfileSocialMediaQueryDto } from '../dto/request/profile-social-media-query.request.dto.js';
+import { ProfileSocialMediaQueryDto } from '../dto/request/profile-social-media-query.dto.js';
 import { ProfileRepository } from '../index.js';
 import { GetAllProfileSocialMediasUseCase } from './get-all-profile-social-medias.use-case.js';
 

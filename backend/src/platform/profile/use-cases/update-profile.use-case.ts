@@ -4,7 +4,7 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { UpdateProfileDto } from '../dto/request/update-profile.request.dto.js';
+import { UpdateProfileDto } from '../dto/request/update-profile.dto.js';
 import { ProfileRepository } from '../repositories/profile.repository.js';
 
 @Injectable()

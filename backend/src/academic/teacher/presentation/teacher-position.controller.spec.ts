@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import {
   CreateTeacherPositionDto,
   UpdateTeacherPositionDto,
-} from '../dto/request/teacher-position.request.dto.js';
+} from '../dto/request/teacher-position.dto.js';
 import { TeacherPositionUseCase } from '../use-cases/teacher-position.use-case.js';
 import { TeacherPositionsController } from './teacher-position.controller.js';
 import type { AuthenticatedUser } from '../../../core/types/authenticated-user.type.js';

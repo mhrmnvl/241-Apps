@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { IUserRepository } from '../interfaces/user-repository.interface.js';
-import { UserQueryDto } from '../dto/request/user-query.request.dto.js';
+import { UserQueryDto } from '../dto/request/user-query.dto.js';
 
 @Injectable()
 export class GetUsersUseCase {

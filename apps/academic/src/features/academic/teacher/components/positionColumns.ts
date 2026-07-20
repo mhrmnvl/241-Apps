@@ -25,13 +25,6 @@ export const createPositionColumns = (
 ): ColumnDef<TeacherPosition>[] => {
   const base: ColumnDef<TeacherPosition>[] = [
     {
-      id: 'no',
-      header: 'No',
-      cell: ({ row }) => row.index + 1,
-      enableSorting: false,
-      enableHiding: false,
-    },
-    {
       accessorKey: 'position.name',
       header: 'Nama Jabatan',
       cell: ({ row }) => row.original.position?.name || '-',

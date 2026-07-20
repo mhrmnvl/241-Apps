@@ -108,13 +108,6 @@ export const createAccountColumns = (
   actions: TeacherColumnActions,
 ): ColumnDef<Teacher>[] => [
   {
-    id: 'no',
-    header: 'No',
-    cell: ({ row }) => row.index + 1,
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
     id: 'name',
     header: 'Nama Lengkap',
     cell: ({ row }) => row.original.user?.profile?.name || '-',

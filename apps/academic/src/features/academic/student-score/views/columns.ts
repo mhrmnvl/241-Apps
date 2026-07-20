@@ -10,13 +10,6 @@ export const createstudentScoreColumns = (
 ): ColumnDef<StudentScoreRow>[] => {
   const baseColumns: ColumnDef<StudentScoreRow>[] = [
     {
-      id: 'no',
-      header: 'No',
-      cell: ({ row }) => row.index + 1,
-      enableSorting: false,
-      enableHiding: false,
-    },
-    {
       id: 'nis',
       header: 'NIS',
       accessorFn: (row) => row.student?.nis ?? '-',

@@ -10,13 +10,6 @@ export const createTeachingAssignmentColumns = (
   actions: TeachingAssignmentColumnActions,
 ): ColumnDef<TeachingAssignment>[] => [
   {
-    id: 'no',
-    header: 'No',
-    cell: ({ row }) => row.index + 1,
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
     id: 'teacher',
     header: 'Guru',
     cell: ({ row }) =>

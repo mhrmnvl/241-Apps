@@ -1,5 +1,5 @@
 import { ConflictException, Injectable, Logger } from '@nestjs/common';
-import { CreateTeacherDto } from '../dto/request/create-teacher.request.dto.js';
+import { CreateTeacherDto } from '../dto/request/create-teacher.dto.js';
 import { TeacherRepository } from '../repositories/teacher.repository.js';
 import { hashPassword } from '../../../shared/utils/hash.helper.js';
 

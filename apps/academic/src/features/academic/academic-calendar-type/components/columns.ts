@@ -12,13 +12,6 @@ export const createColumns = (
   showActions = true,
 ): ColumnDef<AcademicCalendarType>[] => [
   {
-    id: 'no',
-    header: 'No',
-    cell: ({ row }) => row.index + 1,
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
     accessorKey: 'name',
     header: 'Tipe Kalender',
   },

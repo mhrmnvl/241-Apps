@@ -28,8 +28,8 @@ import type { AuthenticatedUser } from '../../../core/types/authenticated-user.t
 import {
   CreateTeacherPositionDto,
   UpdateTeacherPositionDto,
-} from '../dto/request/teacher-position.request.dto.js';
-import { TeacherPositionResponseDto } from '../dto/response/teacher-position.response.dto.js';
+} from '../dto/request/teacher-position.dto.js';
+import { TeacherPositionResponseDto } from '../dto/response/teacher-position-response.dto.js';
 import { TeacherPositionUseCase } from '../use-cases/teacher-position.use-case.js';
 
 @ApiTags('Teacher Positions')

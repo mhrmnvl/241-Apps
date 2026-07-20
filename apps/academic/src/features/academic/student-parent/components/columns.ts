@@ -29,11 +29,6 @@ export const createStudentParentColumns = (
   actions: StudentParentColumnActions,
 ): ColumnDef<StudentParent>[] => [
   {
-    id: 'no',
-    header: 'No',
-    cell: ({ row }) => h('div', { class: 'text-center' }, row.index + 1),
-  },
-  {
     id: 'studentName',
     header: 'Nama Siswa',
     cell: ({ row }) => {

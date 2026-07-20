@@ -1,7 +1,7 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { ProfileRepository } from '../index.js';
 import { ProfileSocialMediaRepository } from '../repositories/profile-social-media.repository.js';
-import { UpdateProfileSocialMediaDto } from '../dto/request/update-profile-social-media.request.dto.js';
+import { UpdateProfileSocialMediaDto } from '../dto/request/update-profile-social-media.dto.js';
 
 @Injectable()
 export class UpdateProfileSocialMediaUseCase {

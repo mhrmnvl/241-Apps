@@ -1,8 +1,8 @@
 import { ForbiddenException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { CreateUserDto } from '../dto/request/create-user.request.dto.js';
-import { UpdateUserDto } from '../dto/request/update-user.request.dto.js';
-import { UserQueryDto } from '../dto/request/user-query.request.dto.js';
+import { CreateUserDto } from '../dto/request/create-user.dto.js';
+import { UpdateUserDto } from '../dto/request/update-user.dto.js';
+import { UserQueryDto } from '../dto/request/user-query.dto.js';
 import { CreateUserUseCase } from '../use-cases/create-user.use-case.js';
 import { DeleteUserUseCase } from '../use-cases/delete-user.use-case.js';
 import { GetUserByIdUseCase } from '../use-cases/get-user-by-id.use-case.js';

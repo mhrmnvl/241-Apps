@@ -3,13 +3,6 @@ import type { AttendanceRecapItem } from '../types'
 
 export const createRecapColumns = (): ColumnDef<AttendanceRecapItem>[] => [
   {
-    id: 'no',
-    header: 'No',
-    cell: ({ row }) => row.index + 1,
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
     accessorKey: 'nis',
     header: 'NIS',
   },

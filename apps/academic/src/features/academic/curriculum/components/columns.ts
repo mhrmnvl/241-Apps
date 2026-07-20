@@ -10,13 +10,6 @@ export const createCurriculaColumns = (
   actions: CurriculaColumnActions,
 ): ColumnDef<Curricula>[] => [
   {
-    id: 'no',
-    header: 'No',
-    cell: ({ row }) => row.index + 1,
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
     id: 'name',
     header: 'Nama Kurikulum',
     accessorKey: 'name',

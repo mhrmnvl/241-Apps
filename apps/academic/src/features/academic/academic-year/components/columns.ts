@@ -9,13 +9,6 @@ export const createAcademicYearColumns = (
   actions: AcademicYearColumnActions,
 ): ColumnDef<AcademicYear>[] => [
   {
-    id: 'no',
-    header: 'No',
-    cell: ({ row }) => row.index + 1,
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
     id: 'name',
     header: 'Tahun Ajaran',
     accessorKey: 'name',

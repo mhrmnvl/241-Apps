@@ -35,15 +35,15 @@ import { CurrentUser } from '../../../core/decorators/current-user.decorator.js'
 import type { AuthenticatedUser } from '../../../core/types/authenticated-user.type.js';
 
 import { UpdateProfileDto } from '../../../platform/profile/index.js';
-import { BulkImportTeachersResponseDto } from '../dto/response/bulk-import-teacher.response.dto.js';
-import { CreateTeacherDto } from '../dto/request/create-teacher.request.dto.js';
-import { TeacherQueryDto } from '../dto/request/teacher-query.request.dto.js';
+import { BulkImportTeachersResponseDto } from '../dto/response/bulk-import-teacher-response.dto.js';
+import { CreateTeacherDto } from '../dto/request/create-teacher.dto.js';
+import { TeacherQueryDto } from '../dto/request/teacher-query.dto.js';
 import {
   TeacherListResponseDto,
   TeacherResponseDto,
-} from '../dto/response/teacher.response.dto.js';
-import { ExportTeacherQueryDto } from '../dto/request/export-teacher-query.request.dto.js';
-import { UpdateTeacherDto } from '../dto/request/update-teacher.request.dto.js';
+} from '../dto/response/teacher-response.dto.js';
+import { ExportTeacherQueryDto } from '../dto/request/export-teacher-query.dto.js';
+import { UpdateTeacherDto } from '../dto/request/update-teacher.dto.js';
 import { BulkImportTeachersUseCase } from '../use-cases/bulk-import-teacher.use-case.js';
 import { CreateTeacherUseCase } from '../use-cases/create-teacher.use-case.js';
 import { DeleteTeacherUseCase } from '../use-cases/delete-teacher.use-case.js';

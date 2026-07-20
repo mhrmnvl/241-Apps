@@ -9,7 +9,7 @@ import {
 import {
   CreateTeacherPositionDto,
   UpdateTeacherPositionDto,
-} from '../../dto/request/teacher-position.request.dto.js';
+} from '../../dto/request/teacher-position.dto.js';
 
 @Injectable()
 export class PrismaTeacherPositionsRepository extends ITeacherPositionsRepository {

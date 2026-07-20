@@ -2,7 +2,7 @@ import { Position, Prisma, TeacherPosition } from '@prisma/client';
 import {
   CreateTeacherPositionDto,
   UpdateTeacherPositionDto,
-} from '../../dto/request/teacher-position.request.dto.js';
+} from '../../dto/request/teacher-position.dto.js';
 
 export const TEACHER_POSITION_INCLUDE = {
   position: { include: { category: true } },

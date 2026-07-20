@@ -1,6 +1,6 @@
 import { ConflictException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { UpdateTeacherDto } from '../dto/request/update-teacher.request.dto.js';
+import { UpdateTeacherDto } from '../dto/request/update-teacher.dto.js';
 import { TeacherRepository } from '../repositories/teacher.repository.js';
 import { UpdateTeacherUseCase } from './update-teacher.use-case.js';
 
