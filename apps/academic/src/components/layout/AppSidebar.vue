@@ -30,29 +30,48 @@ const activeAcademicInfo = ref({ academicYear: 'Memuat...', semester: '' })
 
 const userRoles = computed(() => user.value?.roles ?? [])
 const isSuperAdmin = computed(() => userRoles.value.includes('SUPER_ADMIN'))
+const isStaff = computed(
+  () =>
+    userRoles.value.length > 0 &&
+    !userRoles.value.every((r) => r === 'STUDENT'),
+)
 
 const filteredSections = computed(() => {
   if (isSuperAdmin.value) return menuSections
 
   const roles = userRoles.value
   const hasRole = (r: string) => roles.includes(r)
+
+  // Role custom (non-sistem) tidak ada di allowedRoles → perlakukan seperti ADMIN
+  const effectiveHasRole = (r: string) => {
+    if (hasRole(r)) return true
+    // Kalau r adalah role staff (ADMIN/TEACHER) dan user adalah staff → izinkan
+    if (
+      isStaff.value &&
+      (r === 'ADMIN' || r === 'TEACHER') &&
+      !roles.includes('STUDENT')
+    )
+      return true
+    return false
+  }
+
   return menuSections
     .filter((section: MenuSection) => {
       if (!section.allowedRoles || section.allowedRoles.length === 0)
         return true
-      return section.allowedRoles.some(hasRole)
+      return section.allowedRoles.some(effectiveHasRole)
     })
     .map((section: MenuSection) => {
       const filteredItems = section.items
         .filter((item: MenuItem) => {
           if (!item.allowedRoles || item.allowedRoles.length === 0) return true
-          return item.allowedRoles.some(hasRole)
+          return item.allowedRoles.some(effectiveHasRole)
         })
         .map((item: MenuItem): MenuItem | null => {
           if (!item.items) return item
           const filteredSubs = item.items.filter((sub: SubMenuItem) => {
             if (!sub.allowedRoles || sub.allowedRoles.length === 0) return true
-            return sub.allowedRoles.some(hasRole)
+            return sub.allowedRoles.some(effectiveHasRole)
           })
           if (filteredSubs.length === 0 && item.items.length > 0) return null
           return { ...item, items: filteredSubs }
