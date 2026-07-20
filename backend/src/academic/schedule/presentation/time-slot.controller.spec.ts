@@ -5,6 +5,7 @@ import { CreateTimeSlotUseCase } from '../use-cases/create-time-slot.use-case.js
 import { DeleteTimeSlotUseCase } from '../use-cases/delete-time-slot.use-case.js';
 import { GetTimeSlotByIdUseCase } from '../use-cases/get-time-slot-by-id.use-case.js';
 import { GetTimeSlotsUseCase } from '../use-cases/get-time-slots.use-case.js';
+import { GetTimeSlotTypesUseCase } from '../use-cases/get-time-slot-types.use-case.js';
 import { UpdateTimeSlotUseCase } from '../use-cases/update-time-slot.use-case.js';
 import { TimeSlotController } from './time-slot.controller.js';
 import type { AuthenticatedUser } from '../../../core/types/authenticated-user.type.js';
@@ -13,6 +14,7 @@ describe('TimeSlotController', () => {
   let controller: TimeSlotController;
 
   const mockGetTimeSlotsService = { execute: jest.fn() };
+  const mockGetTimeSlotTypesService = { execute: jest.fn() };
   const mockGetTimeSlotByIdService = { execute: jest.fn() };
   const mockCreateTimeSlotService = { execute: jest.fn() };
   const mockUpdateTimeSlotService = { execute: jest.fn() };
@@ -30,6 +32,10 @@ describe('TimeSlotController', () => {
       controllers: [TimeSlotController],
       providers: [
         { provide: GetTimeSlotsUseCase, useValue: mockGetTimeSlotsService },
+        {
+          provide: GetTimeSlotTypesUseCase,
+          useValue: mockGetTimeSlotTypesService,
+        },
         {
           provide: GetTimeSlotByIdUseCase,
           useValue: mockGetTimeSlotByIdService,
@@ -59,6 +65,18 @@ describe('TimeSlotController', () => {
       const result = await controller.findAll(user);
 
       expect(mockGetTimeSlotsService.execute).toHaveBeenCalledWith();
+      expect(result).toEqual(expected);
+    });
+  });
+
+  describe('findAllTypes', () => {
+    it('should delegate to GetTimeSlotTypesUseCase', async () => {
+      const expected = [{ id: 'type-1', code: 'LESSON', name: 'Pelajaran' }];
+      mockGetTimeSlotTypesService.execute.mockResolvedValue(expected);
+
+      const result = await controller.findAllTypes();
+
+      expect(mockGetTimeSlotTypesService.execute).toHaveBeenCalledWith();
       expect(result).toEqual(expected);
     });
   });

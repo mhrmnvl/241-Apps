@@ -7,11 +7,16 @@ import type {
   TimeSlotQueryParams,
   TimeSlotSavePayload,
   TimeSlot,
+  TimeSlotType,
 } from '../types'
 
 export const timeSlotApi = {
   getTimeSlots: (params?: TimeSlotQueryParams) => {
     return api.get<ApiPaginatedResponse<TimeSlot>>('/time-slots', { params })
+  },
+
+  getTimeSlotTypes: () => {
+    return api.get<ApiPaginatedResponse<TimeSlotType>>('/time-slots/types')
   },
 
   createTimeSlot: (payload: TimeSlotSavePayload) => {

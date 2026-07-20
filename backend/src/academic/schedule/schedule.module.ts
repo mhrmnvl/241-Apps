@@ -23,6 +23,7 @@ import { CreateTimeSlotUseCase } from './use-cases/create-time-slot.use-case.js'
 import { DeleteTimeSlotUseCase } from './use-cases/delete-time-slot.use-case.js';
 import { GetTimeSlotByIdUseCase } from './use-cases/get-time-slot-by-id.use-case.js';
 import { GetTimeSlotsUseCase } from './use-cases/get-time-slots.use-case.js';
+import { GetTimeSlotTypesUseCase } from './use-cases/get-time-slot-types.use-case.js';
 import { UpdateTimeSlotUseCase } from './use-cases/update-time-slot.use-case.js';
 
 @Module({
@@ -47,6 +48,7 @@ import { UpdateTimeSlotUseCase } from './use-cases/update-time-slot.use-case.js'
     BatchUpsertScheduleUseCase,
 
     GetTimeSlotsUseCase,
+    GetTimeSlotTypesUseCase,
     GetTimeSlotByIdUseCase,
     CreateTimeSlotUseCase,
     UpdateTimeSlotUseCase,

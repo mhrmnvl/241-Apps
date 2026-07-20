@@ -1,4 +1,8 @@
-export type TimeSlotType = 'LESSON' | 'BREAK' | 'CEREMONY' | 'TAHFIDZ'
+export interface TimeSlotType {
+  id: string
+  code: string
+  name: string
+}
 
 export interface TimeSlot {
   id: string
@@ -6,5 +10,6 @@ export interface TimeSlot {
   startTime: string
   endTime: string
   order: number
+  typeId: string
   type: TimeSlotType
 }

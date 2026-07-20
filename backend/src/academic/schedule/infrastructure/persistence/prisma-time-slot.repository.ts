@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { TimeSlot } from '@prisma/client';
+import { TimeSlot, TimeSlotType } from '@prisma/client';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
 import { CreateTimeSlotDto } from '../../dto/request/create-time-slot.dto.js';
 import { UpdateTimeSlotDto } from '../../dto/request/update-time-slot.dto.js';
@@ -24,6 +24,13 @@ export class PrismaTimeSlotRepository extends ITimeSlotRepository {
       where: { deletedAt: null },
       include: TIME_SLOT_INCLUDE,
       orderBy: { order: 'asc' },
+    });
+  }
+
+  async findAllTypes(): Promise<TimeSlotType[]> {
+    return this.prisma.timeSlotType.findMany({
+      where: { deletedAt: null },
+      orderBy: { name: 'asc' },
     });
   }
 

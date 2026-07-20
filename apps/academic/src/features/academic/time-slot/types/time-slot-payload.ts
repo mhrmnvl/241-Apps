@@ -1,11 +1,9 @@
-import type { TimeSlotType } from './time-slot'
-
 export interface TimeSlotSavePayload {
   name: string
   startTime: string
   endTime: string
   order: number
-  type: TimeSlotType
+  typeId: string
 }
 
 export interface TimeSlotQueryParams {

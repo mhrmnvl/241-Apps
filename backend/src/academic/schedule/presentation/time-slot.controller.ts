@@ -24,13 +24,17 @@ import { JwtAuthGuard } from '../../../platform/auth/index.js';
 import { CurrentUser } from '../../../core/decorators/current-user.decorator.js';
 import type { AuthenticatedUser } from '../../../core/types/authenticated-user.type.js';
 
-import { TimeSlotResponseDto } from '../dto/response/time-slot-response.dto.js';
+import {
+  TimeSlotResponseDto,
+  TimeSlotTypeResponseDto,
+} from '../dto/response/time-slot-response.dto.js';
 import { CreateTimeSlotDto } from '../dto/request/create-time-slot.dto.js';
 import { UpdateTimeSlotDto } from '../dto/request/update-time-slot.dto.js';
 import { CreateTimeSlotUseCase } from '../use-cases/create-time-slot.use-case.js';
 import { DeleteTimeSlotUseCase } from '../use-cases/delete-time-slot.use-case.js';
 import { GetTimeSlotByIdUseCase } from '../use-cases/get-time-slot-by-id.use-case.js';
 import { GetTimeSlotsUseCase } from '../use-cases/get-time-slots.use-case.js';
+import { GetTimeSlotTypesUseCase } from '../use-cases/get-time-slot-types.use-case.js';
 import { UpdateTimeSlotUseCase } from '../use-cases/update-time-slot.use-case.js';
 
 @ApiTags('Time-Slots')
@@ -40,6 +44,7 @@ import { UpdateTimeSlotUseCase } from '../use-cases/update-time-slot.use-case.js
 export class TimeSlotController {
   constructor(
     private readonly getTimeSlotsService: GetTimeSlotsUseCase,
+    private readonly getTimeSlotTypesService: GetTimeSlotTypesUseCase,
     private readonly getTimeSlotByIdService: GetTimeSlotByIdUseCase,
     private readonly createTimeSlotService: CreateTimeSlotUseCase,
     private readonly updateTimeSlotService: UpdateTimeSlotUseCase,
@@ -52,6 +57,14 @@ export class TimeSlotController {
   @ApiResponse({ status: 200, type: [TimeSlotResponseDto] })
   async findAll(@CurrentUser() user: AuthenticatedUser) {
     return this.getTimeSlotsService.execute();
+  }
+
+  @Get('types')
+  @RequirePermissions('time-slots.read')
+  @ApiOperation({ summary: 'List all time slot types' })
+  @ApiResponse({ status: 200, type: [TimeSlotTypeResponseDto] })
+  async findAllTypes() {
+    return this.getTimeSlotTypesService.execute();
   }
 
   @Get(':id')

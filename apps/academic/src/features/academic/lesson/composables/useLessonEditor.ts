@@ -45,7 +45,9 @@ export function useLessonEditor(classroomId: string) {
 
       classroomInfo.value = classroomRes.data.data ?? null
 
-      const allSlots: LessonEditorTimeSlot[] = tsRes.data.data ?? []
+      const allSlots: LessonEditorTimeSlot[] = (tsRes.data.data ?? []).map(
+        (ts) => ({ ...ts, type: ts.type?.code }),
+      )
       allOrderedSlots.value = [...allSlots].sort(
         (a, b) => (a.order ?? 0) - (b.order ?? 0),
       )

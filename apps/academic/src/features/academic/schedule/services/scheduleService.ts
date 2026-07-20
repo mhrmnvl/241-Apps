@@ -58,7 +58,10 @@ export const scheduleService = {
 
       const [tsRes, lessonRes] = await Promise.all([tsPromise, lessonPromise])
 
-      store.timeSlots = tsRes.data?.data ?? tsRes.data ?? []
+      store.timeSlots = (tsRes.data?.data ?? []).map((ts) => ({
+        ...ts,
+        type: ts.type?.code,
+      }))
       store.lessons = Array.isArray(lessonRes.data) ? lessonRes.data : []
 
       return { success: true }

@@ -1,4 +1,4 @@
-import { Prisma, TimeSlot } from '@prisma/client';
+import { Prisma, TimeSlot, TimeSlotType } from '@prisma/client';
 import { CreateTimeSlotDto } from '../../dto/request/create-time-slot.dto.js';
 import { UpdateTimeSlotDto } from '../../dto/request/update-time-slot.dto.js';
 
@@ -12,6 +12,7 @@ export type TimeSlotWithDetails = Prisma.TimeSlotGetPayload<{
 
 export abstract class ITimeSlotRepository {
   abstract findAll(): Promise<TimeSlotWithDetails[]>;
+  abstract findAllTypes(): Promise<TimeSlotType[]>;
   abstract findById(id: string): Promise<TimeSlotWithDetails | null>;
   abstract findByOrder(
     order: number,
