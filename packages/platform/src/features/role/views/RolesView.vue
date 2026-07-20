@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { DataTable } from '@/ui'
@@ -9,8 +10,9 @@ import { Plus } from 'lucide-vue-next'
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
 import { rolesApi } from '../api/rolesApi'
 import { getColumns } from '../components/roleColumns'
-import RoleFormSheet from '../components/RoleFormSheet.vue'
-import type { Role, CreateRolePayload, UpdateRolePayload } from '../types'
+import type { Role } from '../types'
+
+const router = useRouter()
 
 const breadcrumbs = [
   { title: 'Pengaturan', href: '#' },
@@ -19,11 +21,6 @@ const breadcrumbs = [
 
 const roles = ref<Role[]>([])
 const isLoading = ref(false)
-const isSaving = ref(false)
-const formError = ref<string | null>(null)
-
-const isSheetOpen = ref(false)
-const selectedRole = ref<Role | null>(null)
 
 const fetchRoles = async () => {
   isLoading.value = true
@@ -38,15 +35,11 @@ const fetchRoles = async () => {
 }
 
 const handleAddClick = () => {
-  selectedRole.value = null
-  formError.value = null
-  isSheetOpen.value = true
+  void router.push('/pengaturan/roles/tambah')
 }
 
 const handleEditClick = (role: Role) => {
-  selectedRole.value = role
-  formError.value = null
-  isSheetOpen.value = true
+  void router.push(`/pengaturan/roles/${role.id}/edit`)
 }
 
 const handleDeleteRole = async (
@@ -66,37 +59,6 @@ const handleDeleteRole = async (
     toast.error(getIndonesianErrorMessage(error, 'Gagal menghapus role.'))
   } finally {
     setLoading(false)
-  }
-}
-
-const handleSaveRole = async (
-  payload: CreateRolePayload | UpdateRolePayload,
-) => {
-  isSaving.value = true
-  formError.value = null
-  try {
-    if (selectedRole.value) {
-      // Update
-      await rolesApi.updateRole(
-        selectedRole.value.id,
-        payload as UpdateRolePayload,
-      )
-      toast.success('Berhasil memperbarui data role')
-    } else {
-      // Create
-      await rolesApi.createRole(payload as CreateRolePayload)
-      toast.success('Berhasil menambahkan role baru')
-    }
-    isSheetOpen.value = false
-    await fetchRoles()
-  } catch (error) {
-    formError.value = getIndonesianErrorMessage(
-      error,
-      'Gagal menyimpan data role.',
-    )
-    toast.error(formError.value)
-  } finally {
-    isSaving.value = false
   }
 }
 
@@ -140,15 +102,6 @@ onMounted(() => {
           />
         </div>
       </Card>
-
-      <RoleFormSheet
-        v-if="isSheetOpen"
-        v-model:open="isSheetOpen"
-        :edit-data="selectedRole"
-        :is-saving="isSaving"
-        :form-error="formError"
-        @save="handleSaveRole"
-      />
     </div>
   </AppLayout>
 </template>
