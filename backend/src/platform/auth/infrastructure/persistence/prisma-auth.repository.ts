@@ -15,6 +15,9 @@ export class PrismaAuthRepository extends IAuthRepository {
   async findUserByIdentifier(identifier: string) {
     return this.prisma.user.findFirst({
       where: { identifier, deletedAt: null },
+      include: {
+        userRoles: { include: { role: true } },
+      },
     });
   }
 

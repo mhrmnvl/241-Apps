@@ -58,6 +58,7 @@ export class LoginUseCase {
         id: user.id,
         identifier: user.identifier,
         isActive: user.isActive,
+        roles: user.userRoles?.map((ur) => ur.role.code) ?? [],
       },
     };
   }

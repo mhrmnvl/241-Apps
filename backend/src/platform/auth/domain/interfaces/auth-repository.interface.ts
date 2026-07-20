@@ -20,7 +20,9 @@ export type PasswordResetTokenWithUser = Prisma.PasswordResetTokenGetPayload<{
 }>;
 
 export abstract class IAuthRepository {
-  abstract findUserByIdentifier(identifier: string): Promise<User | null>;
+  abstract findUserByIdentifier(
+    identifier: string,
+  ): Promise<(User & { userRoles: { role: { code: string } }[] }) | null>;
 
   abstract findUserById(
     userId: string,
