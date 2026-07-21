@@ -22,7 +22,7 @@ export function useRoleGuard() {
   const canContribute = computed(() => isAdmin.value || isTeacher.value)
 
   function hasRole(...roles: string[]): boolean {
-    return userRoles.value.some((r) => roles.includes(r))
+    return userRoles.value.some((r: string) => roles.includes(r))
   }
 
   return {
