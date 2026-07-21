@@ -135,7 +135,8 @@ const onSubmit = handleSubmit(async (values) => {
   }
 })
 
-function categoryLabel(cat: string) {
+function categoryLabel(cat?: string) {
+  if (!cat) return '-'
   const map: Record<string, string> = {
     MANAGEMENT: 'Pimpinan',
     FINANCE: 'Keuangan',
@@ -194,7 +195,7 @@ function categoryLabel(cat: string) {
                     :value="pos.id"
                   >
                     {{ pos.name }} —
-                    {{ categoryLabel(pos.category) }}
+                    {{ categoryLabel(pos.category?.code) }}
                   </SelectItem>
                 </SelectContent>
               </Select>

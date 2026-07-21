@@ -152,10 +152,16 @@ export interface PositionEditData {
   position?: { id: string; name?: string }
 }
 
+export interface PositionCategoryRef {
+  id: string
+  code: string
+  name: string
+}
+
 export interface PositionListItem {
   id: string
   name: string
-  category: string
+  category: PositionCategoryRef
 }
 
 export interface BulkImportResult {

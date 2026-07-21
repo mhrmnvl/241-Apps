@@ -3,6 +3,7 @@ import { computed, onMounted, ref, toRefs, watch } from 'vue'
 import { toTypedSchema } from '@vee-validate/zod'
 import { useForm } from 'vee-validate'
 import * as z from 'zod'
+import { toast } from 'vue-sonner'
 import api from '@/shared/utils/api'
 import type {
   TeacherSavePayload,
@@ -94,6 +95,7 @@ const activeTab = computed({
 const showConfirmAlert = ref(false)
 
 const kategori = ref('')
+const originalKategori = ref('')
 const originalPositionId = ref('')
 const originalPositionLinkId = ref<string | null>(null)
 
@@ -117,9 +119,9 @@ const filteredPositions = computed(() => {
   if (!props.positions) return []
   if (!kategori.value) return props.positions
   if (kategori.value === 'guru') {
-    return props.positions.filter((p) => p.category === 'ACADEMIC')
+    return props.positions.filter((p) => p.category?.code === 'ACADEMIC')
   }
-  return props.positions.filter((p) => p.category !== 'ACADEMIC')
+  return props.positions.filter((p) => p.category?.code !== 'ACADEMIC')
 })
 
 const profilFields = [
@@ -221,6 +223,7 @@ watch(
           originalPositionId.value = ''
           originalPositionLinkId.value = null
         }
+        originalKategori.value = kategori.value
         setValues({
           name: data.user?.profile?.name ?? '',
           nik: data.user?.profile?.nik ?? '',
@@ -239,6 +242,7 @@ watch(
         })
       } else {
         kategori.value = ''
+        originalKategori.value = ''
         resetForm()
       }
     }
@@ -293,6 +297,18 @@ function confirmSave() {
 
 function emitSave(values: Record<string, unknown>) {
   if (isEditing.value) {
+    const newPositionId = (values.positionId as string) || ''
+
+    // Kategori bukan field tersimpan — ia mengikuti kategori Jabatan Utama.
+    // Jadi mengubah kategori tanpa memilih jabatan tidak akan tersimpan (akan
+    // "balik" saat data dimuat ulang). Cegah dengan validasi yang jelas.
+    if (kategori.value !== originalKategori.value && !newPositionId) {
+      toast.error(
+        'Anda mengubah kategori. Pilih Jabatan Utama yang sesuai, atau kembalikan kategori seperti semula.',
+      )
+      return
+    }
+
     const updatePayload: TeacherUpdatePayload = {
       nip: (values.nip as string) || undefined,
       nuptk: (values.nuptk as string) || undefined,
@@ -300,7 +316,6 @@ function emitSave(values: Record<string, unknown>) {
     }
     emit('save', updatePayload)
 
-    const newPositionId = (values.positionId as string) || ''
     if (newPositionId && newPositionId !== originalPositionId.value) {
       const teacherId = editData?.value?.id
       if (teacherId) {

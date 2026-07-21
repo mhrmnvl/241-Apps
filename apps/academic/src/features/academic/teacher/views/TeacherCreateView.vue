@@ -117,9 +117,9 @@ const { values, validateField, setFieldValue } = useForm({
 const filteredPositions = computed(() => {
   if (!kategori.value) return positions.value
   if (kategori.value === 'guru') {
-    return positions.value.filter((p) => p.category === 'ACADEMIC')
+    return positions.value.filter((p) => p.category?.code === 'ACADEMIC')
   }
-  return positions.value.filter((p) => p.category !== 'ACADEMIC')
+  return positions.value.filter((p) => p.category?.code !== 'ACADEMIC')
 })
 
 const address = reactive({
