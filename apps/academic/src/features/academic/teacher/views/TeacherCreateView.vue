@@ -43,6 +43,7 @@ import type {
   PositionListItem,
   TeacherPositionInput,
 } from '../types'
+import { positionCategoryLabel } from '../utils'
 
 const router = useRouter()
 const breadcrumbs = [
@@ -62,7 +63,6 @@ const submitting = ref(false)
 
 const employmentTypes = ref<EmploymentTypeOption[]>([])
 const positions = ref<PositionListItem[]>([])
-const kategori = ref('')
 
 const formSchema = toTypedSchema(
   z.object({
@@ -96,7 +96,7 @@ const formSchema = toTypedSchema(
   }),
 )
 
-const { values, validateField, setFieldValue } = useForm({
+const { values, validateField } = useForm({
   validationSchema: formSchema,
   keepValuesOnUnmount: true,
   initialValues: {
@@ -112,14 +112,6 @@ const { values, validateField, setFieldValue } = useForm({
     employmentTypeId: '',
     positionId: '',
   },
-})
-
-const filteredPositions = computed(() => {
-  if (!kategori.value) return positions.value
-  if (kategori.value === 'guru') {
-    return positions.value.filter((p) => p.category?.code === 'ACADEMIC')
-  }
-  return positions.value.filter((p) => p.category?.code !== 'ACADEMIC')
 })
 
 const address = reactive({
@@ -537,25 +529,6 @@ onMounted(async () => {
                   <FormMessage />
                 </FormItem>
               </FormField>
-              <div class="space-y-2">
-                <label class="text-sm font-medium"
-                  >Kategori Jabatan Utama</label
-                >
-                <Select
-                  v-model="kategori"
-                  @update:model-value="setFieldValue('positionId', '')"
-                >
-                  <SelectTrigger class="w-full">
-                    <SelectValue placeholder="Pilih kategori (opsional)" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="guru"> Guru </SelectItem>
-                    <SelectItem value="tendik">
-                      Tenaga Kependidikan
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
               <FormField
                 v-slot="{ value, handleChange }"
                 name="positionId"
@@ -569,27 +542,21 @@ onMounted(async () => {
                   </FormLabel>
                   <Select
                     :model-value="value"
-                    :disabled="!kategori"
                     @update:model-value="handleChange"
                   >
                     <FormControl>
                       <SelectTrigger class="w-full">
-                        <SelectValue
-                          :placeholder="
-                            !kategori
-                              ? 'Pilih kategori terlebih dahulu'
-                              : 'Pilih jabatan utama'
-                          "
-                        />
+                        <SelectValue placeholder="Pilih jabatan..." />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
                       <SelectItem
-                        v-for="pos in filteredPositions"
+                        v-for="pos in positions"
                         :key="pos.id"
                         :value="pos.id"
                       >
-                        {{ pos.name }}
+                        {{ pos.name }} —
+                        {{ positionCategoryLabel(pos.category?.code) }}
                       </SelectItem>
                     </SelectContent>
                   </Select>

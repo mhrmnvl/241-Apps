@@ -3,7 +3,6 @@ import { computed, onMounted, ref, toRefs, watch } from 'vue'
 import { toTypedSchema } from '@vee-validate/zod'
 import { useForm } from 'vee-validate'
 import * as z from 'zod'
-import { toast } from 'vue-sonner'
 import api from '@/shared/utils/api'
 import type {
   TeacherSavePayload,
@@ -12,6 +11,7 @@ import type {
   PositionListItem,
   EmploymentTypeOption,
 } from '../types'
+import { positionCategoryLabel } from '../utils'
 import { DatePicker } from '@/ui'
 import {
   AlertDialog,
@@ -94,8 +94,6 @@ const activeTab = computed({
 
 const showConfirmAlert = ref(false)
 
-const kategori = ref('')
-const originalKategori = ref('')
 const originalPositionId = ref('')
 const originalPositionLinkId = ref<string | null>(null)
 
@@ -113,15 +111,6 @@ onMounted(async () => {
   } catch {
     // non-blocking
   }
-})
-
-const filteredPositions = computed(() => {
-  if (!props.positions) return []
-  if (!kategori.value) return props.positions
-  if (kategori.value === 'guru') {
-    return props.positions.filter((p) => p.category?.code === 'ACADEMIC')
-  }
-  return props.positions.filter((p) => p.category?.code !== 'ACADEMIC')
 })
 
 const profilFields = [
@@ -209,21 +198,15 @@ watch(
       const data = editData?.value
       _activeTab.value = data ? 'kepegawaian' : 'profil'
       showConfirmAlert.value = false
-      kategori.value = ''
       if (data) {
         const primaryPos = data.teacherPositions?.find((ep) => ep.isPrimary)
         if (primaryPos) {
-          kategori.value =
-            primaryPos.position?.category?.code === 'ACADEMIC'
-              ? 'guru'
-              : 'tendik'
           originalPositionId.value = primaryPos.position?.id ?? ''
           originalPositionLinkId.value = primaryPos.id ?? null
         } else {
           originalPositionId.value = ''
           originalPositionLinkId.value = null
         }
-        originalKategori.value = kategori.value
         setValues({
           name: data.user?.profile?.name ?? '',
           nik: data.user?.profile?.nik ?? '',
@@ -241,18 +224,12 @@ watch(
           positionId: primaryPos?.position?.id ?? '',
         })
       } else {
-        kategori.value = ''
-        originalKategori.value = ''
         resetForm()
       }
     }
   },
   { immediate: true },
 )
-
-watch(kategori, () => {
-  setValues({ positionId: '' })
-})
 
 async function validateProfilFields(): Promise<boolean> {
   const results = await Promise.all(
@@ -298,16 +275,6 @@ function confirmSave() {
 function emitSave(values: Record<string, unknown>) {
   if (isEditing.value) {
     const newPositionId = (values.positionId as string) || ''
-
-    // Kategori bukan field tersimpan — ia mengikuti kategori Jabatan Utama.
-    // Jadi mengubah kategori tanpa memilih jabatan tidak akan tersimpan (akan
-    // "balik" saat data dimuat ulang). Cegah dengan validasi yang jelas.
-    if (kategori.value !== originalKategori.value && !newPositionId) {
-      toast.error(
-        'Anda mengubah kategori. Pilih Jabatan Utama yang sesuai, atau kembalikan kategori seperti semula.',
-      )
-      return
-    }
 
     const updatePayload: TeacherUpdatePayload = {
       nip: (values.nip as string) || undefined,
@@ -573,29 +540,11 @@ function emitSave(values: Record<string, unknown>) {
                     <FormMessage />
                   </FormItem>
                 </FormField>
-                <div class="space-y-2 content-start">
-                  <label
-                    class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                  >
-                    Kategori <span class="text-destructive">*</span>
-                  </label>
-                  <Select v-model="kategori">
-                    <SelectTrigger class="w-full">
-                      <SelectValue placeholder="Pilih kategori guru" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="guru"> Guru </SelectItem>
-                      <SelectItem value="tendik">
-                        Tenaga Kependidikan
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
                 <FormField
                   v-slot="{ value, handleChange }"
                   name="positionId"
                 >
-                  <FormItem class="content-start">
+                  <FormItem class="content-start md:col-span-2">
                     <FormLabel>
                       Jabatan Utama
                       <span class="text-xs font-normal text-muted-foreground"
@@ -604,29 +553,21 @@ function emitSave(values: Record<string, unknown>) {
                     </FormLabel>
                     <Select
                       :model-value="value"
-                      :disabled="!kategori"
                       @update:model-value="handleChange"
                     >
                       <FormControl>
                         <SelectTrigger class="w-full">
-                          <SelectValue
-                            :placeholder="
-                              !kategori
-                                ? 'Pilih kategori terlebih dahulu'
-                                : filteredPositions.length === 0
-                                  ? 'Belum ada jabatan tersedia'
-                                  : 'Pilih jabatan guru'
-                            "
-                          />
+                          <SelectValue placeholder="Pilih jabatan..." />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
                         <SelectItem
-                          v-for="pos in filteredPositions"
+                          v-for="pos in positions ?? []"
                           :key="pos.id"
                           :value="pos.id"
                         >
-                          {{ pos.name }}
+                          {{ pos.name }} —
+                          {{ positionCategoryLabel(pos.category?.code) }}
                         </SelectItem>
                       </SelectContent>
                     </Select>
