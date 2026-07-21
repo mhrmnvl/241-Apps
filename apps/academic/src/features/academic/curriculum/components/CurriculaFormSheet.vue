@@ -4,14 +4,13 @@ import { useCurriculaForm } from '../composables/useCurriculaForm'
 import type { AcademicYearRef, Curricula } from '../types'
 import { Button } from '@/ui/button'
 import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-} from '@/ui/sheet'
-import { ScrollArea } from '@/ui/scroll-area'
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/ui/dialog'
 import { Loader2, AlertCircle } from 'lucide-vue-next'
 import { Input } from '@/ui/input'
 import {
@@ -69,123 +68,118 @@ const curriculaForm = useCurriculaForm({
 </script>
 
 <template>
-  <Sheet v-model:open="open">
-    <SheetContent class="w-full sm:max-w-md flex flex-col gap-0 border-l p-0">
-      <SheetHeader class="px-6 py-6 border-b shrink-0 bg-muted/20">
-        <SheetTitle>
+  <Dialog v-model:open="open">
+    <DialogContent class="sm:max-w-md">
+      <DialogHeader>
+        <DialogTitle>
           {{
             curriculaForm.isEditing.value
               ? 'Edit Kurikulum'
               : 'Tambah Kurikulum Baru'
           }}
-        </SheetTitle>
-        <SheetDescription>
+        </DialogTitle>
+        <DialogDescription>
           {{
             curriculaForm.isEditing.value
               ? 'Perbarui nama atau status kurikulum ini.'
               : 'Masukkan nama kurikulum (misal: Kurikulum Merdeka).'
           }}
-        </SheetDescription>
-      </SheetHeader>
+        </DialogDescription>
+      </DialogHeader>
 
-      <ScrollArea class="flex-1 min-h-0">
-        <form
-          id="curricula-form"
-          class="space-y-4 px-6 py-4"
-          @submit.prevent="curriculaForm.onSubmit"
-        >
-          <FormField
-            v-slot="{ value, handleChange }"
-            name="academicYearId"
-          >
-            <FormItem>
-              <FormLabel
-                >Tahun Ajaran <span class="text-destructive">*</span></FormLabel
-              >
-              <Select
-                :model-value="value"
-                disabled
-                @update:model-value="handleChange"
-              >
-                <FormControl>
-                  <SelectTrigger class="w-full">
-                    <SelectValue placeholder="Memuat..." />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem
-                    v-for="opt in curriculaForm.academicYearOptions.value"
-                    :key="opt.value"
-                    :value="opt.value"
-                  >
-                    {{ opt.label }}
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          </FormField>
-
-          <FormField
-            v-slot="{ componentField }"
-            name="name"
-          >
-            <FormItem>
-              <FormLabel
-                >Nama Kurikulum
-                <span class="text-destructive">*</span></FormLabel
-              >
-              <FormControl>
-                <Input
-                  placeholder="Contoh: Kurikulum Merdeka"
-                  v-bind="componentField"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          </FormField>
-
-          <FormField
-            v-slot="{ value, handleChange }"
-            name="isActive"
-          >
-            <FormItem>
-              <FormLabel
-                >Status <span class="text-destructive">*</span></FormLabel
-              >
-              <Select
-                :model-value="String(value)"
-                @update:model-value="handleChange($event === 'true')"
-              >
-                <FormControl>
-                  <SelectTrigger class="w-full">
-                    <SelectValue placeholder="Pilih status" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="true"> Aktif </SelectItem>
-                  <SelectItem value="false"> Tidak Aktif </SelectItem>
-                </SelectContent>
-              </Select>
-            </FormItem>
-          </FormField>
-
-          <Alert
-            v-if="curriculaForm.formError.value"
-            variant="destructive"
-            class="mt-2"
-          >
-            <AlertCircle class="h-4 w-4" />
-            <AlertDescription>{{
-              curriculaForm.formError.value
-            }}</AlertDescription>
-          </Alert>
-        </form>
-      </ScrollArea>
-
-      <SheetFooter
-        class="px-6 py-4 border-t shrink-0 flex sm:justify-between w-full bg-background"
+      <form
+        id="curricula-form"
+        class="space-y-4 py-2"
+        @submit.prevent="curriculaForm.onSubmit"
       >
+        <FormField
+          v-slot="{ value, handleChange }"
+          name="academicYearId"
+        >
+          <FormItem>
+            <FormLabel
+              >Tahun Ajaran <span class="text-destructive">*</span></FormLabel
+            >
+            <Select
+              :model-value="value"
+              disabled
+              @update:model-value="handleChange"
+            >
+              <FormControl>
+                <SelectTrigger class="w-full">
+                  <SelectValue placeholder="Memuat..." />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                <SelectItem
+                  v-for="opt in curriculaForm.academicYearOptions.value"
+                  :key="opt.value"
+                  :value="opt.value"
+                >
+                  {{ opt.label }}
+                </SelectItem>
+              </SelectContent>
+            </Select>
+            <FormMessage />
+          </FormItem>
+        </FormField>
+
+        <FormField
+          v-slot="{ componentField }"
+          name="name"
+        >
+          <FormItem>
+            <FormLabel
+              >Nama Kurikulum <span class="text-destructive">*</span></FormLabel
+            >
+            <FormControl>
+              <Input
+                placeholder="Contoh: Kurikulum Merdeka"
+                v-bind="componentField"
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        </FormField>
+
+        <FormField
+          v-slot="{ value, handleChange }"
+          name="isActive"
+        >
+          <FormItem>
+            <FormLabel
+              >Status <span class="text-destructive">*</span></FormLabel
+            >
+            <Select
+              :model-value="String(value)"
+              @update:model-value="handleChange($event === 'true')"
+            >
+              <FormControl>
+                <SelectTrigger class="w-full">
+                  <SelectValue placeholder="Pilih status" />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                <SelectItem value="true"> Aktif </SelectItem>
+                <SelectItem value="false"> Tidak Aktif </SelectItem>
+              </SelectContent>
+            </Select>
+          </FormItem>
+        </FormField>
+
+        <Alert
+          v-if="curriculaForm.formError.value"
+          variant="destructive"
+          class="mt-2"
+        >
+          <AlertCircle class="h-4 w-4" />
+          <AlertDescription>{{
+            curriculaForm.formError.value
+          }}</AlertDescription>
+        </Alert>
+      </form>
+
+      <DialogFooter class="flex sm:justify-between gap-2">
         <Button
           type="button"
           variant="outline"
@@ -206,9 +200,9 @@ const curriculaForm = useCurriculaForm({
           />
           {{ curriculaForm.isSaving.value ? 'Menyimpan...' : 'Simpan' }}
         </Button>
-      </SheetFooter>
-    </SheetContent>
-  </Sheet>
+      </DialogFooter>
+    </DialogContent>
+  </Dialog>
 
   <AlertDialog v-model:open="curriculaForm.showConfirmAlert.value">
     <AlertDialogContent>

@@ -3,7 +3,7 @@ import { Badge } from '@/ui/badge'
 import type { ColumnDef } from '@tanstack/vue-table'
 import { h } from 'vue'
 import type { Teacher, TeacherColumnActions } from '../types'
-import { getPrimaryPosition, isGuru } from '../utils'
+import { getPrimaryPosition } from '../utils'
 
 function statusBadge(isActive: boolean) {
   return h(Badge, { variant: isActive ? 'default' : 'secondary' }, () =>
@@ -35,18 +35,6 @@ export const createColumns = (
       const g = row.user?.profile?.gender?.toLowerCase()
       return g === 'male' ? 'L' : g === 'female' ? 'P' : '-'
     },
-  },
-  {
-    id: 'kategori',
-    header: 'Kategori',
-    meta: { align: 'center' },
-    cell: ({ row }) => {
-      const guru = isGuru(row.original)
-      return h(Badge, { variant: 'outline' }, () =>
-        guru ? 'Guru' : 'Tenaga Kependidikan',
-      )
-    },
-    accessorFn: (row) => (isGuru(row) ? 'Guru' : 'Tenaga Kependidikan'),
   },
   {
     id: 'position',

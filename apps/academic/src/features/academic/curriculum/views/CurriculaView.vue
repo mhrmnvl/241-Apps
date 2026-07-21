@@ -9,8 +9,10 @@ import { Button } from '@/ui/button'
 import { Card, CardHeader, CardTitle } from '@/ui/card'
 import { useRoleGuard } from '@/shared/composables/useRoleGuard'
 import { Plus } from 'lucide-vue-next'
+import { useRouter } from 'vue-router'
 import { onMounted, ref, watch } from 'vue'
 
+const router = useRouter()
 const breadcrumbs = [
   { title: 'Akademik', href: '#' },
   { title: 'Kurikulum', href: '/akademik/kurikulum' },
@@ -32,6 +34,9 @@ const { isAdmin } = useRoleGuard()
 
 const tableColumns = createCurriculaColumns({
   showActions: isAdmin.value,
+  onView: (item: Curricula) => {
+    void router.push(`/akademik/kurikulum/${item.id}/mata-pelajaran`)
+  },
   onEdit: (item: Curricula) => {
     editingItem.value = item
     isAddModalOpen.value = true

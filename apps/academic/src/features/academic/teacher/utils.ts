@@ -24,3 +24,9 @@ export function positionCategoryLabel(
   if (!code) return fallback ?? '-'
   return POSITION_CATEGORY_LABELS[code] ?? fallback ?? code
 }
+
+export function getPrimaryCategoryLabel(teacher: Teacher): string {
+  const primary = teacher.teacherPositions?.find((ep) => ep.isPrimary)
+  const cat = primary?.position?.category
+  return positionCategoryLabel(cat?.code, cat?.name)
+}

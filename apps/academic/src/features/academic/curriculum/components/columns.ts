@@ -1,5 +1,4 @@
 import { h } from 'vue'
-import { RouterLink } from 'vue-router'
 import type { ColumnDef } from '@tanstack/vue-table'
 import { ActionCell } from '@/ui'
 import { Badge } from '@/ui/badge'
@@ -37,21 +36,6 @@ export const createCurriculaColumns = (
         () => (row.original.isActive ? 'Aktif' : 'Nonaktif'),
       ),
   },
-  {
-    id: 'subjects',
-    header: 'Mapel',
-    meta: { align: 'center' },
-    cell: ({ row }) => {
-      return h(
-        RouterLink,
-        {
-          to: `/akademik/kurikulum/${row.original.id}/mata-pelajaran`,
-          class: 'text-sm font-medium text-primary hover:underline',
-        },
-        () => 'Lihat Mapel',
-      )
-    },
-  },
   ...(actions.showActions !== false
     ? [
         {
@@ -60,9 +44,13 @@ export const createCurriculaColumns = (
           cell: ({ row }: { row: { original: Curricula } }) => {
             const curriculum = row.original
             return h(ActionCell, {
+              viewLabel: 'Mata Pelajaran',
               deleteTitle: 'Hapus Kurikulum?',
               deleteDescription:
                 'Data kurikulum ini akan dihapus secara permanen dan tidak dapat dikembalikan.',
+              onView: () => {
+                if (actions.onView) actions.onView(curriculum)
+              },
               onEdit: () => {
                 if (actions.onEdit) actions.onEdit(curriculum)
               },

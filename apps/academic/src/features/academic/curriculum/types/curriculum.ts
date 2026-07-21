@@ -14,6 +14,7 @@ export interface Curricula {
 
 export interface CurriculaColumnActions {
   onEdit?: (curriculum: Curricula) => void
+  onView?: (curriculum: Curricula) => void
   onDelete?: (
     curriculum: Curricula,
     callbacks: { closeAlert: () => void; setLoading: (s: boolean) => void },
