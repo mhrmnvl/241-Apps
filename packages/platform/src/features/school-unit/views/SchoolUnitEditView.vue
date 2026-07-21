@@ -88,7 +88,7 @@ const handleSaveAddress = async () => {
                 v-for="step in steps"
                 :key="step.value"
                 :step="step.value"
-                class="flex items-center gap-4 md:gap-8 group"
+                class="flex items-center gap-2 md:gap-6 group"
               >
                 <StepperTrigger
                   class="flex items-center gap-3 cursor-pointer outline-none"
@@ -101,14 +101,14 @@ const handleSaveAddress = async () => {
                     <span v-else>{{ step.value }}</span>
                   </StepperIndicator>
                   <StepperTitle
-                    class="text-sm font-semibold leading-none whitespace-nowrap"
+                    class="hidden sm:block text-sm font-semibold leading-none whitespace-nowrap"
                   >
                     {{ step.title }}
                   </StepperTitle>
                 </StepperTrigger>
                 <StepperSeparator
                   v-if="step.value < steps.length"
-                  class="w-16 md:w-32 h-0.5 bg-muted"
+                  class="w-8 sm:w-16 md:w-24 h-0.5 bg-muted"
                 />
               </StepperItem>
             </Stepper>

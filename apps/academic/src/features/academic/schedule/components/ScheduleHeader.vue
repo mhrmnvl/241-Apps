@@ -42,7 +42,7 @@ function onClassroomChange(val: string | null) {
       </div>
       <div
         v-if="isAdmin"
-        class="flex items-center gap-2 min-w-[240px]"
+        class="w-full sm:w-auto sm:min-w-[240px]"
       >
         <AppCombobox
           :model-value="selectedClassroomId"

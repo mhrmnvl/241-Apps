@@ -128,7 +128,7 @@ onMounted(() => {
         class="overflow-hidden rounded-2xl shadow-sm shadow-black/5 ring-1 ring-black/4"
       >
         <CardHeader
-          class="flex flex-row items-center justify-between border-b px-6 py-5"
+          class="flex flex-col gap-3 border-b px-6 py-5 sm:flex-row sm:items-center sm:justify-between"
         >
           <CardTitle class="text-2xl font-bold tracking-tight">
             Semester
@@ -139,12 +139,17 @@ onMounted(() => {
           >
             <Button
               variant="outline"
+              class="flex-1 sm:flex-none"
               @click="isRolloverModalOpen = true"
             >
               <Copy class="size-4 mr-2" />
-              Salin Data
+              <span class="hidden sm:inline">Salin Data</span>
+              <span class="sm:hidden">Salin</span>
             </Button>
-            <Button @click="isAddModalOpen = true">
+            <Button
+              class="flex-1 sm:flex-none"
+              @click="isAddModalOpen = true"
+            >
               <Plus class="size-4 mr-2" />
               Tambah
             </Button>

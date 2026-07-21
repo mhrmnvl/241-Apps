@@ -1,19 +1,68 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import TimeSlotTypeManageTable from '../components/TimeSlotTypeManageTable.vue'
-import AppLayout from '@/layouts/AppLayout.vue'
-import { Card, CardHeader, CardTitle } from '@/ui/card'
-import { Button } from '@/ui/button'
+import { onMounted, ref } from 'vue'
+import { toast } from 'vue-sonner'
 import { Plus } from 'lucide-vue-next'
+import AppLayout from '@/layouts/AppLayout.vue'
+import { DataTable } from '@/ui'
+import { Button } from '@/ui/button'
+import { Card, CardHeader, CardTitle } from '@/ui/card'
 import { useRoleGuard } from '@/shared/composables/useRoleGuard'
+import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
+import { timeSlotApi } from '../api/timeSlotApi'
+import { createTimeSlotTypeColumns } from '../components/timeSlotTypeColumns'
+import TimeSlotTypeFormSheet from '../components/TimeSlotTypeFormSheet.vue'
+import type { TimeSlotType } from '../types'
 
 const breadcrumbs = [
-  { title: 'Pembelajaran', href: '#' },
+  { title: 'Referensi', href: '#' },
   { title: 'Tipe Jam', href: '/pembelajaran/tipe-jam' },
 ]
 
 const { isAdmin } = useRoleGuard()
-const tableRef = ref<InstanceType<typeof TimeSlotTypeManageTable> | null>(null)
+
+const data = ref<TimeSlotType[]>([])
+const isLoading = ref(false)
+const isAddOpen = ref(false)
+const isEditOpen = ref(false)
+const selectedItem = ref<TimeSlotType | null>(null)
+
+async function fetchTypes() {
+  isLoading.value = true
+  try {
+    const res = await timeSlotApi.getTimeSlotTypes()
+    data.value = res.data.data ?? []
+  } catch (error: unknown) {
+    toast.error(getIndonesianErrorMessage(error, 'Gagal memuat tipe jam.'))
+  } finally {
+    isLoading.value = false
+  }
+}
+
+function openEdit(item: TimeSlotType) {
+  selectedItem.value = { ...item }
+  isEditOpen.value = true
+}
+
+async function handleDelete(
+  item: TimeSlotType,
+  callbacks: { closeAlert: () => void; setLoading: (state: boolean) => void },
+) {
+  callbacks.setLoading(true)
+  try {
+    await timeSlotApi.deleteTimeSlotType(item.id)
+    toast.success('Tipe jam berhasil dihapus')
+    callbacks.closeAlert()
+    await fetchTypes()
+  } catch (error: unknown) {
+    toast.error(getIndonesianErrorMessage(error, 'Gagal menghapus tipe jam.'))
+  } finally {
+    callbacks.setLoading(false)
+  }
+}
+
+const columns = createTimeSlotTypeColumns(openEdit, handleDelete, isAdmin.value)
+
+onMounted(fetchTypes)
 </script>
 
 <template>
@@ -23,21 +72,22 @@ const tableRef = ref<InstanceType<typeof TimeSlotTypeManageTable> | null>(null)
         class="overflow-hidden rounded-2xl shadow-sm shadow-black/5 ring-1 ring-black/4"
       >
         <CardHeader
-          class="flex flex-row items-center justify-between border-b px-6 py-5"
+          class="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b px-6 py-5 gap-4"
         >
           <div class="space-y-1.5">
             <CardTitle class="text-2xl font-bold tracking-tight">
               Tipe Jam
             </CardTitle>
             <p class="text-sm text-muted-foreground">
-              Atur tipe jam (mis. Pelajaran, Istirahat, Upacara). Tandai
-              "Khusus" untuk kegiatan non-pelajaran, dan batasi hari bila hanya
-              berlaku di hari tertentu.
+              Referensi tipe jam. Tandai "Khusus" untuk kegiatan non-pelajaran,
+              dan batasi hari bila hanya berlaku di hari tertentu (mis.
+              upacara).
             </p>
           </div>
           <Button
             v-if="isAdmin"
-            @click="tableRef?.addRow"
+            class="w-full sm:w-auto"
+            @click="isAddOpen = true"
           >
             <Plus class="size-4 mr-2" />
             Tambah Tipe
@@ -45,12 +95,30 @@ const tableRef = ref<InstanceType<typeof TimeSlotTypeManageTable> | null>(null)
         </CardHeader>
 
         <div class="p-6">
-          <TimeSlotTypeManageTable
-            ref="tableRef"
-            :can-edit="isAdmin"
+          <DataTable
+            :columns="columns"
+            :data="data"
+            :is-loading="isLoading"
+            :total-items="data.length"
+            item-label="tipe jam"
+            filter-column="name"
+            filter-placeholder="Cari tipe jam..."
           />
         </div>
       </Card>
+
+      <TimeSlotTypeFormSheet
+        v-if="isAdmin"
+        v-model:open="isAddOpen"
+        @success="fetchTypes"
+      />
+
+      <TimeSlotTypeFormSheet
+        v-if="isAdmin"
+        v-model:open="isEditOpen"
+        :initial-data="selectedItem"
+        @success="fetchTypes"
+      />
     </div>
   </AppLayout>
 </template>

@@ -133,11 +133,6 @@ export const menuSections: MenuSection[] = [
             requiredPermission: 'time-slots.read',
           },
           {
-            title: 'Tipe Jam',
-            url: '/pembelajaran/tipe-jam',
-            requiredPermission: 'time-slots.read',
-          },
-          {
             title: 'Jadwal Pelajaran',
             url: '/pembelajaran/jadwal-pelajaran',
             requiredPermission: 'schedules.read',
@@ -283,6 +278,11 @@ export const menuSections: MenuSection[] = [
             title: 'Tipe Semester',
             url: '/academic/semester-type',
             requiredPermission: 'semesters.read',
+          },
+          {
+            title: 'Tipe Jam',
+            url: '/pembelajaran/tipe-jam',
+            requiredPermission: 'time-slots.read',
           },
         ],
       },
