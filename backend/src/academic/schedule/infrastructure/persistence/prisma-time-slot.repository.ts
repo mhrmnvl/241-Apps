@@ -3,6 +3,8 @@ import { TimeSlot, TimeSlotType } from '@prisma/client';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
 import { CreateTimeSlotDto } from '../../dto/request/create-time-slot.dto.js';
 import { UpdateTimeSlotDto } from '../../dto/request/update-time-slot.dto.js';
+import { CreateTimeSlotTypeDto } from '../../dto/request/create-time-slot-type.dto.js';
+import { UpdateTimeSlotTypeDto } from '../../dto/request/update-time-slot-type.dto.js';
 import {
   ITimeSlotRepository,
   TIME_SLOT_INCLUDE,
@@ -31,6 +33,64 @@ export class PrismaTimeSlotRepository extends ITimeSlotRepository {
     return this.prisma.timeSlotType.findMany({
       where: { deletedAt: null },
       orderBy: { name: 'asc' },
+    });
+  }
+
+  async findTypeById(id: string): Promise<TimeSlotType | null> {
+    return this.prisma.timeSlotType.findFirst({
+      where: { id, deletedAt: null },
+    });
+  }
+
+  async findTypeByCode(
+    code: string,
+    excludeId?: string,
+  ): Promise<TimeSlotType | null> {
+    return this.prisma.timeSlotType.findFirst({
+      where: {
+        code,
+        deletedAt: null,
+        ...(excludeId && { id: { not: excludeId } }),
+      },
+    });
+  }
+
+  async createType(dto: CreateTimeSlotTypeDto): Promise<TimeSlotType> {
+    return this.prisma.timeSlotType.create({
+      data: {
+        code: dto.code,
+        name: dto.name,
+        isLesson: dto.isLesson ?? true,
+        days: dto.days ?? [],
+      },
+    });
+  }
+
+  async updateType(
+    id: string,
+    dto: UpdateTimeSlotTypeDto,
+  ): Promise<TimeSlotType> {
+    return this.prisma.timeSlotType.update({
+      where: { id },
+      data: {
+        ...(dto.code && { code: dto.code }),
+        ...(dto.name && { name: dto.name }),
+        ...(dto.isLesson !== undefined && { isLesson: dto.isLesson }),
+        ...(dto.days !== undefined && { days: dto.days }),
+      },
+    });
+  }
+
+  async removeType(id: string): Promise<TimeSlotType> {
+    return this.prisma.timeSlotType.update({
+      where: { id },
+      data: { deletedAt: new Date() },
+    });
+  }
+
+  async countSlotsUsingType(typeId: string): Promise<number> {
+    return this.prisma.timeSlot.count({
+      where: { typeId, deletedAt: null },
     });
   }
 

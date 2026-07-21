@@ -5,4 +5,6 @@ export interface ScheduleTimeSlot {
   endTime: string
   order?: number
   type?: string
+  isLesson?: boolean
+  typeName?: string
 }

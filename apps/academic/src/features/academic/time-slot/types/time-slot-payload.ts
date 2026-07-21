@@ -11,3 +11,10 @@ export interface TimeSlotQueryParams {
   limit?: number
   search?: string
 }
+
+export interface TimeSlotTypeSavePayload {
+  code: string
+  name: string
+  isLesson: boolean
+  days: string[]
+}

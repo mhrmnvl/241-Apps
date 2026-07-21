@@ -86,7 +86,7 @@ function toHHMM(val: string): string {
             :key="ts.id"
           >
             <tr
-              v-if="ts.type === 'BREAK' || ts.type === 'TAHFIDZ'"
+              v-if="ts.isLesson === false"
               class="bg-amber-50/60 dark:bg-amber-950/20"
             >
               <td class="border-b border-r px-4 py-2.5">
@@ -105,9 +105,7 @@ function toHHMM(val: string): string {
                 :colspan="days.length"
                 class="border-b px-4 py-2.5 text-center text-xs text-muted-foreground italic"
               >
-                {{
-                  ts.type === 'TAHFIDZ' ? 'Waktu Tahfidz' : 'Waktu istirahat'
-                }}
+                {{ ts.typeName ?? formatEntityName(ts.name) }}
               </td>
             </tr>
 

@@ -25,6 +25,9 @@ import { GetTimeSlotByIdUseCase } from './use-cases/get-time-slot-by-id.use-case
 import { GetTimeSlotsUseCase } from './use-cases/get-time-slots.use-case.js';
 import { GetTimeSlotTypesUseCase } from './use-cases/get-time-slot-types.use-case.js';
 import { UpdateTimeSlotUseCase } from './use-cases/update-time-slot.use-case.js';
+import { CreateTimeSlotTypeUseCase } from './use-cases/create-time-slot-type.use-case.js';
+import { UpdateTimeSlotTypeUseCase } from './use-cases/update-time-slot-type.use-case.js';
+import { DeleteTimeSlotTypeUseCase } from './use-cases/delete-time-slot-type.use-case.js';
 
 @Module({
   imports: [SemesterModule, TeachingAssignmentModule, ClassroomModule],
@@ -53,6 +56,9 @@ import { UpdateTimeSlotUseCase } from './use-cases/update-time-slot.use-case.js'
     CreateTimeSlotUseCase,
     UpdateTimeSlotUseCase,
     DeleteTimeSlotUseCase,
+    CreateTimeSlotTypeUseCase,
+    UpdateTimeSlotTypeUseCase,
+    DeleteTimeSlotTypeUseCase,
   ],
   exports: [IScheduleRepository, ITimeSlotRepository],
 })

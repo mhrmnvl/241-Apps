@@ -61,6 +61,8 @@ export const scheduleService = {
       store.timeSlots = (tsRes.data?.data ?? []).map((ts) => ({
         ...ts,
         type: ts.type?.code,
+        isLesson: ts.type?.isLesson,
+        typeName: ts.type?.name,
       }))
       store.lessons = Array.isArray(lessonRes.data) ? lessonRes.data : []
 

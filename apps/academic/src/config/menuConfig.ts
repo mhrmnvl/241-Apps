@@ -133,6 +133,11 @@ export const menuSections: MenuSection[] = [
             requiredPermission: 'time-slots.read',
           },
           {
+            title: 'Tipe Jam',
+            url: '/pembelajaran/tipe-jam',
+            requiredPermission: 'time-slots.read',
+          },
+          {
             title: 'Jadwal Pelajaran',
             url: '/pembelajaran/jadwal-pelajaran',
             requiredPermission: 'schedules.read',

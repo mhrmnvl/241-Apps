@@ -26,6 +26,8 @@ export interface LessonEditorTimeSlot {
   id: string
   name?: string
   type?: string
+  isLesson?: boolean
+  days?: string[]
   order?: number
   startTime?: string
   endTime?: string
@@ -39,7 +41,8 @@ export interface LessonEditorSubject {
 export const LESSON_TYPES = ['LESSON'] as const
 
 export function isLessonSlot(slot: LessonEditorTimeSlot): boolean {
-  return slot.type === 'LESSON'
+  // Pakai flag isLesson dari tipe; fallback ke kode lama hanya saat flag belum ada
+  return slot.isLesson ?? slot.type === 'LESSON'
 }
 
 /** Shape dari response GET /schedules/classroom/:id */

@@ -46,7 +46,12 @@ export function useLessonEditor(classroomId: string) {
       classroomInfo.value = classroomRes.data.data ?? null
 
       const allSlots: LessonEditorTimeSlot[] = (tsRes.data.data ?? []).map(
-        (ts) => ({ ...ts, type: ts.type?.code }),
+        (ts) => ({
+          ...ts,
+          type: ts.type?.code,
+          isLesson: ts.type?.isLesson,
+          days: ts.type?.days,
+        }),
       )
       allOrderedSlots.value = [...allSlots].sort(
         (a, b) => (a.order ?? 0) - (b.order ?? 0),
@@ -89,17 +94,11 @@ export function useLessonEditor(classroomId: string) {
   }
 
   function getAvailableLessonSlotsForDay(day: string): LessonEditorTimeSlot[] {
-    const slots = lessonSlots.value
-    if (day !== 'MONDAY') return slots
-
-    const hasCeremony = allOrderedSlots.value.some((s) => s.type === 'CEREMONY')
-    if (!hasCeremony) return slots
-
-    return slots.filter((s) => {
-      const start = s.startTime
-        ? new Date(s.startTime).toISOString().substring(11, 16)
-        : ''
-      return start !== '07:30' && start !== '08:00'
+    // Data-driven: sebuah slot tersedia bila tipenya tidak membatasi hari
+    // (days kosong = semua hari) atau hari ini termasuk dalam daftar hari tipe.
+    return lessonSlots.value.filter((s) => {
+      const days = s.days ?? []
+      return days.length === 0 || days.includes(day)
     })
   }
 

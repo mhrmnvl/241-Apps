@@ -2,6 +2,8 @@ export interface TimeSlotType {
   id: string
   code: string
   name: string
+  isLesson: boolean
+  days: string[]
 }
 
 export interface TimeSlot {

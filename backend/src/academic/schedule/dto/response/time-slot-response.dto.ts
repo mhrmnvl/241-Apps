@@ -9,6 +9,19 @@ export class TimeSlotTypeResponseDto {
 
   @ApiProperty({ example: 'Lesson' })
   name!: string;
+
+  @ApiProperty({
+    example: true,
+    description:
+      'Whether this type is a regular lesson slot (can hold a subject)',
+  })
+  isLesson!: boolean;
+
+  @ApiProperty({
+    example: ['MONDAY'],
+    description: 'Weekdays this type applies to; empty means every day',
+  })
+  days!: string[];
 }
 
 export class TimeSlotResponseDto {

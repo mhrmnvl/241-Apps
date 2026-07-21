@@ -11,4 +11,14 @@ export const timeSlotRoutes: RouteRecordRaw[] = [
       title: 'Jam Pelajaran',
     },
   },
+  {
+    path: '/pembelajaran/tipe-jam',
+    name: 'time-slot-type',
+    component: () => import('./views/TimeSlotTypeView.vue'),
+    meta: {
+      requiresAuth: true,
+      allowedRoles: ['ADMIN', 'TEACHER'],
+      title: 'Tipe Jam',
+    },
+  },
 ]
