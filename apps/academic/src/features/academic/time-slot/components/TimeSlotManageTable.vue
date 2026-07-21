@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import { Clock, Loader2, Plus, Save, Trash2 } from 'lucide-vue-next'
+import { Loader2, Save, Trash2 } from 'lucide-vue-next'
 import { useTimeSlotManager } from '../composables/useTimeSlotManager'
 import type { EditableTimeSlotRow } from '../composables/useTimeSlotManager'
 import { Button } from '@/ui/button'
@@ -45,29 +45,14 @@ function requestDelete(row: EditableTimeSlotRow, index: number) {
   }
   pendingDeleteIndex.value = index
 }
+
+defineExpose({
+  addRow,
+})
 </script>
 
 <template>
-  <div
-    class="overflow-hidden rounded-2xl border bg-card shadow-sm shadow-black/5 ring-1 ring-black/4"
-  >
-    <div class="flex items-center justify-between gap-2 border-b px-6 py-4">
-      <div class="flex items-center gap-2">
-        <Clock class="size-4 text-primary shrink-0" />
-        <span class="font-semibold text-sm">Kelola Jam Pelajaran</span>
-      </div>
-      <Button
-        v-if="props.canEdit"
-        size="sm"
-        variant="outline"
-        :disabled="loading"
-        @click="addRow"
-      >
-        <Plus class="size-4 mr-1.5" />
-        Tambah Baris
-      </Button>
-    </div>
-
+  <div class="rounded-md border overflow-hidden">
     <div class="overflow-x-auto">
       <table class="w-full border-collapse text-sm">
         <thead>
