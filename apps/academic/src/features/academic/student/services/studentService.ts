@@ -1,5 +1,8 @@
 import { studentApi } from '../api/studentApi'
 import { classroomApi } from '@/features/academic/classroom'
+import { parentApi } from '@/features/academic/parent'
+import { studentParentApi } from '@/features/academic/student-parent'
+import { addressApi } from '@/features/platform/address'
 import { useStudentStore } from '../stores/studentStore'
 import type {
   StudentQueryParams,
@@ -7,6 +10,8 @@ import type {
   StudentSavePayload,
   StudentUpdatePayload,
   StudentAccountUpdatePayload,
+  CreateStudentWithRelationsInput,
+  CreateStudentWithRelationsResult,
 } from '../types'
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
 import { toast } from 'vue-sonner'
@@ -83,6 +88,69 @@ export const studentService = {
         'Gagal menyimpan data siswa.',
       )
       return { success: false, error: store.formError }
+    } finally {
+      store.isSaving = false
+    }
+  },
+
+  createStudentWithRelations: async (
+    input: CreateStudentWithRelationsInput,
+  ): Promise<CreateStudentWithRelationsResult> => {
+    const store = useStudentStore()
+    store.isSaving = true
+    store.formError = null
+    const warnings: string[] = []
+    try {
+      const res = await studentApi.createStudent(input.core)
+      const created = res.data.data
+      const studentId = created.id
+      const userId = created.userId
+
+      if (input.address) {
+        try {
+          await addressApi.createAddressForUser(userId, input.address)
+        } catch (error: unknown) {
+          warnings.push(
+            getIndonesianErrorMessage(error, 'Alamat gagal disimpan.'),
+          )
+        }
+      }
+
+      for (const parent of input.parents ?? []) {
+        try {
+          const parentRes = await parentApi.createParent({
+            name: parent.name,
+            nik: parent.nik,
+            birthPlace: parent.birthPlace,
+            birthDate: parent.birthDate,
+            email: parent.email || undefined,
+            phone: parent.phone || undefined,
+            occupationId: parent.occupationId,
+            income: parent.income,
+          })
+          await studentParentApi.create({
+            studentId,
+            parentId: parentRes.data.data.id,
+            relation: parent.relation,
+            isPrimary: parent.isPrimary,
+          })
+        } catch (error: unknown) {
+          warnings.push(
+            getIndonesianErrorMessage(
+              error,
+              `Data orang tua "${parent.name}" gagal disimpan.`,
+            ),
+          )
+        }
+      }
+
+      return { success: true, studentId, userId, warnings }
+    } catch (error: unknown) {
+      store.formError = getIndonesianErrorMessage(
+        error,
+        'Gagal menyimpan data siswa.',
+      )
+      return { success: false, warnings }
     } finally {
       store.isSaving = false
     }

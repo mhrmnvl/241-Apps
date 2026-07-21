@@ -31,7 +31,7 @@ const tableRef = ref<InstanceType<typeof TimeSlotManageTable> | null>(null)
             </CardTitle>
             <p class="text-sm text-muted-foreground">
               Atur daftar jam pelajaran langsung pada tabel — tambah, ubah, dan
-              simpan per baris.
+              simpan semua sekaligus di bagian bawah.
             </p>
           </div>
           <Button

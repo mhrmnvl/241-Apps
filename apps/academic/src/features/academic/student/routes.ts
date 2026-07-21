@@ -13,6 +13,17 @@ export const studentRoutes: RouteRecordRaw[] = [
   },
 
   {
+    path: '/students/create',
+    name: 'student-create',
+    component: () => import('./views/StudentCreateView.vue'),
+    meta: {
+      requiresAuth: true,
+      allowedRoles: ['ADMIN'],
+      title: 'Tambah Siswa',
+    },
+  },
+
+  {
     path: '/students/accounts',
     name: 'student-accounts',
     component: () => import('./views/StudentAccountsView.vue'),

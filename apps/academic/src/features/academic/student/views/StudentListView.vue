@@ -1,13 +1,11 @@
 <script setup lang="ts">
 import ImportExportDialog from '../components/ImportExportDialog.vue'
-import StudentFormSheet from '../components/StudentFormSheet.vue'
-import type { StudentSavePayload } from '../types'
 import { createColumns } from '../components/columns'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { DataTable } from '@/ui'
 import { formatEntityName } from '@/shared/utils/utils'
 import { watchDebounced } from '@vueuse/core'
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useStudent } from '../composables/useStudent'
 import { useStudentImportExport } from '../composables/useStudentImportExport'
@@ -38,13 +36,10 @@ const {
   grades,
   totalStudents,
   loading,
-  isSaving,
-  formError,
   filters,
   fetchStudents,
   fetchClassrooms,
   fetchGrades,
-  saveStudent,
   deleteStudent,
   filteredStudents,
 } = useStudent()
@@ -76,8 +71,6 @@ const tableColumns = computed(() =>
   ),
 )
 
-const isAddModalOpen = ref(false)
-
 const {
   isImportExportOpen,
   isImporting,
@@ -91,15 +84,6 @@ const {
     void fetchStudents()
   },
 })
-
-async function handleSaveStudent(payload: StudentSavePayload) {
-  const result = await saveStudent(null, payload)
-  if (result.success) {
-    toast.success('Pendaftaran siswa baru berhasil disimpan ke pangkalan data.')
-    isAddModalOpen.value = false
-    await fetchStudents()
-  }
-}
 
 watch(
   () => filters.value.gradeId,
@@ -153,7 +137,7 @@ onMounted(async () => {
             <Button
               v-if="isAdmin"
               class="w-full sm:w-auto"
-              @click="isAddModalOpen = true"
+              @click="router.push('/students/create')"
             >
               <Plus class="size-4 mr-2" />
               Tambah Siswa
@@ -234,16 +218,6 @@ onMounted(async () => {
         </div>
       </Card>
     </div>
-
-    <StudentFormSheet
-      v-if="isAdmin"
-      v-model:open="isAddModalOpen"
-      :classrooms="classrooms"
-      :grades="grades"
-      :form-error="formError"
-      :is-saving="isSaving"
-      @save="handleSaveStudent"
-    />
 
     <ImportExportDialog
       v-if="isAdmin"

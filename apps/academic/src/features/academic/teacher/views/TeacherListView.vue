@@ -173,7 +173,7 @@ onMounted(() => {
             <Button
               v-if="isAdmin"
               class="w-full sm:w-auto"
-              @click="isModalOpen = true"
+              @click="router.push('/teacher/create')"
             >
               <Plus class="size-4 mr-2" />
               Tambah Guru

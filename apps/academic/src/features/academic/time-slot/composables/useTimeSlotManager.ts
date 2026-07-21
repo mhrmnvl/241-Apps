@@ -1,4 +1,4 @@
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { toast } from 'vue-sonner'
 import { timeSlotApi } from '../api/timeSlotApi'
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
@@ -157,5 +157,71 @@ export function useTimeSlotManager() {
     }
   }
 
-  return { rows, types, loading, load, addRow, saveRow, deleteRow, isDirty }
+  async function saveAll() {
+    const dirtyRows = rows.value.filter(isDirty)
+    if (dirtyRows.length === 0) {
+      toast.info('Tidak ada perubahan untuk disimpan.')
+      return { success: true }
+    }
+
+    for (const row of dirtyRows) {
+      const error = validate(row)
+      if (error) {
+        toast.error(`Baris urutan ke-${row.order}: ${error}`)
+        return { success: false }
+      }
+    }
+
+    loading.value = true
+    try {
+      await Promise.all(
+        dirtyRows.map(async (row) => {
+          row.saving = true
+          const payload = {
+            name: row.name.trim(),
+            startTime: row.startTime,
+            endTime: row.endTime,
+            order: row.order,
+            typeId: row.typeId,
+          }
+          if (row.id) {
+            await timeSlotApi.updateTimeSlot(row.id, payload)
+          } else {
+            const res = await timeSlotApi.createTimeSlot(payload)
+            row.id = res.data.data.id
+          }
+          row.original = snapshot(row)
+          row.saving = false
+        }),
+      )
+      toast.success('Semua perubahan jam pelajaran berhasil disimpan')
+      return { success: true }
+    } catch (error: unknown) {
+      toast.error(
+        getIndonesianErrorMessage(
+          error,
+          'Gagal menyimpan beberapa jam pelajaran.',
+        ),
+      )
+      await load()
+      return { success: false }
+    } finally {
+      loading.value = false
+    }
+  }
+
+  const hasChanges = computed(() => rows.value.some(isDirty))
+
+  return {
+    rows,
+    types,
+    loading,
+    hasChanges,
+    load,
+    addRow,
+    saveRow,
+    saveAll,
+    deleteRow,
+    isDirty,
+  }
 }

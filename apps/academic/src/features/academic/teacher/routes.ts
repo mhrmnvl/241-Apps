@@ -12,6 +12,16 @@ export const teacherRoutes: RouteRecordRaw[] = [
     },
   },
   {
+    path: '/teacher/create',
+    name: 'teacher-create',
+    component: () => import('./views/TeacherCreateView.vue'),
+    meta: {
+      requiresAuth: true,
+      allowedRoles: ['ADMIN'],
+      title: 'Tambah Guru',
+    },
+  },
+  {
     path: '/teacher/accounts',
     name: 'teacher-accounts',
     component: () => import('./views/TeacherAccountView.vue'),

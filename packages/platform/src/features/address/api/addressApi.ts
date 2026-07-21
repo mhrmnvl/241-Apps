@@ -22,6 +22,11 @@ export const addressApi = {
       payload,
     )
   },
+  createAddressForUser: (userId: string, payload: AddressSavePayload) => {
+    return api.post<ApiSingleResponse<AddressRecord>>('/profiles', payload, {
+      params: { userId },
+    })
+  },
   updateMyAddress: (addressId: string, payload: AddressSavePayload) => {
     return api.patch<ApiSingleResponse<AddressRecord>>(
       `/profiles/me/addresses/${addressId}`,

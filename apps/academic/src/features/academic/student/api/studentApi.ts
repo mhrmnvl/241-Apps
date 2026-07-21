@@ -9,6 +9,7 @@ import type {
   StudentUpdatePayload,
   StudentExportParams,
   Student,
+  StudentCreateResult,
   BulkImportResult,
 } from '../types'
 
@@ -28,7 +29,10 @@ export const studentApi = {
   },
 
   createStudent: (payload: StudentSavePayload) => {
-    return api.post<ApiSingleResponse<Student>>('/students', payload)
+    return api.post<ApiSingleResponse<StudentCreateResult>>(
+      '/students',
+      payload,
+    )
   },
 
   exportStudents: (params?: StudentExportParams) => {

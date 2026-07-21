@@ -1,3 +1,6 @@
+import type { AddressSavePayload } from '@/features/platform/address'
+import type { IncomeRange } from '@/features/academic/parent'
+
 export interface GradeOption {
   id: string
   level: number
@@ -88,6 +91,41 @@ export interface StudentUpdatePayload {
   classroomId?: string
   nis?: string
   nisn?: string
+}
+
+export interface StudentCreateResult {
+  id: string
+  userId: string
+  nis: string
+  nisn: string
+  status: string
+  gradeId?: string
+}
+
+export interface StudentParentInput {
+  relation: string
+  name: string
+  nik: string
+  birthPlace: string
+  birthDate: string
+  email?: string
+  phone?: string
+  occupationId: string
+  income?: IncomeRange
+  isPrimary: boolean
+}
+
+export interface CreateStudentWithRelationsInput {
+  core: StudentSavePayload
+  address?: AddressSavePayload | null
+  parents?: StudentParentInput[]
+}
+
+export interface CreateStudentWithRelationsResult {
+  success: boolean
+  studentId?: string
+  userId?: string
+  warnings: string[]
 }
 
 export interface StudentExportParams {

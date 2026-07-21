@@ -1,3 +1,5 @@
+import type { AddressSavePayload } from '@/features/platform/address'
+
 export interface EmploymentTypeOption {
   id: string
   code: string
@@ -91,6 +93,25 @@ export interface TeacherPositionSavePayload {
   positionId: string
   hireDate: string
   isPrimary?: boolean
+}
+
+export interface TeacherPositionInput {
+  positionId: string
+  hireDate: string
+  isPrimary: boolean
+}
+
+export interface CreateTeacherWithRelationsInput {
+  core: TeacherSavePayload
+  address?: AddressSavePayload | null
+  positions?: TeacherPositionInput[]
+}
+
+export interface CreateTeacherWithRelationsResult {
+  success: boolean
+  teacherId?: string
+  userId?: string
+  warnings: string[]
 }
 
 export interface TeacherPositionUpdatePayload {

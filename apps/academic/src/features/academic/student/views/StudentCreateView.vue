@@ -1,0 +1,875 @@
+<script setup lang="ts">
+import { computed, onMounted, reactive, ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { toTypedSchema } from '@vee-validate/zod'
+import { useForm } from 'vee-validate'
+import * as z from 'zod'
+import { toast } from 'vue-sonner'
+import { Check, Plus, Trash2 } from 'lucide-vue-next'
+import AppLayout from '@/layouts/AppLayout.vue'
+import { DatePicker } from '@/ui'
+import { Button } from '@/ui/button'
+import { Card, CardHeader, CardTitle } from '@/ui/card'
+import { Input } from '@/ui/input'
+import { ScrollArea } from '@/ui/scroll-area'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/ui/select'
+import {
+  Stepper,
+  StepperIndicator,
+  StepperItem,
+  StepperSeparator,
+  StepperTitle,
+  StepperTrigger,
+} from '@/ui/stepper'
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/ui/form'
+import { classroomApi, type Classroom } from '@/features/academic/classroom'
+import { occupationApi } from '@/features/academic/occupation'
+import type { IncomeRange } from '@/features/academic/parent'
+import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
+import api from '@/shared/utils/api'
+import type { ApiPaginatedResponse } from '@/shared/types/api'
+import { studentService } from '../services/studentService'
+import type { GradeOption, StudentParentInput } from '../types'
+
+const router = useRouter()
+const breadcrumbs = [
+  { title: 'Siswa', href: '/students' },
+  { title: 'Tambah Siswa' },
+]
+
+const steps = [
+  { value: 1, title: 'Profil' },
+  { value: 2, title: 'Akademik' },
+  { value: 3, title: 'Alamat' },
+  { value: 4, title: 'Orang Tua' },
+  { value: 5, title: 'Ringkasan' },
+]
+const activeStep = ref(1)
+const submitting = ref(false)
+
+const grades = ref<GradeOption[]>([])
+const classrooms = ref<Classroom[]>([])
+const occupations = ref<{ id: string; name: string }[]>([])
+
+const incomeOptions: { value: IncomeRange; label: string }[] = [
+  { value: 'BELOW_500K', label: '< Rp 500.000' },
+  { value: 'BETWEEN_500K_1M', label: 'Rp 500.000 - 1.000.000' },
+  { value: 'BETWEEN_1M_2M', label: 'Rp 1.000.000 - 2.000.000' },
+  { value: 'BETWEEN_2M_3M', label: 'Rp 2.000.000 - 3.000.000' },
+  { value: 'ABOVE_3M', label: '> Rp 3.000.000' },
+]
+const relationOptions = [
+  { value: 'FATHER', label: 'Ayah' },
+  { value: 'MOTHER', label: 'Ibu' },
+  { value: 'GUARDIAN', label: 'Wali' },
+]
+
+const formSchema = toTypedSchema(
+  z.object({
+    name: z
+      .string()
+      .min(1, 'Mohon masukkan nama lengkap siswa.')
+      .max(100, 'Nama tidak boleh lebih dari 100 karakter.'),
+    nik: z
+      .string()
+      .min(1, 'Nomor Induk Kependudukan (NIK) wajib diisi.')
+      .length(16, 'NIK harus berjumlah tepat 16 digit angka.'),
+    gender: z.string().min(1, 'Silakan pilih jenis kelamin siswa.'),
+    birthPlace: z
+      .string()
+      .min(1, 'Kota tempat lahir wajib dicantumkan.')
+      .max(100, 'Tempat lahir tidak boleh lebih dari 100 karakter.'),
+    birthDate: z.string().min(1, 'Mohon tentukan tanggal lahir siswa.'),
+    email: z
+      .string()
+      .max(255)
+      .email('Format alamat email tidak valid.')
+      .optional()
+      .or(z.literal('')),
+    phone: z.string().max(15).optional().or(z.literal('')),
+    nis: z
+      .string()
+      .min(1, 'Nomor Induk Siswa (NIS) wajib diisi.')
+      .max(20, 'NIS tidak boleh lebih dari 20 karakter.'),
+    nisn: z
+      .string()
+      .min(1, 'Nomor Induk Siswa Nasional (NISN) wajib diisi.')
+      .max(20, 'NISN tidak boleh lebih dari 20 karakter.'),
+    gradeId: z.string().optional().default(''),
+    classroomId: z.string().optional().default(''),
+  }),
+)
+
+const { values, validateField, setFieldValue } = useForm({
+  validationSchema: formSchema,
+  keepValuesOnUnmount: true,
+  initialValues: {
+    name: '',
+    nik: '',
+    gender: 'MALE',
+    birthPlace: '',
+    birthDate: '',
+    email: '',
+    phone: '',
+    nis: '',
+    nisn: '',
+    gradeId: '',
+    classroomId: '',
+  },
+})
+
+const address = reactive({
+  street: '',
+  rt: '',
+  rw: '',
+  village: '',
+  district: '',
+  city: '',
+  province: '',
+  postalCode: '',
+  country: 'Indonesia',
+})
+const hasAddress = computed(() => address.street.trim() !== '')
+
+const parents = ref<StudentParentInput[]>([])
+
+function addParent() {
+  parents.value.push({
+    relation: 'FATHER',
+    name: '',
+    nik: '',
+    birthPlace: '',
+    birthDate: '',
+    email: '',
+    phone: '',
+    occupationId: '',
+    income: undefined,
+    isPrimary: parents.value.length === 0,
+  })
+}
+function removeParent(index: number) {
+  parents.value.splice(index, 1)
+}
+
+const filteredClassrooms = computed(() => {
+  if (!values.gradeId) return classrooms.value
+  return classrooms.value.filter(
+    (c) =>
+      c.gradeId === values.gradeId || c.classroomLevelId === values.gradeId,
+  )
+})
+
+type FieldName = Parameters<typeof validateField>[0]
+async function validateFields(fields: FieldName[]): Promise<boolean> {
+  const results = await Promise.all(fields.map((f) => validateField(f)))
+  return results.every((r) => r.valid)
+}
+
+const PROFIL_FIELDS: FieldName[] = [
+  'name',
+  'nik',
+  'gender',
+  'birthPlace',
+  'birthDate',
+]
+const AKADEMIK_FIELDS: FieldName[] = ['nis', 'nisn']
+
+async function goToStep(target: number) {
+  if (target <= activeStep.value) {
+    activeStep.value = target
+    return
+  }
+  if (activeStep.value === 1 && !(await validateFields(PROFIL_FIELDS))) return
+  if (activeStep.value === 2 && !(await validateFields(AKADEMIK_FIELDS))) return
+  activeStep.value = target
+}
+
+function next() {
+  void goToStep(activeStep.value + 1)
+}
+function back() {
+  if (activeStep.value === 1) {
+    void router.push('/students')
+    return
+  }
+  activeStep.value -= 1
+}
+
+function isValidParent(p: StudentParentInput): boolean {
+  return (
+    p.name.trim() !== '' &&
+    /^\d{16}$/.test(p.nik) &&
+    p.birthPlace.trim() !== '' &&
+    p.birthDate !== '' &&
+    p.occupationId !== '' &&
+    p.relation !== ''
+  )
+}
+
+async function submit() {
+  if (!(await validateFields(PROFIL_FIELDS))) {
+    activeStep.value = 1
+    return
+  }
+  if (!(await validateFields(AKADEMIK_FIELDS))) {
+    activeStep.value = 2
+    return
+  }
+  if (hasAddress.value) {
+    const required = [
+      address.village,
+      address.district,
+      address.city,
+      address.province,
+      address.country,
+    ]
+    if (required.some((v) => v.trim() === '')) {
+      activeStep.value = 3
+      toast.error('Lengkapi alamat (desa, kecamatan, kota, provinsi, negara).')
+      return
+    }
+  }
+  const invalidParent = parents.value.find((p) => !isValidParent(p))
+  if (invalidParent) {
+    activeStep.value = 4
+    toast.error(
+      'Lengkapi data orang tua: nama, NIK 16 digit, TTL, pekerjaan, hubungan.',
+    )
+    return
+  }
+
+  submitting.value = true
+  try {
+    const result = await studentService.createStudentWithRelations({
+      core: {
+        name: values.name ?? '',
+        nik: values.nik ?? '',
+        gender: values.gender ?? 'MALE',
+        birthPlace: values.birthPlace ?? '',
+        birthDate: values.birthDate ?? '',
+        email: values.email || undefined,
+        phone: values.phone || undefined,
+        nis: values.nis ?? '',
+        nisn: values.nisn ?? '',
+        gradeId: values.gradeId || undefined,
+        classroomId: values.classroomId || undefined,
+        identifier: values.nis ?? '',
+        password: values.nis ?? '',
+      },
+      address: hasAddress.value ? { ...address } : null,
+      parents: parents.value,
+    })
+
+    if (!result.success) {
+      toast.error('Gagal menyimpan data siswa. Periksa kembali isian Anda.')
+      return
+    }
+    toast.success('Siswa baru berhasil disimpan.')
+    result.warnings.forEach((w) => toast.warning(w))
+    if (result.userId) {
+      void router.push(`/profile/STUDENT/${result.userId}`)
+    } else {
+      void router.push('/students')
+    }
+  } finally {
+    submitting.value = false
+  }
+}
+
+onMounted(async () => {
+  try {
+    const [gradeRes, classroomRes, occupationRes] = await Promise.all([
+      api.get<ApiPaginatedResponse<GradeOption>>('/grades', {
+        params: { limit: 100, isActive: true },
+      }),
+      classroomApi.getClassrooms({ limit: 100, isActive: true }),
+      occupationApi.getOccupations({ limit: 100 }),
+    ])
+    grades.value = gradeRes.data.data ?? []
+    classrooms.value = classroomRes.data.data ?? []
+    occupations.value = occupationRes.data.data ?? []
+  } catch (error: unknown) {
+    toast.error(getIndonesianErrorMessage(error, 'Gagal memuat data pilihan.'))
+  }
+})
+</script>
+
+<template>
+  <AppLayout :breadcrumbs="breadcrumbs">
+    <div class="p-4 md:p-6 lg:p-8">
+      <Card
+        class="overflow-hidden rounded-2xl shadow-sm shadow-black/5 ring-1 ring-black/4 py-0"
+      >
+        <CardHeader class="border-b px-6 pt-5! pb-5!">
+          <CardTitle class="text-2xl font-bold tracking-tight">
+            Tambah Siswa Baru
+          </CardTitle>
+        </CardHeader>
+
+        <div class="px-6 py-4 border-b">
+          <Stepper
+            v-model="activeStep"
+            class="flex items-center justify-center gap-2 md:gap-6 w-full max-w-3xl mx-auto"
+          >
+            <StepperItem
+              v-for="step in steps"
+              :key="step.value"
+              :step="step.value"
+              class="flex items-center gap-2 md:gap-6 group"
+            >
+              <StepperTrigger
+                class="flex items-center gap-2 cursor-pointer outline-none"
+                @click="goToStep(step.value)"
+              >
+                <StepperIndicator class="shrink-0">
+                  <Check
+                    v-if="activeStep > step.value"
+                    class="size-4"
+                  />
+                  <span v-else>{{ step.value }}</span>
+                </StepperIndicator>
+                <StepperTitle
+                  class="text-sm font-semibold leading-none whitespace-nowrap hidden md:block"
+                >
+                  {{ step.title }}
+                </StepperTitle>
+              </StepperTrigger>
+              <StepperSeparator
+                v-if="step.value < steps.length"
+                class="w-8 md:w-16 h-0.5 bg-muted"
+              />
+            </StepperItem>
+          </Stepper>
+        </div>
+
+        <ScrollArea class="max-h-[60vh]">
+          <div class="px-6 py-5">
+            <!-- Step 1: Profil (kept mounted for validation) -->
+            <div
+              v-show="activeStep === 1"
+              class="grid gap-5 md:grid-cols-2"
+            >
+              <FormField
+                v-slot="{ componentField }"
+                name="name"
+              >
+                <FormItem class="md:col-span-2">
+                  <FormLabel
+                    >Nama Lengkap
+                    <span class="text-destructive">*</span></FormLabel
+                  >
+                  <FormControl>
+                    <Input
+                      placeholder="Masukkan nama lengkap"
+                      maxlength="100"
+                      v-bind="componentField"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              </FormField>
+              <FormField
+                v-slot="{ componentField }"
+                name="nik"
+              >
+                <FormItem>
+                  <FormLabel
+                    >NIK <span class="text-destructive">*</span></FormLabel
+                  >
+                  <FormControl>
+                    <Input
+                      placeholder="16 digit NIK"
+                      maxlength="16"
+                      v-bind="componentField"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              </FormField>
+              <FormField
+                v-slot="{ value, handleChange }"
+                name="gender"
+              >
+                <FormItem>
+                  <FormLabel
+                    >Jenis Kelamin
+                    <span class="text-destructive">*</span></FormLabel
+                  >
+                  <Select
+                    :model-value="value"
+                    @update:model-value="handleChange"
+                  >
+                    <FormControl>
+                      <SelectTrigger class="w-full">
+                        <SelectValue placeholder="Pilih jenis kelamin" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="MALE"> Laki-laki </SelectItem>
+                      <SelectItem value="FEMALE"> Perempuan </SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              </FormField>
+              <FormField
+                v-slot="{ componentField }"
+                name="birthPlace"
+              >
+                <FormItem>
+                  <FormLabel
+                    >Tempat Lahir
+                    <span class="text-destructive">*</span></FormLabel
+                  >
+                  <FormControl>
+                    <Input
+                      placeholder="Kota lahir"
+                      maxlength="100"
+                      v-bind="componentField"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              </FormField>
+              <FormField
+                v-slot="{ value, handleChange }"
+                name="birthDate"
+              >
+                <FormItem>
+                  <FormLabel
+                    >Tanggal Lahir
+                    <span class="text-destructive">*</span></FormLabel
+                  >
+                  <FormControl>
+                    <DatePicker
+                      :model-value="value"
+                      placeholder="Pilih tanggal lahir"
+                      @update:model-value="handleChange"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              </FormField>
+              <FormField
+                v-slot="{ componentField }"
+                name="email"
+              >
+                <FormItem>
+                  <FormLabel>Email</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="email"
+                      placeholder="contoh@email.com (opsional)"
+                      maxlength="255"
+                      v-bind="componentField"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              </FormField>
+              <FormField
+                v-slot="{ componentField }"
+                name="phone"
+              >
+                <FormItem>
+                  <FormLabel>No. HP</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="08123456789 (opsional)"
+                      maxlength="15"
+                      v-bind="componentField"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              </FormField>
+            </div>
+
+            <!-- Step 2: Akademik (kept mounted for validation) -->
+            <div
+              v-show="activeStep === 2"
+              class="grid gap-5 md:grid-cols-2"
+            >
+              <FormField
+                v-slot="{ componentField }"
+                name="nis"
+              >
+                <FormItem>
+                  <FormLabel
+                    >NIS <span class="text-destructive">*</span></FormLabel
+                  >
+                  <FormControl>
+                    <Input
+                      placeholder="Nomor Induk Siswa"
+                      maxlength="20"
+                      v-bind="componentField"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              </FormField>
+              <FormField
+                v-slot="{ componentField }"
+                name="nisn"
+              >
+                <FormItem>
+                  <FormLabel
+                    >NISN <span class="text-destructive">*</span></FormLabel
+                  >
+                  <FormControl>
+                    <Input
+                      placeholder="Nomor Induk Siswa Nasional"
+                      maxlength="20"
+                      v-bind="componentField"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              </FormField>
+              <FormField
+                v-slot="{ value, handleChange }"
+                name="gradeId"
+              >
+                <FormItem>
+                  <FormLabel>Tingkat</FormLabel>
+                  <Select
+                    :model-value="value"
+                    @update:model-value="
+                      (val) => {
+                        handleChange(val)
+                        setFieldValue('classroomId', '')
+                      }
+                    "
+                  >
+                    <FormControl>
+                      <SelectTrigger class="w-full">
+                        <SelectValue placeholder="Pilih tingkat (opsional)" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem
+                        v-for="lvl in grades"
+                        :key="lvl.id"
+                        :value="lvl.id"
+                      >
+                        {{ lvl.name }}
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              </FormField>
+              <FormField
+                v-slot="{ value, handleChange }"
+                name="classroomId"
+              >
+                <FormItem>
+                  <FormLabel>Kelas</FormLabel>
+                  <Select
+                    :model-value="value"
+                    @update:model-value="handleChange"
+                  >
+                    <FormControl>
+                      <SelectTrigger class="w-full">
+                        <SelectValue placeholder="Pilih kelas (opsional)" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem
+                        v-for="cls in filteredClassrooms"
+                        :key="cls.id"
+                        :value="cls.id"
+                      >
+                        {{ cls.displayName }}
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </FormItem>
+              </FormField>
+            </div>
+
+            <!-- Step 3: Alamat (optional) -->
+            <div v-if="activeStep === 3">
+              <p class="text-sm text-muted-foreground mb-4">
+                Opsional — kosongkan bila belum ada. Isi jalan untuk
+                mengaktifkan.
+              </p>
+              <div class="grid gap-5 md:grid-cols-2">
+                <div class="md:col-span-2 space-y-2">
+                  <label class="text-sm font-medium">Jalan / Alamat</label>
+                  <Input
+                    v-model="address.street"
+                    placeholder="Nama jalan, nomor rumah"
+                  />
+                </div>
+                <div class="grid grid-cols-2 gap-3 md:col-span-2">
+                  <div class="space-y-2">
+                    <label class="text-sm font-medium">RT</label>
+                    <Input
+                      v-model="address.rt"
+                      placeholder="RT"
+                    />
+                  </div>
+                  <div class="space-y-2">
+                    <label class="text-sm font-medium">RW</label>
+                    <Input
+                      v-model="address.rw"
+                      placeholder="RW"
+                    />
+                  </div>
+                </div>
+                <div class="space-y-2">
+                  <label class="text-sm font-medium">Desa / Kelurahan</label>
+                  <Input
+                    v-model="address.village"
+                    placeholder="Desa / kelurahan"
+                  />
+                </div>
+                <div class="space-y-2">
+                  <label class="text-sm font-medium">Kecamatan</label>
+                  <Input
+                    v-model="address.district"
+                    placeholder="Kecamatan"
+                  />
+                </div>
+                <div class="space-y-2">
+                  <label class="text-sm font-medium">Kota / Kabupaten</label>
+                  <Input
+                    v-model="address.city"
+                    placeholder="Kota / kabupaten"
+                  />
+                </div>
+                <div class="space-y-2">
+                  <label class="text-sm font-medium">Provinsi</label>
+                  <Input
+                    v-model="address.province"
+                    placeholder="Provinsi"
+                  />
+                </div>
+                <div class="space-y-2">
+                  <label class="text-sm font-medium">Kode Pos</label>
+                  <Input
+                    v-model="address.postalCode"
+                    placeholder="Kode pos"
+                  />
+                </div>
+                <div class="space-y-2">
+                  <label class="text-sm font-medium">Negara</label>
+                  <Input
+                    v-model="address.country"
+                    placeholder="Negara"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <!-- Step 4: Orang Tua / Wali (optional, repeatable) -->
+            <div v-if="activeStep === 4">
+              <div class="flex items-center justify-between mb-4">
+                <p class="text-sm text-muted-foreground">
+                  Opsional — tambahkan data ayah, ibu, atau wali.
+                </p>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  @click="addParent"
+                >
+                  <Plus class="size-4 mr-1.5" />
+                  Tambah Orang Tua
+                </Button>
+              </div>
+
+              <p
+                v-if="parents.length === 0"
+                class="text-sm text-muted-foreground italic py-6 text-center border-2 border-dashed rounded-lg"
+              >
+                Belum ada data orang tua. Lewati langkah ini bila belum
+                diperlukan.
+              </p>
+
+              <div
+                v-for="(parent, index) in parents"
+                :key="index"
+                class="rounded-xl border p-4 mb-4 bg-muted/10"
+              >
+                <div class="flex items-center justify-between mb-3">
+                  <span class="text-sm font-semibold">
+                    Orang Tua / Wali #{{ index + 1 }}
+                  </span>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    class="text-destructive hover:text-destructive"
+                    @click="removeParent(index)"
+                  >
+                    <Trash2 class="size-4" />
+                  </Button>
+                </div>
+                <div class="grid gap-4 md:grid-cols-2">
+                  <div class="space-y-2">
+                    <label class="text-sm font-medium">Hubungan</label>
+                    <Select v-model="parent.relation">
+                      <SelectTrigger class="w-full">
+                        <SelectValue placeholder="Pilih hubungan" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem
+                          v-for="r in relationOptions"
+                          :key="r.value"
+                          :value="r.value"
+                        >
+                          {{ r.label }}
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div class="space-y-2">
+                    <label class="text-sm font-medium">Nama Lengkap</label>
+                    <Input
+                      v-model="parent.name"
+                      placeholder="Nama lengkap"
+                      maxlength="100"
+                    />
+                  </div>
+                  <div class="space-y-2">
+                    <label class="text-sm font-medium">NIK</label>
+                    <Input
+                      v-model="parent.nik"
+                      placeholder="16 digit NIK"
+                      maxlength="16"
+                    />
+                  </div>
+                  <div class="space-y-2">
+                    <label class="text-sm font-medium">Tempat Lahir</label>
+                    <Input
+                      v-model="parent.birthPlace"
+                      placeholder="Kota lahir"
+                    />
+                  </div>
+                  <div class="space-y-2">
+                    <label class="text-sm font-medium">Tanggal Lahir</label>
+                    <Input
+                      v-model="parent.birthDate"
+                      type="date"
+                    />
+                  </div>
+                  <div class="space-y-2">
+                    <label class="text-sm font-medium">Pekerjaan</label>
+                    <Select v-model="parent.occupationId">
+                      <SelectTrigger class="w-full">
+                        <SelectValue placeholder="Pilih pekerjaan" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem
+                          v-for="occ in occupations"
+                          :key="occ.id"
+                          :value="occ.id"
+                        >
+                          {{ occ.name }}
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div class="space-y-2">
+                    <label class="text-sm font-medium">Penghasilan</label>
+                    <Select v-model="parent.income">
+                      <SelectTrigger class="w-full">
+                        <SelectValue
+                          placeholder="Pilih penghasilan (opsional)"
+                        />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem
+                          v-for="opt in incomeOptions"
+                          :key="opt.value"
+                          :value="opt.value"
+                        >
+                          {{ opt.label }}
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div class="space-y-2">
+                    <label class="text-sm font-medium">No. HP</label>
+                    <Input
+                      v-model="parent.phone"
+                      placeholder="08xxx (opsional)"
+                      maxlength="15"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Step 5: Ringkasan -->
+            <div
+              v-if="activeStep === 5"
+              class="space-y-4 text-sm"
+            >
+              <div class="rounded-xl border p-4">
+                <p class="font-semibold mb-2">Profil & Akademik</p>
+                <div class="grid gap-1 md:grid-cols-2 text-muted-foreground">
+                  <span>Nama: {{ values.name || '-' }}</span>
+                  <span>NIK: {{ values.nik || '-' }}</span>
+                  <span>NIS: {{ values.nis || '-' }}</span>
+                  <span>NISN: {{ values.nisn || '-' }}</span>
+                </div>
+              </div>
+              <div class="rounded-xl border p-4">
+                <p class="font-semibold mb-1">Alamat</p>
+                <p class="text-muted-foreground">
+                  {{ hasAddress ? address.street : 'Dilewati' }}
+                </p>
+              </div>
+              <div class="rounded-xl border p-4">
+                <p class="font-semibold mb-1">Orang Tua / Wali</p>
+                <p class="text-muted-foreground">
+                  {{
+                    parents.length > 0 ? `${parents.length} data` : 'Dilewati'
+                  }}
+                </p>
+              </div>
+            </div>
+          </div>
+        </ScrollArea>
+
+        <div
+          class="flex items-center justify-between border-t px-6 py-4 bg-background"
+        >
+          <Button
+            variant="outline"
+            :disabled="submitting"
+            @click="back"
+          >
+            {{ activeStep === 1 ? 'Batal' : 'Kembali' }}
+          </Button>
+          <Button
+            v-if="activeStep < 5"
+            @click="next"
+          >
+            Lanjut
+          </Button>
+          <Button
+            v-else
+            :disabled="submitting"
+            @click="submit"
+          >
+            {{ submitting ? 'Menyimpan...' : 'Simpan Siswa' }}
+          </Button>
+        </div>
+      </Card>
+    </div>
+  </AppLayout>
+</template>

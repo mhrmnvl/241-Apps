@@ -1,4 +1,5 @@
 import { teacherApi } from '../api/teacherApi'
+import { addressApi } from '@/features/platform/address'
 import { useTeacherStore } from '../stores/teacherStore'
 import type {
   TeacherQueryParams,
@@ -7,6 +8,8 @@ import type {
   TeacherUpdatePayload,
   TeacherPositionSavePayload,
   TeacherPositionUpdatePayload,
+  CreateTeacherWithRelationsInput,
+  CreateTeacherWithRelationsResult,
 } from '../types'
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
 import { toast } from 'vue-sonner'
@@ -62,6 +65,58 @@ export const teacherService = {
         'Gagal menyimpan data guru.',
       )
       return { success: false, error: store.formError }
+    } finally {
+      store.isSaving = false
+    }
+  },
+
+  createTeacherWithRelations: async (
+    input: CreateTeacherWithRelationsInput,
+  ): Promise<CreateTeacherWithRelationsResult> => {
+    const store = useTeacherStore()
+    store.isSaving = true
+    store.formError = null
+    const warnings: string[] = []
+    try {
+      const res = await teacherApi.createTeacher(input.core)
+      const teacher = res.data.data
+      const teacherId = teacher.id
+      const userId = teacher.user?.id
+
+      if (input.address && userId) {
+        try {
+          await addressApi.createAddressForUser(userId, input.address)
+        } catch (error: unknown) {
+          warnings.push(
+            getIndonesianErrorMessage(error, 'Alamat gagal disimpan.'),
+          )
+        }
+      }
+
+      for (const position of input.positions ?? []) {
+        try {
+          await teacherApi.createPosition(teacherId, {
+            positionId: position.positionId,
+            hireDate: position.hireDate,
+            isPrimary: position.isPrimary,
+          })
+        } catch (error: unknown) {
+          warnings.push(
+            getIndonesianErrorMessage(
+              error,
+              'Sebagian jabatan gagal disimpan.',
+            ),
+          )
+        }
+      }
+
+      return { success: true, teacherId, userId, warnings }
+    } catch (error: unknown) {
+      store.formError = getIndonesianErrorMessage(
+        error,
+        'Gagal menyimpan data guru.',
+      )
+      return { success: false, warnings }
     } finally {
       store.isSaving = false
     }

@@ -23,7 +23,7 @@ import {
 
 const props = defineProps<{ canEdit: boolean }>()
 
-const { rows, types, loading, load, addRow, saveRow, deleteRow, isDirty } =
+const { rows, types, loading, hasChanges, load, addRow, saveAll, deleteRow } =
   useTimeSlotManager()
 
 const pendingDeleteIndex = ref<number | null>(null)
@@ -48,6 +48,8 @@ function requestDelete(row: EditableTimeSlotRow, index: number) {
 
 defineExpose({
   addRow,
+  saveAll,
+  hasChanges,
 })
 </script>
 
@@ -163,26 +165,11 @@ defineExpose({
               v-if="props.canEdit"
               class="border-b px-3 py-2 text-center align-middle"
             >
-              <div class="flex items-center justify-center gap-1">
-                <Button
-                  size="sm"
-                  variant="default"
-                  :disabled="row.saving || !isDirty(row)"
-                  @click="saveRow(row)"
-                >
-                  <Loader2
-                    v-if="row.saving"
-                    class="size-4 animate-spin"
-                  />
-                  <Save
-                    v-else
-                    class="size-4"
-                  />
-                </Button>
+              <div class="flex items-center justify-center">
                 <Button
                   size="icon"
                   variant="ghost"
-                  class="text-destructive hover:text-destructive"
+                  class="text-destructive hover:text-destructive h-8 w-8"
                   :disabled="row.saving"
                   @click="requestDelete(row, index)"
                 >
@@ -193,6 +180,27 @@ defineExpose({
           </tr>
         </tbody>
       </table>
+    </div>
+
+    <!-- Simpan Semua Button at bottom -->
+    <div
+      v-if="props.canEdit"
+      class="flex justify-end gap-2 border-t px-6 py-4 bg-muted/10"
+    >
+      <Button
+        :disabled="!hasChanges || loading"
+        @click="saveAll"
+      >
+        <Loader2
+          v-if="loading"
+          class="size-4 mr-2 animate-spin"
+        />
+        <Save
+          v-else
+          class="size-4 mr-2"
+        />
+        Simpan
+      </Button>
     </div>
   </div>
 
