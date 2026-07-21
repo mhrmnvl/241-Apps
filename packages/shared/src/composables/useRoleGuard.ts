@@ -4,11 +4,18 @@ import { computed } from 'vue'
 export function useRoleGuard() {
   const authStore = useAuthStore()
   const userRoles = computed(() => authStore.user?.roles ?? [])
+  const userPermissions = computed(() => authStore.user?.permissions ?? [])
 
-  const isAdmin = computed(() =>
-    userRoles.value.some((r) => r === 'SUPER_ADMIN' || r === 'ADMIN'),
+  const isSuperAdmin = computed(() => userRoles.value.includes('SUPER_ADMIN'))
+
+  const isAdmin = computed(
+    () => isSuperAdmin.value || userPermissions.value.includes('users.read'),
   )
-  const isTeacher = computed(() => userRoles.value.includes('TEACHER'))
+
+  const isTeacher = computed(
+    () => isSuperAdmin.value || userPermissions.value.includes('teachers.read'),
+  )
+
   const isStudent = computed(() => userRoles.value.includes('STUDENT'))
 
   const canManage = computed(() => isAdmin.value)
