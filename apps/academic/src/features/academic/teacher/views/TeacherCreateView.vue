@@ -41,6 +41,7 @@ import { teacherService } from '../services/teacherService'
 import type {
   EmploymentTypeOption,
   PositionListItem,
+  PositionCategoryRef,
   TeacherPositionInput,
 } from '../types'
 import { positionCategoryLabel } from '../utils'
@@ -63,6 +64,7 @@ const submitting = ref(false)
 
 const employmentTypes = ref<EmploymentTypeOption[]>([])
 const positions = ref<PositionListItem[]>([])
+const kategori = ref('')
 
 const formSchema = toTypedSchema(
   z.object({
@@ -96,7 +98,7 @@ const formSchema = toTypedSchema(
   }),
 )
 
-const { values, validateField } = useForm({
+const { values, validateField, setFieldValue } = useForm({
   validationSchema: formSchema,
   keepValuesOnUnmount: true,
   initialValues: {
@@ -112,6 +114,19 @@ const { values, validateField } = useForm({
     employmentTypeId: '',
     positionId: '',
   },
+})
+
+const categoryOptions = computed(() => {
+  const map = new Map<string, PositionCategoryRef>()
+  for (const p of positions.value) {
+    if (p.category) map.set(p.category.id, p.category)
+  }
+  return [...map.values()]
+})
+
+const filteredPositions = computed(() => {
+  if (!kategori.value) return positions.value
+  return positions.value.filter((p) => p.category?.id === kategori.value)
 })
 
 const address = reactive({
@@ -529,6 +544,36 @@ onMounted(async () => {
                   <FormMessage />
                 </FormItem>
               </FormField>
+              <div class="space-y-2">
+                <label class="text-sm font-medium">
+                  Kategori
+                  <span class="text-xs font-normal text-muted-foreground"
+                    >(filter)</span
+                  >
+                </label>
+                <Select
+                  :model-value="kategori"
+                  @update:model-value="
+                    (v) => {
+                      kategori = String(v ?? '')
+                      setFieldValue('positionId', '')
+                    }
+                  "
+                >
+                  <SelectTrigger class="w-full">
+                    <SelectValue placeholder="Semua kategori" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem
+                      v-for="cat in categoryOptions"
+                      :key="cat.id"
+                      :value="cat.id"
+                    >
+                      {{ positionCategoryLabel(cat.code, cat.name) }}
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
               <FormField
                 v-slot="{ value, handleChange }"
                 name="positionId"
@@ -551,12 +596,11 @@ onMounted(async () => {
                     </FormControl>
                     <SelectContent>
                       <SelectItem
-                        v-for="pos in positions"
+                        v-for="pos in filteredPositions"
                         :key="pos.id"
                         :value="pos.id"
                       >
-                        {{ pos.name }} —
-                        {{ positionCategoryLabel(pos.category?.code) }}
+                        {{ pos.name }}
                       </SelectItem>
                     </SelectContent>
                   </Select>

@@ -9,6 +9,7 @@ import type {
   TeacherUpdatePayload,
   TeacherEditData,
   PositionListItem,
+  PositionCategoryRef,
   EmploymentTypeOption,
 } from '../types'
 import { positionCategoryLabel } from '../utils'
@@ -94,6 +95,7 @@ const activeTab = computed({
 
 const showConfirmAlert = ref(false)
 
+const kategori = ref('')
 const originalPositionId = ref('')
 const originalPositionLinkId = ref<string | null>(null)
 
@@ -111,6 +113,20 @@ onMounted(async () => {
   } catch {
     // non-blocking
   }
+})
+
+const categoryOptions = computed(() => {
+  const map = new Map<string, PositionCategoryRef>()
+  for (const p of props.positions ?? []) {
+    if (p.category) map.set(p.category.id, p.category)
+  }
+  return [...map.values()]
+})
+
+const filteredPositions = computed(() => {
+  const list = props.positions ?? []
+  if (!kategori.value) return list
+  return list.filter((p) => p.category?.id === kategori.value)
 })
 
 const profilFields = [
@@ -171,6 +187,7 @@ const {
   handleSubmit,
   resetForm,
   setValues,
+  setFieldValue,
   values: formValues,
   validateField,
 } = useForm({
@@ -198,11 +215,13 @@ watch(
       const data = editData?.value
       _activeTab.value = data ? 'kepegawaian' : 'profil'
       showConfirmAlert.value = false
+      kategori.value = ''
       if (data) {
         const primaryPos = data.teacherPositions?.find((ep) => ep.isPrimary)
         if (primaryPos) {
           originalPositionId.value = primaryPos.position?.id ?? ''
           originalPositionLinkId.value = primaryPos.id ?? null
+          kategori.value = primaryPos.position?.category?.id ?? ''
         } else {
           originalPositionId.value = ''
           originalPositionLinkId.value = null
@@ -540,11 +559,41 @@ function emitSave(values: Record<string, unknown>) {
                     <FormMessage />
                   </FormItem>
                 </FormField>
+                <div class="space-y-2 content-start">
+                  <label class="text-sm font-medium leading-none">
+                    Kategori
+                    <span class="text-xs font-normal text-muted-foreground"
+                      >(filter)</span
+                    >
+                  </label>
+                  <Select
+                    :model-value="kategori"
+                    @update:model-value="
+                      (v) => {
+                        kategori = String(v ?? '')
+                        setFieldValue('positionId', '')
+                      }
+                    "
+                  >
+                    <SelectTrigger class="w-full">
+                      <SelectValue placeholder="Semua kategori" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem
+                        v-for="cat in categoryOptions"
+                        :key="cat.id"
+                        :value="cat.id"
+                      >
+                        {{ positionCategoryLabel(cat.code, cat.name) }}
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
                 <FormField
                   v-slot="{ value, handleChange }"
                   name="positionId"
                 >
-                  <FormItem class="content-start md:col-span-2">
+                  <FormItem class="content-start">
                     <FormLabel>
                       Jabatan Utama
                       <span class="text-xs font-normal text-muted-foreground"
@@ -562,12 +611,11 @@ function emitSave(values: Record<string, unknown>) {
                       </FormControl>
                       <SelectContent>
                         <SelectItem
-                          v-for="pos in positions ?? []"
+                          v-for="pos in filteredPositions"
                           :key="pos.id"
                           :value="pos.id"
                         >
-                          {{ pos.name }} —
-                          {{ positionCategoryLabel(pos.category?.code) }}
+                          {{ pos.name }}
                         </SelectItem>
                       </SelectContent>
                     </Select>

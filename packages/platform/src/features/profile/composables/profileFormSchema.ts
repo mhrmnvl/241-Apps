@@ -20,6 +20,7 @@ export const profileFormSchema = toTypedSchema(
       .string()
       .max(255, 'Email tidak boleh lebih dari 255 karakter.')
       .email('Format email tidak valid')
+      .optional()
       .or(z.literal('')),
     phone: z
       .string()
