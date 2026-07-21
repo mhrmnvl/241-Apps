@@ -26,7 +26,7 @@ model StudentEnrollment {
   attendances   Attendance[]
   reportCard    ReportCard?
 
-  @@unique([studentId, semesterId])
+  @@unique([studentId, semesterId], where: { deletedAt: null })
   @@index([classroomId])
   @@index([semesterId])
   @@index([status])

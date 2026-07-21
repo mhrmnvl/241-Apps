@@ -9,12 +9,13 @@ enum Day {
 
 model TimeSlotType {
   id        String    @id @default(uuid()) @db.Uuid
-  code      String    @unique @db.VarChar(30)
+  code      String    @db.VarChar(30)
   name      String    @db.VarChar(100)
   deletedAt DateTime? @map("deleted_at")
 
   timeSlots TimeSlot[]
 
+  @@unique([code], where: { deletedAt: null })
   @@map("time_slot_types")
 }
 
@@ -49,7 +50,7 @@ model TeachingAssignment {
   schedules       Schedule[]
   assessmentItems AssessmentItem[]
 
-  @@unique([teacherId, classroomId, subjectId, semesterId])
+  @@unique([teacherId, classroomId, subjectId, semesterId], where: { deletedAt: null })
   @@index([teacherId])
   @@index([classroomId])
   @@index([subjectId])
@@ -70,7 +71,7 @@ model Schedule {
 
   attendances Attendance[]
 
-  @@unique([teachingAssignmentId, day, timeSlotId])
+  @@unique([teachingAssignmentId, day, timeSlotId], where: { deletedAt: null })
   @@index([teachingAssignmentId])
   @@index([timeSlotId])
   @@map("schedules")

@@ -15,7 +15,7 @@ enum ParentRelation {
 model Parent {
   id           String    @id @default(uuid()) @db.Uuid
   name         String    @db.VarChar(100)
-  nik          String    @unique @db.VarChar(16)
+  nik          String    @db.VarChar(16)
   birthPlace   String    @map("birth_place") @db.VarChar(100)
   birthDate    DateTime  @map("birth_date") @db.Date
   email        String?   @db.VarChar(255)
@@ -31,6 +31,7 @@ model Parent {
   occupation Occupation @relation(fields: [occupationId], references: [id])
   education  Education? @relation(fields: [educationId], references: [id])
 
+  @@unique([nik], where: { deletedAt: null })
   @@map("parents")
 }
 
@@ -45,6 +46,6 @@ model StudentParent {
   student Student @relation(fields: [studentId], references: [id])
   parent  Parent  @relation(fields: [parentId], references: [id])
 
-  @@unique([studentId, parentId])
+  @@unique([studentId, parentId], where: { deletedAt: null })
   @@map("student_parents")
 }
