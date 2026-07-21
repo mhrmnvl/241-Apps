@@ -10,5 +10,6 @@
       "@/features/platform/*": ["../platform/src/features/*"]
     }
   },
-  "include": ["src/**/*.ts", "src/**/*.vue"]
+  "include": ["src/**/*.ts", "src/**/*.vue"],
+  "references": [{ "path": "../platform" }]
 }

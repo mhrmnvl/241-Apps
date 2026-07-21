@@ -1,9 +1,5 @@
 const quote = (f) => `"${f}"`
 
-// Files under the backend workspace are linted by the backend's own ESLint
-// config, not the root (frontend) one. Exclude them from the root eslint task
-// (they still get prettier). The regex is case-insensitive so it is robust to
-// Windows path-casing differences between git and the ESLint cwd.
 const isBackend = (f) => /[\\/]backend[\\/]/i.test(f)
 
 module.exports = {
