@@ -11,7 +11,7 @@ import { DatePicker } from '@/ui'
 import { Button } from '@/ui/button'
 import { Card, CardHeader, CardTitle } from '@/ui/card'
 import { Input } from '@/ui/input'
-import { ScrollArea } from '@/ui/scroll-area'
+
 import {
   Select,
   SelectContent,
@@ -162,15 +162,23 @@ const PROFIL_FIELDS: FieldName[] = [
 ]
 const KEPEG_FIELDS: FieldName[] = ['employmentTypeId']
 
+// Mundur bebas; maju (lewat tombol Lanjut MAUPUN klik stepper) selalu lewat gerbang validasi
 async function goToStep(target: number) {
   if (target <= activeStep.value) {
     activeStep.value = target
     return
   }
-  if (activeStep.value === 1 && !(await validateFields(PROFIL_FIELDS))) return
-  if (activeStep.value === 2 && !(await validateFields(KEPEG_FIELDS))) return
+  if (!(await validateFields(PROFIL_FIELDS))) {
+    activeStep.value = 1
+    return
+  }
+  if (target >= 3 && !(await validateFields(KEPEG_FIELDS))) {
+    activeStep.value = 2
+    return
+  }
   activeStep.value = target
 }
+
 function next() {
   void goToStep(activeStep.value + 1)
 }
@@ -226,13 +234,13 @@ async function submit() {
         birthPlace: values.birthPlace ?? '',
         birthDate: values.birthDate ?? '',
         employmentTypeId: values.employmentTypeId ?? '',
-        positionId: values.positionId || undefined,
-        identifier: values.nip || values.nik || '',
-        password: values.nip || values.nik || '',
-        email: values.email || undefined,
-        phone: values.phone || undefined,
-        nip: values.nip || undefined,
-        nuptk: values.nuptk || undefined,
+        positionId: values.positionId ?? undefined,
+        identifier: values.nip ?? values.nik ?? '',
+        password: values.nip ?? values.nik ?? '',
+        email: values.email ?? undefined,
+        phone: values.phone ?? undefined,
+        nip: values.nip ?? undefined,
+        nuptk: values.nuptk ?? undefined,
       },
       address: hasAddress.value ? { ...address } : null,
       positions: extraPositions.value,
@@ -284,8 +292,9 @@ onMounted(async () => {
 
         <div class="px-6 py-4 border-b">
           <Stepper
-            v-model="activeStep"
+            :model-value="activeStep"
             class="flex items-center justify-center gap-2 md:gap-6 w-full max-w-3xl mx-auto"
+            @update:model-value="(v) => void goToStep(Number(v))"
           >
             <StepperItem
               v-for="step in steps"
@@ -295,7 +304,6 @@ onMounted(async () => {
             >
               <StepperTrigger
                 class="flex items-center gap-2 cursor-pointer outline-none"
-                @click="goToStep(step.value)"
               >
                 <StepperIndicator class="shrink-0">
                   <Check
@@ -318,12 +326,12 @@ onMounted(async () => {
           </Stepper>
         </div>
 
-        <ScrollArea class="max-h-[60vh]">
+        <div class="max-h-[60vh] overflow-y-auto">
           <div class="px-6 py-5">
             <!-- Step 1: Profil -->
             <div
               v-show="activeStep === 1"
-              class="grid gap-5 md:grid-cols-2"
+              class="grid gap-5 md:grid-cols-2 items-start"
             >
               <FormField
                 v-slot="{ componentField }"
@@ -464,7 +472,7 @@ onMounted(async () => {
             <!-- Step 2: Kepegawaian -->
             <div
               v-show="activeStep === 2"
-              class="grid gap-5 md:grid-cols-2"
+              class="grid gap-5 md:grid-cols-2 items-start"
             >
               <FormField
                 v-slot="{ componentField }"
@@ -591,11 +599,7 @@ onMounted(async () => {
 
             <!-- Step 3: Alamat (optional) -->
             <div v-if="activeStep === 3">
-              <p class="text-sm text-muted-foreground mb-4">
-                Opsional — kosongkan bila belum ada. Isi jalan untuk
-                mengaktifkan.
-              </p>
-              <div class="grid gap-5 md:grid-cols-2">
+              <div class="grid gap-5 md:grid-cols-2 items-start">
                 <div class="md:col-span-2 space-y-2">
                   <label class="text-sm font-medium">Jalan / Alamat</label>
                   <Input
@@ -665,72 +669,79 @@ onMounted(async () => {
             </div>
 
             <!-- Step 4: Jabatan tambahan (optional) -->
-            <div v-if="activeStep === 4">
-              <div class="flex items-center justify-between mb-4">
-                <p class="text-sm text-muted-foreground">
-                  Opsional — riwayat jabatan tambahan beserta tanggal mulai.
-                </p>
+            <div
+              v-if="activeStep === 4"
+              class="flex flex-col"
+            >
+              <div class="flex items-center justify-end -mt-3 mb-2">
                 <Button
                   size="sm"
                   variant="outline"
+                  class="h-8 shadow-xs gap-1.5"
                   @click="addPosition"
                 >
-                  <Plus class="size-4 mr-1.5" />
+                  <Plus class="size-3.5" />
                   Tambah Jabatan
                 </Button>
               </div>
 
-              <p
-                v-if="extraPositions.length === 0"
-                class="text-sm text-muted-foreground italic py-6 text-center border-2 border-dashed rounded-lg"
-              >
-                Belum ada jabatan tambahan. Lewati bila belum diperlukan.
-              </p>
+              <div class="max-h-[48vh] overflow-y-auto space-y-4 pr-1">
+                <p
+                  v-if="extraPositions.length === 0"
+                  class="text-sm text-muted-foreground italic py-6 text-center border border-dashed rounded-xl bg-muted/5"
+                >
+                  Belum ada jabatan tambahan.
+                </p>
 
-              <div
-                v-for="(pos, index) in extraPositions"
-                :key="index"
-                class="rounded-xl border p-4 mb-4 bg-muted/10"
-              >
-                <div class="flex items-center justify-between mb-3">
-                  <span class="text-sm font-semibold"
-                    >Jabatan #{{ index + 1 }}</span
+                <template v-else>
+                  <Card
+                    v-for="(pos, index) in extraPositions"
+                    :key="index"
+                    class="overflow-hidden rounded-xl border bg-card shadow-xs transition-all hover:border-primary/20"
                   >
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    class="text-destructive hover:text-destructive"
-                    @click="removePosition(index)"
-                  >
-                    <Trash2 class="size-4" />
-                  </Button>
-                </div>
-                <div class="grid gap-4 md:grid-cols-2">
-                  <div class="space-y-2">
-                    <label class="text-sm font-medium">Jabatan</label>
-                    <Select v-model="pos.positionId">
-                      <SelectTrigger class="w-full">
-                        <SelectValue placeholder="Pilih jabatan" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem
-                          v-for="p in positions"
-                          :key="p.id"
-                          :value="p.id"
-                        >
-                          {{ p.name }}
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div class="space-y-2">
-                    <label class="text-sm font-medium">Tanggal Mulai</label>
-                    <Input
-                      v-model="pos.hireDate"
-                      type="date"
-                    />
-                  </div>
-                </div>
+                    <CardHeader
+                      class="flex flex-row items-center justify-between border-b px-5 py-3 bg-muted/20"
+                    >
+                      <CardTitle class="text-xs font-semibold">
+                        Jabatan {{ index + 1 }}
+                      </CardTitle>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        class="text-muted-foreground hover:text-destructive hover:bg-destructive/10 h-7 w-7 rounded-lg transition-colors"
+                        @click="removePosition(index)"
+                      >
+                        <Trash2 class="size-4" />
+                      </Button>
+                    </CardHeader>
+                    <div class="p-5 grid gap-4 md:grid-cols-2 items-start">
+                      <div class="space-y-2">
+                        <label class="text-sm font-medium">Jabatan</label>
+                        <Select v-model="pos.positionId">
+                          <SelectTrigger class="w-full">
+                            <SelectValue placeholder="Pilih jabatan" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem
+                              v-for="p in positions"
+                              :key="p.id"
+                              :value="p.id"
+                            >
+                              {{ p.name }}
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div class="space-y-2">
+                        <label class="text-sm font-medium">Tanggal Mulai</label>
+                        <Input
+                          v-model="pos.hireDate"
+                          type="date"
+                        />
+                      </div>
+                    </div>
+                  </Card>
+                </template>
               </div>
             </div>
 
@@ -766,7 +777,7 @@ onMounted(async () => {
               </div>
             </div>
           </div>
-        </ScrollArea>
+        </div>
 
         <div
           class="flex items-center justify-between border-t px-6 py-4 bg-background"

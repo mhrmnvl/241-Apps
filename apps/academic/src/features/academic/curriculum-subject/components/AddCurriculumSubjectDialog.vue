@@ -61,8 +61,7 @@ const filteredSubjects = computed(() => {
   const q = searchQuery.value.toLowerCase()
   return availableSubjects.value.filter(
     (s) =>
-      s.name.toLowerCase().includes(q) ||
-      (s.code && s.code.toLowerCase().includes(q)),
+      s.name.toLowerCase().includes(q) || s.code?.toLowerCase().includes(q),
   )
 })
 

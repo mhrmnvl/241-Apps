@@ -103,9 +103,7 @@ async function loadCurriculumData() {
     academicYears.value = ayRes.data?.data ?? []
     curricula.value = curRes.data?.data ?? []
     // Filter assignments hanya untuk grade ini
-    assignments.value = (assRes as GradeAcademicYear[]).filter(
-      (a) => a.gradeId === editData.value!.id,
-    )
+    assignments.value = assRes.filter((a) => a.gradeId === editData.value!.id)
   } finally {
     loadingCurriculum.value = false
   }

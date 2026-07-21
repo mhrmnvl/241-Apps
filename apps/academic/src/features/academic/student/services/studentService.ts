@@ -123,8 +123,8 @@ export const studentService = {
             nik: parent.nik,
             birthPlace: parent.birthPlace,
             birthDate: parent.birthDate,
-            email: parent.email || undefined,
-            phone: parent.phone || undefined,
+            email: parent.email ?? undefined,
+            phone: parent.phone ?? undefined,
             occupationId: parent.occupationId,
             income: parent.income,
           })
