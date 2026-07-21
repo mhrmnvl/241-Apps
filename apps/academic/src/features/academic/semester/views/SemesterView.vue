@@ -135,21 +135,16 @@ onMounted(() => {
           </CardTitle>
           <div
             v-if="isAdmin"
-            class="flex items-center gap-2"
+            class="flex w-full items-center justify-end gap-2 sm:w-auto"
           >
             <Button
               variant="outline"
-              class="flex-1 sm:flex-none"
               @click="isRolloverModalOpen = true"
             >
               <Copy class="size-4 mr-2" />
-              <span class="hidden sm:inline">Salin Data</span>
-              <span class="sm:hidden">Salin</span>
+              Salin Data
             </Button>
-            <Button
-              class="flex-1 sm:flex-none"
-              @click="isAddModalOpen = true"
-            >
+            <Button @click="isAddModalOpen = true">
               <Plus class="size-4 mr-2" />
               Tambah
             </Button>

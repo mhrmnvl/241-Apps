@@ -43,6 +43,10 @@ const activeItems = computed(() => {
 function isItemActive(item: MenuItem): boolean {
   return activeItems.value.has(item.title)
 }
+
+function isSubActive(sub: SubMenuItem): boolean {
+  return route.path.startsWith(sub.url) && sub.url !== '#'
+}
 </script>
 
 <template>
@@ -64,7 +68,10 @@ function isItemActive(item: MenuItem): boolean {
             v-if="item.items?.length"
             as-child
           >
-            <SidebarMenuButton :tooltip="item.title">
+            <SidebarMenuButton
+              :tooltip="item.title"
+              :is-active="isItemActive(item)"
+            >
               <component :is="item.icon" />
               <span>{{ item.title }}</span>
               <ChevronRight
@@ -76,6 +83,7 @@ function isItemActive(item: MenuItem): boolean {
             v-else
             as-child
             :tooltip="item.title"
+            :is-active="route.path === item.url"
           >
             <RouterLink :to="item.url">
               <component :is="item.icon" />
@@ -89,7 +97,10 @@ function isItemActive(item: MenuItem): boolean {
                 v-for="subItem in item.items"
                 :key="subItem.title"
               >
-                <SidebarMenuSubButton as-child>
+                <SidebarMenuSubButton
+                  as-child
+                  :is-active="isSubActive(subItem)"
+                >
                   <RouterLink :to="subItem.url">
                     <span>{{ subItem.title }}</span>
                   </RouterLink>
