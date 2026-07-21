@@ -20,6 +20,9 @@ export const authSessionService = {
           if (!parsed.roles && parsed.role) {
             parsed.roles = [parsed.role]
           }
+          if (!parsed.permissions) {
+            parsed.permissions = []
+          }
           if (!parsed.identifier && parsed.username) {
             parsed.identifier = parsed.username
           }

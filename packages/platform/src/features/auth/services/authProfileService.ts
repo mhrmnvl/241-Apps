@@ -32,10 +32,21 @@ export const authProfileService = {
       const profile = extractProfile(profileRes.data)
       const roles: string[] =
         data?.userRoles?.map((ur) => ur.role.code) ?? user.roles ?? []
+      const permissions: string[] = [
+        ...new Set(
+          data?.userRoles?.flatMap(
+            (ur) =>
+              ur.role.rolePermissions?.map((rp) => rp.permission.code) ?? [],
+          ) ??
+            user.permissions ??
+            [],
+        ),
+      ]
 
       return {
         ...user,
         roles,
+        permissions,
         name: data?.profile?.name ?? profile?.name ?? user.name ?? null,
         profile: {
           ...(user.profile ?? {}),

@@ -3,46 +3,46 @@ import { useAuthSession } from '@/features/platform/auth'
 import { menuSections } from '@/config/menuConfig'
 import type { MenuSection, MenuItem, SubMenuItem } from '@/config/menuConfig'
 
-/**
- * Memfilter menu sidebar berdasarkan role user yang sedang login.
- * - SUPER_ADMIN: semua menu tampil
- * - Staff (role custom / ADMIN / TEACHER): semua menu staff tampil
- * - STUDENT: hanya section dengan allowedRoles yang include STUDENT
- * - Tidak punya role: hanya menu tanpa allowedRoles (Dashboard)
- */
 export function useMenuVisibility() {
-  const { roles, hasRole, isStaff } = useAuthSession()
+  const { roles, permissions } = useAuthSession()
 
-  const effectiveHasRole = (r: string): boolean => {
-    if (roles.value.includes(r)) return true
-    if (
-      isStaff.value &&
-      (r === 'ADMIN' || r === 'TEACHER') &&
-      !hasRole('STUDENT')
-    )
-      return true
-    return false
+  const isSuperAdmin = computed(() => roles.value.includes('SUPER_ADMIN'))
+
+  function canShowByPermission(required?: string): boolean {
+    if (!required) return true
+    if (isSuperAdmin.value) return true
+    return permissions.value.includes(required)
+  }
+
+  function canShowByRole(allowed?: string[]): boolean {
+    if (!allowed || allowed.length === 0) return true
+    if (isSuperAdmin.value) return true
+    return allowed.some((r) => roles.value.includes(r))
   }
 
   const filteredSections = computed((): MenuSection[] => {
-    if (hasRole('SUPER_ADMIN')) return menuSections
-
     return menuSections
       .filter((section: MenuSection) => {
-        if (!section.allowedRoles?.length) return true
-        return section.allowedRoles.some(effectiveHasRole)
+        if (section.requiredPermission)
+          return canShowByPermission(section.requiredPermission)
+        if (section.allowedRoles) return canShowByRole(section.allowedRoles)
+        return true
       })
       .map((section: MenuSection): MenuSection | null => {
         const filteredItems = section.items
           .filter((item: MenuItem) => {
-            if (!item.allowedRoles?.length) return true
-            return item.allowedRoles.some(effectiveHasRole)
+            if (item.requiredPermission)
+              return canShowByPermission(item.requiredPermission)
+            if (item.allowedRoles) return canShowByRole(item.allowedRoles)
+            return true
           })
           .map((item: MenuItem): MenuItem | null => {
             if (!item.items) return item
             const filteredSubs = item.items.filter((sub: SubMenuItem) => {
-              if (!sub.allowedRoles?.length) return true
-              return sub.allowedRoles.some(effectiveHasRole)
+              if (sub.requiredPermission)
+                return canShowByPermission(sub.requiredPermission)
+              if (sub.allowedRoles) return canShowByRole(sub.allowedRoles)
+              return true
             })
             if (filteredSubs.length === 0 && item.items.length > 0) return null
             return { ...item, items: filteredSubs }

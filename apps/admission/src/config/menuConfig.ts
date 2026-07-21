@@ -7,12 +7,12 @@ import {
   Waves,
   Settings,
 } from 'lucide-vue-next'
-import type { UserRole } from '@/shared/types/router'
 
 export interface SubMenuItem {
   title: string
   url: string
-  allowedRoles?: UserRole[]
+  requiredPermission?: string
+  allowedRoles?: string[]
 }
 
 export interface MenuItem {
@@ -20,13 +20,15 @@ export interface MenuItem {
   url: string
   icon: LucideIcon
   isActive?: boolean
-  allowedRoles?: UserRole[]
+  requiredPermission?: string
+  allowedRoles?: string[]
   items?: SubMenuItem[]
 }
 
 export interface MenuSection {
   label: string
-  allowedRoles?: UserRole[]
+  requiredPermission?: string
+  allowedRoles?: string[]
   items: MenuItem[]
 }
 
@@ -52,7 +54,7 @@ export const menuSections: MenuSection[] = [
   // ──────────────────── ADMIN PSB ────────────────────
   {
     label: 'Admin PSB',
-    allowedRoles: ['ADMIN'],
+    requiredPermission: 'admissions.read',
     items: [
       {
         title: 'Dashboard',
@@ -68,17 +70,19 @@ export const menuSections: MenuSection[] = [
         title: 'Gelombang',
         url: '/admin/gelombang',
         icon: Waves,
+        requiredPermission: 'admission-waves.read',
       },
       {
         title: 'Pengumuman',
         url: '/admin/pengumuman',
         icon: Megaphone,
+        requiredPermission: 'admission-announcements.read',
       },
     ],
   },
   {
     label: 'Pengaturan',
-    allowedRoles: ['ADMIN'],
+    requiredPermission: 'profiles.read',
     items: [
       {
         title: 'Sistem',

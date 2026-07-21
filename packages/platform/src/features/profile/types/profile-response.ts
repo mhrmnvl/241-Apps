@@ -5,7 +5,13 @@ export interface ProfileApiResponse {
   identifier?: string
   organizationId?: string
   schoolUnitId?: string | null
-  userRoles?: { role: { code: string; name: string } }[]
+  userRoles?: {
+    role: {
+      code: string
+      name: string
+      rolePermissions?: { permission: { code: string } }[]
+    }
+  }[]
   profile: ProfileRecord | null
   teacher: TeacherRecord | null
   student: StudentRecord | null

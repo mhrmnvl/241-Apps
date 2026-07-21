@@ -10,6 +10,7 @@ export interface AuthUser {
   identifier: string
   isActive: boolean
   roles: string[]
+  permissions: string[]
   organizationId?: string | null
   schoolUnitId?: string | null
   name?: string | null

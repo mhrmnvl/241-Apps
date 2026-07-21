@@ -21,7 +21,13 @@ export const USER_DETAIL_SELECT = {
   identifier: true,
   userRoles: {
     include: {
-      role: true,
+      role: {
+        include: {
+          rolePermissions: {
+            include: { permission: true },
+          },
+        },
+      },
     },
   },
   profile: { include: PROFILE_INCLUDE },

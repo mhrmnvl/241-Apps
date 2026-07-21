@@ -7,12 +7,12 @@ import {
   ClipboardList,
   CheckSquare,
 } from 'lucide-vue-next'
-import type { UserRole } from '@/shared/types/router'
 
 export interface SubMenuItem {
   title: string
   url: string
-  allowedRoles?: UserRole[]
+  requiredPermission?: string
+  allowedRoles?: string[]
 }
 
 export interface MenuItem {
@@ -20,18 +20,20 @@ export interface MenuItem {
   url: string
   icon: LucideIcon
   isActive?: boolean
-  allowedRoles?: UserRole[]
+  requiredPermission?: string
+  allowedRoles?: string[]
   items?: SubMenuItem[]
 }
 
 export interface MenuSection {
   label: string
-  allowedRoles?: UserRole[]
+  requiredPermission?: string
+  allowedRoles?: string[]
   items: MenuItem[]
 }
 
 export const menuSections: MenuSection[] = [
-  // ──────────────────── PLATFORM ────────────────────
+  // ──────────────────── UTAMA ────────────────────
   {
     label: 'Utama',
     items: [
@@ -46,7 +48,7 @@ export const menuSections: MenuSection[] = [
   // ──────────────────── INVENTORY ────────────────────
   {
     label: 'Manajemen Aset',
-    allowedRoles: ['ADMIN', 'TEACHER', 'PRINCIPAL'],
+    requiredPermission: 'inventory.read',
     items: [
       {
         title: 'Daftar Aset',
@@ -57,7 +59,7 @@ export const menuSections: MenuSection[] = [
   },
   {
     label: 'Sirkulasi Aset',
-    allowedRoles: ['ADMIN', 'TEACHER', 'PRINCIPAL'],
+    requiredPermission: 'inventory.read',
     items: [
       {
         title: 'Peminjaman',
@@ -72,7 +74,7 @@ export const menuSections: MenuSection[] = [
   },
   {
     label: 'Persetujuan',
-    allowedRoles: ['ADMIN', 'PRINCIPAL'],
+    requiredPermission: 'inventory.update',
     items: [
       {
         title: 'Persetujuan',
@@ -83,10 +85,10 @@ export const menuSections: MenuSection[] = [
     ],
   },
 
-  // ──────────────────── PLATFORM SETTINGS ────────────────────
+  // ──────────────────── SETTINGS ────────────────────
   {
     label: 'Pengaturan',
-    allowedRoles: ['ADMIN', 'TEACHER'],
+    requiredPermission: 'inventory.read',
     items: [
       {
         title: 'Referensi',
@@ -104,26 +106,27 @@ export const menuSections: MenuSection[] = [
         title: 'Sistem',
         url: '#',
         icon: Settings,
+        requiredPermission: 'users.read',
         items: [
           {
             title: 'Kelola Pengguna',
             url: '/pengaturan/kelola-pengguna',
-            allowedRoles: ['ADMIN'],
+            requiredPermission: 'users.read',
           },
           {
             title: 'Manajemen Role',
             url: '/pengaturan/roles',
-            allowedRoles: ['ADMIN'],
+            requiredPermission: 'roles.read',
           },
           {
             title: 'Manajemen Permission',
             url: '/pengaturan/permissions',
-            allowedRoles: ['ADMIN'],
+            requiredPermission: 'permissions.manage',
           },
           {
             title: 'Log Aktivitas',
             url: '/pengaturan/audit-logs',
-            allowedRoles: ['ADMIN'],
+            requiredPermission: 'audit-logs.read',
           },
         ],
       },

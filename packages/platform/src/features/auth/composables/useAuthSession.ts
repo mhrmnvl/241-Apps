@@ -11,11 +11,18 @@ export function useAuthSession() {
   const isAuthenticated = computed(() => !!user.value)
 
   const roles = computed(() => user.value?.roles ?? [])
+  const permissions = computed(() => user.value?.permissions ?? [])
 
   const hasRole = (role: string) => roles.value.includes(role)
 
   const hasAnyRole = (...targetRoles: string[]) =>
     targetRoles.some((r) => roles.value.includes(r))
+
+  const hasPermission = (permission: string) =>
+    permissions.value.includes(permission)
+
+  const hasAnyPermission = (...perms: string[]) =>
+    perms.some((p) => permissions.value.includes(p))
 
   const isStaff = computed(
     () => roles.value.length > 0 && !roles.value.every((r) => r === 'STUDENT'),
@@ -24,10 +31,13 @@ export function useAuthSession() {
   return {
     user,
     roles,
+    permissions,
     isAuthenticated,
     isStaff,
     hasRole,
     hasAnyRole,
+    hasPermission,
+    hasAnyPermission,
     logoutUser: authService.logoutUser,
     syncAuthenticatedUserProfile: authService.syncAuthenticatedUserProfile,
     changePassword: accountService.changePassword,

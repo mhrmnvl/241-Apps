@@ -14,7 +14,6 @@ import {
 } from '@/ui/sidebar'
 import { menuSections } from '@/config/menuConfig'
 import type { MenuSection, MenuItem, SubMenuItem } from '@/config/menuConfig'
-import type { UserRole } from '@/shared/types/router'
 import { computed, onMounted } from 'vue'
 
 const props = withDefaults(defineProps<SidebarProps>(), {
@@ -25,30 +24,44 @@ const props = withDefaults(defineProps<SidebarProps>(), {
 const { user, syncAuthenticatedUserProfile } = useAuthSession()
 
 const userRoles = computed(() => user.value?.roles ?? [])
+const userPermissions = computed(() => user.value?.permissions ?? [])
 const isSuperAdmin = computed(() => userRoles.value.includes('SUPER_ADMIN'))
 
-const filteredSections = computed<MenuSection[]>(() => {
-  if (isSuperAdmin.value) return menuSections
+function canShowByPermission(required?: string): boolean {
+  if (!required) return true
+  if (isSuperAdmin.value) return true
+  return userPermissions.value.includes(required)
+}
 
-  const roles = userRoles.value
-  const hasRole = (r: UserRole) => roles.includes(r)
+function canShowByRole(allowed?: string[]): boolean {
+  if (!allowed || allowed.length === 0) return true
+  if (isSuperAdmin.value) return true
+  return allowed.some((r) => userRoles.value.includes(r))
+}
+
+const filteredSections = computed<MenuSection[]>(() => {
   return menuSections
     .filter((section: MenuSection) => {
-      if (!section.allowedRoles || section.allowedRoles.length === 0)
-        return true
-      return section.allowedRoles.some(hasRole)
+      if (section.requiredPermission)
+        return canShowByPermission(section.requiredPermission)
+      if (section.allowedRoles) return canShowByRole(section.allowedRoles)
+      return true
     })
     .map((section: MenuSection) => {
       const filteredItems = section.items
         .filter((item: MenuItem) => {
-          if (!item.allowedRoles || item.allowedRoles.length === 0) return true
-          return item.allowedRoles.some(hasRole)
+          if (item.requiredPermission)
+            return canShowByPermission(item.requiredPermission)
+          if (item.allowedRoles) return canShowByRole(item.allowedRoles)
+          return true
         })
         .map((item: MenuItem) => {
           if (!item.items) return item
           const filteredSubs = item.items.filter((sub: SubMenuItem) => {
-            if (!sub.allowedRoles || sub.allowedRoles.length === 0) return true
-            return sub.allowedRoles.some(hasRole)
+            if (sub.requiredPermission)
+              return canShowByPermission(sub.requiredPermission)
+            if (sub.allowedRoles) return canShowByRole(sub.allowedRoles)
+            return true
           })
           if (filteredSubs.length === 0 && item.items.length > 0) return null
           return { ...item, items: filteredSubs }
