@@ -7,7 +7,7 @@ export const studentRoutes: RouteRecordRaw[] = [
     component: () => import('./views/StudentListView.vue'),
     meta: {
       requiresAuth: true,
-      allowedRoles: ['ADMIN', 'TEACHER'],
+      requiredPermission: 'students.read',
       title: 'Daftar Siswa',
     },
   },
@@ -18,7 +18,7 @@ export const studentRoutes: RouteRecordRaw[] = [
     component: () => import('./views/StudentCreateView.vue'),
     meta: {
       requiresAuth: true,
-      allowedRoles: ['ADMIN'],
+      requiredPermission: 'students.read',
       title: 'Tambah Siswa',
     },
   },
@@ -29,7 +29,7 @@ export const studentRoutes: RouteRecordRaw[] = [
     component: () => import('./views/StudentAccountsView.vue'),
     meta: {
       requiresAuth: true,
-      allowedRoles: ['ADMIN', 'TEACHER'],
+      requiredPermission: 'students.read',
       title: 'Akun Siswa',
     },
   },

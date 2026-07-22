@@ -25,13 +25,26 @@ export function useRoleGuard() {
     return userRoles.value.some((r: string) => roles.includes(r))
   }
 
+  /**
+   * Permission-based gate for buttons/actions. SUPER_ADMIN always passes.
+   * Prefer this over role checks so custom roles work by the permissions they
+   * hold (e.g. `hasPermission('students.create')`).
+   */
+  function hasPermission(...permissions: string[]): boolean {
+    if (isSuperAdmin.value) return true
+    return permissions.some((p) => userPermissions.value.includes(p))
+  }
+
   return {
     userRoles,
+    userPermissions,
+    isSuperAdmin,
     isAdmin,
     isTeacher,
     isStudent,
     canManage,
     canContribute,
     hasRole,
+    hasPermission,
   }
 }

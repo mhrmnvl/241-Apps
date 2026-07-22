@@ -17,7 +17,11 @@ import StatusFormDialog from '../components/StatusFormDialog.vue'
 import type { ColumnDef } from '@tanstack/vue-table'
 import type { InventoryReferenceItem, InventoryStatusKey } from '../types'
 
-const { isAdmin } = useRoleGuard()
+const { hasPermission } = useRoleGuard()
+// Resource-scoped management gate (replaces coarse admin/role check).
+const isAdmin = computed(() =>
+  hasPermission('inventory.create', 'inventory.update', 'inventory.delete'),
+)
 
 const SYSTEM_KEY_LABELS: Record<InventoryStatusKey, string> = {
   AVAILABLE: 'Tersedia',

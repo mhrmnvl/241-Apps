@@ -5,7 +5,7 @@ import { Button } from '@/ui/button'
 import { Card, CardHeader, CardTitle } from '@/ui/card'
 import { Input } from '@/ui/input'
 import { Plus, Search } from 'lucide-vue-next'
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, computed } from 'vue'
 import PositionFormDialog from '../components/PositionFormDialog.vue'
 import { usePosition } from '../composables/usePosition'
 import { useRoleGuard } from '@/shared/composables/useRoleGuard'
@@ -25,7 +25,11 @@ const isAddOpen = ref(false)
 const isEditDialogOpen = ref(false)
 const selectedItem = ref<Position | null>(null)
 
-const { isAdmin } = useRoleGuard()
+const { hasPermission } = useRoleGuard()
+// Resource-scoped management gate (replaces coarse admin/role check).
+const isAdmin = computed(() =>
+  hasPermission('positions.create', 'positions.update', 'positions.delete'),
+)
 
 const columns = createColumns({
   showActions: isAdmin.value,

@@ -7,7 +7,7 @@ export const fileRoutes: RouteRecordRaw[] = [
     component: () => import('./views/FilesView.vue'),
     meta: {
       requiresAuth: true,
-      allowedRoles: ['ADMIN', 'TEACHER'],
+      requiredPermission: 'files.read',
       title: 'Arsip Berkas',
     },
   },

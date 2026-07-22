@@ -8,7 +8,7 @@ export const employmentTypeRoutes: RouteRecordRaw[] = [
     meta: {
       title: 'Status Kepegawaian',
       requiresAuth: true,
-      allowedRoles: ['ADMIN'],
+      requiredPermission: 'teachers.read',
     },
   },
 ]

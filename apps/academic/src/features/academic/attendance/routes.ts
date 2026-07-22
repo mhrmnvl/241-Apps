@@ -7,7 +7,7 @@ export const attendanceRoutes: RouteRecordRaw[] = [
     component: () => import('./views/AttendanceView.vue'),
     meta: {
       requiresAuth: true,
-      allowedRoles: ['ADMIN', 'TEACHER', 'STUDENT'],
+      requiredPermission: 'attendances.read',
       title: 'Kehadiran Siswa',
     },
   },

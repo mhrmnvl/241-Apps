@@ -3,7 +3,6 @@ import {
   Body,
   Controller,
   Delete,
-  ForbiddenException,
   Get,
   HttpCode,
   HttpStatus,
@@ -23,8 +22,6 @@ import {
 } from '@nestjs/swagger';
 
 import { JwtAuthGuard } from '../../auth/index.js';
-import { CurrentUser } from '../../../core/decorators/current-user.decorator.js';
-import type { AuthenticatedUser } from '../../../core/types/authenticated-user.type.js';
 
 import { CreateUserDto } from '../dto/request/create-user.dto.js';
 import { UpdateUserDto } from '../dto/request/update-user.dto.js';
@@ -87,11 +84,7 @@ export class UserController {
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'User not found' })
-  async findOne(
-    @Param('id', ParseUUIDPipe) id: string,
-    @CurrentUser() user: AuthenticatedUser,
-  ) {
-    this.ensureSelf(user, id);
+  async findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.getUserByIdUseCase.execute(id);
   }
 
@@ -110,9 +103,7 @@ export class UserController {
   async update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateUserDto,
-    @CurrentUser() user: AuthenticatedUser,
   ) {
-    this.ensureSelf(user, id);
     return this.updateUserUseCase.execute(id, dto);
   }
 
@@ -126,14 +117,5 @@ export class UserController {
   @ApiResponse({ status: 404, description: 'User not found' })
   async remove(@Param('id', ParseUUIDPipe) id: string) {
     await this.deleteUserUseCase.execute(id);
-  }
-
-  private ensureSelf(user: AuthenticatedUser, targetUserId: string) {
-    if (!user) {
-      throw new ForbiddenException('Forbidden');
-    }
-    if (user.id !== targetUserId) {
-      throw new ForbiddenException('Forbidden');
-    }
   }
 }

@@ -7,7 +7,7 @@ export const schoolUnitRoutes: RouteRecordRaw[] = [
     component: () => import('./views/SchoolUnitView.vue'),
     meta: {
       requiresAuth: true,
-      allowedRoles: ['ADMIN', 'TEACHER'],
+      requiredPermission: 'school-units.read',
       title: 'Kelembagaan',
     },
   },
@@ -17,7 +17,7 @@ export const schoolUnitRoutes: RouteRecordRaw[] = [
     component: () => import('./views/SchoolUnitEditView.vue'),
     meta: {
       requiresAuth: true,
-      allowedRoles: ['ADMIN'],
+      requiredPermission: 'school-units.read',
       title: 'Ubah Data Kelembagaan',
     },
   },

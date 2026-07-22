@@ -18,3 +18,10 @@ export interface AssignRolePayload {
   userId: string
   roleId: string
 }
+
+// Admin edit of another user's account credentials. Both optional: send only
+// what changed. Empty/omitted password leaves the current one untouched.
+export interface UpdateUserAccountPayload {
+  identifier?: string
+  password?: string
+}

@@ -7,7 +7,7 @@ export const raporRoutes: RouteRecordRaw[] = [
     component: () => import('./views/RaporView.vue'),
     meta: {
       requiresAuth: true,
-      allowedRoles: ['ADMIN', 'TEACHER', 'STUDENT'],
+      requiredPermission: 'report-cards.read',
       title: 'Rapor Siswa',
     },
   },

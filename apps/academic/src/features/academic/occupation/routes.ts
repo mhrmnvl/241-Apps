@@ -8,7 +8,7 @@ export const occupationRoutes: RouteRecordRaw[] = [
     meta: {
       title: 'Pekerjaan',
       requiresAuth: true,
-      allowedRoles: ['ADMIN', 'TEACHER'],
+      requiredPermission: 'occupations.read',
     },
   },
 ]

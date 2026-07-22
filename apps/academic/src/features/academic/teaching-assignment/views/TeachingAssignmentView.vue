@@ -40,7 +40,15 @@ const {
 
 const isAddModalOpen = ref(false)
 const editingItem = ref<TeachingAssignment | null>(null)
-const { isAdmin } = useRoleGuard()
+const { hasPermission } = useRoleGuard()
+// Resource-scoped management gate (replaces coarse admin/role check).
+const isAdmin = computed(() =>
+  hasPermission(
+    'teaching-assignments.create',
+    'teaching-assignments.update',
+    'teaching-assignments.delete',
+  ),
+)
 
 const semesterFilterOptions = computed<ComboboxOption[]>(() => [
   { value: '', label: 'Semua Semester' },

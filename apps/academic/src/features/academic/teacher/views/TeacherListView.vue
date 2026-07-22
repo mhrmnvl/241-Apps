@@ -78,7 +78,11 @@ const {
 
 const isModalOpen = ref(false)
 const editingItem = ref<Teacher | null>(null)
-const { isAdmin } = useRoleGuard()
+const { hasPermission } = useRoleGuard()
+// Resource-scoped management gate (replaces coarse admin/role check).
+const isAdmin = computed(() =>
+  hasPermission('teachers.create', 'teachers.update', 'teachers.delete'),
+)
 
 async function handleSaveTeacher(
   payload: TeacherSavePayload | TeacherUpdatePayload,

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, computed } from 'vue'
 import { Card, CardHeader, CardTitle } from '@/ui/card'
 import { DataTable } from '@/ui'
 import { Button } from '@/ui/button'
@@ -20,7 +20,15 @@ const {
   handleUpdateFilters,
   deleteBulk,
 } = useSocialMedia()
-const { isAdmin } = useRoleGuard()
+const { hasPermission } = useRoleGuard()
+// Resource-scoped management gate (replaces coarse admin/role check).
+const isAdmin = computed(() =>
+  hasPermission(
+    'social-media.create',
+    'social-media.update',
+    'social-media.delete',
+  ),
+)
 const columns = getColumns(isAdmin.value)
 const selectedIds = ref<string[]>([])
 

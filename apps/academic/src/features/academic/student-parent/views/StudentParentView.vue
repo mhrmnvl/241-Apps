@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue'
+import { onMounted, ref, watch, computed } from 'vue'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { DataTable } from '@/ui'
 import { Button } from '@/ui/button'
@@ -33,7 +33,11 @@ const {
 
 const isFormOpen = ref(false)
 const editingItem = ref<StudentParent | null>(null)
-const { isAdmin } = useRoleGuard()
+const { hasPermission } = useRoleGuard()
+// Resource-scoped management gate (replaces coarse admin/role check).
+const isAdmin = computed(() =>
+  hasPermission('students.create', 'students.update', 'students.delete'),
+)
 
 const columns = createStudentParentColumns({
   onEdit: (item: StudentParent) => {

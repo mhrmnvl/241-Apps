@@ -8,7 +8,7 @@ export const socialMediaRoutes: RouteRecordRaw[] = [
     meta: {
       title: 'SocialMedia Sosial Media',
       requiresAuth: true,
-      allowedRoles: ['ADMIN', 'TEACHER'],
+      requiredPermission: 'social-media.read',
     },
   },
 ]

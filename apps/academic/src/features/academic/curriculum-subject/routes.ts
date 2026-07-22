@@ -7,7 +7,7 @@ export const curriculumSubjectRoutes: RouteRecordRaw[] = [
     component: () => import('./views/CurriculumSubjectView.vue'),
     meta: {
       requiresAuth: true,
-      allowedRoles: ['ADMIN', 'TEACHER'],
+      requiredPermission: 'curriculum-subjects.read',
       title: 'Mata Pelajaran Kurikulum',
     },
   },

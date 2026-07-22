@@ -34,7 +34,11 @@ import type {
 } from '../types'
 import { createColumns } from '../components/columns'
 
-const { isAdmin } = useRoleGuard()
+const { hasPermission } = useRoleGuard()
+// Resource-scoped management gate (replaces coarse admin/role check).
+const isAdmin = computed(() =>
+  hasPermission('inventory.create', 'inventory.update', 'inventory.delete'),
+)
 const router = useRouter()
 
 const breadcrumbs = [

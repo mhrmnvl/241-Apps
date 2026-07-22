@@ -7,7 +7,7 @@ export const timeSlotRoutes: RouteRecordRaw[] = [
     component: () => import('./views/TimeSlotView.vue'),
     meta: {
       requiresAuth: true,
-      allowedRoles: ['ADMIN', 'TEACHER'],
+      requiredPermission: 'time-slots.read',
       title: 'Jam Pelajaran',
     },
   },
@@ -17,7 +17,7 @@ export const timeSlotRoutes: RouteRecordRaw[] = [
     component: () => import('./views/TimeSlotTypeView.vue'),
     meta: {
       requiresAuth: true,
-      allowedRoles: ['ADMIN', 'TEACHER'],
+      requiredPermission: 'time-slots.read',
       title: 'Tipe Jam',
     },
   },

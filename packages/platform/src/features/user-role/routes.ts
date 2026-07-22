@@ -8,7 +8,17 @@ export const userRoleRoutes: RouteRecordRaw[] = [
     meta: {
       title: 'Kelola Pengguna',
       requiresAuth: true,
-      allowedRoles: ['ADMIN'],
+      requiredPermission: 'users.read',
+    },
+  },
+  {
+    path: '/pengaturan/kelola-pengguna/:id/edit',
+    name: 'UserRoleEdit',
+    component: () => import('./views/UserEditView.vue'),
+    meta: {
+      title: 'Ubah Akun Pengguna',
+      requiresAuth: true,
+      requiredPermission: 'users.update',
     },
   },
 ]

@@ -38,7 +38,11 @@ const {
 } = useEventCalendar()
 
 const activeTab = ref('calendar')
-const { isAdmin } = useRoleGuard()
+const { hasPermission } = useRoleGuard()
+// Resource-scoped management gate (replaces coarse admin/role check).
+const isAdmin = computed(() =>
+  hasPermission('events.create', 'events.update', 'events.delete'),
+)
 const sheetOpen = ref(false)
 const sheetEventData = ref<EventData | null>(null)
 const selectedDate = ref('')

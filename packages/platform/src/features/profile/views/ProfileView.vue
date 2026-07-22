@@ -11,16 +11,19 @@ import {
   SelectValue,
 } from '@/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/tabs'
-import { Loader2 } from 'lucide-vue-next'
+import { Button } from '@/ui/button'
+import { KeyRound, Loader2 } from 'lucide-vue-next'
+import { useRouter } from 'vue-router'
 
 import PersonalInfoTab from '../components/PersonalInfoTab.vue'
 import ProfileHeaderCard from '../components/ProfileHeaderCard.vue'
 import ProfileSheets from '../components/ProfileSheets.vue'
-import ChangePasswordSection from '../components/ChangePasswordSection.vue'
 
 import { AddressInfoTab } from '@/features/platform/address'
 import { useProfileView } from '../composables/useProfileView'
 import { profileConfig } from '../config'
+
+const router = useRouter()
 
 const breadcrumbs = [{ title: 'Profil', href: '#' }, { title: 'Detail Profil' }]
 
@@ -171,7 +174,24 @@ onMounted(() => {
             value="security"
             class="mt-0"
           >
-            <ChangePasswordSection />
+            <div class="max-w-xl py-4 space-y-4">
+              <div>
+                <h3 class="text-lg font-medium text-slate-900">
+                  Keamanan Akun
+                </h3>
+                <p class="text-sm text-muted-foreground">
+                  Kelola password akun Anda di halaman khusus untuk menjaga
+                  keamanan data.
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                @click="router.push({ name: 'profile-change-password' })"
+              >
+                <KeyRound class="mr-2 h-4 w-4" />
+                Ubah Password
+              </Button>
+            </div>
           </TabsContent>
         </Tabs>
       </Card>

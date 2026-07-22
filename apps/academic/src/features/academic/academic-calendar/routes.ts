@@ -7,7 +7,7 @@ export const academicCalendarRoutes: RouteRecordRaw[] = [
     component: () => import('./views/AcademicCalendarView.vue'),
     meta: {
       requiresAuth: true,
-      allowedRoles: ['ADMIN', 'TEACHER', 'STUDENT'],
+      requiredPermission: 'academic-calendars.read',
       title: 'Kalender Pendidikan',
     },
   },

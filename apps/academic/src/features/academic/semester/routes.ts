@@ -7,7 +7,7 @@ export const semesterRoutes: RouteRecordRaw[] = [
     component: () => import('./views/SemesterView.vue'),
     meta: {
       requiresAuth: true,
-      allowedRoles: ['ADMIN', 'TEACHER'],
+      requiredPermission: 'semesters.read',
       title: 'Semester',
     },
   },
@@ -17,7 +17,7 @@ export const semesterRoutes: RouteRecordRaw[] = [
     component: () => import('./views/PromotionView.vue'),
     meta: {
       requiresAuth: true,
-      allowedRoles: ['ADMIN'],
+      requiredPermission: 'semesters.read',
       title: 'Kenaikan Kelas',
     },
   },

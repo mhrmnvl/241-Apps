@@ -5,7 +5,7 @@ import { Button } from '@/ui/button'
 import { Card, CardHeader, CardTitle } from '@/ui/card'
 import { Input } from '@/ui/input'
 import { Plus, Search } from 'lucide-vue-next'
-import { onMounted } from 'vue'
+import { onMounted, computed } from 'vue'
 import EmploymentTypeFormDialog from '../components/EmploymentTypeFormDialog.vue'
 import { useEmploymentTypeList } from '../composables/useEmploymentTypeList'
 import { useRoleGuard } from '@/shared/composables/useRoleGuard'
@@ -23,7 +23,11 @@ const {
   openEditDialog,
 } = useEmploymentTypeList()
 
-const { isAdmin } = useRoleGuard()
+const { hasPermission } = useRoleGuard()
+// Resource-scoped management gate (replaces coarse admin/role check).
+const isAdmin = computed(() =>
+  hasPermission('teachers.create', 'teachers.update', 'teachers.delete'),
+)
 const columns = createColumns(
   openEditDialog,
   (item, callbacks) => {

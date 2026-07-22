@@ -21,7 +21,7 @@ import {
 } from '@/ui/alert-dialog'
 import { useRoleGuard } from '@/shared/composables/useRoleGuard'
 import { Copy, Plus } from 'lucide-vue-next'
-import { onMounted, ref, watch } from 'vue'
+import { onMounted, ref, watch, computed } from 'vue'
 import { toast } from 'vue-sonner'
 
 const breadcrumbs = [
@@ -48,7 +48,11 @@ const { isRollingOver, rolloverSummary, rolloverSemester } =
 const isAddModalOpen = ref(false)
 const isRolloverModalOpen = ref(false)
 const editingItem = ref<Semester | null>(null)
-const { isAdmin } = useRoleGuard()
+const { hasPermission } = useRoleGuard()
+// Resource-scoped management gate (replaces coarse admin/role check).
+const isAdmin = computed(() =>
+  hasPermission('semesters.create', 'semesters.update', 'semesters.delete'),
+)
 
 const confirmAction = ref<{
   type: 'activate' | 'deactivate'

@@ -8,7 +8,7 @@ export const academicCalendarTypeRoutes: RouteRecordRaw[] = [
     meta: {
       title: 'Tipe Kalender',
       requiresAuth: true,
-      allowedRoles: ['ADMIN'],
+      requiredPermission: 'academic-calendar-types.read',
     },
   },
 ]

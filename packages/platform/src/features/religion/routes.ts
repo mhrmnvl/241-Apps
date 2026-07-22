@@ -8,7 +8,7 @@ export const religionRoutes: RouteRecordRaw[] = [
     meta: {
       title: 'Agama',
       requiresAuth: true,
-      allowedRoles: ['ADMIN'],
+      requiredPermission: 'religions.read',
     },
   },
 ]

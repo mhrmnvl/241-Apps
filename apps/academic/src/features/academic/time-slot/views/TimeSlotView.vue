@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import TimeSlotManageTable from '../components/TimeSlotManageTable.vue'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { Card, CardHeader, CardTitle } from '@/ui/card'
@@ -12,7 +12,11 @@ const breadcrumbs = [
   { title: 'Jam Pelajaran', href: '/pembelajaran/jam-pelajaran' },
 ]
 
-const { isAdmin } = useRoleGuard()
+const { hasPermission } = useRoleGuard()
+// Resource-scoped management gate (replaces coarse admin/role check).
+const isAdmin = computed(() =>
+  hasPermission('time-slots.create', 'time-slots.update', 'time-slots.delete'),
+)
 const tableRef = ref<InstanceType<typeof TimeSlotManageTable> | null>(null)
 </script>
 

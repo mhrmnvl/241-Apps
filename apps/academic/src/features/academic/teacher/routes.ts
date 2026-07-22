@@ -7,7 +7,7 @@ export const teacherRoutes: RouteRecordRaw[] = [
     component: () => import('./views/TeacherListView.vue'),
     meta: {
       requiresAuth: true,
-      allowedRoles: ['ADMIN', 'TEACHER'],
+      requiredPermission: 'teachers.read',
       title: 'Daftar Guru',
     },
   },
@@ -17,7 +17,7 @@ export const teacherRoutes: RouteRecordRaw[] = [
     component: () => import('./views/TeacherCreateView.vue'),
     meta: {
       requiresAuth: true,
-      allowedRoles: ['ADMIN'],
+      requiredPermission: 'teachers.read',
       title: 'Tambah Guru',
     },
   },
@@ -27,7 +27,7 @@ export const teacherRoutes: RouteRecordRaw[] = [
     component: () => import('./views/TeacherAccountView.vue'),
     meta: {
       requiresAuth: true,
-      allowedRoles: ['ADMIN', 'TEACHER'],
+      requiredPermission: 'teachers.read',
       title: 'Akun Guru',
     },
   },

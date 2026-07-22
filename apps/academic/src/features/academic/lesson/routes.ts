@@ -7,7 +7,7 @@ export const lessonRoutes: RouteRecordRaw[] = [
     component: () => import('./views/LessonView.vue'),
     meta: {
       requiresAuth: true,
-      allowedRoles: ['ADMIN', 'TEACHER'],
+      requiredPermission: 'schedules.read',
       title: 'Jadwal Pelajaran',
     },
   },
@@ -17,7 +17,7 @@ export const lessonRoutes: RouteRecordRaw[] = [
     component: () => import('./views/ClassroomScheduleEditorView.vue'),
     meta: {
       requiresAuth: true,
-      allowedRoles: ['ADMIN', 'TEACHER'],
+      requiredPermission: 'schedules.read',
       title: 'Editor Jadwal Kelas',
     },
   },

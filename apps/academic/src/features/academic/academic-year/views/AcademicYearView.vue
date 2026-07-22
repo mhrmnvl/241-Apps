@@ -19,7 +19,7 @@ import {
 } from '@/ui/alert-dialog'
 import { useRoleGuard } from '@/shared/composables/useRoleGuard'
 import { Plus } from 'lucide-vue-next'
-import { onMounted, ref, watch } from 'vue'
+import { onMounted, ref, watch, computed } from 'vue'
 
 const breadcrumbs = [
   { title: 'Akademik', href: '#' },
@@ -38,7 +38,15 @@ const {
 
 const isAddModalOpen = ref(false)
 const editingItem = ref<AcademicYear | null>(null)
-const { isAdmin } = useRoleGuard()
+const { hasPermission } = useRoleGuard()
+// Resource-scoped management gate (replaces coarse admin/role check).
+const isAdmin = computed(() =>
+  hasPermission(
+    'academic-years.create',
+    'academic-years.update',
+    'academic-years.delete',
+  ),
+)
 
 const confirmAction = ref<{
   type: 'activate' | 'deactivate'

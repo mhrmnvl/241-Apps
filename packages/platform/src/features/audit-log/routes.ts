@@ -8,7 +8,7 @@ export const auditLogsRoutes: RouteRecordRaw[] = [
     meta: {
       title: 'Log Aktivitas',
       requiresAuth: true,
-      allowedRoles: ['ADMIN', 'SUPER_ADMIN'],
+      requiredPermission: 'audit-logs.read',
     },
   },
 ]

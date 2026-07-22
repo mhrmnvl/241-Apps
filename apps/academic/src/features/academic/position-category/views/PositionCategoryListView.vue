@@ -5,7 +5,7 @@ import { Button } from '@/ui/button'
 import { Card, CardHeader, CardTitle } from '@/ui/card'
 import { Input } from '@/ui/input'
 import { Plus, Search } from 'lucide-vue-next'
-import { onMounted } from 'vue'
+import { onMounted, computed } from 'vue'
 import PositionCategoryFormDialog from '../components/PositionCategoryFormDialog.vue'
 import { usePositionCategoryList } from '../composables/usePositionCategoryList'
 import { useRoleGuard } from '@/shared/composables/useRoleGuard'
@@ -23,7 +23,11 @@ const {
   openEditDialog,
 } = usePositionCategoryList()
 
-const { isAdmin } = useRoleGuard()
+const { hasPermission } = useRoleGuard()
+// Resource-scoped management gate (replaces coarse admin/role check).
+const isAdmin = computed(() =>
+  hasPermission('positions.create', 'positions.update', 'positions.delete'),
+)
 const columns = createColumns(
   openEditDialog,
   (item, callbacks) => {

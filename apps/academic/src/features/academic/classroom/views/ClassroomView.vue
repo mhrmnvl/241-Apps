@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import type { Classroom } from '../types'
 import AppLayout from '@/layouts/AppLayout.vue'
@@ -48,7 +48,11 @@ watchDebounced(
 )
 
 const isAddModalOpen = ref(false)
-const { isAdmin } = useRoleGuard()
+const { hasPermission } = useRoleGuard()
+// Resource-scoped management gate (replaces coarse admin/role check).
+const isAdmin = computed(() =>
+  hasPermission('classrooms.create', 'classrooms.update', 'classrooms.delete'),
+)
 
 const tableColumns = createClassroomColumns({
   showActions: isAdmin.value,

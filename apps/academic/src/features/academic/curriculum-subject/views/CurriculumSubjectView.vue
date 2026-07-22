@@ -43,7 +43,15 @@ const breadcrumbs = computed(() => [
 const isAddDialogOpen = ref(false)
 const isEditSheetOpen = ref(false)
 const editingItem = ref<CurriculumSubject | null>(null)
-const { isAdmin } = useRoleGuard()
+const { hasPermission } = useRoleGuard()
+// Resource-scoped management gate (replaces coarse admin/role check).
+const isAdmin = computed(() =>
+  hasPermission(
+    'curriculum-subjects.create',
+    'curriculum-subjects.update',
+    'curriculum-subjects.delete',
+  ),
+)
 
 const existingSubjectIds = computed(() =>
   items.value.map((item) => item.subjectId),

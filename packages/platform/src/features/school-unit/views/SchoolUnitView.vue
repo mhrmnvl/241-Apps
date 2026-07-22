@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import SchoolUnitDetailCard from '../components/SchoolUnitDetailCard.vue'
 import { useSchoolUnit } from '../composables/useSchoolUnit'
@@ -11,7 +11,15 @@ import { PencilLine } from 'lucide-vue-next'
 import { useRoleGuard } from '@/shared/composables/useRoleGuard'
 
 const router = useRouter()
-const { isAdmin } = useRoleGuard()
+const { hasPermission } = useRoleGuard()
+// Resource-scoped management gate (replaces coarse admin/role check).
+const isAdmin = computed(() =>
+  hasPermission(
+    'school-units.create',
+    'school-units.update',
+    'school-units.delete',
+  ),
+)
 
 const {
   schoolUnit,

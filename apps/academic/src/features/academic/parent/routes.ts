@@ -7,7 +7,7 @@ export const parentRoutes: RouteRecordRaw[] = [
     component: () => import('./views/ParentView.vue'),
     meta: {
       requiresAuth: true,
-      allowedRoles: ['ADMIN', 'TEACHER'],
+      requiredPermission: 'parents.read',
       title: 'Data Orang Tua',
     },
   },

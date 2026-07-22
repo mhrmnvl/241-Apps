@@ -145,6 +145,22 @@ router.beforeEach((to) => {
     }
   }
 
+  // Permission gate — preferred over allowedRoles so custom roles are granted
+  // access by the permissions they hold. SUPER_ADMIN always passes.
+  const requiredPermission = to.meta.requiredPermission
+  if (requiredPermission) {
+    const user = store.user
+    if (!user) return { name: 'login' }
+    const userRoles = user.roles ?? []
+    const userPermissions = user.permissions ?? []
+    if (
+      !userRoles.includes('SUPER_ADMIN') &&
+      !userPermissions.includes(requiredPermission)
+    ) {
+      return { name: 'dashboard' }
+    }
+  }
+
   return true
 })
 

@@ -8,7 +8,7 @@ export const schoolUnitTypeRoutes: RouteRecordRaw[] = [
     meta: {
       title: 'Tipe Sekolah',
       requiresAuth: true,
-      allowedRoles: ['SUPER_ADMIN', 'ADMIN'],
+      requiredPermission: 'school-units.read',
     },
   },
 ]

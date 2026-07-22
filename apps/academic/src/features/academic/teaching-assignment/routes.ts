@@ -7,7 +7,7 @@ export const teachingAssignmentRoutes: RouteRecordRaw[] = [
     component: () => import('./views/TeachingAssignmentView.vue'),
     meta: {
       requiresAuth: true,
-      allowedRoles: ['ADMIN', 'TEACHER'],
+      requiredPermission: 'teaching-assignments.read',
       title: 'Penugasan Mengajar',
     },
   },

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { Button } from '@/ui/button'
 import { Checkbox } from '@/ui/checkbox'
@@ -11,9 +12,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/ui/dialog'
-import { ShieldCheck } from 'lucide-vue-next'
+import { Pencil, ShieldCheck } from 'lucide-vue-next'
 import { useUserRole } from '../composables/useUserRole'
 import { useAuthSession } from '@/features/platform/auth'
+import { useRoleGuard } from '@/shared/composables/useRoleGuard'
 import type { UserWithRoles } from '../types'
 
 const props = defineProps<{
@@ -21,10 +23,18 @@ const props = defineProps<{
   allRoles: { id: string; code: string; name: string }[]
 }>()
 
+const router = useRouter()
 const { isUpdating, syncUserRoles } = useUserRole()
 const { user: currentUser } = useAuthSession()
+const { hasPermission } = useRoleGuard()
+
+const canEditAccount = computed(() => hasPermission('users.update'))
 
 const isSelf = computed(() => currentUser.value?.id === props.user.id)
+
+function openEditAccount() {
+  void router.push({ name: 'UserRoleEdit', params: { id: props.user.id } })
+}
 
 const open = ref(false)
 const selectedIds = ref<string[]>([])
@@ -85,6 +95,17 @@ const handleSave = async () => {
     </Button>
 
     <template v-else>
+      <Button
+        v-if="canEditAccount"
+        variant="outline"
+        size="sm"
+        class="h-8 text-xs font-semibold px-2.5"
+        @click="openEditAccount"
+      >
+        <Pencil class="mr-1.5 size-3.5 text-muted-foreground" />
+        Ubah Akun
+      </Button>
+
       <Button
         variant="outline"
         size="sm"

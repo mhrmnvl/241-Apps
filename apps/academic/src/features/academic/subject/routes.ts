@@ -7,7 +7,7 @@ export const subjectRoutes: RouteRecordRaw[] = [
     component: () => import('./views/SubjectView.vue'),
     meta: {
       requiresAuth: true,
-      allowedRoles: ['ADMIN', 'TEACHER'],
+      requiredPermission: 'subjects.read',
       title: 'Mata Pelajaran',
     },
   },

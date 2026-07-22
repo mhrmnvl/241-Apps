@@ -1,4 +1,3 @@
-import { ForbiddenException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { CreateUserDto } from '../dto/request/create-user.dto.js';
 import { UpdateUserDto } from '../dto/request/update-user.dto.js';
@@ -9,7 +8,6 @@ import { GetUserByIdUseCase } from '../use-cases/get-user-by-id.use-case.js';
 import { GetUsersUseCase } from '../use-cases/get-users.use-case.js';
 import { UpdateUserUseCase } from '../use-cases/update-user.use-case.js';
 import { UserController } from './user.controller.js';
-import type { AuthenticatedUser } from '../../../core/types/authenticated-user.type.js';
 
 describe('UserController', () => {
   let controller: UserController;
@@ -73,66 +71,28 @@ describe('UserController', () => {
   });
 
   describe('findOne', () => {
-    it('should delegate to GetUserByIdUseCase when requester is self', async () => {
+    it('should delegate to GetUserByIdUseCase with id (any user, gated by users.read)', async () => {
       const id = 'user-1';
-      const requester = { id: 'user-1' };
-      mockGetUserByIdUseCase.execute.mockResolvedValue({
-        id,
-      });
+      mockGetUserByIdUseCase.execute.mockResolvedValue({ id });
 
-      await controller.findOne(id, requester as unknown as AuthenticatedUser);
+      const result = await controller.findOne(id);
 
       expect(mockGetUserByIdUseCase.execute).toHaveBeenCalledWith(id);
-    });
-
-    it('should throw ForbiddenException when user accesses another user', async () => {
-      const requester = { id: 'user-other' };
-      mockGetUserByIdUseCase.execute.mockResolvedValue({
-        id: 'user-1',
-      });
-
-      await expect(
-        controller.findOne('user-1', requester as unknown as AuthenticatedUser),
-      ).rejects.toThrow(ForbiddenException);
+      expect(result).toEqual({ id });
     });
   });
 
   describe('update', () => {
-    it('should delegate to UpdateUserUseCase when requester is self', async () => {
+    it('should delegate to UpdateUserUseCase with id and dto (any user, gated by users.update)', async () => {
       const id = 'user-1';
       const dto: UpdateUserDto = { identifier: 'updated' };
-      const requester = { id: 'user-1' };
       const expected = { id, identifier: 'updated' };
-      mockGetUserByIdUseCase.execute.mockResolvedValue({
-        id,
-      });
       mockUpdateUserUseCase.execute.mockResolvedValue(expected);
 
-      const result = await controller.update(
-        id,
-        dto,
-        requester as unknown as AuthenticatedUser,
-      );
+      const result = await controller.update(id, dto);
 
       expect(mockUpdateUserUseCase.execute).toHaveBeenCalledWith(id, dto);
       expect(result).toEqual(expected);
-    });
-
-    it('should throw ForbiddenException when user updates another user', async () => {
-      const dto: UpdateUserDto = { identifier: 'hacked' };
-      const requester = { id: 'user-other' };
-      mockGetUserByIdUseCase.execute.mockResolvedValue({
-        id: 'user-1',
-      });
-
-      await expect(
-        controller.update(
-          'user-1',
-          dto,
-          requester as unknown as AuthenticatedUser,
-        ),
-      ).rejects.toThrow(ForbiddenException);
-      expect(mockUpdateUserUseCase.execute).not.toHaveBeenCalled();
     });
   });
 

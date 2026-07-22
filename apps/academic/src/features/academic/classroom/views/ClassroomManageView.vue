@@ -38,7 +38,11 @@ const {
   fetchGrades,
 } = useClassroomList()
 
-const { isAdmin } = useRoleGuard()
+const { hasPermission } = useRoleGuard()
+// Resource-scoped management gate (replaces coarse admin/role check).
+const isAdmin = computed(() =>
+  hasPermission('classrooms.create', 'classrooms.update', 'classrooms.delete'),
+)
 
 const {
   teachers,

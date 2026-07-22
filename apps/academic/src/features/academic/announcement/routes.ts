@@ -7,7 +7,7 @@ export const announcementRoutes: RouteRecordRaw[] = [
     component: () => import('./views/AnnouncementView.vue'),
     meta: {
       requiresAuth: true,
-      allowedRoles: ['ADMIN', 'TEACHER', 'STUDENT'],
+      requiredPermission: 'announcements.read',
       title: 'Pengumuman',
     },
   },

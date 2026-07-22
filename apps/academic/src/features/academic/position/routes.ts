@@ -7,7 +7,7 @@ export const positionRoutes: RouteRecordRaw[] = [
     component: () => import('./views/PositionView.vue'),
     meta: {
       requiresAuth: true,
-      allowedRoles: ['ADMIN', 'TEACHER'],
+      requiredPermission: 'positions.read',
       title: 'Kelola Jabatan',
     },
   },

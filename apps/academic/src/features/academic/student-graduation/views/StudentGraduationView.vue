@@ -33,7 +33,15 @@ const {
   deleteStudentGraduation,
 } = useStudentGraduation()
 
-const { isAdmin } = useRoleGuard()
+const { hasPermission } = useRoleGuard()
+// Resource-scoped management gate (replaces coarse admin/role check).
+const isAdmin = computed(() =>
+  hasPermission(
+    'graduations.create',
+    'graduations.update',
+    'graduations.delete',
+  ),
+)
 const isAddModalOpen = ref(false)
 const editingItem = ref<StudentGraduation | null>(null)
 

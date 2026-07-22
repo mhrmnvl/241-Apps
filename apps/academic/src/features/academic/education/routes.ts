@@ -8,7 +8,7 @@ export const educationRoutes: RouteRecordRaw[] = [
     meta: {
       title: 'Tingkat Pendidikan',
       requiresAuth: true,
-      allowedRoles: ['ADMIN'],
+      requiredPermission: 'educations.read',
     },
   },
 ]

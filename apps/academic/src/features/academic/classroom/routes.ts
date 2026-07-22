@@ -7,7 +7,7 @@ export const classroomRoutes: RouteRecordRaw[] = [
     component: () => import('./views/ClassroomView.vue'),
     meta: {
       requiresAuth: true,
-      allowedRoles: ['ADMIN', 'TEACHER'],
+      requiredPermission: 'classrooms.read',
       title: 'Kelas',
     },
   },
@@ -17,7 +17,7 @@ export const classroomRoutes: RouteRecordRaw[] = [
     component: () => import('./views/ClassroomManageView.vue'),
     meta: {
       requiresAuth: true,
-      allowedRoles: ['ADMIN'],
+      requiredPermission: 'classrooms.read',
       title: 'Kelola Kelas',
     },
   },

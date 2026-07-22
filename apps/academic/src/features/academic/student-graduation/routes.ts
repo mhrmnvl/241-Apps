@@ -7,7 +7,7 @@ export const studentGraduationRoutes: RouteRecordRaw[] = [
     component: () => import('./views/StudentGraduationView.vue'),
     meta: {
       requiresAuth: true,
-      allowedRoles: ['ADMIN', 'TEACHER'],
+      requiredPermission: 'graduations.read',
       title: 'Daftar Alumni',
     },
   },

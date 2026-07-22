@@ -8,7 +8,7 @@ export const positionCategoryRoutes: RouteRecordRaw[] = [
     meta: {
       title: 'Kategori Jabatan',
       requiresAuth: true,
-      allowedRoles: ['ADMIN', 'TEACHER'],
+      requiredPermission: 'positions.read',
     },
   },
 ]

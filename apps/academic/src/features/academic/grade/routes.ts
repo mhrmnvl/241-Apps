@@ -7,7 +7,7 @@ export const gradeRoutes: RouteRecordRaw[] = [
     component: () => import('./views/GradeView.vue'),
     meta: {
       requiresAuth: true,
-      allowedRoles: ['ADMIN', 'TEACHER'],
+      requiredPermission: 'academic-years.read',
       title: 'Tingkat Kelas',
     },
   },

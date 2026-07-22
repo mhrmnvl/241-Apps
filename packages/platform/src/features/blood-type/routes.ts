@@ -8,7 +8,7 @@ export const bloodTypeRoutes: RouteRecordRaw[] = [
     meta: {
       title: 'Golongan Darah',
       requiresAuth: true,
-      allowedRoles: ['ADMIN'],
+      requiredPermission: 'blood-types.read',
     },
   },
 ]

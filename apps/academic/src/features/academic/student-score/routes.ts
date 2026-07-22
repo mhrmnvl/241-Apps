@@ -8,7 +8,7 @@ export const studentScoreRoutes: RouteRecordRaw[] = [
     meta: {
       title: 'Nilai Siswa',
       requiresAuth: true,
-      allowedRoles: ['ADMIN', 'TEACHER', 'STUDENT'],
+      requiredPermission: 'student-scores.read',
     },
   },
 ]

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, computed } from 'vue'
 import { toast } from 'vue-sonner'
 import { Plus } from 'lucide-vue-next'
 import AppLayout from '@/layouts/AppLayout.vue'
@@ -18,7 +18,11 @@ const breadcrumbs = [
   { title: 'Tipe Jam', href: '/pembelajaran/tipe-jam' },
 ]
 
-const { isAdmin } = useRoleGuard()
+const { hasPermission } = useRoleGuard()
+// Resource-scoped management gate (replaces coarse admin/role check).
+const isAdmin = computed(() =>
+  hasPermission('time-slots.create', 'time-slots.update', 'time-slots.delete'),
+)
 
 const data = ref<TimeSlotType[]>([])
 const isLoading = ref(false)

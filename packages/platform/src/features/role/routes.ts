@@ -8,7 +8,7 @@ export const rolesRoutes: RouteRecordRaw[] = [
     meta: {
       title: 'Manajemen Role',
       requiresAuth: true,
-      allowedRoles: ['ADMIN', 'SUPER_ADMIN'],
+      requiredPermission: 'roles.read',
     },
   },
   {
@@ -18,7 +18,7 @@ export const rolesRoutes: RouteRecordRaw[] = [
     meta: {
       title: 'Tambah Role',
       requiresAuth: true,
-      allowedRoles: ['ADMIN', 'SUPER_ADMIN'],
+      requiredPermission: 'roles.read',
     },
   },
   {
@@ -28,7 +28,7 @@ export const rolesRoutes: RouteRecordRaw[] = [
     meta: {
       title: 'Edit Role',
       requiresAuth: true,
-      allowedRoles: ['ADMIN', 'SUPER_ADMIN'],
+      requiredPermission: 'roles.read',
     },
   },
 ]

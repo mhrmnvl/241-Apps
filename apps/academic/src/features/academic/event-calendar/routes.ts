@@ -7,7 +7,7 @@ export const eventCalendarRoutes: RouteRecordRaw[] = [
     component: () => import('./views/EventCalendarView.vue'),
     meta: {
       requiresAuth: true,
-      allowedRoles: ['ADMIN', 'TEACHER', 'STUDENT'],
+      requiredPermission: 'events.read',
       title: 'Kalender Kegiatan',
     },
   },

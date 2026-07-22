@@ -17,7 +17,11 @@ import ConditionFormDialog from '../components/ConditionFormDialog.vue'
 import type { ColumnDef } from '@tanstack/vue-table'
 import type { InventoryReferenceItem } from '../types'
 
-const { isAdmin } = useRoleGuard()
+const { hasPermission } = useRoleGuard()
+// Resource-scoped management gate (replaces coarse admin/role check).
+const isAdmin = computed(() =>
+  hasPermission('inventory.create', 'inventory.update', 'inventory.delete'),
+)
 
 // State
 const dataItems = ref<InventoryReferenceItem[]>([])

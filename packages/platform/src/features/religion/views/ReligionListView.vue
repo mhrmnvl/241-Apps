@@ -5,7 +5,7 @@ import { Button } from '@/ui/button'
 import { Card, CardHeader, CardTitle } from '@/ui/card'
 import { Input } from '@/ui/input'
 import { Plus, Search } from 'lucide-vue-next'
-import { onMounted } from 'vue'
+import { onMounted, computed } from 'vue'
 import ReligionFormDialog from '../components/ReligionFormDialog.vue'
 import { useReligionList } from '../composables/useReligionList'
 import { useRoleGuard } from '@/shared/composables/useRoleGuard'
@@ -23,7 +23,11 @@ const {
   openEditDialog,
 } = useReligionList()
 
-const { isAdmin } = useRoleGuard()
+const { hasPermission } = useRoleGuard()
+// Resource-scoped management gate (replaces coarse admin/role check).
+const isAdmin = computed(() =>
+  hasPermission('religions.create', 'religions.update', 'religions.delete'),
+)
 const columns = createColumns(
   openEditDialog,
   (item, callbacks) => {

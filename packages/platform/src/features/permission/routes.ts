@@ -8,7 +8,7 @@ export const permissionsRoutes: RouteRecordRaw[] = [
     meta: {
       title: 'Manajemen Permission',
       requiresAuth: true,
-      allowedRoles: ['ADMIN', 'SUPER_ADMIN'],
+      requiredPermission: 'permissions.manage',
     },
   },
 ]

@@ -59,7 +59,15 @@ const editingData = ref<RaporData | null>(null)
 const detailData = ref<RaporData | null>(null)
 const hasDisplayedData = ref(false)
 const showBulkConfirm = ref(false)
-const { isAdmin } = useRoleGuard()
+const { hasPermission } = useRoleGuard()
+// Resource-scoped management gate (replaces coarse admin/role check).
+const isAdmin = computed(() =>
+  hasPermission(
+    'report-cards.create',
+    'report-cards.update',
+    'report-cards.delete',
+  ),
+)
 
 const isFilterReady = computed(
   () => Boolean(selectedClassroomId.value) && Boolean(selectedSemesterId.value),

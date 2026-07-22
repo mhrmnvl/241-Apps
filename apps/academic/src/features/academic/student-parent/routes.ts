@@ -7,7 +7,7 @@ export const studentParentRoutes: RouteRecordRaw[] = [
     component: () => import('./views/StudentParentView.vue'),
     meta: {
       requiresAuth: true,
-      allowedRoles: ['ADMIN', 'TEACHER'],
+      requiredPermission: 'students.read',
       title: 'Relasi Siswa — Orang Tua',
     },
   },

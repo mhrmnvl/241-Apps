@@ -6,4 +6,5 @@ export type {
   UserWithRoles,
   UserRoleQueryParams,
   AssignRolePayload,
+  UpdateUserAccountPayload,
 } from './types'

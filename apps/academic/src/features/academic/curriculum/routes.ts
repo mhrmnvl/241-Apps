@@ -7,7 +7,7 @@ export const curriculaRoutes: RouteRecordRaw[] = [
     component: () => import('./views/CurriculaView.vue'),
     meta: {
       requiresAuth: true,
-      allowedRoles: ['ADMIN', 'TEACHER'],
+      requiredPermission: 'curricula.read',
       title: 'Kurikulum',
     },
   },

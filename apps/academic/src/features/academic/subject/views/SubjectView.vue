@@ -11,7 +11,7 @@ import { Button } from '@/ui/button'
 import { Card, CardHeader, CardTitle } from '@/ui/card'
 import { useRoleGuard } from '@/shared/composables/useRoleGuard'
 import { Plus, Search } from 'lucide-vue-next'
-import { onMounted, ref, watch } from 'vue'
+import { onMounted, ref, watch, computed } from 'vue'
 import { watchDebounced } from '@vueuse/core'
 import { Input } from '@/ui/input'
 
@@ -39,7 +39,11 @@ const { isSaving, formError, saveSubject } = useSubjectForm()
 
 const isAddModalOpen = ref(false)
 const editingItem = ref<Subject | null>(null)
-const { isAdmin } = useRoleGuard()
+const { hasPermission } = useRoleGuard()
+// Resource-scoped management gate (replaces coarse admin/role check).
+const isAdmin = computed(() =>
+  hasPermission('subjects.create', 'subjects.update', 'subjects.delete'),
+)
 
 const tableColumns = createSubjectColumns({
   showActions: isAdmin.value,

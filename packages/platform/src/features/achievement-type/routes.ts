@@ -8,7 +8,7 @@ export const achievementTypeRoutes: RouteRecordRaw[] = [
     meta: {
       title: 'Tingkat Prestasi',
       requiresAuth: true,
-      allowedRoles: ['ADMIN'],
+      requiredPermission: 'achievement-types.read',
     },
   },
 ]
