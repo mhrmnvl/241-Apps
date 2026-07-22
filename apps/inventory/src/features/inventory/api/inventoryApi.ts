@@ -5,9 +5,12 @@ import type {
 } from '@/shared/types/api'
 import type {
   InventoryAsset,
+  InventoryAssetUnit,
   InventoryMetadata,
   AssetSavePayload,
   AssetQueryParams,
+  AddUnitsPayload,
+  AssetUnitUpdatePayload,
   InventoryReferenceItem,
   InventoryLoan,
   LoanQueryParams,
@@ -57,6 +60,24 @@ export const inventoryApi = {
 
   deleteAsset: (id: string) => {
     return api.delete<void>(`/inventory/assets/${id}`)
+  },
+
+  addUnits: (assetId: string, payload: AddUnitsPayload) => {
+    return api.post<ApiSingleResponse<InventoryAssetUnit[]>>(
+      `/inventory/assets/${assetId}/units`,
+      payload,
+    )
+  },
+
+  updateAssetUnit: (unitId: string, payload: AssetUnitUpdatePayload) => {
+    return api.patch<ApiSingleResponse<InventoryAssetUnit>>(
+      `/inventory/asset-units/${unitId}`,
+      payload,
+    )
+  },
+
+  deleteAssetUnit: (unitId: string) => {
+    return api.delete<void>(`/inventory/asset-units/${unitId}`)
   },
 
   getInventoryMetadata: () => {

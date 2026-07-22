@@ -9,6 +9,7 @@ import type { AcademicYear, AcademicYearSavePayload } from '../types'
 
 export function useAcademicYearForm(options?: {
   editData?: () => AcademicYear | null
+  isOpen?: () => boolean
   onSuccess?: () => void | Promise<void>
 }) {
   const store = useAcademicYearStore()
@@ -33,9 +34,13 @@ export function useAcademicYearForm(options?: {
     },
   })
 
+  // Re-init whenever the dialog opens (not only when editData changes), so
+  // stale validation errors from a previous attempt don't persist on reopen.
   watch(
-    () => options?.editData?.(),
-    (data) => {
+    () => [options?.isOpen?.() ?? true, options?.editData?.()] as const,
+    ([isOpen, data]) => {
+      if (isOpen === false) return
+      formError.value = null
       if (data) {
         form.setValues({
           name: data.name ?? '',

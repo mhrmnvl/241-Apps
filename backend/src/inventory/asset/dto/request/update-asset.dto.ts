@@ -8,6 +8,8 @@ import {
   Min,
 } from 'class-validator';
 
+// Parent/catalog fields only. Per-unit fields (barcode, serial, condition,
+// status, location, custodian) are managed via the asset-unit endpoints.
 export class UpdateAssetDto {
   @ApiPropertyOptional({ description: 'Asset name' })
   @IsOptional()
@@ -29,17 +31,7 @@ export class UpdateAssetDto {
   @IsString()
   model?: string;
 
-  @ApiPropertyOptional({ description: 'Factory Serial Number' })
-  @IsOptional()
-  @IsString()
-  serialNumber?: string;
-
-  @ApiPropertyOptional({ description: 'Barcode identifier' })
-  @IsOptional()
-  @IsString()
-  barcode?: string;
-
-  @ApiPropertyOptional({ description: 'Custom asset number' })
+  @ApiPropertyOptional({ description: 'Batch/asset number' })
   @IsOptional()
   @IsString()
   assetNumber?: string;
@@ -49,7 +41,7 @@ export class UpdateAssetDto {
   @IsDateString()
   purchaseDate?: string;
 
-  @ApiPropertyOptional({ description: 'Purchase Price' })
+  @ApiPropertyOptional({ description: 'Purchase Price (per unit)' })
   @IsOptional()
   @IsNumber()
   @Min(0)
@@ -65,21 +57,6 @@ export class UpdateAssetDto {
   @IsOptional()
   @IsUUID()
   fundingSourceId?: string;
-
-  @ApiPropertyOptional({ description: 'Location UUID' })
-  @IsOptional()
-  @IsUUID()
-  locationId?: string;
-
-  @ApiPropertyOptional({ description: 'Status UUID' })
-  @IsOptional()
-  @IsUUID()
-  statusId?: string;
-
-  @ApiPropertyOptional({ description: 'Condition UUID' })
-  @IsOptional()
-  @IsUUID()
-  conditionId?: string;
 
   @ApiPropertyOptional({ description: 'Extra notes' })
   @IsOptional()

@@ -22,7 +22,7 @@ export class HistoryQueryDto {
   @ApiPropertyOptional()
   @IsUUID()
   @IsOptional()
-  assetId?: string;
+  unitId?: string;
 }
 
 @Injectable()

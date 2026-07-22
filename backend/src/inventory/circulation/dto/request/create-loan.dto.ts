@@ -18,9 +18,12 @@ export class CreateLoanDto {
   @IsNotEmpty()
   purpose: string;
 
-  @ApiProperty({ description: 'IDs of the assets to borrow', type: [String] })
+  @ApiProperty({
+    description: 'IDs of the asset units to borrow',
+    type: [String],
+  })
   @IsArray()
   @IsUUID('all', { each: true })
   @IsNotEmpty()
-  assetIds: string[];
+  unitIds: string[];
 }

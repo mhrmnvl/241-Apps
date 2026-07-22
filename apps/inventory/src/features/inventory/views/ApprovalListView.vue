@@ -110,7 +110,11 @@ const columns: ColumnDef<ApprovalInstance>[] = [
     header: 'Aset',
     cell: ({ row }) => {
       const items = row.original.details?.items ?? []
-      return items.map((i: InventoryLoanItem) => i.asset?.name).join(', ')
+      return items
+        .map(
+          (i: InventoryLoanItem) => i.unit?.asset?.name ?? i.unit?.unitNumber,
+        )
+        .join(', ')
     },
   },
   {
@@ -230,7 +234,7 @@ onMounted(() => {
                   v-for="item in selectedApproval.details?.items"
                   :key="item.id"
                 >
-                  {{ item.asset?.name }} ({{ item.asset?.assetNumber }})
+                  {{ item.unit?.asset?.name }} ({{ item.unit?.unitNumber }})
                 </li>
               </ul>
             </span>

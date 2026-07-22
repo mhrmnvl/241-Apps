@@ -18,11 +18,13 @@ import { RequirePermissions } from '../../../platform/access-control/permissions
 import { CreateAssetDto } from '../dto/request/create-asset.dto.js';
 import { UpdateAssetDto } from '../dto/request/update-asset.dto.js';
 import { AssetQueryDto } from '../dto/request/asset-query.dto.js';
+import { CreateUnitsDto } from '../dto/request/create-units.dto.js';
 import { CreateAssetUseCase } from '../use-cases/create-asset.use-case.js';
 import { UpdateAssetUseCase } from '../use-cases/update-asset.use-case.js';
 import { DeleteAssetUseCase } from '../use-cases/delete-asset.use-case.js';
 import { GetAssetByIdUseCase } from '../use-cases/get-asset-by-id.use-case.js';
 import { GetAssetsUseCase } from '../use-cases/get-assets.use-case.js';
+import { AddUnitsUseCase } from '../use-cases/add-units.use-case.js';
 
 @ApiTags('Inventory Assets')
 @ApiBearerAuth()
@@ -35,6 +37,7 @@ export class AssetController {
     private readonly createAssetUseCase: CreateAssetUseCase,
     private readonly updateAssetUseCase: UpdateAssetUseCase,
     private readonly deleteAssetUseCase: DeleteAssetUseCase,
+    private readonly addUnitsUseCase: AddUnitsUseCase,
   ) {}
 
   @Get()
@@ -55,9 +58,21 @@ export class AssetController {
 
   @Post()
   @RequirePermissions('inventory.create')
-  @ApiOperation({ summary: 'Create a new asset' })
+  @ApiOperation({
+    summary: 'Create a new asset (parent) with N numbered units (quantity)',
+  })
   async create(@Body() dto: CreateAssetDto) {
     return this.createAssetUseCase.execute(dto);
+  }
+
+  @Post(':id/units')
+  @RequirePermissions('inventory.create')
+  @ApiOperation({ summary: 'Add more physical units to an existing asset' })
+  async addUnits(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: CreateUnitsDto,
+  ) {
+    return this.addUnitsUseCase.execute(id, dto);
   }
 
   @Patch(':id')

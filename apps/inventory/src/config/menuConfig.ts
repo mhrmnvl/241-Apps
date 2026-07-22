@@ -6,6 +6,7 @@ import {
   Package,
   ClipboardList,
   CheckSquare,
+  Printer,
 } from 'lucide-vue-next'
 
 export interface SubMenuItem {
@@ -54,6 +55,11 @@ export const menuSections: MenuSection[] = [
         title: 'Daftar Aset',
         url: '/inventory/assets',
         icon: Package,
+      },
+      {
+        title: 'Cetak Label',
+        url: '/inventory/assets/label-printing',
+        icon: Printer,
       },
     ],
   },

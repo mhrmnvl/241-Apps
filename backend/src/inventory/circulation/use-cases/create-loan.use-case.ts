@@ -25,22 +25,23 @@ export class CreateLoanUseCase {
       );
     }
 
-    // 1. Verify assets exist and are available
-    const assets = await this.prisma.inventoryAsset.findMany({
+    // 1. Verify units exist and are available
+    const units = await this.prisma.inventoryAssetUnit.findMany({
       where: {
-        id: { in: dto.assetIds },
+        id: { in: dto.unitIds },
         deletedAt: null,
       },
+      include: { asset: true },
     });
 
-    if (assets.length !== dto.assetIds.length) {
-      throw new BadRequestException('One or more assets do not exist.');
+    if (units.length !== dto.unitIds.length) {
+      throw new BadRequestException('One or more units do not exist.');
     }
 
-    for (const asset of assets) {
-      if (asset.statusId !== availStatus.id) {
+    for (const unit of units) {
+      if (unit.statusId !== availStatus.id) {
         throw new BadRequestException(
-          `Asset "${asset.name}" (${asset.assetNumber}) is not available for borrowing.`,
+          `Unit "${unit.asset.name}" (${unit.unitNumber}) is not available for borrowing.`,
         );
       }
     }
@@ -66,16 +67,16 @@ export class CreateLoanUseCase {
           purpose: dto.purpose,
           statusId: pendingStatus.id,
           items: {
-            create: dto.assetIds.map((assetId) => ({
-              assetId,
+            create: dto.unitIds.map((unitId) => ({
+              unitId,
             })),
           },
         },
       });
 
-      // Update asset statuses to STAT-LOAN-PENDING
-      await tx.inventoryAsset.updateMany({
-        where: { id: { in: dto.assetIds } },
+      // Update unit statuses to STAT-LOAN-PENDING
+      await tx.inventoryAssetUnit.updateMany({
+        where: { id: { in: dto.unitIds } },
         data: { statusId: pendingStatus.id },
       });
 
@@ -101,7 +102,7 @@ export class CreateLoanUseCase {
           include: {
             items: {
               include: {
-                asset: true,
+                unit: true,
               },
             },
           },
@@ -130,19 +131,19 @@ export class CreateLoanUseCase {
           data: { statusId: approvedStatus.id },
         });
 
-        // Update assets to STAT-LOANED
-        await tx.inventoryAsset.updateMany({
-          where: { id: { in: dto.assetIds } },
+        // Update units to STAT-LOANED
+        await tx.inventoryAssetUnit.updateMany({
+          where: { id: { in: dto.unitIds } },
           data: { statusId: loanedStatus.id },
         });
 
         // Create histories
-        for (const asset of assets) {
+        for (const unit of units) {
           await tx.inventoryHistory.create({
             data: {
-              assetId: asset.id,
+              unitId: unit.id,
               transactionTypeId: txType.id,
-              previousStatusId: asset.statusId,
+              previousStatusId: unit.statusId,
               newStatusId: loanedStatus.id,
               note: `Peminjaman otomatis disetujui (No. ${loanNumber})`,
               changedById: requesterId,

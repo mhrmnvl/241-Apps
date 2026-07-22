@@ -10,10 +10,10 @@ import {
 } from 'class-validator';
 
 export class ReturnLoanItemDto {
-  @ApiProperty({ description: 'Asset ID being returned' })
+  @ApiProperty({ description: 'Asset unit ID being returned' })
   @IsUUID()
   @IsNotEmpty()
-  assetId: string;
+  unitId: string;
 
   @ApiProperty({ description: 'Condition ID of the asset when returned' })
   @IsUUID()

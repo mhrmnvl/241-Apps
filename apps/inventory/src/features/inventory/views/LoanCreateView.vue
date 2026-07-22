@@ -11,15 +11,21 @@ import { ChevronLeft } from 'lucide-vue-next'
 import { toast } from 'vue-sonner'
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
 import { inventoryApi } from '../api/inventoryApi'
-import type { InventoryAsset, InventoryStatus } from '../types'
+import type { InventoryAssetUnit, InventoryStatus } from '../types'
 import type { ColumnDef } from '@tanstack/vue-table'
 import { h } from 'vue'
 
+// A selectable row = one available unit, flattened with its parent asset info.
+type LoanUnitRow = InventoryAssetUnit & {
+  assetName: string
+  categoryName: string
+}
+
 const router = useRouter()
 const isSubmitting = ref(false)
-const loadingAssets = ref(false)
-const availableAssets = ref<InventoryAsset[]>([])
-const selectedAssets = ref<InventoryAsset[]>([])
+const loadingUnits = ref(false)
+const availableUnits = ref<LoanUnitRow[]>([])
+const selectedUnits = ref<LoanUnitRow[]>([])
 
 const createForm = ref({
   purpose: '',
@@ -32,8 +38,7 @@ const breadcrumbs = [
   { title: 'Pinjam Aset' },
 ]
 
-// Column definitions with select column
-const selectColumn: ColumnDef<InventoryAsset> = {
+const selectColumn: ColumnDef<LoanUnitRow> = {
   id: 'select',
   header: ({ table }) =>
     h('input', {
@@ -56,25 +61,25 @@ const selectColumn: ColumnDef<InventoryAsset> = {
   enableHiding: false,
 }
 
-const columns: ColumnDef<InventoryAsset>[] = [
+const columns: ColumnDef<LoanUnitRow>[] = [
   selectColumn,
   {
-    id: 'assetNumber',
-    header: 'No. Aset',
-    cell: ({ row }) => row.original.assetNumber,
-    accessorKey: 'assetNumber',
+    id: 'unitNumber',
+    header: 'No. Unit',
+    cell: ({ row }) => row.original.unitNumber,
+    accessorKey: 'unitNumber',
   },
   {
-    id: 'name',
+    id: 'assetName',
     header: 'Nama Aset',
-    cell: ({ row }) => row.original.name,
-    accessorKey: 'name',
+    cell: ({ row }) => row.original.assetName,
+    accessorKey: 'assetName',
   },
   {
-    id: 'category',
+    id: 'categoryName',
     header: 'Kategori',
-    cell: ({ row }) => row.original.category?.name ?? '-',
-    accessorFn: (row) => row.category?.name,
+    cell: ({ row }) => row.original.categoryName,
+    accessorKey: 'categoryName',
   },
   {
     id: 'location',
@@ -98,54 +103,63 @@ const columns: ColumnDef<InventoryAsset>[] = [
   },
 ]
 
-async function loadAvailableAssets() {
-  loadingAssets.value = true
+async function loadAvailableUnits() {
+  loadingUnits.value = true
   try {
     const metaRes = await inventoryApi.getInventoryMetadata()
     const metadata = metaRes.data?.data ?? null
-    if (metadata) {
-      const availStatus = metadata.statuses.find(
-        (s: InventoryStatus) => s.code === 'STAT-AVAIL',
-      )
-      if (availStatus) {
-        const assetsRes = await inventoryApi.getAssets({
-          statusId: availStatus.id,
-          limit: 1000,
-          page: 1,
-        })
-        availableAssets.value = assetsRes.data?.data ?? []
-      }
+    const availStatus = metadata?.statuses.find(
+      (s: InventoryStatus) => s.code === 'STAT-AVAIL',
+    )
+    if (!availStatus) {
+      availableUnits.value = []
+      return
     }
+    const assetsRes = await inventoryApi.getAssets({
+      statusId: availStatus.id,
+      limit: 1000,
+      page: 1,
+    })
+    const assets = assetsRes.data?.data ?? []
+    availableUnits.value = assets.flatMap((asset) =>
+      (asset.units ?? [])
+        .filter((u) => u.status?.code === 'STAT-AVAIL')
+        .map((u) => ({
+          ...u,
+          assetName: asset.name,
+          categoryName: asset.category?.name ?? '-',
+        })),
+    )
   } catch (error) {
     toast.error(
-      getIndonesianErrorMessage(error, 'Gagal memuat daftar aset tersedia.'),
+      getIndonesianErrorMessage(error, 'Gagal memuat daftar unit tersedia.'),
     )
   } finally {
-    loadingAssets.value = false
+    loadingUnits.value = false
   }
 }
 
 onMounted(() => {
-  void loadAvailableAssets()
+  void loadAvailableUnits()
 })
 
-function handleSelectionChange(rows: InventoryAsset[]) {
-  selectedAssets.value = rows
+function handleSelectionChange(rows: LoanUnitRow[]) {
+  selectedUnits.value = rows
 }
 
 async function handleCreateLoan() {
-  if (selectedAssets.value.length === 0) {
-    toast.error('Pilih minimal satu aset untuk dipinjam.')
+  if (selectedUnits.value.length === 0) {
+    toast.error('Pilih minimal satu unit untuk dipinjam.')
     return
   }
 
   isSubmitting.value = true
   try {
-    const assetIds = selectedAssets.value.map((a) => a.id)
+    const unitIds = selectedUnits.value.map((u) => u.id)
     await inventoryApi.createLoan({
       purpose: createForm.value.purpose,
       expectedReturnDate: createForm.value.expectedReturnDate,
-      assetIds,
+      unitIds,
     })
     toast.success('Pengajuan peminjaman berhasil dikirim.')
     void router.push({ name: 'inventory-loans' })
@@ -225,14 +239,14 @@ function handleCancel() {
 
             <div class="space-y-3">
               <Label class="text-base font-semibold"
-                >Pilih Aset Tersedia
+                >Pilih Unit Tersedia
                 <span class="text-destructive">*</span></Label
               >
               <DataTable
                 :columns="columns"
-                :data="availableAssets"
-                :is-loading="loadingAssets"
-                item-label="aset tersedia"
+                :data="availableUnits"
+                :is-loading="loadingUnits"
+                item-label="unit tersedia"
                 @selection-change="handleSelectionChange"
               />
             </div>

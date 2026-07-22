@@ -51,11 +51,13 @@ const columns: ColumnDef<InventoryHistory>[] = [
     cell: ({ row }) => row.index + 1,
   },
   {
-    id: 'asset',
-    header: 'Nama Aset',
+    id: 'unit',
+    header: 'Unit Aset',
     cell: ({ row }) => {
-      const asset = row.original.asset
-      return asset ? `${asset.name} (${asset.assetNumber})` : '-'
+      const unit = row.original.unit
+      if (!unit) return '-'
+      const name = unit.asset?.name ?? 'Aset'
+      return `${name} (${unit.unitNumber})`
     },
   },
   {

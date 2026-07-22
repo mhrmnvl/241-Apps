@@ -11,6 +11,7 @@ import type { AcademicYearRef, Curricula, CurriculaSavePayload } from '../types'
 export function useCurriculaForm(options?: {
   academicYears: () => AcademicYearRef[]
   editData?: () => Curricula | null
+  isOpen?: () => boolean
   onSuccess?: () => void | Promise<void>
 }) {
   const store = useCurriculaStore()
@@ -54,9 +55,13 @@ export function useCurriculaForm(options?: {
     }
   }
 
+  // Re-init whenever the dialog opens (not only when editData changes), so
+  // stale validation errors from a previous attempt don't persist on reopen.
   watch(
-    () => options?.editData?.(),
-    (data) => {
+    () => [options?.isOpen?.() ?? true, options?.editData?.()] as const,
+    ([isOpen, data]) => {
+      if (isOpen === false) return
+      formError.value = null
       if (data) {
         form.setValues({
           academicYearId: data.academicYearId,

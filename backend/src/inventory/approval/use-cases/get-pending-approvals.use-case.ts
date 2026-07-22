@@ -28,7 +28,7 @@ export class GetPendingApprovalsUseCase {
                 include: {
                   items: {
                     include: {
-                      asset: true,
+                      unit: { include: { asset: true } },
                     },
                   },
                 },

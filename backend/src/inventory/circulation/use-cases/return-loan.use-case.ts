@@ -50,14 +50,14 @@ export class ReturnLoanUseCase {
 
       // 2. Process each item being returned
       for (const itemDto of dto.items) {
-        const loanItem = loan.items.find((i) => i.assetId === itemDto.assetId);
+        const loanItem = loan.items.find((i) => i.unitId === itemDto.unitId);
         if (!loanItem) {
           throw new BadRequestException(
-            `Asset ID ${itemDto.assetId} is not part of this loan.`,
+            `Unit ID ${itemDto.unitId} is not part of this loan.`,
           );
         }
 
-        const asset = loanItem.asset;
+        const unit = loanItem.unit;
 
         // Update returned condition on the loan item
         await tx.inventoryLoanItem.update({
@@ -68,9 +68,9 @@ export class ReturnLoanUseCase {
           },
         });
 
-        // Revert asset status to STAT-AVAIL and set new condition
-        await tx.inventoryAsset.update({
-          where: { id: asset.id },
+        // Revert unit status to STAT-AVAIL and set new condition
+        await tx.inventoryAssetUnit.update({
+          where: { id: unit.id },
           data: {
             statusId: availStatus.id,
             conditionId: itemDto.returnedConditionId,
@@ -80,11 +80,11 @@ export class ReturnLoanUseCase {
         // Record history log
         await tx.inventoryHistory.create({
           data: {
-            assetId: asset.id,
+            unitId: unit.id,
             transactionTypeId: txType.id,
-            previousConditionId: asset.conditionId,
+            previousConditionId: unit.conditionId,
             newConditionId: itemDto.returnedConditionId,
-            previousStatusId: asset.statusId,
+            previousStatusId: unit.statusId,
             newStatusId: availStatus.id,
             note: `Pengembalian aset dari peminjaman (No. ${loan.loanNumber}). ${itemDto.notes ?? ''}`,
             changedById,

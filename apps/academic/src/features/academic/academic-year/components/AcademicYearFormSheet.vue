@@ -60,6 +60,7 @@ const { editData } = toRefs(props)
 
 const academicYearForm = useAcademicYearForm({
   editData: () => editData.value ?? null,
+  isOpen: () => props.open,
   onSuccess: () => {
     emit('save-success')
     open.value = false

@@ -50,9 +50,9 @@ export class PrismaCirculationRepository extends ICirculationRepository {
         include: {
           items: {
             include: {
-              asset: {
+              unit: {
                 include: {
-                  category: true,
+                  asset: true,
                   location: true,
                   status: true,
                   condition: true,
@@ -74,9 +74,9 @@ export class PrismaCirculationRepository extends ICirculationRepository {
       include: {
         items: {
           include: {
-            asset: {
+            unit: {
               include: {
-                category: true,
+                asset: true,
                 location: true,
                 status: true,
                 condition: true,
@@ -113,14 +113,14 @@ export class PrismaCirculationRepository extends ICirculationRepository {
   async findAllHistories(query: {
     page?: number;
     limit?: number;
-    assetId?: string;
+    unitId?: string;
   }): Promise<PaginatedResult<InventoryHistory>> {
-    const { page = 1, limit = 10, assetId } = query;
+    const { page = 1, limit = 10, unitId } = query;
     const skip = (page - 1) * limit;
 
     const where: Prisma.InventoryHistoryWhereInput = {};
-    if (assetId) {
-      where.assetId = assetId;
+    if (unitId) {
+      where.unitId = unitId;
     }
 
     const [data, total] = await Promise.all([
@@ -130,7 +130,7 @@ export class PrismaCirculationRepository extends ICirculationRepository {
         take: limit,
         orderBy: { changedAt: 'desc' },
         include: {
-          asset: true,
+          unit: { include: { asset: true } },
           transactionType: true,
         },
       }),

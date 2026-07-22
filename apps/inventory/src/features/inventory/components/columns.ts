@@ -1,5 +1,6 @@
 import type { InventoryAsset } from '../types'
 import { ActionCell, Badge } from '@/ui'
+import { Checkbox } from '@/ui/checkbox'
 import type { ColumnDef } from '@tanstack/vue-table'
 import { h } from 'vue'
 
@@ -10,6 +11,8 @@ export interface AssetColumnActions {
     callbacks: { closeAlert: () => void; setLoading: (v: boolean) => void },
   ) => void | Promise<void>
   showActions?: boolean
+  /** Adds a row-selection checkbox column (used by the label-printing page). */
+  selectable?: boolean
 }
 
 function formatIDR(value: number) {
@@ -23,6 +26,48 @@ function formatIDR(value: number) {
 export const createColumns = (
   actions: AssetColumnActions,
 ): ColumnDef<InventoryAsset>[] => [
+  ...(actions.selectable
+    ? [
+        {
+          id: 'select',
+          header: ({
+            table,
+          }: {
+            table: {
+              getIsAllPageRowsSelected: () => boolean
+              getIsSomePageRowsSelected: () => boolean
+              toggleAllPageRowsSelected: (v: boolean) => void
+            }
+          }) =>
+            h(Checkbox, {
+              modelValue: table.getIsAllPageRowsSelected()
+                ? true
+                : table.getIsSomePageRowsSelected()
+                  ? 'indeterminate'
+                  : false,
+              'onUpdate:modelValue': (value: boolean | 'indeterminate') =>
+                table.toggleAllPageRowsSelected(value === true),
+              ariaLabel: 'Pilih semua',
+            }),
+          cell: ({
+            row,
+          }: {
+            row: {
+              getIsSelected: () => boolean
+              toggleSelected: (v: boolean) => void
+            }
+          }) =>
+            h(Checkbox, {
+              modelValue: row.getIsSelected(),
+              'onUpdate:modelValue': (value: boolean | 'indeterminate') =>
+                row.toggleSelected(value === true),
+              ariaLabel: 'Pilih baris',
+            }),
+          enableSorting: false,
+          enableHiding: false,
+        },
+      ]
+    : []),
   {
     id: 'no',
     header: 'No',
@@ -49,47 +94,29 @@ export const createColumns = (
     accessorFn: (row) => row.category?.name,
   },
   {
-    id: 'location',
-    header: 'Lokasi',
-    cell: ({ row }) => {
-      const loc = row.original.location
-      return loc ? `${loc.name} (${loc.building ?? ''})` : '-'
-    },
-    accessorFn: (row) => row.location?.name,
+    id: 'unitCount',
+    header: 'Jumlah Unit',
+    meta: { align: 'center' },
+    cell: ({ row }) => row.original.units?.length ?? 0,
+    accessorFn: (row) => row.units?.length ?? 0,
   },
   {
-    id: 'status',
-    header: 'Status',
+    id: 'available',
+    header: 'Tersedia',
+    meta: { align: 'center' },
     cell: ({ row }) => {
-      const status = row.original.status
-      if (!status) return '-'
-
-      // Determine badge variant based on status code
-      let variant: 'default' | 'secondary' | 'destructive' | 'outline' =
-        'outline'
-      if (status.code === 'STAT-AVAIL') variant = 'default'
-      else if (status.code === 'STAT-LOANED') variant = 'secondary'
-      else if (status.code === 'STAT-MAINT') variant = 'outline'
-      else if (status.code === 'STAT-LOST') variant = 'destructive'
-
-      return h(Badge, { variant }, () => status.name)
+      const units = row.original.units ?? []
+      const avail = units.filter((u) => u.status?.code === 'STAT-AVAIL').length
+      return h(
+        Badge,
+        { variant: avail > 0 ? 'default' : 'secondary' },
+        () => `${avail}/${units.length}`,
+      )
     },
-    accessorFn: (row) => row.status?.name,
-  },
-  {
-    id: 'condition',
-    header: 'Kondisi',
-    cell: ({ row }) => {
-      const cond = row.original.condition
-      if (!cond) return '-'
-      const variant = cond.isUsable ? 'outline' : 'destructive'
-      return h(Badge, { variant }, () => cond.name)
-    },
-    accessorFn: (row) => row.condition?.name,
   },
   {
     id: 'purchasePrice',
-    header: 'Nilai Aset',
+    header: 'Harga / Unit',
     cell: ({ row }) => formatIDR(Number(row.original.purchasePrice)),
     accessorKey: 'purchasePrice',
   },

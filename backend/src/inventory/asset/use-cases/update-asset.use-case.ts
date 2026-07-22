@@ -16,8 +16,6 @@ export class UpdateAssetUseCase {
       name: dto.name,
       brand: dto.brand ?? undefined,
       model: dto.model ?? undefined,
-      serialNumber: dto.serialNumber ?? undefined,
-      barcode: dto.barcode,
       assetNumber: dto.assetNumber,
       purchaseDate: dto.purchaseDate ? new Date(dto.purchaseDate) : undefined,
       purchasePrice: dto.purchasePrice,
@@ -25,13 +23,6 @@ export class UpdateAssetUseCase {
       notes: dto.notes ?? undefined,
       category: dto.categoryId
         ? { connect: { id: dto.categoryId } }
-        : undefined,
-      location: dto.locationId
-        ? { connect: { id: dto.locationId } }
-        : undefined,
-      status: dto.statusId ? { connect: { id: dto.statusId } } : undefined,
-      condition: dto.conditionId
-        ? { connect: { id: dto.conditionId } }
         : undefined,
       fundingSource: dto.fundingSourceId
         ? { connect: { id: dto.fundingSourceId } }

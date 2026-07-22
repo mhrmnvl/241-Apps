@@ -36,25 +36,39 @@ export class PrismaAssetRepository extends IAssetRepository {
         { assetNumber: { contains: keyword, mode: 'insensitive' } },
         { brand: { contains: keyword, mode: 'insensitive' } },
         { model: { contains: keyword, mode: 'insensitive' } },
-        { serialNumber: { contains: keyword, mode: 'insensitive' } },
-        { barcode: { contains: keyword, mode: 'insensitive' } },
+        {
+          units: {
+            some: { unitNumber: { contains: keyword, mode: 'insensitive' } },
+          },
+        },
+        {
+          units: {
+            some: { barcode: { contains: keyword, mode: 'insensitive' } },
+          },
+        },
+        {
+          units: {
+            some: { serialNumber: { contains: keyword, mode: 'insensitive' } },
+          },
+        },
       ];
     }
 
     if (categoryId && categoryId !== 'all') {
       where.categoryId = categoryId;
     }
-    if (locationId && locationId !== 'all') {
-      where.locationId = locationId;
-    }
-    if (statusId && statusId !== 'all') {
-      where.statusId = statusId;
-    }
-    if (conditionId && conditionId !== 'all') {
-      where.conditionId = conditionId;
-    }
     if (fundingSourceId && fundingSourceId !== 'all') {
       where.fundingSourceId = fundingSourceId;
+    }
+
+    // condition/status/location now live on units — filter parents with a matching unit.
+    const unitFilter: Prisma.InventoryAssetUnitWhereInput = { deletedAt: null };
+    if (locationId && locationId !== 'all') unitFilter.locationId = locationId;
+    if (statusId && statusId !== 'all') unitFilter.statusId = statusId;
+    if (conditionId && conditionId !== 'all')
+      unitFilter.conditionId = conditionId;
+    if (Object.keys(unitFilter).length > 1) {
+      where.units = { some: unitFilter };
     }
 
     const [data, total] = await Promise.all([
@@ -65,10 +79,11 @@ export class PrismaAssetRepository extends IAssetRepository {
         orderBy: { createdAt: 'desc' },
         include: {
           category: true,
-          location: true,
-          condition: true,
-          status: true,
           fundingSource: true,
+          units: {
+            where: { deletedAt: null },
+            include: { condition: true, status: true, location: true },
+          },
         },
       }),
       this.prisma.inventoryAsset.count({ where }),
@@ -82,10 +97,12 @@ export class PrismaAssetRepository extends IAssetRepository {
       where: { id, deletedAt: null },
       include: {
         category: true,
-        location: true,
-        condition: true,
-        status: true,
         fundingSource: true,
+        units: {
+          where: { deletedAt: null },
+          orderBy: { unitNumber: 'asc' },
+          include: { condition: true, status: true, location: true },
+        },
       },
     });
   }

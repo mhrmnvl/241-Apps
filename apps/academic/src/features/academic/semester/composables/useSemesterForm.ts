@@ -22,6 +22,7 @@ interface SemesterFormValues {
 export function useSemesterForm(options?: {
   academicYears: () => AcademicYearRef[]
   editData?: () => Semester | null
+  isOpen?: () => boolean
   onSuccess?: () => void | Promise<void>
 }) {
   const store = useSemesterStore()
@@ -69,9 +70,17 @@ export function useSemesterForm(options?: {
     }
   }
 
+  // Re-init whenever the dialog opens (not only when editData changes), so
+  // stale validation errors from a previous attempt don't persist on reopen.
   watch(
-    [() => options?.editData?.(), semesterTypes],
-    ([data, types]) => {
+    [
+      () => options?.isOpen?.() ?? true,
+      () => options?.editData?.(),
+      semesterTypes,
+    ],
+    ([isOpen, data, types]) => {
+      if (isOpen === false) return
+      formError.value = null
       if (data) {
         form.setValues({
           academicYearId: data.academicYearId,

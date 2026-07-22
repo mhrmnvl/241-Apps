@@ -102,13 +102,13 @@ export class ProcessApprovalUseCase {
           data: { statusId: rejectedStatus.id },
         });
 
-        // Revert assets to STAT-AVAIL
+        // Revert units to STAT-AVAIL
         const loanItems = await tx.inventoryLoanItem.findMany({
           where: { loanId: instance.referenceId },
         });
-        const assetIds = loanItems.map((item) => item.assetId);
-        await tx.inventoryAsset.updateMany({
-          where: { id: { in: assetIds } },
+        const unitIds = loanItems.map((item) => item.unitId);
+        await tx.inventoryAssetUnit.updateMany({
+          where: { id: { in: unitIds } },
           data: { statusId: availStatus.id },
         });
 
@@ -162,21 +162,21 @@ export class ProcessApprovalUseCase {
             data: { statusId: approvedStatus.id },
           });
 
-          // Revert assets from STAT-LOAN-PENDING to STAT-LOANED
+          // Revert units from STAT-LOAN-PENDING to STAT-LOANED
           const loanItems = await tx.inventoryLoanItem.findMany({
             where: { loanId: instance.referenceId },
           });
-          const assetIds = loanItems.map((item) => item.assetId);
-          await tx.inventoryAsset.updateMany({
-            where: { id: { in: assetIds } },
+          const unitIds = loanItems.map((item) => item.unitId);
+          await tx.inventoryAssetUnit.updateMany({
+            where: { id: { in: unitIds } },
             data: { statusId: loanedStatus.id },
           });
 
-          // Write histories for each asset
-          for (const assetId of assetIds) {
+          // Write histories for each unit
+          for (const unitId of unitIds) {
             await tx.inventoryHistory.create({
               data: {
-                assetId,
+                unitId,
                 transactionTypeId: txType.id,
                 previousStatusId: pendingStatus.id,
                 newStatusId: loanedStatus.id,

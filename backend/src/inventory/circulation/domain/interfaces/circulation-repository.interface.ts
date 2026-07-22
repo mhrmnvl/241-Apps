@@ -16,9 +16,9 @@ export type LoanWithRelations = Prisma.InventoryLoanGetPayload<{
   include: {
     items: {
       include: {
-        asset: {
+        unit: {
           include: {
-            category: true;
+            asset: true;
             location: true;
             status: true;
             condition: true;
@@ -46,7 +46,7 @@ export abstract class ICirculationRepository {
   abstract findAllHistories(query: {
     page?: number;
     limit?: number;
-    assetId?: string;
+    unitId?: string;
   }): Promise<PaginatedResult<InventoryHistory>>;
   abstract createHistory(
     data: Prisma.InventoryHistoryCreateInput,

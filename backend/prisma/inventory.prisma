@@ -2,22 +2,42 @@
 // INVENTORY MODULE SCHEMA
 // =========================================================================
 
+// Parent = asset definition / batch (catalog). Physical units live in InventoryAssetUnit.
 model InventoryAsset {
   id               String    @id @default(uuid()) @db.Uuid
   assetNumber      String    @unique @map("asset_number") @db.VarChar(50)
-  barcode          String?   @unique @db.VarChar(100)
   name             String    @db.VarChar(150)
   categoryId       String    @map("category_id") @db.Uuid
   brand            String?   @db.VarChar(100)
   model            String?   @db.VarChar(100)
-  serialNumber     String?   @map("serial_number") @db.VarChar(100)
   purchaseDate     DateTime  @map("purchase_date") @db.Date
   purchasePrice    Decimal   @map("purchase_price") @db.Decimal(15, 2)
-  residualValue    Decimal   @default(0.00) @map("residual_value") @db.Decimal(15, 2)
   usefulLifeMonths Int       @default(0) @map("useful_life_months")
-  currentBookValue Decimal   @map("current_book_value") @db.Decimal(15, 2)
   fundingSourceId  String?   @map("funding_source_id") @db.Uuid
   imageUrl         String?   @map("image_url") @db.Text
+  notes            String?   @db.Text
+  version          Int       @default(1)
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt        DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt        DateTime? @map("deleted_at") @db.Timestamptz
+
+  category      InventoryCategory       @relation(fields: [categoryId], references: [id])
+  fundingSource InventoryFundingSource? @relation(fields: [fundingSourceId], references: [id])
+
+  units InventoryAssetUnit[]
+
+  @@map("inventory_assets")
+}
+
+// Child = individual physical unit, each with its own number/barcode/condition/status/location.
+model InventoryAssetUnit {
+  id               String    @id @default(uuid()) @db.Uuid
+  assetId          String    @map("asset_id") @db.Uuid
+  unitNumber       String    @unique @map("unit_number") @db.VarChar(50)
+  barcode          String?   @unique @db.VarChar(100)
+  serialNumber     String?   @map("serial_number") @db.VarChar(100)
+  residualValue    Decimal   @default(0.00) @map("residual_value") @db.Decimal(15, 2)
+  currentBookValue Decimal   @map("current_book_value") @db.Decimal(15, 2)
   conditionId      String    @map("condition_id") @db.Uuid
   statusId         String    @map("status_id") @db.Uuid
   locationId       String    @map("location_id") @db.Uuid
@@ -28,16 +48,15 @@ model InventoryAsset {
   updatedAt        DateTime  @updatedAt @map("updated_at") @db.Timestamptz
   deletedAt        DateTime? @map("deleted_at") @db.Timestamptz
 
-  category      InventoryCategory      @relation(fields: [categoryId], references: [id])
-  location      InventoryLocation      @relation(fields: [locationId], references: [id])
-  condition     InventoryCondition     @relation(fields: [conditionId], references: [id])
-  status        InventoryStatus        @relation(fields: [statusId], references: [id])
-  fundingSource InventoryFundingSource? @relation(fields: [fundingSourceId], references: [id])
+  asset     InventoryAsset     @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  condition InventoryCondition @relation(fields: [conditionId], references: [id])
+  status    InventoryStatus    @relation(fields: [statusId], references: [id])
+  location  InventoryLocation  @relation(fields: [locationId], references: [id])
 
-  histories     InventoryHistory[]
-  loanItems     InventoryLoanItem[]
+  histories InventoryHistory[]
+  loanItems InventoryLoanItem[]
 
-  @@map("inventory_assets")
+  @@map("inventory_asset_units")
 }
 
 model InventoryCategory {
@@ -65,7 +84,7 @@ model InventoryLocation {
   description String?  @db.Text
   createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
 
-  assets InventoryAsset[]
+  units InventoryAssetUnit[]
 
   @@map("inventory_locations")
 }
@@ -77,7 +96,7 @@ model InventoryCondition {
   isUsable  Boolean  @default(true) @map("is_usable")
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
 
-  assets InventoryAsset[]
+  units InventoryAssetUnit[]
 
   @@map("inventory_conditions")
 }
@@ -89,7 +108,7 @@ model InventoryStatus {
   allowTransactions Boolean  @default(true) @map("allow_transactions")
   createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz
 
-  assets InventoryAsset[]
+  units InventoryAssetUnit[]
 
   @@map("inventory_statuses")
 }
@@ -110,7 +129,7 @@ model InventoryFundingSource {
 
 model InventoryHistory {
   id                  String   @id @default(uuid()) @db.Uuid
-  assetId             String   @map("asset_id") @db.Uuid
+  unitId              String   @map("unit_id") @db.Uuid
   transactionTypeId   String   @map("transaction_type_id") @db.Uuid
   previousConditionId String?  @map("previous_condition_id") @db.Uuid
   newConditionId      String?  @map("new_condition_id") @db.Uuid
@@ -124,7 +143,7 @@ model InventoryHistory {
   changedById         String   @map("changed_by_id") @db.Uuid
   changedAt           DateTime @default(now()) @map("changed_at") @db.Timestamptz
 
-  asset           InventoryAsset           @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  unit            InventoryAssetUnit       @relation(fields: [unitId], references: [id], onDelete: Cascade)
   transactionType InventoryTransactionType @relation(fields: [transactionTypeId], references: [id])
 
   @@map("inventory_histories")
@@ -164,12 +183,12 @@ model InventoryLoan {
 model InventoryLoanItem {
   id                  String  @id @default(uuid()) @db.Uuid
   loanId              String  @map("loan_id") @db.Uuid
-  assetId             String  @map("asset_id") @db.Uuid
+  unitId              String  @map("unit_id") @db.Uuid
   returnedConditionId String? @map("returned_condition_id") @db.Uuid
   notes               String? @db.Text
 
-  loan  InventoryLoan  @relation(fields: [loanId], references: [id], onDelete: Cascade)
-  asset InventoryAsset @relation(fields: [assetId], references: [id])
+  loan InventoryLoan      @relation(fields: [loanId], references: [id], onDelete: Cascade)
+  unit InventoryAssetUnit @relation(fields: [unitId], references: [id])
 
   @@map("inventory_loan_items")
 }

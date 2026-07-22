@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsDateString,
+  IsInt,
   IsNotEmpty,
   IsNumber,
   IsOptional,
@@ -14,6 +15,17 @@ export class CreateAssetDto {
   @IsNotEmpty()
   @IsString()
   name: string;
+
+  @ApiPropertyOptional({
+    description:
+      'Jumlah unit fisik yang dibuat (tiap unit dapat nomor sendiri)',
+    default: 1,
+    minimum: 1,
+  })
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  quantity?: number;
 
   @ApiProperty({ description: 'Category UUID' })
   @IsNotEmpty()

@@ -32,6 +32,16 @@ export const inventoryRoutes: RouteRecordRaw[] = [
     },
   },
   {
+    path: '/inventory/assets/label-printing',
+    name: 'inventory-assets-label-printing',
+    component: () => import('./views/AssetLabelPrintView.vue'),
+    meta: {
+      requiresAuth: true,
+      title: 'Cetak Label',
+      description: 'Pilih aset dan cetak label unit untuk ditempel.',
+    },
+  },
+  {
     path: '/inventory/categories',
     name: 'inventory-categories',
     component: () => import('./views/CategoryListView.vue'),

@@ -47,7 +47,7 @@ const selectedLoanForReturn = ref<InventoryLoan | null>(null)
 // Form States
 const returnForm = ref({
   items: [] as {
-    assetId: string
+    unitId: string
     returnedConditionId: string
     notes: string
   }[],
@@ -77,8 +77,8 @@ async function loadData() {
 function openReturnDialog(loan: InventoryLoan) {
   selectedLoanForReturn.value = loan
   returnForm.value.items = loan.items.map((item: InventoryLoanItem) => ({
-    assetId: item.assetId,
-    returnedConditionId: item.asset?.conditionId ?? '',
+    unitId: item.unitId,
+    returnedConditionId: item.unit?.conditionId ?? '',
     notes: '',
   }))
   isReturnOpen.value = true
@@ -122,10 +122,12 @@ const columns: ColumnDef<InventoryLoan>[] = [
   },
   {
     id: 'assets',
-    header: 'Aset',
+    header: 'Unit',
     cell: ({ row }) => {
       const items = row.original.items ?? []
-      return items.map((i: InventoryLoanItem) => i.asset?.name).join(', ')
+      return items
+        .map((i: InventoryLoanItem) => i.unit?.unitNumber ?? '-')
+        .join(', ')
     },
   },
   {
@@ -243,14 +245,14 @@ onMounted(() => {
           <div class="space-y-3 max-h-[250px] overflow-y-auto pr-1">
             <div
               v-for="item in returnForm.items"
-              :key="item.assetId"
+              :key="item.unitId"
               class="border p-3 rounded-lg bg-card space-y-2"
             >
               <div class="text-sm font-semibold text-foreground">
                 {{
                   selectedLoanForReturn?.items.find(
-                    (i: any) => i.assetId === item.assetId,
-                  )?.asset?.name
+                    (i) => i.unitId === item.unitId,
+                  )?.unit?.unitNumber
                 }}
               </div>
 

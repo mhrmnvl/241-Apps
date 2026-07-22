@@ -42,26 +42,19 @@ export interface InventoryFundingSource {
   createdAt: string
 }
 
+// Parent = asset definition / batch (catalog). Physical units live in `units`.
 export interface InventoryAsset {
   id: string
   assetNumber: string
-  barcode: string | null
   name: string
   categoryId: string
   brand: string | null
   model: string | null
-  serialNumber: string | null
   purchaseDate: string
   purchasePrice: number
-  residualValue: number
   usefulLifeMonths: number
-  currentBookValue: number
   fundingSourceId: string | null
   imageUrl: string | null
-  conditionId: string
-  statusId: string
-  locationId: string
-  custodianId: string | null
   notes: string | null
   version: number
   createdAt: string
@@ -69,10 +62,41 @@ export interface InventoryAsset {
   deletedAt: string | null
 
   category: InventoryCategory
-  location: InventoryLocation
-  condition: InventoryCondition
-  status: InventoryStatus
   fundingSource: InventoryFundingSource | null
+  units: InventoryAssetUnit[]
+}
+
+// Child = individual physical unit (each numbered/labelled and loanable).
+export interface InventoryAssetUnit {
+  id: string
+  assetId: string
+  unitNumber: string
+  barcode: string | null
+  serialNumber: string | null
+  residualValue: number
+  currentBookValue: number
+  conditionId: string
+  statusId: string
+  locationId: string
+  custodianId: string | null
+  notes: string | null
+  createdAt: string
+  updatedAt: string
+  deletedAt: string | null
+
+  condition?: InventoryCondition
+  status?: InventoryStatus
+  location?: InventoryLocation
+  asset?: InventoryAsset
+}
+
+// Flattened unit for label printing — carries its own asset name so a single
+// label sheet can mix units from different assets (cross-asset batch print).
+export interface LabelUnit {
+  id: string
+  unitNumber: string
+  barcode: string | null
+  assetName: string
 }
 
 export interface InventoryMetadata {
@@ -88,15 +112,32 @@ export interface AssetSavePayload {
   categoryId: string
   brand?: string
   model?: string
-  serialNumber?: string
-  barcode?: string
   purchaseDate: string
   purchasePrice: number
-  usefulLifeMonths?: number
   fundingSourceId?: string | null
-  locationId: string
-  statusId: string
+  notes?: string
+  // unit defaults + quantity (create only)
+  quantity?: number
+  conditionId?: string
+  statusId?: string
+  locationId?: string
+  serialNumber?: string
+}
+
+export interface AddUnitsPayload {
+  quantity?: number
   conditionId: string
+  statusId: string
+  locationId: string
+}
+
+export interface AssetUnitUpdatePayload {
+  conditionId?: string
+  statusId?: string
+  locationId?: string
+  custodianId?: string
+  serialNumber?: string
+  barcode?: string
   notes?: string
 }
 
@@ -126,10 +167,10 @@ export interface InventoryReferenceItem {
 export interface InventoryLoanItem {
   id: string
   loanId: string
-  assetId: string
+  unitId: string
   returnedConditionId: string | null
   notes: string | null
-  asset?: InventoryAsset
+  unit?: InventoryAssetUnit
 }
 
 export interface InventoryLoan {
@@ -157,11 +198,11 @@ export interface LoanQueryParams {
 export interface CreateLoanPayload {
   purpose: string
   expectedReturnDate: string
-  assetIds: string[]
+  unitIds: string[]
 }
 
 export interface ReturnLoanItemPayload {
-  assetId: string
+  unitId: string
   returnedConditionId: string
   notes?: string
 }
@@ -180,7 +221,7 @@ export interface InventoryTransactionType {
 
 export interface InventoryHistory {
   id: string
-  assetId: string
+  unitId: string
   transactionTypeId: string
   previousConditionId: string | null
   newConditionId: string | null
@@ -189,14 +230,14 @@ export interface InventoryHistory {
   note: string | null
   changedById: string
   changedAt: string
-  asset?: InventoryAsset
+  unit?: InventoryAssetUnit
   transactionType?: InventoryTransactionType
 }
 
 export interface HistoryQueryParams {
   page: number
   limit: number
-  assetId?: string
+  unitId?: string
 }
 
 export interface ApprovalStep {
