@@ -7,7 +7,7 @@ export const organizationRoutes: RouteRecordRaw[] = [
     component: () => import('./views/OrganizationView.vue'),
     meta: {
       requiresAuth: true,
-      allowedRoles: ['ADMIN', 'TEACHER'],
+      requiredPermission: 'school-units.read',
       title: 'Profil Yayasan',
     },
   },
@@ -17,7 +17,7 @@ export const organizationRoutes: RouteRecordRaw[] = [
     component: () => import('./views/OrganizationEditView.vue'),
     meta: {
       requiresAuth: true,
-      allowedRoles: ['ADMIN'],
+      requiredPermission: 'school-units.update',
       title: 'Ubah Data Yayasan',
     },
   },

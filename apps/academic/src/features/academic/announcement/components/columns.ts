@@ -61,6 +61,8 @@ export const createAnnouncementColumns = (
           cell: ({ row }: { row: { original: Announcement } }) => {
             const item = row.original
             return h(ActionCell, {
+              hideEdit: actions.canUpdate === false,
+              hideDelete: actions.canDelete === false,
               deleteTitle: 'Hapus Pengumuman?',
               deleteDescription:
                 'Pengumuman ini akan dihapus secara permanen dari sistem.',

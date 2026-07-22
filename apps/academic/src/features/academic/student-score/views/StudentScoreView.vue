@@ -67,23 +67,27 @@ const isFilterReady = computed(() =>
   Boolean(selectedClassroomId.value && selectedSubjectId.value),
 )
 const hasDisplayedData = ref(items.value.length > 0)
-const { isAdmin, canContribute } = useRoleGuard()
+const { can } = useRoleGuard()
+const canUpdateScores = computed(() => can('student-scores.update'))
+const canManageAssessmentItems = computed(
+  () =>
+    can('assessment-items.create') ||
+    can('assessment-items.update') ||
+    can('assessment-items.delete'),
+)
 
-const columns = computed(() => {
-  const cols = createstudentScoreColumns(
+const columns = computed(() =>
+  createstudentScoreColumns(
     {
+      canUpdate: canUpdateScores.value,
       onEdit: (item) => {
         editingData.value = item
         openForm.value = true
       },
     },
     assessmentItems.value,
-  )
-  if (!canContribute.value) {
-    return cols.filter((c) => c.id !== 'actions')
-  }
-  return cols
-})
+  ),
+)
 
 async function handleFilter() {
   if (!isFilterReady.value) return
@@ -189,7 +193,9 @@ onMounted(async () => {
           </div>
 
           <div
-            v-if="hasDisplayedData && teachingAssignment && isAdmin"
+            v-if="
+              hasDisplayedData && teachingAssignment && canManageAssessmentItems
+            "
             class="flex justify-end"
           >
             <Button
@@ -231,7 +237,7 @@ onMounted(async () => {
           </div>
 
           <StudentScoreFormDialog
-            v-if="isAdmin && openForm"
+            v-if="canUpdateScores && openForm"
             v-model:open="openForm"
             :edit-data="editingData"
             :form-error="formError"
@@ -240,7 +246,7 @@ onMounted(async () => {
           />
 
           <AssessmentItemDialog
-            v-if="isAdmin"
+            v-if="canManageAssessmentItems"
             v-model:open="openAssessmentDialog"
             @changed="handleFilter"
           />

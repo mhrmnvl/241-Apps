@@ -36,6 +36,10 @@ export const createstudentScoreColumns = (
     }),
   )
 
+  if (actions.canUpdate === false) {
+    return [...baseColumns, ...dynamicColumns]
+  }
+
   const actionColumn: ColumnDef<StudentScoreRow> = {
     id: 'actions',
     header: 'Opsi',

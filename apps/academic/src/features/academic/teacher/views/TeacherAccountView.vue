@@ -27,11 +27,14 @@ import { watchDebounced } from '@vueuse/core'
 import { Search, Filter } from 'lucide-vue-next'
 import { onMounted, ref, computed } from 'vue'
 import { toast } from 'vue-sonner'
+import { useRoleGuard } from '@/shared/composables/useRoleGuard'
 
 const breadcrumbs = [
   { title: 'Guru', href: '/teacher' },
   { title: 'Akun Guru' },
 ]
+
+const { can } = useRoleGuard()
 
 const {
   filters,
@@ -49,6 +52,8 @@ const isEditAccountModalOpen = ref(false)
 const accountToEdit = ref<Teacher | null>(null)
 
 const tableColumns = createAccountColumns({
+  canUpdate: can('teachers.update'),
+  canDelete: can('teachers.delete'),
   onEdit: (teacher) => {
     accountToEdit.value = teacher
     isEditAccountModalOpen.value = true

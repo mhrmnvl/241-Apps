@@ -1,4 +1,4 @@
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useAcademicCalendar } from './useAcademicCalendar'
 import { useCalendarFormat } from './useCalendarFormat'
 import { useCalendarEvents } from './useCalendarEvents'
@@ -30,7 +30,13 @@ export function useAcademicCalendarView() {
   const { todayEvents, upcomingEvents } = useCalendarEvents(events)
 
   const activeTab = ref('calendar')
-  const { isAdmin } = useRoleGuard()
+  const { can } = useRoleGuard()
+  const canManageCalendar = computed(
+    () =>
+      can('academic-calendars.create') ||
+      can('academic-calendars.update') ||
+      can('academic-calendars.delete'),
+  )
   const sheetOpen = ref(false)
   const sheetEventData = ref<CalendarEventData | null>(null)
   const selectedDate = ref('')
@@ -44,14 +50,14 @@ export function useAcademicCalendarView() {
   }
 
   function handleDateClick(info: DateClickInfo) {
-    if (!isAdmin.value) return
+    if (!can('academic-calendars.create')) return
     sheetEventData.value = null
     selectedDate.value = info.dateStr
     sheetOpen.value = true
   }
 
   function handleEventClick(info: EventClickInfo) {
-    if (!isAdmin.value) return
+    if (!can('academic-calendars.update')) return
     const ep = info.event.extendedProps
     openEditSheet({
       id: info.event.id,
@@ -137,7 +143,7 @@ export function useAcademicCalendarView() {
     handleUpdateFilters,
     deleteBulk,
     activeTab,
-    isAdmin,
+    canManageCalendar,
     sheetOpen,
     sheetEventData,
     selectedDate,

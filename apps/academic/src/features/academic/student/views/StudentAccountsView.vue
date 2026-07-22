@@ -27,8 +27,11 @@ import { Search, Filter } from 'lucide-vue-next'
 import { computed, onMounted, ref, watch } from 'vue'
 import { toast } from 'vue-sonner'
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
+import { useRoleGuard } from '@/shared/composables/useRoleGuard'
 
 import type { Student, StudentAccountUpdatePayload } from '../types'
+
+const { can } = useRoleGuard()
 
 const isEditModalOpen = ref(false)
 const selectedStudent = ref<Student | null>(null)
@@ -38,6 +41,8 @@ const formError = ref<string | null>(null)
 const tableColumns = computed(() =>
   createAccountColumns(
     {
+      canUpdate: can('students.update'),
+      canDelete: can('students.delete'),
       onEdit: (student) => {
         selectedStudent.value = student
         isEditModalOpen.value = true

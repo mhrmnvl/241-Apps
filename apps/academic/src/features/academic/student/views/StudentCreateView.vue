@@ -324,10 +324,10 @@ onMounted(async () => {
           </CardTitle>
         </CardHeader>
 
-        <div class="px-6 py-4 border-b">
+        <div class="px-6 py-4 border-b overflow-x-auto">
           <Stepper
             :model-value="activeStep"
-            class="flex items-center justify-center gap-2 md:gap-6 w-full max-w-3xl mx-auto"
+            class="flex items-center justify-[safe_center] gap-2 md:gap-6 w-full max-w-3xl mx-auto min-w-max"
             @update:model-value="(v) => void goToStep(Number(v))"
           >
             <StepperItem

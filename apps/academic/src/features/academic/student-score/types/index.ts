@@ -68,4 +68,6 @@ export interface StudentScoreRow {
 
 export interface StudentScoreColumnActions {
   onEdit?: (item: StudentScoreRow) => void
+  /** Hides the actions column entirely when the user lacks update rights. */
+  canUpdate?: boolean
 }

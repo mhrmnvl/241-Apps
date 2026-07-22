@@ -27,7 +27,7 @@ import {
 } from '@/ui/sheet'
 
 const router = useRouter()
-const { isAdmin } = useRoleGuard()
+const { can } = useRoleGuard()
 
 const { organization, isLoading, loadError, loadOrganizationData } =
   useOrganization()
@@ -82,7 +82,7 @@ const handleSaveNewSchool = async () => {
             Profil Yayasan
           </CardTitle>
           <Button
-            v-if="isAdmin"
+            v-if="can('school-units.update')"
             :disabled="isLoading || Boolean(loadError)"
             @click="router.push('/organization/edit')"
           >
@@ -109,7 +109,7 @@ const handleSaveNewSchool = async () => {
             Daftar Unit Sekolah
           </CardTitle>
           <Button
-            v-if="isAdmin"
+            v-if="can('school-units.create')"
             :disabled="isLoading || Boolean(loadError)"
             @click="handleAddClick"
           >

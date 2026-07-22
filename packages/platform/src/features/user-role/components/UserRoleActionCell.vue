@@ -26,9 +26,9 @@ const props = defineProps<{
 const router = useRouter()
 const { isUpdating, syncUserRoles } = useUserRole()
 const { user: currentUser } = useAuthSession()
-const { hasPermission } = useRoleGuard()
+const { can } = useRoleGuard()
 
-const canEditAccount = computed(() => hasPermission('users.update'))
+const canEditAccount = computed(() => can('users.update'))
 
 const isSelf = computed(() => currentUser.value?.id === props.user.id)
 

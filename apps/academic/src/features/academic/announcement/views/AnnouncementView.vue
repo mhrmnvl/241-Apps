@@ -37,8 +37,13 @@ const {
 
 const isAddModalOpen = ref(false)
 const editingItem = ref<Announcement | null>(null)
-const { isAdmin, isTeacher } = useRoleGuard()
-const hasWritePermission = computed(() => isAdmin.value || isTeacher.value)
+const { can } = useRoleGuard()
+const canManageAnnouncements = computed(
+  () =>
+    can('announcements.create') ||
+    can('announcements.update') ||
+    can('announcements.delete'),
+)
 
 const classroomFilterOptions = computed<ComboboxOption[]>(() => [
   { value: '', label: 'Semua Kelas' },
@@ -49,7 +54,9 @@ const classroomFilterOptions = computed<ComboboxOption[]>(() => [
 ])
 
 const tableColumns = createAnnouncementColumns({
-  showActions: hasWritePermission.value,
+  showActions: can('announcements.update') || can('announcements.delete'),
+  canUpdate: can('announcements.update'),
+  canDelete: can('announcements.delete'),
   onEdit: (item: Announcement) => {
     editingItem.value = item
     isAddModalOpen.value = true
@@ -101,7 +108,7 @@ onMounted(async () => {
             Pengumuman
           </CardTitle>
           <Button
-            v-if="hasWritePermission"
+            v-if="can('announcements.create')"
             @click="isAddModalOpen = true"
           >
             <Plus class="size-4 mr-2" />
@@ -145,7 +152,7 @@ onMounted(async () => {
           </DataTable>
 
           <AnnouncementFormSheet
-            v-if="hasWritePermission && isAddModalOpen"
+            v-if="canManageAnnouncements && isAddModalOpen"
             v-model:open="isAddModalOpen"
             :form-error="formError"
             :is-saving="isSaving"

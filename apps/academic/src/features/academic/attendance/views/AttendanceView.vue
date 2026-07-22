@@ -15,7 +15,8 @@ import { Search } from 'lucide-vue-next'
 import { onMounted, computed } from 'vue'
 import { useRoleGuard } from '@/shared/composables/useRoleGuard'
 
-const { isStudent } = useRoleGuard()
+const { can } = useRoleGuard()
+const canRecordAttendance = computed(() => can('attendances.update'))
 
 const breadcrumbs = [
   { title: 'Penilaian', href: '#' },
@@ -81,7 +82,7 @@ async function handleBulkSave() {
 }
 
 onMounted(async () => {
-  if (isStudent.value) {
+  if (!canRecordAttendance.value) {
     activeTab.value = 'recap'
   }
   await fetchFilterOptions()
@@ -164,7 +165,7 @@ onMounted(async () => {
           >
             <TabsList>
               <TabsTrigger
-                v-if="!isStudent"
+                v-if="canRecordAttendance"
                 value="input"
               >
                 Input Kehadiran

@@ -1,6 +1,14 @@
 import { useAuthStore } from '@/features/platform/auth'
 import { computed } from 'vue'
 
+/**
+ * Permission-based authorization (CASL-style) — the only gate consumers
+ * should use. There is deliberately no isAdmin/isTeacher/isStudent here:
+ * a role name says who the user *is*, not what they're allowed to do, and
+ * custom roles (assigned arbitrary permission sets) would silently fail
+ * any role-name check. Every access decision is "does this user hold the
+ * permission for this action", never "is this user an admin/teacher".
+ */
 export function useRoleGuard() {
   const authStore = useAuthStore()
   const userRoles = computed(() => authStore.user?.roles ?? [])
@@ -8,48 +16,20 @@ export function useRoleGuard() {
 
   const isSuperAdmin = computed(() => userRoles.value.includes('SUPER_ADMIN'))
 
-  const isAdmin = computed(
-    () => isSuperAdmin.value || userPermissions.value.includes('users.read'),
-  )
-
-  const isTeacher = computed(
-    () => isSuperAdmin.value || userPermissions.value.includes('teachers.read'),
-  )
-
-  const isStudent = computed(() => userRoles.value.includes('STUDENT'))
-
-  const canManage = computed(() => isAdmin.value)
-  const canContribute = computed(() => isAdmin.value || isTeacher.value)
-
-  function hasRole(...roles: string[]): boolean {
-    return userRoles.value.some((r: string) => roles.includes(r))
-  }
-
   /**
-   * Permission gate for buttons/actions, named after intent (CASL-style).
-   * SUPER_ADMIN always passes. Pass a single permission for a specific action
-   * (`can('students.create')`) or several for an OR check
-   * (`can('students.update', 'students.delete')` → "can manage").
+   * Pass a single permission for a specific action (`can('students.create')`)
+   * or several for an OR check (`can('students.update', 'students.delete')`
+   * — CASL's "manage" equivalent). SUPER_ADMIN always passes.
    */
   function can(...permissions: string[]): boolean {
     if (isSuperAdmin.value) return true
     return permissions.some((p) => userPermissions.value.includes(p))
   }
 
-  // Backwards-compatible alias.
-  const hasPermission = can
-
   return {
     userRoles,
     userPermissions,
     isSuperAdmin,
-    isAdmin,
-    isTeacher,
-    isStudent,
-    canManage,
-    canContribute,
-    hasRole,
     can,
-    hasPermission,
   }
 }

@@ -27,7 +27,7 @@ const {
   fetchEvents,
   handleUpdateFilters,
   activeTab,
-  isAdmin,
+  canManageCalendar,
   sheetOpen,
   sheetEventData,
   selectedDate,
@@ -47,6 +47,7 @@ const {
 
 onMounted(() => {
   void tableViewRef
+  void canManageCalendar
   if (currentRange.value.start && currentRange.value.end) {
     void fetchEvents(currentRange.value)
   }
@@ -69,7 +70,7 @@ onMounted(() => {
           </div>
           <div class="flex flex-col sm:flex-row w-full sm:w-auto gap-2">
             <Button
-              v-if="isAdmin"
+              v-if="canManageCalendar"
               class="w-full sm:w-auto"
               @click="openCreateDialog"
             >
@@ -92,7 +93,7 @@ onMounted(() => {
                 Tampilan Kalender
               </TabsTrigger>
               <TabsTrigger
-                v-if="isAdmin"
+                v-if="canManageCalendar"
                 value="tabel"
                 class="rounded-b-none border border-transparent border-b-0 px-4 py-2 data-[state=active]:-mb-px data-[state=active]:z-10 data-[state=active]:border-border data-[state=active]:bg-background data-[state=active]:shadow-none"
               >
@@ -137,7 +138,7 @@ onMounted(() => {
               :table-events="tableEvents"
               :is-loading="tableLoading"
               :is-deleting-bulk="isDeletingBulk"
-              :show-actions="isAdmin"
+              :show-actions="canManageCalendar"
               @update-filters="handleUpdateFilters"
               @delete-bulk="handleDeleteBulk"
               @edit="openEditSheet"
@@ -149,7 +150,7 @@ onMounted(() => {
     </div>
 
     <AcademicCalendarDialog
-      v-if="isAdmin"
+      v-if="canManageCalendar"
       :open="sheetOpen"
       :event-data="sheetEventData"
       :selected-date="selectedDate"

@@ -79,10 +79,10 @@ const handleSaveAddress = async () => {
         </CardHeader>
 
         <div class="w-full">
-          <div class="px-6 py-3 border-b">
+          <div class="px-6 py-3 border-b overflow-x-auto">
             <Stepper
               v-model="activeStep"
-              class="flex items-center justify-center gap-4 md:gap-8 w-full max-w-2xl mx-auto"
+              class="flex items-center justify-[safe_center] gap-4 md:gap-8 w-full max-w-2xl mx-auto min-w-max"
             >
               <StepperItem
                 v-for="step in steps"
