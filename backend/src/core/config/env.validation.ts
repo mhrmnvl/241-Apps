@@ -45,7 +45,23 @@ export const envSchema = z
 
     FRONTEND_URL: z
       .string()
-      .url('FRONTEND_URL must be a valid URL')
+      .refine(
+        (val) => {
+          const urls = val.split(',').map((u) => u.trim());
+          return urls.every((url) => {
+            try {
+              new URL(url);
+              return true;
+            } catch {
+              return false;
+            }
+          });
+        },
+        {
+          message:
+            'FRONTEND_URL must be a valid URL or a comma-separated list of valid URLs',
+        },
+      )
       .default('http://localhost:5173'),
   })
   .superRefine((env, ctx) => {
