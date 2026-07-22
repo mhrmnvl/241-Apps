@@ -27,6 +27,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/ui/dialog'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/ui/dropdown-menu'
 import { ArrowLeftRight, Plus, Search, Filter } from 'lucide-vue-next'
 import { toast } from 'vue-sonner'
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
@@ -151,26 +157,59 @@ onMounted(async () => {
             </CardTitle>
           </div>
           <div class="flex items-center gap-2">
-            <Button
+            <!-- Desktop Action Buttons -->
+            <div class="hidden sm:flex items-center gap-2">
+              <Button
+                v-if="isAdmin"
+                variant="outline"
+                size="sm"
+                class="h-10 px-4 bg-white"
+                @click="isImportExportOpen = true"
+              >
+                <ArrowLeftRight class="size-4 mr-2" />
+                Import / Export
+              </Button>
+              <Button
+                v-if="isAdmin"
+                size="sm"
+                class="h-10 px-4"
+                @click="router.push('/students/create')"
+              >
+                <Plus class="size-4 mr-2" />
+                Tambah Siswa
+              </Button>
+            </div>
+
+            <!-- Mobile Action Dropdown -->
+            <div
               v-if="isAdmin"
-              variant="outline"
-              size="sm"
-              class="sm:h-10 sm:px-4 text-xs sm:text-sm"
-              @click="isImportExportOpen = true"
+              class="flex sm:hidden"
             >
-              <ArrowLeftRight class="size-4 mr-1 sm:mr-2" />
-              <span class="hidden xs:inline">Import / Export</span>
-              <span class="inline xs:hidden">Imp/Exp</span>
-            </Button>
-            <Button
-              v-if="isAdmin"
-              size="sm"
-              class="sm:h-10 sm:px-4 text-xs sm:text-sm"
-              @click="router.push('/students/create')"
-            >
-              <Plus class="size-4 mr-1 sm:mr-2" />
-              Tambah Siswa
-            </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger as-child>
+                  <Button
+                    size="sm"
+                    class="h-9 px-3 gap-1"
+                  >
+                    <Plus class="size-4" />
+                    Tambah
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="end"
+                  class="w-48"
+                >
+                  <DropdownMenuItem @click="router.push('/students/create')">
+                    <Plus class="size-4 mr-2 text-muted-foreground" />
+                    Tambah Siswa
+                  </DropdownMenuItem>
+                  <DropdownMenuItem @click="isImportExportOpen = true">
+                    <ArrowLeftRight class="size-4 mr-2 text-muted-foreground" />
+                    Import / Export
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
         </CardHeader>
         <div class="p-6">
