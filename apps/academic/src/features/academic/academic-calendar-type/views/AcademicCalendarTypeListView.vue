@@ -5,7 +5,7 @@ import { Button } from '@/ui/button'
 import { Card, CardHeader, CardTitle } from '@/ui/card'
 import { Input } from '@/ui/input'
 import { Plus, Search } from 'lucide-vue-next'
-import { onMounted, computed } from 'vue'
+import { onMounted } from 'vue'
 import AcademicCalendarTypeFormDialog from '../components/AcademicCalendarTypeFormDialog.vue'
 import { useAcademicCalendarTypeList } from '../composables/useAcademicCalendarTypeList'
 import { useRoleGuard } from '@/shared/composables/useRoleGuard'
@@ -23,21 +23,14 @@ const {
   openEditDialog,
 } = useAcademicCalendarTypeList()
 
-const { hasPermission } = useRoleGuard()
-// Resource-scoped management gate (replaces coarse admin/role check).
-const isAdmin = computed(() =>
-  hasPermission(
-    'academic-calendar-types.create',
-    'academic-calendar-types.update',
-    'academic-calendar-types.delete',
-  ),
-)
+const { can } = useRoleGuard()
 const columns = createColumns(
   openEditDialog,
   (item, callbacks) => {
     void deleteAcademicCalendarType(item.id, callbacks)
   },
-  isAdmin.value,
+  can('academic-calendar-types.update') ||
+    can('academic-calendar-types.delete'),
 )
 
 const breadcrumbs = [
@@ -65,7 +58,7 @@ onMounted(() => {
             </CardTitle>
           </div>
           <div
-            v-if="isAdmin"
+            v-if="can('academic-calendar-types.create')"
             class="flex flex-col sm:flex-row w-full sm:w-auto gap-2"
           >
             <Button
@@ -101,13 +94,13 @@ onMounted(() => {
       </Card>
 
       <AcademicCalendarTypeFormDialog
-        v-if="isAdmin"
+        v-if="can('academic-calendar-types.create')"
         v-model:open="isAddOpen"
         @success="fetchAcademicCalendarTypes"
       />
 
       <AcademicCalendarTypeFormDialog
-        v-if="isAdmin"
+        v-if="can('academic-calendar-types.update')"
         v-model:open="isEditDialogOpen"
         :initial-data="selectedItem"
         @success="fetchAcademicCalendarTypes"

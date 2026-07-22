@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref, computed } from 'vue'
+import { onMounted, ref } from 'vue'
 import { toast } from 'vue-sonner'
 import { Plus } from 'lucide-vue-next'
 import AppLayout from '@/layouts/AppLayout.vue'
@@ -18,11 +18,7 @@ const breadcrumbs = [
   { title: 'Tipe Jam', href: '/pembelajaran/tipe-jam' },
 ]
 
-const { hasPermission } = useRoleGuard()
-// Resource-scoped management gate (replaces coarse admin/role check).
-const isAdmin = computed(() =>
-  hasPermission('time-slots.create', 'time-slots.update', 'time-slots.delete'),
-)
+const { can } = useRoleGuard()
 
 const data = ref<TimeSlotType[]>([])
 const isLoading = ref(false)
@@ -69,7 +65,7 @@ const columns = createTimeSlotTypeColumns(
   (item, callbacks) => {
     void handleDelete(item, callbacks)
   },
-  isAdmin.value,
+  can('time-slots.update') || can('time-slots.delete'),
 )
 
 onMounted(fetchTypes)
@@ -95,7 +91,7 @@ onMounted(fetchTypes)
             </p>
           </div>
           <Button
-            v-if="isAdmin"
+            v-if="can('time-slots.create')"
             class="w-full sm:w-auto"
             @click="isAddOpen = true"
           >
@@ -117,13 +113,13 @@ onMounted(fetchTypes)
       </Card>
 
       <TimeSlotTypeFormDialog
-        v-if="isAdmin"
+        v-if="can('time-slots.create')"
         v-model:open="isAddOpen"
         @success="fetchTypes"
       />
 
       <TimeSlotTypeFormDialog
-        v-if="isAdmin"
+        v-if="can('time-slots.update')"
         v-model:open="isEditOpen"
         :initial-data="selectedItem"
         @success="fetchTypes"

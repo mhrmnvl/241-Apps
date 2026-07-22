@@ -9,7 +9,7 @@ import { Button } from '@/ui/button'
 import { Card, CardHeader, CardTitle } from '@/ui/card'
 import { Plus, Search } from 'lucide-vue-next'
 import { useRoleGuard } from '@/shared/composables/useRoleGuard'
-import { onMounted, ref, watch, computed } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import { watchDebounced } from '@vueuse/core'
 import { Input } from '@/ui/input'
 
@@ -35,18 +35,10 @@ watchDebounced(
 
 const isAddModalOpen = ref(false)
 const editingItem = ref<Grade | null>(null)
-const { hasPermission } = useRoleGuard()
-// Resource-scoped management gate (replaces coarse admin/role check).
-const isAdmin = computed(() =>
-  hasPermission(
-    'academic-years.create',
-    'academic-years.update',
-    'academic-years.delete',
-  ),
-)
+const { can } = useRoleGuard()
 
 const tableColumns = createGradeColumns({
-  showActions: isAdmin.value,
+  showActions: can('academic-years.update') || can('academic-years.delete'),
   onEdit: (item: Grade) => {
     editingItem.value = item
     isAddModalOpen.value = true
@@ -86,7 +78,7 @@ onMounted(() => {
             Tingkat Kelas
           </CardTitle>
           <Button
-            v-if="isAdmin"
+            v-if="can('academic-years.create')"
             @click="isAddModalOpen = true"
           >
             <Plus class="size-4 mr-2" />

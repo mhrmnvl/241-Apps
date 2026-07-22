@@ -9,4 +9,7 @@ export interface SemesterColumnActions {
   onActivate?: (semester: Semester) => void
   onDeactivate?: (semester: Semester) => void
   showActions?: boolean
+  /** Per-action gates — hide edit/delete when the user lacks that permission. */
+  canUpdate?: boolean
+  canDelete?: boolean
 }

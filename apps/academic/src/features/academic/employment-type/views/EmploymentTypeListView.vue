@@ -5,7 +5,7 @@ import { Button } from '@/ui/button'
 import { Card, CardHeader, CardTitle } from '@/ui/card'
 import { Input } from '@/ui/input'
 import { Plus, Search } from 'lucide-vue-next'
-import { onMounted, computed } from 'vue'
+import { onMounted } from 'vue'
 import EmploymentTypeFormDialog from '../components/EmploymentTypeFormDialog.vue'
 import { useEmploymentTypeList } from '../composables/useEmploymentTypeList'
 import { useRoleGuard } from '@/shared/composables/useRoleGuard'
@@ -23,17 +23,13 @@ const {
   openEditDialog,
 } = useEmploymentTypeList()
 
-const { hasPermission } = useRoleGuard()
-// Resource-scoped management gate (replaces coarse admin/role check).
-const isAdmin = computed(() =>
-  hasPermission('teachers.create', 'teachers.update', 'teachers.delete'),
-)
+const { can } = useRoleGuard()
 const columns = createColumns(
   openEditDialog,
   (item, callbacks) => {
     void deleteEmploymentType(item.id, callbacks)
   },
-  isAdmin.value,
+  can('teachers.update') || can('teachers.delete'),
 )
 
 const breadcrumbs = [
@@ -61,7 +57,7 @@ onMounted(() => {
             </CardTitle>
           </div>
           <div
-            v-if="isAdmin"
+            v-if="can('teachers.create')"
             class="flex flex-col sm:flex-row w-full sm:w-auto gap-2"
           >
             <Button
@@ -97,13 +93,13 @@ onMounted(() => {
       </Card>
 
       <EmploymentTypeFormDialog
-        v-if="isAdmin"
+        v-if="can('teachers.create')"
         v-model:open="isAddOpen"
         @success="fetchEmploymentTypes"
       />
 
       <EmploymentTypeFormDialog
-        v-if="isAdmin"
+        v-if="can('teachers.update')"
         v-model:open="isEditDialogOpen"
         :initial-data="selectedItem"
         @success="fetchEmploymentTypes"

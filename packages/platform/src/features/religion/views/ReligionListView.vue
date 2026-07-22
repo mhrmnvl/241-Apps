@@ -5,7 +5,7 @@ import { Button } from '@/ui/button'
 import { Card, CardHeader, CardTitle } from '@/ui/card'
 import { Input } from '@/ui/input'
 import { Plus, Search } from 'lucide-vue-next'
-import { onMounted, computed } from 'vue'
+import { onMounted } from 'vue'
 import ReligionFormDialog from '../components/ReligionFormDialog.vue'
 import { useReligionList } from '../composables/useReligionList'
 import { useRoleGuard } from '@/shared/composables/useRoleGuard'
@@ -23,17 +23,13 @@ const {
   openEditDialog,
 } = useReligionList()
 
-const { hasPermission } = useRoleGuard()
-// Resource-scoped management gate (replaces coarse admin/role check).
-const isAdmin = computed(() =>
-  hasPermission('religions.create', 'religions.update', 'religions.delete'),
-)
+const { can } = useRoleGuard()
 const columns = createColumns(
   openEditDialog,
   (item, callbacks) => {
     void deleteReligion(item.id, callbacks)
   },
-  isAdmin.value,
+  can('religions.update') || can('religions.delete'),
 )
 
 const breadcrumbs = [
@@ -61,7 +57,7 @@ onMounted(() => {
             </CardTitle>
           </div>
           <div
-            v-if="isAdmin"
+            v-if="can('religions.create')"
             class="flex flex-col sm:flex-row w-full sm:w-auto gap-2"
           >
             <Button
@@ -97,13 +93,13 @@ onMounted(() => {
       </Card>
 
       <ReligionFormDialog
-        v-if="isAdmin"
+        v-if="can('religions.create')"
         v-model:open="isAddOpen"
         @success="fetchReligions"
       />
 
       <ReligionFormDialog
-        v-if="isAdmin"
+        v-if="can('religions.update')"
         v-model:open="isEditDialogOpen"
         :initial-data="selectedItem"
         @success="fetchReligions"

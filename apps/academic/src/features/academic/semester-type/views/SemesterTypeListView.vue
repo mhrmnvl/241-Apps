@@ -5,7 +5,7 @@ import { Button } from '@/ui/button'
 import { Card, CardHeader, CardTitle } from '@/ui/card'
 import { Input } from '@/ui/input'
 import { Plus, Search } from 'lucide-vue-next'
-import { onMounted, computed } from 'vue'
+import { onMounted } from 'vue'
 import SemesterTypeFormDialog from '../components/SemesterTypeFormDialog.vue'
 import { useSemesterType } from '../composables/useSemesterType'
 import { useRoleGuard } from '@/shared/composables/useRoleGuard'
@@ -23,17 +23,13 @@ const {
   openEditDialog,
 } = useSemesterType()
 
-const { hasPermission } = useRoleGuard()
-// Resource-scoped management gate (replaces coarse admin/role check).
-const isAdmin = computed(() =>
-  hasPermission('semesters.create', 'semesters.update', 'semesters.delete'),
-)
+const { can } = useRoleGuard()
 const columns = createColumns(
   openEditDialog,
   (item, callbacks) => {
     void deleteSemesterType(item.id, callbacks)
   },
-  isAdmin.value,
+  can('semesters.update') || can('semesters.delete'),
 )
 
 const breadcrumbs = [
@@ -61,7 +57,7 @@ onMounted(() => {
             </CardTitle>
           </div>
           <div
-            v-if="isAdmin"
+            v-if="can('semesters.create')"
             class="flex flex-col sm:flex-row w-full sm:w-auto gap-2"
           >
             <Button
@@ -97,13 +93,13 @@ onMounted(() => {
       </Card>
 
       <SemesterTypeFormDialog
-        v-if="isAdmin"
+        v-if="can('semesters.create')"
         v-model:open="isAddOpen"
         @success="fetchSemesterTypes"
       />
 
       <SemesterTypeFormDialog
-        v-if="isAdmin"
+        v-if="can('semesters.update')"
         v-model:open="isEditDialogOpen"
         :initial-data="selectedItem"
         @success="fetchSemesterTypes"

@@ -10,7 +10,7 @@ import { Card, CardHeader, CardTitle } from '@/ui/card'
 import { useRoleGuard } from '@/shared/composables/useRoleGuard'
 import { Plus } from 'lucide-vue-next'
 import { useRouter } from 'vue-router'
-import { onMounted, ref, watch, computed } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 
 const router = useRouter()
 const breadcrumbs = [
@@ -30,14 +30,10 @@ const {
 
 const isAddModalOpen = ref(false)
 const editingItem = ref<Curricula | null>(null)
-const { hasPermission } = useRoleGuard()
-// Resource-scoped management gate (replaces coarse admin/role check).
-const isAdmin = computed(() =>
-  hasPermission('curricula.create', 'curricula.update', 'curricula.delete'),
-)
+const { can } = useRoleGuard()
 
 const tableColumns = createCurriculaColumns({
-  showActions: isAdmin.value,
+  showActions: can('curricula.update') || can('curricula.delete'),
   onView: (item: Curricula) => {
     void router.push(`/akademik/kurikulum/${item.id}/mata-pelajaran`)
   },
@@ -81,7 +77,7 @@ onMounted(() => {
             Kurikulum
           </CardTitle>
           <Button
-            v-if="isAdmin"
+            v-if="can('curricula.create')"
             @click="isAddModalOpen = true"
           >
             <Plus class="size-4 mr-2" />
@@ -101,7 +97,7 @@ onMounted(() => {
           />
 
           <CurriculaFormSheet
-            v-if="isAdmin && isAddModalOpen"
+            v-if="can('curricula.create') && isAddModalOpen"
             v-model:open="isAddModalOpen"
             :academic-years="academicYears"
             :edit-data="editingItem"

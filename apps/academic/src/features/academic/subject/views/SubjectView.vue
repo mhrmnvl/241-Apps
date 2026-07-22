@@ -11,7 +11,7 @@ import { Button } from '@/ui/button'
 import { Card, CardHeader, CardTitle } from '@/ui/card'
 import { useRoleGuard } from '@/shared/composables/useRoleGuard'
 import { Plus, Search } from 'lucide-vue-next'
-import { onMounted, ref, watch, computed } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import { watchDebounced } from '@vueuse/core'
 import { Input } from '@/ui/input'
 
@@ -39,14 +39,10 @@ const { isSaving, formError, saveSubject } = useSubjectForm()
 
 const isAddModalOpen = ref(false)
 const editingItem = ref<Subject | null>(null)
-const { hasPermission } = useRoleGuard()
-// Resource-scoped management gate (replaces coarse admin/role check).
-const isAdmin = computed(() =>
-  hasPermission('subjects.create', 'subjects.update', 'subjects.delete'),
-)
+const { can } = useRoleGuard()
 
 const tableColumns = createSubjectColumns({
-  showActions: isAdmin.value,
+  showActions: can('subjects.update') || can('subjects.delete'),
   onEdit: (item: Subject) => {
     editingItem.value = item
     isAddModalOpen.value = true
@@ -93,7 +89,7 @@ onMounted(() => {
             Mata Pelajaran
           </CardTitle>
           <Button
-            v-if="isAdmin"
+            v-if="can('subjects.create')"
             @click="isAddModalOpen = true"
           >
             <Plus class="size-4 mr-2" />
@@ -127,7 +123,7 @@ onMounted(() => {
           </DataTable>
 
           <SubjectFormDialog
-            v-if="isAdmin && isAddModalOpen"
+            v-if="can('subjects.create') && isAddModalOpen"
             v-model:open="isAddModalOpen"
             :form-error="formError"
             :is-saving="isSaving"

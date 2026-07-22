@@ -5,7 +5,7 @@ import { Button } from '@/ui/button'
 import { Card, CardHeader, CardTitle } from '@/ui/card'
 import { Input } from '@/ui/input'
 import { Plus, Search } from 'lucide-vue-next'
-import { onMounted, computed } from 'vue'
+import { onMounted } from 'vue'
 import BloodTypeFormDialog from '../components/BloodTypeFormDialog.vue'
 import { useBloodTypeList } from '../composables/useBloodTypeList'
 import { useRoleGuard } from '@/shared/composables/useRoleGuard'
@@ -23,21 +23,13 @@ const {
   openEditDialog,
 } = useBloodTypeList()
 
-const { hasPermission } = useRoleGuard()
-// Resource-scoped management gate (replaces coarse admin/role check).
-const isAdmin = computed(() =>
-  hasPermission(
-    'blood-types.create',
-    'blood-types.update',
-    'blood-types.delete',
-  ),
-)
+const { can } = useRoleGuard()
 const columns = createColumns(
   openEditDialog,
   (item, callbacks) => {
     void deleteBloodType(item.id, callbacks)
   },
-  isAdmin.value,
+  can('blood-types.update') || can('blood-types.delete'),
 )
 
 const breadcrumbs = [
@@ -65,7 +57,7 @@ onMounted(() => {
             </CardTitle>
           </div>
           <div
-            v-if="isAdmin"
+            v-if="can('blood-types.create')"
             class="flex flex-col sm:flex-row w-full sm:w-auto gap-2"
           >
             <Button
@@ -101,13 +93,13 @@ onMounted(() => {
       </Card>
 
       <BloodTypeFormDialog
-        v-if="isAdmin"
+        v-if="can('blood-types.create')"
         v-model:open="isAddOpen"
         @success="fetchBloodTypes"
       />
 
       <BloodTypeFormDialog
-        v-if="isAdmin"
+        v-if="can('blood-types.update')"
         v-model:open="isEditDialogOpen"
         :initial-data="selectedItem"
         @success="fetchBloodTypes"

@@ -43,22 +43,15 @@ const breadcrumbs = computed(() => [
 const isAddDialogOpen = ref(false)
 const isEditSheetOpen = ref(false)
 const editingItem = ref<CurriculumSubject | null>(null)
-const { hasPermission } = useRoleGuard()
-// Resource-scoped management gate (replaces coarse admin/role check).
-const isAdmin = computed(() =>
-  hasPermission(
-    'curriculum-subjects.create',
-    'curriculum-subjects.update',
-    'curriculum-subjects.delete',
-  ),
-)
+const { can } = useRoleGuard()
 
 const existingSubjectIds = computed(() =>
   items.value.map((item) => item.subjectId),
 )
 
 const tableColumns = createCurriculumSubjectColumns({
-  showActions: isAdmin.value,
+  showActions:
+    can('curriculum-subjects.update') || can('curriculum-subjects.delete'),
   onEdit: (item: CurriculumSubject) => {
     editingItem.value = item
     isEditSheetOpen.value = true
@@ -139,7 +132,7 @@ onMounted(async () => {
             </div>
           </div>
           <Button
-            v-if="isAdmin"
+            v-if="can('curriculum-subjects.create')"
             @click="isAddDialogOpen = true"
           >
             <Plus class="size-4 mr-2" />
@@ -159,7 +152,7 @@ onMounted(async () => {
           />
 
           <CurriculumSubjectFormDialog
-            v-if="isAdmin && isEditSheetOpen"
+            v-if="can('curriculum-subjects.update') && isEditSheetOpen"
             v-model:open="isEditSheetOpen"
             :form-error="formError"
             :is-saving="isSaving"
@@ -169,7 +162,7 @@ onMounted(async () => {
           />
 
           <AddCurriculumSubjectDialog
-            v-if="isAdmin && isAddDialogOpen"
+            v-if="can('curriculum-subjects.create') && isAddDialogOpen"
             v-model:open="isAddDialogOpen"
             :subjects="subjects"
             :existing-subject-ids="existingSubjectIds"

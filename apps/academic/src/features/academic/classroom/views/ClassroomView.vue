@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref, computed } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import type { Classroom } from '../types'
 import AppLayout from '@/layouts/AppLayout.vue'
@@ -48,14 +48,10 @@ watchDebounced(
 )
 
 const isAddModalOpen = ref(false)
-const { hasPermission } = useRoleGuard()
-// Resource-scoped management gate (replaces coarse admin/role check).
-const isAdmin = computed(() =>
-  hasPermission('classrooms.create', 'classrooms.update', 'classrooms.delete'),
-)
+const { can } = useRoleGuard()
 
 const tableColumns = createClassroomColumns({
-  showActions: isAdmin.value,
+  showActions: can('classrooms.update') || can('classrooms.delete'),
   onManageSupervisor: (item: Classroom) => {
     void router.push(`/akademik/kelas/${item.id}/kelola`)
   },
@@ -89,7 +85,7 @@ onMounted(async () => {
             Kelas
           </CardTitle>
           <Button
-            v-if="isAdmin"
+            v-if="can('classrooms.create')"
             @click="isAddModalOpen = true"
           >
             <Plus class="size-4 mr-2" />
@@ -123,7 +119,7 @@ onMounted(async () => {
           </DataTable>
 
           <ClassroomFormDialog
-            v-if="isAdmin && isAddModalOpen"
+            v-if="can('classrooms.create') && isAddModalOpen"
             v-model:open="isAddModalOpen"
             :academic-years="academicYears"
             :grades="grades"

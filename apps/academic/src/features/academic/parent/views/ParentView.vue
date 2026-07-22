@@ -37,12 +37,10 @@ const {
 
 const isAddModalOpen = ref(false)
 const editingItem = ref<Parent | null>(null)
-const { hasPermission } = useRoleGuard()
-// Resource-scoped management gate (replaces coarse admin/role check).
-const isAdmin = computed(() =>
-  hasPermission('parents.create', 'parents.update', 'parents.delete'),
+const { can } = useRoleGuard()
+const hasWritePermission = computed(
+  () => can('parents.update') || can('parents.delete'),
 )
-const hasWritePermission = computed(() => isAdmin.value)
 
 const occupationFilterOptions = computed<ComboboxOption[]>(() => [
   { value: '', label: 'Semua Pekerjaan' },

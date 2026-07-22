@@ -38,11 +38,7 @@ const {
   fetchGrades,
 } = useClassroomList()
 
-const { hasPermission } = useRoleGuard()
-// Resource-scoped management gate (replaces coarse admin/role check).
-const isAdmin = computed(() =>
-  hasPermission('classrooms.create', 'classrooms.update', 'classrooms.delete'),
-)
+const { can } = useRoleGuard()
 
 const {
   teachers,
@@ -254,7 +250,7 @@ onMounted(async () => {
             <ClassroomInfoCard
               :current-classroom="currentClassroom"
               :active-semester="activeSemester ?? null"
-              :is-admin="isAdmin"
+              :is-admin="can('classrooms.update') || can('classrooms.delete')"
               @manage="isEditInfoOpen = true"
             />
 
@@ -307,7 +303,7 @@ onMounted(async () => {
       />
 
       <ClassroomFormDialog
-        v-if="isAdmin && isEditInfoOpen"
+        v-if="can('classrooms.update') && isEditInfoOpen"
         v-model:open="isEditInfoOpen"
         :academic-years="academicYears"
         :grades="grades"

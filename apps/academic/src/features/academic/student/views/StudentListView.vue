@@ -38,11 +38,7 @@ import { toast } from 'vue-sonner'
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
 import { useRoleGuard } from '@/shared/composables/useRoleGuard'
 
-const { hasPermission } = useRoleGuard()
-// Resource-scoped management gate (replaces coarse admin/role check).
-const isAdmin = computed(() =>
-  hasPermission('students.create', 'students.update', 'students.delete'),
-)
+const { can } = useRoleGuard()
 const router = useRouter()
 
 const isFilterDialogOpen = ref(false)
@@ -101,7 +97,7 @@ const tableColumns = computed(() =>
           setLoading(false)
         }
       },
-      showActions: isAdmin.value,
+      showActions: can('students.update') || can('students.delete'),
     },
     grades.value,
   ),
@@ -164,7 +160,7 @@ onMounted(async () => {
             <!-- Desktop Action Buttons -->
             <div class="hidden sm:flex items-center gap-2">
               <Button
-                v-if="isAdmin"
+                v-if="can('students.create')"
                 variant="outline"
                 size="sm"
                 class="h-10 px-4 bg-white"
@@ -174,7 +170,7 @@ onMounted(async () => {
                 Import / Export
               </Button>
               <Button
-                v-if="isAdmin"
+                v-if="can('students.create')"
                 size="sm"
                 class="h-10 px-4"
                 @click="router.push('/students/create')"
@@ -186,7 +182,7 @@ onMounted(async () => {
 
             <!-- Mobile Action Dropdown -->
             <div
-              v-if="isAdmin"
+              v-if="can('students.create')"
               class="flex sm:hidden"
             >
               <DropdownMenu>
@@ -403,7 +399,7 @@ onMounted(async () => {
     </Dialog>
 
     <ImportExportDialog
-      v-if="isAdmin"
+      v-if="can('students.create')"
       v-model:open="isImportExportOpen"
       :is-processing="isImporting"
       @download-template="downloadTemplate"

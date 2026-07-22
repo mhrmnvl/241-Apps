@@ -26,14 +26,18 @@ export function useRoleGuard() {
   }
 
   /**
-   * Permission-based gate for buttons/actions. SUPER_ADMIN always passes.
-   * Prefer this over role checks so custom roles work by the permissions they
-   * hold (e.g. `hasPermission('students.create')`).
+   * Permission gate for buttons/actions, named after intent (CASL-style).
+   * SUPER_ADMIN always passes. Pass a single permission for a specific action
+   * (`can('students.create')`) or several for an OR check
+   * (`can('students.update', 'students.delete')` → "can manage").
    */
-  function hasPermission(...permissions: string[]): boolean {
+  function can(...permissions: string[]): boolean {
     if (isSuperAdmin.value) return true
     return permissions.some((p) => userPermissions.value.includes(p))
   }
+
+  // Backwards-compatible alias.
+  const hasPermission = can
 
   return {
     userRoles,
@@ -45,6 +49,7 @@ export function useRoleGuard() {
     canManage,
     canContribute,
     hasRole,
+    can,
     hasPermission,
   }
 }

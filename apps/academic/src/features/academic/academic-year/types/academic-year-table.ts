@@ -9,4 +9,7 @@ export interface AcademicYearColumnActions {
   onActivate?: (academicYear: AcademicYear) => void
   onDeactivate?: (academicYear: AcademicYear) => void
   showActions?: boolean
+  /** Per-action gates — hide edit/delete when the user lacks that permission. */
+  canUpdate?: boolean
+  canDelete?: boolean
 }

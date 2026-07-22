@@ -11,6 +11,9 @@ export interface AssetColumnActions {
     callbacks: { closeAlert: () => void; setLoading: (v: boolean) => void },
   ) => void | Promise<void>
   showActions?: boolean
+  /** Per-action gates — hide edit/delete when the user lacks that permission. */
+  canUpdate?: boolean
+  canDelete?: boolean
   /** Adds a row-selection checkbox column (used by the label-printing page). */
   selectable?: boolean
 }
@@ -130,6 +133,8 @@ export const createColumns = (
           cell: ({ row }: { row: { original: InventoryAsset } }) => {
             const asset = row.original
             return h(ActionCell, {
+              hideEdit: actions.canUpdate === false,
+              hideDelete: actions.canDelete === false,
               deleteTitle: 'Hapus Aset?',
               deleteDescription: `Apakah Anda yakin ingin menghapus data aset "${asset.name}" (${asset.assetNumber})? Tindakan ini tidak dapat dibatalkan.`,
               onEdit: () => {

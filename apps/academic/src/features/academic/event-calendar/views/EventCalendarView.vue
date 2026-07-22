@@ -38,11 +38,7 @@ const {
 } = useEventCalendar()
 
 const activeTab = ref('calendar')
-const { hasPermission } = useRoleGuard()
-// Resource-scoped management gate (replaces coarse admin/role check).
-const isAdmin = computed(() =>
-  hasPermission('events.create', 'events.update', 'events.delete'),
-)
+const { can } = useRoleGuard()
 const sheetOpen = ref(false)
 const sheetEventData = ref<EventData | null>(null)
 const selectedDate = ref('')
@@ -136,14 +132,14 @@ function openCreateDialog() {
 }
 
 function handleDateClick(info: DateClickInfo) {
-  if (!isAdmin.value) return
+  if (!(can('events.update') || can('events.delete'))) return
   sheetEventData.value = null
   selectedDate.value = info.dateStr
   sheetOpen.value = true
 }
 
 function handleEventClick(info: EventClickInfo) {
-  if (!isAdmin.value) return
+  if (!(can('events.update') || can('events.delete'))) return
   const ep = info.event.extendedProps
   openEditSheet({
     id: info.event.id,
@@ -237,7 +233,7 @@ watch(activeTab, (val) => {
           </div>
           <div class="flex flex-col sm:flex-row w-full sm:w-auto gap-2">
             <Button
-              v-if="isAdmin"
+              v-if="can('events.create')"
               class="w-full sm:w-auto"
               @click="openCreateDialog"
             >
@@ -260,7 +256,7 @@ watch(activeTab, (val) => {
                 Tampilan Kalender
               </TabsTrigger>
               <TabsTrigger
-                v-if="isAdmin"
+                v-if="can('events.create')"
                 value="tabel"
                 class="rounded-b-none border border-transparent border-b-0 px-4 py-2 data-[state=active]:-mb-px data-[state=active]:z-10 data-[state=active]:border-border data-[state=active]:bg-background data-[state=active]:shadow-none"
               >
@@ -398,7 +394,7 @@ watch(activeTab, (val) => {
               :table-events="tableEvents"
               :is-loading="tableLoading"
               :is-deleting-bulk="isDeletingBulk"
-              :show-actions="isAdmin"
+              :show-actions="can('events.update') || can('events.delete')"
               @update-filters="handleUpdateFilters"
               @delete-bulk="handleDeleteBulk"
               @edit="openEditSheet"
@@ -410,7 +406,7 @@ watch(activeTab, (val) => {
     </div>
 
     <EventCalendarDialog
-      v-if="isAdmin"
+      v-if="can('events.create')"
       :open="sheetOpen"
       :event-data="sheetEventData"
       :selected-date="selectedDate"

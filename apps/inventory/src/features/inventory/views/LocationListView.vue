@@ -16,11 +16,7 @@ import LocationFormDialog from '../components/LocationFormDialog.vue'
 import type { ColumnDef } from '@tanstack/vue-table'
 import type { InventoryReferenceItem } from '../types'
 
-const { hasPermission } = useRoleGuard()
-// Resource-scoped management gate (replaces coarse admin/role check).
-const isAdmin = computed(() =>
-  hasPermission('inventory.create', 'inventory.update', 'inventory.delete'),
-)
+const { can } = useRoleGuard()
 
 // State
 const dataItems = ref<InventoryReferenceItem[]>([])
@@ -70,12 +66,14 @@ const columns = computed<ColumnDef<InventoryReferenceItem>[]>(() => {
     },
   ]
 
-  if (isAdmin.value) {
+  if (can('inventory.update') || can('inventory.delete')) {
     baseColumns.push({
       id: 'actions',
       header: 'Aksi',
       cell: ({ row }) =>
         h(ActionCell, {
+          hideEdit: !can('inventory.update'),
+          hideDelete: !can('inventory.delete'),
           onEdit: () => handleOpenEditForm(row.original),
           onDelete: () => handleDeleteItem(row.original.id),
         }),
@@ -176,7 +174,7 @@ onMounted(() => {
             >Daftar Lokasi</CardTitle
           >
           <Button
-            v-if="isAdmin"
+            v-if="can('inventory.create')"
             size="sm"
             @click="handleOpenCreateForm"
           >

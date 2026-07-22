@@ -19,7 +19,7 @@ import {
 } from '@/ui/alert-dialog'
 import { useRoleGuard } from '@/shared/composables/useRoleGuard'
 import { Plus } from 'lucide-vue-next'
-import { onMounted, ref, watch, computed } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 
 const breadcrumbs = [
   { title: 'Akademik', href: '#' },
@@ -38,15 +38,7 @@ const {
 
 const isAddModalOpen = ref(false)
 const editingItem = ref<AcademicYear | null>(null)
-const { hasPermission } = useRoleGuard()
-// Resource-scoped management gate (replaces coarse admin/role check).
-const isAdmin = computed(() =>
-  hasPermission(
-    'academic-years.create',
-    'academic-years.update',
-    'academic-years.delete',
-  ),
-)
+const { can } = useRoleGuard()
 
 const confirmAction = ref<{
   type: 'activate' | 'deactivate'
@@ -55,7 +47,7 @@ const confirmAction = ref<{
 const isProcessing = ref(false)
 
 const tableColumns = createAcademicYearColumns({
-  showActions: isAdmin.value,
+  showActions: can('academic-years.update') || can('academic-years.delete'),
   onEdit: (academicYear: AcademicYear) => {
     editingItem.value = academicYear
     isAddModalOpen.value = true
@@ -116,7 +108,7 @@ onMounted(() => {
             Tahun Ajaran
           </CardTitle>
           <Button
-            v-if="isAdmin"
+            v-if="can('academic-years.create')"
             @click="isAddModalOpen = true"
           >
             <Plus class="size-4 mr-2" />
@@ -136,7 +128,7 @@ onMounted(() => {
           />
 
           <AcademicYearFormSheet
-            v-if="isAdmin && isAddModalOpen"
+            v-if="can('academic-years.create') && isAddModalOpen"
             v-model:open="isAddModalOpen"
             :edit-data="editingItem"
             @save-success="fetchAcademicYears"

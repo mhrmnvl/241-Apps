@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref, watch, computed } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { DataTable } from '@/ui'
 import { Button } from '@/ui/button'
@@ -33,11 +33,7 @@ const {
 
 const isFormOpen = ref(false)
 const editingItem = ref<StudentParent | null>(null)
-const { hasPermission } = useRoleGuard()
-// Resource-scoped management gate (replaces coarse admin/role check).
-const isAdmin = computed(() =>
-  hasPermission('students.create', 'students.update', 'students.delete'),
-)
+const { can } = useRoleGuard()
 
 const columns = createStudentParentColumns({
   onEdit: (item: StudentParent) => {
@@ -93,7 +89,7 @@ onMounted(async () => {
             Relasi Siswa — Orang Tua
           </CardTitle>
           <Button
-            v-if="isAdmin"
+            v-if="can('students.create')"
             @click="isFormOpen = true"
           >
             <Plus class="size-4 mr-2" />
@@ -111,7 +107,7 @@ onMounted(async () => {
           />
 
           <StudentParentFormDialog
-            v-if="isAdmin && isFormOpen"
+            v-if="can('students.create') && isFormOpen"
             v-model:open="isFormOpen"
             :edit-data="editingItem"
             :form-error="formError"

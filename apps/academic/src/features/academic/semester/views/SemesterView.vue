@@ -21,7 +21,7 @@ import {
 } from '@/ui/alert-dialog'
 import { useRoleGuard } from '@/shared/composables/useRoleGuard'
 import { Copy, Plus } from 'lucide-vue-next'
-import { onMounted, ref, watch, computed } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import { toast } from 'vue-sonner'
 
 const breadcrumbs = [
@@ -48,11 +48,7 @@ const { isRollingOver, rolloverSummary, rolloverSemester } =
 const isAddModalOpen = ref(false)
 const isRolloverModalOpen = ref(false)
 const editingItem = ref<Semester | null>(null)
-const { hasPermission } = useRoleGuard()
-// Resource-scoped management gate (replaces coarse admin/role check).
-const isAdmin = computed(() =>
-  hasPermission('semesters.create', 'semesters.update', 'semesters.delete'),
-)
+const { can } = useRoleGuard()
 
 const confirmAction = ref<{
   type: 'activate' | 'deactivate'
@@ -61,7 +57,7 @@ const confirmAction = ref<{
 const isProcessing = ref(false)
 
 const tableColumns = createSemesterColumns({
-  showActions: isAdmin.value,
+  showActions: can('semesters.update') || can('semesters.delete'),
   onEdit: (semester: Semester) => {
     editingItem.value = semester
     isAddModalOpen.value = true
@@ -138,7 +134,7 @@ onMounted(() => {
             Semester
           </CardTitle>
           <div
-            v-if="isAdmin"
+            v-if="can('semesters.create')"
             class="flex w-full items-center justify-end gap-2 sm:w-auto"
           >
             <Button
@@ -167,7 +163,7 @@ onMounted(() => {
           />
 
           <SemesterFormSheet
-            v-if="isAdmin && isAddModalOpen"
+            v-if="can('semesters.create') && isAddModalOpen"
             v-model:open="isAddModalOpen"
             :academic-years="academicYears"
             :edit-data="editingItem"
@@ -175,7 +171,7 @@ onMounted(() => {
           />
 
           <RolloverSemesterDialog
-            v-if="isAdmin"
+            v-if="can('semesters.create')"
             v-model:open="isRolloverModalOpen"
             :semesters="semesters"
             :is-rolling-over="isRollingOver"

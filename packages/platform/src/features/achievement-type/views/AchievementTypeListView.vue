@@ -5,7 +5,7 @@ import { Button } from '@/ui/button'
 import { Card, CardHeader, CardTitle } from '@/ui/card'
 import { Input } from '@/ui/input'
 import { Plus, Search } from 'lucide-vue-next'
-import { onMounted, computed } from 'vue'
+import { onMounted } from 'vue'
 import AchievementTypeFormDialog from '../components/AchievementTypeFormDialog.vue'
 import { useAchievementTypeList } from '../composables/useAchievementTypeList'
 import { useRoleGuard } from '@/shared/composables/useRoleGuard'
@@ -23,21 +23,13 @@ const {
   openEditDialog,
 } = useAchievementTypeList()
 
-const { hasPermission } = useRoleGuard()
-// Resource-scoped management gate (replaces coarse admin/role check).
-const isAdmin = computed(() =>
-  hasPermission(
-    'achievement-types.create',
-    'achievement-types.update',
-    'achievement-types.delete',
-  ),
-)
+const { can } = useRoleGuard()
 const columns = createColumns(
   openEditDialog,
   (item, callbacks) => {
     void deleteAchievementType(item.id, callbacks)
   },
-  isAdmin.value,
+  can('achievement-types.update') || can('achievement-types.delete'),
 )
 
 const breadcrumbs = [
@@ -65,7 +57,7 @@ onMounted(() => {
             </CardTitle>
           </div>
           <div
-            v-if="isAdmin"
+            v-if="can('achievement-types.create')"
             class="flex flex-col sm:flex-row w-full sm:w-auto gap-2"
           >
             <Button
@@ -101,13 +93,13 @@ onMounted(() => {
       </Card>
 
       <AchievementTypeFormDialog
-        v-if="isAdmin"
+        v-if="can('achievement-types.create')"
         v-model:open="isAddOpen"
         @success="fetchAchievementTypes"
       />
 
       <AchievementTypeFormDialog
-        v-if="isAdmin"
+        v-if="can('achievement-types.update')"
         v-model:open="isEditDialogOpen"
         :initial-data="selectedItem"
         @success="fetchAchievementTypes"

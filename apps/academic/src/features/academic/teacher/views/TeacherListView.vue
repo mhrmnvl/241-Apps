@@ -78,11 +78,7 @@ const {
 
 const isModalOpen = ref(false)
 const editingItem = ref<Teacher | null>(null)
-const { hasPermission } = useRoleGuard()
-// Resource-scoped management gate (replaces coarse admin/role check).
-const isAdmin = computed(() =>
-  hasPermission('teachers.create', 'teachers.update', 'teachers.delete'),
-)
+const { can } = useRoleGuard()
 
 async function handleSaveTeacher(
   payload: TeacherSavePayload | TeacherUpdatePayload,
@@ -120,7 +116,7 @@ async function handleSavePosition(
 }
 
 const tableColumns = createColumns({
-  showActions: isAdmin.value,
+  showActions: can('teachers.update') || can('teachers.delete'),
   onViewDetail: (teacher) => {
     if (teacher?.user?.id) {
       void router.push(`/profile/TEACHER/${teacher.user.id}`)
@@ -208,7 +204,7 @@ onMounted(() => {
             <!-- Desktop Action Buttons -->
             <div class="hidden sm:flex items-center gap-2">
               <Button
-                v-if="isAdmin"
+                v-if="can('teachers.create')"
                 variant="outline"
                 size="sm"
                 class="h-10 px-4 bg-white"
@@ -218,7 +214,7 @@ onMounted(() => {
                 Import / Export
               </Button>
               <Button
-                v-if="isAdmin"
+                v-if="can('teachers.create')"
                 size="sm"
                 class="h-10 px-4"
                 @click="router.push('/teacher/create')"
@@ -230,7 +226,7 @@ onMounted(() => {
 
             <!-- Mobile Action Dropdown -->
             <div
-              v-if="isAdmin"
+              v-if="can('teachers.create')"
               class="flex sm:hidden"
             >
               <DropdownMenu>
@@ -490,7 +486,7 @@ onMounted(() => {
     </Dialog>
 
     <TeacherFormDialog
-      v-if="isAdmin"
+      v-if="can('teachers.update')"
       v-model:open="isModalOpen"
       :form-error="formError"
       :is-saving="isSaving"
@@ -501,7 +497,7 @@ onMounted(() => {
     />
 
     <ImportExportTeacherDialog
-      v-if="isAdmin"
+      v-if="can('teachers.create')"
       v-model:open="isImportExportOpen"
       :is-processing="isImporting"
       @download-template="downloadTemplate"

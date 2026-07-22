@@ -5,7 +5,7 @@ import { Button } from '@/ui/button'
 import { Card, CardHeader, CardTitle } from '@/ui/card'
 import { Input } from '@/ui/input'
 import { Plus, Search } from 'lucide-vue-next'
-import { onMounted, ref, computed } from 'vue'
+import { onMounted, ref } from 'vue'
 import PositionFormDialog from '../components/PositionFormDialog.vue'
 import { usePosition } from '../composables/usePosition'
 import { useRoleGuard } from '@/shared/composables/useRoleGuard'
@@ -25,14 +25,10 @@ const isAddOpen = ref(false)
 const isEditDialogOpen = ref(false)
 const selectedItem = ref<Position | null>(null)
 
-const { hasPermission } = useRoleGuard()
-// Resource-scoped management gate (replaces coarse admin/role check).
-const isAdmin = computed(() =>
-  hasPermission('positions.create', 'positions.update', 'positions.delete'),
-)
+const { can } = useRoleGuard()
 
 const columns = createColumns({
-  showActions: isAdmin.value,
+  showActions: can('positions.update') || can('positions.delete'),
   onEdit: (item: Position) => {
     selectedItem.value = item
     isEditDialogOpen.value = true
@@ -75,7 +71,7 @@ onMounted(() => {
             </CardTitle>
           </div>
           <div
-            v-if="isAdmin"
+            v-if="can('positions.create')"
             class="flex flex-col sm:flex-row w-full sm:w-auto gap-2"
           >
             <Button
@@ -111,13 +107,13 @@ onMounted(() => {
       </Card>
 
       <PositionFormDialog
-        v-if="isAdmin"
+        v-if="can('positions.create')"
         v-model:open="isAddOpen"
         @success="fetchPositions"
       />
 
       <PositionFormDialog
-        v-if="isAdmin"
+        v-if="can('positions.update')"
         v-model:open="isEditDialogOpen"
         :initial-data="selectedItem"
         @success="fetchPositions"

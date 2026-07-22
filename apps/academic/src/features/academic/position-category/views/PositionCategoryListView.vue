@@ -5,7 +5,7 @@ import { Button } from '@/ui/button'
 import { Card, CardHeader, CardTitle } from '@/ui/card'
 import { Input } from '@/ui/input'
 import { Plus, Search } from 'lucide-vue-next'
-import { onMounted, computed } from 'vue'
+import { onMounted } from 'vue'
 import PositionCategoryFormDialog from '../components/PositionCategoryFormDialog.vue'
 import { usePositionCategoryList } from '../composables/usePositionCategoryList'
 import { useRoleGuard } from '@/shared/composables/useRoleGuard'
@@ -23,17 +23,13 @@ const {
   openEditDialog,
 } = usePositionCategoryList()
 
-const { hasPermission } = useRoleGuard()
-// Resource-scoped management gate (replaces coarse admin/role check).
-const isAdmin = computed(() =>
-  hasPermission('positions.create', 'positions.update', 'positions.delete'),
-)
+const { can } = useRoleGuard()
 const columns = createColumns(
   openEditDialog,
   (item, callbacks) => {
     void deletePositionCategory(item.id, callbacks)
   },
-  isAdmin.value,
+  can('positions.update') || can('positions.delete'),
 )
 
 const breadcrumbs = [
@@ -61,7 +57,7 @@ onMounted(() => {
             </CardTitle>
           </div>
           <div
-            v-if="isAdmin"
+            v-if="can('positions.create')"
             class="flex flex-col sm:flex-row w-full sm:w-auto gap-2"
           >
             <Button
@@ -97,13 +93,13 @@ onMounted(() => {
       </Card>
 
       <PositionCategoryFormDialog
-        v-if="isAdmin"
+        v-if="can('positions.create')"
         v-model:open="isAddOpen"
         @success="fetchPositionCategories"
       />
 
       <PositionCategoryFormDialog
-        v-if="isAdmin"
+        v-if="can('positions.update')"
         v-model:open="isEditDialogOpen"
         :initial-data="selectedItem"
         @success="fetchPositionCategories"

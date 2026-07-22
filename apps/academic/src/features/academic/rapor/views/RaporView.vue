@@ -59,15 +59,7 @@ const editingData = ref<RaporData | null>(null)
 const detailData = ref<RaporData | null>(null)
 const hasDisplayedData = ref(false)
 const showBulkConfirm = ref(false)
-const { hasPermission } = useRoleGuard()
-// Resource-scoped management gate (replaces coarse admin/role check).
-const isAdmin = computed(() =>
-  hasPermission(
-    'report-cards.create',
-    'report-cards.update',
-    'report-cards.delete',
-  ),
-)
+const { can } = useRoleGuard()
 
 const isFilterReady = computed(
   () => Boolean(selectedClassroomId.value) && Boolean(selectedSemesterId.value),
@@ -117,7 +109,7 @@ const tableColumns = [
             openDetail.value = true
           },
         },
-        ...(isAdmin.value
+        ...(can('report-cards.update') || can('report-cards.delete')
           ? [
               {
                 label: 'Edit',
@@ -238,7 +230,10 @@ onMounted(async () => {
               <div class="flex-1"></div>
 
               <Button
-                v-if="hasDisplayedData && isAdmin"
+                v-if="
+                  hasDisplayedData &&
+                  (can('report-cards.create') || can('report-cards.update'))
+                "
                 variant="outline"
                 :disabled="!isFilterReady || isGenerating"
                 class="w-full sm:w-auto"
@@ -305,7 +300,7 @@ onMounted(async () => {
     </div>
 
     <RaporFormDialog
-      v-if="isAdmin"
+      v-if="can('report-cards.create')"
       v-model:open="openForm"
       :rapor="editingData"
     />

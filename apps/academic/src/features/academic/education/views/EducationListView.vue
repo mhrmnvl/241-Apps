@@ -5,7 +5,7 @@ import { Button } from '@/ui/button'
 import { Card, CardHeader, CardTitle } from '@/ui/card'
 import { Input } from '@/ui/input'
 import { Plus, Search } from 'lucide-vue-next'
-import { onMounted, computed } from 'vue'
+import { onMounted } from 'vue'
 import EducationFormDialog from '../components/EducationFormDialog.vue'
 import { useEducationList } from '../composables/useEducationList'
 import { useRoleGuard } from '@/shared/composables/useRoleGuard'
@@ -23,17 +23,13 @@ const {
   openEditDialog,
 } = useEducationList()
 
-const { hasPermission } = useRoleGuard()
-// Resource-scoped management gate (replaces coarse admin/role check).
-const isAdmin = computed(() =>
-  hasPermission('educations.create', 'educations.update', 'educations.delete'),
-)
+const { can } = useRoleGuard()
 const columns = createColumns(
   openEditDialog,
   (item, callbacks) => {
     void deleteEducationLevel(item.id, callbacks)
   },
-  isAdmin.value,
+  can('educations.update') || can('educations.delete'),
 )
 
 const breadcrumbs = [
@@ -61,7 +57,7 @@ onMounted(() => {
             </CardTitle>
           </div>
           <div
-            v-if="isAdmin"
+            v-if="can('educations.create')"
             class="flex flex-col sm:flex-row w-full sm:w-auto gap-2"
           >
             <Button
@@ -97,13 +93,13 @@ onMounted(() => {
       </Card>
 
       <EducationFormDialog
-        v-if="isAdmin"
+        v-if="can('educations.create')"
         v-model:open="isAddOpen"
         @success="fetchEducationLevels"
       />
 
       <EducationFormDialog
-        v-if="isAdmin"
+        v-if="can('educations.update')"
         v-model:open="isEditDialogOpen"
         :initial-data="selectedItem"
         @success="fetchEducationLevels"

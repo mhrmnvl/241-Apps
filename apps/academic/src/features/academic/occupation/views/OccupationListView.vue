@@ -5,7 +5,7 @@ import { Button } from '@/ui/button'
 import { Card, CardHeader, CardTitle } from '@/ui/card'
 import { Input } from '@/ui/input'
 import { Plus, Search } from 'lucide-vue-next'
-import { onMounted, computed } from 'vue'
+import { onMounted } from 'vue'
 import OccupationFormDialog from '../components/OccupationFormDialog.vue'
 import { useOccupationList } from '../composables/useOccupationList'
 import { useRoleGuard } from '@/shared/composables/useRoleGuard'
@@ -23,21 +23,13 @@ const {
   openEditDialog,
 } = useOccupationList()
 
-const { hasPermission } = useRoleGuard()
-// Resource-scoped management gate (replaces coarse admin/role check).
-const isAdmin = computed(() =>
-  hasPermission(
-    'occupations.create',
-    'occupations.update',
-    'occupations.delete',
-  ),
-)
+const { can } = useRoleGuard()
 const columns = createColumns(
   openEditDialog,
   (id, callbacks) => {
     void deleteOccupation(id, callbacks)
   },
-  isAdmin.value,
+  can('occupations.update') || can('occupations.delete'),
 )
 
 const breadcrumbs = [
@@ -65,7 +57,7 @@ onMounted(() => {
             </CardTitle>
           </div>
           <div
-            v-if="isAdmin"
+            v-if="can('occupations.create')"
             class="flex flex-col sm:flex-row w-full sm:w-auto gap-2"
           >
             <Button
@@ -101,13 +93,13 @@ onMounted(() => {
       </Card>
 
       <OccupationFormDialog
-        v-if="isAdmin"
+        v-if="can('occupations.create')"
         v-model:open="isAddOpen"
         @success="fetchOccupations"
       />
 
       <OccupationFormDialog
-        v-if="isAdmin"
+        v-if="can('occupations.update')"
         v-model:open="isEditDialogOpen"
         :initial-data="selectedItem"
         @success="fetchOccupations"

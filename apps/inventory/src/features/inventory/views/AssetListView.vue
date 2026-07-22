@@ -34,11 +34,7 @@ import type {
 } from '../types'
 import { createColumns } from '../components/columns'
 
-const { hasPermission } = useRoleGuard()
-// Resource-scoped management gate (replaces coarse admin/role check).
-const isAdmin = computed(() =>
-  hasPermission('inventory.create', 'inventory.update', 'inventory.delete'),
-)
+const { can } = useRoleGuard()
 const router = useRouter()
 
 const breadcrumbs = [
@@ -95,7 +91,9 @@ function handleFilterChange(
 // Columns configuration
 const tableColumns = computed(() =>
   createColumns({
-    showActions: isAdmin.value,
+    showActions: can('inventory.update') || can('inventory.delete'),
+    canUpdate: can('inventory.update'),
+    canDelete: can('inventory.delete'),
     onEdit: (asset) => {
       void router.push(`/inventory/assets/${asset.id}/edit`)
     },
@@ -209,7 +207,7 @@ onMounted(async () => {
           </div>
           <div class="flex items-center gap-2">
             <Button
-              v-if="isAdmin"
+              v-if="can('inventory.create')"
               size="sm"
               class="sm:h-10 sm:px-4 text-xs sm:text-sm"
               @click="openAddForm"

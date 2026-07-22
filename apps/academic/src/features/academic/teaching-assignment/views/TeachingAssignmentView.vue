@@ -15,7 +15,7 @@ import { Card, CardHeader, CardTitle } from '@/ui/card'
 import { Label } from '@/ui/label'
 import { useRoleGuard } from '@/shared/composables/useRoleGuard'
 import { Plus } from 'lucide-vue-next'
-import { onMounted, ref, watch, computed } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 
 const breadcrumbs = [
   { title: 'Pembelajaran', href: '#' },
@@ -40,15 +40,7 @@ const {
 
 const isAddModalOpen = ref(false)
 const editingItem = ref<TeachingAssignment | null>(null)
-const { hasPermission } = useRoleGuard()
-// Resource-scoped management gate (replaces coarse admin/role check).
-const isAdmin = computed(() =>
-  hasPermission(
-    'teaching-assignments.create',
-    'teaching-assignments.update',
-    'teaching-assignments.delete',
-  ),
-)
+const { can } = useRoleGuard()
 
 const semesterFilterOptions = computed<ComboboxOption[]>(() => [
   { value: '', label: 'Semua Semester' },
@@ -68,7 +60,8 @@ const classroomFilterOptions = computed<ComboboxOption[]>(() => [
 ])
 
 const tableColumns = createTeachingAssignmentColumns({
-  showActions: isAdmin.value,
+  showActions:
+    can('teaching-assignments.update') || can('teaching-assignments.delete'),
   onEdit: (item: TeachingAssignment) => {
     editingItem.value = item
     isAddModalOpen.value = true
@@ -125,7 +118,7 @@ onMounted(async () => {
             Penugasan Mengajar
           </CardTitle>
           <Button
-            v-if="isAdmin"
+            v-if="can('teaching-assignments.create')"
             @click="isAddModalOpen = true"
           >
             <Plus class="size-4 mr-2" />
@@ -171,7 +164,7 @@ onMounted(async () => {
           />
 
           <TeachingAssignmentFormDialog
-            v-if="isAdmin && isAddModalOpen"
+            v-if="can('teaching-assignments.create') && isAddModalOpen"
             v-model:open="isAddModalOpen"
             :form-error="formError"
             :is-saving="isSaving"
