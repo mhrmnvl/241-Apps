@@ -1,24 +1,13 @@
-export interface StudentScoreProfile {
-  name?: string | null
-}
-
-export interface StudentScoreUser {
-  profile?: StudentScoreProfile | null
-}
-
-export interface StudentScoreStudent {
-  id: string
+export interface StudentScoreRosterItem {
+  enrollmentId: string
   nis: string
-  user?: StudentScoreUser
+  studentName: string
+  scoreId: string | null
+  score: number | null
+  note: string | null
 }
 
-export interface StudentScoreEnrollment {
-  id: string
-  studentId: string
-  student?: StudentScoreStudent
-}
-
-export interface StudentScoreAssessmentItem {
+export interface StudentScoreRosterAssessmentItem {
   id: string
   name: string
   type: string
@@ -26,48 +15,18 @@ export interface StudentScoreAssessmentItem {
   maxScore: number
 }
 
-export interface StudentScore {
-  id?: string
-  enrollmentId: string
-  assessmentItemId: string
-  score: number | null
-  notes?: string | null
-  enrollment?: StudentScoreEnrollment
-  assessmentItem?: StudentScoreAssessmentItem
+export interface StudentScoreRosterResponse {
+  assessmentItem: StudentScoreRosterAssessmentItem
+  items: StudentScoreRosterItem[]
 }
 
-export interface StudentScoreQueryParams {
-  enrollmentId?: string
-  assessmentItemId?: string
-  limit?: number
-}
-
-export interface StudentScoreSavePayload {
+export interface BulkStudentScoreRecordPayload {
   enrollmentId: string
-  assessmentItemId: string
-  score: number
+  score?: number
   note?: string
 }
 
-export interface BulkStudentScorePayload {
-  scores: StudentScoreSavePayload[]
-}
-
-export interface StudentScoreRow {
-  student?: {
-    id?: string
-    nis?: string
-    user?: { profile?: { name?: string } }
-  }
-  enrollmentId?: string
-  scores?: Record<
-    string,
-    { id?: string; score: number | null; notes?: string | null }
-  >
-}
-
-export interface StudentScoreColumnActions {
-  onEdit?: (item: StudentScoreRow) => void
-  /** Hides the actions column entirely when the user lacks update rights. */
-  canUpdate?: boolean
+export interface BulkUpsertStudentScorePayload {
+  assessmentItemId: string
+  records: BulkStudentScoreRecordPayload[]
 }

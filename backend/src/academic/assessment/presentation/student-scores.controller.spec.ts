@@ -1,12 +1,16 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CreateStudentScoreDto } from '../dto/request/create-student-score.dto.js';
 import { UpdateStudentScoreDto } from '../dto/request/update-student-score.dto.js';
+import { BulkUpsertStudentScoreDto } from '../dto/request/bulk-upsert-student-score.dto.js';
+import { StudentScoreRosterQueryDto } from '../dto/request/student-score-roster-query.dto.js';
 import {
   CreateStudentScoreUseCase,
   DeleteStudentScoreUseCase,
   GetStudentScoreByIdUseCase,
   GetStudentScoresUseCase,
   UpdateStudentScoreUseCase,
+  GetStudentScoreRosterUseCase,
+  BulkUpsertStudentScoresUseCase,
 } from '../use-cases/student-score.use-case.js';
 import { StudentScoresController } from './student-scores.controller.js';
 import type { AuthenticatedUser } from '../../../core/types/authenticated-user.type.js';
@@ -18,6 +22,8 @@ describe('StudentScoresController', () => {
   const mockCreate = { execute: jest.fn() };
   const mockUpdate = { execute: jest.fn() };
   const mockDelete = { execute: jest.fn() };
+  const mockRoster = { execute: jest.fn() };
+  const mockBulkUpsert = { execute: jest.fn() };
 
   const mockUser: AuthenticatedUser = {
     id: 'user-uuid',
@@ -35,6 +41,8 @@ describe('StudentScoresController', () => {
         { provide: CreateStudentScoreUseCase, useValue: mockCreate },
         { provide: UpdateStudentScoreUseCase, useValue: mockUpdate },
         { provide: DeleteStudentScoreUseCase, useValue: mockDelete },
+        { provide: GetStudentScoreRosterUseCase, useValue: mockRoster },
+        { provide: BulkUpsertStudentScoresUseCase, useValue: mockBulkUpsert },
       ],
     }).compile();
     controller = module.get<StudentScoresController>(StudentScoresController);
@@ -93,6 +101,29 @@ describe('StudentScoresController', () => {
       mockDelete.execute.mockResolvedValue(undefined);
       await controller.remove(mockUser, 'ss-1');
       expect(mockDelete.execute).toHaveBeenCalledWith('ss-1');
+    });
+  });
+
+  describe('getRoster', () => {
+    it('should delegate', async () => {
+      const query: StudentScoreRosterQueryDto = { assessmentItemId: 'ai-1' };
+      mockRoster.execute.mockResolvedValue({ assessmentItem: {}, items: [] });
+      const result = await controller.getRoster(mockUser, query);
+      expect(mockRoster.execute).toHaveBeenCalledWith(query);
+      expect(result).toEqual({ assessmentItem: {}, items: [] });
+    });
+  });
+
+  describe('bulkUpsert', () => {
+    it('should delegate', async () => {
+      const dto: BulkUpsertStudentScoreDto = {
+        assessmentItemId: 'ai-1',
+        records: [{ enrollmentId: 'e1', score: 85 }],
+      };
+      mockBulkUpsert.execute.mockResolvedValue({ saved: 1 });
+      const result = await controller.bulkUpsert(mockUser, dto);
+      expect(mockBulkUpsert.execute).toHaveBeenCalledWith(dto);
+      expect(result).toEqual({ saved: 1 });
     });
   });
 });

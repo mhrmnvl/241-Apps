@@ -132,6 +132,12 @@ export async function seedIam(prisma: PrismaClient) {
     'attendances.manage',
     'report-cards.read',
     'report-cards.publish',
+    'assessment-items.read',
+    'assessment-items.create',
+    'assessment-items.update',
+    'assessment-items.delete',
+    'student-scores.read',
+    'student-scores.manage',
   ];
   for (const perm of permissions) {
     if (teacherPermissionCodes.includes(perm.code)) {

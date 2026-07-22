@@ -26,6 +26,7 @@ import { semesterRoutes } from '@/features/academic/semester'
 import { studentRoutes } from '@/features/academic/student'
 import { studentGraduationRoutes } from '@/features/academic/student-graduation'
 import { studentScoreRoutes } from '@/features/academic/student-score'
+import { assessmentItemRoutes } from '@/features/academic/assessment-item'
 import { subjectRoutes } from '@/features/academic/subject'
 import { teachingAssignmentRoutes } from '@/features/academic/teaching-assignment'
 import { attendanceRoutes } from '@/features/academic/attendance'
@@ -84,6 +85,7 @@ const router = createRouter({
     ...profileRoutes,
     ...occupationRoutes,
     ...positionRoutes,
+    ...assessmentItemRoutes,
     ...studentScoreRoutes,
     ...raporRoutes,
     ...announcementRoutes,

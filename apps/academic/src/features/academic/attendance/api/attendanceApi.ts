@@ -11,6 +11,8 @@ import type {
   BulkUpsertAttendanceResult,
   AttendanceRecapItem,
   AttendanceRecapQueryParams,
+  AttendanceTrendPoint,
+  AttendanceTrendQueryParams,
 } from '../types'
 
 export const attendanceApi = {
@@ -43,8 +45,16 @@ export const attendanceApi = {
   },
 
   getRecap: (params: AttendanceRecapQueryParams) => {
-    return api.get<AttendanceRecapItem[]>('/attendances/recap', {
-      params,
-    })
+    return api.get<ApiSingleResponse<AttendanceRecapItem[]>>(
+      '/attendances/recap',
+      { params },
+    )
+  },
+
+  getMonthlyTrend: (params: AttendanceTrendQueryParams) => {
+    return api.get<ApiSingleResponse<AttendanceTrendPoint[]>>(
+      '/attendances/recap/trend',
+      { params },
+    )
   },
 }

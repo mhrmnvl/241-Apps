@@ -23,6 +23,8 @@ import {
   GetStudentScoreByIdUseCase,
   GetStudentScoresUseCase,
   UpdateStudentScoreUseCase,
+  GetStudentScoreRosterUseCase,
+  BulkUpsertStudentScoresUseCase,
 } from './use-cases/student-score.use-case.js';
 
 @Module({
@@ -49,6 +51,8 @@ import {
     CreateStudentScoreUseCase,
     UpdateStudentScoreUseCase,
     DeleteStudentScoreUseCase,
+    GetStudentScoreRosterUseCase,
+    BulkUpsertStudentScoresUseCase,
   ],
   exports: [IAssessmentItemsRepository, IStudentScoresRepository],
 })

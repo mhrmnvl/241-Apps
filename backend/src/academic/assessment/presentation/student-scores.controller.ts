@@ -27,12 +27,16 @@ import type { AuthenticatedUser } from '../../../core/types/authenticated-user.t
 import { CreateStudentScoreDto } from '../dto/request/create-student-score.dto.js';
 import { UpdateStudentScoreDto } from '../dto/request/update-student-score.dto.js';
 import { StudentScoreQueryDto } from '../dto/request/student-score-query.dto.js';
+import { StudentScoreRosterQueryDto } from '../dto/request/student-score-roster-query.dto.js';
+import { BulkUpsertStudentScoreDto } from '../dto/request/bulk-upsert-student-score.dto.js';
 import {
   GetStudentScoresUseCase,
   GetStudentScoreByIdUseCase,
   CreateStudentScoreUseCase,
   UpdateStudentScoreUseCase,
   DeleteStudentScoreUseCase,
+  GetStudentScoreRosterUseCase,
+  BulkUpsertStudentScoresUseCase,
 } from '../use-cases/student-score.use-case.js';
 
 @ApiTags('Student Scores')
@@ -46,6 +50,8 @@ export class StudentScoresController {
     private readonly createUC: CreateStudentScoreUseCase,
     private readonly updateUC: UpdateStudentScoreUseCase,
     private readonly deleteUC: DeleteStudentScoreUseCase,
+    private readonly rosterUC: GetStudentScoreRosterUseCase,
+    private readonly bulkUpsertUC: BulkUpsertStudentScoresUseCase,
   ) {}
 
   @Get()
@@ -56,6 +62,18 @@ export class StudentScoresController {
     @Query() q: StudentScoreQueryDto,
   ) {
     return this.getAll.execute(q);
+  }
+
+  @Get('roster')
+  @RequirePermissions('student-scores.read')
+  @ApiOperation({
+    summary: 'Get the full class roster with scores for one assessment item',
+  })
+  async getRoster(
+    @CurrentUser() user: AuthenticatedUser,
+    @Query() q: StudentScoreRosterQueryDto,
+  ) {
+    return this.rosterUC.execute(q);
   }
 
   @Get(':id')
@@ -77,6 +95,18 @@ export class StudentScoresController {
     @Body() dto: CreateStudentScoreDto,
   ) {
     return this.createUC.execute(dto);
+  }
+
+  @Post('bulk')
+  @RequirePermissions('student-scores.manage')
+  @ApiOperation({
+    summary: 'Bulk upsert scores for a class on one assessment item',
+  })
+  async bulkUpsert(
+    @CurrentUser() user: AuthenticatedUser,
+    @Body() dto: BulkUpsertStudentScoreDto,
+  ) {
+    return this.bulkUpsertUC.execute(dto);
   }
 
   @Patch(':id')

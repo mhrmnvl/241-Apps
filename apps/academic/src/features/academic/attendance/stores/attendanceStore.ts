@@ -4,6 +4,7 @@ import type {
   Attendance,
   AttendanceRecapItem,
   AttendanceInputRow,
+  AttendanceTrendPoint,
 } from '../types'
 import type { Classroom } from '@/features/academic/classroom'
 import type { Semester } from '@/features/academic/semester'
@@ -22,10 +23,17 @@ export const useAttendanceStore = defineStore('attendance', () => {
   const selectedSemesterId = ref<string>('')
   const selectedDate = ref<string>('')
 
+  const now = new Date()
+  const selectedMonth = ref<number>(now.getMonth() + 1)
+  const selectedYear = ref<number>(now.getFullYear())
+
   const inputRows = ref<AttendanceInputRow[]>([])
 
   const recapItems = ref<AttendanceRecapItem[]>([])
   const recapLoading = ref(false)
+
+  const trendData = ref<AttendanceTrendPoint[]>([])
+  const trendLoading = ref(false)
 
   const activeTab = ref<'input' | 'recap'>('input')
 
@@ -40,9 +48,13 @@ export const useAttendanceStore = defineStore('attendance', () => {
     selectedClassroomId,
     selectedSemesterId,
     selectedDate,
+    selectedMonth,
+    selectedYear,
     inputRows,
     recapItems,
     recapLoading,
+    trendData,
+    trendLoading,
     activeTab,
   }
 })

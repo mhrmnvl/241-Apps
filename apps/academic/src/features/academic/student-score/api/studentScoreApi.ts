@@ -1,35 +1,20 @@
-import type {
-  ApiPaginatedResponse,
-  ApiSingleResponse,
-} from '@/shared/types/api'
+import type { ApiSingleResponse } from '@/shared/types/api'
 import api from '@/shared/utils/api'
 import type {
-  StudentScoreQueryParams,
-  StudentScoreSavePayload,
-  BulkStudentScorePayload,
-  StudentScore,
+  StudentScoreRosterResponse,
+  BulkUpsertStudentScorePayload,
 } from '../types'
 
 export const studentScoreApi = {
-  getScores: (params?: StudentScoreQueryParams) => {
-    return api.get<ApiPaginatedResponse<StudentScore>>('/student-scores', {
-      params,
-    })
-  },
-
-  createScore: (payload: StudentScoreSavePayload) => {
-    return api.post<ApiSingleResponse<StudentScore>>('/student-scores', payload)
-  },
-
-  updateScore: (id: string, payload: Partial<StudentScoreSavePayload>) => {
-    return api.patch<ApiSingleResponse<StudentScore>>(
-      `/student-scores/${id}`,
-      payload,
+  getRoster: (assessmentItemId: string) => {
+    return api.get<ApiSingleResponse<StudentScoreRosterResponse>>(
+      '/student-scores/roster',
+      { params: { assessmentItemId } },
     )
   },
 
-  bulkSaveScores: (payload: BulkStudentScorePayload) => {
-    return api.post<ApiSingleResponse<StudentScore>>(
+  bulkUpsertScores: (payload: BulkUpsertStudentScorePayload) => {
+    return api.post<ApiSingleResponse<{ saved: number }>>(
       '/student-scores/bulk',
       payload,
     )

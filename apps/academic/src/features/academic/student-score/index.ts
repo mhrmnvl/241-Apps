@@ -4,12 +4,9 @@ export { useStudentScoreStore } from './stores/studentScoreStore'
 export { useStudentScore } from './composables/useStudentScore'
 export { studentScoreRoutes } from './routes'
 export type {
-  StudentScore,
-  StudentScoreAssessmentItem,
-  StudentScoreEnrollment,
-  StudentScoreQueryParams,
-  StudentScoreSavePayload,
-  BulkStudentScorePayload,
-  StudentScoreRow,
-  StudentScoreColumnActions,
+  StudentScoreRosterItem,
+  StudentScoreRosterAssessmentItem,
+  StudentScoreRosterResponse,
+  BulkStudentScoreRecordPayload,
+  BulkUpsertStudentScorePayload,
 } from './types'

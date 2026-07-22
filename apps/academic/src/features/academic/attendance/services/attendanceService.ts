@@ -120,8 +120,10 @@ export const attendanceService = {
       const res = await attendanceApi.getRecap({
         classroomId: store.selectedClassroomId,
         semesterId: store.selectedSemesterId,
+        month: store.selectedMonth,
+        year: store.selectedYear,
       })
-      store.recapItems = res.data ?? []
+      store.recapItems = res.data?.data ?? []
     } catch (error: unknown) {
       toast.error(
         getIndonesianErrorMessage(
@@ -132,5 +134,35 @@ export const attendanceService = {
     } finally {
       store.recapLoading = false
     }
+  },
+
+  fetchTrend: async () => {
+    const store = useAttendanceStore()
+    if (!store.selectedClassroomId || !store.selectedSemesterId) {
+      store.trendData = []
+      return
+    }
+
+    store.trendLoading = true
+    try {
+      const res = await attendanceApi.getMonthlyTrend({
+        classroomId: store.selectedClassroomId,
+        semesterId: store.selectedSemesterId,
+      })
+      store.trendData = res.data?.data ?? []
+    } catch (error: unknown) {
+      toast.error(
+        getIndonesianErrorMessage(error, 'Gagal memuat tren kehadiran.'),
+      )
+    } finally {
+      store.trendLoading = false
+    }
+  },
+
+  fetchRecapAndTrend: async () => {
+    await Promise.all([
+      attendanceService.fetchRecap(),
+      attendanceService.fetchTrend(),
+    ])
   },
 }

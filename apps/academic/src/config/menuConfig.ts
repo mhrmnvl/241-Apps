@@ -150,9 +150,9 @@ export const menuSections: MenuSection[] = [
             requiredPermission: 'attendances.read',
           },
           {
-            title: 'Nilai Siswa',
+            title: 'Tugas & Nilai',
             url: '/akademik/student-scores',
-            requiredPermission: 'student-scores.read',
+            requiredPermission: 'assessment-items.read',
           },
           {
             title: 'Rapor',

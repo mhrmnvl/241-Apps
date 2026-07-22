@@ -368,9 +368,9 @@ defineExpose({ table })
 
     <div
       v-if="!hidePagination"
-      class="flex items-center justify-between px-2"
+      class="flex flex-col sm:flex-row items-center justify-between gap-4 px-2"
     >
-      <div class="flex-1 text-sm text-muted-foreground">
+      <div class="text-sm text-muted-foreground">
         Menampilkan {{ table.getRowModel().rows.length }} dari
         {{ totalItemCount }} {{ itemLabel }}
       </div>

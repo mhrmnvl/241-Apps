@@ -1,6 +1,7 @@
 import { computed, ref, type Ref, type ComputedRef, type Component } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAuthSession } from '@/shared/composables/use-session'
+import { useRoleGuard } from '@/shared/composables/useRoleGuard'
 import { useProfile } from './useProfile'
 import { useProfileSheets } from './useProfileSheets'
 import { PencilLine } from 'lucide-vue-next'
@@ -36,16 +37,11 @@ export function useProfileView(): ProfileViewReturn {
   const activeTab = ref('personal')
   const { user: authUser } = useAuthSession()
 
+  const { can } = useRoleGuard()
   const routeRole = computed(() => route.params.role as string | undefined)
   const routeId = computed(() => route.params.id as string | undefined)
   const isViewingOther = computed(() => !!routeRole.value && !!routeId.value)
-  const isAdmin = computed(() =>
-    Boolean(
-      authUser.value?.roles?.some(
-        (r: string) => r === 'ADMIN' || r === 'SUPER_ADMIN',
-      ),
-    ),
-  )
+  const isAdmin = computed(() => can('profiles.update'))
 
   const sheets = useProfileSheets()
 

@@ -67,6 +67,8 @@ export const createParentColumns = (
           cell: ({ row }: { row: { original: Parent } }) => {
             const item = row.original
             return h(ActionCell, {
+              hideEdit: actions.canUpdate === false,
+              hideDelete: actions.canDelete === false,
               deleteTitle: 'Hapus Data Orang Tua?',
               deleteDescription:
                 'Data orang tua ini akan dihapus secara permanen dari sistem.',

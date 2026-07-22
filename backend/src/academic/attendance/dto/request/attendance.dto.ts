@@ -6,10 +6,13 @@ import {
   IsArray,
   IsDateString,
   IsEnum,
+  IsInt,
   IsNotEmpty,
   IsOptional,
   IsString,
   IsUUID,
+  Max,
+  Min,
   ValidateNested,
 } from 'class-validator';
 import { PaginationQueryDto } from '../../../../shared/dto/pagination.dto.js';
@@ -64,6 +67,25 @@ export class BulkUpsertAttendanceDto {
 }
 
 export class AttendanceRecapQueryDto {
+  @ApiProperty() @IsUUID() @IsNotEmpty() classroomId: string;
+  @ApiProperty() @IsUUID() @IsNotEmpty() semesterId: string;
+  @ApiPropertyOptional({
+    description: 'Month (1-12). Omit for whole-semester recap.',
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(12)
+  month?: number;
+  @ApiPropertyOptional({ description: 'Year, required together with month.' })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  year?: number;
+}
+
+export class AttendanceTrendQueryDto {
   @ApiProperty() @IsUUID() @IsNotEmpty() classroomId: string;
   @ApiProperty() @IsUUID() @IsNotEmpty() semesterId: string;
 }

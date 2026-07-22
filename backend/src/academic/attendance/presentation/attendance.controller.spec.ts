@@ -5,6 +5,7 @@ import {
   CreateAttendanceDto,
   UpdateAttendanceDto,
   AttendanceRecapQueryDto,
+  AttendanceTrendQueryDto,
 } from '../dto/request/attendance.dto.js';
 import {
   GetAttendancesUseCase,
@@ -14,6 +15,7 @@ import {
   DeleteAttendanceUseCase,
   BulkUpsertAttendanceUseCase,
   GetAttendanceRecapUseCase,
+  GetAttendanceTrendUseCase,
 } from '../use-cases/attendance.use-case.js';
 import { AttendanceController } from './attendance.controller.js';
 import type { AuthenticatedUser } from '../../../core/types/authenticated-user.type.js';
@@ -28,6 +30,7 @@ describe('AttendanceController', () => {
   const mockDelete = { execute: jest.fn() };
   const mockBulkUpsert = { execute: jest.fn() };
   const mockRecap = { execute: jest.fn() };
+  const mockTrend = { execute: jest.fn() };
 
   const mockUser: AuthenticatedUser = {
     id: 'user-uuid',
@@ -50,6 +53,7 @@ describe('AttendanceController', () => {
           useValue: mockBulkUpsert,
         },
         { provide: GetAttendanceRecapUseCase, useValue: mockRecap },
+        { provide: GetAttendanceTrendUseCase, useValue: mockTrend },
       ],
     }).compile();
 
@@ -141,6 +145,19 @@ describe('AttendanceController', () => {
       mockRecap.execute.mockResolvedValue([]);
       const result = await controller.getRecap(mockUser, q);
       expect(mockRecap.execute).toHaveBeenCalledWith(q);
+      expect(result).toEqual([]);
+    });
+  });
+
+  describe('getTrend', () => {
+    it('should delegate to GetAttendanceTrendUseCase', async () => {
+      const q: AttendanceTrendQueryDto = {
+        classroomId: 'cls-1',
+        semesterId: 'sem-1',
+      };
+      mockTrend.execute.mockResolvedValue([]);
+      const result = await controller.getTrend(mockUser, q);
+      expect(mockTrend.execute).toHaveBeenCalledWith(q);
       expect(result).toEqual([]);
     });
   });

@@ -9,6 +9,7 @@ import {
   UpdateAttendanceUseCase,
   BulkUpsertAttendanceUseCase,
   GetAttendanceRecapUseCase,
+  GetAttendanceTrendUseCase,
 } from './use-cases/attendance.use-case.js';
 import { IAttendanceRepository } from './domain/interfaces/attendance-repository.interface.js';
 
@@ -26,6 +27,7 @@ import { IAttendanceRepository } from './domain/interfaces/attendance-repository
     DeleteAttendanceUseCase,
     BulkUpsertAttendanceUseCase,
     GetAttendanceRecapUseCase,
+    GetAttendanceTrendUseCase,
   ],
   exports: [IAttendanceRepository],
 })

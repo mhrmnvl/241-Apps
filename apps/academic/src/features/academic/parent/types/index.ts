@@ -53,6 +53,9 @@ export interface ParentColumnActions {
     callbacks: { closeAlert: () => void; setLoading: (s: boolean) => void },
   ) => Promise<void>
   showActions?: boolean
+  /** Per-action gates — hide edit/delete when the user lacks that permission. */
+  canUpdate?: boolean
+  canDelete?: boolean
 }
 
 export const INCOME_RANGE_LABELS: Record<IncomeRange, string> = {

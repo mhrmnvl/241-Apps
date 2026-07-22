@@ -3,6 +3,7 @@ import { useScheduleStore } from '../stores/scheduleStore'
 import { DAYS } from '../types'
 import type { ScheduleLessonMap } from '../types'
 import { useAuthSession } from '@/shared/composables/use-session'
+import { useRoleGuard } from '@/shared/composables/useRoleGuard'
 import { storeToRefs } from 'pinia'
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
@@ -21,12 +22,15 @@ export function useSchedule() {
     isLoadingSchedule,
   } = storeToRefs(store)
 
+  const { can } = useRoleGuard()
   const roles = computed(() => user.value?.roles ?? [])
+  // Identity-based (which schedule view this person naturally sees), not an
+  // authorization gate — kept role-based on purpose.
   const isStudent = computed(() => roles.value.includes('STUDENT'))
   const isTeacher = computed(() => roles.value.includes('TEACHER'))
-  const isAdmin = computed(() =>
-    roles.value.some((r) => r === 'ADMIN' || r === 'SUPER_ADMIN'),
-  )
+  // Authorization gate: only those who can edit schedules get the
+  // cross-classroom picker — a teacher only browses their own.
+  const isAdmin = computed(() => can('schedules.update'))
 
   const selectedClassroom = computed(() =>
     classrooms.value.find((c) => c.id === selectedClassroomId.value),

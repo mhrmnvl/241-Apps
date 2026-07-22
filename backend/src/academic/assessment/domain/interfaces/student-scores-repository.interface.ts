@@ -1,6 +1,16 @@
 import { StudentScore, Prisma } from '@prisma/client';
 import type { StudentScoreQueryDto } from '../../dto/request/student-score-query.dto.js';
+import type { BulkStudentScoreRecordDto } from '../../dto/request/bulk-upsert-student-score.dto.js';
 import { PaginatedResult } from '../../../../shared/domain/interfaces/repository.interface.js';
+
+export interface StudentScoreRosterItem {
+  enrollmentId: string;
+  nis: string;
+  studentName: string;
+  scoreId: string | null;
+  score: number | null;
+  note: string | null;
+}
 
 export const STUDENT_SCORE_INCLUDE = {
   enrollment: {
@@ -51,4 +61,15 @@ export abstract class IStudentScoresRepository {
   ): Promise<StudentScore>;
 
   abstract softDelete(id: string): Promise<StudentScore>;
+
+  abstract getRoster(
+    assessmentItemId: string,
+    classroomId: string,
+    semesterId: string,
+  ): Promise<StudentScoreRosterItem[]>;
+
+  abstract bulkUpsert(
+    assessmentItemId: string,
+    records: BulkStudentScoreRecordDto[],
+  ): Promise<{ saved: number }>;
 }

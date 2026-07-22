@@ -21,3 +21,4 @@ allowBuilds:
   prisma: true
   puppeteer: true
   unrs-resolver: true
+  maplibre-gl: set this to true or false

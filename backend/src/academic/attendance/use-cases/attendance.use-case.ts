@@ -12,6 +12,7 @@ import {
   AttendanceQueryDto,
   BulkUpsertAttendanceDto,
   AttendanceRecapQueryDto,
+  AttendanceTrendQueryDto,
 } from '../dto/request/attendance.dto.js';
 
 @Injectable()
@@ -125,5 +126,13 @@ export class GetAttendanceRecapUseCase {
   constructor(private readonly repo: IAttendanceRepository) {}
   async execute(query: AttendanceRecapQueryDto) {
     return this.repo.getRecap(query);
+  }
+}
+
+@Injectable()
+export class GetAttendanceTrendUseCase {
+  constructor(private readonly repo: IAttendanceRepository) {}
+  async execute(query: AttendanceTrendQueryDto) {
+    return this.repo.getMonthlyTrend(query);
   }
 }

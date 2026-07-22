@@ -1,0 +1,14 @@
+import type { RouteRecordRaw } from 'vue-router'
+
+export const assessmentItemRoutes: RouteRecordRaw[] = [
+  {
+    path: '/akademik/student-scores',
+    name: 'AssessmentItems',
+    component: () => import('./views/AssessmentItemListView.vue'),
+    meta: {
+      title: 'Tugas & Nilai',
+      requiresAuth: true,
+      requiredPermission: 'assessment-items.read',
+    },
+  },
+]

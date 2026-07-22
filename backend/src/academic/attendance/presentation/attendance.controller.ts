@@ -30,6 +30,7 @@ import {
   AttendanceQueryDto,
   BulkUpsertAttendanceDto,
   AttendanceRecapQueryDto,
+  AttendanceTrendQueryDto,
 } from '../dto/request/attendance.dto.js';
 import {
   GetAttendancesUseCase,
@@ -39,6 +40,7 @@ import {
   DeleteAttendanceUseCase,
   BulkUpsertAttendanceUseCase,
   GetAttendanceRecapUseCase,
+  GetAttendanceTrendUseCase,
 } from '../use-cases/attendance.use-case.js';
 
 @ApiTags('Attendances')
@@ -54,6 +56,7 @@ export class AttendanceController {
     private readonly deleteUC: DeleteAttendanceUseCase,
     private readonly bulkUpsertUC: BulkUpsertAttendanceUseCase,
     private readonly recapUC: GetAttendanceRecapUseCase,
+    private readonly trendUC: GetAttendanceTrendUseCase,
   ) {}
 
   @Get()
@@ -74,6 +77,18 @@ export class AttendanceController {
     @Query() q: AttendanceRecapQueryDto,
   ) {
     return this.recapUC.execute(q);
+  }
+
+  @Get('recap/trend')
+  @RequirePermissions('attendances.read')
+  @ApiOperation({
+    summary: 'Get monthly attendance percentage trend for a classroom',
+  })
+  async getTrend(
+    @CurrentUser() user: AuthenticatedUser,
+    @Query() q: AttendanceTrendQueryDto,
+  ) {
+    return this.trendUC.execute(q);
   }
 
   @Get(':id')

@@ -2,6 +2,7 @@ import { Attendance, AttendanceStatus, Prisma } from '@prisma/client';
 import type {
   AttendanceQueryDto,
   AttendanceRecapQueryDto,
+  AttendanceTrendQueryDto,
   BulkAttendanceRecordDto,
 } from '../../dto/request/attendance.dto.js';
 import { PaginatedResult } from '../../../../shared/domain/interfaces/repository.interface.js';
@@ -30,6 +31,25 @@ export interface AttendanceRecap {
   EXCUSED: number;
   ABSENT: number;
   LATE: number;
+  /** Sum of all five status counts. */
+  total: number;
+  /** (PRESENT + LATE) / total * 100, rounded to 1 decimal. 0 when total is 0. */
+  percentage: number;
+}
+
+export interface AttendanceMonthlyTrendPoint {
+  year: number;
+  /** 1-12. */
+  month: number;
+  /** e.g. "Jan 2026" — ready to display as an x-axis label. */
+  monthLabel: string;
+  PRESENT: number;
+  SICK: number;
+  EXCUSED: number;
+  ABSENT: number;
+  LATE: number;
+  total: number;
+  percentage: number;
 }
 
 export abstract class IAttendanceRepository {
@@ -79,4 +99,8 @@ export abstract class IAttendanceRepository {
   ): Promise<{ saved: number }>;
 
   abstract getRecap(query: AttendanceRecapQueryDto): Promise<AttendanceRecap[]>;
+
+  abstract getMonthlyTrend(
+    query: AttendanceTrendQueryDto,
+  ): Promise<AttendanceMonthlyTrendPoint[]>;
 }

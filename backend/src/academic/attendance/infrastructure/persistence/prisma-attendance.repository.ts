@@ -4,13 +4,42 @@ import { PrismaService } from '../../../../core/database/prisma.service.js';
 import {
   AttendanceQueryDto,
   AttendanceRecapQueryDto,
+  AttendanceTrendQueryDto,
   BulkAttendanceRecordDto,
 } from '../../dto/request/attendance.dto.js';
 import { resolveSemesterId } from '../../../../shared/utils/active-academic-year.helper.js';
 import {
   IAttendanceRepository,
   ATTENDANCE_INCLUDE,
+  AttendanceMonthlyTrendPoint,
 } from '../../domain/interfaces/attendance-repository.interface.js';
+
+const MONTH_LABELS = [
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'Mei',
+  'Jun',
+  'Jul',
+  'Agu',
+  'Sep',
+  'Okt',
+  'Nov',
+  'Des',
+];
+
+/** (PRESENT + LATE) / total * 100, rounded to 1 decimal. 0 when total is 0. */
+function calcPercentage(counts: {
+  PRESENT: number;
+  LATE: number;
+  total: number;
+}): number {
+  if (counts.total === 0) return 0;
+  return (
+    Math.round(((counts.PRESENT + counts.LATE) / counts.total) * 1000) / 10
+  );
+}
 
 @Injectable()
 export class PrismaAttendanceRepository extends IAttendanceRepository {
@@ -186,11 +215,22 @@ export class PrismaAttendanceRepository extends IAttendanceRepository {
   }
 
   async getRecap(query: AttendanceRecapQueryDto) {
-    const { classroomId, semesterId } = query;
+    const { classroomId, semesterId, month, year } = query;
+
+    // month/year both present -> scope to that calendar month; otherwise the
+    // legacy whole-semester behavior (no date filter) is preserved.
+    const dateRange =
+      month && year
+        ? {
+            gte: new Date(year, month - 1, 1),
+            lte: new Date(year, month, 0, 23, 59, 59, 999),
+          }
+        : undefined;
 
     const attendances = await this.prisma.attendance.findMany({
       where: {
         deletedAt: null,
+        ...(dateRange && { date: dateRange }),
         enrollment: {
           classroomId,
           semesterId,
@@ -244,6 +284,69 @@ export class PrismaAttendanceRepository extends IAttendanceRepository {
       entry[att.status]++;
     }
 
-    return Array.from(recapMap.values());
+    return Array.from(recapMap.values()).map((entry) => {
+      const total =
+        entry.PRESENT + entry.SICK + entry.EXCUSED + entry.ABSENT + entry.LATE;
+      return {
+        ...entry,
+        total,
+        percentage: calcPercentage({ ...entry, total }),
+      };
+    });
+  }
+
+  async getMonthlyTrend(query: AttendanceTrendQueryDto) {
+    const { classroomId, semesterId } = query;
+
+    // Whole-semester query (no date filter), then grouped in-memory by
+    // calendar month — same style as getRecap, no raw SQL needed.
+    const attendances = await this.prisma.attendance.findMany({
+      where: {
+        deletedAt: null,
+        enrollment: { classroomId, semesterId, deletedAt: null },
+      },
+      select: { status: true, date: true },
+    });
+
+    const trendMap = new Map<
+      string,
+      Omit<AttendanceMonthlyTrendPoint, 'total' | 'percentage'>
+    >();
+
+    for (const att of attendances) {
+      const year = att.date.getFullYear();
+      const month = att.date.getMonth() + 1;
+      const key = `${year}-${month}`;
+      if (!trendMap.has(key)) {
+        trendMap.set(key, {
+          year,
+          month,
+          monthLabel: `${MONTH_LABELS[month - 1]} ${year}`,
+          PRESENT: 0,
+          SICK: 0,
+          EXCUSED: 0,
+          ABSENT: 0,
+          LATE: 0,
+        });
+      }
+      const entry = trendMap.get(key)!;
+      entry[att.status]++;
+    }
+
+    return Array.from(trendMap.values())
+      .map((entry) => {
+        const total =
+          entry.PRESENT +
+          entry.SICK +
+          entry.EXCUSED +
+          entry.ABSENT +
+          entry.LATE;
+        return {
+          ...entry,
+          total,
+          percentage: calcPercentage({ ...entry, total }),
+        };
+      })
+      .sort((a, b) => a.year - b.year || a.month - b.month);
   }
 }

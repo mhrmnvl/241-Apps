@@ -4,40 +4,16 @@ import { useStudentScoreStore } from '../stores/studentScoreStore'
 
 export function useStudentScore() {
   const store = useStudentScoreStore()
-  const {
-    items,
-    totalItems,
-    loading,
-    isSaving,
-    formError,
-    classrooms,
-    subjects,
-    semesters,
-    selectedClassroomId,
-    selectedSubjectId,
-    selectedSemesterId,
-    teachingAssignment,
-    assessmentItems,
-  } = storeToRefs(store)
+  const { assessmentItem, roster, loading, isSaving, formError } =
+    storeToRefs(store)
 
   return {
-    items,
-    totalItems,
+    assessmentItem,
+    roster,
     loading,
     isSaving,
     formError,
-    classrooms,
-    subjects,
-    semesters,
-    selectedClassroomId,
-    selectedSubjectId,
-    selectedSemesterId,
-    teachingAssignment,
-    assessmentItems,
-    fetchAll: studentScoreService.fetchAll,
-    fetchRelatedData: studentScoreService.fetchRelatedData,
-    saveScores: studentScoreService.saveScores,
-    saveAssessmentItem: studentScoreService.saveAssessmentItem,
-    deleteAssessmentItem: studentScoreService.deleteAssessmentItem,
+    fetchRoster: studentScoreService.fetchRoster,
+    saveRoster: studentScoreService.saveRoster,
   }
 }

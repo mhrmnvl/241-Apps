@@ -38,8 +38,8 @@ const {
 const isAddModalOpen = ref(false)
 const editingItem = ref<Parent | null>(null)
 const { can } = useRoleGuard()
-const hasWritePermission = computed(
-  () => can('parents.update') || can('parents.delete'),
+const canManageParents = computed(
+  () => can('parents.create') || can('parents.update') || can('parents.delete'),
 )
 
 const occupationFilterOptions = computed<ComboboxOption[]>(() => [
@@ -51,7 +51,9 @@ const occupationFilterOptions = computed<ComboboxOption[]>(() => [
 ])
 
 const tableColumns = createParentColumns({
-  showActions: hasWritePermission.value,
+  showActions: can('parents.update') || can('parents.delete'),
+  canUpdate: can('parents.update'),
+  canDelete: can('parents.delete'),
   onEdit: (item: Parent) => {
     editingItem.value = item
     isAddModalOpen.value = true
@@ -103,7 +105,7 @@ onMounted(async () => {
             Data Orang Tua
           </CardTitle>
           <Button
-            v-if="hasWritePermission"
+            v-if="can('parents.create')"
             @click="isAddModalOpen = true"
           >
             <Plus class="size-4 mr-2" />
@@ -147,7 +149,7 @@ onMounted(async () => {
           </DataTable>
 
           <ParentFormDialog
-            v-if="hasWritePermission && isAddModalOpen"
+            v-if="canManageParents && isAddModalOpen"
             v-model:open="isAddModalOpen"
             :form-error="formError"
             :is-saving="isSaving"

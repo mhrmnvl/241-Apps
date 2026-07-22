@@ -948,6 +948,13 @@ export const SYSTEM_PERMISSIONS: SystemPermission[] = [
   },
   {
     module: 'student-scores',
+    action: 'manage',
+    code: 'student-scores.manage',
+    description:
+      'Manage student scores (bulk grade a class for one assessment item)',
+  },
+  {
+    module: 'student-scores',
     action: 'read',
     code: 'student-scores.read',
     description: 'Read student scores',

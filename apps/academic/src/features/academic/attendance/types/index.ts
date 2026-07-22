@@ -95,9 +95,37 @@ export interface AttendanceRecapItem {
   EXCUSED: number
   ABSENT: number
   LATE: number
+  /** Sum of all five status counts. */
+  total: number
+  /** (PRESENT + LATE) / total * 100, rounded to 1 decimal. */
+  percentage: number
 }
 
 export interface AttendanceRecapQueryParams {
+  classroomId: string
+  semesterId: string
+  /** Month (1-12). Omit for whole-semester recap. */
+  month?: number
+  /** Year, required together with month. */
+  year?: number
+}
+
+export interface AttendanceTrendPoint {
+  year: number
+  /** 1-12. */
+  month: number
+  /** e.g. "Jan 2026" — ready to use as a chart x-axis label. */
+  monthLabel: string
+  PRESENT: number
+  SICK: number
+  EXCUSED: number
+  ABSENT: number
+  LATE: number
+  total: number
+  percentage: number
+}
+
+export interface AttendanceTrendQueryParams {
   classroomId: string
   semesterId: string
 }
