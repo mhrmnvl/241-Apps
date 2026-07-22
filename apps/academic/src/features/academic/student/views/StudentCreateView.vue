@@ -24,7 +24,6 @@ import {
   StepperIndicator,
   StepperItem,
   StepperSeparator,
-  StepperTitle,
   StepperTrigger,
 } from '@/ui/stepper'
 import {
@@ -265,8 +264,8 @@ async function submit() {
         gender: values.gender ?? 'MALE',
         birthPlace: values.birthPlace ?? '',
         birthDate: values.birthDate ?? '',
-        email: values.email ?? undefined,
-        phone: values.phone ?? undefined,
+        email: values.email || undefined,
+        phone: values.phone || undefined,
         nis: values.nis ?? '',
         nisn: values.nisn ?? '',
         gradeId: values.gradeId ?? undefined,
@@ -324,20 +323,20 @@ onMounted(async () => {
           </CardTitle>
         </CardHeader>
 
-        <div class="px-6 py-4 border-b overflow-x-auto">
+        <div class="px-6 py-4 border-b">
           <Stepper
             :model-value="activeStep"
-            class="flex items-center justify-[safe_center] gap-2 md:gap-6 w-full max-w-3xl mx-auto min-w-max"
+            class="flex items-center justify-center gap-2 w-full max-w-md mx-auto"
             @update:model-value="(v) => void goToStep(Number(v))"
           >
             <StepperItem
               v-for="step in steps"
               :key="step.value"
               :step="step.value"
-              class="flex items-center gap-2 md:gap-6 group"
+              class="flex items-center gap-2 group"
             >
               <StepperTrigger
-                class="flex items-center gap-2 cursor-pointer outline-none"
+                class="flex items-center gap-2 cursor-pointer outline-none shrink-0"
               >
                 <StepperIndicator class="shrink-0">
                   <Check
@@ -346,18 +345,24 @@ onMounted(async () => {
                   />
                   <span v-else>{{ step.value }}</span>
                 </StepperIndicator>
-                <StepperTitle
-                  class="text-sm font-semibold leading-none whitespace-nowrap hidden md:block"
-                >
-                  {{ step.title }}
-                </StepperTitle>
               </StepperTrigger>
               <StepperSeparator
                 v-if="step.value < steps.length"
-                class="w-8 md:w-16 h-0.5 bg-muted"
+                class="w-6 sm:w-10 h-0.5 bg-muted"
               />
             </StepperItem>
           </Stepper>
+
+          <div class="mt-3 text-center">
+            <span
+              class="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider"
+            >
+              Langkah {{ activeStep }} dari {{ steps.length }}
+            </span>
+            <p class="text-sm font-bold text-foreground">
+              {{ steps.find((s) => s.value === activeStep)?.title }}
+            </p>
+          </div>
         </div>
 
         <div class="max-h-[60vh] overflow-y-auto">

@@ -8,7 +8,6 @@ import {
   StepperIndicator,
   StepperItem,
   StepperSeparator,
-  StepperTitle,
   StepperTrigger,
 } from '@/ui/stepper'
 import { Check } from 'lucide-vue-next'
@@ -79,19 +78,19 @@ const handleSaveAddress = async () => {
         </CardHeader>
 
         <div class="w-full">
-          <div class="px-6 py-3 border-b overflow-x-auto">
+          <div class="px-6 py-3 border-b">
             <Stepper
               v-model="activeStep"
-              class="flex items-center justify-[safe_center] gap-4 md:gap-8 w-full max-w-2xl mx-auto min-w-max"
+              class="flex items-center justify-center gap-2 w-full max-w-md mx-auto"
             >
               <StepperItem
                 v-for="step in steps"
                 :key="step.value"
                 :step="step.value"
-                class="flex items-center gap-2 md:gap-6 group"
+                class="flex items-center gap-2 group"
               >
                 <StepperTrigger
-                  class="flex items-center gap-3 cursor-pointer outline-none"
+                  class="flex items-center gap-3 cursor-pointer outline-none shrink-0"
                 >
                   <StepperIndicator class="shrink-0">
                     <Check
@@ -100,18 +99,24 @@ const handleSaveAddress = async () => {
                     />
                     <span v-else>{{ step.value }}</span>
                   </StepperIndicator>
-                  <StepperTitle
-                    class="hidden sm:block text-sm font-semibold leading-none whitespace-nowrap"
-                  >
-                    {{ step.title }}
-                  </StepperTitle>
                 </StepperTrigger>
                 <StepperSeparator
                   v-if="step.value < steps.length"
-                  class="w-8 sm:w-16 md:w-24 h-0.5 bg-muted"
+                  class="w-6 sm:w-10 h-0.5 bg-muted"
                 />
               </StepperItem>
             </Stepper>
+
+            <div class="mt-3 text-center">
+              <span
+                class="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider"
+              >
+                Langkah {{ activeStep }} dari {{ steps.length }}
+              </span>
+              <p class="text-sm font-bold text-foreground">
+                {{ steps.find((s) => s.value === activeStep)?.title }}
+              </p>
+            </div>
           </div>
 
           <div
