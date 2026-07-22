@@ -11,6 +11,7 @@ export interface UserRoleQueryParams {
   page?: number
   limit?: number
   roleCode?: string
+  search?: string
 }
 
 export interface AssignRolePayload {

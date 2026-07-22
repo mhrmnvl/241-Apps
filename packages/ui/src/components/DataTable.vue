@@ -4,6 +4,7 @@ import type {
   ColumnFiltersState,
   ColumnPinningState,
   SortingState,
+  Row,
 } from '@tanstack/vue-table'
 import type { ColumnMetaAlign } from '@/shared/types/vue-table'
 import {
@@ -50,24 +51,39 @@ import {
   ChevronsRight,
 } from 'lucide-vue-next'
 
-const props = defineProps<{
-  columns: ColumnDef<TData, TValue>[]
-  data: TData[]
-  totalItems?: number
-  itemLabel?: string
-  filterColumn?: string
-  filterPlaceholder?: string
-  hidePerPage?: boolean
-  hidePagination?: boolean
-  isLoading?: boolean
-}>()
+const props = withDefaults(
+  defineProps<{
+    columns: ColumnDef<TData, TValue>[]
+    data: TData[]
+    totalItems?: number
+    page?: number
+    itemLabel?: string
+    filterColumn?: string
+    filterPlaceholder?: string
+    hidePerPage?: boolean
+    hidePagination?: boolean
+    isLoading?: boolean
+  }>(),
+  {
+    page: 1,
+  },
+)
 
-const emit = defineEmits<(e: 'selectionChange', rows: TData[]) => void>()
+const emit = defineEmits<{
+  (e: 'selectionChange', rows: TData[]): void
+  (e: 'update:page', page: number): void
+  (e: 'update:page-size', pageSize: number): void
+}>()
 
 const sorting = ref<SortingState>([])
 const columnFilters = ref<ColumnFiltersState>([])
 const rowSelection = ref({})
 const columnPinning = ref<ColumnPinningState>({ right: ['actions'] })
+
+const pagination = ref({
+  pageIndex: 0,
+  pageSize: 10,
+})
 
 const table = useVueTable({
   get data() {
@@ -83,6 +99,15 @@ const table = useVueTable({
   getRowId: (row: TData, index: number) =>
     (row as { id?: string }).id ?? String(index),
   enableRowSelection: true,
+  get manualPagination() {
+    return props.totalItems !== undefined
+  },
+  get pageCount(): number | undefined {
+    if (props.totalItems !== undefined) {
+      return Math.ceil(props.totalItems / pagination.value.pageSize)
+    }
+    return undefined
+  },
   onSortingChange: (updaterOrValue) => {
     sorting.value =
       typeof updaterOrValue === 'function'
@@ -95,6 +120,12 @@ const table = useVueTable({
         ? updaterOrValue(columnFilters.value)
         : updaterOrValue
   },
+  onPaginationChange: (updaterOrValue) => {
+    pagination.value =
+      typeof updaterOrValue === 'function'
+        ? updaterOrValue(pagination.value)
+        : updaterOrValue
+  },
   onRowSelectionChange: (updaterOrValue) => {
     rowSelection.value =
       typeof updaterOrValue === 'function'
@@ -103,7 +134,7 @@ const table = useVueTable({
     setTimeout(() => {
       emit(
         'selectionChange',
-        table.getSelectedRowModel().flatRows.map((r) => r.original),
+        table.getSelectedRowModel().flatRows.map((r: Row<TData>) => r.original),
       )
     }, 0)
   },
@@ -114,16 +145,14 @@ const table = useVueTable({
     get columnFilters() {
       return columnFilters.value
     },
+    get pagination() {
+      return pagination.value
+    },
     get rowSelection() {
       return rowSelection.value
     },
     get columnPinning() {
       return columnPinning.value
-    },
-  },
-  initialState: {
-    pagination: {
-      pageSize: 10,
     },
   },
 })
@@ -137,9 +166,21 @@ const totalItemCount = computed(() => props.totalItems ?? props.data.length)
 const itemLabel = computed(() => props.itemLabel ?? 'data')
 
 watch(
+  () => props.page,
+  (newPage) => {
+    if (newPage !== undefined) {
+      pagination.value.pageIndex = newPage - 1
+    }
+  },
+  { immediate: true },
+)
+
+watch(
   () => props.data.length,
   () => {
-    table.setPageIndex(0)
+    if (props.totalItems === undefined) {
+      pagination.value.pageIndex = 0
+    }
   },
 )
 
@@ -160,13 +201,18 @@ defineExpose({ table })
           Baris per halaman
         </span>
         <Select
-          :model-value="String(table.getState().pagination.pageSize)"
-          @update:model-value="table.setPageSize(Number($event))"
+          :model-value="String(pagination.pageSize)"
+          @update:model-value="
+            (val) => {
+              const size = Number(val)
+              pagination.pageSize = size
+              pagination.pageIndex = 0
+              emit('update:page-size', size)
+            }
+          "
         >
           <SelectTrigger class="h-8 w-[50px] [&>svg]:hidden">
-            <SelectValue
-              :placeholder="String(table.getState().pagination.pageSize)"
-            />
+            <SelectValue :placeholder="String(pagination.pageSize)" />
           </SelectTrigger>
           <SelectContent side="top">
             <SelectItem
@@ -315,13 +361,18 @@ defineExpose({ table })
       </div>
       <Pagination
         v-if="table.getPageCount() > 1"
-        :page="table.getState().pagination.pageIndex + 1"
-        :items-per-page="table.getState().pagination.pageSize"
+        :page="pagination.pageIndex + 1"
+        :items-per-page="pagination.pageSize"
         :total="totalItemCount"
         :sibling-count="1"
         :show-edges="false"
         class="mx-0 w-auto"
-        @update:page="(val: number) => table.setPageIndex(val - 1)"
+        @update:page="
+          (val: number) => {
+            pagination.pageIndex = val - 1
+            emit('update:page', val)
+          }
+        "
       >
         <PaginationContent
           v-slot="{ items }"
@@ -347,9 +398,7 @@ defineExpose({ table })
             <PaginationItem
               v-if="item.type === 'page'"
               :value="item.value"
-              :is-active="
-                item.value === table.getState().pagination.pageIndex + 1
-              "
+              :is-active="item.value === pagination.pageIndex + 1"
               class="size-8"
             >
               {{ item.value }}

@@ -8,7 +8,8 @@
     "paths": {
       "@/ui": ["./src/index.ts"],
       "@/ui/*": ["./src/components/ui/*/index.ts"],
-      "@/ui/utils": ["./src/utils/index.ts"]
+      "@/ui/utils": ["./src/utils/index.ts"],
+      "@/shared/*": ["../shared/src/*"]
     }
   },
   "include": ["src/**/*.ts", "src/**/*.vue"]

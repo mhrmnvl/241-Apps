@@ -60,7 +60,13 @@ async function handleDelete(
   }
 }
 
-const columns = createTimeSlotTypeColumns(openEdit, handleDelete, isAdmin.value)
+const columns = createTimeSlotTypeColumns(
+  openEdit,
+  (item, callbacks) => {
+    void handleDelete(item, callbacks)
+  },
+  isAdmin.value,
+)
 
 onMounted(fetchTypes)
 </script>

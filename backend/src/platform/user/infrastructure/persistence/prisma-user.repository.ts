@@ -14,11 +14,38 @@ export class PrismaUserRepository extends IUserRepository {
   }
 
   async findAll(query: UserQueryDto) {
-    const { page = 1, limit = 10 } = query;
+    const { page = 1, limit = 10, roleCode, search } = query;
     const skip = (page - 1) * limit;
 
     const where: Prisma.UserWhereInput = {
       deletedAt: null,
+      ...(roleCode && {
+        userRoles: {
+          some: {
+            role: {
+              code: roleCode,
+            },
+          },
+        },
+      }),
+      ...(search && {
+        OR: [
+          {
+            identifier: {
+              contains: search,
+              mode: 'insensitive',
+            },
+          },
+          {
+            profile: {
+              name: {
+                contains: search,
+                mode: 'insensitive',
+              },
+            },
+          },
+        ],
+      }),
     };
 
     const [data, total] = await Promise.all([
