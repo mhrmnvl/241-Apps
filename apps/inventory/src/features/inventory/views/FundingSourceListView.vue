@@ -12,7 +12,7 @@ import { toast } from 'vue-sonner'
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
 import { useRoleGuard } from '@/shared/composables/useRoleGuard'
 import { inventoryApi } from '../api/inventoryApi'
-import FundingSourceFormSheet from '../components/FundingSourceFormSheet.vue'
+import FundingSourceFormDialog from '../components/FundingSourceFormDialog.vue'
 import type { ColumnDef } from '@tanstack/vue-table'
 import type { InventoryReferenceItem } from '../types'
 
@@ -27,8 +27,8 @@ const selectedItem = ref<InventoryReferenceItem | null>(null)
 const searchQuery = ref('')
 
 const breadcrumbs = [
-  { title: 'Pengaturan', href: '#' },
-  { title: 'Sumber Dana' },
+  { title: 'Referensi', href: '#' },
+  { title: 'Sumber Dana', href: '/inventory/funding-sources' },
 ]
 
 // Columns configuration
@@ -204,7 +204,7 @@ onMounted(() => {
       </Card>
 
       <!-- Funding Source Sheet Form -->
-      <FundingSourceFormSheet
+      <FundingSourceFormDialog
         v-model:open="isFormOpen"
         :item="selectedItem"
         :is-saving="isSaving"

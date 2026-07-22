@@ -13,7 +13,7 @@ import { toast } from 'vue-sonner'
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
 import { useRoleGuard } from '@/shared/composables/useRoleGuard'
 import { inventoryApi } from '../api/inventoryApi'
-import ConditionFormSheet from '../components/ConditionFormSheet.vue'
+import ConditionFormDialog from '../components/ConditionFormDialog.vue'
 import type { ColumnDef } from '@tanstack/vue-table'
 import type { InventoryReferenceItem } from '../types'
 
@@ -28,8 +28,8 @@ const selectedItem = ref<InventoryReferenceItem | null>(null)
 const searchQuery = ref('')
 
 const breadcrumbs = [
-  { title: 'Pengaturan', href: '#' },
-  { title: 'Kondisi Aset' },
+  { title: 'Referensi', href: '#' },
+  { title: 'Kondisi Aset', href: '/inventory/conditions' },
 ]
 
 // Columns configuration
@@ -211,7 +211,7 @@ onMounted(() => {
       </Card>
 
       <!-- Condition Sheet Form -->
-      <ConditionFormSheet
+      <ConditionFormDialog
         v-model:open="isFormOpen"
         :item="selectedItem"
         :is-saving="isSaving"

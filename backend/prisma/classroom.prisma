@@ -32,7 +32,7 @@ model ClassroomSupervisor {
   deletedAt   DateTime? @map("deleted_at")
 
   classroom Classroom @relation(fields: [classroomId], references: [id])
-  teacher   Teacher  @relation(fields: [teacherId], references: [id])
+  teacher   Teacher   @relation(fields: [teacherId], references: [id])
   semester  Semester  @relation(fields: [semesterId], references: [id])
 
   @@unique([classroomId, semesterId])

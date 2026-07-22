@@ -11,7 +11,7 @@ import { ChevronLeft } from 'lucide-vue-next'
 import { toast } from 'vue-sonner'
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
 import { inventoryApi } from '../api/inventoryApi'
-import type { InventoryAssetUnit, InventoryStatus } from '../types'
+import type { InventoryAssetUnit } from '../types'
 import type { ColumnDef } from '@tanstack/vue-table'
 import { h } from 'vue'
 
@@ -106,24 +106,14 @@ const columns: ColumnDef<LoanUnitRow>[] = [
 async function loadAvailableUnits() {
   loadingUnits.value = true
   try {
-    const metaRes = await inventoryApi.getInventoryMetadata()
-    const metadata = metaRes.data?.data ?? null
-    const availStatus = metadata?.statuses.find(
-      (s: InventoryStatus) => s.systemKey === 'AVAILABLE',
-    )
-    if (!availStatus) {
-      availableUnits.value = []
-      return
-    }
     const assetsRes = await inventoryApi.getAssets({
-      statusId: availStatus.id,
       limit: 1000,
       page: 1,
     })
     const assets = assetsRes.data?.data ?? []
     availableUnits.value = assets.flatMap((asset) =>
       (asset.units ?? [])
-        .filter((u) => u.status?.systemKey === 'AVAILABLE')
+        .filter((u) => u.status?.allowTransactions === true)
         .map((u) => ({
           ...u,
           assetName: asset.name,

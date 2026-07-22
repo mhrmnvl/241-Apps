@@ -12,14 +12,14 @@ enum EducationStatus {
 }
 
 model Achievement {
-  id          String          @id @default(uuid()) @db.Uuid
-  profileId   String          @map("profile_id") @db.Uuid
-  name        String          @db.VarChar(200)
-  level       String          @db.VarChar(100)
-  typeId      String          @map("type_id") @db.Uuid
+  id          String    @id @default(uuid()) @db.Uuid
+  profileId   String    @map("profile_id") @db.Uuid
+  name        String    @db.VarChar(200)
+  level       String    @db.VarChar(100)
+  typeId      String    @map("type_id") @db.Uuid
   year        Int
-  description String?         @db.Text
-  deletedAt   DateTime?       @map("deleted_at")
+  description String?   @db.Text
+  deletedAt   DateTime? @map("deleted_at")
 
   profile Profile         @relation(fields: [profileId], references: [id])
   type    AchievementType @relation(fields: [typeId], references: [id])

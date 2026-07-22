@@ -42,11 +42,6 @@ export class CreateAssetDto {
   @IsString()
   model?: string;
 
-  @ApiPropertyOptional({ description: 'Factory Serial Number' })
-  @IsOptional()
-  @IsString()
-  serialNumber?: string;
-
   @ApiPropertyOptional({ description: 'Barcode identifier' })
   @IsOptional()
   @IsString()

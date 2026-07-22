@@ -46,11 +46,6 @@ export class PrismaAssetRepository extends IAssetRepository {
             some: { barcode: { contains: keyword, mode: 'insensitive' } },
           },
         },
-        {
-          units: {
-            some: { serialNumber: { contains: keyword, mode: 'insensitive' } },
-          },
-        },
       ];
     }
 

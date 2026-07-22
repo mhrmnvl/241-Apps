@@ -7,18 +7,18 @@ import {
   Button,
   Input,
   ScrollArea,
-  Sheet,
-  SheetContent,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
   FormControl,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
+  Textarea,
 } from '@/ui'
-import { Switch } from '@/ui/switch'
 import type { InventoryReferenceItem } from '../types'
 
 const props = defineProps<{
@@ -37,18 +37,18 @@ const isEdit = computed(() => !!props.item)
 const formSchema = toTypedSchema(
   z.object({
     code: z.string().min(1, 'Kode wajib diisi'),
-    name: z.string().min(1, 'Nama kondisi wajib diisi'),
-    isUsable: z.boolean().default(true),
+    name: z.string().min(1, 'Nama sumber dana wajib diisi'),
+    description: z.string().optional().default(''),
   }),
 )
 
-interface ConditionFormValues {
+interface FundingSourceFormValues {
   code: string
   name: string
-  isUsable: boolean
+  description?: string
 }
 
-const { handleSubmit, resetForm } = useForm<ConditionFormValues>({
+const { handleSubmit, resetForm } = useForm<FundingSourceFormValues>({
   validationSchema: formSchema,
 })
 
@@ -61,7 +61,7 @@ watch(
           values: {
             code: props.item.code || '',
             name: props.item.name || '',
-            isUsable: props.item.isUsable ?? true,
+            description: props.item.description ?? '',
           },
         })
       } else {
@@ -69,7 +69,7 @@ watch(
           values: {
             code: '',
             name: '',
-            isUsable: true,
+            description: '',
           },
         })
       }
@@ -84,16 +84,16 @@ const onSubmit = handleSubmit((values) => {
 </script>
 
 <template>
-  <Sheet
+  <Dialog
     :open="open"
     @update:open="emit('update:open', $event)"
   >
-    <SheetContent class="flex flex-col h-full w-[400px] sm:w-[540px]">
-      <SheetHeader class="border-b pb-4 px-1">
-        <SheetTitle class="text-xl font-semibold tracking-tight">
-          {{ isEdit ? 'Ubah Kondisi Aset' : 'Tambah Kondisi Aset' }}
-        </SheetTitle>
-      </SheetHeader>
+    <DialogContent class="sm:max-w-md flex flex-col gap-0 p-0 overflow-hidden">
+      <DialogHeader class="px-6 py-5 border-b shrink-0 bg-muted/20">
+        <DialogTitle class="text-xl font-semibold tracking-tight">
+          {{ isEdit ? 'Ubah Sumber Dana' : 'Tambah Sumber Dana' }}
+        </DialogTitle>
+      </DialogHeader>
 
       <form
         class="flex flex-col flex-1 min-h-0"
@@ -107,11 +107,13 @@ const onSubmit = handleSubmit((values) => {
               name="code"
             >
               <FormItem>
-                <FormLabel class="text-sm font-medium">Kode Kondisi</FormLabel>
+                <FormLabel class="text-sm font-medium"
+                  >Kode Sumber Dana</FormLabel
+                >
                 <FormControl>
                   <Input
                     v-bind="componentField"
-                    placeholder="Contoh: COND-BAIK"
+                    placeholder="Contoh: FUND-APBD"
                     :disabled="isSaving || isEdit"
                   />
                 </FormControl>
@@ -125,11 +127,13 @@ const onSubmit = handleSubmit((values) => {
               name="name"
             >
               <FormItem>
-                <FormLabel class="text-sm font-medium">Nama Kondisi</FormLabel>
+                <FormLabel class="text-sm font-medium"
+                  >Nama Sumber Dana</FormLabel
+                >
                 <FormControl>
                   <Input
                     v-bind="componentField"
-                    placeholder="Contoh: Baik / Layak Pakai"
+                    placeholder="Contoh: APBD Provinsi / Dana Bos"
                     :disabled="isSaving"
                   />
                 </FormControl>
@@ -137,35 +141,32 @@ const onSubmit = handleSubmit((values) => {
               </FormItem>
             </FormField>
 
-            <!-- Field: isUsable -->
+            <!-- Field: Description -->
             <FormField
-              v-slot="{ value, handleChange }"
-              name="isUsable"
+              v-slot="{ componentField }"
+              name="description"
             >
-              <FormItem
-                class="flex flex-row items-center justify-between rounded-lg border p-4 shadow-sm"
-              >
-                <div class="space-y-0.5">
-                  <FormLabel class="text-sm font-medium"
-                    >Bisa Digunakan</FormLabel
-                  >
-                  <p class="text-xs text-muted-foreground">
-                    Aktifkan jika aset dengan kondisi ini masih layak pakai.
-                  </p>
-                </div>
+              <FormItem>
+                <FormLabel class="text-sm font-medium"
+                  >Keterangan / Deskripsi</FormLabel
+                >
                 <FormControl>
-                  <Switch
-                    :model-value="value"
+                  <Textarea
+                    v-bind="componentField"
+                    placeholder="Tambahkan penjelasan singkat jika diperlukan..."
                     :disabled="isSaving"
-                    @update:model-value="handleChange"
+                    rows="3"
                   />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             </FormField>
           </div>
         </ScrollArea>
 
-        <SheetFooter class="border-t pt-4 px-1 flex-shrink-0">
+        <DialogFooter
+          class="px-6 py-4 border-t shrink-0 flex sm:justify-between w-full bg-background"
+        >
           <Button
             type="button"
             variant="outline"
@@ -180,8 +181,8 @@ const onSubmit = handleSubmit((values) => {
           >
             {{ isSaving ? 'Menyimpan...' : 'Simpan' }}
           </Button>
-        </SheetFooter>
+        </DialogFooter>
       </form>
-    </SheetContent>
-  </Sheet>
+    </DialogContent>
+  </Dialog>
 </template>

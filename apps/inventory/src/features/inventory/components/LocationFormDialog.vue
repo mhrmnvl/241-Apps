@@ -7,11 +7,11 @@ import {
   Button,
   Input,
   ScrollArea,
-  Sheet,
-  SheetContent,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
   FormControl,
   FormField,
   FormItem,
@@ -37,18 +37,24 @@ const isEdit = computed(() => !!props.item)
 const formSchema = toTypedSchema(
   z.object({
     code: z.string().min(1, 'Kode wajib diisi'),
-    name: z.string().min(1, 'Nama sumber dana wajib diisi'),
+    name: z.string().min(1, 'Nama lokasi wajib diisi'),
+    building: z.string().optional().default(''),
+    room: z.string().optional().default(''),
+    rack: z.string().optional().default(''),
     description: z.string().optional().default(''),
   }),
 )
 
-interface FundingSourceFormValues {
+interface LocationFormValues {
   code: string
   name: string
+  building?: string
+  room?: string
+  rack?: string
   description?: string
 }
 
-const { handleSubmit, resetForm } = useForm<FundingSourceFormValues>({
+const { handleSubmit, resetForm } = useForm<LocationFormValues>({
   validationSchema: formSchema,
 })
 
@@ -61,6 +67,9 @@ watch(
           values: {
             code: props.item.code || '',
             name: props.item.name || '',
+            building: props.item.building ?? '',
+            room: props.item.room ?? '',
+            rack: props.item.rack ?? '',
             description: props.item.description ?? '',
           },
         })
@@ -69,6 +78,9 @@ watch(
           values: {
             code: '',
             name: '',
+            building: '',
+            room: '',
+            rack: '',
             description: '',
           },
         })
@@ -84,16 +96,16 @@ const onSubmit = handleSubmit((values) => {
 </script>
 
 <template>
-  <Sheet
+  <Dialog
     :open="open"
     @update:open="emit('update:open', $event)"
   >
-    <SheetContent class="flex flex-col h-full w-[400px] sm:w-[540px]">
-      <SheetHeader class="border-b pb-4 px-1">
-        <SheetTitle class="text-xl font-semibold tracking-tight">
-          {{ isEdit ? 'Ubah Sumber Dana' : 'Tambah Sumber Dana' }}
-        </SheetTitle>
-      </SheetHeader>
+    <DialogContent class="sm:max-w-md flex flex-col gap-0 p-0 overflow-hidden">
+      <DialogHeader class="px-6 py-5 border-b shrink-0 bg-muted/20">
+        <DialogTitle class="text-xl font-semibold tracking-tight">
+          {{ isEdit ? 'Ubah Lokasi' : 'Tambah Lokasi' }}
+        </DialogTitle>
+      </DialogHeader>
 
       <form
         class="flex flex-col flex-1 min-h-0"
@@ -107,13 +119,11 @@ const onSubmit = handleSubmit((values) => {
               name="code"
             >
               <FormItem>
-                <FormLabel class="text-sm font-medium"
-                  >Kode Sumber Dana</FormLabel
-                >
+                <FormLabel class="text-sm font-medium">Kode Lokasi</FormLabel>
                 <FormControl>
                   <Input
                     v-bind="componentField"
-                    placeholder="Contoh: FUND-APBD"
+                    placeholder="Contoh: LOC-LAB-KOMP"
                     :disabled="isSaving || isEdit"
                   />
                 </FormControl>
@@ -127,13 +137,67 @@ const onSubmit = handleSubmit((values) => {
               name="name"
             >
               <FormItem>
+                <FormLabel class="text-sm font-medium">Nama Lokasi</FormLabel>
+                <FormControl>
+                  <Input
+                    v-bind="componentField"
+                    placeholder="Contoh: Laboratorium Komputer"
+                    :disabled="isSaving"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            </FormField>
+
+            <!-- Field: Building -->
+            <FormField
+              v-slot="{ componentField }"
+              name="building"
+            >
+              <FormItem>
+                <FormLabel class="text-sm font-medium">Gedung</FormLabel>
+                <FormControl>
+                  <Input
+                    v-bind="componentField"
+                    placeholder="Contoh: Gedung B Lantai 2"
+                    :disabled="isSaving"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            </FormField>
+
+            <!-- Field: Room -->
+            <FormField
+              v-slot="{ componentField }"
+              name="room"
+            >
+              <FormItem>
+                <FormLabel class="text-sm font-medium">Ruangan</FormLabel>
+                <FormControl>
+                  <Input
+                    v-bind="componentField"
+                    placeholder="Contoh: Ruang Lab 01"
+                    :disabled="isSaving"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            </FormField>
+
+            <!-- Field: Rack -->
+            <FormField
+              v-slot="{ componentField }"
+              name="rack"
+            >
+              <FormItem>
                 <FormLabel class="text-sm font-medium"
-                  >Nama Sumber Dana</FormLabel
+                  >Rak (Opsional)</FormLabel
                 >
                 <FormControl>
                   <Input
                     v-bind="componentField"
-                    placeholder="Contoh: APBD Provinsi / Dana Bos"
+                    placeholder="Contoh: Lemari A"
                     :disabled="isSaving"
                   />
                 </FormControl>
@@ -153,7 +217,7 @@ const onSubmit = handleSubmit((values) => {
                 <FormControl>
                   <Textarea
                     v-bind="componentField"
-                    placeholder="Tambahkan penjelasan singkat jika diperlukan..."
+                    placeholder="Tambahkan keterangan lokasi jika ada..."
                     :disabled="isSaving"
                     rows="3"
                   />
@@ -164,7 +228,9 @@ const onSubmit = handleSubmit((values) => {
           </div>
         </ScrollArea>
 
-        <SheetFooter class="border-t pt-4 px-1 flex-shrink-0">
+        <DialogFooter
+          class="px-6 py-4 border-t shrink-0 flex sm:justify-between w-full bg-background"
+        >
           <Button
             type="button"
             variant="outline"
@@ -179,8 +245,8 @@ const onSubmit = handleSubmit((values) => {
           >
             {{ isSaving ? 'Menyimpan...' : 'Simpan' }}
           </Button>
-        </SheetFooter>
+        </DialogFooter>
       </form>
-    </SheetContent>
-  </Sheet>
+    </DialogContent>
+  </Dialog>
 </template>

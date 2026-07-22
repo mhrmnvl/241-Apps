@@ -22,11 +22,6 @@ export class UpdateUnitDto {
   @IsUUID()
   custodianId?: string;
 
-  @ApiPropertyOptional({ description: 'Factory serial number' })
-  @IsOptional()
-  @IsString()
-  serialNumber?: string;
-
   @ApiPropertyOptional({ description: 'Barcode / QR code' })
   @IsOptional()
   @IsString()

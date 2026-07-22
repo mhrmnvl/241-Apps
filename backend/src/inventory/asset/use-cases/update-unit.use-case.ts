@@ -12,7 +12,6 @@ export class UpdateUnitUseCase {
       throw new NotFoundException(`Asset unit with ID ${id} not found`);
     }
     return this.unitRepo.update(id, {
-      serialNumber: dto.serialNumber ?? undefined,
       barcode: dto.barcode ?? undefined,
       notes: dto.notes ?? undefined,
       custodianId: dto.custodianId ?? undefined,

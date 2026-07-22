@@ -7,11 +7,11 @@ import {
   Button,
   Input,
   ScrollArea,
-  Sheet,
-  SheetContent,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
   FormControl,
   FormField,
   FormItem,
@@ -90,16 +90,16 @@ const onSubmit = handleSubmit((values) => {
 </script>
 
 <template>
-  <Sheet
+  <Dialog
     :open="open"
     @update:open="emit('update:open', $event)"
   >
-    <SheetContent class="flex flex-col h-full w-[400px] sm:w-[540px]">
-      <SheetHeader class="border-b pb-4 px-1">
-        <SheetTitle class="text-xl font-semibold tracking-tight">
+    <DialogContent class="sm:max-w-md flex flex-col gap-0 p-0 overflow-hidden">
+      <DialogHeader class="px-6 py-5 border-b shrink-0 bg-muted/20">
+        <DialogTitle class="text-xl font-semibold tracking-tight">
           {{ isEdit ? 'Ubah Kategori Aset' : 'Tambah Kategori Aset' }}
-        </SheetTitle>
-      </SheetHeader>
+        </DialogTitle>
+      </DialogHeader>
 
       <form
         class="flex flex-col flex-1 min-h-0"
@@ -168,7 +168,9 @@ const onSubmit = handleSubmit((values) => {
           </div>
         </ScrollArea>
 
-        <SheetFooter class="border-t pt-4 px-1 flex-shrink-0">
+        <DialogFooter
+          class="px-6 py-4 border-t shrink-0 flex sm:justify-between w-full bg-background"
+        >
           <Button
             type="button"
             variant="outline"
@@ -183,8 +185,8 @@ const onSubmit = handleSubmit((values) => {
           >
             {{ isSaving ? 'Menyimpan...' : 'Simpan' }}
           </Button>
-        </SheetFooter>
+        </DialogFooter>
       </form>
-    </SheetContent>
-  </Sheet>
+    </DialogContent>
+  </Dialog>
 </template>

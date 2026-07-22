@@ -71,18 +71,18 @@ model AdmissionApplication {
   status             AdmissionStatus @default(DRAFT)
 
   // Personal data
-  fullName     String     @map("full_name") @db.VarChar(100)
-  nickname     String?    @db.VarChar(50)
+  fullName     String      @map("full_name") @db.VarChar(100)
+  nickname     String?     @db.VarChar(50)
   gender       UserGender?
-  birthPlace   String?    @map("birth_place") @db.VarChar(100)
-  birthDate    DateTime?  @map("birth_date") @db.Date
-  nik          String?    @db.VarChar(16)
-  nisn         String?    @db.VarChar(20)
-  religionId   String?    @map("religion_id") @db.Uuid
-  phone        String?    @db.VarChar(15)
-  email        String?    @db.VarChar(255)
-  childOrder   Int?       @map("child_order")
-  siblingCount Int?       @map("sibling_count")
+  birthPlace   String?     @map("birth_place") @db.VarChar(100)
+  birthDate    DateTime?   @map("birth_date") @db.Date
+  nik          String?     @db.VarChar(16)
+  nisn         String?     @db.VarChar(20)
+  religionId   String?     @map("religion_id") @db.Uuid
+  phone        String?     @db.VarChar(15)
+  email        String?     @db.VarChar(255)
+  childOrder   Int?        @map("child_order")
+  siblingCount Int?        @map("sibling_count")
 
   // Domicile address (embedded, mirrors Address fields)
   street     String? @db.VarChar(255)

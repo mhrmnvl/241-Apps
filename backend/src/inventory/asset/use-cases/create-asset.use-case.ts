@@ -40,7 +40,6 @@ export class CreateAssetUseCase {
             quantity === 1 && dto.barcode && dto.barcode.length > 0
               ? dto.barcode
               : unitNumber,
-          serialNumber: quantity === 1 ? (dto.serialNumber ?? null) : null,
           currentBookValue: dto.purchasePrice,
           condition: { connect: { id: dto.conditionId } },
           status: { connect: { id: dto.statusId } },

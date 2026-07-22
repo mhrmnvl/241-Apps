@@ -13,15 +13,15 @@ enum ParentRelation {
 }
 
 model Parent {
-  id           String    @id @default(uuid()) @db.Uuid
-  name         String    @db.VarChar(100)
-  nik          String    @db.VarChar(16)
-  birthPlace   String    @map("birth_place") @db.VarChar(100)
-  birthDate    DateTime  @map("birth_date") @db.Date
-  email        String?   @db.VarChar(255)
-  phone        String?   @db.VarChar(15)
-  occupationId String    @map("occupation_id") @db.Uuid
-  educationId  String?   @map("education_id") @db.Uuid
+  id           String       @id @default(uuid()) @db.Uuid
+  name         String       @db.VarChar(100)
+  nik          String       @db.VarChar(16)
+  birthPlace   String       @map("birth_place") @db.VarChar(100)
+  birthDate    DateTime     @map("birth_date") @db.Date
+  email        String?      @db.VarChar(255)
+  phone        String?      @db.VarChar(15)
+  occupationId String       @map("occupation_id") @db.Uuid
+  educationId  String?      @map("education_id") @db.Uuid
   income       IncomeRange? @map("income")
   deletedAt    DateTime?    @map("deleted_at")
 

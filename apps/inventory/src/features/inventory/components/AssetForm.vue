@@ -39,88 +39,124 @@ const emit = defineEmits<{
 
 const isEdit = computed(() => !!props.asset)
 
-// Zod validation schema. locationId/statusId/conditionId/serialNumber/quantity
-// only describe the initial unit(s) created on submit — irrelevant once
-// editing (units are then managed individually in the Unit table below).
-const formSchema = toTypedSchema(
-  z.object({
-    name: z
-      .string()
-      .min(1, 'Nama aset wajib diisi.')
-      .max(150, 'Nama aset tidak boleh lebih dari 150 karakter.'),
-    categoryId: z.string().min(1, 'Silakan pilih kategori aset.'),
-    brand: z
-      .string()
-      .max(100, 'Merek tidak boleh lebih dari 100 karakter.')
-      .optional()
-      .or(z.literal('')),
-    model: z
-      .string()
-      .max(100, 'Model tidak boleh lebih dari 100 karakter.')
-      .optional()
-      .or(z.literal('')),
-    serialNumber: z
-      .string()
-      .max(100, 'Nomor seri tidak boleh lebih dari 100 karakter.')
-      .optional()
-      .or(z.literal('')),
-    purchaseDate: z.string().min(1, 'Mohon tentukan tanggal pembelian.'),
-    purchasePrice: z
-      .number({ invalid_type_error: 'Nilai pembelian harus berupa angka.' })
-      .min(0, 'Nilai pembelian tidak boleh kurang dari 0.'),
-    fundingSourceId: z.string().optional().or(z.literal('none')),
-    quantity: z
-      .number({ invalid_type_error: 'Jumlah harus berupa angka.' })
-      .int('Jumlah harus bilangan bulat.')
-      .min(1, 'Jumlah minimal 1.'),
-    locationId: z.string().min(1, 'Silakan pilih lokasi penempatan.'),
-    statusId: z.string().min(1, 'Silakan tentukan status aset.'),
-    conditionId: z.string().min(1, 'Silakan tentukan kondisi aset.'),
-    notes: z.string().optional().or(z.literal('')),
-  }),
-)
+const schema = isEdit.value
+  ? z.object({
+      name: z
+        .string()
+        .min(1, 'Nama aset wajib diisi.')
+        .max(150, 'Nama aset tidak boleh lebih dari 150 karakter.'),
+      categoryId: z.string().min(1, 'Silakan pilih kategori aset.'),
+      brand: z
+        .string()
+        .max(100, 'Merek tidak boleh lebih dari 100 karakter.')
+        .optional()
+        .or(z.literal('')),
+      model: z
+        .string()
+        .max(100, 'Model tidak boleh lebih dari 100 karakter.')
+        .optional()
+        .or(z.literal('')),
+      purchaseDate: z.string().min(1, 'Mohon tentukan tanggal pembelian.'),
+      purchasePrice: z
+        .number({ invalid_type_error: 'Nilai pembelian harus berupa angka.' })
+        .min(0, 'Nilai pembelian tidak boleh kurang dari 0.'),
+      fundingSourceId: z.string().optional().or(z.literal('none')),
+      quantity: z.number().optional(),
+      locationId: z.string().optional(),
+      statusId: z.string().optional(),
+      conditionId: z.string().optional(),
+      notes: z.string().optional().or(z.literal('')),
+    })
+  : z.object({
+      name: z
+        .string()
+        .min(1, 'Nama aset wajib diisi.')
+        .max(150, 'Nama aset tidak boleh lebih dari 150 karakter.'),
+      categoryId: z.string().min(1, 'Silakan pilih kategori aset.'),
+      brand: z
+        .string()
+        .max(100, 'Merek tidak boleh lebih dari 100 karakter.')
+        .optional()
+        .or(z.literal('')),
+      model: z
+        .string()
+        .max(100, 'Model tidak boleh lebih dari 100 karakter.')
+        .optional()
+        .or(z.literal('')),
+      purchaseDate: z.string().min(1, 'Mohon tentukan tanggal pembelian.'),
+      purchasePrice: z
+        .number({ invalid_type_error: 'Nilai pembelian harus berupa angka.' })
+        .min(0, 'Nilai pembelian tidak boleh kurang dari 0.'),
+      fundingSourceId: z.string().optional().or(z.literal('none')),
+      quantity: z
+        .number({ invalid_type_error: 'Jumlah harus berupa angka.' })
+        .int('Jumlah harus bilangan bulat.')
+        .min(1, 'Jumlah minimal 1.'),
+      locationId: z.string().min(1, 'Silakan pilih lokasi penempatan.'),
+      statusId: z.string().min(1, 'Silakan tentukan status aset.'),
+      conditionId: z.string().min(1, 'Silakan tentukan kondisi aset.'),
+      notes: z.string().optional().or(z.literal('')),
+    })
 
-const { handleSubmit, resetForm, setValues } = useForm({
+const formSchema = toTypedSchema(schema)
+
+const { handleSubmit, resetForm } = useForm({
   validationSchema: formSchema,
-  initialValues: {
-    name: '',
-    categoryId: '',
-    brand: '',
-    model: '',
-    serialNumber: '',
-    purchaseDate: '',
-    purchasePrice: 0,
-    fundingSourceId: 'none',
-    quantity: 1,
-    locationId: '',
-    statusId: '',
-    conditionId: '',
-    notes: '',
-  },
+  initialValues: props.asset
+    ? {
+        name: props.asset.name,
+        categoryId: props.asset.categoryId,
+        brand: props.asset.brand ?? '',
+        model: props.asset.model ?? '',
+        purchaseDate: props.asset.purchaseDate
+          ? props.asset.purchaseDate.split('T')[0]
+          : '',
+        purchasePrice: Number(props.asset.purchasePrice),
+        fundingSourceId: props.asset.fundingSourceId ?? 'none',
+        quantity: 1,
+        locationId: props.asset.units?.[0]?.locationId ?? '',
+        statusId: props.asset.units?.[0]?.statusId ?? '',
+        conditionId: props.asset.units?.[0]?.conditionId ?? '',
+        notes: props.asset.notes ?? '',
+      }
+    : {
+        name: '',
+        categoryId: '',
+        brand: '',
+        model: '',
+        purchaseDate: '',
+        purchasePrice: 0,
+        fundingSourceId: 'none',
+        quantity: 1,
+        locationId: '',
+        statusId: '',
+        conditionId: '',
+        notes: '',
+      },
 })
 
-// Update values when editing an asset
 watch(
   () => props.asset,
   (newAsset) => {
     if (newAsset) {
       const firstUnit = newAsset.units?.[0]
-      setValues({
-        name: newAsset.name,
-        categoryId: newAsset.categoryId,
-        brand: newAsset.brand ?? '',
-        model: newAsset.model ?? '',
-        serialNumber: firstUnit?.serialNumber ?? '',
-        purchaseDate: newAsset.purchaseDate
-          ? newAsset.purchaseDate.split('T')[0]
-          : '',
-        purchasePrice: Number(newAsset.purchasePrice),
-        fundingSourceId: newAsset.fundingSourceId ?? 'none',
-        quantity: 1,
-        locationId: firstUnit?.locationId ?? '',
-        statusId: firstUnit?.statusId ?? '',
-        conditionId: firstUnit?.conditionId ?? '',
-        notes: newAsset.notes ?? '',
+      resetForm({
+        values: {
+          name: newAsset.name,
+          categoryId: newAsset.categoryId,
+          brand: newAsset.brand ?? '',
+          model: newAsset.model ?? '',
+          purchaseDate: newAsset.purchaseDate
+            ? newAsset.purchaseDate.split('T')[0]
+            : '',
+          purchasePrice: Number(newAsset.purchasePrice),
+          fundingSourceId: newAsset.fundingSourceId ?? 'none',
+          quantity: 1,
+          locationId: firstUnit?.locationId ?? '',
+          statusId: firstUnit?.statusId ?? '',
+          conditionId: firstUnit?.conditionId ?? '',
+          notes: newAsset.notes ?? '',
+        },
       })
     } else {
       resetForm()
@@ -138,7 +174,6 @@ const onSubmit = handleSubmit((values) => {
     ...values,
     brand: blankToUndefined(values.brand),
     model: blankToUndefined(values.model),
-    serialNumber: blankToUndefined(values.serialNumber),
     fundingSourceId:
       values.fundingSourceId && values.fundingSourceId !== 'none'
         ? values.fundingSourceId
@@ -160,68 +195,68 @@ const onSubmit = handleSubmit((values) => {
       >
         <h3 class="text-sm font-semibold">Informasi Aset</h3>
         <Separator />
-        <!-- Asset Name -->
-        <FormField
-          v-slot="{ field, errorMessage }"
-          name="name"
-        >
-          <FormItem>
-            <FormLabel
-              >Nama Aset <span class="text-destructive">*</span></FormLabel
-            >
-            <FormControl>
-              <Input
-                v-bind="field"
-                placeholder="Masukkan nama barang/aset"
-                :disabled="isSaving"
-              />
-            </FormControl>
-            <FormMessage>{{ errorMessage }}</FormMessage>
-          </FormItem>
-        </FormField>
-
-        <!-- Category -->
-        <FormField
-          v-slot="{ value, handleChange, errorMessage }"
-          name="categoryId"
-        >
-          <FormItem>
-            <FormLabel
-              >Kategori <span class="text-destructive">*</span></FormLabel
-            >
-            <Select
-              :model-value="value"
-              :disabled="isSaving"
-              @update:model-value="handleChange"
-            >
-              <SelectTrigger class="w-full">
-                <SelectValue placeholder="Pilih kategori aset" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem
-                  v-for="cat in metadata.categories"
-                  :key="cat.id"
-                  :value="cat.id"
-                >
-                  {{ cat.name }}
-                </SelectItem>
-              </SelectContent>
-            </Select>
-            <FormMessage>{{ errorMessage }}</FormMessage>
-          </FormItem>
-        </FormField>
-
-        <!-- Brand & Model (50-50 split) -->
-        <div class="grid grid-cols-2 gap-4 items-start">
+        <div class="grid grid-cols-2 gap-4">
+          <!-- Asset Name -->
           <FormField
-            v-slot="{ field, errorMessage }"
+            v-slot="{ componentField, errorMessage }"
+            name="name"
+          >
+            <FormItem>
+              <FormLabel
+                >Nama Aset <span class="text-destructive">*</span></FormLabel
+              >
+              <FormControl>
+                <Input
+                  v-bind="componentField"
+                  placeholder="Masukkan nama barang/aset"
+                  :disabled="isSaving"
+                />
+              </FormControl>
+              <FormMessage>{{ errorMessage }}</FormMessage>
+            </FormItem>
+          </FormField>
+
+          <!-- Category -->
+          <FormField
+            v-slot="{ value, handleChange, errorMessage }"
+            name="categoryId"
+          >
+            <FormItem>
+              <FormLabel
+                >Kategori <span class="text-destructive">*</span></FormLabel
+              >
+              <Select
+                :model-value="value"
+                :disabled="isSaving"
+                @update:model-value="handleChange"
+              >
+                <SelectTrigger class="w-full">
+                  <SelectValue placeholder="Pilih kategori aset" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem
+                    v-for="cat in metadata.categories"
+                    :key="cat.id"
+                    :value="cat.id"
+                  >
+                    {{ cat.name }}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage>{{ errorMessage }}</FormMessage>
+            </FormItem>
+          </FormField>
+
+          <!-- Brand -->
+          <FormField
+            v-slot="{ componentField, errorMessage }"
             name="brand"
           >
             <FormItem>
               <FormLabel>Merek</FormLabel>
               <FormControl>
                 <Input
-                  v-bind="field"
+                  v-bind="componentField"
                   placeholder="Contoh: Asus, LG"
                   :disabled="isSaving"
                 />
@@ -230,15 +265,16 @@ const onSubmit = handleSubmit((values) => {
             </FormItem>
           </FormField>
 
+          <!-- Model -->
           <FormField
-            v-slot="{ field, errorMessage }"
+            v-slot="{ componentField, errorMessage }"
             name="model"
           >
             <FormItem>
               <FormLabel>Model / Tipe</FormLabel>
               <FormControl>
                 <Input
-                  v-bind="field"
+                  v-bind="componentField"
                   placeholder="Contoh: ROG, 24MK600"
                   :disabled="isSaving"
                 />
@@ -246,20 +282,12 @@ const onSubmit = handleSubmit((values) => {
               <FormMessage>{{ errorMessage }}</FormMessage>
             </FormItem>
           </FormField>
-        </div>
 
-        <!-- Initial unit details — only meaningful when creating; units are
+          <!-- Initial unit details — only meaningful when creating; units are
                otherwise managed individually in the Unit table below. -->
-        <template v-if="!isEdit">
-          <div class="border-t pt-4 space-y-4">
-            <p
-              class="text-xs font-semibold text-muted-foreground uppercase tracking-wider"
-            >
-              Detail Unit Awal
-            </p>
-
+          <template v-if="!isEdit">
             <FormField
-              v-slot="{ field, errorMessage }"
+              v-slot="{ value, handleChange, errorMessage }"
               name="quantity"
             >
               <FormItem>
@@ -271,133 +299,106 @@ const onSubmit = handleSubmit((values) => {
                   <Input
                     type="number"
                     min="1"
-                    v-bind="field"
+                    :model-value="value"
                     :disabled="isSaving"
-                    @input="
-                      field.onInput(
-                        Number(($event.target as HTMLInputElement).value),
-                      )
-                    "
+                    @update:model-value="handleChange(Number($event))"
                   />
                 </FormControl>
-                <p class="text-xs text-muted-foreground">
-                  Setiap unit otomatis mendapat nomornya sendiri (…-01, -02,
-                  dst).
-                </p>
                 <FormMessage>{{ errorMessage }}</FormMessage>
               </FormItem>
             </FormField>
 
             <FormField
-              v-slot="{ field, errorMessage }"
-              name="serialNumber"
+              v-slot="{ value, handleChange, errorMessage }"
+              name="locationId"
             >
               <FormItem>
-                <FormLabel>Nomor Seri Pabrik</FormLabel>
-                <FormControl>
-                  <Input
-                    v-bind="field"
-                    placeholder="Masukkan nomor seri pabrik"
-                    :disabled="isSaving"
-                  />
-                </FormControl>
+                <FormLabel
+                  >Lokasi <span class="text-destructive">*</span></FormLabel
+                >
+                <Select
+                  :model-value="value"
+                  :disabled="isSaving"
+                  @update:model-value="handleChange"
+                >
+                  <SelectTrigger class="w-full">
+                    <SelectValue placeholder="Pilih lokasi" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem
+                      v-for="loc in metadata.locations"
+                      :key="loc.id"
+                      :value="loc.id"
+                    >
+                      {{ loc.name }}
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
                 <FormMessage>{{ errorMessage }}</FormMessage>
               </FormItem>
             </FormField>
 
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-start">
-              <FormField
-                v-slot="{ value, handleChange, errorMessage }"
-                name="locationId"
-              >
-                <FormItem>
-                  <FormLabel
-                    >Lokasi <span class="text-destructive">*</span></FormLabel
-                  >
-                  <Select
-                    :model-value="value"
-                    :disabled="isSaving"
-                    @update:model-value="handleChange"
-                  >
-                    <SelectTrigger class="w-full">
-                      <SelectValue placeholder="Pilih lokasi" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem
-                        v-for="loc in metadata.locations"
-                        :key="loc.id"
-                        :value="loc.id"
-                      >
-                        {{ loc.name }}
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage>{{ errorMessage }}</FormMessage>
-                </FormItem>
-              </FormField>
+            <FormField
+              v-slot="{ value, handleChange, errorMessage }"
+              name="statusId"
+            >
+              <FormItem>
+                <FormLabel
+                  >Status <span class="text-destructive">*</span></FormLabel
+                >
+                <Select
+                  :model-value="value"
+                  :disabled="isSaving"
+                  @update:model-value="handleChange"
+                >
+                  <SelectTrigger class="w-full">
+                    <SelectValue placeholder="Pilih status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem
+                      v-for="status in metadata.statuses"
+                      :key="status.id"
+                      :value="status.id"
+                    >
+                      {{ status.name }}
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage>{{ errorMessage }}</FormMessage>
+              </FormItem>
+            </FormField>
 
-              <FormField
-                v-slot="{ value, handleChange, errorMessage }"
-                name="statusId"
-              >
-                <FormItem>
-                  <FormLabel
-                    >Status <span class="text-destructive">*</span></FormLabel
-                  >
-                  <Select
-                    :model-value="value"
-                    :disabled="isSaving"
-                    @update:model-value="handleChange"
-                  >
-                    <SelectTrigger class="w-full">
-                      <SelectValue placeholder="Pilih status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem
-                        v-for="status in metadata.statuses"
-                        :key="status.id"
-                        :value="status.id"
-                      >
-                        {{ status.name }}
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage>{{ errorMessage }}</FormMessage>
-                </FormItem>
-              </FormField>
-
-              <FormField
-                v-slot="{ value, handleChange, errorMessage }"
-                name="conditionId"
-              >
-                <FormItem>
-                  <FormLabel
-                    >Kondisi <span class="text-destructive">*</span></FormLabel
-                  >
-                  <Select
-                    :model-value="value"
-                    :disabled="isSaving"
-                    @update:model-value="handleChange"
-                  >
-                    <SelectTrigger class="w-full">
-                      <SelectValue placeholder="Pilih kondisi" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem
-                        v-for="cond in metadata.conditions"
-                        :key="cond.id"
-                        :value="cond.id"
-                      >
-                        {{ cond.name }}
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage>{{ errorMessage }}</FormMessage>
-                </FormItem>
-              </FormField>
-            </div>
-          </div>
-        </template>
+            <FormField
+              v-slot="{ value, handleChange, errorMessage }"
+              name="conditionId"
+            >
+              <FormItem>
+                <FormLabel
+                  >Kondisi <span class="text-destructive">*</span></FormLabel
+                >
+                <Select
+                  :model-value="value"
+                  :disabled="isSaving"
+                  @update:model-value="handleChange"
+                >
+                  <SelectTrigger class="w-full">
+                    <SelectValue placeholder="Pilih kondisi" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem
+                      v-for="cond in metadata.conditions"
+                      :key="cond.id"
+                      :value="cond.id"
+                    >
+                      {{ cond.name }}
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage>{{ errorMessage }}</FormMessage>
+              </FormItem>
+            </FormField>
+          </template>
+        </div>
       </div>
 
       <!-- Section 2: Keuangan & Administrasi -->
@@ -430,7 +431,7 @@ const onSubmit = handleSubmit((values) => {
         <!-- Purchase Price & Funding Source (50-50 split) -->
         <div class="grid grid-cols-2 gap-4 items-start">
           <FormField
-            v-slot="{ field, errorMessage }"
+            v-slot="{ value, handleChange, errorMessage }"
             name="purchasePrice"
           >
             <FormItem>
@@ -441,13 +442,9 @@ const onSubmit = handleSubmit((values) => {
               <FormControl>
                 <Input
                   type="number"
-                  v-bind="field"
+                  :model-value="value"
                   :disabled="isSaving"
-                  @input="
-                    field.onInput(
-                      Number(($event.target as HTMLInputElement).value),
-                    )
-                  "
+                  @update:model-value="handleChange(Number($event))"
                 />
               </FormControl>
               <FormMessage>{{ errorMessage }}</FormMessage>
@@ -486,14 +483,14 @@ const onSubmit = handleSubmit((values) => {
 
         <!-- Notes -->
         <FormField
-          v-slot="{ field, errorMessage }"
+          v-slot="{ componentField, errorMessage }"
           name="notes"
         >
           <FormItem>
             <FormLabel>Catatan / Keterangan</FormLabel>
             <FormControl>
               <Textarea
-                v-bind="field"
+                v-bind="componentField"
                 placeholder="Masukkan catatan tambahan mengenai aset"
                 :disabled="isSaving"
                 rows="4"

@@ -12,7 +12,7 @@ import { toast } from 'vue-sonner'
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
 import { useRoleGuard } from '@/shared/composables/useRoleGuard'
 import { inventoryApi } from '../api/inventoryApi'
-import LocationFormSheet from '../components/LocationFormSheet.vue'
+import LocationFormDialog from '../components/LocationFormDialog.vue'
 import type { ColumnDef } from '@tanstack/vue-table'
 import type { InventoryReferenceItem } from '../types'
 
@@ -27,8 +27,8 @@ const selectedItem = ref<InventoryReferenceItem | null>(null)
 const searchQuery = ref('')
 
 const breadcrumbs = [
-  { title: 'Pengaturan', href: '#' },
-  { title: 'Daftar Lokasi' },
+  { title: 'Referensi', href: '#' },
+  { title: 'Daftar Lokasi', href: '/inventory/locations' },
 ]
 
 // Columns configuration
@@ -206,7 +206,7 @@ onMounted(() => {
       </Card>
 
       <!-- Location Sheet Form -->
-      <LocationFormSheet
+      <LocationFormDialog
         v-model:open="isFormOpen"
         :item="selectedItem"
         :is-saving="isSaving"

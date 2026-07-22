@@ -107,7 +107,7 @@ export const createColumns = (
     cell: ({ row }) => {
       const units = row.original.units ?? []
       const avail = units.filter(
-        (u) => u.status?.systemKey === 'AVAILABLE',
+        (u) => u.status?.allowTransactions === true,
       ).length
       return h(
         Badge,

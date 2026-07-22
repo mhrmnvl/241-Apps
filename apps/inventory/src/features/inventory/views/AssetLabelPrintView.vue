@@ -32,7 +32,6 @@ const breadcrumbs = [
 ]
 
 const assets = ref<InventoryAsset[]>([])
-const totalAssets = ref(0)
 const loading = ref(false)
 
 const metadata = ref<InventoryMetadata>({
@@ -75,7 +74,6 @@ async function fetchAssets() {
     const response = await inventoryApi.getAssets(params)
     const envelope = response.data
     assets.value = envelope.data ?? []
-    totalAssets.value = envelope.meta?.total ?? assets.value.length
   } catch (e) {
     toast.error(getIndonesianErrorMessage(e, 'Gagal memuat data aset.'))
   } finally {
@@ -234,7 +232,6 @@ onMounted(async () => {
           <DataTable
             :columns="tableColumns"
             :data="assets"
-            :total-items="totalAssets"
             :is-loading="loading"
             item-label="aset"
             @selection-change="handleSelectionChange"

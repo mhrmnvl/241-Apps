@@ -4,13 +4,13 @@ model AcademicYear {
   isActive  Boolean   @default(false) @map("is_active")
   deletedAt DateTime? @map("deleted_at")
 
-  classrooms          Classroom[]
-  curricula           Curricula[]
-  semesters           Semester[]
-  academicCalendars   AcademicCalendar[]
-  graduations         StudentGraduation[]
-  admissionWaves      AdmissionWave[]
-  gradeAcademicYears  GradeAcademicYear[]
+  classrooms         Classroom[]
+  curricula          Curricula[]
+  semesters          Semester[]
+  academicCalendars  AcademicCalendar[]
+  graduations        StudentGraduation[]
+  admissionWaves     AdmissionWave[]
+  gradeAcademicYears GradeAcademicYear[]
 
   @@map("academic_years")
 }

@@ -17,12 +17,10 @@ export class CreateLoanUseCase {
   async execute(dto: CreateLoanDto, requesterId: string) {
     const pendingStatus =
       await this.repository.findStatusBySystemKey('LOAN_PENDING');
-    const availStatus =
-      await this.repository.findStatusBySystemKey('AVAILABLE');
 
-    if (!pendingStatus || !availStatus) {
+    if (!pendingStatus) {
       throw new NotFoundException(
-        'Peran status "Tersedia" dan/atau "Menunggu Persetujuan" belum diatur di Referensi > Status Aset.',
+        'Peran status "Menunggu Persetujuan" belum diatur di Referensi > Status Aset.',
       );
     }
 
@@ -32,7 +30,7 @@ export class CreateLoanUseCase {
         id: { in: dto.unitIds },
         deletedAt: null,
       },
-      include: { asset: true },
+      include: { asset: true, status: true },
     });
 
     if (units.length !== dto.unitIds.length) {
@@ -40,7 +38,7 @@ export class CreateLoanUseCase {
     }
 
     for (const unit of units) {
-      if (unit.statusId !== availStatus.id) {
+      if (!unit.status || !unit.status.allowTransactions) {
         throw new BadRequestException(
           `Unit "${unit.asset.name}" (${unit.unitNumber}) is not available for borrowing.`,
         );

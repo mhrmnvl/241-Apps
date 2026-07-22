@@ -84,8 +84,6 @@ export interface InventoryAssetUnit {
   assetId: string
   unitNumber: string
   barcode: string | null
-  serialNumber: string | null
-  residualValue: number
   currentBookValue: number
   conditionId: string
   statusId: string
@@ -133,7 +131,6 @@ export interface AssetSavePayload {
   conditionId?: string
   statusId?: string
   locationId?: string
-  serialNumber?: string
 }
 
 export interface AddUnitsPayload {
@@ -148,7 +145,6 @@ export interface AssetUnitUpdatePayload {
   statusId?: string
   locationId?: string
   custodianId?: string
-  serialNumber?: string
   barcode?: string
   notes?: string
 }

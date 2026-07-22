@@ -163,7 +163,6 @@ const unitForm = reactive({
   conditionId: '',
   statusId: '',
   locationId: '',
-  serialNumber: '',
   barcode: '',
   notes: '',
 })
@@ -173,7 +172,6 @@ function openEditUnit(u: InventoryAssetUnit) {
   unitForm.conditionId = u.conditionId
   unitForm.statusId = u.statusId
   unitForm.locationId = u.locationId
-  unitForm.serialNumber = u.serialNumber ?? ''
   unitForm.barcode = u.barcode ?? ''
   unitForm.notes = u.notes ?? ''
   isUnitEditOpen.value = true
@@ -187,7 +185,6 @@ async function saveUnit() {
       conditionId: unitForm.conditionId,
       statusId: unitForm.statusId,
       locationId: unitForm.locationId,
-      serialNumber: unitForm.serialNumber || undefined,
       barcode: unitForm.barcode || undefined,
       notes: unitForm.notes || undefined,
     })
@@ -344,7 +341,6 @@ const unitColumns = computed(() =>
           <DataTable
             :columns="unitColumns"
             :data="asset.units ?? []"
-            :total-items="asset.units?.length ?? 0"
             :is-loading="false"
             item-label="unit"
             @selection-change="handleUnitSelectionChange"
@@ -418,21 +414,12 @@ const unitColumns = computed(() =>
             </Select>
           </div>
 
-          <div class="grid grid-cols-2 gap-3">
-            <div class="space-y-1.5">
-              <Label>No. Seri</Label>
-              <Input
-                v-model="unitForm.serialNumber"
-                placeholder="Opsional"
-              />
-            </div>
-            <div class="space-y-1.5">
-              <Label>Barcode</Label>
-              <Input
-                v-model="unitForm.barcode"
-                placeholder="Opsional"
-              />
-            </div>
+          <div class="space-y-1.5">
+            <Label>Barcode</Label>
+            <Input
+              v-model="unitForm.barcode"
+              placeholder="Opsional"
+            />
           </div>
 
           <div class="space-y-1.5">

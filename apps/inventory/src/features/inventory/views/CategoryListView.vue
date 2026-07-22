@@ -12,7 +12,7 @@ import { toast } from 'vue-sonner'
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
 import { useRoleGuard } from '@/shared/composables/useRoleGuard'
 import { inventoryApi } from '../api/inventoryApi'
-import CategoryFormSheet from '../components/CategoryFormSheet.vue'
+import CategoryFormDialog from '../components/CategoryFormDialog.vue'
 import type { ColumnDef } from '@tanstack/vue-table'
 import type { InventoryReferenceItem } from '../types'
 
@@ -27,8 +27,8 @@ const selectedItem = ref<InventoryReferenceItem | null>(null)
 const searchQuery = ref('')
 
 const breadcrumbs = [
-  { title: 'Pengaturan', href: '#' },
-  { title: 'Kategori Aset' },
+  { title: 'Referensi', href: '#' },
+  { title: 'Kategori Aset', href: '/inventory/categories' },
 ]
 
 // Columns configuration
@@ -202,7 +202,7 @@ onMounted(() => {
       </Card>
 
       <!-- Category Sheet Form -->
-      <CategoryFormSheet
+      <CategoryFormDialog
         v-model:open="isFormOpen"
         :item="selectedItem"
         :is-saving="isSaving"

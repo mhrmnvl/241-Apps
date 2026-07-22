@@ -13,7 +13,7 @@ import { toast } from 'vue-sonner'
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
 import { useRoleGuard } from '@/shared/composables/useRoleGuard'
 import { inventoryApi } from '../api/inventoryApi'
-import StatusFormSheet from '../components/StatusFormSheet.vue'
+import StatusFormDialog from '../components/StatusFormDialog.vue'
 import type { ColumnDef } from '@tanstack/vue-table'
 import type { InventoryReferenceItem, InventoryStatusKey } from '../types'
 
@@ -37,8 +37,8 @@ const selectedItem = ref<InventoryReferenceItem | null>(null)
 const searchQuery = ref('')
 
 const breadcrumbs = [
-  { title: 'Pengaturan', href: '#' },
-  { title: 'Status Aset' },
+  { title: 'Referensi', href: '#' },
+  { title: 'Status Aset', href: '/inventory/statuses' },
 ]
 
 // Columns configuration
@@ -227,7 +227,7 @@ onMounted(() => {
       </Card>
 
       <!-- Status Sheet Form -->
-      <StatusFormSheet
+      <StatusFormDialog
         v-model:open="isFormOpen"
         :item="selectedItem"
         :is-saving="isSaving"

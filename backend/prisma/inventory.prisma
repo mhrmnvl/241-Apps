@@ -35,8 +35,6 @@ model InventoryAssetUnit {
   assetId          String    @map("asset_id") @db.Uuid
   unitNumber       String    @unique @map("unit_number") @db.VarChar(50)
   barcode          String?   @unique @db.VarChar(100)
-  serialNumber     String?   @map("serial_number") @db.VarChar(100)
-  residualValue    Decimal   @default(0.00) @map("residual_value") @db.Decimal(15, 2)
   currentBookValue Decimal   @map("current_book_value") @db.Decimal(15, 2)
   conditionId      String    @map("condition_id") @db.Uuid
   statusId         String    @map("status_id") @db.Uuid
@@ -140,8 +138,6 @@ model InventoryFundingSource {
 
   @@map("inventory_funding_sources")
 }
-
-
 
 model InventoryHistory {
   id                  String   @id @default(uuid()) @db.Uuid
@@ -263,7 +259,7 @@ model ApprovalLog {
   note         String?  @db.Text
   createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz
 
-  instance     ApprovalInstance @relation(fields: [instanceId], references: [id], onDelete: Cascade)
+  instance ApprovalInstance @relation(fields: [instanceId], references: [id], onDelete: Cascade)
 
   @@map("approval_logs")
 }

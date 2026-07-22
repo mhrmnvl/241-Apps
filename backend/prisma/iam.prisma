@@ -1,11 +1,11 @@
 model Role {
-  id          String         @id @default(uuid()) @db.Uuid
-  name        String         @db.VarChar(100)
-  code        String         @unique @db.VarChar(50)
-  description String?        @db.Text
-  isSystem    Boolean        @default(false) @map("is_system")
-  createdAt   DateTime       @default(now()) @map("created_at")
-  updatedAt   DateTime       @updatedAt @map("updated_at")
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String   @db.VarChar(100)
+  code        String   @unique @db.VarChar(50)
+  description String?  @db.Text
+  isSystem    Boolean  @default(false) @map("is_system")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
 
   userRoles       UserRole[]
   rolePermissions RolePermission[]
