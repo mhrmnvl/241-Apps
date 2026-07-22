@@ -117,6 +117,8 @@ async function handleSavePosition(
 
 const tableColumns = createColumns({
   showActions: can('teachers.update') || can('teachers.delete'),
+  canUpdate: can('teachers.update'),
+  canDelete: can('teachers.delete'),
   onViewDetail: (teacher) => {
     if (teacher?.user?.id) {
       void router.push(`/profile/TEACHER/${teacher.user.id}`)

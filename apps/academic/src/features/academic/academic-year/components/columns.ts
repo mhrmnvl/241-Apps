@@ -34,6 +34,8 @@ export const createAcademicYearColumns = (
           cell: ({ row }: { row: { original: AcademicYear } }) => {
             const academicYear = row.original
             return h(ActionCell, {
+              hideEdit: actions.canUpdate === false,
+              hideDelete: actions.canDelete === false,
               deleteTitle: 'Hapus Tahun Ajaran?',
               deleteDescription:
                 'Data tahun ajaran ini akan dihapus secara permanen dan tidak dapat dikembalikan.',

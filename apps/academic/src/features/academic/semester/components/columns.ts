@@ -62,6 +62,8 @@ export const createSemesterColumns = (
           cell: ({ row }: { row: { original: Semester } }) => {
             const semester = row.original
             return h(ActionCell, {
+              hideEdit: actions.canUpdate === false,
+              hideDelete: actions.canDelete === false,
               deleteTitle: 'Hapus Semester?',
               deleteDescription:
                 'Data semester ini akan dihapus secara permanen dan tidak dapat dikembalikan.',

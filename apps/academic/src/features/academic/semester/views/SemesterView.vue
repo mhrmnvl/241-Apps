@@ -58,6 +58,8 @@ const isProcessing = ref(false)
 
 const tableColumns = createSemesterColumns({
   showActions: can('semesters.update') || can('semesters.delete'),
+  canUpdate: can('semesters.update'),
+  canDelete: can('semesters.delete'),
   onEdit: (semester: Semester) => {
     editingItem.value = semester
     isAddModalOpen.value = true

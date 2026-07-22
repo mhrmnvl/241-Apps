@@ -62,6 +62,8 @@ export const createStudentGraduationColumns = (
           cell: ({ row }: { row: { original: StudentGraduation } }) => {
             const item = row.original
             return h(ActionCell, {
+              hideEdit: actions.canUpdate === false,
+              hideDelete: actions.canDelete === false,
               deleteTitle: 'Hapus Data Kelulusan?',
               deleteDescription:
                 'Data kelulusan ini akan dihapus secara permanen. Status siswa TIDAK akan dikembalikan otomatis.',

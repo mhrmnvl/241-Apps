@@ -52,6 +52,8 @@ const { can } = useRoleGuard()
 
 const tableColumns = createClassroomColumns({
   showActions: can('classrooms.update') || can('classrooms.delete'),
+  canUpdate: can('classrooms.update'),
+  canDelete: can('classrooms.delete'),
   onManageSupervisor: (item: Classroom) => {
     void router.push(`/akademik/kelas/${item.id}/kelola`)
   },

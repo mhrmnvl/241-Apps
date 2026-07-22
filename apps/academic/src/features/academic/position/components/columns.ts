@@ -41,6 +41,8 @@ export const createColumns = (
           cell: ({ row }: { row: { original: Position } }) => {
             const item = row.original
             return h(ActionCell, {
+              hideEdit: actions.canUpdate === false,
+              hideDelete: actions.canDelete === false,
               deleteTitle: 'Hapus Jabatan?',
               deleteDescription: `Yakin ingin menghapus jabatan "${item.name}"? Tindakan ini tidak dapat dibatalkan.`,
               onEdit: () => {

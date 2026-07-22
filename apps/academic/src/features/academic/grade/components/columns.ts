@@ -41,6 +41,8 @@ export const createGradeColumns = (
           cell: ({ row }: { row: { original: Grade } }) => {
             const item = row.original
             return h(ActionCell, {
+              hideEdit: actions.canUpdate === false,
+              hideDelete: actions.canDelete === false,
               deleteTitle: 'Hapus Tingkat Kelas?',
               deleteDescription: `Yakin ingin menghapus tingkat "${item.name}"? Tindakan ini tidak dapat dibatalkan.`,
               onEdit: () => {

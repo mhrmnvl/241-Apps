@@ -47,6 +47,8 @@ const academicYearFilterOptions = computed<ComboboxOption[]>(() => [
 
 const tableColumns = createStudentGraduationColumns({
   showActions: can('graduations.update') || can('graduations.delete'),
+  canUpdate: can('graduations.update'),
+  canDelete: can('graduations.delete'),
   onEdit: (item: StudentGraduation) => {
     editingItem.value = item
     isAddModalOpen.value = true

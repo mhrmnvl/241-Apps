@@ -34,6 +34,8 @@ const { can } = useRoleGuard()
 
 const tableColumns = createCurriculaColumns({
   showActions: can('curricula.update') || can('curricula.delete'),
+  canUpdate: can('curricula.update'),
+  canDelete: can('curricula.delete'),
   onView: (item: Curricula) => {
     void router.push(`/akademik/kurikulum/${item.id}/mata-pelajaran`)
   },

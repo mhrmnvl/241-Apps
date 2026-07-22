@@ -72,6 +72,7 @@ export const createClassroomColumns = (
             return h(ActionCell, {
               manageLabel: 'Kelola kelas',
               hideEdit: true,
+              hideDelete: actions.canDelete === false,
               deleteTitle: 'Hapus Kelas?',
               deleteDescription:
                 'Data kelas ini akan terhapus. Hal ini juga akan memberhentikan status siswa yang ada di dalamnya secara paksa.',

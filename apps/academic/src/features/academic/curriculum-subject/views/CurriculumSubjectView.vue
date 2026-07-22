@@ -52,6 +52,8 @@ const existingSubjectIds = computed(() =>
 const tableColumns = createCurriculumSubjectColumns({
   showActions:
     can('curriculum-subjects.update') || can('curriculum-subjects.delete'),
+  canUpdate: can('curriculum-subjects.update'),
+  canDelete: can('curriculum-subjects.delete'),
   onEdit: (item: CurriculumSubject) => {
     editingItem.value = item
     isEditSheetOpen.value = true

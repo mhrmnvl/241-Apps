@@ -46,6 +46,8 @@ export const createTeachingAssignmentColumns = (
           cell: ({ row }: { row: { original: TeachingAssignment } }) => {
             const item = row.original
             return h(ActionCell, {
+              hideEdit: actions.canUpdate === false,
+              hideDelete: actions.canDelete === false,
               deleteTitle: 'Hapus Penugasan?',
               deleteDescription:
                 'Data penugasan mengajar ini akan dihapus secara permanen.',

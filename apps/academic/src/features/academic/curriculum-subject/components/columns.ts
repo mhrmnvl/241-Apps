@@ -34,6 +34,8 @@ export const createCurriculumSubjectColumns = (
           cell: ({ row }: { row: { original: CurriculumSubject } }) => {
             const item = row.original
             return h(ActionCell, {
+              hideEdit: actions.canUpdate === false,
+              hideDelete: actions.canDelete === false,
               deleteTitle: 'Hapus Mata Pelajaran?',
               deleteDescription:
                 'Mata pelajaran ini akan dihapus dari kurikulum secara permanen.',

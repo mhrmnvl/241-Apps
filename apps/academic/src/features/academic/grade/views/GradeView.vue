@@ -39,6 +39,8 @@ const { can } = useRoleGuard()
 
 const tableColumns = createGradeColumns({
   showActions: can('academic-years.update') || can('academic-years.delete'),
+  canUpdate: can('academic-years.update'),
+  canDelete: can('academic-years.delete'),
   onEdit: (item: Grade) => {
     editingItem.value = item
     isAddModalOpen.value = true

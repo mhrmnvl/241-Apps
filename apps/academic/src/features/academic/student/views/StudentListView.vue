@@ -98,6 +98,8 @@ const tableColumns = computed(() =>
         }
       },
       showActions: can('students.update') || can('students.delete'),
+      canUpdate: can('students.update'),
+      canDelete: can('students.delete'),
     },
     grades.value,
   ),

@@ -37,6 +37,8 @@ export const createSubjectColumns = (
           cell: ({ row }: { row: { original: Subject } }) => {
             const subject = row.original
             return h(ActionCell, {
+              hideEdit: actions.canUpdate === false,
+              hideDelete: actions.canDelete === false,
               deleteTitle: 'Hapus Mata Pelajaran?',
               deleteDescription:
                 'Data mata pelajaran ini akan dihapus secara permanen.',

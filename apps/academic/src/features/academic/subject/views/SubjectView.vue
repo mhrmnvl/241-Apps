@@ -43,6 +43,8 @@ const { can } = useRoleGuard()
 
 const tableColumns = createSubjectColumns({
   showActions: can('subjects.update') || can('subjects.delete'),
+  canUpdate: can('subjects.update'),
+  canDelete: can('subjects.delete'),
   onEdit: (item: Subject) => {
     editingItem.value = item
     isAddModalOpen.value = true

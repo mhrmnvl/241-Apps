@@ -62,6 +62,8 @@ const classroomFilterOptions = computed<ComboboxOption[]>(() => [
 const tableColumns = createTeachingAssignmentColumns({
   showActions:
     can('teaching-assignments.update') || can('teaching-assignments.delete'),
+  canUpdate: can('teaching-assignments.update'),
+  canDelete: can('teaching-assignments.delete'),
   onEdit: (item: TeachingAssignment) => {
     editingItem.value = item
     isAddModalOpen.value = true

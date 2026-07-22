@@ -45,6 +45,8 @@ export const createCurriculaColumns = (
             const curriculum = row.original
             return h(ActionCell, {
               viewLabel: 'Mata Pelajaran',
+              hideEdit: actions.canUpdate === false,
+              hideDelete: actions.canDelete === false,
               deleteTitle: 'Hapus Kurikulum?',
               deleteDescription:
                 'Data kurikulum ini akan dihapus secara permanen dan tidak dapat dikembalikan.',

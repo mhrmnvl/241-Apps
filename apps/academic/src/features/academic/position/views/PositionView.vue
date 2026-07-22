@@ -29,6 +29,8 @@ const { can } = useRoleGuard()
 
 const columns = createColumns({
   showActions: can('positions.update') || can('positions.delete'),
+  canUpdate: can('positions.update'),
+  canDelete: can('positions.delete'),
   onEdit: (item: Position) => {
     selectedItem.value = item
     isEditDialogOpen.value = true

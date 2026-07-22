@@ -48,6 +48,8 @@ const isProcessing = ref(false)
 
 const tableColumns = createAcademicYearColumns({
   showActions: can('academic-years.update') || can('academic-years.delete'),
+  canUpdate: can('academic-years.update'),
+  canDelete: can('academic-years.delete'),
   onEdit: (academicYear: AcademicYear) => {
     editingItem.value = academicYear
     isAddModalOpen.value = true
