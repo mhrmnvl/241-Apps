@@ -10,6 +10,7 @@ import type {
   Semester,
   ClassroomStructure,
   Grade,
+  ClassroomQueryParams,
 } from '../types'
 
 export const useClassroomStore = defineStore('classroom', () => {
@@ -27,6 +28,11 @@ export const useClassroomStore = defineStore('classroom', () => {
   const isSupervisorSaving = ref(false)
   const formError = ref<string | null>(null)
   const supervisorFormError = ref<string | null>(null)
+  const currentFilters = ref<ClassroomQueryParams>({
+    page: 1,
+    limit: 10,
+    search: '',
+  })
 
   const currentClassroom = ref<Classroom | null>(null)
   const classroomEnrollments = ref<ClassroomEnrollment[]>([])
@@ -49,6 +55,7 @@ export const useClassroomStore = defineStore('classroom', () => {
     isSupervisorSaving,
     formError,
     supervisorFormError,
+    currentFilters,
     currentClassroom,
     classroomEnrollments,
     availableStudents,

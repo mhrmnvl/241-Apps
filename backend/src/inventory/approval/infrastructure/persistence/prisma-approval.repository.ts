@@ -81,7 +81,7 @@ export class PrismaApprovalRepository extends IApprovalRepository {
     roleCodes: string[],
   ): Promise<ApprovalInstanceWithRelations[]> {
     const pendingStatus = await this.prisma.inventoryStatus.findUnique({
-      where: { code: 'STAT-LOAN-PENDING' },
+      where: { systemKey: 'LOAN_PENDING' },
     });
     if (!pendingStatus) return [];
 

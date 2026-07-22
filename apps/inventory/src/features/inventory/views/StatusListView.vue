@@ -15,9 +15,18 @@ import { useRoleGuard } from '@/shared/composables/useRoleGuard'
 import { inventoryApi } from '../api/inventoryApi'
 import StatusFormSheet from '../components/StatusFormSheet.vue'
 import type { ColumnDef } from '@tanstack/vue-table'
-import type { InventoryReferenceItem } from '../types'
+import type { InventoryReferenceItem, InventoryStatusKey } from '../types'
 
 const { isAdmin } = useRoleGuard()
+
+const SYSTEM_KEY_LABELS: Record<InventoryStatusKey, string> = {
+  AVAILABLE: 'Tersedia',
+  LOAN_PENDING: 'Menunggu Persetujuan',
+  LOAN_APPROVED: 'Pinjam Disetujui',
+  LOANED: 'Sedang Dipinjam',
+  LOAN_RETURNED: 'Baru Dikembalikan',
+  LOAN_REJECTED: 'Pinjam Ditolak',
+}
 
 // State
 const dataItems = ref<InventoryReferenceItem[]>([])
@@ -58,6 +67,17 @@ const columns = computed<ColumnDef<InventoryReferenceItem>[]>(() => {
         return h(Badge, { variant: allow ? 'default' : 'destructive' }, () =>
           allow ? 'Diizinkan' : 'Dilarang',
         )
+      },
+    },
+    {
+      accessorKey: 'systemKey',
+      header: 'Peran Sistem',
+      cell: ({ row }) => {
+        const key = row.original.systemKey
+        if (!key) {
+          return h('span', { class: 'text-muted-foreground' }, '-')
+        }
+        return h(Badge, { variant: 'outline' }, () => SYSTEM_KEY_LABELS[key])
       },
     },
   ]
@@ -211,6 +231,7 @@ onMounted(() => {
         v-model:open="isFormOpen"
         :item="selectedItem"
         :is-saving="isSaving"
+        :existing-statuses="dataItems"
         @save="handleSaveStatus"
       />
     </div>

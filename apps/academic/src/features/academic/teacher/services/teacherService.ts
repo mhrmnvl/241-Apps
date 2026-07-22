@@ -1,6 +1,7 @@
 import { teacherApi } from '../api/teacherApi'
 import { addressApi } from '@/features/platform/address'
 import { useTeacherStore } from '../stores/teacherStore'
+import { positionCategoryApi } from '../../position-category/api/positionCategoryApi'
 import type {
   TeacherQueryParams,
   TeacherExportParams,
@@ -41,6 +42,20 @@ export const teacherService = {
     } catch (error: unknown) {
       toast.error(
         getIndonesianErrorMessage(error, 'Gagal memuat data jabatan.'),
+      )
+    }
+  },
+
+  fetchPositionCategories: async () => {
+    const store = useTeacherStore()
+    try {
+      const res = await positionCategoryApi.getPositionCategories({
+        limit: 100,
+      })
+      store.positionCategories = res.data.data
+    } catch (error: unknown) {
+      toast.error(
+        getIndonesianErrorMessage(error, 'Gagal memuat kategori jabatan.'),
       )
     }
   },

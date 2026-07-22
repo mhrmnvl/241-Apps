@@ -158,10 +158,10 @@ const columns: ColumnDef<InventoryLoan>[] = [
 
       let variant: 'default' | 'secondary' | 'destructive' | 'outline' =
         'outline'
-      if (status.code === 'STAT-LOAN-APPROVED') variant = 'default'
-      else if (status.code === 'STAT-LOAN-PENDING') variant = 'secondary'
-      else if (status.code === 'STAT-LOAN-REJECTED') variant = 'destructive'
-      else if (status.code === 'STAT-LOAN-RETURNED') variant = 'outline'
+      if (status.systemKey === 'LOAN_APPROVED') variant = 'default'
+      else if (status.systemKey === 'LOAN_PENDING') variant = 'secondary'
+      else if (status.systemKey === 'LOAN_REJECTED') variant = 'destructive'
+      else if (status.systemKey === 'LOAN_RETURNED') variant = 'outline'
 
       return h(Badge, { variant }, () => status.name)
     },
@@ -175,7 +175,7 @@ const columns: ColumnDef<InventoryLoan>[] = [
         (s: InventoryStatus) => s.id === loan.statusId,
       )
 
-      if (status?.code === 'STAT-LOAN-APPROVED') {
+      if (status?.systemKey === 'LOAN_APPROVED') {
         return h(
           Button,
           {

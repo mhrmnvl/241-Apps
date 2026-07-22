@@ -10,26 +10,26 @@ import ParentInfoTab from './components/ParentInfoTab.vue'
 
 import {
   EducationalHistoryTab,
-  EditEducationalHistorySheet,
+  EditEducationalHistoryDialog,
 } from '@/features/academic/educational-history'
 
 import {
   ScholarshipTab,
-  EditScholarshipSheet,
+  EditScholarshipDialog,
 } from '@/features/academic/scholarship'
 
 import {
   AchievementTab,
-  EditAchievementSheet,
+  EditAchievementDialog,
 } from '@/features/academic/achievement'
 
 import {
   PositionTab,
-  EditPositionSheet,
-  EditTeacherIdentitySheet,
+  EditPositionDialog,
+  EditTeacherIdentityDialog,
 } from '@/features/academic/teacher'
 
-import { EditStudentIdentitySheet } from '@/features/academic/student'
+import { EditStudentIdentityDialog } from '@/features/academic/student'
 
 import { useSocialMedia } from '@/features/academic/social-media'
 
@@ -146,7 +146,7 @@ export function setupProfileFeature() {
     ],
     extraSheets: [
       {
-        component: EditTeacherIdentitySheet,
+        component: EditTeacherIdentityDialog,
         props: (ctx: ExtraSheetContext) => ({
           open:
             showEditIdentity.value &&
@@ -162,7 +162,7 @@ export function setupProfileFeature() {
         }),
       },
       {
-        component: EditStudentIdentitySheet,
+        component: EditStudentIdentityDialog,
         props: (ctx: ExtraSheetContext) => ({
           open:
             showEditIdentity.value &&
@@ -178,7 +178,7 @@ export function setupProfileFeature() {
         }),
       },
       {
-        component: EditEducationalHistorySheet,
+        component: EditEducationalHistoryDialog,
         props: (ctx: ExtraSheetContext) => ({
           open: showEditEdu.value,
           'onUpdate:open': (val: boolean) => {
@@ -190,7 +190,7 @@ export function setupProfileFeature() {
         }),
       },
       {
-        component: EditAchievementSheet,
+        component: EditAchievementDialog,
         props: (ctx: ExtraSheetContext) => ({
           open: showEditAchievement.value,
           'onUpdate:open': (val: boolean) => {
@@ -202,7 +202,7 @@ export function setupProfileFeature() {
         }),
       },
       {
-        component: EditScholarshipSheet,
+        component: EditScholarshipDialog,
         props: (ctx: ExtraSheetContext) => ({
           open: showEditScholarship.value,
           'onUpdate:open': (val: boolean) => {
@@ -214,7 +214,7 @@ export function setupProfileFeature() {
         }),
       },
       {
-        component: EditPositionSheet,
+        component: EditPositionDialog,
         props: (ctx: ExtraSheetContext) => ({
           open: showEditPosition.value && ctx.rawProfile?.teacher?.id,
           'onUpdate:open': (val: boolean) => {

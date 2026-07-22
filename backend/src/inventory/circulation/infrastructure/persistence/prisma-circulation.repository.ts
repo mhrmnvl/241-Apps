@@ -3,6 +3,7 @@ import {
   InventoryLoan,
   InventoryHistory,
   InventoryStatus,
+  InventoryStatusKey,
   InventoryTransactionType,
   Prisma,
 } from '@prisma/client';
@@ -149,6 +150,14 @@ export class PrismaCirculationRepository extends ICirculationRepository {
   async findStatusByCode(code: string): Promise<InventoryStatus | null> {
     return this.prisma.inventoryStatus.findUnique({
       where: { code },
+    });
+  }
+
+  async findStatusBySystemKey(
+    systemKey: InventoryStatusKey,
+  ): Promise<InventoryStatus | null> {
+    return this.prisma.inventoryStatus.findUnique({
+      where: { systemKey },
     });
   }
 

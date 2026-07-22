@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import type { Subject } from '../types'
+import type { Subject, SubjectQueryParams } from '../types'
 
 export const useSubjectStore = defineStore('subject', () => {
   const subjects = ref<Subject[]>([])
@@ -8,6 +8,11 @@ export const useSubjectStore = defineStore('subject', () => {
   const loading = ref(false)
   const isSaving = ref(false)
   const formError = ref<string | null>(null)
+  const currentFilters = ref<SubjectQueryParams>({
+    page: 1,
+    limit: 10,
+    search: '',
+  })
 
   return {
     subjects,
@@ -15,5 +20,6 @@ export const useSubjectStore = defineStore('subject', () => {
     loading,
     isSaving,
     formError,
+    currentFilters,
   }
 })

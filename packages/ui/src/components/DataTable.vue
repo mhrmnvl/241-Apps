@@ -169,7 +169,10 @@ watch(
   () => props.page,
   (newPage) => {
     if (newPage !== undefined) {
-      pagination.value.pageIndex = newPage - 1
+      pagination.value = {
+        ...pagination.value,
+        pageIndex: newPage - 1,
+      }
     }
   },
   { immediate: true },
@@ -179,10 +182,29 @@ watch(
   () => props.data.length,
   () => {
     if (props.totalItems === undefined) {
-      pagination.value.pageIndex = 0
+      pagination.value = {
+        ...pagination.value,
+        pageIndex: 0,
+      }
     }
   },
 )
+
+const setPage = (val: number) => {
+  pagination.value = {
+    ...pagination.value,
+    pageIndex: val - 1,
+  }
+  emit('update:page', val)
+}
+
+const setPageSize = (size: number) => {
+  pagination.value = {
+    pageIndex: 0,
+    pageSize: size,
+  }
+  emit('update:page-size', size)
+}
 
 defineExpose({ table })
 </script>
@@ -202,14 +224,7 @@ defineExpose({ table })
         </span>
         <Select
           :model-value="String(pagination.pageSize)"
-          @update:model-value="
-            (val) => {
-              const size = Number(val)
-              pagination.pageSize = size
-              pagination.pageIndex = 0
-              emit('update:page-size', size)
-            }
-          "
+          @update:model-value="(val) => setPageSize(Number(val))"
         >
           <SelectTrigger class="h-8 w-[50px] [&>svg]:hidden">
             <SelectValue :placeholder="String(pagination.pageSize)" />
@@ -367,12 +382,7 @@ defineExpose({ table })
         :sibling-count="1"
         :show-edges="false"
         class="mx-0 w-auto"
-        @update:page="
-          (val: number) => {
-            pagination.pageIndex = val - 1
-            emit('update:page', val)
-          }
-        "
+        @update:page="setPage"
       >
         <PaginationContent
           v-slot="{ items }"

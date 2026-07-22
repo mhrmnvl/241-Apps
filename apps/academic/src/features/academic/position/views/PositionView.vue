@@ -6,7 +6,7 @@ import { Card, CardHeader, CardTitle } from '@/ui/card'
 import { Input } from '@/ui/input'
 import { Plus, Search } from 'lucide-vue-next'
 import { onMounted, ref } from 'vue'
-import PositionFormSheet from '../components/PositionFormSheet.vue'
+import PositionFormDialog from '../components/PositionFormDialog.vue'
 import { usePosition } from '../composables/usePosition'
 import { useRoleGuard } from '@/shared/composables/useRoleGuard'
 import { createColumns } from '../components/columns'
@@ -18,14 +18,8 @@ const breadcrumbs = [
   { title: 'Jabatan', href: '/pengaturan/jabatan' },
 ]
 
-const {
-  items,
-  totalItems,
-  loading,
-  searchQuery,
-  fetchPositions,
-  deletePosition,
-} = usePosition()
+const { items, loading, searchQuery, fetchPositions, deletePosition } =
+  usePosition()
 
 const isAddOpen = ref(false)
 const isEditDialogOpen = ref(false)
@@ -94,7 +88,6 @@ onMounted(() => {
             :columns="columns"
             :data="items"
             :is-loading="loading"
-            :total-items="totalItems"
             item-label="jabatan"
           >
             <template #header-right>
@@ -113,13 +106,13 @@ onMounted(() => {
         </div>
       </Card>
 
-      <PositionFormSheet
+      <PositionFormDialog
         v-if="isAdmin"
         v-model:open="isAddOpen"
         @success="fetchPositions"
       />
 
-      <PositionFormSheet
+      <PositionFormDialog
         v-if="isAdmin"
         v-model:open="isEditDialogOpen"
         :initial-data="selectedItem"

@@ -34,7 +34,6 @@ const {
   students,
   classrooms,
   grades,
-  totalStudents,
   loading,
   filters,
   fetchStudents,
@@ -211,7 +210,6 @@ onMounted(async () => {
           <DataTable
             :columns="tableColumns"
             :data="filteredStudents"
-            :total-items="totalStudents"
             :is-loading="loading"
             item-label="siswa"
           />

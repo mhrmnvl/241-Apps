@@ -6,7 +6,7 @@ import { Card, CardHeader, CardTitle } from '@/ui/card'
 import { Input } from '@/ui/input'
 import { Plus, Search } from 'lucide-vue-next'
 import { onMounted } from 'vue'
-import BloodTypeFormSheet from '../components/BloodTypeFormSheet.vue'
+import BloodTypeFormDialog from '../components/BloodTypeFormDialog.vue'
 import { useBloodTypeList } from '../composables/useBloodTypeList'
 import { useRoleGuard } from '@/shared/composables/useRoleGuard'
 import { createColumns } from '../components/columns'
@@ -16,7 +16,6 @@ const {
   isLoading,
   fetchBloodTypes,
   deleteBloodType,
-  totalRows,
   searchQuery,
   isAddOpen,
   isEditDialogOpen,
@@ -75,7 +74,6 @@ onMounted(() => {
             :columns="columns"
             :data="data"
             :is-loading="isLoading"
-            :total-items="totalRows"
             item-label="golongan darah"
           >
             <template #header-right>
@@ -94,13 +92,13 @@ onMounted(() => {
         </div>
       </Card>
 
-      <BloodTypeFormSheet
+      <BloodTypeFormDialog
         v-if="isAdmin"
         v-model:open="isAddOpen"
         @success="fetchBloodTypes"
       />
 
-      <BloodTypeFormSheet
+      <BloodTypeFormDialog
         v-if="isAdmin"
         v-model:open="isEditDialogOpen"
         :initial-data="selectedItem"

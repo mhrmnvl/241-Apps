@@ -109,7 +109,7 @@ async function loadAvailableUnits() {
     const metaRes = await inventoryApi.getInventoryMetadata()
     const metadata = metaRes.data?.data ?? null
     const availStatus = metadata?.statuses.find(
-      (s: InventoryStatus) => s.code === 'STAT-AVAIL',
+      (s: InventoryStatus) => s.systemKey === 'AVAILABLE',
     )
     if (!availStatus) {
       availableUnits.value = []
@@ -123,7 +123,7 @@ async function loadAvailableUnits() {
     const assets = assetsRes.data?.data ?? []
     availableUnits.value = assets.flatMap((asset) =>
       (asset.units ?? [])
-        .filter((u) => u.status?.code === 'STAT-AVAIL')
+        .filter((u) => u.status?.systemKey === 'AVAILABLE')
         .map((u) => ({
           ...u,
           assetName: asset.name,

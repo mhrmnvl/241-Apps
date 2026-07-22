@@ -26,7 +26,7 @@ export class ProcessApprovalUseCase {
     }
 
     const pendingStatus = await this.prisma.inventoryStatus.findUnique({
-      where: { code: 'STAT-LOAN-PENDING' },
+      where: { systemKey: 'LOAN_PENDING' },
     });
     if (!pendingStatus) {
       throw new BadRequestException(
@@ -81,13 +81,15 @@ export class ProcessApprovalUseCase {
       if (dto.action === 'REJECT') {
         // --- PROCESS REJECTION ---
         const rejectedStatus = await tx.inventoryStatus.findUnique({
-          where: { code: 'STAT-LOAN-REJECTED' },
+          where: { systemKey: 'LOAN_REJECTED' },
         });
         const availStatus = await tx.inventoryStatus.findUnique({
-          where: { code: 'STAT-AVAIL' },
+          where: { systemKey: 'AVAILABLE' },
         });
         if (!rejectedStatus || !availStatus) {
-          throw new NotFoundException('Statuses are not seeded.');
+          throw new NotFoundException(
+            'Peran status "Pinjam Ditolak"/"Tersedia" belum diatur di Referensi > Status Aset.',
+          );
         }
 
         // Update instance to REJECTED
@@ -102,7 +104,7 @@ export class ProcessApprovalUseCase {
           data: { statusId: rejectedStatus.id },
         });
 
-        // Revert units to STAT-AVAIL
+        // Revert units to the "available" status
         const loanItems = await tx.inventoryLoanItem.findMany({
           where: { loanId: instance.referenceId },
         });
@@ -135,10 +137,10 @@ export class ProcessApprovalUseCase {
         } else {
           // Final step approved -> COMPLETE workflow
           const approvedStatus = await tx.inventoryStatus.findUnique({
-            where: { code: 'STAT-LOAN-APPROVED' },
+            where: { systemKey: 'LOAN_APPROVED' },
           });
           const loanedStatus = await tx.inventoryStatus.findUnique({
-            where: { code: 'STAT-LOANED' },
+            where: { systemKey: 'LOANED' },
           });
           const txType = await tx.inventoryTransactionType.findUnique({
             where: { code: 'TX-LOAN-OUT' },
@@ -146,7 +148,7 @@ export class ProcessApprovalUseCase {
 
           if (!approvedStatus || !loanedStatus || !txType) {
             throw new NotFoundException(
-              'Statuses or transaction types are not seeded.',
+              'Peran status "Pinjam Disetujui"/"Dipinjam" belum diatur, atau tipe transaksi TX-LOAN-OUT belum tersedia.',
             );
           }
 
@@ -162,7 +164,7 @@ export class ProcessApprovalUseCase {
             data: { statusId: approvedStatus.id },
           });
 
-          // Revert units from STAT-LOAN-PENDING to STAT-LOANED
+          // Move units from "loan pending" to "loaned"
           const loanItems = await tx.inventoryLoanItem.findMany({
             where: { loanId: instance.referenceId },
           });

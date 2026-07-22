@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import StudentScoreFormSheet from '../components/StudentScoreFormSheet.vue'
+import StudentScoreFormDialog from '../components/StudentScoreFormDialog.vue'
 import AssessmentItemDialog from '../components/AssessmentItemDialog.vue'
 import { useStudentScore } from '../composables/useStudentScore'
 import { createstudentScoreColumns } from './columns'
@@ -230,7 +230,7 @@ onMounted(async () => {
             </p>
           </div>
 
-          <StudentScoreFormSheet
+          <StudentScoreFormDialog
             v-if="isAdmin && openForm"
             v-model:open="openForm"
             :edit-data="editingData"

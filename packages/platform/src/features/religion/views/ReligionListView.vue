@@ -6,7 +6,7 @@ import { Card, CardHeader, CardTitle } from '@/ui/card'
 import { Input } from '@/ui/input'
 import { Plus, Search } from 'lucide-vue-next'
 import { onMounted } from 'vue'
-import ReligionFormSheet from '../components/ReligionFormSheet.vue'
+import ReligionFormDialog from '../components/ReligionFormDialog.vue'
 import { useReligionList } from '../composables/useReligionList'
 import { useRoleGuard } from '@/shared/composables/useRoleGuard'
 import { createColumns } from '../components/columns'
@@ -16,7 +16,6 @@ const {
   isLoading,
   fetchReligions,
   deleteReligion,
-  totalRows,
   searchQuery,
   isAddOpen,
   isEditDialogOpen,
@@ -75,7 +74,6 @@ onMounted(() => {
             :columns="columns"
             :data="data"
             :is-loading="isLoading"
-            :total-items="totalRows"
             item-label="agama"
           >
             <template #header-right>
@@ -94,13 +92,13 @@ onMounted(() => {
         </div>
       </Card>
 
-      <ReligionFormSheet
+      <ReligionFormDialog
         v-if="isAdmin"
         v-model:open="isAddOpen"
         @success="fetchReligions"
       />
 
-      <ReligionFormSheet
+      <ReligionFormDialog
         v-if="isAdmin"
         v-model:open="isEditDialogOpen"
         :initial-data="selectedItem"

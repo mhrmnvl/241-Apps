@@ -6,7 +6,7 @@ import { Card, CardHeader, CardTitle } from '@/ui/card'
 import { Input } from '@/ui/input'
 import { Plus, Search } from 'lucide-vue-next'
 import { onMounted } from 'vue'
-import OccupationFormSheet from '../components/OccupationFormSheet.vue'
+import OccupationFormDialog from '../components/OccupationFormDialog.vue'
 import { useOccupationList } from '../composables/useOccupationList'
 import { useRoleGuard } from '@/shared/composables/useRoleGuard'
 import { createColumns } from '../components/columns'
@@ -16,7 +16,6 @@ const {
   isLoading,
   fetchOccupations,
   deleteOccupation,
-  totalRows,
   searchQuery,
   isAddOpen,
   isEditDialogOpen,
@@ -75,7 +74,6 @@ onMounted(() => {
             :columns="columns"
             :data="data"
             :is-loading="isLoading"
-            :total-items="totalRows"
             item-label="pekerjaan"
           >
             <template #header-right>
@@ -94,13 +92,13 @@ onMounted(() => {
         </div>
       </Card>
 
-      <OccupationFormSheet
+      <OccupationFormDialog
         v-if="isAdmin"
         v-model:open="isAddOpen"
         @success="fetchOccupations"
       />
 
-      <OccupationFormSheet
+      <OccupationFormDialog
         v-if="isAdmin"
         v-model:open="isEditDialogOpen"
         :initial-data="selectedItem"

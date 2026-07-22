@@ -8,7 +8,7 @@ import { Plus } from 'lucide-vue-next'
 import { useStudentParent } from '../composables/useStudentParent'
 import { useRoleGuard } from '@/shared/composables/useRoleGuard'
 import { createStudentParentColumns } from '../components/columns'
-import StudentParentFormSheet from '../components/StudentParentFormSheet.vue'
+import StudentParentFormDialog from '../components/StudentParentFormDialog.vue'
 import type { StudentParent, StudentParentFormPayload } from '../types'
 
 const breadcrumbs = [
@@ -106,7 +106,7 @@ onMounted(async () => {
             item-label="relasi"
           />
 
-          <StudentParentFormSheet
+          <StudentParentFormDialog
             v-if="isAdmin && isFormOpen"
             v-model:open="isFormOpen"
             :edit-data="editingItem"

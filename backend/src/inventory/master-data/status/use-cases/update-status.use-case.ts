@@ -15,6 +15,7 @@ export class UpdateStatusUseCase {
       code: dto.code,
       name: dto.name,
       allowTransactions: dto.allowTransactions ?? true,
+      systemKey: dto.systemKey !== undefined ? dto.systemKey : undefined,
     });
   }
 }

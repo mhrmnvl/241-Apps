@@ -3,14 +3,21 @@ import { useSubjectStore } from '../stores/subjectStore'
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
 import { teacherApi } from '@/features/academic/teacher'
 import { toast } from 'vue-sonner'
-import type { SubjectSavePayload } from '../types'
+import type { SubjectSavePayload, SubjectQueryParams } from '../types'
 
 export const subjectService = {
-  fetchSubjects: async () => {
+  fetchSubjects: async (params?: SubjectQueryParams) => {
     const store = useSubjectStore()
     store.loading = true
     try {
-      const res = await subjectApi.getSubjects({ limit: 100 })
+      const mergedParams = {
+        page: params?.page ?? store.currentFilters.page,
+        limit: params?.limit ?? store.currentFilters.limit,
+        search: params?.search ?? store.currentFilters.search,
+      }
+      store.currentFilters = mergedParams
+
+      const res = await subjectApi.getSubjects(mergedParams)
       store.subjects = res.data.data ?? []
       store.totalSubjects = res.data.meta?.total ?? store.subjects.length
     } catch (error: unknown) {

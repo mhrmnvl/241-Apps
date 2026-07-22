@@ -6,7 +6,7 @@ import { Button } from '@/ui/button'
 import { Plus, Trash } from 'lucide-vue-next'
 import { getColumns } from '../components/columns'
 import { useSocialMedia } from '../composables/useSocialMedia'
-import SocialMediaFormSheet from '../components/SocialMediaFormSheet.vue'
+import SocialMediaFormDialog from '../components/SocialMediaFormDialog.vue'
 import { useRoleGuard } from '@/shared/composables/useRoleGuard'
 import AppLayout from '@/layouts/AppLayout.vue'
 
@@ -103,6 +103,6 @@ const handleBulkDelete = async () => {
       </Card>
     </div>
 
-    <SocialMediaFormSheet v-if="isAdmin" />
+    <SocialMediaFormDialog v-if="isAdmin" />
   </AppLayout>
 </template>

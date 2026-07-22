@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
-import AcademicCalendarSheet from '../components/AcademicCalendarSheet.vue'
+import AcademicCalendarDialog from '../components/AcademicCalendarDialog.vue'
 import AcademicCalendarGridView from '../components/AcademicCalendarGridView.vue'
 import AcademicCalendarTableView from '../components/AcademicCalendarTableView.vue'
 import AcademicCalendarSidebar from '../components/AcademicCalendarSidebar.vue'
@@ -148,7 +148,7 @@ onMounted(() => {
       </Card>
     </div>
 
-    <AcademicCalendarSheet
+    <AcademicCalendarDialog
       v-if="isAdmin"
       :open="sheetOpen"
       :event-data="sheetEventData"

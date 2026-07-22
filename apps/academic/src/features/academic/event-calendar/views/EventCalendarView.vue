@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import EventCalendarGridView from '../components/EventCalendarGridView.vue'
 import EventCalendarTableView from '../components/EventCalendarTableView.vue'
-import EventCalendarSheet from '../components/EventCalendarSheet.vue'
+import EventCalendarDialog from '../components/EventCalendarDialog.vue'
 import { useEventCalendar } from '../composables/useEventCalendar'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { Button } from '@/ui/button'
@@ -405,7 +405,7 @@ watch(activeTab, (val) => {
       </Card>
     </div>
 
-    <EventCalendarSheet
+    <EventCalendarDialog
       v-if="isAdmin"
       :open="sheetOpen"
       :event-data="sheetEventData"

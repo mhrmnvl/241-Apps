@@ -8,6 +8,7 @@ export function useTeacher() {
   const {
     teachers,
     positions,
+    positionCategories,
     totalTeachers,
     filters,
     loading,
@@ -20,6 +21,7 @@ export function useTeacher() {
   return {
     teachers,
     positions,
+    positionCategories,
     totalTeachers,
     filters,
     loading,
@@ -29,6 +31,7 @@ export function useTeacher() {
     filteredTeachers,
     fetchTeachers: teacherService.fetchTeachers,
     fetchPositions: teacherService.fetchPositions,
+    fetchPositionCategories: teacherService.fetchPositionCategories,
     saveTeacher: teacherService.saveTeacher,
     savePosition: teacherService.savePosition,
     deletePosition: teacherService.deletePosition,

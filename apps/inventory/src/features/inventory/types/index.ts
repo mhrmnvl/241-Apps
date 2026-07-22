@@ -26,11 +26,23 @@ export interface InventoryCondition {
   createdAt: string
 }
 
+// Protected role a status plays in the loan lifecycle (create/approve/reject/
+// return) — assigned by an admin via Referensi > Status Aset, independent of
+// the freely-editable code/name. Business logic must check this, never code.
+export type InventoryStatusKey =
+  | 'AVAILABLE'
+  | 'LOAN_PENDING'
+  | 'LOAN_APPROVED'
+  | 'LOANED'
+  | 'LOAN_RETURNED'
+  | 'LOAN_REJECTED'
+
 export interface InventoryStatus {
   id: string
   code: string
   name: string
   allowTransactions: boolean
+  systemKey: InventoryStatusKey | null
   createdAt: string
 }
 
@@ -162,6 +174,8 @@ export interface InventoryReferenceItem {
   description?: string
   isUsable?: boolean
   allowTransactions?: boolean
+  /** Statuses only — protected loan-lifecycle role, see InventoryStatusKey. */
+  systemKey?: InventoryStatusKey | null
 }
 
 export interface InventoryLoanItem {

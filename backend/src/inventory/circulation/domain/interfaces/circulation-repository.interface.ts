@@ -2,6 +2,7 @@ import {
   InventoryLoan,
   InventoryHistory,
   InventoryStatus,
+  InventoryStatusKey,
   InventoryTransactionType,
   Prisma,
 } from '@prisma/client';
@@ -53,6 +54,11 @@ export abstract class ICirculationRepository {
   ): Promise<InventoryHistory>;
 
   abstract findStatusByCode(code: string): Promise<InventoryStatus | null>;
+  /** Looks up a status by its protected role in the loan lifecycle, never by
+   * the admin-editable code/name (see InventoryStatusKey in inventory.prisma). */
+  abstract findStatusBySystemKey(
+    key: InventoryStatusKey,
+  ): Promise<InventoryStatus | null>;
   abstract findTransactionTypeByCode(
     code: string,
   ): Promise<InventoryTransactionType | null>;

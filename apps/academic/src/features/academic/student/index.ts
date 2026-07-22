@@ -4,7 +4,7 @@ export { useStudentStore } from './stores/studentStore'
 export { useStudent } from './composables/useStudent'
 export { useStudentImportExport } from './composables/useStudentImportExport'
 export { studentRoutes } from './routes'
-export { default as EditStudentIdentitySheet } from './components/EditStudentIdentitySheet.vue'
+export { default as EditStudentIdentityDialog } from './components/EditStudentIdentityDialog.vue'
 export type {
   GradeOption,
   StudentProfile,

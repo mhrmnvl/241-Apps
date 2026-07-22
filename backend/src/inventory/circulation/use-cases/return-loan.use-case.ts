@@ -21,14 +21,15 @@ export class ReturnLoanUseCase {
     }
 
     const returnedStatus =
-      await this.repository.findStatusByCode('STAT-LOAN-RETURNED');
-    const availStatus = await this.repository.findStatusByCode('STAT-AVAIL');
+      await this.repository.findStatusBySystemKey('LOAN_RETURNED');
+    const availStatus =
+      await this.repository.findStatusBySystemKey('AVAILABLE');
     const txType =
       await this.repository.findTransactionTypeByCode('TX-LOAN-IN');
 
     if (!returnedStatus || !availStatus || !txType) {
       throw new NotFoundException(
-        'Statuses or transaction types not initialized.',
+        'Peran status "Baru Dikembalikan"/"Tersedia" belum diatur, atau tipe transaksi TX-LOAN-IN belum tersedia.',
       );
     }
 
@@ -68,7 +69,7 @@ export class ReturnLoanUseCase {
           },
         });
 
-        // Revert unit status to STAT-AVAIL and set new condition
+        // Revert unit status to "available" and set new condition
         await tx.inventoryAssetUnit.update({
           where: { id: unit.id },
           data: {

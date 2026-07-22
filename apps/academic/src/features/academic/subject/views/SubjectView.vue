@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { Subject, SubjectSavePayload } from '../types'
-import SubjectFormSheet from '../components/SubjectFormSheet.vue'
+import SubjectFormDialog from '../components/SubjectFormDialog.vue'
 import { createSubjectColumns } from '../components/columns'
 import { useSubjectList } from '../composables/useSubjectList'
 import { useSubjectDelete } from '../composables/useSubjectDelete'
@@ -10,15 +10,30 @@ import { DataTable } from '@/ui'
 import { Button } from '@/ui/button'
 import { Card, CardHeader, CardTitle } from '@/ui/card'
 import { useRoleGuard } from '@/shared/composables/useRoleGuard'
-import { Plus } from 'lucide-vue-next'
+import { Plus, Search } from 'lucide-vue-next'
 import { onMounted, ref, watch } from 'vue'
+import { watchDebounced } from '@vueuse/core'
+import { Input } from '@/ui/input'
 
 const breadcrumbs = [
   { title: 'Pembelajaran', href: '#' },
   { title: 'Mata Pelajaran', href: '/pembelajaran/mata-pelajaran' },
 ]
 
-const { subjects, totalSubjects, loading, fetchSubjects } = useSubjectList()
+const { subjects, totalSubjects, loading, currentFilters, fetchSubjects } =
+  useSubjectList()
+const searchKeyword = ref(currentFilters.value.search ?? '')
+
+watchDebounced(
+  searchKeyword,
+  (val) => {
+    void fetchSubjects({
+      search: val.trim() || '',
+      page: 1,
+    })
+  },
+  { debounce: 500 },
+)
 const { deleteSubject } = useSubjectDelete()
 const { isSaving, formError, saveSubject } = useSubjectForm()
 
@@ -87,13 +102,27 @@ onMounted(() => {
             :columns="tableColumns"
             :data="subjects"
             :total-items="totalSubjects"
+            :page="currentFilters.page"
             :is-loading="loading"
             item-label="mata pelajaran"
-            filter-column="name"
-            filter-placeholder="Cari mata pelajaran..."
-          />
+            @update:page="(page) => fetchSubjects({ page })"
+            @update:page-size="(limit) => fetchSubjects({ limit, page: 1 })"
+          >
+            <template #header-right>
+              <div class="relative w-48">
+                <Search
+                  class="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground"
+                />
+                <Input
+                  v-model="searchKeyword"
+                  placeholder="Cari mata pelajaran..."
+                  class="h-8 pl-8 w-full text-xs"
+                />
+              </div>
+            </template>
+          </DataTable>
 
-          <SubjectFormSheet
+          <SubjectFormDialog
             v-if="isAdmin && isAddModalOpen"
             v-model:open="isAddModalOpen"
             :form-error="formError"

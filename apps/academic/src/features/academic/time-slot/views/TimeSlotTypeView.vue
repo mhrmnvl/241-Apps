@@ -10,7 +10,7 @@ import { useRoleGuard } from '@/shared/composables/useRoleGuard'
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
 import { timeSlotApi } from '../api/timeSlotApi'
 import { createTimeSlotTypeColumns } from '../components/timeSlotTypeColumns'
-import TimeSlotTypeFormSheet from '../components/TimeSlotTypeFormSheet.vue'
+import TimeSlotTypeFormDialog from '../components/TimeSlotTypeFormDialog.vue'
 import type { TimeSlotType } from '../types'
 
 const breadcrumbs = [
@@ -105,7 +105,6 @@ onMounted(fetchTypes)
             :columns="columns"
             :data="data"
             :is-loading="isLoading"
-            :total-items="data.length"
             item-label="tipe jam"
             filter-column="name"
             filter-placeholder="Cari tipe jam..."
@@ -113,13 +112,13 @@ onMounted(fetchTypes)
         </div>
       </Card>
 
-      <TimeSlotTypeFormSheet
+      <TimeSlotTypeFormDialog
         v-if="isAdmin"
         v-model:open="isAddOpen"
         @success="fetchTypes"
       />
 
-      <TimeSlotTypeFormSheet
+      <TimeSlotTypeFormDialog
         v-if="isAdmin"
         v-model:open="isEditOpen"
         :initial-data="selectedItem"

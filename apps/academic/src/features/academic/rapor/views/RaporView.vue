@@ -28,7 +28,7 @@ import {
 } from '@/ui/alert-dialog'
 import { useRapor } from '../composables/useRapor'
 import { columns } from '../components/columns'
-import RaporFormSheet from '../components/RaporFormSheet.vue'
+import RaporFormDialog from '../components/RaporFormDialog.vue'
 import RaporDetailDialog from '../components/RaporDetailDialog.vue'
 import type { RaporData } from '../types'
 import { useRoleGuard } from '@/shared/composables/useRoleGuard'
@@ -296,7 +296,7 @@ onMounted(async () => {
       </Card>
     </div>
 
-    <RaporFormSheet
+    <RaporFormDialog
       v-if="isAdmin"
       v-model:open="openForm"
       :rapor="editingData"

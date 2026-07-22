@@ -19,7 +19,7 @@ import { onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { createColumns } from '../components/columns'
-import TeacherFormSheet from '../components/TeacherFormSheet.vue'
+import TeacherFormDialog from '../components/TeacherFormDialog.vue'
 import ImportExportTeacherDialog from '../components/ImportExportTeacherDialog.vue'
 import { useTeacher } from '../composables/useTeacher'
 import { useTeacherImportExport } from '../composables/useTeacherImportExport'
@@ -34,12 +34,14 @@ const router = useRouter()
 
 const {
   positions,
+  positionCategories,
   loading,
   filters,
   isSaving,
   formError,
   fetchTeachers,
   fetchPositions,
+  fetchPositionCategories,
   saveTeacher,
   savePosition,
   deletePosition,
@@ -143,6 +145,7 @@ watchDebounced(
 onMounted(() => {
   void fetchTeachers()
   void fetchPositions()
+  void fetchPositionCategories()
 })
 </script>
 
@@ -196,8 +199,36 @@ onMounted(() => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all"> Semua Kategori </SelectItem>
-                <SelectItem value="guru"> Guru </SelectItem>
-                <SelectItem value="tendik"> Tenaga Kependidikan </SelectItem>
+                <SelectItem
+                  v-for="cat in positionCategories"
+                  :key="cat.id"
+                  :value="cat.id"
+                >
+                  {{ cat.name }}
+                </SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select
+              :model-value="filters.positionFilter"
+              @update:model-value="
+                filters.positionFilter = ($event as string | null) ?? 'all'
+              "
+            >
+              <SelectTrigger
+                class="w-full lg:w-fit lg:min-w-[150px] px-3! gap-2!"
+              >
+                <SelectValue placeholder="Semua Jabatan" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all"> Semua Jabatan </SelectItem>
+                <SelectItem
+                  v-for="pos in positions"
+                  :key="pos.id"
+                  :value="pos.id"
+                >
+                  {{ pos.name }}
+                </SelectItem>
               </SelectContent>
             </Select>
 
@@ -235,7 +266,6 @@ onMounted(() => {
             <DataTable
               :columns="tableColumns"
               :data="filteredTeachers"
-              :total-items="filteredTeachers.length"
               :is-loading="loading"
               item-label="guru"
             />
@@ -244,7 +274,7 @@ onMounted(() => {
       </Card>
     </div>
 
-    <TeacherFormSheet
+    <TeacherFormDialog
       v-if="isAdmin"
       v-model:open="isModalOpen"
       :form-error="formError"

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { StudentGraduation, StudentGraduationSavePayload } from '../types'
-import StudentGraduationFormSheet from '../components/StudentGraduationFormSheet.vue'
+import StudentGraduationFormDialog from '../components/StudentGraduationFormDialog.vue'
 import { createStudentGraduationColumns } from '../components/columns'
 import { useStudentGraduation } from '../composables/useStudentGraduation'
 import AppLayout from '@/layouts/AppLayout.vue'
@@ -138,7 +138,7 @@ onMounted(async () => {
             filter-placeholder="Cari nama siswa..."
           />
 
-          <StudentGraduationFormSheet
+          <StudentGraduationFormDialog
             v-if="isAdmin && isAddModalOpen"
             v-model:open="isAddModalOpen"
             :edit-data="editingItem"

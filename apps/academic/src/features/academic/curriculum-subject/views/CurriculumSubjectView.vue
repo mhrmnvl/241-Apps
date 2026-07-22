@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { CurriculumSubject, CurriculumSubjectSavePayload } from '../types'
-import CurriculumSubjectFormSheet from '../components/CurriculumSubjectFormSheet.vue'
+import CurriculumSubjectFormDialog from '../components/CurriculumSubjectFormDialog.vue'
 import AddCurriculumSubjectDialog from '../components/AddCurriculumSubjectDialog.vue'
 import { createCurriculumSubjectColumns } from '../components/columns'
 import { useCurriculumSubject } from '../composables/useCurriculumSubject'
@@ -150,7 +150,7 @@ onMounted(async () => {
             filter-placeholder="Cari mata pelajaran..."
           />
 
-          <CurriculumSubjectFormSheet
+          <CurriculumSubjectFormDialog
             v-if="isAdmin && isEditSheetOpen"
             v-model:open="isEditSheetOpen"
             :form-error="formError"

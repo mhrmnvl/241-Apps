@@ -6,7 +6,7 @@ import { Card, CardHeader, CardTitle } from '@/ui/card'
 import { Input } from '@/ui/input'
 import { Plus, Search } from 'lucide-vue-next'
 import { onMounted } from 'vue'
-import SchoolUnitTypeFormSheet from '../components/SchoolUnitTypeFormSheet.vue'
+import SchoolUnitTypeFormDialog from '../components/SchoolUnitTypeFormDialog.vue'
 import { useSchoolUnitTypeList } from '../composables/useSchoolUnitTypeList'
 import { useRoleGuard } from '@/shared/composables/useRoleGuard'
 import { createColumns } from '../components/columns'
@@ -16,7 +16,6 @@ const {
   isLoading,
   fetchSchoolUnitTypes,
   deleteSchoolUnitType,
-  totalRows,
   searchQuery,
   isAddOpen,
   isEditDialogOpen,
@@ -75,7 +74,6 @@ onMounted(() => {
             :columns="columns"
             :data="data"
             :is-loading="isLoading"
-            :total-items="totalRows"
             item-label="tipe sekolah"
           >
             <template #header-right>
@@ -94,13 +92,13 @@ onMounted(() => {
         </div>
       </Card>
 
-      <SchoolUnitTypeFormSheet
+      <SchoolUnitTypeFormDialog
         v-if="isAdmin"
         v-model:open="isAddOpen"
         @success="fetchSchoolUnitTypes"
       />
 
-      <SchoolUnitTypeFormSheet
+      <SchoolUnitTypeFormDialog
         v-if="isAdmin"
         v-model:open="isEditDialogOpen"
         :initial-data="selectedItem"

@@ -101,12 +101,28 @@ model InventoryCondition {
   @@map("inventory_conditions")
 }
 
+// The loan lifecycle (create/approve/reject/return) must reliably find "the
+// status that means X" without depending on the free-text code/name below,
+// which admins can freely relabel via the Referensi > Status Aset CRUD.
+// systemKey is a protected, optional 1:1 tag an admin assigns to one of their
+// custom statuses to mark its role in that lifecycle — business logic looks
+// up statuses by systemKey, never by hardcoded code strings.
+enum InventoryStatusKey {
+  AVAILABLE
+  LOAN_PENDING
+  LOAN_APPROVED
+  LOANED
+  LOAN_RETURNED
+  LOAN_REJECTED
+}
+
 model InventoryStatus {
-  id                String   @id @default(uuid()) @db.Uuid
-  code              String   @unique @db.VarChar(50)
-  name              String   @db.VarChar(50)
-  allowTransactions Boolean  @default(true) @map("allow_transactions")
-  createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz
+  id                String              @id @default(uuid()) @db.Uuid
+  code              String              @unique @db.VarChar(50)
+  name              String              @db.VarChar(50)
+  allowTransactions Boolean             @default(true) @map("allow_transactions")
+  systemKey         InventoryStatusKey? @unique @map("system_key")
+  createdAt         DateTime            @default(now()) @map("created_at") @db.Timestamptz
 
   units InventoryAssetUnit[]
 

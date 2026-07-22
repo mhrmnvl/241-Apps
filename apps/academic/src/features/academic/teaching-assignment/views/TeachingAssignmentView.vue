@@ -3,7 +3,7 @@ import type {
   TeachingAssignment,
   TeachingAssignmentSavePayload,
 } from '../types'
-import TeachingAssignmentFormSheet from '../components/TeachingAssignmentFormSheet.vue'
+import TeachingAssignmentFormDialog from '../components/TeachingAssignmentFormDialog.vue'
 import { createTeachingAssignmentColumns } from '../components/columns'
 import { useTeachingAssignment } from '../composables/useTeachingAssignment'
 import AppLayout from '@/layouts/AppLayout.vue'
@@ -162,7 +162,7 @@ onMounted(async () => {
             filter-placeholder="Cari guru..."
           />
 
-          <TeachingAssignmentFormSheet
+          <TeachingAssignmentFormDialog
             v-if="isAdmin && isAddModalOpen"
             v-model:open="isAddModalOpen"
             :form-error="formError"

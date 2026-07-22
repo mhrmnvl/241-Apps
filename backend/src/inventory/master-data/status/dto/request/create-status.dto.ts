@@ -1,6 +1,8 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { InventoryStatusKey } from '@prisma/client';
 import {
   IsBoolean,
+  IsEnum,
   IsNotEmpty,
   IsOptional,
   IsString,
@@ -24,4 +26,14 @@ export class CreateStatusDto {
   @IsBoolean()
   @IsOptional()
   allowTransactions?: boolean;
+
+  @ApiPropertyOptional({
+    description:
+      'Protected role of this status in the loan lifecycle (null = custom, no special role).',
+    enum: InventoryStatusKey,
+    nullable: true,
+  })
+  @IsOptional()
+  @IsEnum(InventoryStatusKey)
+  systemKey?: InventoryStatusKey | null;
 }

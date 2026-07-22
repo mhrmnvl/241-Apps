@@ -2,6 +2,7 @@ import type {
   Classroom,
   ClassroomSupervisorAssignment,
   ClassroomSavePayload,
+  ClassroomQueryParams,
 } from '../types'
 import { classroomApi } from '../api/classroomApi'
 import { useClassroomStore } from '../stores/classroomStore'
@@ -9,11 +10,18 @@ import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
 import { toast } from 'vue-sonner'
 
 export const classroomService = {
-  fetchClassrooms: async () => {
+  fetchClassrooms: async (params?: ClassroomQueryParams) => {
     const store = useClassroomStore()
     store.loading = true
     try {
-      const res = await classroomApi.getClassrooms({ limit: 100 })
+      const mergedParams = {
+        page: params?.page ?? store.currentFilters.page,
+        limit: params?.limit ?? store.currentFilters.limit,
+        search: params?.search ?? store.currentFilters.search,
+      }
+      store.currentFilters = mergedParams
+
+      const res = await classroomApi.getClassrooms(mergedParams)
       const classrooms: Classroom[] = res.data.data ?? []
       store.classrooms = classrooms
       store.totalClassrooms = res.data.meta?.total ?? classrooms.length

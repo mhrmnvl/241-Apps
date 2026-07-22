@@ -5,12 +5,14 @@ import type { Classroom } from '../types'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { Card, CardHeader, CardTitle } from '@/ui/card'
 import { Button } from '@/ui/button'
-import { Plus } from 'lucide-vue-next'
+import { Plus, Search } from 'lucide-vue-next'
 import { DataTable } from '@/ui'
 import { createClassroomColumns } from '../components/columns'
-import ClassroomFormSheet from '../components/ClassroomFormSheet.vue'
+import ClassroomFormDialog from '../components/ClassroomFormDialog.vue'
 import { useRoleGuard } from '@/shared/composables/useRoleGuard'
 import { useClassroomList } from '../composables/useClassroomList'
+import { watchDebounced } from '@vueuse/core'
+import { Input } from '@/ui/input'
 
 const router = useRouter()
 
@@ -25,12 +27,25 @@ const {
   academicYears,
   totalClassrooms,
   loading,
+  currentFilters,
   fetchClassrooms,
   fetchAcademicYears,
   fetchGrades,
   fetchSemesters,
   deleteClassroom,
 } = useClassroomList()
+const searchKeyword = ref(currentFilters.value.search ?? '')
+
+watchDebounced(
+  searchKeyword,
+  (val) => {
+    void fetchClassrooms({
+      search: val.trim() || '',
+      page: 1,
+    })
+  },
+  { debounce: 500 },
+)
 
 const isAddModalOpen = ref(false)
 const { isAdmin } = useRoleGuard()
@@ -83,13 +98,27 @@ onMounted(async () => {
             :columns="tableColumns"
             :data="classrooms"
             :total-items="totalClassrooms"
+            :page="currentFilters.page"
             :is-loading="loading"
             item-label="kelas"
-            filter-column="displayName"
-            filter-placeholder="Cari kelas..."
-          />
+            @update:page="(page) => fetchClassrooms({ page })"
+            @update:page-size="(limit) => fetchClassrooms({ limit, page: 1 })"
+          >
+            <template #header-right>
+              <div class="relative w-48">
+                <Search
+                  class="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground"
+                />
+                <Input
+                  v-model="searchKeyword"
+                  placeholder="Cari kelas..."
+                  class="h-8 pl-8 w-full text-xs"
+                />
+              </div>
+            </template>
+          </DataTable>
 
-          <ClassroomFormSheet
+          <ClassroomFormDialog
             v-if="isAdmin && isAddModalOpen"
             v-model:open="isAddModalOpen"
             :academic-years="academicYears"

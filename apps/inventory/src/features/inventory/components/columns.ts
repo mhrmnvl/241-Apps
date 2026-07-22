@@ -106,7 +106,9 @@ export const createColumns = (
     meta: { align: 'center' },
     cell: ({ row }) => {
       const units = row.original.units ?? []
-      const avail = units.filter((u) => u.status?.code === 'STAT-AVAIL').length
+      const avail = units.filter(
+        (u) => u.status?.systemKey === 'AVAILABLE',
+      ).length
       return h(
         Badge,
         { variant: avail > 0 ? 'default' : 'secondary' },

@@ -1,16 +1,18 @@
 import type { Teacher, PositionListItem } from '../types'
-import { isGuru } from '../utils'
+import type { PositionCategory } from '../../position-category/types'
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 
 export const useTeacherStore = defineStore('teacher', () => {
   const teachers = ref<Teacher[]>([])
   const positions = ref<PositionListItem[]>([])
+  const positionCategories = ref<PositionCategory[]>([])
   const totalTeachers = ref(0)
 
   const filters = ref({
     keyword: '',
     categoryFilter: 'all',
+    positionFilter: 'all',
     statusFilter: 'all',
   })
 
@@ -23,8 +25,17 @@ export const useTeacherStore = defineStore('teacher', () => {
     let list = teachers.value
 
     if (filters.value.categoryFilter !== 'all') {
-      const isGuruCategory = filters.value.categoryFilter === 'guru'
-      list = list.filter((e) => isGuru(e) === isGuruCategory)
+      list = list.filter((e) => {
+        const primary = e.teacherPositions?.find((ep) => ep.isPrimary)
+        return primary?.position?.category?.id === filters.value.categoryFilter
+      })
+    }
+
+    if (filters.value.positionFilter !== 'all') {
+      list = list.filter((e) => {
+        const primary = e.teacherPositions?.find((ep) => ep.isPrimary)
+        return primary?.position?.id === filters.value.positionFilter
+      })
     }
 
     if (filters.value.statusFilter !== 'all') {
@@ -38,6 +49,7 @@ export const useTeacherStore = defineStore('teacher', () => {
   return {
     teachers,
     positions,
+    positionCategories,
     totalTeachers,
     filters,
     loading,

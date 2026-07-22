@@ -1,22 +1,37 @@
 <script setup lang="ts">
 import type { Grade } from '../types'
 import { createGradeColumns } from '../components/columns'
-import GradeFormSheet from '../components/GradeFormSheet.vue'
+import GradeFormDialog from '../components/GradeFormDialog.vue'
 import { useGradeList } from '../composables/useGradeList'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { DataTable } from '@/ui'
 import { Button } from '@/ui/button'
 import { Card, CardHeader, CardTitle } from '@/ui/card'
-import { Plus } from 'lucide-vue-next'
+import { Plus, Search } from 'lucide-vue-next'
 import { useRoleGuard } from '@/shared/composables/useRoleGuard'
 import { onMounted, ref, watch } from 'vue'
+import { watchDebounced } from '@vueuse/core'
+import { Input } from '@/ui/input'
 
 const breadcrumbs = [
   { title: 'Akademik', href: '#' },
   { title: 'Tingkat Kelas', href: '/akademik/tingkat-kelas' },
 ]
 
-const { items, totalItems, loading, fetchGrades, deleteGrade } = useGradeList()
+const { items, totalItems, loading, currentFilters, fetchGrades, deleteGrade } =
+  useGradeList()
+const searchKeyword = ref(currentFilters.value.search ?? '')
+
+watchDebounced(
+  searchKeyword,
+  (val) => {
+    void fetchGrades({
+      search: val.trim() || '',
+      page: 1,
+    })
+  },
+  { debounce: 500 },
+)
 
 const isAddModalOpen = ref(false)
 const editingItem = ref<Grade | null>(null)
@@ -76,13 +91,27 @@ onMounted(() => {
             :columns="tableColumns"
             :data="items"
             :total-items="totalItems"
+            :page="currentFilters.page"
             :is-loading="loading"
             item-label="tingkat kelas"
-            filter-column="name"
-            filter-placeholder="Cari tingkat kelas..."
-          />
+            @update:page="(page) => fetchGrades({ page })"
+            @update:page-size="(limit) => fetchGrades({ limit, page: 1 })"
+          >
+            <template #header-right>
+              <div class="relative w-48">
+                <Search
+                  class="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground"
+                />
+                <Input
+                  v-model="searchKeyword"
+                  placeholder="Cari tingkat kelas..."
+                  class="h-8 pl-8 w-full text-xs"
+                />
+              </div>
+            </template>
+          </DataTable>
 
-          <GradeFormSheet
+          <GradeFormDialog
             v-if="isAddModalOpen"
             v-model:open="isAddModalOpen"
             :edit-data="editingItem"

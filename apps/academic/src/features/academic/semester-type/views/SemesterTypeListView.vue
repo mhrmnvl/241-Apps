@@ -6,7 +6,7 @@ import { Card, CardHeader, CardTitle } from '@/ui/card'
 import { Input } from '@/ui/input'
 import { Plus, Search } from 'lucide-vue-next'
 import { onMounted } from 'vue'
-import SemesterTypeFormSheet from '../components/SemesterTypeFormSheet.vue'
+import SemesterTypeFormDialog from '../components/SemesterTypeFormDialog.vue'
 import { useSemesterType } from '../composables/useSemesterType'
 import { useRoleGuard } from '@/shared/composables/useRoleGuard'
 import { createColumns } from '../components/columns'
@@ -16,7 +16,6 @@ const {
   isLoading,
   fetchSemesterTypes,
   deleteSemesterType,
-  totalRows,
   searchQuery,
   isAddOpen,
   isEditDialogOpen,
@@ -75,7 +74,6 @@ onMounted(() => {
             :columns="columns"
             :data="data"
             :is-loading="isLoading"
-            :total-items="totalRows"
             item-label="tipe semester"
           >
             <template #header-right>
@@ -94,13 +92,13 @@ onMounted(() => {
         </div>
       </Card>
 
-      <SemesterTypeFormSheet
+      <SemesterTypeFormDialog
         v-if="isAdmin"
         v-model:open="isAddOpen"
         @success="fetchSemesterTypes"
       />
 
-      <SemesterTypeFormSheet
+      <SemesterTypeFormDialog
         v-if="isAdmin"
         v-model:open="isEditDialogOpen"
         :initial-data="selectedItem"

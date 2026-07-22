@@ -16,12 +16,13 @@ export class CreateLoanUseCase {
 
   async execute(dto: CreateLoanDto, requesterId: string) {
     const pendingStatus =
-      await this.repository.findStatusByCode('STAT-LOAN-PENDING');
-    const availStatus = await this.repository.findStatusByCode('STAT-AVAIL');
+      await this.repository.findStatusBySystemKey('LOAN_PENDING');
+    const availStatus =
+      await this.repository.findStatusBySystemKey('AVAILABLE');
 
     if (!pendingStatus || !availStatus) {
       throw new NotFoundException(
-        'Inventory statuses not initialized. Run seeds.',
+        'Peran status "Tersedia" dan/atau "Menunggu Persetujuan" belum diatur di Referensi > Status Aset.',
       );
     }
 
@@ -74,7 +75,7 @@ export class CreateLoanUseCase {
         },
       });
 
-      // Update unit statuses to STAT-LOAN-PENDING
+      // Update unit statuses to "loan pending"
       await tx.inventoryAssetUnit.updateMany({
         where: { id: { in: dto.unitIds } },
         data: { statusId: pendingStatus.id },
@@ -110,10 +111,10 @@ export class CreateLoanUseCase {
       } else {
         // Auto-approve if no active workflow
         const approvedStatus = await tx.inventoryStatus.findUnique({
-          where: { code: 'STAT-LOAN-APPROVED' },
+          where: { systemKey: 'LOAN_APPROVED' },
         });
         const loanedStatus = await tx.inventoryStatus.findUnique({
-          where: { code: 'STAT-LOANED' },
+          where: { systemKey: 'LOANED' },
         });
         const txType = await tx.inventoryTransactionType.findUnique({
           where: { code: 'TX-LOAN-OUT' },
@@ -121,7 +122,7 @@ export class CreateLoanUseCase {
 
         if (!approvedStatus || !loanedStatus || !txType) {
           throw new NotFoundException(
-            'Inventory statuses or transaction types not initialized.',
+            'Peran status "Pinjam Disetujui"/"Dipinjam" belum diatur, atau tipe transaksi TX-LOAN-OUT belum tersedia.',
           );
         }
 
@@ -131,7 +132,7 @@ export class CreateLoanUseCase {
           data: { statusId: approvedStatus.id },
         });
 
-        // Update units to STAT-LOANED
+        // Update units to "loaned"
         await tx.inventoryAssetUnit.updateMany({
           where: { id: { in: dto.unitIds } },
           data: { statusId: loanedStatus.id },

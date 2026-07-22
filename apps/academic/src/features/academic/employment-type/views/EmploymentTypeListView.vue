@@ -6,7 +6,7 @@ import { Card, CardHeader, CardTitle } from '@/ui/card'
 import { Input } from '@/ui/input'
 import { Plus, Search } from 'lucide-vue-next'
 import { onMounted } from 'vue'
-import EmploymentTypeFormSheet from '../components/EmploymentTypeFormSheet.vue'
+import EmploymentTypeFormDialog from '../components/EmploymentTypeFormDialog.vue'
 import { useEmploymentTypeList } from '../composables/useEmploymentTypeList'
 import { useRoleGuard } from '@/shared/composables/useRoleGuard'
 import { createColumns } from '../components/columns'
@@ -16,7 +16,6 @@ const {
   isLoading,
   fetchEmploymentTypes,
   deleteEmploymentType,
-  totalRows,
   searchQuery,
   isAddOpen,
   isEditDialogOpen,
@@ -75,7 +74,6 @@ onMounted(() => {
             :columns="columns"
             :data="data"
             :is-loading="isLoading"
-            :total-items="totalRows"
             item-label="status kepegawaian"
           >
             <template #header-right>
@@ -94,13 +92,13 @@ onMounted(() => {
         </div>
       </Card>
 
-      <EmploymentTypeFormSheet
+      <EmploymentTypeFormDialog
         v-if="isAdmin"
         v-model:open="isAddOpen"
         @success="fetchEmploymentTypes"
       />
 
-      <EmploymentTypeFormSheet
+      <EmploymentTypeFormDialog
         v-if="isAdmin"
         v-model:open="isEditDialogOpen"
         :initial-data="selectedItem"

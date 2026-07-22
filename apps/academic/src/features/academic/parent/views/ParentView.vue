@@ -12,7 +12,7 @@ import { Plus, Search } from 'lucide-vue-next'
 import { useParent } from '../composables/useParent'
 import { useRoleGuard } from '@/shared/composables/useRoleGuard'
 import { createParentColumns } from '../components/columns'
-import ParentFormSheet from '../components/ParentFormSheet.vue'
+import ParentFormDialog from '../components/ParentFormDialog.vue'
 import type { Parent, ParentSavePayload } from '../types'
 
 const breadcrumbs = [
@@ -144,7 +144,7 @@ onMounted(async () => {
             </template>
           </DataTable>
 
-          <ParentFormSheet
+          <ParentFormDialog
             v-if="hasWritePermission && isAddModalOpen"
             v-model:open="isAddModalOpen"
             :form-error="formError"

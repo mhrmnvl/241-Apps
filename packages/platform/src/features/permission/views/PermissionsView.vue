@@ -9,7 +9,7 @@ import { Plus, RefreshCw } from 'lucide-vue-next'
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
 import { permissionsApi } from '../api/permissionsApi'
 import { getColumns } from '../components/permissionColumns'
-import PermissionFormSheet from '../components/PermissionFormSheet.vue'
+import PermissionFormDialog from '../components/PermissionFormDialog.vue'
 import type {
   Permission,
   CreatePermissionPayload,
@@ -173,7 +173,7 @@ onMounted(() => {
         </div>
       </Card>
 
-      <PermissionFormSheet
+      <PermissionFormDialog
         v-if="isSheetOpen"
         v-model:open="isSheetOpen"
         :edit-data="selectedPermission"

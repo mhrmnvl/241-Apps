@@ -12,6 +12,7 @@ export function useClassroomList() {
     semesters,
     totalClassrooms,
     loading,
+    currentFilters,
   } = storeToRefs(store)
 
   return {
@@ -21,6 +22,7 @@ export function useClassroomList() {
     semesters,
     totalClassrooms,
     loading,
+    currentFilters,
     fetchClassrooms: classroomService.fetchClassrooms,
     fetchAcademicYears: classroomReferenceService.fetchAcademicYears,
     fetchGrades: classroomReferenceService.fetchGrades,

@@ -19,7 +19,7 @@ import ClassroomStudentsCard from '../components/ClassroomStudentsCard.vue'
 import AddStudentDialog from '../components/AddStudentDialog.vue'
 import TransferStudentDialog from '../components/TransferStudentDialog.vue'
 import ClassroomStructureDialog from '../components/ClassroomStructureDialog.vue'
-import ClassroomFormSheet from '../components/ClassroomFormSheet.vue'
+import ClassroomFormDialog from '../components/ClassroomFormDialog.vue'
 import { useRoleGuard } from '@/shared/composables/useRoleGuard'
 import { ArrowLeft } from 'lucide-vue-next'
 
@@ -302,7 +302,7 @@ onMounted(async () => {
         @save="handleSaveStructure"
       />
 
-      <ClassroomFormSheet
+      <ClassroomFormDialog
         v-if="isAdmin && isEditInfoOpen"
         v-model:open="isEditInfoOpen"
         :academic-years="academicYears"

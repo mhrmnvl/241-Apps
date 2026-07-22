@@ -1,18 +1,22 @@
 import { gradeApi } from '../api/gradeApi'
 import { useGradeStore } from '../stores/gradeStore'
-import type { GradeSavePayload } from '../types'
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
 import { toast } from 'vue-sonner'
+import type { GradeSavePayload, GradeQueryParams } from '../types'
 
 export const gradeService = {
-  fetchGrades: async () => {
+  fetchGrades: async (params?: GradeQueryParams) => {
     const store = useGradeStore()
     store.loading = true
     try {
-      const res = await gradeApi.getGrades({
-        page: 1,
-        limit: 100,
-      })
+      const mergedParams = {
+        page: params?.page ?? store.currentFilters.page,
+        limit: params?.limit ?? store.currentFilters.limit,
+        search: params?.search ?? store.currentFilters.search,
+      }
+      store.currentFilters = mergedParams
+
+      const res = await gradeApi.getGrades(mergedParams)
       store.items = res.data.data
       store.totalItems = res.data.meta?.total ?? res.data.data.length
     } catch (error: unknown) {
