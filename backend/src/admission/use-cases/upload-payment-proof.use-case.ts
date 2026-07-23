@@ -7,6 +7,8 @@ import { isEditable } from '../domain/admission-status.transitions.js';
 import { serializePayment } from '../domain/admission.serializers.js';
 import { IAdmissionApplicantRepository } from '../domain/interfaces/admission-applicant-repository.interface.js';
 import { UploadPaymentProofDto } from '../dto/request/upload-payment-proof.dto.js';
+import { StorageService } from '../../core/storage/storage.service.js';
+import { StorageKeyBuilder } from '../../core/storage/storage-key-builder.service.js';
 import {
   assertValidAdmissionFile,
   saveAdmissionFile,
@@ -14,7 +16,11 @@ import {
 
 @Injectable()
 export class UploadPaymentProofUseCase {
-  constructor(private readonly repository: IAdmissionApplicantRepository) {}
+  constructor(
+    private readonly repository: IAdmissionApplicantRepository,
+    private readonly storage: StorageService,
+    private readonly keyBuilder: StorageKeyBuilder,
+  ) {}
 
   async execute(
     userId: string,
@@ -37,7 +43,12 @@ export class UploadPaymentProofUseCase {
       throw new ConflictException('Pembayaran sudah diverifikasi');
     }
 
-    const { filename, storageKey } = saveAdmissionFile(file, application.id);
+    const { filename, storageKey } = await saveAdmissionFile(
+      this.storage,
+      this.keyBuilder,
+      file,
+      ['payments'],
+    );
 
     const payment = await this.repository.savePaymentProof({
       paymentId: application.payment.id,

@@ -4,14 +4,24 @@ import {
   Controller,
   Get,
   Param,
+  ParseEnumPipe,
   ParseUUIDPipe,
   Patch,
+  Post,
+  Query,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { AppKey } from '@prisma/client';
 import {
   ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
   ApiOperation,
   ApiParam,
+  ApiQuery,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
@@ -24,6 +34,7 @@ import { ProfileResponseDto } from '../dto/response/profile-response.dto.js';
 import { UpdateProfileDto } from '../dto/request/update-profile.dto.js';
 import { GetProfileUseCase } from '../use-cases/get-profile.use-case.js';
 import { UpdateProfileUseCase } from '../use-cases/update-profile.use-case.js';
+import { UploadProfilePhotoUseCase } from '../use-cases/upload-profile-photo.use-case.js';
 
 @ApiTags('Profiles')
 @ApiBearerAuth()
@@ -33,6 +44,7 @@ export class ProfileController {
   constructor(
     private readonly getProfileUseCase: GetProfileUseCase,
     private readonly updateProfileUseCase: UpdateProfileUseCase,
+    private readonly uploadProfilePhotoUseCase: UploadProfilePhotoUseCase,
   ) {}
 
   @Get('me')
@@ -51,6 +63,27 @@ export class ProfileController {
     @Body() dto: UpdateProfileDto,
   ) {
     return this.updateProfileUseCase.execute(userId, dto);
+  }
+
+  @Post('me/photo')
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiConsumes('multipart/form-data')
+  @ApiQuery({ name: 'appKey', enum: AppKey })
+  @ApiOperation({ summary: "Upload current user's profile photo" })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: { file: { type: 'string', format: 'binary' } },
+      required: ['file'],
+    },
+  })
+  @ApiResponse({ status: 200, type: ProfileResponseDto })
+  async uploadOwnPhoto(
+    @CurrentUser('id') userId: string,
+    @UploadedFile() file: Express.Multer.File,
+    @Query('appKey', new ParseEnumPipe(AppKey)) appKey: AppKey,
+  ) {
+    return this.uploadProfilePhotoUseCase.execute(userId, appKey, file);
   }
 
   @Get(':userId')

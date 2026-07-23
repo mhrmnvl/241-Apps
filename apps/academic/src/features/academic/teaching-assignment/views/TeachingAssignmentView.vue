@@ -13,7 +13,7 @@ import type { ComboboxOption } from '@/ui'
 import { Button } from '@/ui/button'
 import { Card, CardHeader, CardTitle } from '@/ui/card'
 import { Label } from '@/ui/label'
-import { useRoleGuard } from '@/shared/composables/useRoleGuard'
+import { useRoleGuard } from '@/features/platform/auth'
 import { Plus } from 'lucide-vue-next'
 import { computed, onMounted, ref, watch } from 'vue'
 

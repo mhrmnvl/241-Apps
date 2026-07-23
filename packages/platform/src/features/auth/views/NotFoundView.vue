@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { useAuthStore } from '@/features/platform/auth/stores/authStore'
+import { useAuthStore } from '../stores/authStore'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { Button } from '@/ui/button'
 import { AlertTriangle } from 'lucide-vue-next'

@@ -2,6 +2,7 @@
 import type { SidebarProps } from '@/ui/sidebar'
 
 import { useAuthSession } from '@/features/platform/auth'
+import { useBranding, useSettingsStore } from '@/features/platform/settings'
 import { useMenuVisibility } from '@/composables/useMenuVisibility'
 import { academicYearApi } from '@/features/academic/academic-year/api/academicYearApi'
 import { semesterApi } from '@/features/academic/semester/api/semesterApi'
@@ -16,7 +17,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/ui/sidebar'
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 
 const props = withDefaults(defineProps<SidebarProps>(), {
   variant: 'sidebar',
@@ -25,6 +26,9 @@ const props = withDefaults(defineProps<SidebarProps>(), {
 
 const { user, syncAuthenticatedUserProfile } = useAuthSession()
 const { filteredSections } = useMenuVisibility()
+const { logoSrc } = useBranding()
+const settingsStore = useSettingsStore()
+const appTitle = computed(() => settingsStore.settings?.appTitle ?? 'SIAKAD 241')
 const activeAcademicInfo = ref({ academicYear: 'Memuat...', semester: '' })
 
 const scrollContainer = ref<HTMLDivElement | null>(null)
@@ -92,12 +96,12 @@ async function fetchActiveAcademicInfo() {
           >
             <RouterLink to="/dashboard">
               <img
-                src="/logo.webp"
-                alt="SIAKAD Logo"
+                :src="logoSrc"
+                :alt="appTitle"
                 class="size-8 rounded-lg object-contain"
               />
               <div class="grid flex-1 text-left text-sm leading-tight">
-                <span class="truncate font-semibold text-base">SIAKAD 241</span>
+                <span class="truncate font-semibold text-base">{{ appTitle }}</span>
                 <span
                   class="truncate text-xs text-muted-foreground font-medium"
                 >

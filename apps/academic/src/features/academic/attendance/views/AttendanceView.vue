@@ -27,7 +27,7 @@ import {
 } from '@/ui/dialog'
 import { Filter } from 'lucide-vue-next'
 import { onMounted, computed, ref, watch } from 'vue'
-import { useRoleGuard } from '@/shared/composables/useRoleGuard'
+import { useRoleGuard } from '@/features/platform/auth'
 
 // Recording attendance (single or bulk create) requires attendances.manage —
 // that's what the backend actually checks on POST /attendances[/bulk], not

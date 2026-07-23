@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { useLoginForm } from '../composables/useLoginForm'
 import { cn } from '@/shared/utils/utils'
 import { Button } from '@/ui/button'
@@ -12,12 +13,18 @@ import {
 } from '@/ui/form'
 
 import { authConfig } from '../config'
+import { useSettingsStore } from '../../settings/stores/settingsStore'
 
 const props = defineProps<{
   class?: string
 }>()
 
 const { isSubmitting, errorMessage, onSubmit } = useLoginForm()
+
+const settingsStore = useSettingsStore()
+const loginTitle = computed(
+  () => settingsStore.settings?.loginTitle ?? authConfig.value.loginTitle,
+)
 </script>
 
 <template>
@@ -27,7 +34,7 @@ const { isSubmitting, errorMessage, onSubmit } = useLoginForm()
   >
     <div class="flex flex-col gap-6">
       <div class="flex flex-col items-center gap-1 text-center">
-        <h1 class="text-2xl font-bold">{{ authConfig.loginTitle }}</h1>
+        <h1 class="text-2xl font-bold">{{ loginTitle }}</h1>
         <p class="text-muted-foreground text-sm text-balance">
           Masukkan kredensial Anda untuk melanjutkan
         </p>

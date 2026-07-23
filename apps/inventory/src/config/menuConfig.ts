@@ -1,4 +1,3 @@
-import type { LucideIcon } from 'lucide-vue-next'
 import {
   LayoutDashboard,
   ListChecks,
@@ -9,33 +8,13 @@ import {
   Printer,
 } from 'lucide-vue-next'
 
-export interface SubMenuItem {
-  title: string
-  url: string
-  requiredPermission?: string
-  allowedRoles?: string[]
-}
-
-export interface MenuItem {
-  title: string
-  url: string
-  icon: LucideIcon
-  isActive?: boolean
-  requiredPermission?: string
-  allowedRoles?: string[]
-  items?: SubMenuItem[]
-}
-
-export interface MenuSection {
-  label: string
-  requiredPermission?: string
-  allowedRoles?: string[]
-  items: MenuItem[]
-}
+export type { SubMenuItem, MenuItem, MenuSection } from '@/shared/types/menu.types'
+import type { MenuSection } from '@/shared/types/menu.types'
 
 export const menuSections: MenuSection[] = [
   // ──────────────────── UTAMA ────────────────────
   {
+    key: 'main',
     label: 'Utama',
     items: [
       {
@@ -48,6 +27,7 @@ export const menuSections: MenuSection[] = [
 
   // ──────────────────── INVENTORY ────────────────────
   {
+    key: 'asset-management',
     label: 'Manajemen Aset',
     requiredPermission: 'inventory.read',
     items: [
@@ -64,10 +44,12 @@ export const menuSections: MenuSection[] = [
     ],
   },
   {
+    key: 'asset-circulation',
     label: 'Sirkulasi Aset',
     requiredPermission: 'inventory.read',
     items: [
       {
+        key: 'asset-circulation-loan',
         title: 'Peminjaman',
         url: '#',
         icon: ClipboardList,
@@ -79,10 +61,12 @@ export const menuSections: MenuSection[] = [
     ],
   },
   {
+    key: 'approval',
     label: 'Persetujuan',
     requiredPermission: 'inventory.update',
     items: [
       {
+        key: 'approval-list',
         title: 'Persetujuan',
         url: '#',
         icon: CheckSquare,
@@ -93,10 +77,12 @@ export const menuSections: MenuSection[] = [
 
   // ──────────────────── SETTINGS ────────────────────
   {
+    key: 'settings',
     label: 'Pengaturan',
     requiredPermission: 'inventory.read',
     items: [
       {
+        key: 'settings-reference',
         title: 'Referensi',
         url: '#',
         icon: ListChecks,
@@ -109,6 +95,7 @@ export const menuSections: MenuSection[] = [
         ],
       },
       {
+        key: 'settings-system',
         title: 'Sistem',
         url: '#',
         icon: Settings,
@@ -133,6 +120,11 @@ export const menuSections: MenuSection[] = [
             title: 'Log Aktivitas',
             url: '/pengaturan/audit-logs',
             requiredPermission: 'audit-logs.read',
+          },
+          {
+            title: 'Pengaturan Umum',
+            url: '/pengaturan/umum',
+            requiredPermission: 'settings.update',
           },
         ],
       },

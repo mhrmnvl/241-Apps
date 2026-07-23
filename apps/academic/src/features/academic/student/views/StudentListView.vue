@@ -37,7 +37,7 @@ import {
 import { ArrowLeftRight, Plus, Search, Filter } from 'lucide-vue-next'
 import { toast } from 'vue-sonner'
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
-import { useRoleGuard } from '@/shared/composables/useRoleGuard'
+import { useRoleGuard } from '@/features/platform/auth'
 
 const { can } = useRoleGuard()
 const router = useRouter()

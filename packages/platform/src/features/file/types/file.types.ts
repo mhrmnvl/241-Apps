@@ -17,6 +17,8 @@ export interface FileItem {
   mimeType: string
   sizeBytes: number
   storageKey: string
+  /** Signed, time-limited download URL (storage bucket is private). */
+  url: string
   createdAt: string
   category?: FileCategory | null
 }

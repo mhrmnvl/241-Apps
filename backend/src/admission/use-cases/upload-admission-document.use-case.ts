@@ -4,10 +4,12 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import * as fs from 'fs';
+import { AppKey } from '@prisma/client';
 import * as path from 'path';
 import { isEditable } from '../domain/admission-status.transitions.js';
 import { IAdmissionApplicantRepository } from '../domain/interfaces/admission-applicant-repository.interface.js';
+import { StorageService } from '../../core/storage/storage.service.js';
+import { StorageKeyBuilder } from '../../core/storage/storage-key-builder.service.js';
 
 export const ADMISSION_ALLOWED_MIME_TYPES = [
   'image/jpeg',
@@ -25,23 +27,31 @@ export function assertValidAdmissionFile(file: Express.Multer.File): void {
   }
 }
 
-export function saveAdmissionFile(
+/**
+ * Saves an admission upload under admission/{...segments}/{filename} — e.g.
+ * ['documents', 'Kartu Keluarga'] groups every applicant's KK together, or
+ * ['payments'] for payment proofs, instead of nesting per-application.
+ */
+export async function saveAdmissionFile(
+  storage: StorageService,
+  keyBuilder: StorageKeyBuilder,
   file: Express.Multer.File,
-  subdir: string,
-): { filename: string; storageKey: string } {
-  const uploadDir = path.join(process.cwd(), 'uploads', 'admission', subdir);
-  if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir, { recursive: true });
-  }
+  segments: string[],
+): Promise<{ filename: string; storageKey: string }> {
   const fileExt = path.extname(file.originalname);
   const filename = `${Date.now()}-${Math.round(Math.random() * 1e9)}${fileExt}`;
-  fs.writeFileSync(path.join(uploadDir, filename), file.buffer);
-  return { filename, storageKey: `uploads/admission/${subdir}/${filename}` };
+  const storageKey = keyBuilder.build(AppKey.ADMISSION, segments, filename);
+  await storage.uploadFile(file.buffer, storageKey, file.mimetype);
+  return { filename, storageKey };
 }
 
 @Injectable()
 export class UploadAdmissionDocumentUseCase {
-  constructor(private readonly repository: IAdmissionApplicantRepository) {}
+  constructor(
+    private readonly repository: IAdmissionApplicantRepository,
+    private readonly storage: StorageService,
+    private readonly keyBuilder: StorageKeyBuilder,
+  ) {}
 
   async execute(
     userId: string,
@@ -68,7 +78,12 @@ export class UploadAdmissionDocumentUseCase {
       );
     }
 
-    const { filename, storageKey } = saveAdmissionFile(file, application.id);
+    const { filename, storageKey } = await saveAdmissionFile(
+      this.storage,
+      this.keyBuilder,
+      file,
+      ['documents', documentType.name],
+    );
 
     return this.repository.saveDocument({
       applicationId: application.id,

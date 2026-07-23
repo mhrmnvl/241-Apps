@@ -907,6 +907,14 @@ export const SYSTEM_PERMISSIONS: SystemPermission[] = [
     description: 'Read sessions',
   },
 
+  // settings
+  {
+    module: 'settings',
+    action: 'update',
+    code: 'settings.update',
+    description: 'Update app settings',
+  },
+
   // social-media
   {
     module: 'social-media',

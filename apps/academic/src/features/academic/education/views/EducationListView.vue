@@ -8,7 +8,7 @@ import { Plus, Search } from 'lucide-vue-next'
 import { onMounted } from 'vue'
 import EducationFormDialog from '../components/EducationFormDialog.vue'
 import { useEducationList } from '../composables/useEducationList'
-import { useRoleGuard } from '@/shared/composables/useRoleGuard'
+import { useRoleGuard } from '@/features/platform/auth'
 import { createColumns } from '../components/columns'
 
 const {

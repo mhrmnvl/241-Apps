@@ -92,6 +92,7 @@ export interface ProfileStoreData {
   maritalStatus?: MaritalStatus | null
   kk?: string | null
   npwp?: string | null
+  avatar?: string | null
   schoolIdentity?: SchoolIdentity
   address?: AddressData | null
   parents?: ParentDisplayData[]
@@ -120,6 +121,7 @@ export interface RawProfileData {
   maritalStatus?: MaritalStatus | null
   noKk?: string | null
   npwp?: string | null
+  avatar?: string | null
   teacher?: TeacherRecord | null
   student?: StudentRecord | null
   address?: AddressRecord | null

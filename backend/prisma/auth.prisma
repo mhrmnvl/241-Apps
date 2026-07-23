@@ -17,6 +17,7 @@ model User {
   uploadedFiles        File[]
   passwordResetTokens  PasswordResetToken[]
   admissionApplication AdmissionApplication?
+  updatedAppSettings   AppSetting[]
 
   @@map("users")
 }

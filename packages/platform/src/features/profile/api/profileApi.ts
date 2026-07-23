@@ -4,12 +4,14 @@ import type {
 } from '@/shared/types/api'
 import type {
   ProfileApiResponse,
+  ProfileRecord,
   SocialMediaPayload,
   SocialMediaUpdatePayload,
   ProfileUpdatePayload,
   SocialMediaRecord,
 } from '../types'
 import api from '@/shared/utils/api'
+import { authConfig } from '../../auth/config'
 
 export const profileApi = {
   getProfileByUserId: (userId: string) => {
@@ -24,6 +26,19 @@ export const profileApi = {
     return api.patch<ApiSingleResponse<ProfileApiResponse>>(
       '/profiles/me',
       payload,
+    )
+  },
+
+  uploadMyPhoto: (file: File) => {
+    const formData = new FormData()
+    formData.append('file', file)
+    // appKey tags which app the upload came from, purely for how the
+    // backend organizes its storage bucket — see fileApi.ts for the same
+    // pattern already used by the generic file upload endpoint.
+    return api.post<ApiSingleResponse<ProfileRecord>>(
+      '/profiles/me/photo',
+      formData,
+      { params: { appKey: authConfig.value.appKey } },
     )
   },
 

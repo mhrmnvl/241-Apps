@@ -26,7 +26,7 @@ import { watchDebounced } from '@vueuse/core'
 import { Search, Filter } from 'lucide-vue-next'
 import { onMounted, ref, computed } from 'vue'
 import { toast } from 'vue-sonner'
-import { useRoleGuard } from '@/shared/composables/useRoleGuard'
+import { useRoleGuard } from '@/features/platform/auth'
 
 const breadcrumbs = [
   { title: 'Guru', href: '/teacher' },

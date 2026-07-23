@@ -2,7 +2,7 @@ import { computed, ref, watch } from 'vue'
 import { useAcademicCalendar } from './useAcademicCalendar'
 import { useCalendarFormat } from './useCalendarFormat'
 import { useCalendarEvents } from './useCalendarEvents'
-import { useRoleGuard } from '@/shared/composables/useRoleGuard'
+import { useRoleGuard } from '@/features/platform/auth'
 import type {
   CalendarEventData,
   DateClickInfo,

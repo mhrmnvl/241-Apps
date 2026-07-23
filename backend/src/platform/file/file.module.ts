@@ -17,6 +17,6 @@ import { DeleteFileUseCase } from './use-cases/delete-file.use-case.js';
     GetFilesUseCase,
     DeleteFileUseCase,
   ],
-  exports: [FileRepository],
+  exports: [FileRepository, ImageOptimizerService],
 })
 export class FileModule {}

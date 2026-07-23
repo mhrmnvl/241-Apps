@@ -1,0 +1,40 @@
+enum AppKey {
+  ACADEMIC
+  INVENTORY
+  ADMISSION
+}
+
+model AppSetting {
+  id     String @id @default(uuid()) @db.Uuid
+  appKey AppKey @unique @map("app_key")
+
+  // Branding
+  appTitle        String  @map("app_title") @db.VarChar(150)
+  appSubtitle     String  @map("app_subtitle") @db.VarChar(255)
+  loginTitle      String  @map("login_title") @db.VarChar(150)
+  metaDescription String  @map("meta_description") @db.VarChar(500)
+  logoFileId      String? @map("logo_file_id") @db.Uuid
+  faviconFileId   String? @map("favicon_file_id") @db.Uuid
+
+  // Contact / footer
+  contactEmail String? @map("contact_email") @db.VarChar(255)
+  contactPhone String? @map("contact_phone") @db.VarChar(20)
+  footerText   String? @map("footer_text") @db.VarChar(500)
+
+  // Maintenance mode
+  maintenanceMode    Boolean @default(false) @map("maintenance_mode")
+  maintenanceMessage String? @map("maintenance_message") @db.VarChar(500)
+
+  // Per-item sidebar menu visibility overrides (MenuItem/SubMenuItem/MenuSection keys)
+  hiddenMenuKeys String[] @default([]) @map("hidden_menu_keys")
+
+  updatedBy String?  @map("updated_by") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  logoFile    File? @relation("AppSettingLogo", fields: [logoFileId], references: [id])
+  faviconFile File? @relation("AppSettingFavicon", fields: [faviconFileId], references: [id])
+  updater     User? @relation(fields: [updatedBy], references: [id])
+
+  @@map("app_settings")
+}

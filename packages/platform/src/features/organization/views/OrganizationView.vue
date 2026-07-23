@@ -9,7 +9,7 @@ import { Card, CardHeader, CardTitle } from '@/ui/card'
 import { Button } from '@/ui/button'
 import { Badge } from '@/ui/badge'
 import { PencilLine, Plus, School } from 'lucide-vue-next'
-import { useRoleGuard } from '@/shared/composables/useRoleGuard'
+import { useRoleGuard } from '@/features/platform/auth'
 import { toast } from 'vue-sonner'
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
 

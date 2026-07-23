@@ -31,7 +31,7 @@ import { columns } from '../components/columns'
 import RaporFormDialog from '../components/RaporFormDialog.vue'
 import RaporDetailDialog from '../components/RaporDetailDialog.vue'
 import type { RaporData } from '../types'
-import { useRoleGuard } from '@/shared/composables/useRoleGuard'
+import { useRoleGuard } from '@/features/platform/auth'
 
 const breadcrumbs = [
   { title: 'Manajemen Akademik', href: '#' },

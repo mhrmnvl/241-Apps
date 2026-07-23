@@ -2,9 +2,12 @@ import '@/shared/types/router'
 import { authRoutes } from '@/features/platform/auth'
 import { profileRoutes } from '@/features/platform/profile'
 import { admissionRoutes } from '@/features/admission'
+import { settingsRoutes, useSettingsStore } from '@/features/platform/settings'
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/features/platform/auth/stores/authStore'
 import { authSessionService } from '@/features/platform/auth/services/authSessionService'
+import { authConfig } from '@/features/platform/auth'
+import { menuSections } from '@/config/menuConfig'
 
 function isAdminUser(roles: string[]) {
   return roles.includes('ADMIN') || roles.includes('SUPER_ADMIN')
@@ -21,6 +24,21 @@ const router = createRouter({
     ...admissionRoutes,
     ...authRoutes,
     ...profileRoutes,
+    ...settingsRoutes,
+    {
+      path: '/setting/general',
+      name: 'setting-general',
+      component: () =>
+        import('@/features/platform/settings').then((m) => ({
+          default: m.AppSettingsView,
+        })),
+      props: { appKey: 'ADMISSION', menuSections },
+      meta: {
+        requiresAuth: true,
+        requiredPermission: 'settings.update',
+        title: 'Pengaturan Umum',
+      },
+    },
     {
       // Platform login redirects to { name: 'dashboard' } after login;
       // resolve it per role instead of a fixed page.
@@ -34,7 +52,7 @@ const router = createRouter({
     {
       path: '/:pathMatch(.*)*',
       name: 'not-found',
-      component: () => import('@/shared/views/NotFoundView.vue'),
+      component: () => import('@/features/platform/auth').then((m) => ({ default: m.NotFoundView })),
       meta: { title: 'Halaman Tidak Ditemukan' },
     },
   ],
@@ -54,6 +72,20 @@ router.beforeEach((to) => {
   // optimistic auth gate; real enforcement stays server-side — the API layer
   // silently refreshes on 401 or logs out if the refresh cookie is invalid.
   const hasSession = Boolean(store.user)
+
+  // Admin-toggled maintenance mode blocks everyone except SUPER_ADMIN, who
+  // still needs /login reachable to authenticate and flip it back off.
+  const settingsStore = useSettingsStore()
+  const isMaintenanceOn = settingsStore.maintenanceMode
+  const userRolesForMaintenance = store.user?.roles ?? []
+  if (
+    isMaintenanceOn &&
+    !userRolesForMaintenance.includes('SUPER_ADMIN') &&
+    to.name !== 'login' &&
+    to.name !== 'maintenance'
+  ) {
+    return { name: 'maintenance' }
+  }
 
   if (to.meta.requiresAuth && !hasSession) {
     return { name: 'login' }
@@ -98,8 +130,9 @@ router.beforeEach((to) => {
 })
 
 router.afterEach((to) => {
+  const appTitle = useSettingsStore().settings?.appTitle ?? authConfig.value.appTitle
   const title = to.meta.title
-  document.title = title ? `${title} — PSB 241` : 'PSB 241'
+  document.title = title ? `${title} — ${appTitle}` : appTitle
 })
 
 export default router

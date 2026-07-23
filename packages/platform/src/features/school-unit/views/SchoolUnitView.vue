@@ -8,7 +8,7 @@ import AppLayout from '@/layouts/AppLayout.vue'
 import { Card, CardHeader, CardTitle } from '@/ui/card'
 import { Button } from '@/ui/button'
 import { PencilLine } from 'lucide-vue-next'
-import { useRoleGuard } from '@/shared/composables/useRoleGuard'
+import { useRoleGuard } from '@/features/platform/auth'
 
 const router = useRouter()
 const { can } = useRoleGuard()

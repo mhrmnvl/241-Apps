@@ -22,7 +22,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/ui/tooltip'
 import { Pencil, ShieldCheck, Settings2 } from 'lucide-vue-next'
 import { useUserRole } from '../composables/useUserRole'
 import { useAuthSession } from '@/features/platform/auth'
-import { useRoleGuard } from '@/shared/composables/useRoleGuard'
+import { useRoleGuard } from '@/features/platform/auth'
 import type { UserWithRoles } from '../types'
 
 const props = defineProps<{

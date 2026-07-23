@@ -5,7 +5,7 @@ import AppLayout from '@/layouts/AppLayout.vue'
 import { Card, CardHeader, CardTitle } from '@/ui/card'
 import { Button } from '@/ui/button'
 import { Plus } from 'lucide-vue-next'
-import { useRoleGuard } from '@/shared/composables/useRoleGuard'
+import { useRoleGuard } from '@/features/platform/auth'
 
 const breadcrumbs = [
   { title: 'Pembelajaran', href: '#' },

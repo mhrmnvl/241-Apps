@@ -7,7 +7,7 @@ import { Plus, Trash } from 'lucide-vue-next'
 import { getColumns } from '../components/columns'
 import { useSocialMedia } from '../composables/useSocialMedia'
 import SocialMediaFormDialog from '../components/SocialMediaFormDialog.vue'
-import { useRoleGuard } from '@/shared/composables/useRoleGuard'
+import { useRoleGuard } from '@/features/platform/auth'
 import AppLayout from '@/layouts/AppLayout.vue'
 
 const {

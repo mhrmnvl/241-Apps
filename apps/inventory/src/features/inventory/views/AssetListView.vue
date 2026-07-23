@@ -25,7 +25,7 @@ import {
 import { Plus, Search, Filter } from 'lucide-vue-next'
 import { toast } from 'vue-sonner'
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
-import { useRoleGuard } from '@/shared/composables/useRoleGuard'
+import { useRoleGuard } from '@/features/platform/auth'
 import { inventoryApi } from '../api/inventoryApi'
 import type {
   InventoryAsset,

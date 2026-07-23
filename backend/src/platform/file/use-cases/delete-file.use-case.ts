@@ -1,13 +1,15 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { FileRepository } from '../repositories/file.repository.js';
-import * as fs from 'fs';
-import * as path from 'path';
+import { StorageService } from '../../../core/storage/storage.service.js';
 
 @Injectable()
 export class DeleteFileUseCase {
   private readonly logger = new Logger(DeleteFileUseCase.name);
 
-  constructor(private readonly repo: FileRepository) {}
+  constructor(
+    private readonly repo: FileRepository,
+    private readonly storage: StorageService,
+  ) {}
 
   async execute(id: string) {
     const existing = await this.repo.findById(id);
@@ -18,17 +20,14 @@ export class DeleteFileUseCase {
     // Soft delete in the database
     await this.repo.softDelete(id);
 
-    // Clean up physical file to save space
-    const filePath = path.join(process.cwd(), existing.storageKey);
-    if (fs.existsSync(filePath)) {
-      try {
-        fs.unlinkSync(filePath);
-      } catch (err) {
-        this.logger.error(
-          `Failed to delete physical file: ${filePath}`,
-          err instanceof Error ? err.stack : undefined,
-        );
-      }
+    // Clean up the object in storage to save space
+    try {
+      await this.storage.deleteFile(existing.storageKey);
+    } catch (err) {
+      this.logger.error(
+        `Failed to delete stored object: ${existing.storageKey}`,
+        err instanceof Error ? err.stack : undefined,
+      );
     }
   }
 }

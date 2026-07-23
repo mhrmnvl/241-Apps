@@ -55,6 +55,8 @@ import { seedProfileExtras } from './seeds/modules/profile-extras.seed.js';
 
 import { seedAdmission } from './seeds/modules/admission.seed.js';
 
+import { seedAppSettings } from './seeds/modules/app-setting.seed.js';
+
 const connectionString = process.env.DIRECT_URL ?? process.env.DATABASE_URL;
 if (!connectionString) {
   throw new Error('DIRECT_URL or DATABASE_URL is required for seeding');
@@ -178,6 +180,9 @@ async function main() {
 
   console.log('\n── Admission ──');
   await seedAdmission(prisma);
+
+  console.log('\n── App Settings ──');
+  await seedAppSettings(prisma);
 
   console.log('\n╔══════════════════════════════════╗');
   console.log('║  ✓ Seed completed successfully   ║');

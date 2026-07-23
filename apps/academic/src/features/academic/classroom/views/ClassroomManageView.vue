@@ -20,7 +20,7 @@ import AddStudentDialog from '../components/AddStudentDialog.vue'
 import TransferStudentDialog from '../components/TransferStudentDialog.vue'
 import ClassroomStructureDialog from '../components/ClassroomStructureDialog.vue'
 import ClassroomFormDialog from '../components/ClassroomFormDialog.vue'
-import { useRoleGuard } from '@/shared/composables/useRoleGuard'
+import { useRoleGuard } from '@/features/platform/auth'
 import { ArrowLeft } from 'lucide-vue-next'
 
 const route = useRoute()

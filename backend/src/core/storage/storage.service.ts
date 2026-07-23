@@ -4,38 +4,61 @@ import {
   Logger,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import * as fs from 'fs';
-import * as path from 'path';
+import {
+  DeleteObjectCommand,
+  GetObjectCommand,
+  PutObjectCommand,
+  S3Client,
+} from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 @Injectable()
 export class StorageService {
   private readonly logger = new Logger(StorageService.name);
-  private readonly uploadDir: string;
+  private readonly client: S3Client;
+  private readonly bucket: string;
+  private readonly signedUrlExpirySeconds: number;
 
   constructor(private readonly configService: ConfigService) {
-    this.uploadDir = path.join(process.cwd(), 'uploads');
-    if (!fs.existsSync(this.uploadDir)) {
-      fs.mkdirSync(this.uploadDir, { recursive: true });
-    }
+    this.bucket = this.configService.get<string>('S3_BUCKET')!;
+    this.signedUrlExpirySeconds = this.configService.get<number>(
+      'S3_SIGNED_URL_EXPIRY_SECONDS',
+    )!;
+
+    this.client = new S3Client({
+      endpoint: this.configService.get<string>('S3_ENDPOINT'),
+      region: this.configService.get<string>('S3_REGION'),
+      // MinIO (and most self-hosted S3-compatible servers) need path-style
+      // addressing (endpoint/bucket/key), not AWS's virtual-hosted style.
+      forcePathStyle: true,
+      credentials: {
+        accessKeyId: this.configService.get<string>('S3_ACCESS_KEY_ID')!,
+        secretAccessKey: this.configService.get<string>(
+          'S3_SECRET_ACCESS_KEY',
+        )!,
+      },
+    });
   }
 
   /**
-   * Saves a file buffer to the local uploads directory and returns its public URL.
-   * @param fileBuffer The buffer of the file.
-   * @param filePath The destination path inside the uploads dir (e.g. 'avatars/user-123.png').
-   * @param _mimeType The MIME type of the file (unused for local storage).
+   * Uploads a file buffer to the bucket and returns its storage key. The
+   * bucket is private, so this does NOT return a usable URL — call
+   * getSignedUrl() to get one, generated fresh at read time.
    */
   async uploadFile(
     fileBuffer: Buffer,
     filePath: string,
-    _mimeType: string,
+    mimeType: string,
   ): Promise<string> {
-    const destination = path.join(this.uploadDir, filePath);
-    const dir = path.dirname(destination);
-
     try {
-      await fs.promises.mkdir(dir, { recursive: true });
-      await fs.promises.writeFile(destination, fileBuffer);
+      await this.client.send(
+        new PutObjectCommand({
+          Bucket: this.bucket,
+          Key: filePath,
+          Body: fileBuffer,
+          ContentType: mimeType,
+        }),
+      );
     } catch (err) {
       this.logger.error(
         `Failed to upload file to ${filePath}`,
@@ -47,18 +70,14 @@ export class StorageService {
     }
 
     this.logger.log(`Uploaded file successfully: ${filePath}`);
-    return this.getPublicUrl(filePath);
+    return filePath;
   }
 
-  /**
-   * Deletes a file from the local uploads directory by its path.
-   * @param filePath The path of the file to delete (e.g. 'avatars/user-123.png').
-   */
   async deleteFile(filePath: string): Promise<void> {
-    const destination = path.join(this.uploadDir, filePath);
-
     try {
-      await fs.promises.rm(destination, { force: true });
+      await this.client.send(
+        new DeleteObjectCommand({ Bucket: this.bucket, Key: filePath }),
+      );
     } catch (err) {
       this.logger.error(
         `Failed to delete file from ${filePath}`,
@@ -73,11 +92,16 @@ export class StorageService {
   }
 
   /**
-   * Generates and returns the public URL for a given file path.
-   * @param filePath The path inside the uploads directory.
+   * Generates a time-limited signed URL for downloading a private object.
+   * Callers must not cache this beyond the configured expiry.
    */
-  getPublicUrl(filePath: string): string {
-    const baseUrl = this.configService.get<string>('FRONTEND_URL');
-    return `${baseUrl}/uploads/${filePath}`;
+  async getSignedUrl(filePath: string): Promise<string> {
+    const command = new GetObjectCommand({
+      Bucket: this.bucket,
+      Key: filePath,
+    });
+    return getSignedUrl(this.client, command, {
+      expiresIn: this.signedUrlExpirySeconds,
+    });
   }
 }

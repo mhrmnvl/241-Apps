@@ -8,7 +8,7 @@ import { Plus, Search } from 'lucide-vue-next'
 import { onMounted } from 'vue'
 import OccupationFormDialog from '../components/OccupationFormDialog.vue'
 import { useOccupationList } from '../composables/useOccupationList'
-import { useRoleGuard } from '@/shared/composables/useRoleGuard'
+import { useRoleGuard } from '@/features/platform/auth'
 import { createColumns } from '../components/columns'
 
 const {

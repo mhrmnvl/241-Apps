@@ -49,6 +49,7 @@ export interface ProfileRecord {
   maritalStatus?: MaritalStatus | null
   kk?: string | null
   npwp?: string | null
+  avatar?: string | null
   socialMedias?: {
     id?: string
     platform?: { name?: string; baseUrl?: string }

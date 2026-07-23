@@ -6,12 +6,17 @@ import {
 } from '@nestjs/common';
 import { UpdateProfileDto } from '../dto/request/update-profile.dto.js';
 import { ProfileRepository } from '../repositories/profile.repository.js';
+import { StorageService } from '../../../core/storage/storage.service.js';
+import { withAvatarUrl } from '../infrastructure/profile-avatar.mapper.js';
 
 @Injectable()
 export class UpdateProfileUseCase {
   private readonly logger = new Logger(UpdateProfileUseCase.name);
 
-  constructor(private readonly repo: ProfileRepository) {}
+  constructor(
+    private readonly repo: ProfileRepository,
+    private readonly storage: StorageService,
+  ) {}
 
   async execute(userId: string, dto: UpdateProfileDto) {
     const profile = await this.repo.findByUserId(userId);
@@ -40,6 +45,6 @@ export class UpdateProfileUseCase {
 
     const updated = await this.repo.update(userId, dto);
     this.logger.log(`Profile updated for user ${userId}`);
-    return updated;
+    return withAvatarUrl(updated, this.storage);
   }
 }

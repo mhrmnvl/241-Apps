@@ -1,4 +1,3 @@
-import type { LucideIcon } from 'lucide-vue-next'
 import {
   LayoutDashboard,
   FileText,
@@ -8,33 +7,13 @@ import {
   Settings,
 } from 'lucide-vue-next'
 
-export interface SubMenuItem {
-  title: string
-  url: string
-  requiredPermission?: string
-  allowedRoles?: string[]
-}
-
-export interface MenuItem {
-  title: string
-  url: string
-  icon: LucideIcon
-  isActive?: boolean
-  requiredPermission?: string
-  allowedRoles?: string[]
-  items?: SubMenuItem[]
-}
-
-export interface MenuSection {
-  label: string
-  requiredPermission?: string
-  allowedRoles?: string[]
-  items: MenuItem[]
-}
+export type { SubMenuItem, MenuItem, MenuSection } from '@/shared/types/menu.types'
+import type { MenuSection } from '@/shared/types/menu.types'
 
 export const menuSections: MenuSection[] = [
   // ──────────────────── PENDAFTAR ────────────────────
   {
+    key: 'applicant',
     label: 'Pendaftaran',
     allowedRoles: ['APPLICANT'],
     items: [
@@ -53,6 +32,7 @@ export const menuSections: MenuSection[] = [
 
   // ──────────────────── ADMIN PSB ────────────────────
   {
+    key: 'admin-psb',
     label: 'Admin PSB',
     requiredPermission: 'admissions.read',
     items: [
@@ -81,10 +61,12 @@ export const menuSections: MenuSection[] = [
     ],
   },
   {
+    key: 'settings',
     label: 'Pengaturan',
     requiredPermission: 'profiles.read',
     items: [
       {
+        key: 'settings-system',
         title: 'Sistem',
         url: '#',
         icon: Settings,
@@ -92,6 +74,11 @@ export const menuSections: MenuSection[] = [
           {
             title: 'Profil Saya',
             url: '/profile',
+          },
+          {
+            title: 'Pengaturan Umum',
+            url: '/setting/general',
+            requiredPermission: 'settings.update',
           },
         ],
       },

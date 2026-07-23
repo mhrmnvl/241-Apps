@@ -23,7 +23,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/ui/dialog'
-import { useRoleGuard } from '@/shared/composables/useRoleGuard'
+import { useRoleGuard } from '@/features/platform/auth'
 import { Plus, Filter } from 'lucide-vue-next'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'

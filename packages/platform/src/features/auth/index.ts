@@ -8,8 +8,10 @@ export { accountService } from './services/accountService'
 export { useAuthStore } from './stores/authStore'
 export { useAuthLogin } from './composables/useAuthLogin'
 export { useAuthSession } from './composables/useAuthSession'
+export { useRoleGuard } from './composables/useRoleGuard'
 export { useLoginForm } from './composables/useLoginForm'
 export { authRoutes } from './routes'
+export { default as NotFoundView } from './views/NotFoundView.vue'
 export type {
   AuthUser,
   AuthProfile,

@@ -8,7 +8,7 @@ import { Plus, Search } from 'lucide-vue-next'
 import { onMounted } from 'vue'
 import EmploymentTypeFormDialog from '../components/EmploymentTypeFormDialog.vue'
 import { useEmploymentTypeList } from '../composables/useEmploymentTypeList'
-import { useRoleGuard } from '@/shared/composables/useRoleGuard'
+import { useRoleGuard } from '@/features/platform/auth'
 import { createColumns } from '../components/columns'
 
 const {

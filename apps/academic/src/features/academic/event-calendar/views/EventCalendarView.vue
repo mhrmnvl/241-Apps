@@ -16,7 +16,7 @@ import type {
 import '../styles/calendar.css'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/tabs'
 import { Calendar as CalendarIcon, Clock, Plus } from 'lucide-vue-next'
-import { useRoleGuard } from '@/shared/composables/useRoleGuard'
+import { useRoleGuard } from '@/features/platform/auth'
 import { computed, ref, watch } from 'vue'
 
 const breadcrumbs = [

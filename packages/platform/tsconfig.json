@@ -14,5 +14,6 @@
       "@/layouts/*": ["../../apps/academic/src/layouts/*"]
     }
   },
-  "include": ["src/**/*.ts", "src/**/*.vue"]
+  "include": ["src/**/*.ts", "src/**/*.vue"],
+  "references": [{ "path": "../shared" }]
 }

@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/ui/select'
-import { useRoleGuard } from '@/shared/composables/useRoleGuard'
+import { useRoleGuard } from '@/features/platform/auth'
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
 import { watchDebounced } from '@vueuse/core'
 import { ArrowLeftRight, Plus, Search, Filter } from 'lucide-vue-next'

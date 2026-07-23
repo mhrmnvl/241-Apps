@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 
 import { authConfig } from '../config'
+import { useBranding } from '../../settings/composables/useBranding'
 
 const props = withDefaults(
   defineProps<{
@@ -11,6 +12,8 @@ const props = withDefaults(
     size: 'md',
   },
 )
+
+const { logoSrc } = useBranding()
 
 const sizeClasses = computed(() => {
   switch (props.size) {
@@ -26,15 +29,9 @@ const sizeClasses = computed(() => {
 </script>
 
 <template>
-  <picture>
-    <source
-      srcset="/logo.webp"
-      type="image/webp"
-    />
-    <img
-      src="/logo.png"
-      :alt="authConfig.logoAlt"
-      :class="sizeClasses"
-    />
-  </picture>
+  <img
+    :src="logoSrc"
+    :alt="authConfig.logoAlt"
+    :class="sizeClasses"
+  />
 </template>

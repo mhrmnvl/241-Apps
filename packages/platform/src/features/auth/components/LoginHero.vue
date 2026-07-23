@@ -1,6 +1,17 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { authConfig } from '../config'
+import { useSettingsStore } from '../../settings/stores/settingsStore'
 import AuthLogo from './AuthLogo.vue'
+
+const settingsStore = useSettingsStore()
+
+const appTitle = computed(
+  () => settingsStore.settings?.appTitle ?? authConfig.value.appTitle,
+)
+const appSubtitle = computed(
+  () => settingsStore.settings?.appSubtitle ?? authConfig.value.appSubtitle,
+)
 </script>
 
 <template>
@@ -26,14 +37,14 @@ import AuthLogo from './AuthLogo.vue'
       <h2
         class="text-4xl font-extrabold tracking-tight text-white drop-shadow-md"
       >
-        {{ authConfig.appTitle }}
+        {{ appTitle }}
       </h2>
       <div class="flex items-center gap-3">
         <span class="h-px w-12 bg-[#b49b50]" />
         <p
           class="text-sm font-semibold tracking-widest text-[#b49b50] uppercase"
         >
-          {{ authConfig.appSubtitle }}
+          {{ appSubtitle }}
         </p>
         <span class="h-px w-12 bg-[#b49b50]" />
       </div>

@@ -8,7 +8,7 @@ import { Plus, Search } from 'lucide-vue-next'
 import { onMounted } from 'vue'
 import AchievementTypeFormDialog from '../components/AchievementTypeFormDialog.vue'
 import { useAchievementTypeList } from '../composables/useAchievementTypeList'
-import { useRoleGuard } from '@/shared/composables/useRoleGuard'
+import { useRoleGuard } from '@/features/platform/auth'
 import { createColumns } from '../components/columns'
 
 const {

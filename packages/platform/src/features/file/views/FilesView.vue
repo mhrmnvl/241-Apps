@@ -12,6 +12,7 @@ import {
   Film,
   FileCode,
   RefreshCw,
+  Download,
 } from 'lucide-vue-next'
 import { toast } from 'vue-sonner'
 
@@ -225,6 +226,19 @@ const formatBytes = (bytes: number, decimals = 2) => {
                   </div>
                 </div>
                 <div class="flex items-center gap-1">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    as-child
+                  >
+                    <a
+                      :href="file.url"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <Download class="size-4 text-muted-foreground" />
+                    </a>
+                  </Button>
                   <Button
                     variant="ghost"
                     size="icon"

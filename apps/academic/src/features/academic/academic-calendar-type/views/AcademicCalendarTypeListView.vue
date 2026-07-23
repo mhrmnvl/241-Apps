@@ -8,7 +8,7 @@ import { Plus, Search } from 'lucide-vue-next'
 import { onMounted } from 'vue'
 import AcademicCalendarTypeFormDialog from '../components/AcademicCalendarTypeFormDialog.vue'
 import { useAcademicCalendarTypeList } from '../composables/useAcademicCalendarTypeList'
-import { useRoleGuard } from '@/shared/composables/useRoleGuard'
+import { useRoleGuard } from '@/features/platform/auth'
 import { createColumns } from '../components/columns'
 
 const {

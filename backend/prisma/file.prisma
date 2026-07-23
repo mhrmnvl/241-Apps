@@ -27,6 +27,9 @@ model File {
 
   admissionDocuments     AdmissionDocument[]
   admissionPaymentProofs AdmissionPayment[]
+  appSettingLogos        AppSetting[]        @relation("AppSettingLogo")
+  appSettingFavicons     AppSetting[]        @relation("AppSettingFavicon")
+  profileAvatars         Profile[]           @relation("ProfileAvatar")
 
   @@index([categoryId])
   @@map("files")

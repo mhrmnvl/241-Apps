@@ -1,4 +1,4 @@
-import { useAuthStore } from '@/features/platform/auth'
+import { useAuthStore } from '../stores/authStore'
 import { computed } from 'vue'
 
 /**

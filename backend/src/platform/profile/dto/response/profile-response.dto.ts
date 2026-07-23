@@ -36,4 +36,9 @@ export class ProfileResponseDto {
 
   @ApiPropertyOptional({ example: '081234567890' })
   phone?: string | null;
+
+  @ApiPropertyOptional({
+    description: 'Signed, time-limited profile photo URL (bucket is private)',
+  })
+  avatar?: string | null;
 }

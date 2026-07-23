@@ -1,0 +1,1 @@
+export const BRANDING_FILE_CATEGORY_CODE = 'BRANDING';

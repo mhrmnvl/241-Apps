@@ -5,6 +5,7 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  ParseEnumPipe,
   ParseUUIDPipe,
   Post,
   Query,
@@ -13,12 +14,14 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { AppKey } from '@prisma/client';
 import {
   ApiBearerAuth,
   ApiBody,
   ApiConsumes,
   ApiOperation,
   ApiParam,
+  ApiQuery,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
@@ -65,13 +68,15 @@ export class FileController {
       required: ['file'],
     },
   })
+  @ApiQuery({ name: 'appKey', enum: AppKey })
   @ApiResponse({ status: 201, type: FileResponseDto })
   async upload(
     @CurrentUser() user: AuthenticatedUser,
     @UploadedFile() file: Express.Multer.File,
+    @Query('appKey', new ParseEnumPipe(AppKey)) appKey: AppKey,
     @Query('categoryId') categoryId?: string,
   ) {
-    return this.uploadUseCase.execute(file, categoryId, user.id);
+    return this.uploadUseCase.execute(file, appKey, categoryId, user.id);
   }
 
   @Get()

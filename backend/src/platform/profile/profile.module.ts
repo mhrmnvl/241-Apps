@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { FileModule } from '../file/file.module.js';
 import { ProfileController } from './presentation/profile.controller.js';
 import { ProfileAddressController } from './presentation/profile-address.controller.js';
 import { ProfileSocialMediaController } from './presentation/profile-social-media.controller.js';
@@ -10,6 +11,7 @@ import { PrismaProfileAddressRepository } from './infrastructure/persistence/pri
 import { PrismaProfileSocialMediaRepository } from './infrastructure/persistence/prisma-profile-social-media.repository.js';
 import { GetProfileUseCase } from './use-cases/get-profile.use-case.js';
 import { UpdateProfileUseCase } from './use-cases/update-profile.use-case.js';
+import { UploadProfilePhotoUseCase } from './use-cases/upload-profile-photo.use-case.js';
 import { AddProfileAddressUseCase } from './use-cases/add-profile-address.use-case.js';
 import { GetProfileAddressesUseCase } from './use-cases/get-profile-addresses.use-case.js';
 import { UpdateProfileAddressUseCase } from './use-cases/update-profile-address.use-case.js';
@@ -21,6 +23,7 @@ import { UpdateProfileSocialMediaUseCase } from './use-cases/update-profile-soci
 import { RemoveProfileSocialMediaUseCase } from './use-cases/remove-profile-social-media.use-case.js';
 
 @Module({
+  imports: [FileModule],
   controllers: [
     ProfileController,
     ProfileAddressController,
@@ -38,6 +41,7 @@ import { RemoveProfileSocialMediaUseCase } from './use-cases/remove-profile-soci
     },
     GetProfileUseCase,
     UpdateProfileUseCase,
+    UploadProfilePhotoUseCase,
     AddProfileAddressUseCase,
     GetProfileAddressesUseCase,
     UpdateProfileAddressUseCase,

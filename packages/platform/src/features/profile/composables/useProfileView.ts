@@ -1,7 +1,6 @@
 import { computed, ref, type Ref, type ComputedRef, type Component } from 'vue'
 import { useRoute } from 'vue-router'
-import { useAuthSession } from '@/shared/composables/use-session'
-import { useRoleGuard } from '@/shared/composables/useRoleGuard'
+import { useAuthSession, useRoleGuard } from '@/features/platform/auth'
 import { useProfile } from './useProfile'
 import { useProfileSheets } from './useProfileSheets'
 import { PencilLine } from 'lucide-vue-next'
@@ -21,15 +20,19 @@ export interface ProfileViewReturn {
   profileData: Ref<ProfileStoreData | null>
   rawProfile: Ref<RawProfileData | null>
   isSaving: Ref<boolean>
+  isUploadingPhoto: Ref<boolean>
   isAdmin: ComputedRef<boolean>
   isEditable: ComputedRef<boolean>
+  isOwnProfile: ComputedRef<boolean>
   initials: ComputedRef<string>
   profileSubtitle: ComputedRef<string>
+  avatarUrl: ComputedRef<string | null>
   getUserId: ComputedRef<string>
   actionConfig: ComputedRef<{ text: string; icon: Component }>
   reloadProfile: () => void
   handleActionClick: (tabId: string) => void
   handleUpdateProfile: (payload: ProfileUpdatePayload) => Promise<void>
+  handlePhotoChange: (file: File) => Promise<void>
 }
 
 export function useProfileView(): ProfileViewReturn {
@@ -50,9 +53,13 @@ export function useProfileView(): ProfileViewReturn {
     profileData,
     rawProfile,
     isSaving,
+    isUploadingPhoto,
     fetchProfileData,
     updateProfile,
+    uploadPhoto,
   } = useProfile()
+
+  const isOwnProfile = computed(() => !isViewingOther.value)
 
   const reloadProfile = () => {
     if (!authUser.value) return
@@ -151,6 +158,13 @@ export function useProfileView(): ProfileViewReturn {
     )
   })
 
+  const avatarUrl = computed(() => profileData.value?.avatar ?? null)
+
+  const handlePhotoChange = async (file: File) => {
+    const { success } = await uploadPhoto(file)
+    if (success) reloadProfile()
+  }
+
   return {
     activeTab,
     ...sheets,
@@ -158,14 +172,18 @@ export function useProfileView(): ProfileViewReturn {
     profileData,
     rawProfile,
     isSaving,
+    isUploadingPhoto,
     isAdmin,
     isEditable,
+    isOwnProfile,
     initials,
     profileSubtitle,
+    avatarUrl,
     getUserId,
     actionConfig,
     reloadProfile,
     handleActionClick,
     handleUpdateProfile,
+    handlePhotoChange,
   }
 }

@@ -59,6 +59,12 @@ export async function seedLookupData(prisma: PrismaClient) {
       description: 'Berkas umum lainnya',
       isSystem: true,
     },
+    {
+      code: 'BRANDING',
+      name: 'Aset Branding',
+      description: 'Logo dan favicon aplikasi',
+      isSystem: true,
+    },
   ];
 
   console.log('  [lookup] Seeding system file categories...');

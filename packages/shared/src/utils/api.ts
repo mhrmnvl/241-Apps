@@ -5,7 +5,15 @@ import type {
   InternalAxiosRequestConfig,
 } from 'axios'
 import { toast } from 'vue-sonner'
-import type { RefreshTokenResponse } from '@/features/platform/auth'
+
+// Narrow local shape for the refresh-token response — kept here rather than
+// imported from @/features/platform/auth so packages/shared never depends on
+// packages/platform (see CLAUDE.md: platform depends on shared, not the
+// reverse).
+interface RefreshTokenResponse {
+  data?: { accessToken?: string }
+  accessToken?: string
+}
 
 const API_BASE_URL = (
   (import.meta.env.VITE_API_BASE_URL as string | undefined) ??
@@ -199,4 +207,10 @@ api.interceptors.response.use(
 )
 
 export default api
-export { clearSession, getAccessToken, restoreSession, setAccessToken }
+export {
+  API_BASE_URL,
+  clearSession,
+  getAccessToken,
+  restoreSession,
+  setAccessToken,
+}

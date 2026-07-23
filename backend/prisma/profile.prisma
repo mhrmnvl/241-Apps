@@ -25,9 +25,11 @@ model Profile {
   maritalStatus MaritalStatus? @map("marital_status")
   noKk          String?        @map("no_kk") @db.VarChar(16)
   npwp          String?        @db.VarChar(20)
+  avatarFileId  String?        @map("avatar_file_id") @db.Uuid
 
   religion             Religion?            @relation(fields: [religionId], references: [id])
   bloodType            BloodType?           @relation(fields: [bloodTypeId], references: [id])
+  avatarFile           File?                @relation("ProfileAvatar", fields: [avatarFileId], references: [id])
   socialMedias         ProfileSocialMedia[]
   achievements         Achievement[]
   scholarships         Scholarship[]

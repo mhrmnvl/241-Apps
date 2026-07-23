@@ -1,4 +1,3 @@
-import type { LucideIcon } from 'lucide-vue-next'
 import {
   BookOpen,
   BookText,
@@ -22,33 +21,13 @@ import {
   Users,
 } from 'lucide-vue-next'
 
-export interface SubMenuItem {
-  title: string
-  url: string
-  requiredPermission?: string
-  allowedRoles?: string[]
-}
-
-export interface MenuItem {
-  title: string
-  url: string
-  icon: LucideIcon
-  isActive?: boolean
-  requiredPermission?: string
-  allowedRoles?: string[]
-  items?: SubMenuItem[]
-}
-
-export interface MenuSection {
-  label: string
-  requiredPermission?: string
-  allowedRoles?: string[]
-  items: MenuItem[]
-}
+export type { SubMenuItem, MenuItem, MenuSection } from '@/shared/types/menu.types'
+import type { MenuSection } from '@/shared/types/menu.types'
 
 export const menuSections: MenuSection[] = [
   // ──────────────────── MAIN ────────────────────
   {
+    key: 'main',
     label: 'Utama',
     items: [
       {
@@ -67,10 +46,12 @@ export const menuSections: MenuSection[] = [
 
   // ──────────────────── ACADEMIC ────────────────────
   {
+    key: 'academic',
     label: 'Akademik',
     requiredPermission: 'academic-years.read',
     items: [
       {
+        key: 'academic-calendar-semester',
         title: 'Kalender & Semester',
         url: '#',
         icon: CalendarDays,
@@ -93,6 +74,7 @@ export const menuSections: MenuSection[] = [
         ],
       },
       {
+        key: 'academic-classroom',
         title: 'Kelas',
         url: '#',
         icon: ClipboardList,
@@ -114,10 +96,12 @@ export const menuSections: MenuSection[] = [
 
   // ──────────────────── LEARNING ────────────────────
   {
+    key: 'learning',
     label: 'Pembelajaran',
     requiredPermission: 'subjects.read',
     items: [
       {
+        key: 'learning-material-schedule',
         title: 'Materi & Jadwal',
         url: '#',
         icon: BookOpen,
@@ -145,6 +129,7 @@ export const menuSections: MenuSection[] = [
         ],
       },
       {
+        key: 'learning-assessment',
         title: 'Penilaian',
         url: '#',
         icon: FileSpreadsheet,
@@ -171,10 +156,12 @@ export const menuSections: MenuSection[] = [
 
   // ──────────────────── DATA MASTER ────────────────────
   {
+    key: 'master-data',
     label: 'Data Master',
     requiredPermission: 'students.read',
     items: [
       {
+        key: 'master-data-student',
         title: 'Siswa',
         url: '#',
         icon: Users,
@@ -197,6 +184,7 @@ export const menuSections: MenuSection[] = [
         ],
       },
       {
+        key: 'master-data-teacher',
         title: 'Guru',
         url: '#',
         icon: UserCheck,
@@ -218,10 +206,12 @@ export const menuSections: MenuSection[] = [
 
   // ──────────────────── SETTINGS ────────────────────
   {
+    key: 'settings',
     label: 'Pengaturan',
     requiredPermission: 'occupations.read',
     items: [
       {
+        key: 'settings-employment-ref',
         title: 'Ref. Kepegawaian',
         url: '#',
         icon: Briefcase,
@@ -254,6 +244,7 @@ export const menuSections: MenuSection[] = [
         ],
       },
       {
+        key: 'settings-academic-ref',
         title: 'Ref. Akademik',
         url: '#',
         icon: ListChecks,
@@ -286,6 +277,7 @@ export const menuSections: MenuSection[] = [
         ],
       },
       {
+        key: 'settings-profile-ref',
         title: 'Ref. Profil',
         url: '#',
         icon: Globe,
@@ -308,6 +300,7 @@ export const menuSections: MenuSection[] = [
         ],
       },
       {
+        key: 'settings-system',
         title: 'Sistem',
         url: '#',
         icon: Settings,
@@ -333,6 +326,11 @@ export const menuSections: MenuSection[] = [
             url: '/setting/audit-log',
             requiredPermission: 'audit-logs.read',
           },
+          {
+            title: 'Pengaturan Umum',
+            url: '/setting/general',
+            requiredPermission: 'settings.update',
+          },
         ],
       },
     ],
@@ -340,6 +338,7 @@ export const menuSections: MenuSection[] = [
 
   // ──────────────────── COMING SOON ────────────────────
   {
+    key: 'coming-soon',
     label: 'Segera Hadir',
     requiredPermission: 'announcements.read',
     items: [
@@ -396,10 +395,12 @@ export const menuSections: MenuSection[] = [
 
   // ──────────────────── STUDENT VIEW ────────────────────
   {
+    key: 'student-view',
     label: 'Siswa',
     allowedRoles: ['STUDENT'],
     items: [
       {
+        key: 'student-view-academic',
         title: 'Akademik Saya',
         url: '#',
         icon: BookText,
@@ -411,6 +412,7 @@ export const menuSections: MenuSection[] = [
         ],
       },
       {
+        key: 'student-view-info',
         title: 'Informasi',
         url: '#',
         icon: Megaphone,

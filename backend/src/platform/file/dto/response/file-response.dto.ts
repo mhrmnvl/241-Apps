@@ -25,6 +25,11 @@ export class FileResponseDto {
   @ApiProperty({ example: 'files/12345-photo.jpg' })
   storageKey!: string;
 
+  @ApiProperty({
+    description: 'Signed, time-limited download URL (bucket is private)',
+  })
+  url!: string;
+
   @ApiProperty()
   createdAt!: Date;
 }

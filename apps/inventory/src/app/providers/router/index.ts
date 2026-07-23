@@ -14,9 +14,12 @@ import { religionRoutes } from '@/features/platform/religion'
 import { bloodTypeRoutes } from '@/features/platform/blood-type'
 import { achievementTypeRoutes } from '@/features/platform/achievement-type'
 import { inventoryRoutes } from '@/features/inventory/routes'
+import { settingsRoutes, useSettingsStore } from '@/features/platform/settings'
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/features/platform/auth/stores/authStore'
 import { authSessionService } from '@/features/platform/auth/services/authSessionService'
+import { authConfig } from '@/features/platform/auth'
+import { menuSections } from '@/config/menuConfig'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -40,10 +43,25 @@ const router = createRouter({
     ...bloodTypeRoutes,
     ...achievementTypeRoutes,
     ...inventoryRoutes,
+    ...settingsRoutes,
+    {
+      path: '/pengaturan/umum',
+      name: 'setting-general',
+      component: () =>
+        import('@/features/platform/settings').then((m) => ({
+          default: m.AppSettingsView,
+        })),
+      props: { appKey: 'INVENTORY', menuSections },
+      meta: {
+        requiresAuth: true,
+        requiredPermission: 'settings.update',
+        title: 'Pengaturan Umum',
+      },
+    },
     {
       path: '/:pathMatch(.*)*',
       name: 'not-found',
-      component: () => import('@/shared/views/NotFoundView.vue'),
+      component: () => import('@/features/platform/auth').then((m) => ({ default: m.NotFoundView })),
       meta: { title: 'Halaman Tidak Ditemukan' },
     },
   ],
@@ -63,6 +81,20 @@ router.beforeEach((to) => {
   // optimistic auth gate; real enforcement stays server-side — the API layer
   // silently refreshes on 401 or logs out if the refresh cookie is invalid.
   const hasSession = Boolean(store.user)
+
+  // Admin-toggled maintenance mode blocks everyone except SUPER_ADMIN, who
+  // still needs /login reachable to authenticate and flip it back off.
+  const settingsStore = useSettingsStore()
+  const isMaintenanceOn = settingsStore.maintenanceMode
+  const userRolesForMaintenance = store.user?.roles ?? []
+  if (
+    isMaintenanceOn &&
+    !userRolesForMaintenance.includes('SUPER_ADMIN') &&
+    to.name !== 'login' &&
+    to.name !== 'maintenance'
+  ) {
+    return { name: 'maintenance' }
+  }
 
   if (to.meta.requiresAuth && !hasSession) {
     return { name: 'login' }
@@ -107,8 +139,9 @@ router.beforeEach((to) => {
 })
 
 router.afterEach((to) => {
+  const appTitle = useSettingsStore().settings?.appTitle ?? authConfig.value.appTitle
   const title = to.meta.title
-  document.title = title ? `${title} — SIMAS` : 'SIMAS'
+  document.title = title ? `${title} — ${appTitle}` : appTitle
 })
 
 export default router

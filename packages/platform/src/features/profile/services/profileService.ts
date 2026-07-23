@@ -2,6 +2,7 @@ import { useProfileStore } from '../stores/profileStore'
 import { profileApi } from '../api/profileApi'
 import { toast } from 'vue-sonner'
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
+import { useAuthStore } from '@/features/platform/auth'
 import type {
   AuthUser,
   ParentRecord,
@@ -61,6 +62,7 @@ export const profileService = {
         teacher,
         student,
         address: primaryAddress ?? null,
+        avatar: profile?.avatar ?? null,
       }
 
       store.profileData = {
@@ -88,6 +90,7 @@ export const profileService = {
         maritalStatus: profile?.maritalStatus,
         kk: profile?.kk,
         npwp: profile?.npwp,
+        avatar: profile?.avatar ?? null,
 
         schoolIdentity: {
           employmentStatus: teacher?.employmentType?.name ?? null,
@@ -174,6 +177,43 @@ export const profileService = {
       return { success: false }
     } finally {
       store.isSaving = false
+    }
+  },
+
+  uploadPhoto: async (file: File) => {
+    const store = useProfileStore()
+    store.isUploadingPhoto = true
+    try {
+      const res = await profileApi.uploadMyPhoto(file)
+      const avatar = res.data.data?.avatar ?? null
+
+      store.rawProfile = { ...store.rawProfile, avatar }
+      store.profileData = { ...store.profileData, avatar }
+
+      // Keep the sidebar/header avatar (sourced from the auth session, not
+      // this feature's own store) in sync without requiring a full reload.
+      const authStore = useAuthStore()
+      if (authStore.user) {
+        authStore.setUser({
+          ...authStore.user,
+          profile: { ...authStore.user.profile, avatar },
+        })
+      }
+
+      toast.success('Berhasil', {
+        description: 'Foto profil berhasil diperbarui',
+      })
+      return { success: true, avatar }
+    } catch (err: unknown) {
+      toast.error('Gagal mengunggah foto profil', {
+        description: getIndonesianErrorMessage(
+          err,
+          'Terjadi kesalahan saat mengunggah foto.',
+        ),
+      })
+      return { success: false, avatar: null }
+    } finally {
+      store.isUploadingPhoto = false
     }
   },
 

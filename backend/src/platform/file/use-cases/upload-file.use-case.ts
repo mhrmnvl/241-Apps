@@ -1,24 +1,30 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
+import { AppKey } from '@prisma/client';
 import { fileTypeFromBuffer } from 'file-type';
 import { FileRepository } from '../repositories/file.repository.js';
 import { CreateFileDto } from '../dto/request/create-file.dto.js';
 import { ImageOptimizerService } from '../infrastructure/image-optimizer.service.js';
+import { StorageService } from '../../../core/storage/storage.service.js';
+import { StorageKeyBuilder } from '../../../core/storage/storage-key-builder.service.js';
 import {
   ALLOWED_UPLOAD_MIME_TYPES,
   OPTIMIZABLE_IMAGE_MIME_TYPES,
 } from '../constants/file-upload.constants.js';
-import * as fs from 'fs';
-import * as path from 'path';
+
+const UNCATEGORIZED_FOLDER = 'Umum';
 
 @Injectable()
 export class UploadFileUseCase {
   constructor(
     private readonly repo: FileRepository,
     private readonly imageOptimizer: ImageOptimizerService,
+    private readonly storage: StorageService,
+    private readonly keyBuilder: StorageKeyBuilder,
   ) {}
 
   async execute(
     file: Express.Multer.File,
+    appKey: AppKey,
     categoryId?: string,
     uploadedBy?: string,
   ) {
@@ -48,15 +54,17 @@ export class UploadFileUseCase {
       fileExt = optimized.extension;
     }
 
-    const uploadDir = path.join(process.cwd(), 'uploads');
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
+    const category = categoryId
+      ? await this.repo.findCategoryById(categoryId)
+      : null;
 
     const uniqueFilename = `${Date.now()}-${Math.round(Math.random() * 1e9)}${fileExt}`;
-    const filePath = path.join(uploadDir, uniqueFilename);
-
-    fs.writeFileSync(filePath, buffer);
+    const storageKey = this.keyBuilder.build(
+      appKey,
+      ['files', category?.name ?? UNCATEGORIZED_FOLDER],
+      uniqueFilename,
+    );
+    await this.storage.uploadFile(buffer, storageKey, mimeType);
 
     const dto: CreateFileDto = {
       categoryId,
@@ -64,9 +72,10 @@ export class UploadFileUseCase {
       originalName: file.originalname,
       mimeType,
       sizeBytes: buffer.length,
-      storageKey: `uploads/${uniqueFilename}`,
+      storageKey,
     };
 
-    return this.repo.create(dto, uploadedBy);
+    const entity = await this.repo.create(dto, uploadedBy);
+    return { ...entity, url: await this.storage.getSignedUrl(storageKey) };
   }
 }

@@ -10,6 +10,7 @@ export const PROFILE_INCLUDE = {
   educationalHistories: { where: { deletedAt: null } },
   religion: true,
   bloodType: true,
+  avatarFile: true,
 } satisfies Prisma.ProfileInclude;
 
 export type ProfileWithDetails = Prisma.ProfileGetPayload<{

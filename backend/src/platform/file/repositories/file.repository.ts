@@ -48,6 +48,16 @@ export class FileRepository {
     });
   }
 
+  async findCategoryByCode(code: string) {
+    return this.prisma.fileCategory.findFirst({
+      where: { code, isSystem: true },
+    });
+  }
+
+  async findCategoryById(id: string) {
+    return this.prisma.fileCategory.findUnique({ where: { id } });
+  }
+
   async createCategory(code: string, name: string, description?: string) {
     return this.prisma.fileCategory.create({
       data: {

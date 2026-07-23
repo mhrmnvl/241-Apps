@@ -6,10 +6,8 @@
     "baseUrl": ".",
     "outDir": "./node_modules/.tmp",
     "paths": {
-      "@/shared/*": ["./src/*"],
-      "@/features/platform/*": ["../platform/src/features/*"]
+      "@/shared/*": ["./src/*"]
     }
   },
-  "include": ["src/**/*.ts", "src/**/*.vue"],
-  "references": [{ "path": "../platform" }]
+  "include": ["src/**/*.ts", "src/**/*.vue"]
 }

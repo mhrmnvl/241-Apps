@@ -7,11 +7,13 @@ export const useProfileStore = defineStore('profile', () => {
   const profileData = ref<ProfileStoreData>({})
   const rawProfile = ref<RawProfileData>({})
   const isSaving = ref(false)
+  const isUploadingPhoto = ref(false)
 
   return {
     loading,
     profileData,
     rawProfile,
     isSaving,
+    isUploadingPhoto,
   }
 })

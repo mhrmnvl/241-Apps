@@ -63,6 +63,23 @@ export const envSchema = z
         },
       )
       .default('http://localhost:5173'),
+
+    S3_ENDPOINT: z.string().url('S3_ENDPOINT must be a valid URL'),
+    S3_REGION: z.string().min(1).default('us-east-1'),
+    S3_BUCKET: z.string().min(1, 'S3_BUCKET is required'),
+    S3_ACCESS_KEY_ID: z.string().min(1, 'S3_ACCESS_KEY_ID is required'),
+    S3_SECRET_ACCESS_KEY: z
+      .string()
+      .min(1, 'S3_SECRET_ACCESS_KEY is required'),
+    // Bucket is private — every download URL is signed and expires. 1 hour
+    // balances not-too-stale sidebar/login assets against not leaking a
+    // long-lived link to sensitive documents (KTP/KK/rapor, etc).
+    S3_SIGNED_URL_EXPIRY_SECONDS: z.coerce
+      .number()
+      .int()
+      .min(60)
+      .max(604800)
+      .default(3600),
   })
   .superRefine((env, ctx) => {
     if (env.NODE_ENV !== 'production') {

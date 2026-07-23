@@ -35,15 +35,19 @@ const {
   profileData,
   rawProfile,
   isSaving,
+  isUploadingPhoto,
   isAdmin,
   isEditable,
+  isOwnProfile,
   initials,
   profileSubtitle,
+  avatarUrl,
   getUserId,
   actionConfig,
   reloadProfile,
   handleActionClick,
   handleUpdateProfile,
+  handlePhotoChange,
 } = useProfileView()
 
 onMounted(() => {
@@ -78,10 +82,14 @@ onMounted(() => {
           :full-name="profileData.fullName ?? ''"
           :subtitle="profileSubtitle"
           :initials="initials"
+          :avatar-url="avatarUrl"
           :is-editable="isEditable"
+          :is-own-profile="isOwnProfile"
+          :is-uploading-photo="isUploadingPhoto"
           :active-tab="activeTab"
           :action-config="actionConfig"
           @action-click="handleActionClick"
+          @photo-change="handlePhotoChange"
         />
 
         <Tabs
