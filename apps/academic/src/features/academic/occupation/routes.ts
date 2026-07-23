@@ -1,8 +1,8 @@
-import type { RouteRecordRaw } from 'vue-router'
+﻿import type { RouteRecordRaw } from 'vue-router'
 
 export const occupationRoutes: RouteRecordRaw[] = [
   {
-    path: '/occupations',
+    path: '/setting/occupation',
     name: 'OccupationList',
     component: () => import('./views/OccupationListView.vue'),
     meta: {

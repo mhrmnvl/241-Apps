@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { toTypedSchema } from '@vee-validate/zod'
@@ -44,7 +44,7 @@ import type { GradeOption, StudentParentInput } from '../types'
 
 const router = useRouter()
 const breadcrumbs = [
-  { title: 'Siswa', href: '/students' },
+  { title: 'Siswa', href: '/student' },
   { title: 'Tambah Siswa' },
 ]
 
@@ -56,6 +56,12 @@ const steps = [
   { value: 5, title: 'Ringkasan' },
 ]
 const activeStep = ref(1)
+const mobileVisibleStepValues = computed(() => {
+  if (activeStep.value <= 2) return [1, 2, 3]
+  if (activeStep.value >= steps.length - 1)
+    return [steps.length - 2, steps.length - 1, steps.length]
+  return [activeStep.value - 1, activeStep.value, activeStep.value + 1]
+})
 const submitting = ref(false)
 
 const grades = ref<GradeOption[]>([])
@@ -100,12 +106,14 @@ const formSchema = toTypedSchema(
     phone: z.string().max(15).optional().or(z.literal('')),
     nis: z
       .string()
-      .min(1, 'Nomor Induk Siswa (NIS) wajib diisi.')
-      .max(20, 'NIS tidak boleh lebih dari 20 karakter.'),
+      .max(20, 'NIS tidak boleh lebih dari 20 karakter.')
+      .optional()
+      .or(z.literal('')),
     nisn: z
       .string()
-      .min(1, 'Nomor Induk Siswa Nasional (NISN) wajib diisi.')
-      .max(20, 'NISN tidak boleh lebih dari 20 karakter.'),
+      .max(20, 'NISN tidak boleh lebih dari 20 karakter.')
+      .optional()
+      .or(z.literal('')),
     gradeId: z.string().optional().default(''),
     classroomId: z.string().optional().default(''),
   }),
@@ -206,7 +214,7 @@ function next() {
 }
 function back() {
   if (activeStep.value === 1) {
-    void router.push('/students')
+    void router.push('/student')
     return
   }
   activeStep.value -= 1
@@ -266,12 +274,12 @@ async function submit() {
         birthDate: values.birthDate ?? '',
         email: values.email || undefined,
         phone: values.phone || undefined,
-        nis: values.nis ?? '',
-        nisn: values.nisn ?? '',
-        gradeId: values.gradeId ?? undefined,
-        classroomId: values.classroomId ?? undefined,
-        identifier: values.nis ?? '',
-        password: values.nis ?? '',
+        nis: values.nis || undefined,
+        nisn: values.nisn || undefined,
+        gradeId: values.gradeId || undefined,
+        classroomId: values.classroomId || undefined,
+        identifier: values.nis || undefined,
+        password: values.nis || undefined,
       },
       address: hasAddress.value ? { ...address } : null,
       parents: parents.value,
@@ -286,7 +294,7 @@ async function submit() {
     if (result.userId) {
       void router.push(`/profile/STUDENT/${result.userId}`)
     } else {
-      void router.push('/students')
+      void router.push('/student')
     }
   } finally {
     submitting.value = false
@@ -326,17 +334,20 @@ onMounted(async () => {
         <div class="px-6 py-4 border-b">
           <Stepper
             :model-value="activeStep"
-            class="flex items-center justify-center gap-2 w-full max-w-md mx-auto"
+            class="flex items-center justify-center gap-1 sm:gap-2 w-full max-w-md mx-auto"
             @update:model-value="(v) => void goToStep(Number(v))"
           >
             <StepperItem
               v-for="step in steps"
               :key="step.value"
               :step="step.value"
-              class="flex items-center gap-2 group"
+              class="flex items-center gap-1 sm:gap-2 group transition-all duration-300"
+              :class="{
+                'hidden sm:flex': !mobileVisibleStepValues.includes(step.value),
+              }"
             >
               <StepperTrigger
-                class="flex items-center gap-2 cursor-pointer outline-none shrink-0"
+                class="flex items-center gap-1 sm:gap-2 cursor-pointer outline-none shrink-0"
               >
                 <StepperIndicator class="shrink-0">
                   <Check
@@ -348,7 +359,13 @@ onMounted(async () => {
               </StepperTrigger>
               <StepperSeparator
                 v-if="step.value < steps.length"
-                class="w-6 sm:w-10 h-0.5 bg-muted"
+                class="w-3 sm:w-10 h-0.5 bg-muted transition-all duration-300"
+                :class="{
+                  'hidden sm:block': !(
+                    mobileVisibleStepValues.includes(step.value) &&
+                    mobileVisibleStepValues.includes(step.value + 1)
+                  ),
+                }"
               />
             </StepperItem>
           </Stepper>

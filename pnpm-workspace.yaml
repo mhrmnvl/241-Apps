@@ -22,3 +22,4 @@ allowBuilds:
   puppeteer: true
   unrs-resolver: true
   maplibre-gl: set this to true or false
+  sharp: set this to true or false

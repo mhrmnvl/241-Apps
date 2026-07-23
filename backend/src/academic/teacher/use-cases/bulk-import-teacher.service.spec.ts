@@ -41,6 +41,7 @@ describe('BulkImportTeachersUseCase', () => {
   const mockRepo = {
     findUserByIdentifier: jest.fn(),
     findProfileByNik: jest.fn(),
+    findByUserId: jest.fn(),
     findByNip: jest.fn(),
     findByNuptk: jest.fn(),
     resolveEmploymentTypeId: jest.fn().mockResolvedValue('employment-type-id'),
@@ -108,20 +109,24 @@ describe('BulkImportTeachersUseCase', () => {
       expect(mockRepo.create).not.toHaveBeenCalled();
     });
 
-    it('should fail row when NIK is duplicated', async () => {
+    it('should flag row as CONFLICT when NIK is duplicated', async () => {
       mockRepo.findUserByIdentifier.mockResolvedValue(null);
       mockRepo.findProfileByNik.mockResolvedValue({ userId: 'user-existing' });
+      mockRepo.findByUserId.mockResolvedValue({ id: 'emp-existing' });
       mockRepo.findByNip.mockResolvedValue(null);
       mockRepo.findByNuptk.mockResolvedValue(null);
 
       const buffer = await makeExcelBuffer([validRow]);
       const result = await useCase.execute(buffer);
 
-      expect(result.failed).toBe(1);
+      expect(result.failed).toBe(0);
+      expect(result.conflict).toBe(1);
+      expect(result.results[0].status).toBe('CONFLICT');
+      expect(result.results[0].existingId).toBe('emp-existing');
       expect(result.results[0].error).toContain('NIK');
     });
 
-    it('should fail row when NIP is duplicated', async () => {
+    it('should flag row as CONFLICT when NIP is duplicated', async () => {
       mockRepo.findUserByIdentifier.mockResolvedValue(null);
       mockRepo.findProfileByNik.mockResolvedValue(null);
       mockRepo.findByNip.mockResolvedValue({ id: 'emp-existing' });
@@ -130,11 +135,14 @@ describe('BulkImportTeachersUseCase', () => {
       const buffer = await makeExcelBuffer([validRow]);
       const result = await useCase.execute(buffer);
 
-      expect(result.failed).toBe(1);
+      expect(result.failed).toBe(0);
+      expect(result.conflict).toBe(1);
+      expect(result.results[0].status).toBe('CONFLICT');
+      expect(result.results[0].existingId).toBe('emp-existing');
       expect(result.results[0].error).toContain('NIP');
     });
 
-    it('should fail row when NUPTK is duplicated', async () => {
+    it('should flag row as CONFLICT when NUPTK is duplicated', async () => {
       mockRepo.findUserByIdentifier.mockResolvedValue(null);
       mockRepo.findProfileByNik.mockResolvedValue(null);
       mockRepo.findByNip.mockResolvedValue(null);
@@ -143,7 +151,10 @@ describe('BulkImportTeachersUseCase', () => {
       const buffer = await makeExcelBuffer([validRow]);
       const result = await useCase.execute(buffer);
 
-      expect(result.failed).toBe(1);
+      expect(result.failed).toBe(0);
+      expect(result.conflict).toBe(1);
+      expect(result.results[0].status).toBe('CONFLICT');
+      expect(result.results[0].existingId).toBe('emp-existing');
       expect(result.results[0].error).toContain('NUPTK');
     });
 

@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import StudentScoreInputTable from '../components/StudentScoreInputTable.vue'
 import { useStudentScore } from '../composables/useStudentScore'
 import AppLayout from '@/layouts/AppLayout.vue'
@@ -38,7 +38,7 @@ const {
 
 const breadcrumbs = computed(() => [
   { title: 'Penilaian', href: '#' },
-  { title: 'Tugas & Nilai', href: '/akademik/student-scores' },
+  { title: 'Tugas & Nilai', href: '/academic/student-score' },
   { title: assessmentItem.value?.name ?? 'Nilai', href: route.path },
 ])
 
@@ -69,7 +69,7 @@ onMounted(() => {
                 variant="ghost"
                 size="icon"
                 class="size-8"
-                @click="router.push('/akademik/student-scores')"
+                @click="router.push('/academic/student-score')"
               >
                 <ArrowLeft class="size-4" />
               </Button>

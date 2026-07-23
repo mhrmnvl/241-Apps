@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import AttendanceInputTable from '../components/AttendanceInputTable.vue'
 import AttendanceSummaryCards from '../components/AttendanceSummaryCards.vue'
 import AttendanceTrendChart from '../components/AttendanceTrendChart.vue'
@@ -57,7 +57,7 @@ const MONTH_OPTIONS: FilterOption[] = [
 
 const breadcrumbs = [
   { title: 'Penilaian', href: '#' },
-  { title: 'Kehadiran Siswa', href: '/akademik/kehadiran' },
+  { title: 'Kehadiran Siswa', href: '/academic/attendance' },
 ]
 
 const {

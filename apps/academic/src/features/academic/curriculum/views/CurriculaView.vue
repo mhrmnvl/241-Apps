@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import type { Curricula } from '../types'
 import CurriculaFormSheet from '../components/CurriculaFormSheet.vue'
 import { createCurriculaColumns } from '../components/columns'
@@ -15,7 +15,7 @@ import { onMounted, ref, watch } from 'vue'
 const router = useRouter()
 const breadcrumbs = [
   { title: 'Akademik', href: '#' },
-  { title: 'Kurikulum', href: '/akademik/kurikulum' },
+  { title: 'Kurikulum', href: '/academic/curriculum' },
 ]
 
 const {
@@ -37,7 +37,7 @@ const tableColumns = createCurriculaColumns({
   canUpdate: can('curricula.update'),
   canDelete: can('curricula.delete'),
   onView: (item: Curricula) => {
-    void router.push(`/akademik/kurikulum/${item.id}/mata-pelajaran`)
+    void router.push(`/academic/curriculum/${item.id}/mata-pelajaran`)
   },
   onEdit: (item: Curricula) => {
     editingItem.value = item

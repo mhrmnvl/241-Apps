@@ -1,8 +1,8 @@
-import type { RouteRecordRaw } from 'vue-router'
+﻿import type { RouteRecordRaw } from 'vue-router'
 
 export const rolesRoutes: RouteRecordRaw[] = [
   {
-    path: '/pengaturan/roles',
+    path: '/setting/role',
     name: 'Roles',
     component: () => import('./views/RolesView.vue'),
     meta: {
@@ -12,7 +12,7 @@ export const rolesRoutes: RouteRecordRaw[] = [
     },
   },
   {
-    path: '/pengaturan/roles/tambah',
+    path: '/setting/role/create',
     name: 'RoleCreate',
     component: () => import('./views/RoleFormView.vue'),
     meta: {
@@ -22,7 +22,7 @@ export const rolesRoutes: RouteRecordRaw[] = [
     },
   },
   {
-    path: '/pengaturan/roles/:id/edit',
+    path: '/setting/role/:id/edit',
     name: 'RoleEdit',
     component: () => import('./views/RoleFormView.vue'),
     meta: {

@@ -1,11 +1,10 @@
 <script setup lang="ts">
-import EditTeacherAccountDialog from '../components/EditTeacherAccountDialog.vue'
 import { useTeacher } from '../composables/useTeacher'
-import type { Teacher } from '../types'
 import { createAccountColumns } from '../components/columns'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { DataTable } from '@/ui'
 import { Card, CardHeader, CardTitle } from '@/ui/card'
+import { Button } from '@/ui/button'
 import { Input } from '@/ui/input'
 import {
   Select,
@@ -39,24 +38,31 @@ const { can } = useRoleGuard()
 const {
   filters,
   loading,
-  isSaving,
-  formError,
   fetchTeachers,
   filteredTeachers,
   toggleActive,
   deleteTeacher,
-  changePassword,
+  positions,
+  positionCategories,
+  fetchPositions,
+  fetchPositionCategories,
 } = useTeacher()
-
-const isEditAccountModalOpen = ref(false)
-const accountToEdit = ref<Teacher | null>(null)
 
 const tableColumns = createAccountColumns({
   canUpdate: can('teachers.update'),
   canDelete: can('teachers.delete'),
-  onEdit: (teacher) => {
-    accountToEdit.value = teacher
-    isEditAccountModalOpen.value = true
+  onToggleActive: async (teacher, isActive) => {
+    try {
+      await toggleActive(teacher.id, isActive)
+      toast.success(
+        `Status akun berhasil diubah menjadi ${isActive ? 'Aktif' : 'Nonaktif'}`,
+      )
+      await fetchTeachers()
+    } catch (e: unknown) {
+      toast.error(
+        getIndonesianErrorMessage(e, 'Gagal mengubah status akun guru'),
+      )
+    }
   },
   onDelete: async (teacher, { closeAlert, setLoading }) => {
     setLoading(true)
@@ -73,51 +79,24 @@ const tableColumns = createAccountColumns({
   },
 })
 
-async function handleToggleActive(isActive: boolean) {
-  if (!accountToEdit.value) return
-  try {
-    await toggleActive(accountToEdit.value.id, isActive)
-    toast.success(
-      `Status akun berhasil diubah menjadi ${isActive ? 'Aktif' : 'Nonaktif'}`,
-    )
-    isEditAccountModalOpen.value = false
-    await fetchTeachers()
-  } catch (e: unknown) {
-    toast.error(getIndonesianErrorMessage(e, 'Gagal mengubah status akun guru'))
-  }
-}
-
-async function handleChangePassword(newPassword: string) {
-  if (!accountToEdit.value?.user?.id) return
-  try {
-    await changePassword({
-      userId: accountToEdit.value.user.id,
-      password: newPassword,
-    })
-    toast.success('Password akun guru berhasil diperbarui')
-    isEditAccountModalOpen.value = false
-  } catch (e: unknown) {
-    toast.error(
-      getIndonesianErrorMessage(e, 'Gagal mengubah password akun guru'),
-    )
-  }
-}
 const isFilterDialogOpen = ref(false)
 
 const activeFiltersCount = computed(() => {
   let count = 0
   if (filters.value.categoryFilter !== 'all') count++
+  if (filters.value.positionFilter !== 'all') count++
   if (filters.value.statusFilter !== 'all') count++
   return count
 })
 
 function resetAllFilters() {
   filters.value.categoryFilter = 'all'
+  filters.value.positionFilter = 'all'
   filters.value.statusFilter = 'all'
 }
 
 function handleFilterChange(
-  key: 'categoryFilter' | 'statusFilter',
+  key: 'categoryFilter' | 'positionFilter' | 'statusFilter',
   value: unknown,
 ) {
   filters.value[key] = typeof value === 'string' ? value : 'all'
@@ -130,6 +109,8 @@ watchDebounced(
 
 onMounted(() => {
   void fetchTeachers()
+  void fetchPositions()
+  void fetchPositionCategories()
 })
 </script>
 
@@ -166,8 +147,36 @@ onMounted(() => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all"> Semua Kategori </SelectItem>
-                  <SelectItem value="guru"> Guru </SelectItem>
-                  <SelectItem value="tendik"> Tenaga Kependidikan </SelectItem>
+                  <SelectItem
+                    v-for="cat in positionCategories"
+                    :key="cat.id"
+                    :value="cat.id"
+                  >
+                    {{ cat.name }}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select
+                :model-value="filters.positionFilter"
+                @update:model-value="
+                  handleFilterChange('positionFilter', $event)
+                "
+              >
+                <SelectTrigger
+                  class="w-full lg:w-fit lg:min-w-[150px] px-3! gap-2!"
+                >
+                  <SelectValue placeholder="Semua Jabatan" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all"> Semua Jabatan </SelectItem>
+                  <SelectItem
+                    v-for="pos in positions"
+                    :key="pos.id"
+                    :value="pos.id"
+                  >
+                    {{ pos.name }}
+                  </SelectItem>
                 </SelectContent>
               </Select>
 
@@ -178,7 +187,7 @@ onMounted(() => {
                 <SelectTrigger
                   class="w-full lg:w-fit lg:min-w-[140px] px-3! gap-2!"
                 >
-                  <SelectValue placeholder="Status Akun" />
+                  <SelectValue placeholder="Status" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all"> Semua Status </SelectItem>
@@ -186,47 +195,24 @@ onMounted(() => {
                   <SelectItem value="inactive"> Nonaktif </SelectItem>
                 </SelectContent>
               </Select>
-
-              <div class="relative lg:ml-auto lg:w-[240px]">
-                <Search
-                  class="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
-                />
-                <Input
-                  v-model="filters.keyword"
-                  placeholder="Cari akun guru..."
-                  class="pl-9"
-                />
-              </div>
             </div>
 
-            <!-- Mobile Layout: Search + Filter Dialog Button -->
+            <!-- Mobile Layout: Filter Dialog Button -->
             <div class="flex flex-col lg:hidden gap-3">
-              <div class="flex items-center gap-2">
-                <div class="relative flex-1">
-                  <Search
-                    class="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
-                  />
-                  <Input
-                    v-model="filters.keyword"
-                    placeholder="Cari akun guru..."
-                    class="pl-9"
-                  />
-                </div>
-                <Button
-                  variant="outline"
-                  class="relative shrink-0"
-                  @click="isFilterDialogOpen = true"
+              <Button
+                variant="outline"
+                class="w-full relative justify-center"
+                @click="isFilterDialogOpen = true"
+              >
+                <Filter class="size-4 mr-2" />
+                Filter Guru
+                <span
+                  v-if="activeFiltersCount > 0"
+                  class="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-primary-foreground"
                 >
-                  <Filter class="size-4 mr-2" />
-                  Filter
-                  <span
-                    v-if="activeFiltersCount > 0"
-                    class="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-primary-foreground"
-                  >
-                    {{ activeFiltersCount }}
-                  </span>
-                </Button>
-              </div>
+                  {{ activeFiltersCount }}
+                </span>
+              </Button>
             </div>
           </div>
 
@@ -236,7 +222,20 @@ onMounted(() => {
             :total-items="filteredTeachers.length"
             :is-loading="loading"
             item-label="akun guru"
-          />
+          >
+            <template #header-right>
+              <div class="relative w-full sm:w-48 max-w-[200px]">
+                <Search
+                  class="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground"
+                />
+                <Input
+                  v-model="filters.keyword"
+                  placeholder="Cari guru..."
+                  class="h-8 pl-8 w-full text-xs"
+                />
+              </div>
+            </template>
+          </DataTable>
         </div>
       </Card>
     </div>
@@ -249,7 +248,7 @@ onMounted(() => {
         <DialogHeader class="px-6 py-5 border-b shrink-0 bg-muted/20">
           <DialogTitle>Filter Akun Guru</DialogTitle>
           <DialogDescription class="sr-only">
-            Saring daftar akun guru berdasarkan kategori dan status.
+            Saring daftar akun guru berdasarkan kategori, jabatan, dan status.
           </DialogDescription>
         </DialogHeader>
 
@@ -268,8 +267,38 @@ onMounted(() => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all"> Semua Kategori </SelectItem>
-                <SelectItem value="guru"> Guru </SelectItem>
-                <SelectItem value="tendik"> Tenaga Kependidikan </SelectItem>
+                <SelectItem
+                  v-for="cat in positionCategories"
+                  :key="cat.id"
+                  :value="cat.id"
+                >
+                  {{ cat.name }}
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <!-- Position -->
+          <div class="space-y-1.5">
+            <label class="text-xs font-semibold text-muted-foreground"
+              >Jabatan</label
+            >
+            <Select
+              :model-value="filters.positionFilter"
+              @update:model-value="handleFilterChange('positionFilter', $event)"
+            >
+              <SelectTrigger class="w-full">
+                <SelectValue placeholder="Semua Jabatan" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all"> Semua Jabatan </SelectItem>
+                <SelectItem
+                  v-for="pos in positions"
+                  :key="pos.id"
+                  :value="pos.id"
+                >
+                  {{ pos.name }}
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -284,7 +313,7 @@ onMounted(() => {
               @update:model-value="handleFilterChange('statusFilter', $event)"
             >
               <SelectTrigger class="w-full">
-                <SelectValue placeholder="Status Akun" />
+                <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all"> Semua Status </SelectItem>
@@ -316,14 +345,5 @@ onMounted(() => {
         </DialogFooter>
       </DialogContent>
     </Dialog>
-
-    <EditTeacherAccountDialog
-      v-model:open="isEditAccountModalOpen"
-      :edit-data="accountToEdit"
-      :form-error="formError"
-      :is-saving="isSaving"
-      @toggle-active="handleToggleActive"
-      @change-password="handleChangePassword"
-    />
   </AppLayout>
 </template>

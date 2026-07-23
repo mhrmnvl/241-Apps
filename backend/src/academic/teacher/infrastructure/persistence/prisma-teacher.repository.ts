@@ -147,6 +147,10 @@ export class PrismaTeacherRepository extends ITeacherRepository {
     return this.prisma.profile.findUnique({ where: { nik } });
   }
 
+  async findByUserId(userId: string): Promise<Teacher | null> {
+    return this.prisma.teacher.findUnique({ where: { userId } });
+  }
+
   async findByNip(nip: string, excludeId?: string): Promise<Teacher | null> {
     return this.prisma.teacher.findFirst({
       where: { nip, ...(excludeId && { NOT: { id: excludeId } }) },
@@ -255,5 +259,13 @@ export class PrismaTeacherRepository extends ITeacherRepository {
         data: { deletedAt: new Date(), isActive: false },
       }),
     ]);
+  }
+
+  async getActiveEmploymentTypeCodes(): Promise<string[]> {
+    const empTypes = await this.prisma.employmentType.findMany({
+      where: { deletedAt: null },
+      select: { code: true },
+    });
+    return empTypes.map((et) => et.code);
   }
 }

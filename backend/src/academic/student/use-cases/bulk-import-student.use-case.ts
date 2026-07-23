@@ -33,6 +33,12 @@ export class BulkImportStudentsUseCase {
       const rowNumber = i + 2;
       const dto = plainToInstance(BulkImportStudentRowDto, rows[i]);
 
+      const [dupNis, dupNisn] = await Promise.all([
+        dto.nis ? this.repo.findByNis(dto.nis) : null,
+        dto.nisn ? this.repo.findByNisn(dto.nisn) : null,
+      ]);
+      const existing = dupNis ?? dupNisn;
+
       const errors = await validate(dto, {
         whitelist: true,
         forbidNonWhitelisted: false,
@@ -43,11 +49,17 @@ export class BulkImportStudentsUseCase {
           .map((e) => Object.values(e.constraints ?? {}).join(', '))
           .join('; ');
 
+        const conflictMsg = existing
+          ? `; ${dupNis ? `NIS "${dto.nis}" is already registered` : `NISN "${dto.nisn}" is already registered`}`
+          : '';
+
         results.push({
           row: rowNumber,
           status: 'FAILED',
           identifier: dto.identifier,
-          error: `Validation failed: ${messages}`,
+          existingId: existing?.id,
+          data: dto,
+          error: `Validation failed: ${messages}${conflictMsg}`,
         });
         continue;
       }
@@ -61,6 +73,7 @@ export class BulkImportStudentsUseCase {
               row: rowNumber,
               status: 'FAILED',
               identifier: dto.identifier,
+              data: dto,
               error: `Tingkat ${dto.grade} tidak ditemukan`,
             });
             continue;
@@ -78,6 +91,7 @@ export class BulkImportStudentsUseCase {
               row: rowNumber,
               status: 'FAILED',
               identifier: dto.identifier,
+              data: dto,
               error: `Kelas dengan kode "${dto.classroomCode}" tidak ditemukan`,
             });
             continue;
@@ -85,27 +99,16 @@ export class BulkImportStudentsUseCase {
           resolvedClassroomId = classroom.id;
         }
 
-        const [dupNis, dupNisn] = await Promise.all([
-          this.repo.findByNis(dto.nis),
-          this.repo.findByNisn(dto.nisn),
-        ]);
-
-        if (dupNis) {
+        if (existing) {
           results.push({
             row: rowNumber,
-            status: 'FAILED',
+            status: 'CONFLICT',
             identifier: dto.identifier,
-            error: `NIS "${dto.nis}" is already registered`,
-          });
-          continue;
-        }
-
-        if (dupNisn) {
-          results.push({
-            row: rowNumber,
-            status: 'FAILED',
-            identifier: dto.identifier,
-            error: `NISN "${dto.nisn}" is already registered`,
+            existingId: existing.id,
+            data: dto,
+            error: dupNis
+              ? `NIS "${dto.nis}" is already registered`
+              : `NISN "${dto.nisn}" is already registered`,
           });
           continue;
         }
@@ -125,30 +128,18 @@ export class BulkImportStudentsUseCase {
           nisn: dto.nisn,
         };
 
-        const passwordHash = await hashPassword(createDto.password!);
-        const userWithStudent = await this.repo.create(createDto, passwordHash);
-        const student = userWithStudent.student;
-        if (!student) {
-          throw new Error('Student creation failed');
-        }
-
-        if (resolvedClassroomId) {
-          this.eventEmitter.emit(
-            'student.created',
-            new StudentCreatedEvent(student.id, resolvedClassroomId),
-          );
-        }
-
         results.push({
           row: rowNumber,
           status: 'SUCCESS',
           identifier: dto.identifier,
+          data: dto,
         });
       } catch {
         results.push({
           row: rowNumber,
           status: 'FAILED',
           identifier: dto.identifier,
+          data: dto,
           error: 'Unexpected error during import',
         });
       }
@@ -156,7 +147,8 @@ export class BulkImportStudentsUseCase {
 
     const success = results.filter((r) => r.status === 'SUCCESS').length;
     const failed = results.filter((r) => r.status === 'FAILED').length;
+    const conflict = results.filter((r) => r.status === 'CONFLICT').length;
 
-    return { total: results.length, success, failed, results };
+    return { total: results.length, success, failed, conflict, results };
   }
 }

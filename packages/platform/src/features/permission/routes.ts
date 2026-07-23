@@ -1,8 +1,8 @@
-import type { RouteRecordRaw } from 'vue-router'
+﻿import type { RouteRecordRaw } from 'vue-router'
 
 export const permissionsRoutes: RouteRecordRaw[] = [
   {
-    path: '/pengaturan/permissions',
+    path: '/setting/permission',
     name: 'Permissions',
     component: () => import('./views/PermissionsView.vue'),
     meta: {

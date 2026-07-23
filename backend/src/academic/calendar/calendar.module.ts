@@ -4,6 +4,7 @@ import { SemesterModule } from '../semester/semester.module.js';
 import { ClassroomModule } from '../classroom/classroom.module.js';
 import { AcademicCalendarController } from './presentation/academic-calendar.controller.js';
 import { EventsController } from './presentation/events.controller.js';
+import { AudienceGroupsController } from './presentation/audience-groups.controller.js';
 import { PrismaAcademicCalendarRepository } from './infrastructure/persistence/prisma-academic-calendar.repository.js';
 import { PrismaEventsRepository } from './infrastructure/persistence/prisma-events.repository.js';
 import { IAcademicCalendarRepository } from './domain/interfaces/academic-calendar-repository.interface.js';
@@ -23,7 +24,11 @@ import { UpdateEventUseCase } from './use-cases/update-event.use-case.js';
 
 @Module({
   imports: [AcademicYearModule, SemesterModule, ClassroomModule],
-  controllers: [AcademicCalendarController, EventsController],
+  controllers: [
+    AcademicCalendarController,
+    EventsController,
+    AudienceGroupsController,
+  ],
   providers: [
     {
       provide: IAcademicCalendarRepository,

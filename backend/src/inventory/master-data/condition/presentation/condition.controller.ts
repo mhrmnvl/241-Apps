@@ -14,7 +14,7 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../../../platform/auth/index.js';
-import { RequirePermissions } from '../../../../platform/access-control/permissions/decorators/require-permissions.decorator.js';
+import { RequirePermissions } from '../../../../platform/access-control/permission/decorators/require-permissions.decorator.js';
 import { GetConditionsUseCase } from '../use-cases/get-conditions.use-case.js';
 import { CreateConditionUseCase } from '../use-cases/create-condition.use-case.js';
 import { UpdateConditionUseCase } from '../use-cases/update-condition.use-case.js';

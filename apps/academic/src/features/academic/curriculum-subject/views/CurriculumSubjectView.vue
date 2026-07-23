@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import type { CurriculumSubject, CurriculumSubjectSavePayload } from '../types'
 import CurriculumSubjectFormDialog from '../components/CurriculumSubjectFormDialog.vue'
 import AddCurriculumSubjectDialog from '../components/AddCurriculumSubjectDialog.vue'
@@ -36,7 +36,7 @@ const {
 
 const breadcrumbs = computed(() => [
   { title: 'Akademik', href: '#' },
-  { title: 'Kurikulum', href: '/akademik/kurikulum' },
+  { title: 'Kurikulum', href: '/academic/curriculum' },
   { title: curriculumName.value || 'Detail', href: route.path },
 ])
 
@@ -120,7 +120,7 @@ onMounted(async () => {
               variant="outline"
               size="icon"
               class="size-8"
-              @click="router.push('/akademik/kurikulum')"
+              @click="router.push('/academic/curriculum')"
             >
               <ArrowLeft class="size-4" />
             </Button>

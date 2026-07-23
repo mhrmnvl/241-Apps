@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { toast } from 'vue-sonner'
 import { Plus } from 'lucide-vue-next'
@@ -15,7 +15,7 @@ import type { TimeSlotType } from '../types'
 
 const breadcrumbs = [
   { title: 'Referensi', href: '#' },
-  { title: 'Tipe Jam', href: '/pembelajaran/tipe-jam' },
+  { title: 'Tipe Jam', href: '/setting/time-slot-type' },
 ]
 
 const { can } = useRoleGuard()
@@ -80,16 +80,9 @@ onMounted(fetchTypes)
         <CardHeader
           class="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b px-6 py-5 gap-4"
         >
-          <div class="space-y-1.5">
-            <CardTitle class="text-2xl font-bold tracking-tight">
-              Tipe Jam
-            </CardTitle>
-            <p class="text-sm text-muted-foreground">
-              Referensi tipe jam. Tandai "Khusus" untuk kegiatan non-pelajaran,
-              dan batasi hari bila hanya berlaku di hari tertentu (mis.
-              upacara).
-            </p>
-          </div>
+          <CardTitle class="text-2xl font-bold tracking-tight">
+            Tipe Jam
+          </CardTitle>
           <Button
             v-if="can('time-slots.create')"
             class="w-full sm:w-auto"

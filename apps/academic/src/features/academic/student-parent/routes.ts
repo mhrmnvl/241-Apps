@@ -1,8 +1,8 @@
-import type { RouteRecordRaw } from 'vue-router'
+﻿import type { RouteRecordRaw } from 'vue-router'
 
 export const studentParentRoutes: RouteRecordRaw[] = [
   {
-    path: '/data-master/relasi-orang-tua',
+    path: '/data/parent-relation',
     name: 'student-parent',
     component: () => import('./views/StudentParentView.vue'),
     meta: {

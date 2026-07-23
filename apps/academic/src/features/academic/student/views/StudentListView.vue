@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import ImportExportDialog from '../components/ImportExportDialog.vue'
+import ImportPreviewDialog from '../components/ImportPreviewDialog.vue'
 import { createColumns } from '../components/columns'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { DataTable } from '@/ui'
@@ -59,7 +60,7 @@ function handleFilterChange(key: 'gradeId' | 'classroomId', value: unknown) {
   filters.value[key] = typeof value === 'string' ? value : 'all'
 }
 const breadcrumbs = [
-  { title: 'Siswa', href: '/students' },
+  { title: 'Siswa', href: '/student' },
   { title: 'Daftar Siswa' },
 ]
 
@@ -108,9 +109,13 @@ const tableColumns = computed(() =>
 const {
   isImportExportOpen,
   isImporting,
+  isConflictDialogOpen,
+  isResolvingConflicts,
+  conflictRows,
   downloadTemplate,
   exportData,
   handleFileUpload,
+  handleResolveConflicts,
 } = useStudentImportExport({
   students: students,
   classes: classrooms,
@@ -175,7 +180,7 @@ onMounted(async () => {
                 v-if="can('students.create')"
                 size="sm"
                 class="h-10 px-4"
-                @click="router.push('/students/create')"
+                @click="router.push('/student/create')"
               >
                 <Plus class="size-4 mr-2" />
                 Tambah Siswa
@@ -201,7 +206,7 @@ onMounted(async () => {
                   align="end"
                   class="w-48"
                 >
-                  <DropdownMenuItem @click="router.push('/students/create')">
+                  <DropdownMenuItem @click="router.push('/student/create')">
                     <Plus class="size-4 mr-2 text-muted-foreground" />
                     Tambah Siswa
                   </DropdownMenuItem>
@@ -214,7 +219,7 @@ onMounted(async () => {
             </div>
           </div>
         </CardHeader>
-        <div class="p-6">
+        <div class="p-6 pt-1">
           <!-- Filters Section matching Academic Layout -->
           <div class="mb-6">
             <!-- Desktop Layout: Inline selects -->
@@ -260,47 +265,24 @@ onMounted(async () => {
                   </SelectItem>
                 </SelectContent>
               </Select>
-
-              <div class="relative lg:ml-auto lg:w-[240px]">
-                <Search
-                  class="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
-                />
-                <Input
-                  v-model="filters.keyword"
-                  placeholder="Cari siswa..."
-                  class="pl-9"
-                />
-              </div>
             </div>
 
-            <!-- Mobile Layout: Search + Filter Dialog Button -->
+            <!-- Mobile Layout: Filter Dialog Button -->
             <div class="flex flex-col lg:hidden gap-3">
-              <div class="flex items-center gap-2">
-                <div class="relative flex-1">
-                  <Search
-                    class="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
-                  />
-                  <Input
-                    v-model="filters.keyword"
-                    placeholder="Cari siswa..."
-                    class="pl-9"
-                  />
-                </div>
-                <Button
-                  variant="outline"
-                  class="relative shrink-0"
-                  @click="isFilterDialogOpen = true"
+              <Button
+                variant="outline"
+                class="w-full relative justify-center"
+                @click="isFilterDialogOpen = true"
+              >
+                <Filter class="size-4 mr-2" />
+                Filter Siswa
+                <span
+                  v-if="activeFiltersCount > 0"
+                  class="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-primary-foreground"
                 >
-                  <Filter class="size-4 mr-2" />
-                  Filter
-                  <span
-                    v-if="activeFiltersCount > 0"
-                    class="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-primary-foreground"
-                  >
-                    {{ activeFiltersCount }}
-                  </span>
-                </Button>
-              </div>
+                  {{ activeFiltersCount }}
+                </span>
+              </Button>
             </div>
           </div>
 
@@ -309,7 +291,20 @@ onMounted(async () => {
             :data="filteredStudents"
             :is-loading="loading"
             item-label="siswa"
-          />
+          >
+            <template #header-right>
+              <div class="relative w-full sm:w-48 max-w-[200px]">
+                <Search
+                  class="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground"
+                />
+                <Input
+                  v-model="filters.keyword"
+                  placeholder="Cari siswa..."
+                  class="h-8 pl-8 w-full text-xs"
+                />
+              </div>
+            </template>
+          </DataTable>
         </div>
       </Card>
     </div>
@@ -407,6 +402,13 @@ onMounted(async () => {
       @download-template="downloadTemplate"
       @export-data="exportData"
       @import-data="handleFileUpload"
+    />
+
+    <ImportPreviewDialog
+      v-model:open="isConflictDialogOpen"
+      :conflicts="conflictRows"
+      :loading="isResolvingConflicts"
+      @resolve="handleResolveConflicts"
     />
   </AppLayout>
 </template>

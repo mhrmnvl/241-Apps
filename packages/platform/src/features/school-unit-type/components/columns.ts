@@ -13,19 +13,14 @@ export const createColumns = (
   showActions = true,
 ): ColumnDef<SchoolUnitType>[] => [
   {
-    id: 'no',
-    header: 'No',
-    cell: ({ row }) => row.index + 1,
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
     accessorKey: 'code',
     header: 'Kode Tipe Sekolah',
+    meta: { align: 'center' },
   },
   {
     accessorKey: 'name',
     header: 'Nama Tipe Sekolah',
+    meta: { align: 'left' },
   },
   {
     accessorKey: 'isActive',

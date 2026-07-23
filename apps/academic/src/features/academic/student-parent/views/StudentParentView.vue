@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { onMounted, ref, watch } from 'vue'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { DataTable } from '@/ui'
@@ -13,7 +13,7 @@ import type { StudentParent, StudentParentFormPayload } from '../types'
 
 const breadcrumbs = [
   { title: 'Data Master', href: '#' },
-  { title: 'Relasi Orang Tua', href: '/data-master/relasi-orang-tua' },
+  { title: 'Relasi Orang Tua', href: '/data/parent-relation' },
 ]
 
 const {

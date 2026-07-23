@@ -1,8 +1,8 @@
-import type { RouteRecordRaw } from 'vue-router'
+﻿import type { RouteRecordRaw } from 'vue-router'
 
 export const curriculumSubjectRoutes: RouteRecordRaw[] = [
   {
-    path: '/akademik/kurikulum/:id/mata-pelajaran',
+    path: '/academic/curriculum/:id/subject',
     name: 'curriculum-subject',
     component: () => import('./views/CurriculumSubjectView.vue'),
     meta: {

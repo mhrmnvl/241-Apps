@@ -1,8 +1,8 @@
-import type { RouteRecordRaw } from 'vue-router'
+﻿import type { RouteRecordRaw } from 'vue-router'
 
 export const studentRoutes: RouteRecordRaw[] = [
   {
-    path: '/students',
+    path: '/student',
     name: 'students',
     component: () => import('./views/StudentListView.vue'),
     meta: {
@@ -13,7 +13,7 @@ export const studentRoutes: RouteRecordRaw[] = [
   },
 
   {
-    path: '/students/create',
+    path: '/student/create',
     name: 'student-create',
     component: () => import('./views/StudentCreateView.vue'),
     meta: {
@@ -24,7 +24,7 @@ export const studentRoutes: RouteRecordRaw[] = [
   },
 
   {
-    path: '/students/accounts',
+    path: '/student/account',
     name: 'student-accounts',
     component: () => import('./views/StudentAccountsView.vue'),
     meta: {

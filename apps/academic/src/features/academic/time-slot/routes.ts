@@ -1,8 +1,8 @@
-import type { RouteRecordRaw } from 'vue-router'
+﻿import type { RouteRecordRaw } from 'vue-router'
 
 export const timeSlotRoutes: RouteRecordRaw[] = [
   {
-    path: '/pembelajaran/jam-pelajaran',
+    path: '/learning/time-slot',
     name: 'time-slot',
     component: () => import('./views/TimeSlotView.vue'),
     meta: {
@@ -12,7 +12,7 @@ export const timeSlotRoutes: RouteRecordRaw[] = [
     },
   },
   {
-    path: '/pembelajaran/tipe-jam',
+    path: '/setting/time-slot-type',
     name: 'time-slot-type',
     component: () => import('./views/TimeSlotTypeView.vue'),
     meta: {

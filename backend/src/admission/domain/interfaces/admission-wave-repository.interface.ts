@@ -17,7 +17,6 @@ export interface CreateAdmissionWaveRepositoryInput {
   name: string;
   code: string;
   academicYearId: string;
-  schoolUnitId: string | null;
   startDate: Date;
   endDate: Date;
   quota: number;

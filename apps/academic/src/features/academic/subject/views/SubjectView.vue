@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import type { Subject, SubjectSavePayload } from '../types'
 import SubjectFormDialog from '../components/SubjectFormDialog.vue'
 import { createSubjectColumns } from '../components/columns'
@@ -17,7 +17,7 @@ import { Input } from '@/ui/input'
 
 const breadcrumbs = [
   { title: 'Pembelajaran', href: '#' },
-  { title: 'Mata Pelajaran', href: '/pembelajaran/mata-pelajaran' },
+  { title: 'Mata Pelajaran', href: '/learning/subject' },
 ]
 
 const { subjects, totalSubjects, loading, currentFilters, fetchSubjects } =
@@ -111,7 +111,7 @@ onMounted(() => {
             @update:page-size="(limit) => fetchSubjects({ limit, page: 1 })"
           >
             <template #header-right>
-              <div class="relative w-48">
+              <div class="relative w-full sm:w-48 max-w-[200px]">
                 <Search
                   class="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground"
                 />

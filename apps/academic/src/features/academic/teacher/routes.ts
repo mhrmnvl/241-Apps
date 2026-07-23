@@ -1,4 +1,4 @@
-import type { RouteRecordRaw } from 'vue-router'
+﻿import type { RouteRecordRaw } from 'vue-router'
 
 export const teacherRoutes: RouteRecordRaw[] = [
   {
@@ -22,7 +22,7 @@ export const teacherRoutes: RouteRecordRaw[] = [
     },
   },
   {
-    path: '/teacher/accounts',
+    path: '/teacher/account',
     name: 'teacher-accounts',
     component: () => import('./views/TeacherAccountView.vue'),
     meta: {

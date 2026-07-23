@@ -20,6 +20,7 @@ import { GetStudentsUseCase } from './use-cases/get-students.use-case.js';
 import { UpdateStudentUseCase } from './use-cases/update-student.use-case.js';
 import { ToggleStudentActiveUseCase } from './use-cases/toggle-student-active.use-case.js';
 import { BulkImportStudentsUseCase } from './use-cases/bulk-import-student.use-case.js';
+import { ResolveBulkImportConflictsUseCase } from './use-cases/resolve-bulk-import-conflicts.use-case.js';
 import { ExportStudentsUseCase } from './use-cases/export-student.use-case.js';
 import { AddStudentAddressUseCase } from './use-cases/add-student-address.use-case.js';
 import { GetStudentAddressesUseCase } from './use-cases/get-student-addresses.use-case.js';
@@ -58,6 +59,7 @@ import { UpdateStudentProfileUseCase } from './use-cases/update-student-profile.
     UpdateStudentUseCase,
     ToggleStudentActiveUseCase,
     BulkImportStudentsUseCase,
+    ResolveBulkImportConflictsUseCase,
     ExportStudentsUseCase,
     AddStudentAddressUseCase,
     GetStudentAddressesUseCase,

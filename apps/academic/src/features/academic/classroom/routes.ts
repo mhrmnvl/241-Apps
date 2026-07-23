@@ -1,8 +1,8 @@
-import type { RouteRecordRaw } from 'vue-router'
+﻿import type { RouteRecordRaw } from 'vue-router'
 
 export const classroomRoutes: RouteRecordRaw[] = [
   {
-    path: '/akademik/kelas',
+    path: '/academic/classroom',
     name: 'classroom',
     component: () => import('./views/ClassroomView.vue'),
     meta: {
@@ -12,7 +12,7 @@ export const classroomRoutes: RouteRecordRaw[] = [
     },
   },
   {
-    path: '/akademik/kelas/:id/kelola',
+    path: '/academic/classroom/:id/manage',
     name: 'classroom-manage',
     component: () => import('./views/ClassroomManageView.vue'),
     meta: {

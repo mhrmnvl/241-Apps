@@ -14,6 +14,7 @@ export const createColumns = (
   {
     accessorKey: 'name',
     header: 'Tipe Kalender',
+    meta: { align: 'left' },
   },
   {
     accessorKey: 'isActive',

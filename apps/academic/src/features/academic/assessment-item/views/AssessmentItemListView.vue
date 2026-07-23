@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import AssessmentItemFormDialog from '../components/AssessmentItemFormDialog.vue'
 import { createAssessmentItemColumns } from '../components/columns'
 import { useAssessmentItem } from '../composables/useAssessmentItem'
@@ -33,7 +33,7 @@ const { can } = useRoleGuard()
 
 const breadcrumbs = [
   { title: 'Penilaian', href: '#' },
-  { title: 'Tugas & Nilai', href: '/akademik/student-scores' },
+  { title: 'Tugas & Nilai', href: '/academic/student-score' },
 ]
 
 const {
@@ -99,7 +99,7 @@ const columns = computed(() =>
       openForm.value = true
     },
     onGrade: (item) => {
-      router.push(`/akademik/student-scores/${item.id}/nilai`)
+      router.push(`/academic/student-score/${item.id}/nilai`)
     },
     onDelete: async (item, { closeAlert, setLoading }) => {
       setLoading(true)

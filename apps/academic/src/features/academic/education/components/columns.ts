@@ -14,6 +14,7 @@ export const createColumns = (
   {
     accessorKey: 'name',
     header: 'Tingkat Pendidikan',
+    meta: { align: 'center' },
   },
   {
     accessorKey: 'isActive',

@@ -35,6 +35,7 @@ import type {
   ScholarshipCreatePayload,
   ScholarshipUpdatePayload,
 } from '../types'
+import { SCHOLARSHIP_STATUSES } from '../types'
 
 const props = defineProps<{
   open: boolean
@@ -229,9 +230,13 @@ const onSubmit = form.handleSubmit(async (values) => {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="Aktif"> Aktif </SelectItem>
-                      <SelectItem value="Selesai"> Selesai </SelectItem>
-                      <SelectItem value="Dicabut"> Dicabut </SelectItem>
+                    <SelectItem
+                      v-for="s in SCHOLARSHIP_STATUSES"
+                      :key="s.value"
+                      :value="s.value"
+                    >
+                      {{ s.label }}
+                    </SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />

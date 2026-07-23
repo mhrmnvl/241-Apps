@@ -12,6 +12,7 @@ import type {
   StudentAccountUpdatePayload,
   CreateStudentWithRelationsInput,
   CreateStudentWithRelationsResult,
+  ResolveBulkImportConflict,
 } from '../types'
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
 import { toast } from 'vue-sonner'
@@ -174,6 +175,12 @@ export const studentService = {
     return studentApi.bulkImport(file)
   },
 
+  resolveBulkImportConflicts: async (
+    conflicts: ResolveBulkImportConflict[],
+  ) => {
+    return studentApi.resolveBulkImportConflicts(conflicts)
+  },
+
   updateStudentAccount: async (id: string, payload: StudentUpdatePayload) => {
     return studentApi.updateStudentAccount(id, payload)
   },
@@ -189,18 +196,10 @@ export const studentService = {
   updateStudentCredentials: async (
     studentId: string,
     payload: StudentAccountUpdatePayload,
-    userId?: string,
     currentIsActive?: boolean,
   ) => {
     if (payload.isActive !== currentIsActive) {
       await studentApi.toggleActive(studentId, payload.isActive)
-    }
-
-    if (payload.password && userId) {
-      const { accountService } = await import('@/features/platform/auth')
-      await accountService.changePassword(userId, {
-        password: payload.password,
-      })
     }
   },
 }

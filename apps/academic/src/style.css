@@ -110,3 +110,11 @@
     background-color: var(--muted-foreground);
   }
 }
+
+/* Global Card spacing alignment */
+[data-slot='card'] > div.p-6,
+[data-slot='card'] > div.p-6.pt-4,
+[data-slot='card'] > div.p-6.pt-2,
+[data-slot='card'] > div.p-6.pt-1 {
+  padding-top: 0.25rem !important; /* pt-1 */
+}

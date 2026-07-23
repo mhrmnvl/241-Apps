@@ -1,11 +1,10 @@
-<script setup lang="ts">
-import EditStudentAccountDialog from '../components/EditStudentAccountDialog.vue'
-
+﻿<script setup lang="ts">
 import { useStudent } from '../composables/useStudent'
 import { createAccountColumns } from '../components/columns'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { DataTable } from '@/ui'
 import { Card, CardHeader, CardTitle } from '@/ui/card'
+import { Button } from '@/ui/button'
 import { Input } from '@/ui/input'
 import {
   Select,
@@ -29,23 +28,29 @@ import { toast } from 'vue-sonner'
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
 import { useRoleGuard } from '@/shared/composables/useRoleGuard'
 
-import type { Student, StudentAccountUpdatePayload } from '../types'
-
 const { can } = useRoleGuard()
-
-const isEditModalOpen = ref(false)
-const selectedStudent = ref<Student | null>(null)
-const isSaving = ref(false)
-const formError = ref<string | null>(null)
 
 const tableColumns = computed(() =>
   createAccountColumns(
     {
       canUpdate: can('students.update'),
       canDelete: can('students.delete'),
-      onEdit: (student) => {
-        selectedStudent.value = student
-        isEditModalOpen.value = true
+      onToggleActive: async (student, isActive) => {
+        try {
+          await updateStudentCredentials(
+            student.id,
+            { isActive },
+            student.user?.isActive,
+          )
+          toast.success(
+            `Status akun berhasil diubah menjadi ${isActive ? 'Aktif' : 'Nonaktif'}`,
+          )
+          await fetchStudents()
+        } catch (e: unknown) {
+          toast.error(
+            getIndonesianErrorMessage(e, 'Gagal mengubah status akun siswa'),
+          )
+        }
       },
       onDelete: async (student, { closeAlert, setLoading }) => {
         setLoading(true)
@@ -67,32 +72,8 @@ const tableColumns = computed(() =>
   ),
 )
 
-async function handleSaveAccount(payload: StudentAccountUpdatePayload) {
-  if (!selectedStudent.value) return
-  isSaving.value = true
-  formError.value = null
-  try {
-    const studentId = selectedStudent.value.id
-    const userId = selectedStudent.value.user?.id
-    const currentIsActive = selectedStudent.value.user?.isActive
-
-    await updateStudentCredentials(studentId, payload, userId, currentIsActive)
-
-    toast.success('Pembaruan akun berhasil disimpan')
-    isEditModalOpen.value = false
-    await fetchStudents()
-  } catch (err: unknown) {
-    formError.value = getIndonesianErrorMessage(
-      err,
-      'Gagal menyimpan perubahan',
-    )
-  } finally {
-    isSaving.value = false
-  }
-}
-
 const breadcrumbs = [
-  { title: 'Siswa', href: '/students' },
+  { title: 'Siswa', href: '/student' },
   { title: 'Akun Siswa' },
 ]
 
@@ -227,47 +208,24 @@ onMounted(async () => {
                   </SelectItem>
                 </SelectContent>
               </Select>
-
-              <div class="relative lg:ml-auto lg:w-[240px]">
-                <Search
-                  class="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
-                />
-                <Input
-                  v-model="keyword"
-                  placeholder="Cari akun..."
-                  class="pl-9"
-                />
-              </div>
             </div>
 
-            <!-- Mobile Layout: Search + Filter Dialog Button -->
+            <!-- Mobile Layout: Filter Dialog Button -->
             <div class="flex flex-col lg:hidden gap-3">
-              <div class="flex items-center gap-2">
-                <div class="relative flex-1">
-                  <Search
-                    class="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
-                  />
-                  <Input
-                    v-model="keyword"
-                    placeholder="Cari akun..."
-                    class="pl-9"
-                  />
-                </div>
-                <Button
-                  variant="outline"
-                  class="relative shrink-0"
-                  @click="isFilterDialogOpen = true"
+              <Button
+                variant="outline"
+                class="w-full relative justify-center"
+                @click="isFilterDialogOpen = true"
+              >
+                <Filter class="size-4 mr-2" />
+                Filter Siswa
+                <span
+                  v-if="activeFiltersCount > 0"
+                  class="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-primary-foreground"
                 >
-                  <Filter class="size-4 mr-2" />
-                  Filter
-                  <span
-                    v-if="activeFiltersCount > 0"
-                    class="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-primary-foreground"
-                  >
-                    {{ activeFiltersCount }}
-                  </span>
-                </Button>
-              </div>
+                  {{ activeFiltersCount }}
+                </span>
+              </Button>
             </div>
           </div>
 
@@ -277,7 +235,20 @@ onMounted(async () => {
             :total-items="totalStudents"
             :is-loading="loading"
             item-label="akun siswa"
-          />
+          >
+            <template #header-right>
+              <div class="relative w-full sm:w-48 max-w-[200px]">
+                <Search
+                  class="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground"
+                />
+                <Input
+                  v-model="keyword"
+                  placeholder="Cari siswa..."
+                  class="h-8 pl-8 w-full text-xs"
+                />
+              </div>
+            </template>
+          </DataTable>
         </div>
       </Card>
     </div>
@@ -367,13 +338,5 @@ onMounted(async () => {
         </DialogFooter>
       </DialogContent>
     </Dialog>
-
-    <EditStudentAccountDialog
-      v-model:open="isEditModalOpen"
-      :edit-data="selectedStudent"
-      :is-saving="isSaving"
-      :form-error="formError"
-      @save="handleSaveAccount"
-    />
   </AppLayout>
 </template>

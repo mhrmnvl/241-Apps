@@ -24,6 +24,7 @@ export const createColumns = (
   {
     id: 'name',
     header: 'Nama Lengkap',
+    meta: { align: 'left' },
     cell: ({ row }) => row.original.user?.profile?.name || '-',
     accessorFn: (row) => row.user?.profile?.name,
   },
@@ -167,13 +168,16 @@ export const createAccountColumns = (
           header: 'Opsi',
           cell: ({ row }: { row: { original: Student } }) => {
             const student = row.original
+            const isActive = student.user?.isActive ?? false
             return h(ActionCell, {
-              hideEdit: actions.canUpdate === false,
+              hideEdit: true,
               hideDelete: actions.canDelete === false,
+              manageLabel: isActive ? 'Nonaktifkan' : 'Aktifkan',
               deleteTitle: 'Hapus Akun Siswa?',
               deleteDescription: `Yakin ingin menghapus akun "${student.user?.identifier || ''}" milik ${student.user?.profile?.name || ''}? Tindakan ini tidak dapat dibatalkan.`,
-              onEdit: () => {
-                if (actions.onEdit) actions.onEdit(student)
+              onManage: () => {
+                if (actions.onToggleActive)
+                  actions.onToggleActive(student, !isActive)
               },
               onDelete: (callbacks: {
                 closeAlert: () => void

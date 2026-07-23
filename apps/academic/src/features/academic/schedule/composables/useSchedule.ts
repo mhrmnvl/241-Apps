@@ -1,4 +1,4 @@
-import { scheduleService } from '../services/scheduleService'
+﻿import { scheduleService } from '../services/scheduleService'
 import { useScheduleStore } from '../stores/scheduleStore'
 import { DAYS } from '../types'
 import type { ScheduleLessonMap } from '../types'
@@ -53,7 +53,7 @@ export function useSchedule() {
   )
 
   const breadcrumbs = computed(() => [
-    { title: 'Lihat Jadwal', href: '/jadwal' },
+    { title: 'Lihat Jadwal', href: '/schedule' },
     ...(selectedClassroom.value
       ? [
           {

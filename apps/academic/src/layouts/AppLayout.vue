@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import AppSidebar from '@/components/layout/AppSidebar.vue'
 import {
   Breadcrumb,
@@ -27,37 +27,18 @@ import {
   DropdownMenuTrigger,
 } from '@/ui/dropdown-menu'
 import { Avatar, AvatarFallback, AvatarImage } from '@/ui/avatar'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/ui/dialog'
-import { Input } from '@/ui/input'
-import { Label } from '@/ui/label'
 import { Separator } from '@/ui/separator'
 import { SidebarProvider, SidebarTrigger } from '@/ui/sidebar'
 import { TooltipProvider } from '@/ui/tooltip'
 import { useAuthSession } from '@/features/platform/auth'
 import { menuSections } from '@/config/menuConfig'
-import { KeyRound, LogOut, Search, UserRound } from 'lucide-vue-next'
+import { LogOut, Search, Settings, UserRound } from 'lucide-vue-next'
 import { useRouter } from 'vue-router'
-import { toast } from 'vue-sonner'
-import { computed, reactive, ref } from 'vue'
+import { computed, ref } from 'vue'
 
-const { user, logoutUser, changePassword } = useAuthSession()
+const { user, logoutUser } = useAuthSession()
 const router = useRouter()
 const openSearch = ref(false)
-
-const isPasswordDialogOpen = ref(false)
-const isChangingPassword = ref(false)
-const passwordForm = reactive({
-  password: '',
-  confirmPassword: '',
-})
-const passwordErrors = reactive<Record<string, string>>({})
 
 const ROLE_LABELS: Record<string, string> = {
   SUPER_ADMIN: 'Super Admin',
@@ -100,64 +81,10 @@ const initials = computed(() => {
   )
 })
 
-function openPasswordDialog() {
-  resetPasswordForm()
-  isPasswordDialogOpen.value = true
-}
-
-function resetPasswordForm() {
-  passwordForm.password = ''
-  passwordForm.confirmPassword = ''
-  Object.keys(passwordErrors).forEach((k) => delete passwordErrors[k])
-}
-
-function validatePasswordForm() {
-  const errors: Record<string, string> = {}
-
-  if (!passwordForm.password) {
-    errors.password = 'Password baru wajib diisi.'
-  } else if (passwordForm.password.length < 6) {
-    errors.password = 'Password baru minimal 6 karakter.'
-  }
-
-  if (!passwordForm.confirmPassword) {
-    errors.confirmPassword = 'Konfirmasi password wajib diisi.'
-  }
-
-  if (passwordForm.confirmPassword !== passwordForm.password) {
-    errors.confirmPassword = 'Konfirmasi password belum sama.'
-  }
-
-  Object.assign(passwordErrors, errors)
-  Object.keys(passwordErrors).forEach((key) => {
-    if (!(key in errors)) delete passwordErrors[key]
-  })
-
-  return Object.keys(errors).length === 0
-}
-
-async function handleChangePassword() {
-  if (!validatePasswordForm()) return
-
+function handleEditAccount() {
   const userId = user.value?.id
-  if (!userId) {
-    toast.error('Sesi tidak valid', {
-      description: 'Silakan login ulang sebelum mengganti password.',
-    })
-    return
-  }
-
-  isChangingPassword.value = true
-  try {
-    const result = await changePassword(userId, {
-      password: passwordForm.password,
-    })
-    if (result.success) {
-      isPasswordDialogOpen.value = false
-      resetPasswordForm()
-    }
-  } finally {
-    isChangingPassword.value = false
+  if (userId) {
+    void router.push(`/setting/user/${userId}/edit`)
   }
 }
 
@@ -323,9 +250,9 @@ const searchGroups = computed(() => {
                     <UserRound class="size-4 mr-2" />
                     <span>Lihat Profil</span>
                   </DropdownMenuItem>
-                  <DropdownMenuItem @click="openPasswordDialog">
-                    <KeyRound class="size-4 mr-2" />
-                    <span>Ganti Password</span>
+                  <DropdownMenuItem @click="handleEditAccount">
+                    <Settings class="size-4 mr-2" />
+                    <span>Ubah Akun</span>
                   </DropdownMenuItem>
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator />
@@ -346,77 +273,4 @@ const searchGroups = computed(() => {
       </main>
     </TooltipProvider>
   </SidebarProvider>
-
-  <Dialog v-model:open="isPasswordDialogOpen">
-    <DialogContent>
-      <DialogHeader>
-        <DialogTitle>Ganti Password</DialogTitle>
-        <DialogDescription
-          >Masukkan password baru untuk akun Anda.</DialogDescription
-        >
-      </DialogHeader>
-
-      <div class="grid gap-4 py-2">
-        <div class="grid gap-2">
-          <Label for="new-password">Password Baru</Label>
-          <Input
-            id="new-password"
-            v-model="passwordForm.password"
-            type="password"
-            autocomplete="new-password"
-            :class="
-              passwordErrors.password
-                ? 'border-destructive focus-visible:ring-destructive'
-                : ''
-            "
-            @input="delete passwordErrors.password"
-          />
-          <p
-            v-if="passwordErrors.password"
-            class="text-xs text-destructive"
-          >
-            {{ passwordErrors.password }}
-          </p>
-        </div>
-
-        <div class="grid gap-2">
-          <Label for="confirm-password">Konfirmasi Password</Label>
-          <Input
-            id="confirm-password"
-            v-model="passwordForm.confirmPassword"
-            type="password"
-            autocomplete="new-password"
-            :class="
-              passwordErrors.confirmPassword
-                ? 'border-destructive focus-visible:ring-destructive'
-                : ''
-            "
-            @input="delete passwordErrors.confirmPassword"
-          />
-          <p
-            v-if="passwordErrors.confirmPassword"
-            class="text-xs text-destructive"
-          >
-            {{ passwordErrors.confirmPassword }}
-          </p>
-        </div>
-      </div>
-
-      <DialogFooter>
-        <Button
-          variant="outline"
-          :disabled="isChangingPassword"
-          @click="isPasswordDialogOpen = false"
-        >
-          Batal
-        </Button>
-        <Button
-          :disabled="isChangingPassword"
-          @click="handleChangePassword"
-        >
-          {{ isChangingPassword ? 'Menyimpan...' : 'Simpan Password' }}
-        </Button>
-      </DialogFooter>
-    </DialogContent>
-  </Dialog>
 </template>

@@ -1,7 +1,7 @@
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../../platform/auth/index.js';
-import { RequirePermissions } from '../../../platform/access-control/permissions/decorators/require-permissions.decorator.js';
+import { RequirePermissions } from '../../../platform/access-control/permission/decorators/require-permissions.decorator.js';
 import {
   GetHistoriesUseCase,
   HistoryQueryDto,

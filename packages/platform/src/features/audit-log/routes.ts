@@ -1,8 +1,8 @@
-import type { RouteRecordRaw } from 'vue-router'
+﻿import type { RouteRecordRaw } from 'vue-router'
 
 export const auditLogsRoutes: RouteRecordRaw[] = [
   {
-    path: '/pengaturan/audit-logs',
+    path: '/setting/audit-log',
     name: 'AuditLogs',
     component: () => import('./views/AuditLogsView.vue'),
     meta: {

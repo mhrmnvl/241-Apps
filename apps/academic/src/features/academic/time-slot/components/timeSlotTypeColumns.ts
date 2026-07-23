@@ -16,14 +16,17 @@ export const createTimeSlotTypeColumns = (
   {
     accessorKey: 'code',
     header: 'Kode',
+    meta: { align: 'center' },
   },
   {
     accessorKey: 'name',
     header: 'Nama',
+    meta: { align: 'left' },
   },
   {
     id: 'isLesson',
     header: 'Jenis',
+    meta: { align: 'center' },
     cell: ({ row }) =>
       h(
         Badge,
@@ -34,6 +37,7 @@ export const createTimeSlotTypeColumns = (
   {
     id: 'days',
     header: 'Hari Berlaku',
+    meta: { align: 'center' },
     cell: ({ row }) => {
       const days = row.original.days ?? []
       if (days.length === 0) {
@@ -45,7 +49,7 @@ export const createTimeSlotTypeColumns = (
       }
       return h(
         'div',
-        { class: 'flex flex-wrap gap-1' },
+        { class: 'flex flex-wrap justify-center gap-1' },
         days.map((d) =>
           h(Badge, { variant: 'outline', class: 'text-[11px]' }, () =>
             dayShortLabel(d),

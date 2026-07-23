@@ -1,8 +1,8 @@
-import type { RouteRecordRaw } from 'vue-router'
+﻿import type { RouteRecordRaw } from 'vue-router'
 
 export const positionCategoryRoutes: RouteRecordRaw[] = [
   {
-    path: '/pengaturan/kategori-jabatan',
+    path: '/setting/position-category',
     name: 'PositionCategoryList',
     component: () => import('./views/PositionCategoryListView.vue'),
     meta: {

@@ -59,6 +59,7 @@ export abstract class ITeacherRepository {
   abstract findById(id: string): Promise<TeacherWithDetails | null>;
   abstract findUserByIdentifier(identifier: string): Promise<User | null>;
   abstract findProfileByNik(nik: string): Promise<Profile | null>;
+  abstract findByUserId(userId: string): Promise<Teacher | null>;
   abstract findByNip(nip: string, excludeId?: string): Promise<Teacher | null>;
   abstract findByNuptk(
     nuptk: string,
@@ -82,4 +83,5 @@ export abstract class ITeacherRepository {
   ): Promise<TeacherWithDetails>;
   abstract resolveEmploymentTypeId(code: string): Promise<string>;
   abstract softDelete(id: string, userId: string): Promise<[Teacher, User]>;
+  abstract getActiveEmploymentTypeCodes(): Promise<string[]>;
 }

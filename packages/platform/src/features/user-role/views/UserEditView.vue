@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { toTypedSchema } from '@vee-validate/zod'
@@ -31,7 +31,7 @@ const currentIdentifier = ref('')
 
 const breadcrumbs = [
   { title: 'Pengaturan', href: '#' },
-  { title: 'Kelola Pengguna', href: '/pengaturan/kelola-pengguna' },
+  { title: 'Kelola Pengguna', href: '/setting/user' },
   { title: 'Ubah Akun' },
 ]
 
@@ -124,7 +124,7 @@ const onSubmit = handleSubmit(async (values) => {
 
 <template>
   <AppLayout :breadcrumbs="breadcrumbs">
-    <div class="p-4 md:p-6 lg:p-8 w-full max-w-3xl">
+    <div class="p-4 md:p-6 lg:p-8 w-full">
       <Card
         class="overflow-hidden rounded-2xl shadow-sm shadow-black/5 ring-1 ring-black/4"
       >
@@ -140,9 +140,6 @@ const onSubmit = handleSubmit(async (values) => {
             <CardTitle class="text-2xl font-bold tracking-tight">
               Ubah Akun Pengguna
             </CardTitle>
-            <p class="text-sm text-muted-foreground mt-1">
-              Perbarui username dan/atau password akun pengguna ini.
-            </p>
           </div>
         </CardHeader>
 
@@ -183,7 +180,7 @@ const onSubmit = handleSubmit(async (values) => {
                 </FormItem>
               </FormField>
 
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
                 <FormField
                   v-slot="{ componentField }"
                   name="password"
@@ -220,11 +217,6 @@ const onSubmit = handleSubmit(async (values) => {
                   </FormItem>
                 </FormField>
               </div>
-
-              <p class="text-xs text-muted-foreground">
-                Pengelolaan role pengguna dilakukan lewat tombol
-                <span class="font-medium">Kelola Role</span> di daftar pengguna.
-              </p>
             </div>
 
             <div class="flex items-center justify-end gap-3 pt-2">

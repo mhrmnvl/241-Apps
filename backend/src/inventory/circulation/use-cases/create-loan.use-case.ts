@@ -38,7 +38,7 @@ export class CreateLoanUseCase {
     }
 
     for (const unit of units) {
-      if (!unit.status || !unit.status.allowTransactions) {
+      if (!unit.status?.allowTransactions) {
         throw new BadRequestException(
           `Unit "${unit.asset.name}" (${unit.unitNumber}) is not available for borrowing.`,
         );

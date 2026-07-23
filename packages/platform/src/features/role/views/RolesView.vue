@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
@@ -16,7 +16,7 @@ const router = useRouter()
 
 const breadcrumbs = [
   { title: 'Pengaturan', href: '#' },
-  { title: 'Manajemen Role', href: '/pengaturan/roles' },
+  { title: 'Manajemen Role', href: '/setting/role' },
 ]
 
 const roles = ref<Role[]>([])
@@ -35,11 +35,11 @@ const fetchRoles = async () => {
 }
 
 const handleAddClick = () => {
-  void router.push('/pengaturan/roles/tambah')
+  void router.push('/setting/role/create')
 }
 
 const handleEditClick = (role: Role) => {
-  void router.push(`/pengaturan/roles/${role.id}/edit`)
+  void router.push(`/setting/role/${role.id}/edit`)
 }
 
 const handleDeleteRole = async (

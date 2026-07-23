@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import type { RolloverSemesterPayload, Semester } from '../types'
 import RolloverSemesterDialog from '../components/RolloverSemesterDialog.vue'
 import SemesterFormSheet from '../components/SemesterFormSheet.vue'
@@ -26,7 +26,7 @@ import { toast } from 'vue-sonner'
 
 const breadcrumbs = [
   { title: 'Akademik', href: '#' },
-  { title: 'Semester', href: '/akademik/semester' },
+  { title: 'Semester', href: '/academic/semester' },
 ]
 
 const {

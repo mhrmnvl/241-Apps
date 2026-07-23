@@ -11,6 +11,8 @@ import type {
   Student,
   StudentCreateResult,
   BulkImportResult,
+  ResolveBulkImportConflict,
+  ResolveBulkImportResult,
 } from '../types'
 
 export const studentApi = {
@@ -57,6 +59,13 @@ export const studentApi = {
     })
   },
 
+  resolveBulkImportConflicts: (conflicts: ResolveBulkImportConflict[]) => {
+    return api.post<ApiSingleResponse<ResolveBulkImportResult>>(
+      '/students/bulk-import/resolve',
+      { conflicts },
+    )
+  },
+
   updateStudentAccount: (id: string, payload: StudentUpdatePayload) => {
     return api.patch<ApiSingleResponse<Student>>(`/students/${id}`, payload)
   },
@@ -74,7 +83,7 @@ export const studentApi = {
   toggleActive: (id: string, isActive: boolean) => {
     return api.patch<ApiSingleResponse<Student>>(
       `/students/${id}/toggle-active`,
-      null,
+      {},
       { params: { isActive } },
     )
   },

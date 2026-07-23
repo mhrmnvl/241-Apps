@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import type { Grade } from '../types'
 import { createGradeColumns } from '../components/columns'
 import GradeFormDialog from '../components/GradeFormDialog.vue'
@@ -15,7 +15,7 @@ import { Input } from '@/ui/input'
 
 const breadcrumbs = [
   { title: 'Akademik', href: '#' },
-  { title: 'Tingkat Kelas', href: '/akademik/tingkat-kelas' },
+  { title: 'Tingkat Kelas', href: '/academic/grade' },
 ]
 
 const { items, totalItems, loading, currentFilters, fetchGrades, deleteGrade } =
@@ -100,7 +100,7 @@ onMounted(() => {
             @update:page-size="(limit) => fetchGrades({ limit, page: 1 })"
           >
             <template #header-right>
-              <div class="relative w-48">
+              <div class="relative w-full sm:w-48 max-w-[200px]">
                 <Search
                   class="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground"
                 />

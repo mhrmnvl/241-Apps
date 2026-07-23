@@ -29,11 +29,6 @@ export class CreateAdmissionWaveDto {
   @IsUUID()
   academicYearId: string;
 
-  @ApiPropertyOptional({ format: 'uuid' })
-  @IsOptional()
-  @IsUUID()
-  schoolUnitId?: string;
-
   @ApiProperty({ format: 'date' })
   @IsDateString()
   startDate: string;

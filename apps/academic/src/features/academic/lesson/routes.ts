@@ -1,8 +1,8 @@
-import type { RouteRecordRaw } from 'vue-router'
+﻿import type { RouteRecordRaw } from 'vue-router'
 
 export const lessonRoutes: RouteRecordRaw[] = [
   {
-    path: '/pembelajaran/jadwal-pelajaran',
+    path: '/learning/lesson',
     name: 'lesson',
     component: () => import('./views/LessonView.vue'),
     meta: {
@@ -12,7 +12,7 @@ export const lessonRoutes: RouteRecordRaw[] = [
     },
   },
   {
-    path: '/pembelajaran/jadwal-pelajaran/:classroomId',
+    path: '/learning/lesson/:classroomId',
     name: 'classroom-schedule-editor',
     component: () => import('./views/ClassroomScheduleEditorView.vue'),
     meta: {

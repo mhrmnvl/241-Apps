@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../../platform/auth/index.js';
-import { RequirePermissions } from '../../../platform/access-control/permissions/decorators/require-permissions.decorator.js';
+import { RequirePermissions } from '../../../platform/access-control/permission/decorators/require-permissions.decorator.js';
 import { CurrentUser } from '../../../core/decorators/current-user.decorator.js';
 import type { AuthenticatedUser } from '../../../core/types/authenticated-user.type.js';
 import { ApproveActionDto } from '../dto/request/approve-action.dto.js';

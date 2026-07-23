@@ -20,7 +20,7 @@ import {
 } from '@nestjs/swagger';
 import { CurrentUser } from '../../core/decorators/current-user.decorator.js';
 import type { AuthenticatedUser } from '../../core/types/authenticated-user.type.js';
-import { RequirePermissions } from '../../platform/access-control/permissions/decorators/require-permissions.decorator.js';
+import { RequirePermissions } from '../../platform/access-control/permission/decorators/require-permissions.decorator.js';
 import { JwtAuthGuard } from '../../platform/auth/index.js';
 import { AdmissionAnnouncementQueryDto } from '../dto/request/admission-announcement-query.dto.js';
 import { CreateAdmissionAnnouncementDto } from '../dto/request/create-admission-announcement.dto.js';

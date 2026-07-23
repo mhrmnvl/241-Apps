@@ -2,38 +2,31 @@ import { h } from 'vue'
 import type { ColumnDef } from '@tanstack/vue-table'
 import { Badge } from '@/ui/badge'
 import type { UserWithRoles } from '../types'
-import { useUserRoleStore } from '../stores/userRoleStore'
 import UserRoleActionCell from './UserRoleActionCell.vue'
 
 export const getColumns = (
   allRoles: { id: string; code: string; name: string }[],
 ): ColumnDef<UserWithRoles>[] => [
   {
-    id: 'no',
-    header: 'No',
-    cell: ({ row }) => {
-      const store = useUserRoleStore()
-      return (
-        (store.paginationMeta.page - 1) * store.paginationMeta.limit +
-        row.index +
-        1
-      )
-    },
-    enableSorting: false,
-    enableHiding: false,
+    id: 'name',
+    header: 'Nama',
+    meta: { align: 'left' },
+    cell: ({ row }) => row.original.profile?.name || '-',
   },
   {
     accessorKey: 'identifier',
     header: 'Username',
+    meta: { align: 'left' },
   },
   {
     id: 'roles',
     header: 'Role',
+    meta: { align: 'center' },
     cell: ({ row }) => {
       const roles = (row.original.userRoles ?? []).map((ur) => ur.role)
       return h(
         'div',
-        { class: 'flex flex-wrap gap-1.5' },
+        { class: 'flex flex-wrap gap-1.5 justify-center' },
         roles.map((role) => {
           let variant: 'default' | 'secondary' | 'outline' | 'destructive' =
             'secondary'
@@ -65,22 +58,32 @@ export const getColumns = (
   {
     accessorKey: 'isActive',
     header: 'Status Akun',
+    meta: { align: 'center' },
     cell: ({ row }) => {
       const isActive = row.getValue<boolean>('isActive')
-      return h(Badge, { variant: isActive ? 'outline' : 'destructive' }, () =>
-        isActive ? 'Aktif' : 'Nonaktif',
+      return h(
+        'div',
+        { class: 'flex justify-center' },
+        h(Badge, { variant: isActive ? 'outline' : 'destructive' }, () =>
+          isActive ? 'Aktif' : 'Nonaktif',
+        ),
       )
     },
   },
   {
     id: 'actions',
     header: 'Opsi',
+    meta: { align: 'center' },
     cell: ({ row }) => {
       const item = row.original
-      return h(UserRoleActionCell, {
-        user: item,
-        allRoles,
-      })
+      return h(
+        'div',
+        { class: 'flex justify-center' },
+        h(UserRoleActionCell, {
+          user: item,
+          allRoles,
+        }),
+      )
     },
   },
 ]

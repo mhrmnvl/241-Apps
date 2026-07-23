@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue'
 import { DataTable } from '@/ui'
 import { Button } from '@/ui/button'
@@ -34,7 +34,7 @@ const columns = createColumns(
 
 const breadcrumbs = [
   { title: 'Pengaturan', href: '#' },
-  { title: 'Tipe Sekolah', href: '/pengaturan/tipe-sekolah' },
+  { title: 'Tipe Sekolah', href: '/setting/school-unit-type' },
 ]
 
 onMounted(() => {

@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import type {
@@ -87,7 +87,7 @@ const remainingCapacity = computed(
 )
 const breadcrumbs = computed(() => [
   { title: 'Akademik', href: '#' },
-  { title: 'Kelas', href: '/akademik/kelas' },
+  { title: 'Kelas', href: '/academic/classroom' },
   { title: currentClassroom.value?.displayName ?? 'Kelola' },
 ])
 
@@ -230,7 +230,7 @@ onMounted(async () => {
               variant="outline"
               size="icon"
               class="h-8 w-8"
-              @click="router.push('/akademik/kelas')"
+              @click="router.push('/academic/classroom')"
             >
               <ArrowLeft class="h-4 w-4" />
             </Button>

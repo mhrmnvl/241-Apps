@@ -2,11 +2,13 @@ import type { LucideIcon } from 'lucide-vue-next'
 import {
   BookOpen,
   BookText,
+  Briefcase,
   CalendarDays,
   CalendarRange,
   ClipboardList,
   FileSpreadsheet,
   FolderOpen,
+  Globe,
   GraduationCap,
   LayoutDashboard,
   Link2,
@@ -14,6 +16,7 @@ import {
   Megaphone,
   School,
   Settings,
+  Trophy,
   UserCheck,
   UserRound,
   Users,
@@ -44,7 +47,7 @@ export interface MenuSection {
 }
 
 export const menuSections: MenuSection[] = [
-  // ──────────────────── PLATFORM ────────────────────
+  // ──────────────────── MAIN ────────────────────
   {
     label: 'Utama',
     items: [
@@ -54,7 +57,7 @@ export const menuSections: MenuSection[] = [
         icon: LayoutDashboard,
       },
       {
-        title: 'Unit Sekolah',
+        title: 'Profil Sekolah',
         url: '/school-unit',
         icon: School,
         requiredPermission: 'school-units.read',
@@ -68,23 +71,23 @@ export const menuSections: MenuSection[] = [
     requiredPermission: 'academic-years.read',
     items: [
       {
-        title: 'Kalender & Kurikulum',
+        title: 'Kalender & Semester',
         url: '#',
         icon: CalendarDays,
         items: [
           {
             title: 'Tahun Ajaran',
-            url: '/akademik/tahun-ajaran',
+            url: '/academic/academic-year',
             requiredPermission: 'academic-years.read',
           },
           {
             title: 'Semester',
-            url: '/akademik/semester',
+            url: '/academic/semester',
             requiredPermission: 'semesters.read',
           },
           {
             title: 'Kurikulum',
-            url: '/akademik/kurikulum',
+            url: '/academic/curriculum',
             requiredPermission: 'curricula.read',
           },
         ],
@@ -96,18 +99,20 @@ export const menuSections: MenuSection[] = [
         items: [
           {
             title: 'Tingkat Kelas',
-            url: '/akademik/tingkat-kelas',
+            url: '/academic/grade',
             requiredPermission: 'classrooms.read',
           },
           {
             title: 'Daftar Kelas',
-            url: '/akademik/kelas',
+            url: '/academic/classroom',
             requiredPermission: 'classrooms.read',
           },
         ],
       },
     ],
   },
+
+  // ──────────────────── LEARNING ────────────────────
   {
     label: 'Pembelajaran',
     requiredPermission: 'subjects.read',
@@ -119,22 +124,22 @@ export const menuSections: MenuSection[] = [
         items: [
           {
             title: 'Mata Pelajaran',
-            url: '/pembelajaran/mata-pelajaran',
+            url: '/learning/subject',
             requiredPermission: 'subjects.read',
           },
           {
             title: 'Penugasan Mengajar',
-            url: '/pembelajaran/penugasan-mengajar',
+            url: '/learning/teaching-assignment',
             requiredPermission: 'teaching-assignments.read',
           },
           {
             title: 'Jam Pelajaran',
-            url: '/pembelajaran/jam-pelajaran',
+            url: '/learning/time-slot',
             requiredPermission: 'time-slots.read',
           },
           {
             title: 'Jadwal Pelajaran',
-            url: '/pembelajaran/jadwal-pelajaran',
+            url: '/learning/lesson',
             requiredPermission: 'schedules.read',
           },
         ],
@@ -146,23 +151,25 @@ export const menuSections: MenuSection[] = [
         items: [
           {
             title: 'Kehadiran',
-            url: '/akademik/kehadiran',
+            url: '/academic/attendance',
             requiredPermission: 'attendances.read',
           },
           {
             title: 'Tugas & Nilai',
-            url: '/akademik/student-scores',
+            url: '/academic/student-score',
             requiredPermission: 'assessment-items.read',
           },
           {
             title: 'Rapor',
-            url: '/akademik/rapor',
+            url: '/academic/report-card',
             requiredPermission: 'report-cards.read',
           },
         ],
       },
     ],
   },
+
+  // ──────────────────── DATA MASTER ────────────────────
   {
     label: 'Data Master',
     requiredPermission: 'students.read',
@@ -174,17 +181,17 @@ export const menuSections: MenuSection[] = [
         items: [
           {
             title: 'Daftar Siswa',
-            url: '/students',
+            url: '/student',
             requiredPermission: 'students.read',
           },
           {
             title: 'Akun Siswa',
-            url: '/students/accounts',
+            url: '/student/account',
             requiredPermission: 'students.read',
           },
           {
             title: 'Daftar Alumni',
-            url: '/alumni',
+            url: '/student/alumni',
             requiredPermission: 'graduations.read',
           },
         ],
@@ -201,7 +208,7 @@ export const menuSections: MenuSection[] = [
           },
           {
             title: 'Akun Guru',
-            url: '/teacher/accounts',
+            url: '/teacher/account',
             requiredPermission: 'teachers.read',
           },
         ],
@@ -209,80 +216,94 @@ export const menuSections: MenuSection[] = [
     ],
   },
 
-  // ──────────────────── PLATFORM SETTINGS ────────────────────
+  // ──────────────────── SETTINGS ────────────────────
   {
     label: 'Pengaturan',
     requiredPermission: 'occupations.read',
     items: [
       {
-        title: 'Referensi',
+        title: 'Ref. Kepegawaian',
         url: '#',
-        icon: ListChecks,
+        icon: Briefcase,
         items: [
           {
-            title: 'Pekerjaan',
-            url: '/occupations',
-            requiredPermission: 'occupations.read',
-          },
-          {
             title: 'Kategori Jabatan',
-            url: '/pengaturan/kategori-jabatan',
+            url: '/setting/position-category',
             requiredPermission: 'positions.read',
           },
           {
             title: 'Jabatan',
-            url: '/pengaturan/jabatan',
+            url: '/setting/position',
             requiredPermission: 'positions.read',
           },
           {
             title: 'Status Kepegawaian',
-            url: '/pengaturan/status-kepegawaian',
+            url: '/setting/employment-type',
             requiredPermission: 'teachers.read',
           },
           {
+            title: 'Pekerjaan',
+            url: '/setting/occupation',
+            requiredPermission: 'occupations.read',
+          },
+          {
             title: 'Tingkat Pendidikan',
-            url: '/pengaturan/tingkat-pendidikan',
+            url: '/setting/education-level',
             requiredPermission: 'educations.read',
           },
-          {
-            title: 'Tipe Sekolah',
-            url: '/pengaturan/tipe-sekolah',
-            requiredPermission: 'school-units.read',
-          },
-          {
-            title: 'Platform Sosial Media',
-            url: '/social-medias',
-            requiredPermission: 'social-media.read',
-          },
-          {
-            title: 'Agama',
-            url: '/pengaturan/religion',
-            requiredPermission: 'religions.read',
-          },
-          {
-            title: 'Golongan Darah',
-            url: '/pengaturan/blood-type',
-            requiredPermission: 'blood-types.read',
-          },
-          {
-            title: 'Tingkat Prestasi',
-            url: '/pengaturan/achievement-type',
-            requiredPermission: 'achievement-types.read',
-          },
-          {
-            title: 'Tipe Kalender',
-            url: '/pengaturan/academic-calendar-type',
-            requiredPermission: 'academic-calendar-types.read',
-          },
+        ],
+      },
+      {
+        title: 'Ref. Akademik',
+        url: '#',
+        icon: ListChecks,
+        items: [
           {
             title: 'Tipe Semester',
-            url: '/academic/semester-type',
+            url: '/setting/semester-type',
             requiredPermission: 'semesters.read',
           },
           {
             title: 'Tipe Jam',
-            url: '/pembelajaran/tipe-jam',
+            url: '/setting/time-slot-type',
             requiredPermission: 'time-slots.read',
+          },
+          {
+            title: 'Tipe Kalender',
+            url: '/setting/academic-calendar-type',
+            requiredPermission: 'academic-calendar-types.read',
+          },
+          {
+            title: 'Tingkat Prestasi',
+            url: '/setting/achievement-type',
+            requiredPermission: 'achievement-types.read',
+          },
+          {
+            title: 'Tipe Sekolah',
+            url: '/setting/school-unit-type',
+            requiredPermission: 'school-units.read',
+          },
+        ],
+      },
+      {
+        title: 'Ref. Profil',
+        url: '#',
+        icon: Globe,
+        items: [
+          {
+            title: 'Agama',
+            url: '/setting/religion',
+            requiredPermission: 'religions.read',
+          },
+          {
+            title: 'Golongan Darah',
+            url: '/setting/blood-type',
+            requiredPermission: 'blood-types.read',
+          },
+          {
+            title: 'Sosial Media',
+            url: '/setting/social-media',
+            requiredPermission: 'social-media.read',
           },
         ],
       },
@@ -294,22 +315,22 @@ export const menuSections: MenuSection[] = [
         items: [
           {
             title: 'Kelola Pengguna',
-            url: '/pengaturan/kelola-pengguna',
+            url: '/setting/user',
             requiredPermission: 'users.read',
           },
           {
             title: 'Manajemen Role',
-            url: '/pengaturan/roles',
+            url: '/setting/role',
             requiredPermission: 'roles.read',
           },
           {
             title: 'Manajemen Permission',
-            url: '/pengaturan/permissions',
+            url: '/setting/permission',
             requiredPermission: 'permissions.manage',
           },
           {
             title: 'Log Aktivitas',
-            url: '/pengaturan/audit-logs',
+            url: '/setting/audit-log',
             requiredPermission: 'audit-logs.read',
           },
         ],
@@ -324,7 +345,7 @@ export const menuSections: MenuSection[] = [
     items: [
       {
         title: 'Pengumuman',
-        url: '/pengumuman',
+        url: '/announcement',
         icon: Megaphone,
         requiredPermission: 'announcements.read',
       },
@@ -336,33 +357,39 @@ export const menuSections: MenuSection[] = [
       },
       {
         title: 'Kenaikan Kelas',
-        url: '/akademik/semester/kenaikan-kelas',
+        url: '/academic/semester/promotion',
         icon: GraduationCap,
         requiredPermission: 'graduations.read',
       },
       {
         title: 'Kalender Pendidikan',
-        url: '/akademik/kalender-pendidikan',
+        url: '/academic/education-calendar',
         icon: CalendarDays,
         requiredPermission: 'academic-calendars.read',
       },
       {
         title: 'Kalender Kegiatan',
-        url: '/akademik/kalender-kegiatan',
+        url: '/academic/event-calendar',
         icon: CalendarRange,
         requiredPermission: 'events.read',
       },
       {
         title: 'Data Orang Tua',
-        url: '/data-master/orang-tua',
+        url: '/data/parent',
         icon: UserRound,
         requiredPermission: 'parents.read',
       },
       {
         title: 'Relasi Orang Tua',
-        url: '/data-master/relasi-orang-tua',
+        url: '/data/parent-relation',
         icon: Link2,
         requiredPermission: 'parents.read',
+      },
+      {
+        title: 'Prestasi Siswa',
+        url: '/achievement',
+        icon: Trophy,
+        requiredPermission: 'achievements.read',
       },
     ],
   },
@@ -377,10 +404,10 @@ export const menuSections: MenuSection[] = [
         url: '#',
         icon: BookText,
         items: [
-          { title: 'Jadwal Pelajaran', url: '/jadwal' },
-          { title: 'Kehadiran', url: '/akademik/kehadiran' },
-          { title: 'Nilai', url: '/akademik/student-scores' },
-          { title: 'Rapor', url: '/akademik/rapor' },
+          { title: 'Jadwal Pelajaran', url: '/schedule' },
+          { title: 'Kehadiran', url: '/academic/attendance' },
+          { title: 'Nilai', url: '/academic/student-score' },
+          { title: 'Rapor', url: '/academic/report-card' },
         ],
       },
       {
@@ -388,12 +415,12 @@ export const menuSections: MenuSection[] = [
         url: '#',
         icon: Megaphone,
         items: [
-          { title: 'Pengumuman', url: '/pengumuman' },
+          { title: 'Pengumuman', url: '/announcement' },
           {
             title: 'Kalender Pendidikan',
-            url: '/akademik/kalender-pendidikan',
+            url: '/academic/education-calendar',
           },
-          { title: 'Kalender Kegiatan', url: '/akademik/kalender-kegiatan' },
+          { title: 'Kalender Kegiatan', url: '/academic/event-calendar' },
         ],
       },
     ],

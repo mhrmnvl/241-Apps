@@ -3,6 +3,14 @@ import ExcelJS from 'exceljs';
 import { ExportStudentQueryDto } from '../dto/request/export-student-query.dto.js';
 import { StudentRepository } from '../repositories/student.repository.js';
 
+declare module 'exceljs' {
+  interface Worksheet {
+    dataValidations: {
+      add(range: string, validation: ExcelJS.DataValidation): void;
+    };
+  }
+}
+
 type ExcelRow = Record<string, ExcelJS.CellValue>;
 
 @Injectable()
@@ -37,7 +45,7 @@ export class ExportStudentsUseCase {
         Tingkat: s.grade ? String(s.grade.level) : '',
         Kelas: latestEnrollment ? latestEnrollment.classroom.code : '',
         Status: s.status,
-        Username: user.identifier,
+        Identifier: user.identifier,
         'Akun Aktif': user.isActive ? 'Aktif' : 'Nonaktif',
       };
     });
@@ -65,6 +73,7 @@ export class ExportStudentsUseCase {
     const arrayBuffer = await workbook.xlsx.writeBuffer();
     return Buffer.from(arrayBuffer);
   }
+
   async buildImportTemplate(): Promise<Buffer> {
     const headers = [
       {
@@ -72,16 +81,80 @@ export class ExportStudentsUseCase {
         NISN: '',
         Nama: '',
         NIK: '',
-        'Jenis Kelamin': 'L | P',
+        'Jenis Kelamin': '',
         'Tempat Lahir': '',
-        'Tanggal Lahir': 'YYYY-MM-DD',
+        'Tanggal Lahir': '',
         Email: '',
         Telepon: '',
-        Tingkat: '7 | 8 | 9',
-        Username: '',
+        Tingkat: '',
+        Kelas: '',
+        Identifier: '',
         Password: '',
       },
     ];
-    return this.buildExcel(headers, 'Template Import Siswa');
+
+    const activeLevels = await this.repo.getActiveGradeLevels();
+    const levelsFormula =
+      activeLevels.length > 0 ? `"${activeLevels.join(',')}"` : '"7,8,9"';
+    const sampleLevel = activeLevels.length > 0 ? activeLevels[0] : 7;
+
+    const activeClassrooms = await this.repo.getActiveClassroomCodes();
+    const classroomsFormula =
+      activeClassrooms.length > 0 ? `"${activeClassrooms.join(',')}"` : '""';
+    const sampleClassroom =
+      activeClassrooms.length > 0 ? activeClassrooms[0] : '';
+
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Template Import Siswa');
+
+    const keys = Object.keys(headers[0]);
+    worksheet.columns = keys.map((key) => ({
+      header: key,
+      key,
+      width: 20,
+    }));
+    worksheet.addRows(headers);
+
+    // Set placeholder values on row 2
+    const row2 = worksheet.getRow(2);
+    row2.getCell('Jenis Kelamin').value = 'L';
+    row2.getCell('Tanggal Lahir').value = '2010-01-01';
+    row2.getCell('Tingkat').value = sampleLevel;
+    row2.getCell('Kelas').value = sampleClassroom;
+
+    // Add Data Validation for Jenis Kelamin (Col E) on rows 2 to 1000
+    worksheet.dataValidations.add('E2:E1000', {
+      type: 'list',
+      allowBlank: true,
+      formulae: ['"L,P"'],
+      showErrorMessage: true,
+      errorTitle: 'Pilihan Tidak Valid',
+      error: 'Silakan pilih L (Laki-laki) atau P (Perempuan).',
+    });
+
+    // Add Data Validation for Tingkat (Col J) on rows 2 to 1000
+    worksheet.dataValidations.add('J2:J1000', {
+      type: 'list',
+      allowBlank: true,
+      formulae: [levelsFormula],
+      showErrorMessage: true,
+      errorTitle: 'Tingkat Tidak Valid',
+      error: 'Silakan pilih tingkat sekolah yang sesuai dan aktif di sistem.',
+    });
+
+    // Add Data Validation for Kelas (Col K) on rows 2 to 1000
+    if (activeClassrooms.length > 0) {
+      worksheet.dataValidations.add('K2:K1000', {
+        type: 'list',
+        allowBlank: true,
+        formulae: [classroomsFormula],
+        showErrorMessage: true,
+        errorTitle: 'Kelas Tidak Valid',
+        error: 'Silakan pilih kode kelas yang sesuai dan aktif di sistem.',
+      });
+    }
+
+    const arrayBuffer = await workbook.xlsx.writeBuffer();
+    return Buffer.from(arrayBuffer);
   }
 }

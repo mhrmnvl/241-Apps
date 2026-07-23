@@ -12,6 +12,8 @@ import type {
   TeacherPositionUpdatePayload,
   Teacher,
   BulkImportResult,
+  ResolveBulkImportConflict,
+  ResolveBulkImportResult,
   PositionListItem,
 } from '../types'
 
@@ -45,7 +47,7 @@ export const teacherApi = {
   toggleActive: (id: string, isActive: boolean) => {
     return api.patch<ApiSingleResponse<Teacher>>(
       `/teachers/${id}/toggle-active`,
-      null,
+      {},
       {
         params: { isActive },
       },
@@ -71,6 +73,13 @@ export const teacherApi = {
     return api.post<ApiSingleResponse<BulkImportResult>>(
       '/teachers/bulk-import',
       formData,
+    )
+  },
+
+  resolveBulkImportConflicts: (conflicts: ResolveBulkImportConflict[]) => {
+    return api.post<ApiSingleResponse<ResolveBulkImportResult>>(
+      '/teachers/bulk-import/resolve',
+      { conflicts },
     )
   },
 

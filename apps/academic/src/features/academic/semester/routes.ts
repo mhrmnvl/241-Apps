@@ -1,8 +1,8 @@
-import type { RouteRecordRaw } from 'vue-router'
+﻿import type { RouteRecordRaw } from 'vue-router'
 
 export const semesterRoutes: RouteRecordRaw[] = [
   {
-    path: '/akademik/semester',
+    path: '/academic/semester',
     name: 'semester',
     component: () => import('./views/SemesterView.vue'),
     meta: {
@@ -12,7 +12,7 @@ export const semesterRoutes: RouteRecordRaw[] = [
     },
   },
   {
-    path: '/akademik/semester/kenaikan-kelas',
+    path: '/academic/semester/promotion',
     name: 'promotion',
     component: () => import('./views/PromotionView.vue'),
     meta: {

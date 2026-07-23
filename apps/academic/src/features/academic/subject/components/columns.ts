@@ -16,10 +16,12 @@ export const createSubjectColumns = (
     id: 'name',
     header: 'Nama Mata Pelajaran',
     accessorKey: 'name',
+    meta: { align: 'left' },
   },
   {
     id: 'teacher',
     header: 'Guru Pengampu',
+    meta: { align: 'left' },
     cell: ({ row }) => {
       const teachers = row.original.teachingAssignments
       if (teachers && teachers.length > 0) {

@@ -1,8 +1,8 @@
-import type { RouteRecordRaw } from 'vue-router'
+﻿import type { RouteRecordRaw } from 'vue-router'
 
 export const positionRoutes: RouteRecordRaw[] = [
   {
-    path: '/pengaturan/jabatan',
+    path: '/setting/position',
     name: 'positions',
     component: () => import('./views/PositionView.vue'),
     meta: {

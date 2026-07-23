@@ -26,12 +26,11 @@ const props = defineProps<{
 const route = useRoute()
 
 const activeItems = computed(() => {
-  const path = route.path
   const set = new Set<string>()
 
   for (const section of props.sections) {
     for (const item of section.items) {
-      if (item.items?.some((sub: SubMenuItem) => path.startsWith(sub.url))) {
+      if (item.items?.some((sub: SubMenuItem) => isSubActive(sub, item))) {
         set.add(item.title)
       }
     }
@@ -44,8 +43,18 @@ function isItemActive(item: MenuItem): boolean {
   return activeItems.value.has(item.title)
 }
 
-function isSubActive(sub: SubMenuItem): boolean {
-  return route.path.startsWith(sub.url) && sub.url !== '#'
+function isSubActive(sub: SubMenuItem, parentItem: MenuItem): boolean {
+  if (sub.url === '#') return false
+  const path = route.path
+
+  const hasBetterSiblingMatch = parentItem.items?.some((sibling) => {
+    if (sibling.url === sub.url || sibling.url === '#') return false
+    return sibling.url.length > sub.url.length && path.startsWith(sibling.url)
+  })
+
+  if (hasBetterSiblingMatch) return false
+
+  return path === sub.url || path.startsWith(sub.url + '/')
 }
 </script>
 
@@ -99,7 +108,7 @@ function isSubActive(sub: SubMenuItem): boolean {
               >
                 <SidebarMenuSubButton
                   as-child
-                  :is-active="isSubActive(subItem)"
+                  :is-active="isSubActive(subItem, item)"
                 >
                   <RouterLink :to="subItem.url">
                     <span>{{ subItem.title }}</span>

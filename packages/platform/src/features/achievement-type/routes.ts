@@ -1,8 +1,8 @@
-import type { RouteRecordRaw } from 'vue-router'
+﻿import type { RouteRecordRaw } from 'vue-router'
 
 export const achievementTypeRoutes: RouteRecordRaw[] = [
   {
-    path: '/pengaturan/achievement-type',
+    path: '/setting/achievement-type',
     name: 'AchievementTypeList',
     component: () => import('./views/AchievementTypeListView.vue'),
     meta: {

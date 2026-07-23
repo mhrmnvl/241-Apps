@@ -82,8 +82,8 @@ export interface StudentSavePayload {
   phone?: string
   gradeId?: string
   classroomId?: string
-  nis: string
-  nisn: string
+  nis?: string
+  nisn?: string
 }
 
 export interface StudentUpdatePayload {
@@ -136,7 +136,6 @@ export interface StudentExportParams {
 
 export interface StudentAccountUpdatePayload {
   isActive: boolean
-  password?: string
 }
 
 export interface StudentAccountEditData {
@@ -151,16 +150,50 @@ export interface StudentIdentityData {
   nisn?: string
 }
 
+export interface BulkImportStudentRow {
+  identifier: string
+  password: string
+  name: string
+  nik: string
+  gender: string
+  birthPlace: string
+  birthDate: string
+  email?: string
+  phone?: string
+  grade?: number
+  classroomCode?: string
+  nis: string
+  nisn: string
+}
+
+export interface BulkImportRowResult {
+  row: number
+  status: 'SUCCESS' | 'FAILED' | 'CONFLICT'
+  identifier?: string
+  error?: string
+  existingId?: string
+  data?: BulkImportStudentRow
+}
+
 export interface BulkImportResult {
   total: number
   success: number
   failed: number
-  results: {
-    row: number
-    status: string
-    identifier?: string
-    error?: string
-  }[]
+  conflict: number
+  results: BulkImportRowResult[]
+}
+
+export interface ResolveBulkImportConflict {
+  existingId: string
+  action: 'update' | 'skip'
+  data: BulkImportStudentRow
+}
+
+export interface ResolveBulkImportResult {
+  total: number
+  updated: number
+  skipped: number
+  errors: { existingId: string; error: string }[]
 }
 
 export interface StudentColumnActions {
@@ -171,8 +204,8 @@ export interface StudentColumnActions {
     student: Student,
     callbacks: { closeAlert: () => void; setLoading: (s: boolean) => void },
   ) => Promise<void>
+  onToggleActive?: (student: Student, isActive: boolean) => Promise<void>
   showActions?: boolean
-  /** Per-action gates — hide edit/delete when the user lacks that permission. */
   canUpdate?: boolean
   canDelete?: boolean
 }

@@ -37,6 +37,10 @@ describe('ExportStudentsUseCase', () => {
 
   const mockRepo = {
     findAllForExport: jest.fn(),
+    getActiveGradeLevels: jest.fn().mockResolvedValue([7, 8, 9]),
+    getActiveClassroomCodes: jest
+      .fn()
+      .mockResolvedValue(['VII-A', 'VII-B', 'VIII-A']),
   };
 
   beforeEach(async () => {

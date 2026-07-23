@@ -34,7 +34,6 @@ model AdmissionWave {
   name                String    @db.VarChar(100)
   code                String    @unique @db.VarChar(30)
   academicYearId      String    @map("academic_year_id") @db.Uuid
-  schoolUnitId        String?   @map("school_unit_id") @db.Uuid
   startDate           DateTime  @map("start_date") @db.Date
   endDate             DateTime  @map("end_date") @db.Date
   quota               Int
@@ -50,7 +49,6 @@ model AdmissionWave {
   announcements AdmissionAnnouncement[]
 
   academicYear AcademicYear @relation(fields: [academicYearId], references: [id])
-  schoolUnit   SchoolUnit?  @relation(fields: [schoolUnitId], references: [id])
 
   @@index([isActive])
   @@map("admission_waves")

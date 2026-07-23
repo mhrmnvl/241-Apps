@@ -141,7 +141,7 @@ describe('BulkImportStudentsUseCase', () => {
       expect(result.results[0].error).toContain('tidak ditemukan');
     });
 
-    it('should fail row when NIS is duplicated', async () => {
+    it('should flag row as CONFLICT when NIS is duplicated', async () => {
       mockClassroomRepo.findByCode.mockResolvedValue({
         id: 'cls-1',
         code: 'VII-A',
@@ -153,11 +153,14 @@ describe('BulkImportStudentsUseCase', () => {
       const buffer = await makeExcelBuffer([validRow]);
       const result = await useCase.execute(buffer);
 
-      expect(result.failed).toBe(1);
+      expect(result.failed).toBe(0);
+      expect(result.conflict).toBe(1);
+      expect(result.results[0].status).toBe('CONFLICT');
+      expect(result.results[0].existingId).toBe('stu-existing');
       expect(result.results[0].error).toContain('NIS');
     });
 
-    it('should fail row when NISN is duplicated', async () => {
+    it('should flag row as CONFLICT when NISN is duplicated', async () => {
       mockClassroomRepo.findByCode.mockResolvedValue({
         id: 'cls-1',
         code: 'VII-A',
@@ -169,7 +172,10 @@ describe('BulkImportStudentsUseCase', () => {
       const buffer = await makeExcelBuffer([validRow]);
       const result = await useCase.execute(buffer);
 
-      expect(result.failed).toBe(1);
+      expect(result.failed).toBe(0);
+      expect(result.conflict).toBe(1);
+      expect(result.results[0].status).toBe('CONFLICT');
+      expect(result.results[0].existingId).toBe('stu-existing');
       expect(result.results[0].error).toContain('NISN');
     });
 

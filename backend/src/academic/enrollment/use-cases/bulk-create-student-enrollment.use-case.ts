@@ -36,10 +36,12 @@ export class BulkCreateStudentEnrollmentUseCase {
     }
 
     const created =
-      toCreate.length > 0 ? await this.repo.createMany(toCreate) : [];
+      toCreate.length > 0
+        ? await this.repo.createMany(toCreate)
+        : { count: 0 };
 
     return {
-      created: created.length + restored.length,
+      created: created.count + restored.length,
       skipped: skipped.length,
       errors: skipped.map(
         (sid) => `Student ${sid} is already enrolled in this semester`,

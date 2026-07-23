@@ -8,6 +8,7 @@ import {
   IsString,
   MaxLength,
   MinLength,
+  Matches,
 } from 'class-validator';
 
 export class BulkImportTeacherRowDto {
@@ -50,6 +51,9 @@ export class BulkImportTeacherRowDto {
 
   @IsOptional()
   @IsString()
+  @Matches(/^[0-9+]+$/, {
+    message: 'phone must contain only numbers or +',
+  })
   @MaxLength(15)
   phone?: string;
 

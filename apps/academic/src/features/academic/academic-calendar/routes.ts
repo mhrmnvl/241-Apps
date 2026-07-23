@@ -1,8 +1,8 @@
-import type { RouteRecordRaw } from 'vue-router'
+﻿import type { RouteRecordRaw } from 'vue-router'
 
 export const academicCalendarRoutes: RouteRecordRaw[] = [
   {
-    path: '/akademik/kalender-pendidikan',
+    path: '/academic/education-calendar',
     name: 'academic-calendar',
     component: () => import('./views/AcademicCalendarView.vue'),
     meta: {

@@ -14,10 +14,12 @@ export const createColumns = (
   {
     accessorKey: 'code',
     header: 'Kode Kategori',
+    meta: { align: 'center' },
   },
   {
     accessorKey: 'name',
     header: 'Nama Kategori',
+    meta: { align: 'left' },
   },
   ...(showActions
     ? [

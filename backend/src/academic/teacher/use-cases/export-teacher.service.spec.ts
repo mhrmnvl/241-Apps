@@ -29,6 +29,9 @@ describe('ExportTeachersUseCase', () => {
 
   const mockRepo = {
     findAllForExport: jest.fn(),
+    getActiveEmploymentTypeCodes: jest
+      .fn()
+      .mockResolvedValue(['PNS', 'PPPK', 'NON_ASN']),
   };
 
   beforeEach(async () => {

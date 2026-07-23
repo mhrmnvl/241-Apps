@@ -23,6 +23,7 @@ export const createColumns = (
   {
     id: 'name',
     header: 'Nama Lengkap',
+    meta: { align: 'left' },
     cell: ({ row }) => row.original.user?.profile?.name ?? '-',
     accessorFn: (row) => row.user?.profile?.name,
   },
@@ -100,6 +101,7 @@ export const createAccountColumns = (
   {
     id: 'name',
     header: 'Nama Lengkap',
+    meta: { align: 'left' },
     cell: ({ row }) => row.original.user?.profile?.name || '-',
     accessorFn: (row) => row.user?.profile?.name,
   },
@@ -130,13 +132,16 @@ export const createAccountColumns = (
           header: 'Opsi',
           cell: ({ row }: { row: { original: Teacher } }) => {
             const teacher = row.original
+            const isActive = teacher.user?.isActive ?? false
             return h(ActionCell, {
-              hideEdit: actions.canUpdate === false,
+              hideEdit: true,
               hideDelete: actions.canDelete === false,
+              manageLabel: isActive ? 'Nonaktifkan' : 'Aktifkan',
               deleteTitle: 'Hapus Akun Guru?',
               deleteDescription: `Yakin ingin menghapus akun "${teacher.user?.identifier || ''}"? Tindakan ini tidak dapat dibatalkan.`,
-              onEdit: () => {
-                if (actions.onEdit) actions.onEdit(teacher)
+              onManage: () => {
+                if (actions.onToggleActive)
+                  actions.onToggleActive(teacher, !isActive)
               },
               onDelete: (callbacks: {
                 closeAlert: () => void
@@ -151,3 +156,5 @@ export const createAccountColumns = (
       ]
     : []),
 ]
+
+

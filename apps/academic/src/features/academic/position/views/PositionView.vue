@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue'
 import { DataTable } from '@/ui'
 import { Button } from '@/ui/button'
@@ -15,7 +15,7 @@ import { watchDebounced } from '@vueuse/core'
 
 const breadcrumbs = [
   { title: 'Pengaturan', href: '#' },
-  { title: 'Jabatan', href: '/pengaturan/jabatan' },
+  { title: 'Jabatan', href: '/setting/position' },
 ]
 
 const { items, loading, searchQuery, fetchPositions, deletePosition } =

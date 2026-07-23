@@ -12,6 +12,7 @@ import type {
 import { classroomApi } from '@/features/academic/classroom'
 import { semesterApi } from '@/features/academic/semester'
 import { studentScoreApi } from '@/features/academic/student-score'
+import type { StudentScoreItem } from '@/features/academic/student-score/types'
 
 export const raporService = {
   fetchFilterOptions: async () => {
@@ -193,7 +194,7 @@ export const raporService = {
       const res = await studentScoreApi.getScores({ enrollmentId, limit: 100 })
       const rawScores = res.data?.data ?? []
       return rawScores.map(
-        (s): RaporScoreRow => ({
+        (s: StudentScoreItem): RaporScoreRow => ({
           subject: s.assessmentItem?.name ?? '-',
           type: s.assessmentItem?.type ?? '-',
           score: s.score,

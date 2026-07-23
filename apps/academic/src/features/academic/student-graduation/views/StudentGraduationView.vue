@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import type { StudentGraduation, StudentGraduationSavePayload } from '../types'
 import StudentGraduationFormDialog from '../components/StudentGraduationFormDialog.vue'
 import { createStudentGraduationColumns } from '../components/columns'
@@ -16,7 +16,7 @@ import { computed, onMounted, ref, watch } from 'vue'
 
 const breadcrumbs = [
   { title: 'Data Master', href: '#' },
-  { title: 'Daftar Alumni', href: '/alumni' },
+  { title: 'Daftar Alumni', href: '/student/alumni' },
 ]
 
 const {

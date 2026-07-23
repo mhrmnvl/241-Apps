@@ -25,7 +25,7 @@ import {
 
 import { JwtAuthGuard } from '../../auth/index.js';
 import { CurrentUser } from '../../../core/decorators/current-user.decorator.js';
-import { RequirePermissions } from '../../access-control/permissions/decorators/require-permissions.decorator.js';
+import { RequirePermissions } from '../../access-control/permission/decorators/require-permissions.decorator.js';
 import type { AuthenticatedUser } from '../../../core/types/authenticated-user.type.js';
 
 import { FileResponseDto } from '../dto/response/file-response.dto.js';

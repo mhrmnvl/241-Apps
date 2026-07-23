@@ -14,10 +14,12 @@ export const createColumns = (
   {
     accessorKey: 'code',
     header: 'Kode Status',
+    meta: { align: 'center' },
   },
   {
     accessorKey: 'name',
     header: 'Status Kepegawaian',
+    meta: { align: 'left' },
   },
   ...(showActions
     ? [

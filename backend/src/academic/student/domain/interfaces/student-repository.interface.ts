@@ -67,4 +67,6 @@ export abstract class IStudentRepository {
     dto: UpdateProfileDto,
   ): Promise<Profile | null>;
   abstract softDelete(id: string, userId: string): Promise<[Student, User]>;
+  abstract getActiveGradeLevels(): Promise<number[]>;
+  abstract getActiveClassroomCodes(): Promise<string[]>;
 }

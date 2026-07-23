@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import type { AcademicYear } from '../types'
 import AcademicYearFormSheet from '../components/AcademicYearFormSheet.vue'
 import { createAcademicYearColumns } from '../components/columns'
@@ -23,7 +23,7 @@ import { onMounted, ref, watch } from 'vue'
 
 const breadcrumbs = [
   { title: 'Akademik', href: '#' },
-  { title: 'Tahun Ajaran', href: '/akademik/tahun-ajaran' },
+  { title: 'Tahun Ajaran', href: '/academic/academic-year' },
 ]
 
 const {

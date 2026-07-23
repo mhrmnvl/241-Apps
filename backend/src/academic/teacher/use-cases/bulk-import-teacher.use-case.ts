@@ -34,6 +34,21 @@ export class BulkImportTeachersUseCase {
       const rawRow: MappedRow = this.mapColumns(rows[i]);
 
       const dto = plainToInstance(BulkImportTeacherRowDto, rawRow);
+      const [dupUsername, dupNik, dupNip, dupNuptk] = await Promise.all([
+        dto.identifier ? this.repo.findUserByIdentifier(dto.identifier) : null,
+        dto.nik ? this.repo.findProfileByNik(dto.nik) : null,
+        dto.nip ? this.repo.findByNip(dto.nip) : null,
+        dto.nuptk ? this.repo.findByNuptk(dto.nuptk) : null,
+      ]);
+
+      const existingId = dupNip
+        ? dupNip.id
+        : dupNuptk
+          ? dupNuptk.id
+          : dupNik
+            ? (await this.repo.findByUserId(dupNik.userId))?.id
+            : undefined;
+
       const errors = await validate(dto, {
         whitelist: true,
         forbidNonWhitelisted: false,
@@ -44,59 +59,57 @@ export class BulkImportTeachersUseCase {
           .map((e) => Object.values(e.constraints ?? {}).join(', '))
           .join('; ');
 
+        let conflictMsg = '';
+        if (dupUsername) {
+          conflictMsg = `; Username "${dto.identifier}" is already taken`;
+        } else if (dupNik || dupNip || dupNuptk) {
+          conflictMsg = `; ${
+            dupNip
+              ? `NIP "${dto.nip}" is already registered`
+              : dupNuptk
+                ? `NUPTK "${dto.nuptk}" is already registered`
+                : `NIK "${dto.nik}" is already registered`
+          }`;
+        }
+
         results.push({
           row: rowNumber,
           status: 'FAILED',
           identifier: rawRow.identifier,
-          error: `Validation failed: ${messages}`,
+          existingId,
+          data: dto,
+          error: `Validation failed: ${messages}${conflictMsg}`,
         });
         continue;
       }
 
       try {
-        const [dupUsername, dupNik, dupNip, dupNuptk] = await Promise.all([
-          this.repo.findUserByIdentifier(dto.identifier),
-          this.repo.findProfileByNik(dto.nik),
-          dto.nip ? this.repo.findByNip(dto.nip) : null,
-          dto.nuptk ? this.repo.findByNuptk(dto.nuptk) : null,
-        ]);
+        if (dupNik || dupNip || dupNuptk) {
+          if (existingId) {
+            results.push({
+              row: rowNumber,
+              status: 'CONFLICT',
+              identifier: dto.identifier,
+              existingId,
+              data: dto,
+              error: dupNip
+                ? `NIP "${dto.nip}" is already registered`
+                : dupNuptk
+                  ? `NUPTK "${dto.nuptk}" is already registered`
+                  : `NIK "${dto.nik}" is already registered`,
+            });
+            continue;
+          }
+        }
 
         if (dupUsername) {
           results.push({
             row: rowNumber,
             status: 'FAILED',
             identifier: dto.identifier,
+            existingId,
+            data: dto,
             error: `Identifier "${dto.identifier}" is already taken`,
-          });
-          continue;
-        }
-
-        if (dupNik) {
-          results.push({
-            row: rowNumber,
-            status: 'FAILED',
-            identifier: dto.identifier,
-            error: `NIK "${dto.nik}" is already registered`,
-          });
-          continue;
-        }
-
-        if (dupNip) {
-          results.push({
-            row: rowNumber,
-            status: 'FAILED',
-            identifier: dto.identifier,
-            error: `NIP "${dto.nip}" is already registered`,
-          });
-          continue;
-        }
-
-        if (dupNuptk) {
-          results.push({
-            row: rowNumber,
-            status: 'FAILED',
-            identifier: dto.identifier,
-            error: `NUPTK "${dto.nuptk}" is already registered`,
           });
           continue;
         }
@@ -109,19 +122,18 @@ export class BulkImportTeachersUseCase {
           employmentTypeId,
         };
 
-        const hashedPassword = await hashPassword(dto.password);
-        await this.repo.create(createDto, hashedPassword);
-
         results.push({
           row: rowNumber,
           status: 'SUCCESS',
           identifier: dto.identifier,
+          data: dto,
         });
       } catch {
         results.push({
           row: rowNumber,
           status: 'FAILED',
           identifier: dto.identifier,
+          data: dto,
           error: 'Unexpected error during import',
         });
       }
@@ -129,8 +141,9 @@ export class BulkImportTeachersUseCase {
 
     const success = results.filter((r) => r.status === 'SUCCESS').length;
     const failed = results.filter((r) => r.status === 'FAILED').length;
+    const conflict = results.filter((r) => r.status === 'CONFLICT').length;
 
-    return { total: results.length, success, failed, results };
+    return { total: results.length, success, failed, conflict, results };
   }
   private mapColumns(row: ExcelRow): MappedRow {
     const pick = (...keys: string[]): ExcelJS.CellValue =>

@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { ref } from 'vue'
 import TimeSlotManageTable from '../components/TimeSlotManageTable.vue'
 import AppLayout from '@/layouts/AppLayout.vue'
@@ -9,7 +9,7 @@ import { useRoleGuard } from '@/shared/composables/useRoleGuard'
 
 const breadcrumbs = [
   { title: 'Pembelajaran', href: '#' },
-  { title: 'Jam Pelajaran', href: '/pembelajaran/jam-pelajaran' },
+  { title: 'Jam Pelajaran', href: '/learning/time-slot' },
 ]
 
 const { can } = useRoleGuard()
@@ -25,15 +25,9 @@ const tableRef = ref<InstanceType<typeof TimeSlotManageTable> | null>(null)
         <CardHeader
           class="flex flex-row items-center justify-between border-b px-6 py-5"
         >
-          <div class="space-y-1.5">
-            <CardTitle class="text-2xl font-bold tracking-tight">
-              Jam Pelajaran
-            </CardTitle>
-            <p class="text-sm text-muted-foreground">
-              Atur daftar jam pelajaran langsung pada tabel — tambah, ubah, dan
-              simpan semua sekaligus di bagian bawah.
-            </p>
-          </div>
+          <CardTitle class="text-2xl font-bold tracking-tight">
+            Jam Pelajaran
+          </CardTitle>
           <Button
             v-if="can('time-slots.create')"
             @click="tableRef?.addRow"

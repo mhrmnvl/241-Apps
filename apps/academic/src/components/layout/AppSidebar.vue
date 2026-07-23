@@ -8,7 +8,6 @@ import { semesterApi } from '@/features/academic/semester/api/semesterApi'
 import type { AcademicYear } from '@/features/academic/academic-year'
 import type { Semester } from '@/features/academic/semester'
 import NavMain from './NavMain.vue'
-import { ScrollArea } from '@/ui/scroll-area'
 import {
   Sidebar,
   SidebarContent,
@@ -28,12 +27,25 @@ const { user, syncAuthenticatedUserProfile } = useAuthSession()
 const { filteredSections } = useMenuVisibility()
 const activeAcademicInfo = ref({ academicYear: 'Memuat...', semester: '' })
 
+const scrollContainer = ref<HTMLDivElement | null>(null)
+const STORAGE_KEY = 'sidebar-scroll-position'
+
 onMounted(() => {
   if (user.value) {
     void syncAuthenticatedUserProfile()
     void fetchActiveAcademicInfo()
   }
+
+  const saved = sessionStorage.getItem(STORAGE_KEY)
+  if (saved && scrollContainer.value) {
+    scrollContainer.value.scrollTop = parseInt(saved, 10)
+  }
 })
+
+function handleScroll(e: Event) {
+  const target = e.target as HTMLDivElement
+  sessionStorage.setItem(STORAGE_KEY, String(target.scrollTop))
+}
 
 async function fetchActiveAcademicInfo() {
   try {
@@ -103,9 +115,13 @@ async function fetchActiveAcademicInfo() {
       </SidebarMenu>
     </SidebarHeader>
     <SidebarContent>
-      <ScrollArea class="h-full w-full">
+      <div
+        ref="scrollContainer"
+        class="h-full w-full overflow-y-auto"
+        @scroll="handleScroll"
+      >
         <NavMain :sections="filteredSections" />
-      </ScrollArea>
+      </div>
     </SidebarContent>
   </Sidebar>
 </template>

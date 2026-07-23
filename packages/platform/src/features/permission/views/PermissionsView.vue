@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { toast } from 'vue-sonner'
 import AppLayout from '@/layouts/AppLayout.vue'
@@ -18,7 +18,7 @@ import type {
 
 const breadcrumbs = [
   { title: 'Pengaturan', href: '#' },
-  { title: 'Manajemen Permission', href: '/pengaturan/permissions' },
+  { title: 'Manajemen Permission', href: '/setting/permission' },
 ]
 
 const permissions = ref<Permission[]>([])

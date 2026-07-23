@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { DataTable } from '@/ui'
@@ -17,7 +17,7 @@ import type { Announcement, AnnouncementSavePayload } from '../types'
 
 const breadcrumbs = [
   { title: 'Utama', href: '#' },
-  { title: 'Pengumuman', href: '/pengumuman' },
+  { title: 'Pengumuman', href: '/announcement' },
 ]
 
 const {

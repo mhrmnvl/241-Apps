@@ -17,6 +17,7 @@ import { UpdateTeacherUseCase } from './use-cases/update-teacher.use-case.js';
 import { UpdateTeacherProfileUseCase } from './use-cases/update-teacher-profile.use-case.js';
 import { ToggleTeacherActiveUseCase } from './use-cases/toggle-teacher-active.use-case.js';
 import { BulkImportTeachersUseCase } from './use-cases/bulk-import-teacher.use-case.js';
+import { ResolveBulkImportConflictsUseCase } from './use-cases/resolve-bulk-import-conflicts.use-case.js';
 import { ExportTeachersUseCase } from './use-cases/export-teacher.use-case.js';
 import { TeacherAddressUseCase } from './use-cases/teacher-address.use-case.js';
 import { TeacherPositionUseCase } from './use-cases/teacher-position.use-case.js';
@@ -46,6 +47,7 @@ import { TeacherPositionUseCase } from './use-cases/teacher-position.use-case.js
     UpdateTeacherProfileUseCase,
     ToggleTeacherActiveUseCase,
     BulkImportTeachersUseCase,
+    ResolveBulkImportConflictsUseCase,
     ExportTeachersUseCase,
     TeacherAddressUseCase,
     TeacherPositionUseCase,

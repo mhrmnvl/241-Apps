@@ -3,7 +3,6 @@ import type { SidebarProps } from '@/ui/sidebar'
 
 import { useAuthSession } from '@/features/platform/auth'
 import NavMain from './NavMain.vue'
-import { ScrollArea } from '@/ui/scroll-area'
 import {
   Sidebar,
   SidebarContent,
@@ -14,7 +13,7 @@ import {
 } from '@/ui/sidebar'
 import { menuSections } from '@/config/menuConfig'
 import type { MenuSection, MenuItem, SubMenuItem } from '@/config/menuConfig'
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 
 const props = withDefaults(defineProps<SidebarProps>(), {
   variant: 'sidebar',
@@ -22,6 +21,9 @@ const props = withDefaults(defineProps<SidebarProps>(), {
 })
 
 const { user, syncAuthenticatedUserProfile } = useAuthSession()
+
+const scrollContainer = ref<HTMLDivElement | null>(null)
+const STORAGE_KEY = 'sidebar-scroll-position'
 
 const userRoles = computed(() => user.value?.roles ?? [])
 const userPermissions = computed(() => user.value?.permissions ?? [])
@@ -80,7 +82,17 @@ onMounted(() => {
   if (user.value) {
     void syncAuthenticatedUserProfile()
   }
+
+  const saved = sessionStorage.getItem(STORAGE_KEY)
+  if (saved && scrollContainer.value) {
+    scrollContainer.value.scrollTop = parseInt(saved, 10)
+  }
 })
+
+function handleScroll(e: Event) {
+  const target = e.target as HTMLDivElement
+  sessionStorage.setItem(STORAGE_KEY, String(target.scrollTop))
+}
 </script>
 
 <template>
@@ -112,9 +124,13 @@ onMounted(() => {
       </SidebarMenu>
     </SidebarHeader>
     <SidebarContent>
-      <ScrollArea class="h-full w-full">
+      <div
+        ref="scrollContainer"
+        class="h-full w-full overflow-y-auto"
+        @scroll="handleScroll"
+      >
         <NavMain :sections="filteredSections" />
-      </ScrollArea>
+      </div>
     </SidebarContent>
   </Sidebar>
 </template>

@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import type {
   PromotionPayload,
   PromotionResult,
@@ -33,8 +33,8 @@ import { useRouter } from 'vue-router'
 
 const breadcrumbs = [
   { title: 'Akademik', href: '#' },
-  { title: 'Semester', href: '/akademik/semester' },
-  { title: 'Kenaikan Kelas', href: '/akademik/semester/kenaikan-kelas' },
+  { title: 'Semester', href: '/academic/semester' },
+  { title: 'Kenaikan Kelas', href: '/academic/semester/promotion' },
 ]
 
 const router = useRouter()
@@ -127,7 +127,7 @@ async function handleExecute() {
 
 function handleDone() {
   showResultDialog.value = false
-  void router.push('/akademik/semester')
+  void router.push('/academic/semester')
 }
 
 function onDecisionsUpdate(decisions: PromotionStudentDecision[]) {

@@ -49,6 +49,7 @@ import {
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
+  Search,
 } from 'lucide-vue-next'
 
 const props = withDefaults(
@@ -63,9 +64,11 @@ const props = withDefaults(
     hidePerPage?: boolean
     hidePagination?: boolean
     isLoading?: boolean
+    pageSize?: number
   }>(),
   {
     page: 1,
+    pageSize: 10,
   },
 )
 
@@ -82,7 +85,7 @@ const columnPinning = ref<ColumnPinningState>({ right: ['actions'] })
 
 const pagination = ref({
   pageIndex: 0,
-  pageSize: 10,
+  pageSize: props.pageSize,
 })
 
 const table = useVueTable({
@@ -138,6 +141,7 @@ const table = useVueTable({
       )
     }, 0)
   },
+
   state: {
     get sorting() {
       return sorting.value
@@ -190,6 +194,18 @@ watch(
   },
 )
 
+watch(
+  () => props.pageSize,
+  (newSize) => {
+    if (newSize !== undefined) {
+      pagination.value = {
+        ...pagination.value,
+        pageSize: newSize,
+      }
+    }
+  },
+)
+
 const setPage = (val: number) => {
   pagination.value = {
     ...pagination.value,
@@ -213,13 +229,18 @@ defineExpose({ table })
   <div class="flex flex-col gap-4">
     <div
       v-if="!hidePerPage || showFilterInput || $slots['header-right']"
-      class="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2 sm:gap-4 w-full"
+      class="flex flex-row justify-between items-center gap-4 w-full"
     >
       <div
         v-if="!hidePerPage"
-        class="flex items-center gap-2"
+        class="flex items-center gap-2 shrink-0"
       >
-        <span class="text-xs text-muted-foreground whitespace-nowrap">
+        <span class="text-xs text-muted-foreground whitespace-nowrap sm:hidden">
+          Baris
+        </span>
+        <span
+          class="text-xs text-muted-foreground whitespace-nowrap hidden sm:inline"
+        >
           Baris per halaman
         </span>
         <Select
@@ -241,20 +262,30 @@ defineExpose({ table })
         </Select>
       </div>
 
-      <div class="flex items-center gap-2 w-full sm:w-auto sm:ml-auto">
+      <div
+        class="flex items-center gap-2 w-full sm:w-auto sm:ml-auto justify-end"
+      >
         <slot name="header-right">
-          <Input
+          <div
             v-if="showFilterInput"
-            :placeholder="filterPlaceholder"
-            :model-value="
-              (table.getColumn(filterColumnKey)?.getFilterValue() as string) ??
-              ''
-            "
-            class="h-8 w-full sm:w-44 sm:max-w-none text-sm"
-            @update:model-value="
-              table.getColumn(filterColumnKey)?.setFilterValue($event)
-            "
-          />
+            class="relative w-full sm:w-48 max-w-[200px]"
+          >
+            <Search
+              class="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+            />
+            <Input
+              :placeholder="filterPlaceholder"
+              :model-value="
+                (table
+                  .getColumn(filterColumnKey)
+                  ?.getFilterValue() as string) ?? ''
+              "
+              class="h-8 pl-8 w-full text-xs"
+              @update:model-value="
+                table.getColumn(filterColumnKey)?.setFilterValue($event)
+              "
+            />
+          </div>
         </slot>
       </div>
     </div>
@@ -270,7 +301,7 @@ defineExpose({ table })
             <TableHead
               v-for="header in headerGroup.headers"
               :key="header.id"
-              class="px-4"
+              class="px-4 text-center"
               :class="[
                 {
                   'w-[1%] whitespace-nowrap text-center':

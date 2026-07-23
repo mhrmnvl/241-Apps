@@ -1,8 +1,8 @@
-import type { RouteRecordRaw } from 'vue-router'
+﻿import type { RouteRecordRaw } from 'vue-router'
 
 export const socialMediaRoutes: RouteRecordRaw[] = [
   {
-    path: '/social-medias',
+    path: '/setting/social-media',
     name: 'SocialMedia',
     component: () => import('./views/SocialMediaView.vue'),
     meta: {

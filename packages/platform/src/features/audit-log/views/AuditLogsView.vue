@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { h, onMounted, ref, watch } from 'vue'
 import { watchDebounced } from '@vueuse/core'
 import { toast } from 'vue-sonner'
@@ -17,7 +17,7 @@ import type { ColumnDef } from '@tanstack/vue-table'
 
 const breadcrumbs = [
   { title: 'Pengaturan', href: '#' },
-  { title: 'Log Aktivitas', href: '/pengaturan/audit-logs' },
+  { title: 'Log Aktivitas', href: '/setting/audit-log' },
 ]
 
 const logs = ref<AuditLog[]>([])

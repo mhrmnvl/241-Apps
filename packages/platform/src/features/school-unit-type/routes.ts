@@ -1,8 +1,8 @@
-import type { RouteRecordRaw } from 'vue-router'
+﻿import type { RouteRecordRaw } from 'vue-router'
 
 export const schoolUnitTypeRoutes: RouteRecordRaw[] = [
   {
-    path: '/pengaturan/tipe-sekolah',
+    path: '/setting/school-unit-type',
     name: 'SchoolUnitTypeList',
     component: () => import('./views/SchoolUnitTypeListView.vue'),
     meta: {

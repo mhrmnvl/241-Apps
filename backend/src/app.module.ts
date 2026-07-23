@@ -46,11 +46,11 @@ import { TeachingAssignmentModule } from './academic/teaching-assignment/teachin
 import { UserModule } from './platform/user/user.module.js';
 import { GradeModule } from './academic/grade/grade.module.js';
 import { RoleModule } from './platform/access-control/role/role.module.js';
-import { PermissionsModule } from './platform/access-control/permissions/permissions.module.js';
+import { PermissionModule } from './platform/access-control/permission/permission.module.js';
 import { SessionModule } from './platform/session/session.module.js';
 import { AuditLogModule } from './platform/audit-log/audit-log.module.js';
 import { JwtAuthGuard } from './platform/auth/index.js';
-import { PermissionsGuard } from './platform/access-control/permissions/guards/permissions.guard.js';
+import { PermissionGuard } from './platform/access-control/permission/guards/permission.guard.js';
 import { SettingsModule } from './platform/settings/settings.module.js';
 import { NotificationModule } from './platform/notification/notification.module.js';
 import { FileModule } from './platform/file/file.module.js';
@@ -104,7 +104,7 @@ import { AdmissionModule } from './admission/admission.module.js';
     AuthModule,
     UserModule,
     RoleModule,
-    PermissionsModule,
+    PermissionModule,
     SessionModule,
     AuditLogModule,
     TeacherModule,
@@ -159,7 +159,7 @@ import { AdmissionModule } from './admission/admission.module.js';
     },
     {
       provide: APP_GUARD,
-      useClass: PermissionsGuard,
+      useClass: PermissionGuard,
     },
     {
       provide: APP_FILTER,

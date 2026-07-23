@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import type {
   TeachingAssignment,
   TeachingAssignmentSavePayload,
@@ -19,7 +19,7 @@ import { computed, onMounted, ref, watch } from 'vue'
 
 const breadcrumbs = [
   { title: 'Pembelajaran', href: '#' },
-  { title: 'Penugasan Mengajar', href: '/pembelajaran/penugasan-mengajar' },
+  { title: 'Penugasan Mengajar', href: '/learning/teaching-assignment' },
 ]
 
 const {

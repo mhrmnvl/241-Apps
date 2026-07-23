@@ -1,4 +1,4 @@
-import { RequirePermissions } from '../../../platform/access-control/permissions/decorators/require-permissions.decorator.js';
+import { RequirePermissions } from '../../../platform/access-control/permission/decorators/require-permissions.decorator.js';
 import {
   Body,
   Controller,
@@ -44,7 +44,10 @@ import {
 } from '../dto/response/teacher-response.dto.js';
 import { ExportTeacherQueryDto } from '../dto/request/export-teacher-query.dto.js';
 import { UpdateTeacherDto } from '../dto/request/update-teacher.dto.js';
+import { ResolveBulkImportConflictsDto } from '../dto/request/resolve-bulk-import-conflicts.dto.js';
+import { ResolveBulkImportResponseDto } from '../dto/response/resolve-bulk-import-response.dto.js';
 import { BulkImportTeachersUseCase } from '../use-cases/bulk-import-teacher.use-case.js';
+import { ResolveBulkImportConflictsUseCase } from '../use-cases/resolve-bulk-import-conflicts.use-case.js';
 import { CreateTeacherUseCase } from '../use-cases/create-teacher.use-case.js';
 import { DeleteTeacherUseCase } from '../use-cases/delete-teacher.use-case.js';
 import { ExportTeachersUseCase } from '../use-cases/export-teacher.use-case.js';
@@ -72,6 +75,7 @@ export class TeacherController {
     private readonly toggleTeacherActiveUseCase: ToggleTeacherActiveUseCase,
     private readonly updateProfileUseCase: UpdateTeacherProfileUseCase,
     private readonly bulkImportTeachersUseCase: BulkImportTeachersUseCase,
+    private readonly resolveBulkImportConflictsUseCase: ResolveBulkImportConflictsUseCase,
     private readonly exportTeachersUseCase: ExportTeachersUseCase,
   ) {}
 
@@ -189,6 +193,21 @@ export class TeacherController {
     @CurrentUser() creator: AuthenticatedUser,
   ): Promise<BulkImportTeachersResponseDto> {
     return this.bulkImportTeachersUseCase.execute(file.buffer);
+  }
+
+  @Post('bulk-import/resolve')
+  @RequirePermissions('teachers.update')
+  @ApiOperation({
+    summary:
+      'Resolve CONFLICT rows from a bulk import: update the matching ' +
+      'teacher or skip it',
+  })
+  @ApiResponse({ status: 201, type: ResolveBulkImportResponseDto })
+  async resolveBulkImportConflicts(
+    @CurrentUser() user: AuthenticatedUser,
+    @Body() dto: ResolveBulkImportConflictsDto,
+  ): Promise<ResolveBulkImportResponseDto> {
+    return this.resolveBulkImportConflictsUseCase.execute(dto);
   }
 
   @Patch(':id')

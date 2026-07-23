@@ -1,8 +1,8 @@
-import type { RouteRecordRaw } from 'vue-router'
+﻿import type { RouteRecordRaw } from 'vue-router'
 
 export const gradeRoutes: RouteRecordRaw[] = [
   {
-    path: '/akademik/tingkat-kelas',
+    path: '/academic/grade',
     name: 'grade',
     component: () => import('./views/GradeView.vue'),
     meta: {

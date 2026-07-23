@@ -1,5 +1,5 @@
 import { studentService } from '../services/studentService'
-import type { Student } from '../types'
+import type { Student, BulkImportRowResult } from '../types'
 import type { Classroom } from '@/features/academic/classroom'
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
 import { ref, type Ref } from 'vue'
@@ -27,6 +27,9 @@ export function useStudentImportExport(options: {
 }) {
   const isImportExportOpen = ref(false)
   const isImporting = ref(false)
+  const isConflictDialogOpen = ref(false)
+  const isResolvingConflicts = ref(false)
+  const conflictRows = ref<BulkImportRowResult[]>([])
 
   async function downloadTemplate() {
     try {
@@ -63,28 +66,38 @@ export function useStudentImportExport(options: {
         return
       }
 
-      if (result.success === 0 && result.failed > 0) {
-        const firstErrors = result.results
-          .filter((r) => r.status === 'FAILED')
-          .slice(0, 3)
-          .map((r) => `Baris ${r.row}: ${r.error}`)
-          .join('\n')
-        toast.error(
-          `Import gagal: semua ${result.failed} baris tidak valid.\n${firstErrors}`,
-          {
-            duration: 8000,
-          },
-        )
-      } else if (result.failed > 0) {
-        toast.warning(
-          `Import selesai: ${result.success} berhasil, ${result.failed} gagal dari ${result.total} baris.`,
-          { duration: 6000 },
-        )
-        isImportExportOpen.value = false
-        options.onImportSuccess()
-      } else {
-        toast.success(`Import berhasil: ${result.success} siswa ditambahkan.`)
-        isImportExportOpen.value = false
+      const conflicts = result.results.filter(
+        (r) => r.status === 'CONFLICT' || r.status === 'FAILED',
+      )
+
+      const parts: string[] = []
+      if (result.success > 0)
+        parts.push(`${result.success} berhasil ditambahkan`)
+      const failedCount = result.results.filter(
+        (r) => r.status === 'FAILED',
+      ).length
+      const conflictCount = result.results.filter(
+        (r) => r.status === 'CONFLICT',
+      ).length
+      if (failedCount > 0) parts.push(`${failedCount} gagal`)
+      if (conflictCount > 0) parts.push(`${conflictCount} sudah terdaftar`)
+
+      if (conflicts.length === 0) {
+        const summary = `Import selesai: ${parts.join(', ')} dari ${result.total} baris.`
+        if (result.success === 0 && failedCount > 0 && conflictCount === 0) {
+          toast.error(summary, { duration: 8000 })
+        } else if (failedCount > 0 || conflictCount > 0) {
+          toast.warning(summary, { duration: 6000 })
+        } else {
+          toast.success(summary)
+        }
+      }
+
+      conflictRows.value = result.results
+      isImportExportOpen.value = false
+      isConflictDialogOpen.value = true
+
+      if (result.success > 0 || (failedCount === 0 && conflictCount === 0)) {
         options.onImportSuccess()
       }
     } catch (err) {
@@ -98,11 +111,48 @@ export function useStudentImportExport(options: {
     }
   }
 
+  async function handleResolveConflicts(
+    decisions: {
+      existingId: string
+      action: 'update' | 'skip'
+      data: NonNullable<BulkImportRowResult['data']>
+    }[],
+  ) {
+    isResolvingConflicts.value = true
+    try {
+      const response =
+        await studentService.resolveBulkImportConflicts(decisions)
+      const result = response.data.data
+
+      const parts: string[] = []
+      if (result.updated > 0) parts.push(`${result.updated} diperbarui`)
+      if (result.skipped > 0) parts.push(`${result.skipped} dilewati`)
+      toast.success(`Selesai: ${parts.join(', ') || 'tidak ada perubahan'}.`)
+
+      isConflictDialogOpen.value = false
+      isImportExportOpen.value = false
+      options.onImportSuccess()
+    } catch (err) {
+      toast.error(
+        getIndonesianErrorMessage(
+          err,
+          'Terjadi kesalahan saat memperbarui data.',
+        ),
+      )
+    } finally {
+      isResolvingConflicts.value = false
+    }
+  }
+
   return {
     isImportExportOpen,
     isImporting,
+    isConflictDialogOpen,
+    isResolvingConflicts,
+    conflictRows,
     downloadTemplate,
     exportData,
     handleFileUpload,
+    handleResolveConflicts,
   }
 }

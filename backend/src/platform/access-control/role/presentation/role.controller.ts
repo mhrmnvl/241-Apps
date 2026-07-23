@@ -1,4 +1,4 @@
-import { RequirePermissions } from '../../permissions/decorators/require-permissions.decorator.js';
+import { RequirePermissions } from '../../permission/decorators/require-permissions.decorator.js';
 import {
   Body,
   Controller,

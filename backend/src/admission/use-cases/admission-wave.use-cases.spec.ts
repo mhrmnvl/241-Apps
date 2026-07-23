@@ -104,7 +104,6 @@ describe('Admission Wave use-cases', () => {
           startDate: new Date('2026-01-01'),
           endDate: new Date('2026-02-01'),
           isActive: true,
-          schoolUnitId: null,
         }),
       );
       expect(result.registrationFee).toBe(250000);

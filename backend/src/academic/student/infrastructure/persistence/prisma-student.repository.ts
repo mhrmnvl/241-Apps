@@ -192,17 +192,40 @@ export class PrismaStudentRepository extends IStudentRepository {
       const student = await tx.student.create({
         data: {
           userId: user.id,
-          nis: dto.nis,
-          nisn: dto.nisn,
+          nis: dto.nis ?? '',
+          nisn: dto.nisn ?? '',
           status: StudentStatus.ACTIVE,
           ...(dto.gradeId && {
             gradeId: dto.gradeId,
           }),
         },
-        include: STUDENT_INCLUDE,
+        include: {
+          user: {
+            select: {
+              id: true,
+              identifier: true,
+              isActive: true,
+              createdAt: true,
+              updatedAt: true,
+              profile: true,
+            },
+          },
+          grade: true,
+          enrollments: {
+            where: { deletedAt: null },
+            include: {
+              classroom: true,
+              semester: { include: { academicYear: true } },
+            },
+            orderBy: { enrolledAt: 'desc' as const },
+          },
+        },
       });
 
-      return { ...user, student };
+      return {
+        ...user,
+        student,
+      };
     });
   }
 
@@ -269,5 +292,23 @@ export class PrismaStudentRepository extends IStudentRepository {
         data: { deletedAt: new Date(), isActive: false },
       }),
     ]);
+  }
+
+  async getActiveGradeLevels(): Promise<number[]> {
+    const grades = await this.prisma.grade.findMany({
+      where: { deletedAt: null, isActive: true },
+      select: { level: true },
+      orderBy: { level: 'asc' },
+    });
+    return grades.map((g) => g.level);
+  }
+
+  async getActiveClassroomCodes(): Promise<string[]> {
+    const classrooms = await this.prisma.classroom.findMany({
+      where: { deletedAt: null, isActive: true },
+      select: { code: true },
+      orderBy: { code: 'asc' },
+    });
+    return classrooms.map((c) => c.code);
   }
 }

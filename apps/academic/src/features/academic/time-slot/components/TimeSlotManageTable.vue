@@ -63,7 +63,7 @@ defineExpose({
               Urutan
             </th>
             <th
-              class="border-b px-4 py-3 text-left font-semibold min-w-[160px]"
+              class="border-b px-4 py-3 text-center font-semibold min-w-[160px]"
             >
               Nama Jam
             </th>
@@ -74,7 +74,7 @@ defineExpose({
               Selesai
             </th>
             <th
-              class="border-b px-4 py-3 text-left font-semibold min-w-[150px]"
+              class="border-b px-4 py-3 text-center font-semibold min-w-[150px]"
             >
               Tipe
             </th>
@@ -125,6 +125,7 @@ defineExpose({
               <Input
                 v-model="row.name"
                 placeholder="cth: Jam ke-1"
+                class="text-center"
                 :disabled="!props.canEdit || row.saving"
               />
             </td>
@@ -147,7 +148,7 @@ defineExpose({
                 v-model="row.typeId"
                 :disabled="!props.canEdit || row.saving"
               >
-                <SelectTrigger class="w-full">
+                <SelectTrigger class="w-full justify-center">
                   <SelectValue placeholder="Pilih tipe..." />
                 </SelectTrigger>
                 <SelectContent>

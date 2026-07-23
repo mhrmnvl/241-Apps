@@ -159,18 +159,14 @@ export class PrismaEnrollmentRepository extends IEnrollmentRepository {
       semesterId: string;
       status?: EnrollmentStatus;
     }[],
-  ): Promise<EnrollmentWithDetails[]> {
-    return this.prisma.$transaction(
-      data.map((item) =>
-        this.prisma.studentEnrollment.create({
-          data: {
-            ...item,
-            status: item.status ?? undefined,
-          },
-          include: ENROLLMENT_INCLUDE,
-        }),
-      ),
-    );
+  ): Promise<Prisma.BatchPayload> {
+    return this.prisma.studentEnrollment.createMany({
+      data: data.map((item) => ({
+        ...item,
+        status: item.status ?? undefined,
+      })),
+      skipDuplicates: true,
+    });
   }
 
   async bulkCreateForRollover(

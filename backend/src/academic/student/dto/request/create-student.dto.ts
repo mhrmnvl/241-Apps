@@ -83,15 +83,21 @@ export class CreateStudentDto {
   @IsUUID()
   classroomId?: string;
 
-  @ApiProperty({ example: '2024001' })
+  @ApiPropertyOptional({
+    example: '2024001',
+    description: 'Boleh kosong saat pendataan awal',
+  })
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
   @MaxLength(20)
-  nis: string;
+  nis?: string;
 
-  @ApiProperty({ example: '0012345678' })
+  @ApiPropertyOptional({
+    example: '0012345678',
+    description: 'Boleh kosong saat pendataan awal',
+  })
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
   @MaxLength(20)
-  nisn: string;
+  nisn?: string;
 }

@@ -1,8 +1,8 @@
-import type { RouteRecordRaw } from 'vue-router'
+﻿import type { RouteRecordRaw } from 'vue-router'
 
 export const bloodTypeRoutes: RouteRecordRaw[] = [
   {
-    path: '/pengaturan/blood-type',
+    path: '/setting/blood-type',
     name: 'BloodTypeList',
     component: () => import('./views/BloodTypeListView.vue'),
     meta: {

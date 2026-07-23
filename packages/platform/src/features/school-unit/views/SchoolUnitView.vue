@@ -38,7 +38,7 @@ onMounted(() => {
         >
           <div>
             <CardTitle class="text-2xl font-bold tracking-tight">
-              Unit Sekolah
+              Profil Sekolah
             </CardTitle>
           </div>
           <Button

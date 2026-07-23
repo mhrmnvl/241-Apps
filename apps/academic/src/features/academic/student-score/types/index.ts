@@ -30,3 +30,14 @@ export interface BulkUpsertStudentScorePayload {
   assessmentItemId: string
   records: BulkStudentScoreRecordPayload[]
 }
+
+export interface StudentScoreItem {
+  id: string
+  score: number
+  assessmentItem?: {
+    id: string
+    name: string
+    type: string
+    weight: number
+  }
+}

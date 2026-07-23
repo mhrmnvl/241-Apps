@@ -1,8 +1,8 @@
-import type { RouteRecordRaw } from 'vue-router'
+﻿import type { RouteRecordRaw } from 'vue-router'
 
 export const raporRoutes: RouteRecordRaw[] = [
   {
-    path: '/akademik/rapor',
+    path: '/academic/report-card',
     name: 'rapor',
     component: () => import('./views/RaporView.vue'),
     meta: {

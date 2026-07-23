@@ -91,6 +91,7 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
@@ -99,14 +100,25 @@
     width: 6px;
     height: 6px;
   }
+
   ::-webkit-scrollbar-track {
     background: transparent;
   }
+
   ::-webkit-scrollbar-thumb {
     background-color: var(--border);
     border-radius: 10px;
   }
+
   ::-webkit-scrollbar-thumb:hover {
     background-color: var(--muted-foreground);
   }
+}
+
+[data-slot='card']>div.p-6,
+[data-slot='card']>div.p-6.pt-4,
+[data-slot='card']>div.p-6.pt-2,
+[data-slot='card']>div.p-6.pt-1 {
+  padding-top: 0.25rem !important;
+  /* pt-1 */
 }

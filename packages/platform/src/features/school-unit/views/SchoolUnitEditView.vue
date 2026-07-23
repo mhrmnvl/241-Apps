@@ -73,7 +73,7 @@ const handleSaveAddress = async () => {
           class="flex flex-row items-center justify-between border-b px-6 pt-5! pb-5!"
         >
           <CardTitle class="text-2xl font-bold tracking-tight">
-            Ubah Data Unit Sekolah
+            Ubah Profil Sekolah
           </CardTitle>
         </CardHeader>
 

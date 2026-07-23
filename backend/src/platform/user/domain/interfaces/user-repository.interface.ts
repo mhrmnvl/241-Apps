@@ -13,6 +13,11 @@ export const PUBLIC_USER_SELECT = {
       role: true,
     },
   },
+  profile: {
+    select: {
+      name: true,
+    },
+  },
 } satisfies Prisma.UserSelect;
 
 export type UserPublic = Prisma.UserGetPayload<{

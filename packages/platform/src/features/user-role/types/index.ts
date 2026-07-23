@@ -3,6 +3,7 @@ export interface UserWithRoles {
   identifier: string
   isActive: boolean
   userRoles: { role: { id: string; code: string; name: string } }[]
+  profile?: { name: string } | null
   createdAt: string
   updatedAt: string
 }

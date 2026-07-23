@@ -1,4 +1,4 @@
-import { RequirePermissions } from '../../access-control/permissions/decorators/require-permissions.decorator.js';
+import { RequirePermissions } from '../../access-control/permission/decorators/require-permissions.decorator.js';
 import { Body, Controller, Get, Patch, Post, UseGuards } from '@nestjs/common';
 import {
   ApiBearerAuth,

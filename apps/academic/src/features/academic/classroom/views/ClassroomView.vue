@@ -18,7 +18,7 @@ const router = useRouter()
 
 const breadcrumbs = [
   { title: 'Akademik', href: '#' },
-  { title: 'Kelas', href: '/akademik/kelas' },
+  { title: 'Kelas', href: '/academic/classroom' },
 ]
 
 const {
@@ -55,7 +55,7 @@ const tableColumns = createClassroomColumns({
   canUpdate: can('classrooms.update'),
   canDelete: can('classrooms.delete'),
   onManageSupervisor: (item: Classroom) => {
-    void router.push(`/akademik/kelas/${item.id}/kelola`)
+    void router.push({ name: 'classroom-manage', params: { id: item.id } })
   },
   onDelete: async (item: Classroom, { closeAlert, setLoading }) => {
     setLoading(true)
@@ -107,7 +107,7 @@ onMounted(async () => {
             @update:page-size="(limit) => fetchClassrooms({ limit, page: 1 })"
           >
             <template #header-right>
-              <div class="relative w-48">
+              <div class="relative w-full sm:w-48 max-w-[200px]">
                 <Search
                   class="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground"
                 />

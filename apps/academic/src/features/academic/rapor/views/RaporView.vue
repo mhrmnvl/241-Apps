@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import {
   Search,
@@ -35,7 +35,7 @@ import { useRoleGuard } from '@/shared/composables/useRoleGuard'
 
 const breadcrumbs = [
   { title: 'Manajemen Akademik', href: '#' },
-  { title: 'Rapor Siswa', href: '/akademik/rapor' },
+  { title: 'Rapor Siswa', href: '/academic/report-card' },
 ]
 
 const {

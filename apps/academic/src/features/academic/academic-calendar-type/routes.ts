@@ -1,8 +1,8 @@
-import type { RouteRecordRaw } from 'vue-router'
+﻿import type { RouteRecordRaw } from 'vue-router'
 
 export const academicCalendarTypeRoutes: RouteRecordRaw[] = [
   {
-    path: '/pengaturan/academic-calendar-type',
+    path: '/setting/academic-calendar-type',
     name: 'AcademicCalendarTypeList',
     component: () => import('./views/AcademicCalendarTypeListView.vue'),
     meta: {

@@ -1,8 +1,8 @@
-import type { RouteRecordRaw } from 'vue-router'
+﻿import type { RouteRecordRaw } from 'vue-router'
 
 export const studentGraduationRoutes: RouteRecordRaw[] = [
   {
-    path: '/alumni',
+    path: '/student/alumni',
     name: 'student-graduation',
     component: () => import('./views/StudentGraduationView.vue'),
     meta: {

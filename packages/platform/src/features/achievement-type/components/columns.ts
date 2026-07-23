@@ -12,15 +12,9 @@ export const createColumns = (
   showActions = true,
 ): ColumnDef<AchievementType>[] => [
   {
-    id: 'no',
-    header: 'No',
-    cell: ({ row }) => row.index + 1,
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
     accessorKey: 'name',
     header: 'Tingkat Prestasi',
+    meta: { align: 'left' },
   },
   {
     accessorKey: 'isActive',

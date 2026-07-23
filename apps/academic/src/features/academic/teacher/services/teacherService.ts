@@ -11,6 +11,7 @@ import type {
   TeacherPositionUpdatePayload,
   CreateTeacherWithRelationsInput,
   CreateTeacherWithRelationsResult,
+  ResolveBulkImportConflict,
 } from '../types'
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
 import { toast } from 'vue-sonner'
@@ -159,6 +160,12 @@ export const teacherService = {
 
   bulkImport: async (file: File) => {
     return teacherApi.bulkImport(file)
+  },
+
+  resolveBulkImportConflicts: async (
+    conflicts: ResolveBulkImportConflict[],
+  ) => {
+    return teacherApi.resolveBulkImportConflicts(conflicts)
   },
 
   savePosition: async (

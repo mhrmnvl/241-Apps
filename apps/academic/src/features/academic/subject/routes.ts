@@ -1,8 +1,8 @@
-import type { RouteRecordRaw } from 'vue-router'
+﻿import type { RouteRecordRaw } from 'vue-router'
 
 export const subjectRoutes: RouteRecordRaw[] = [
   {
-    path: '/pembelajaran/mata-pelajaran',
+    path: '/learning/subject',
     name: 'subject',
     component: () => import('./views/SubjectView.vue'),
     meta: {

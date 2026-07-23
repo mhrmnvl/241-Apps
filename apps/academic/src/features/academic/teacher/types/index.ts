@@ -164,16 +164,49 @@ export interface PositionListItem {
   category: PositionCategoryRef
 }
 
+export interface BulkImportTeacherRow {
+  identifier: string
+  password: string
+  name: string
+  nik: string
+  gender: string
+  birthPlace: string
+  birthDate: string
+  email?: string
+  phone?: string
+  nip?: string
+  nuptk?: string
+  employmentTypeCode: string
+}
+
+export interface BulkImportRowResult {
+  row: number
+  status: 'SUCCESS' | 'FAILED' | 'CONFLICT'
+  identifier?: string
+  error?: string
+  existingId?: string
+  data?: BulkImportTeacherRow
+}
+
 export interface BulkImportResult {
   total: number
   success: number
   failed: number
-  results: {
-    row: number
-    status: string
-    identifier?: string
-    error?: string
-  }[]
+  conflict: number
+  results: BulkImportRowResult[]
+}
+
+export interface ResolveBulkImportConflict {
+  existingId: string
+  action: 'update' | 'skip'
+  data: BulkImportTeacherRow
+}
+
+export interface ResolveBulkImportResult {
+  total: number
+  updated: number
+  skipped: number
+  errors: { existingId: string; error: string }[]
 }
 
 export interface TeacherColumnActions {
@@ -184,8 +217,8 @@ export interface TeacherColumnActions {
     teacher: Teacher,
     callbacks: { closeAlert: () => void; setLoading: (s: boolean) => void },
   ) => Promise<void>
+  onToggleActive?: (teacher: Teacher, isActive: boolean) => Promise<void>
   showActions?: boolean
-  /** Per-action gates — hide edit/delete when the user lacks that permission. */
   canUpdate?: boolean
   canDelete?: boolean
 }

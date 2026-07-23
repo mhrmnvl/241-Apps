@@ -10,6 +10,7 @@ export const createColumns = (
   {
     accessorKey: 'name',
     header: 'Nama Jabatan',
+    meta: { align: 'left' },
     cell: ({ row }) => row.original.name,
   },
   {

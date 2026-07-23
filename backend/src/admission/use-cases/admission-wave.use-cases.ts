@@ -50,7 +50,6 @@ export class CreateAdmissionWaveUseCase {
       name: dto.name,
       code: dto.code,
       academicYearId: dto.academicYearId,
-      schoolUnitId: dto.schoolUnitId ?? null,
       startDate: new Date(dto.startDate),
       endDate: new Date(dto.endDate),
       quota: dto.quota,

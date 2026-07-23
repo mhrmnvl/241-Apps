@@ -1,4 +1,4 @@
-import { RequirePermissions } from '../../../platform/access-control/permissions/decorators/require-permissions.decorator.js';
+import { RequirePermissions } from '../../../platform/access-control/permission/decorators/require-permissions.decorator.js';
 import {
   Body,
   Controller,
@@ -44,7 +44,10 @@ import {
   StudentResponseDto,
 } from '../dto/response/student-response.dto.js';
 import { UpdateStudentDto } from '../dto/request/update-student.dto.js';
+import { ResolveBulkImportConflictsDto } from '../dto/request/resolve-bulk-import-conflicts.dto.js';
+import { ResolveBulkImportResponseDto } from '../dto/response/resolve-bulk-import-response.dto.js';
 import { BulkImportStudentsUseCase } from '../use-cases/bulk-import-student.use-case.js';
+import { ResolveBulkImportConflictsUseCase } from '../use-cases/resolve-bulk-import-conflicts.use-case.js';
 import { CreateStudentUseCase } from '../use-cases/create-student.use-case.js';
 import { DeleteStudentUseCase } from '../use-cases/delete-student.use-case.js';
 import { ExportStudentsUseCase } from '../use-cases/export-student.use-case.js';
@@ -67,6 +70,7 @@ export class StudentController {
     private readonly deleteStudentService: DeleteStudentUseCase,
     private readonly toggleStudentActiveService: ToggleStudentActiveUseCase,
     private readonly bulkImportStudentsService: BulkImportStudentsUseCase,
+    private readonly resolveBulkImportConflictsService: ResolveBulkImportConflictsUseCase,
     private readonly exportStudentsService: ExportStudentsUseCase,
   ) {}
 
@@ -185,6 +189,21 @@ export class StudentController {
     @CurrentUser() creator: AuthenticatedUser,
   ): Promise<BulkImportStudentsResponseDto> {
     return this.bulkImportStudentsService.execute(file.buffer);
+  }
+
+  @Post('bulk-import/resolve')
+  @RequirePermissions('students.update')
+  @ApiOperation({
+    summary:
+      'Resolve CONFLICT rows from a bulk import: update the matching ' +
+      'student or skip it',
+  })
+  @ApiResponse({ status: 201, type: ResolveBulkImportResponseDto })
+  async resolveBulkImportConflicts(
+    @CurrentUser() user: AuthenticatedUser,
+    @Body() dto: ResolveBulkImportConflictsDto,
+  ): Promise<ResolveBulkImportResponseDto> {
+    return this.resolveBulkImportConflictsService.execute(dto);
   }
 
   @Patch(':id')

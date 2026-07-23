@@ -1,8 +1,8 @@
-import type { RouteRecordRaw } from 'vue-router'
+﻿import type { RouteRecordRaw } from 'vue-router'
 
 export const employmentTypeRoutes: RouteRecordRaw[] = [
   {
-    path: '/pengaturan/status-kepegawaian',
+    path: '/setting/employment-type',
     name: 'EmploymentTypeList',
     component: () => import('./views/EmploymentTypeListView.vue'),
     meta: {

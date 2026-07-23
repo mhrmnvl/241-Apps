@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { useLessonEditor } from '../composables/useLessonEditor'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { Button } from '@/ui/button'
@@ -58,7 +58,7 @@ const activeDay = ref('MONDAY')
 
 const breadcrumbs = computed(() => [
   { title: 'Pembelajaran', href: '#' },
-  { title: 'Jadwal Pelajaran', href: '/pembelajaran/jadwal-pelajaran' },
+  { title: 'Jadwal Pelajaran', href: '/learning/lesson' },
   {
     title: classroomInfo.value ? `Kelas ${classroomInfo.value.code}` : 'Kelas',
     href: '#',
@@ -186,7 +186,7 @@ onMounted(fetchData)
             size="icon"
             class="shrink-0"
             aria-label="Kembali"
-            @click="router.push('/pembelajaran/jadwal-pelajaran')"
+            @click="router.push('/learning/lesson')"
           >
             <ArrowLeft class="size-4" />
           </Button>

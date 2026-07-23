@@ -35,6 +35,7 @@ import { toast } from 'vue-sonner'
 import { createColumns } from '../components/columns'
 import TeacherFormDialog from '../components/TeacherFormDialog.vue'
 import ImportExportTeacherDialog from '../components/ImportExportTeacherDialog.vue'
+import ImportPreviewDialog from '../components/ImportPreviewDialog.vue'
 import { useTeacher } from '../composables/useTeacher'
 import { useTeacherImportExport } from '../composables/useTeacherImportExport'
 import type {
@@ -66,9 +67,13 @@ const {
 const {
   isImportExportOpen,
   isImporting,
+  isConflictDialogOpen,
+  isResolvingConflicts,
+  conflictRows,
   downloadTemplate,
   exportData,
   handleFileUpload,
+  handleResolveConflicts,
 } = useTeacherImportExport({
   teachers: filteredTeachers,
   onImportSuccess: () => {
@@ -325,47 +330,24 @@ onMounted(() => {
                   <SelectItem value="inactive"> Nonaktif </SelectItem>
                 </SelectContent>
               </Select>
-
-              <div class="relative lg:ml-auto lg:w-[240px]">
-                <Search
-                  class="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
-                />
-                <Input
-                  v-model="filters.keyword"
-                  placeholder="Cari guru..."
-                  class="pl-9"
-                />
-              </div>
             </div>
 
-            <!-- Mobile Layout: Search + Filter Dialog Button -->
+            <!-- Mobile Layout: Filter Dialog Button -->
             <div class="flex flex-col lg:hidden gap-3">
-              <div class="flex items-center gap-2">
-                <div class="relative flex-1">
-                  <Search
-                    class="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
-                  />
-                  <Input
-                    v-model="filters.keyword"
-                    placeholder="Cari guru..."
-                    class="pl-9"
-                  />
-                </div>
-                <Button
-                  variant="outline"
-                  class="relative shrink-0"
-                  @click="isFilterDialogOpen = true"
+              <Button
+                variant="outline"
+                class="w-full relative justify-center"
+                @click="isFilterDialogOpen = true"
+              >
+                <Filter class="size-4 mr-2" />
+                Filter Guru
+                <span
+                  v-if="activeFiltersCount > 0"
+                  class="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-primary-foreground"
                 >
-                  <Filter class="size-4 mr-2" />
-                  Filter
-                  <span
-                    v-if="activeFiltersCount > 0"
-                    class="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-primary-foreground"
-                  >
-                    {{ activeFiltersCount }}
-                  </span>
-                </Button>
-              </div>
+                  {{ activeFiltersCount }}
+                </span>
+              </Button>
             </div>
           </div>
 
@@ -375,7 +357,20 @@ onMounted(() => {
               :data="filteredTeachers"
               :is-loading="loading"
               item-label="guru"
-            />
+            >
+              <template #header-right>
+                <div class="relative w-full sm:w-48 max-w-[200px]">
+                  <Search
+                    class="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground"
+                  />
+                  <Input
+                    v-model="filters.keyword"
+                    placeholder="Cari guru..."
+                    class="h-8 pl-8 w-full text-xs"
+                  />
+                </div>
+              </template>
+            </DataTable>
           </div>
         </div>
       </Card>
@@ -505,6 +500,13 @@ onMounted(() => {
       @download-template="downloadTemplate"
       @export-data="exportData"
       @import-data="handleFileUpload"
+    />
+
+    <ImportPreviewDialog
+      v-model:open="isConflictDialogOpen"
+      :conflicts="conflictRows"
+      :loading="isResolvingConflicts"
+      @resolve="handleResolveConflicts"
     />
   </AppLayout>
 </template>

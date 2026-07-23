@@ -9,10 +9,12 @@ export const getColumns = (showActions = true): ColumnDef<SocialMedia>[] => [
   {
     accessorKey: 'name',
     header: 'Nama SocialMedia',
+    meta: { align: 'left' },
   },
   {
     accessorKey: 'baseUrl',
     header: 'Base URL',
+    meta: { align: 'left' },
     cell: ({ row }) => {
       const url = row.getValue<string>('baseUrl')
       return h(

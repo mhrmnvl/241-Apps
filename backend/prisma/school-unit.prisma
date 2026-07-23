@@ -31,7 +31,6 @@ model SchoolUnit {
 
   type           SchoolUnitType?         @relation(fields: [typeId], references: [id])
   socialMedias   SchoolUnitSocialMedia[]
-  admissionWaves AdmissionWave[]
   addresses      Address[]
 
   @@map("school_units")

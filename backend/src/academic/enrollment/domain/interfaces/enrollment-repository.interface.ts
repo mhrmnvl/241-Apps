@@ -53,7 +53,7 @@ export abstract class IEnrollmentRepository {
       semesterId: string;
       status?: EnrollmentStatus;
     }[],
-  ): Promise<EnrollmentWithDetails[]>;
+  ): Promise<Prisma.BatchPayload>;
   abstract bulkCreateForRollover(
     data: {
       studentId: string;

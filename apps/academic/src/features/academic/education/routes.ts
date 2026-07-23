@@ -1,8 +1,8 @@
-import type { RouteRecordRaw } from 'vue-router'
+﻿import type { RouteRecordRaw } from 'vue-router'
 
 export const educationRoutes: RouteRecordRaw[] = [
   {
-    path: '/pengaturan/tingkat-pendidikan',
+    path: '/setting/education-level',
     name: 'EducationList',
     component: () => import('./views/EducationListView.vue'),
     meta: {

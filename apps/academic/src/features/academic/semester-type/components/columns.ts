@@ -14,6 +14,7 @@ export const createColumns = (
   {
     accessorKey: 'name',
     header: 'Tipe Semester',
+    meta: { align: 'center' },
   },
   {
     accessorKey: 'isActive',

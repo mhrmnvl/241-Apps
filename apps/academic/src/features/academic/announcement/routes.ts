@@ -1,8 +1,8 @@
-import type { RouteRecordRaw } from 'vue-router'
+﻿import type { RouteRecordRaw } from 'vue-router'
 
 export const announcementRoutes: RouteRecordRaw[] = [
   {
-    path: '/pengumuman',
+    path: '/announcement',
     name: 'announcement',
     component: () => import('./views/AnnouncementView.vue'),
     meta: {

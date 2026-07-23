@@ -12,15 +12,9 @@ export const createColumns = (
   showActions = true,
 ): ColumnDef<BloodType>[] => [
   {
-    id: 'no',
-    header: 'No',
-    cell: ({ row }) => row.index + 1,
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
     accessorKey: 'name',
     header: 'Golongan Darah',
+    meta: { align: 'center' },
   },
   {
     accessorKey: 'isActive',

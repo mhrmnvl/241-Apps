@@ -12,15 +12,9 @@ export const createColumns = (
   showActions = true,
 ): ColumnDef<Religion>[] => [
   {
-    id: 'no',
-    header: 'No',
-    cell: ({ row }) => row.index + 1,
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
     accessorKey: 'name',
     header: 'Nama Agama',
+    meta: { align: 'left' },
   },
   {
     accessorKey: 'isActive',

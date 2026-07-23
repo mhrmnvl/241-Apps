@@ -16,17 +16,22 @@ export class CreateStudentUseCase {
   ) {}
 
   async execute(dto: CreateStudentDto): Promise<StudentResponseDto> {
-    dto.identifier ??= dto.nis;
-    dto.password ??= dto.nis;
+    const nis = dto.nis ?? '';
+    const nisn = dto.nisn ?? '';
+    dto.nis = nis;
+    dto.nisn = nisn;
+
+    dto.identifier ??= nis ? nis : dto.name.toLowerCase().replace(/\s+/g, '.');
+    dto.password ??= nis ? nis : dto.identifier;
 
     const [dupNis, dupNisn] = await Promise.all([
-      this.repo.findByNis(dto.nis),
-      this.repo.findByNisn(dto.nisn),
+      nis ? this.repo.findByNis(nis) : null,
+      nisn ? this.repo.findByNisn(nisn) : null,
     ]);
     if (dupNis)
-      throw new ConflictException(`NIS "${dto.nis}" is already registered`);
+      throw new ConflictException(`NIS "${nis}" is already registered`);
     if (dupNisn)
-      throw new ConflictException(`NISN "${dto.nisn}" is already registered`);
+      throw new ConflictException(`NISN "${nisn}" is already registered`);
 
     const passwordHash = await hashPassword(dto.password);
 
@@ -42,11 +47,11 @@ export class CreateStudentUseCase {
         new StudentCreatedEvent(student.id, dto.classroomId),
       );
       this.logger.log(
-        `Dispatched student.created event for student ${dto.nis} with classroomId ${dto.classroomId}`,
+        `Dispatched student.created event for student ${nis || dto.identifier} with classroomId ${dto.classroomId}`,
       );
     }
 
-    this.logger.log(`Student created: ${dto.nis}`);
+    this.logger.log(`Student created: ${nis || dto.identifier}`);
     return {
       id: student.id,
       userId: student.userId,

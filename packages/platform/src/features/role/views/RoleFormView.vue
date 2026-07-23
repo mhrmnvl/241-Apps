@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
@@ -24,7 +24,7 @@ const isEditing = computed(() => !!roleId.value)
 
 const breadcrumbs = computed(() => [
   { title: 'Pengaturan', href: '#' },
-  { title: 'Manajemen Role', href: '/pengaturan/roles' },
+  { title: 'Manajemen Role', href: '/setting/role' },
   { title: isEditing.value ? 'Edit Role' : 'Tambah Role', href: '#' },
 ])
 
@@ -60,7 +60,7 @@ const fetchRoleDetails = async () => {
     toast.error(
       getIndonesianErrorMessage(error, 'Gagal memuat data detail role.'),
     )
-    void router.push('/pengaturan/roles')
+    void router.push('/setting/role')
   } finally {
     isLoadingRole.value = false
   }
@@ -79,7 +79,7 @@ const handleSaveRole = async (
       await rolesApi.createRole(payload as CreateRolePayload)
       toast.success('Berhasil menambahkan role baru')
     }
-    void router.push('/pengaturan/roles')
+    void router.push('/setting/role')
   } catch (error) {
     formError.value = getIndonesianErrorMessage(
       error,
@@ -92,7 +92,7 @@ const handleSaveRole = async (
 }
 
 const handleCancel = () => {
-  void router.push('/pengaturan/roles')
+  void router.push('/setting/role')
 }
 
 onMounted(async () => {

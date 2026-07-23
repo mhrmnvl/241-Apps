@@ -59,6 +59,12 @@ const steps = [
   { value: 5, title: 'Ringkasan' },
 ]
 const activeStep = ref(1)
+const mobileVisibleStepValues = computed(() => {
+  if (activeStep.value <= 2) return [1, 2, 3]
+  if (activeStep.value >= steps.length - 1)
+    return [steps.length - 2, steps.length - 1, steps.length]
+  return [activeStep.value - 1, activeStep.value, activeStep.value + 1]
+})
 const submitting = ref(false)
 
 const employmentTypes = ref<EmploymentTypeOption[]>([])
@@ -299,17 +305,20 @@ onMounted(async () => {
         <div class="px-6 py-4 border-b">
           <Stepper
             :model-value="activeStep"
-            class="flex items-center justify-center gap-2 w-full max-w-md mx-auto"
+            class="flex items-center justify-center gap-1 sm:gap-2 w-full max-w-md mx-auto"
             @update:model-value="(v) => void goToStep(Number(v))"
           >
             <StepperItem
               v-for="step in steps"
               :key="step.value"
               :step="step.value"
-              class="flex items-center gap-2 group"
+              class="flex items-center gap-1 sm:gap-2 group transition-all duration-300"
+              :class="{
+                'hidden sm:flex': !mobileVisibleStepValues.includes(step.value),
+              }"
             >
               <StepperTrigger
-                class="flex items-center gap-2 cursor-pointer outline-none shrink-0"
+                class="flex items-center gap-1 sm:gap-2 cursor-pointer outline-none shrink-0"
               >
                 <StepperIndicator class="shrink-0">
                   <Check
@@ -321,7 +330,13 @@ onMounted(async () => {
               </StepperTrigger>
               <StepperSeparator
                 v-if="step.value < steps.length"
-                class="w-6 sm:w-10 h-0.5 bg-muted"
+                class="w-3 sm:w-10 h-0.5 bg-muted transition-all duration-300"
+                :class="{
+                  'hidden sm:block': !(
+                    mobileVisibleStepValues.includes(step.value) &&
+                    mobileVisibleStepValues.includes(step.value + 1)
+                  ),
+                }"
               />
             </StepperItem>
           </Stepper>
