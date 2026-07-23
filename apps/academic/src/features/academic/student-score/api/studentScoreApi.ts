@@ -1,4 +1,7 @@
-import type { ApiSingleResponse, ApiPaginatedResponse } from '@/shared/types/api'
+import type {
+  ApiSingleResponse,
+  ApiPaginatedResponse,
+} from '@/shared/types/api'
 import api from '@/shared/utils/api'
 import type {
   StudentScoreRosterResponse,
@@ -8,10 +11,9 @@ import type {
 
 export const studentScoreApi = {
   getScores: (params: { enrollmentId?: string; limit?: number }) => {
-    return api.get<ApiPaginatedResponse<StudentScoreItem>>(
-      '/student-scores',
-      { params },
-    )
+    return api.get<ApiPaginatedResponse<StudentScoreItem>>('/student-scores', {
+      params,
+    })
   },
 
   getRoster: (assessmentItemId: string) => {

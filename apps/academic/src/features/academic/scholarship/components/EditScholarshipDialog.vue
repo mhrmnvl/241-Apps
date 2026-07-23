@@ -230,13 +230,13 @@ const onSubmit = form.handleSubmit(async (values) => {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                    <SelectItem
-                      v-for="s in SCHOLARSHIP_STATUSES"
-                      :key="s.value"
-                      :value="s.value"
-                    >
-                      {{ s.label }}
-                    </SelectItem>
+                      <SelectItem
+                        v-for="s in SCHOLARSHIP_STATUSES"
+                        :key="s.value"
+                        :value="s.value"
+                      >
+                        {{ s.label }}
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
