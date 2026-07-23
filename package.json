@@ -43,5 +43,11 @@
     "vite-tsconfig-paths": "^6.1.1",
     "vue-eslint-parser": "^10.4.0",
     "vue-tsc": "^3.3.3"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "maplibre-gl",
+      "sharp"
+    ]
   }
 }
