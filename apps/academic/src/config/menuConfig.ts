@@ -21,7 +21,11 @@ import {
   Users,
 } from 'lucide-vue-next'
 
-export type { SubMenuItem, MenuItem, MenuSection } from '@/shared/types/menu.types'
+export type {
+  SubMenuItem,
+  MenuItem,
+  MenuSection,
+} from '@/shared/types/menu.types'
 import type { MenuSection } from '@/shared/types/menu.types'
 
 export const menuSections: MenuSection[] = [

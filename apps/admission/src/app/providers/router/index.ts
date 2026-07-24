@@ -52,7 +52,10 @@ const router = createRouter({
     {
       path: '/:pathMatch(.*)*',
       name: 'not-found',
-      component: () => import('@/features/platform/auth').then((m) => ({ default: m.NotFoundView })),
+      component: () =>
+        import('@/features/platform/auth').then((m) => ({
+          default: m.NotFoundView,
+        })),
       meta: { title: 'Halaman Tidak Ditemukan' },
     },
   ],
@@ -130,7 +133,8 @@ router.beforeEach((to) => {
 })
 
 router.afterEach((to) => {
-  const appTitle = useSettingsStore().settings?.appTitle ?? authConfig.value.appTitle
+  const appTitle =
+    useSettingsStore().settings?.appTitle ?? authConfig.value.appTitle
   const title = to.meta.title
   document.title = title ? `${title} — ${appTitle}` : appTitle
 })
