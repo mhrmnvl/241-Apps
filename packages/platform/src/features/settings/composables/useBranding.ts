@@ -1,5 +1,6 @@
 import { computed } from 'vue'
 import { useSettingsStore } from '../stores/settingsStore'
+import { authConfig } from '../../auth/config'
 
 /**
  * Resolves the currently-configured logo/favicon URLs, falling back to each
@@ -15,5 +16,9 @@ export function useBranding() {
 
   const faviconSrc = computed(() => store.settings?.faviconUrl ?? '/vite.svg')
 
-  return { logoSrc, faviconSrc }
+  const appTitle = computed(
+    () => store.settings?.appTitle ?? authConfig.value.appTitle,
+  )
+
+  return { logoSrc, faviconSrc, appTitle }
 }

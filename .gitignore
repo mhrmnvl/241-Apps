@@ -47,3 +47,6 @@ tmp/
 # Agent tooling / one-off docs (kept locally, not tracked)
 skills-lock.json
 MONOREPO-MIGRATION-PLAN.md
+
+# Claude AI worktrees
+.claude/
