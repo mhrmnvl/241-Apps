@@ -120,13 +120,7 @@ const onSubmit = handleSubmit(async (values) => {
     <DialogContent class="sm:max-w-md flex flex-col gap-0 p-0 overflow-hidden">
       <DialogHeader class="px-6 py-5 border-b shrink-0 bg-muted/20">
         <DialogTitle>{{ initialData ? 'Edit' : 'Tambah' }} Jabatan</DialogTitle>
-        <DialogDescription>
-          {{
-            initialData
-              ? 'Perbarui data jabatan.'
-              : 'Tambahkan jabatan baru ke dalam sistem.'
-          }}
-        </DialogDescription>
+        <DialogDescription class="sr-only"> </DialogDescription>
       </DialogHeader>
 
       <ScrollArea class="flex-1 min-h-0">

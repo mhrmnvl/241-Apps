@@ -145,13 +145,7 @@ function confirmSave() {
         <DialogTitle>
           {{ isEditing ? 'Edit Mata Pelajaran' : 'Tambah Mata Pelajaran Baru' }}
         </DialogTitle>
-        <DialogDescription>
-          {{
-            isEditing
-              ? 'Perbarui informasi mata pelajaran.'
-              : 'Masukkan informasi mata pelajaran yang baru.'
-          }}
-        </DialogDescription>
+        <DialogDescription class="sr-only" />
       </DialogHeader>
 
       <ScrollArea class="flex-1 min-h-0">

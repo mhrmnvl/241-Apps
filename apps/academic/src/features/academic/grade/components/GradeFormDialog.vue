@@ -166,7 +166,7 @@ onMounted(async () => {
               : 'Tambah Tingkat Kelas'
           }}
         </DialogTitle>
-        <DialogDescription>
+        <DialogDescription class="sr-only">
           {{
             levelForm.isEditing.value
               ? 'Perbarui data tingkat kelas yang sudah ada.'

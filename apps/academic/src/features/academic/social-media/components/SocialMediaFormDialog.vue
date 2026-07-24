@@ -86,11 +86,7 @@ const onSubmit = handleSubmit(async (values) => {
         <DialogTitle>{{
           selectedSocialMedia ? 'Edit SocialMedia' : 'Tambah SocialMedia'
         }}</DialogTitle>
-        <DialogDescription>
-          Isi form di bawah ini untuk
-          {{ selectedSocialMedia ? 'mengubah' : 'menambahkan' }} data
-          socialMedia.
-        </DialogDescription>
+        <DialogDescription class="sr-only"> </DialogDescription>
       </DialogHeader>
 
       <ScrollArea class="flex-1 min-h-0">

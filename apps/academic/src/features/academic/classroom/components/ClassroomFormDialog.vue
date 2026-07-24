@@ -78,13 +78,7 @@ const classroomForm = useClassroomForm({
             classroomForm.isEditing.value ? 'Edit Kelas' : 'Tambah Kelas Baru'
           }}
         </DialogTitle>
-        <DialogDescription>
-          {{
-            classroomForm.isEditing.value
-              ? 'Perbarui informasi kelas.'
-              : 'Masukkan informasi kelas baru.'
-          }}
-        </DialogDescription>
+        <DialogDescription class="sr-only"> </DialogDescription>
       </DialogHeader>
 
       <ScrollArea class="flex-1 min-h-0">

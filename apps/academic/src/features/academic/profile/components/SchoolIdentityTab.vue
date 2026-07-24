@@ -1,180 +1,321 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, reactive, watch, onMounted } from 'vue'
+import { Input } from '@/ui/input'
+import { Button } from '@/ui/button'
+import { Loader2 } from 'lucide-vue-next'
 import {
-  Briefcase,
-  Building,
-  CheckCircle2,
-  GraduationCap,
-  Library,
-  Hash,
-  UserCheck,
-  CalendarDays,
-  Fingerprint,
-} from 'lucide-vue-next'
-import type { SchoolProfileData } from '@/features/platform/profile'
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/ui/select'
+import api from '@/shared/utils/api'
+import { useStudent } from '@/features/academic/student'
+import { useTeacher } from '@/features/academic/teacher'
+import type {
+  SchoolProfileData,
+  RawProfileData,
+} from '@/features/platform/profile'
 
-const props = defineProps<{ data: SchoolProfileData }>()
+const props = defineProps<{
+  data: SchoolProfileData
+  rawProfile?: RawProfileData | null
+  isEditable: boolean
+}>()
+
+const emit = defineEmits<{
+  reload: []
+}>()
 
 const isStudent = computed(() => props.data.roles?.includes('STUDENT'))
+
+const { isSaving: isSavingStudent, saveStudent } = useStudent()
+const { isSaving: isSavingTeacher, saveTeacher } = useTeacher()
+const isSaving = computed(() => isSavingStudent.value || isSavingTeacher.value)
+
+const form = reactive({
+  nis: '',
+  nisn: '',
+  nip: '',
+  nuptk: '',
+  employmentTypeId: undefined as string | undefined,
+})
+
+interface EmploymentType {
+  id: string
+  code: string
+  name: string
+}
+
+const employmentTypes = ref<EmploymentType[]>([])
+
+watch(
+  () => props.rawProfile,
+  (raw) => {
+    if (raw) {
+      form.nis = raw.student?.nis ?? ''
+      form.nisn = raw.student?.nisn ?? ''
+      form.nip = raw.teacher?.nip ?? ''
+      form.nuptk = raw.teacher?.nuptk ?? ''
+      form.employmentTypeId = raw.teacher?.employmentType?.id ?? undefined
+    }
+  },
+  { immediate: true },
+)
+
+onMounted(async () => {
+  if (!isStudent.value) {
+    try {
+      const res = await api.get<{ data: EmploymentType[] }>(
+        '/employment-types',
+        {
+          params: { limit: 100 },
+        },
+      )
+      employmentTypes.value = res.data.data ?? []
+    } catch {
+      // non-blocking
+    }
+  }
+})
+
+async function handleSubmit() {
+  if (!props.isEditable) return
+  if (isStudent.value) {
+    const studentId = props.rawProfile?.student?.id
+    if (!studentId) return
+    const { success } = await saveStudent(studentId, {
+      nis: form.nis === '' ? undefined : form.nis,
+      nisn: form.nisn === '' ? undefined : form.nisn,
+    })
+    if (success) {
+      emit('reload')
+    }
+  } else {
+    const teacherId = props.rawProfile?.teacher?.id
+    if (!teacherId) return
+    const { success } = await saveTeacher(teacherId, {
+      nip: form.nip === '' ? undefined : form.nip,
+      nuptk: form.nuptk === '' ? undefined : form.nuptk,
+      employmentTypeId:
+        !form.employmentTypeId || form.employmentTypeId === 'none'
+          ? undefined
+          : form.employmentTypeId,
+    })
+    if (success) {
+      emit('reload')
+    }
+  }
+}
 </script>
 
 <template>
   <div class="py-4">
     <div v-if="data.schoolIdentity">
-      <div
-        v-if="isStudent"
-        class="grid gap-4 md:grid-cols-2 xl:grid-cols-3"
+      <form
+        class="space-y-6"
+        @submit.prevent="handleSubmit"
       >
-        <div class="rounded-lg border bg-background p-4 shadow-sm">
-          <div class="flex items-start justify-between gap-3">
-            <p class="text-xs font-medium text-muted-foreground">NIS</p>
-            <Fingerprint class="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+        <div v-if="isStudent">
+          <div class="grid gap-5 md:grid-cols-2">
+            <!-- NIS -->
+            <div class="space-y-1.5">
+              <label class="text-xs font-semibold text-foreground">NIS</label>
+              <Input
+                v-model="form.nis"
+                placeholder="Nomor Induk Siswa"
+                :disabled="!isEditable"
+                class="disabled:opacity-100 disabled:bg-muted/20 disabled:cursor-default disabled:text-foreground disabled:border-border/80"
+              />
+            </div>
+
+            <!-- NISN -->
+            <div class="space-y-1.5">
+              <label class="text-xs font-semibold text-foreground">NISN</label>
+              <Input
+                v-model="form.nisn"
+                placeholder="Nomor Induk Siswa Nasional"
+                :disabled="!isEditable"
+                class="disabled:opacity-100 disabled:bg-muted/20 disabled:cursor-default disabled:text-foreground disabled:border-border/80"
+              />
+            </div>
+
+            <!-- Kelas Saat Ini -->
+            <div class="space-y-1.5">
+              <label class="text-xs font-semibold text-foreground"
+                >Kelas Saat Ini</label
+              >
+              <Input
+                :model-value="data.schoolIdentity.className || '-'"
+                disabled
+                class="disabled:opacity-100 disabled:bg-muted/20 disabled:cursor-default disabled:text-foreground disabled:border-border/80"
+              />
+            </div>
+
+            <!-- Tingkat Kelas -->
+            <div class="space-y-1.5">
+              <label class="text-xs font-semibold text-foreground"
+                >Tingkat Kelas</label
+              >
+              <Input
+                :model-value="
+                  data.schoolIdentity.gradeLevel
+                    ? `Level ${data.schoolIdentity.gradeLevel}`
+                    : '-'
+                "
+                disabled
+                class="disabled:opacity-100 disabled:bg-muted/20 disabled:cursor-default disabled:text-foreground disabled:border-border/80"
+              />
+            </div>
+
+            <!-- Dosen / Wali Kelas -->
+            <div class="space-y-1.5 md:col-span-2">
+              <label class="text-xs font-semibold text-foreground"
+                >Dosen / Wali Kelas</label
+              >
+              <Input
+                :model-value="data.schoolIdentity.supervisorName || '-'"
+                disabled
+                class="disabled:opacity-100 disabled:bg-muted/20 disabled:cursor-default disabled:text-foreground disabled:border-border/80"
+              />
+            </div>
           </div>
-          <p class="mt-2 text-sm leading-6 font-semibold text-foreground">
-            {{ data.nis || '-' }}
-          </p>
         </div>
-        <div class="rounded-lg border bg-background p-4 shadow-sm">
-          <div class="flex items-start justify-between gap-3">
-            <p class="text-xs font-medium text-muted-foreground">NISN</p>
-            <Fingerprint class="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+
+        <div v-else>
+          <div class="grid gap-5 md:grid-cols-2">
+            <!-- NIP -->
+            <div class="space-y-1.5">
+              <label class="text-xs font-semibold text-foreground">NIP</label>
+              <Input
+                v-model="form.nip"
+                placeholder="Nomor Induk Guru"
+                :disabled="!isEditable"
+                class="disabled:opacity-100 disabled:bg-muted/20 disabled:cursor-default disabled:text-foreground disabled:border-border/80"
+              />
+            </div>
+
+            <!-- NUPTK -->
+            <div class="space-y-1.5">
+              <label class="text-xs font-semibold text-foreground">NUPTK</label>
+              <Input
+                v-model="form.nuptk"
+                placeholder="Nomor Unik Pendidik"
+                :disabled="!isEditable"
+                class="disabled:opacity-100 disabled:bg-muted/20 disabled:cursor-default disabled:text-foreground disabled:border-border/80"
+              />
+            </div>
+
+            <!-- Status Kepegawaian -->
+            <div class="space-y-1.5">
+              <label class="text-xs font-semibold text-foreground"
+                >Status Kepegawaian</label
+              >
+              <Select
+                v-model="form.employmentTypeId"
+                :disabled="!isEditable"
+              >
+                <SelectTrigger
+                  class="w-full disabled:opacity-100 disabled:bg-muted/20 disabled:cursor-default disabled:text-foreground disabled:border-border/80"
+                >
+                  <SelectValue placeholder="Pilih Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Pilih Status</SelectItem>
+                  <SelectItem
+                    v-for="et in employmentTypes"
+                    :key="et.id"
+                    :value="et.id"
+                  >
+                    {{ et.name }}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <!-- Golongan / Kategori -->
+            <div class="space-y-1.5">
+              <label class="text-xs font-semibold text-foreground"
+                >Golongan / Kategori</label
+              >
+              <Input
+                :model-value="data.schoolIdentity.positionCategory || '-'"
+                disabled
+                class="disabled:opacity-100 disabled:bg-muted/20 disabled:cursor-default disabled:text-foreground disabled:border-border/80"
+              />
+            </div>
+
+            <!-- Tugas / Jabatan Utama -->
+            <div class="space-y-1.5">
+              <label class="text-xs font-semibold text-foreground"
+                >Tugas / Jabatan Utama</label
+              >
+              <Input
+                :model-value="data.schoolIdentity.primaryPosition || '-'"
+                disabled
+                class="disabled:opacity-100 disabled:bg-muted/20 disabled:cursor-default disabled:text-foreground disabled:border-border/80"
+              />
+            </div>
+
+            <!-- Tugas / Jabatan Tambahan -->
+            <div class="space-y-1.5">
+              <label class="text-xs font-semibold text-foreground"
+                >Tugas / Jabatan Tambahan</label
+              >
+              <Input
+                :model-value="data.schoolIdentity.additionalDuties || '-'"
+                disabled
+                class="disabled:opacity-100 disabled:bg-muted/20 disabled:cursor-default disabled:text-foreground disabled:border-border/80"
+              />
+            </div>
+
+            <!-- Tanggal Bergabung -->
+            <div class="space-y-1.5">
+              <label class="text-xs font-semibold text-foreground"
+                >Tanggal Bergabung</label
+              >
+              <Input
+                :model-value="data.schoolIdentity.hireDate || '-'"
+                disabled
+                class="disabled:opacity-100 disabled:bg-muted/20 disabled:cursor-default disabled:text-foreground disabled:border-border/80"
+              />
+            </div>
+
+            <!-- Mata Pelajaran Diampu -->
+            <div class="space-y-1.5">
+              <label class="text-xs font-semibold text-foreground"
+                >Mata Pelajaran Diampu</label
+              >
+              <Input
+                :model-value="
+                  data.schoolIdentity.taughtSubjects ||
+                  'Tidak mengajar kelas spesifik'
+                "
+                disabled
+                class="disabled:opacity-100 disabled:bg-muted/20 disabled:cursor-default disabled:text-foreground disabled:border-border/80"
+              />
+            </div>
           </div>
-          <p class="mt-2 text-sm leading-6 font-semibold text-foreground">
-            {{ data.nisn || '-' }}
-          </p>
         </div>
-        <div class="rounded-lg border bg-background p-4 shadow-sm">
-          <div class="flex items-start justify-between gap-3">
-            <p class="text-xs font-medium text-muted-foreground">
-              Kelas Saat Ini
-            </p>
-            <Building class="mt-0.5 size-4 shrink-0 text-muted-foreground" />
-          </div>
-          <p class="mt-2 text-sm leading-6 font-semibold text-foreground">
-            {{ data.schoolIdentity.className || '-' }}
-          </p>
-        </div>
-        <div class="rounded-lg border bg-background p-4 shadow-sm">
-          <div class="flex items-start justify-between gap-3">
-            <p class="text-xs font-medium text-muted-foreground">
-              Tingkat Absen
-            </p>
-            <Hash class="mt-0.5 size-4 shrink-0 text-muted-foreground" />
-          </div>
-          <p class="mt-2 text-sm leading-6 font-semibold text-foreground">
-            Level {{ data.schoolIdentity.gradeLevel || '-' }}
-          </p>
-        </div>
-        <div class="rounded-lg border bg-background p-4 shadow-sm">
-          <div class="flex items-start justify-between gap-3">
-            <p class="text-xs font-medium text-muted-foreground">
-              Dosen / Wali Kelas
-            </p>
-            <UserCheck class="mt-0.5 size-4 shrink-0 text-muted-foreground" />
-          </div>
-          <p class="mt-2 text-sm leading-6 font-semibold text-foreground">
-            {{ data.schoolIdentity.supervisorName || '-' }}
-          </p>
-        </div>
-      </div>
-      <div
-        v-else
-        class="grid gap-4 md:grid-cols-2 xl:grid-cols-3"
-      >
-        <div class="rounded-lg border bg-background p-4 shadow-sm">
-          <div class="flex items-start justify-between gap-3">
-            <p class="text-xs font-medium text-muted-foreground">NIP</p>
-            <Fingerprint class="mt-0.5 size-4 shrink-0 text-muted-foreground" />
-          </div>
-          <p class="mt-2 text-sm leading-6 font-semibold text-foreground">
-            {{ data.nip || '-' }}
-          </p>
-        </div>
-        <div class="rounded-lg border bg-background p-4 shadow-sm">
-          <div class="flex items-start justify-between gap-3">
-            <p class="text-xs font-medium text-muted-foreground">NUPTK</p>
-            <Fingerprint class="mt-0.5 size-4 shrink-0 text-muted-foreground" />
-          </div>
-          <p class="mt-2 text-sm leading-6 font-semibold text-foreground">
-            {{ data.nuptk || '-' }}
-          </p>
-        </div>
-        <div class="rounded-lg border bg-background p-4 shadow-sm">
-          <div class="flex items-start justify-between gap-3">
-            <p class="text-xs font-medium text-muted-foreground">
-              Status Kepegawaian
-            </p>
-            <CheckCircle2
-              class="mt-0.5 size-4 shrink-0 text-muted-foreground"
+
+        <!-- Action Buttons -->
+        <div
+          v-if="isEditable"
+          class="flex justify-end gap-3 pt-4"
+        >
+          <Button
+            type="submit"
+            :disabled="isSaving"
+          >
+            <Loader2
+              v-if="isSaving"
+              class="mr-2 h-4 w-4 animate-spin"
             />
-          </div>
-          <p class="mt-2 text-sm leading-6 font-semibold text-foreground">
-            {{ data.schoolIdentity.employmentStatus || '-' }}
-          </p>
+            {{ isSaving ? 'Menyimpan...' : 'Simpan Perubahan' }}
+          </Button>
         </div>
-        <div class="rounded-lg border bg-background p-4 shadow-sm">
-          <div class="flex items-start justify-between gap-3">
-            <p class="text-xs font-medium text-muted-foreground">
-              Golongan / Kategori
-            </p>
-            <Library class="mt-0.5 size-4 shrink-0 text-muted-foreground" />
-          </div>
-          <p class="mt-2 text-sm leading-6 font-semibold text-foreground">
-            {{ data.schoolIdentity.positionCategory || '-' }}
-          </p>
-        </div>
-        <div class="rounded-lg border bg-background p-4 shadow-sm">
-          <div class="flex items-start justify-between gap-3">
-            <p class="text-xs font-medium text-muted-foreground">
-              Tugas / Jabatan Utama
-            </p>
-            <Briefcase class="mt-0.5 size-4 shrink-0 text-muted-foreground" />
-          </div>
-          <p class="mt-2 text-sm leading-6 font-semibold text-foreground">
-            {{ data.schoolIdentity.primaryPosition || '-' }}
-          </p>
-        </div>
-        <div class="rounded-lg border bg-background p-4 shadow-sm">
-          <div class="flex items-start justify-between gap-3">
-            <p class="text-xs font-medium text-muted-foreground">
-              Tugas / Jabatan Tambahan
-            </p>
-            <Library class="mt-0.5 size-4 shrink-0 text-muted-foreground" />
-          </div>
-          <p class="mt-2 text-sm leading-6 font-semibold text-foreground">
-            {{ data.schoolIdentity.additionalDuties || '-' }}
-          </p>
-        </div>
-        <div class="rounded-lg border bg-background p-4 shadow-sm">
-          <div class="flex items-start justify-between gap-3">
-            <p class="text-xs font-medium text-muted-foreground">
-              Tanggal Bergabung
-            </p>
-            <CalendarDays
-              class="mt-0.5 size-4 shrink-0 text-muted-foreground"
-            />
-          </div>
-          <p class="mt-2 text-sm leading-6 font-semibold text-foreground">
-            {{ data.schoolIdentity.hireDate || '-' }}
-          </p>
-        </div>
-        <div class="rounded-lg border bg-background p-4 shadow-sm">
-          <div class="flex items-start justify-between gap-3">
-            <p class="text-xs font-medium text-muted-foreground">
-              Mata Pelajaran Diampu
-            </p>
-            <GraduationCap
-              class="mt-0.5 size-4 shrink-0 text-muted-foreground"
-            />
-          </div>
-          <p class="mt-2 text-sm leading-6 font-semibold text-foreground">
-            {{
-              data.schoolIdentity.taughtSubjects ||
-              'Tidak mengajar kelas spesifik'
-            }}
-          </p>
-        </div>
-      </div>
+      </form>
     </div>
     <div
       v-else

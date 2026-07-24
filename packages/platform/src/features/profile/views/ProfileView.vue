@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { onMounted, computed } from 'vue'
 import AppLayout from '@/layouts/AppLayout.vue'
-import { Card, CardHeader, CardTitle } from '@/ui/card'
+import { Card } from '@/ui/card'
 import {
   Select,
   SelectContent,
@@ -12,14 +12,18 @@ import {
 } from '@/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/tabs'
 import { Button } from '@/ui/button'
-import { KeyRound, Loader2 } from 'lucide-vue-next'
+import { KeyRound, Loader2, Camera } from 'lucide-vue-next'
 import { useRouter } from 'vue-router'
+import { Avatar, AvatarImage, AvatarFallback } from '@/ui/avatar'
 
 import PersonalInfoTab from '../components/PersonalInfoTab.vue'
-import ProfileHeaderCard from '../components/ProfileHeaderCard.vue'
 import ProfileSheets from '../components/ProfileSheets.vue'
 
-import { AddressInfoTab } from '@/features/platform/address'
+import {
+  AddressInfoTab,
+  useAddress,
+  type AddressSavePayload,
+} from '@/features/platform/address'
 import { useProfileView } from '../composables/useProfileView'
 import { profileConfig } from '../config'
 
@@ -50,6 +54,49 @@ const {
   handlePhotoChange,
 } = useProfileView()
 
+const { saveAddress } = useAddress()
+
+const handleUpdateAddress = async (payload: AddressSavePayload) => {
+  const addressId = rawProfile.value?.address?.id
+  const isCreate = !addressId
+  const { success } = await saveAddress(payload, isCreate, addressId)
+  if (success) {
+    reloadProfile()
+  }
+}
+
+function triggerPhotoUpload() {
+  if (isUploadingPhoto.value) return
+  const input = document.getElementById(
+    'profile-photo-input',
+  ) as HTMLInputElement | null
+  if (input) input.click()
+}
+
+function handleFileChange(e: Event) {
+  const file = (e.target as HTMLInputElement).files?.[0]
+  if (file) handlePhotoChange(file)
+  ;(e.target as HTMLInputElement).value = ''
+}
+
+const activeTabLabel = computed(() => {
+  if (activeTab.value === 'personal') return 'Data Diri'
+  if (activeTab.value === 'address') return 'Alamat'
+  if (activeTab.value === 'security') return 'Keamanan'
+
+  const extraTab = profileConfig.value.extraTabs.find(
+    (tab) => tab.value === activeTab.value,
+  )
+  return extraTab ? extraTab.label : 'Profil Pengguna'
+})
+
+const hasExtraAction = computed(() => {
+  const extraTab = profileConfig.value.extraTabs.find(
+    (tab) => tab.value === activeTab.value,
+  )
+  return !!extraTab?.actionConfig
+})
+
 onMounted(() => {
   reloadProfile()
 })
@@ -70,137 +117,233 @@ onMounted(() => {
 
       <Card
         v-else-if="profileData"
-        class="overflow-hidden rounded-2xl shadow-sm shadow-black/5 ring-1 ring-black/4"
+        class="overflow-hidden rounded-2xl shadow-sm shadow-black/5 ring-1 ring-black/4 bg-card border-none lg:h-[530px] flex flex-col"
       >
-        <CardHeader class="px-6 py-5 border-b bg-background">
-          <CardTitle class="text-2xl font-bold tracking-tight">
-            Profil Pengguna
-          </CardTitle>
-        </CardHeader>
-
-        <ProfileHeaderCard
-          :full-name="profileData.fullName ?? ''"
-          :subtitle="profileSubtitle"
-          :initials="initials"
-          :avatar-url="avatarUrl"
-          :is-editable="isEditable"
-          :is-own-profile="isOwnProfile"
-          :is-uploading-photo="isUploadingPhoto"
-          :active-tab="activeTab"
-          :action-config="actionConfig"
-          @action-click="handleActionClick"
-          @photo-change="handlePhotoChange"
-        />
-
         <Tabs
           v-model="activeTab"
-          class="w-full px-6 pb-6 mt-4"
+          class="w-full lg:h-full lg:flex lg:flex-col"
         >
-          <div class="md:hidden w-full">
-            <Select v-model="activeTab">
-              <SelectTrigger class="w-full">
-                <SelectValue placeholder="Pilih Tab" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectItem value="personal"> Data Diri </SelectItem>
-                  <template
-                    v-for="tab in profileConfig.extraTabs"
-                    :key="tab.value"
-                  >
-                    <SelectItem
-                      v-if="!tab.show || tab.show(profileData.roles ?? [])"
-                      :value="tab.value"
+          <div class="grid grid-cols-1 lg:grid-cols-4 lg:h-full lg:min-h-0">
+            <!-- Left Column: Profile Navigation Sidebar -->
+            <div
+              class="lg:col-span-1 p-6 lg:border-r border-border/60 flex flex-col gap-6 lg:h-full lg:min-h-0"
+            >
+              <div class="flex flex-col items-center text-center shrink-0">
+                <!-- Avatar block -->
+                <div class="relative shrink-0 mb-4">
+                  <Avatar class="size-24 border-2 border-primary/20">
+                    <AvatarImage
+                      v-if="avatarUrl"
+                      :src="avatarUrl"
+                      :alt="profileData.fullName"
+                    />
+                    <AvatarFallback
+                      class="bg-primary/10 text-2xl font-bold text-primary"
                     >
-                      {{ tab.label }}
-                    </SelectItem>
+                      {{ initials }}
+                    </AvatarFallback>
+                  </Avatar>
+
+                  <template v-if="isOwnProfile">
+                    <input
+                      id="profile-photo-input"
+                      type="file"
+                      accept="image/*"
+                      class="hidden"
+                      :disabled="isUploadingPhoto"
+                      @change="handleFileChange"
+                    />
+                    <button
+                      type="button"
+                      title="Ganti foto profil"
+                      class="absolute -bottom-1 -right-1 flex size-8 items-center justify-center rounded-full border-2 border-background bg-primary text-primary-foreground shadow-sm transition-opacity hover:opacity-90 disabled:opacity-50"
+                      :disabled="isUploadingPhoto"
+                      @click="triggerPhotoUpload"
+                    >
+                      <Camera class="size-4" />
+                    </button>
                   </template>
-                  <SelectItem value="address"> Alamat </SelectItem>
-                  <SelectItem value="security"> Keamanan </SelectItem>
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-          </div>
-          <TabsList
-            class="hidden md:grid w-full h-auto md:grid-cols-3 lg:grid-cols-5 gap-1 mb-2"
-          >
-            <TabsTrigger value="personal"> Data Diri </TabsTrigger>
-            <template
-              v-for="tab in profileConfig.extraTabs"
-              :key="tab.value"
-            >
-              <TabsTrigger
-                v-if="!tab.show || tab.show(profileData.roles ?? [])"
-                :value="tab.value"
-              >
-                {{ tab.label }}
-              </TabsTrigger>
-            </template>
-            <TabsTrigger value="address"> Alamat </TabsTrigger>
-            <TabsTrigger value="security"> Keamanan </TabsTrigger>
-          </TabsList>
+                </div>
 
-          <TabsContent
-            value="personal"
-            class="mt-0"
-          >
-            <PersonalInfoTab :data="profileData" />
-          </TabsContent>
-
-          <template
-            v-for="tab in profileConfig.extraTabs"
-            :key="tab.value"
-          >
-            <TabsContent
-              v-if="!tab.show || tab.show(profileData.roles ?? [])"
-              :value="tab.value"
-              class="mt-0"
-            >
-              <component
-                :is="tab.component"
-                v-bind="
-                  tab.props
-                    ? tab.props({
-                        profileData,
-                        rawProfile,
-                        isAdmin,
-                        reloadProfile,
-                      })
-                    : { data: profileData }
-                "
-              />
-            </TabsContent>
-          </template>
-
-          <TabsContent
-            value="address"
-            class="mt-0"
-          >
-            <AddressInfoTab :data="profileData" />
-          </TabsContent>
-          <TabsContent
-            value="security"
-            class="mt-0"
-          >
-            <div class="max-w-xl py-4 space-y-4">
-              <div>
-                <h3 class="text-lg font-medium text-slate-900">
-                  Keamanan Akun
-                </h3>
-                <p class="text-sm text-muted-foreground">
-                  Kelola password akun Anda di halaman khusus untuk menjaga
-                  keamanan data.
+                <!-- Info block -->
+                <h2 class="text-xl font-bold text-foreground line-clamp-2">
+                  {{ profileData.fullName || '-' }}
+                </h2>
+                <p class="text-xs font-medium text-muted-foreground mt-1">
+                  {{ profileSubtitle }}
                 </p>
               </div>
-              <Button
-                variant="outline"
-                @click="router.push({ name: 'profile-change-password' })"
+
+              <!-- Mobile selector -->
+              <div class="lg:hidden w-full shrink-0">
+                <Select v-model="activeTab">
+                  <SelectTrigger class="w-full">
+                    <SelectValue placeholder="Pilih Tab" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectItem value="personal"> Data Diri </SelectItem>
+                      <template
+                        v-for="tab in profileConfig.extraTabs"
+                        :key="tab.value"
+                      >
+                        <SelectItem
+                          v-if="!tab.show || tab.show(profileData.roles ?? [])"
+                          :value="tab.value"
+                        >
+                          {{ tab.label }}
+                        </SelectItem>
+                      </template>
+                      <SelectItem value="address"> Alamat </SelectItem>
+                      <SelectItem value="security"> Keamanan </SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <!-- Desktop Vertical Navigation -->
+              <TabsList
+                class="hidden lg:flex flex-col gap-1 w-full bg-transparent border-0 h-auto p-0 flex-1 overflow-y-auto min-h-0 pr-1 select-none items-stretch justify-start [scrollbar-width:none] [&::-webkit-scrollbar]:w-0 [&::-webkit-scrollbar]:h-0"
               >
-                <KeyRound class="mr-2 h-4 w-4" />
-                Ubah Password
-              </Button>
+                <!-- Trigger item styling: vertical sidebar items matching AppSidebar style -->
+                <TabsTrigger
+                  value="personal"
+                  class="justify-start px-3 py-2 h-9 text-left w-full border-0 rounded-md bg-transparent text-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[state=active]:bg-sidebar-accent data-[state=active]:font-medium data-[state=active]:text-sidebar-accent-foreground shadow-none data-[state=active]:shadow-none transition-all duration-200 cursor-pointer"
+                >
+                  Data Diri
+                </TabsTrigger>
+                <template
+                  v-for="tab in profileConfig.extraTabs"
+                  :key="tab.value"
+                >
+                  <TabsTrigger
+                    v-if="!tab.show || tab.show(profileData.roles ?? [])"
+                    :value="tab.value"
+                    class="justify-start px-3 py-2 h-9 text-left w-full border-0 rounded-md bg-transparent text-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[state=active]:bg-sidebar-accent data-[state=active]:font-medium data-[state=active]:text-sidebar-accent-foreground shadow-none data-[state=active]:shadow-none transition-all duration-200 cursor-pointer"
+                  >
+                    {{ tab.label }}
+                  </TabsTrigger>
+                </template>
+                <TabsTrigger
+                  value="address"
+                  class="justify-start px-3 py-2 h-9 text-left w-full border-0 rounded-md bg-transparent text-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[state=active]:bg-sidebar-accent data-[state=active]:font-medium data-[state=active]:text-sidebar-accent-foreground shadow-none data-[state=active]:shadow-none transition-all duration-200 cursor-pointer"
+                >
+                  Alamat
+                </TabsTrigger>
+                <TabsTrigger
+                  value="security"
+                  class="justify-start px-3 py-2 h-9 text-left w-full border-0 rounded-md bg-transparent text-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[state=active]:bg-sidebar-accent data-[state=active]:font-medium data-[state=active]:text-sidebar-accent-foreground shadow-none data-[state=active]:shadow-none transition-all duration-200 cursor-pointer"
+                >
+                  Keamanan
+                </TabsTrigger>
+              </TabsList>
             </div>
-          </TabsContent>
+
+            <!-- Right Column: Detail Content -->
+            <div class="lg:col-span-3 flex flex-col lg:h-full lg:min-h-0">
+              <!-- Top header of the content area -->
+              <div
+                class="px-6 py-3.5 border-b border-border/60 shrink-0 flex items-center justify-between"
+              >
+                <h3 class="text-lg font-bold tracking-tight text-foreground">
+                  {{ activeTabLabel }}
+                </h3>
+                <Button
+                  v-if="isEditable && hasExtraAction"
+                  size="sm"
+                  class="h-8 gap-1.5 cursor-pointer text-xs"
+                  @click="handleActionClick(activeTab)"
+                >
+                  <component
+                    :is="actionConfig.icon"
+                    class="size-3.5"
+                  />
+                  {{ actionConfig.text }}
+                </Button>
+              </div>
+
+              <!-- Main Content area below the header -->
+              <div
+                class="p-6 lg:p-6 lg:pt-1 flex-1 lg:overflow-y-auto lg:min-h-0"
+              >
+                <TabsContent
+                  value="personal"
+                  class="mt-0 focus-visible:outline-none focus-visible:ring-0 animate-in fade-in-50 duration-200"
+                >
+                  <PersonalInfoTab
+                    :data="profileData"
+                    :raw-profile="rawProfile"
+                    :is-editable="isEditable"
+                    :is-saving="isSaving"
+                    @save="handleUpdateProfile"
+                  />
+                </TabsContent>
+
+                <template
+                  v-for="tab in profileConfig.extraTabs"
+                  :key="tab.value"
+                >
+                  <TabsContent
+                    v-if="!tab.show || tab.show(profileData.roles ?? [])"
+                    :value="tab.value"
+                    class="mt-0 focus-visible:outline-none focus-visible:ring-0 animate-in fade-in-50 duration-200"
+                  >
+                    <component
+                      :is="tab.component"
+                      v-bind="
+                        tab.props
+                          ? tab.props({
+                              profileData,
+                              rawProfile,
+                              isAdmin,
+                              reloadProfile,
+                            })
+                          : { data: profileData }
+                      "
+                      :is-editable="isEditable"
+                      @reload="reloadProfile"
+                    />
+                  </TabsContent>
+                </template>
+
+                <TabsContent
+                  value="address"
+                  class="mt-0 focus-visible:outline-none focus-visible:ring-0 animate-in fade-in-50 duration-200"
+                >
+                  <AddressInfoTab
+                    :data="profileData"
+                    :raw-address="rawProfile?.address"
+                    :is-editable="isEditable"
+                    @save="handleUpdateAddress"
+                  />
+                </TabsContent>
+
+                <TabsContent
+                  value="security"
+                  class="mt-0 focus-visible:outline-none focus-visible:ring-0 animate-in fade-in-50 duration-200"
+                >
+                  <div class="max-w-xl py-2 space-y-4">
+                    <div>
+                      <h3 class="text-lg font-medium text-slate-900">
+                        Keamanan Akun
+                      </h3>
+                      <p class="text-sm text-muted-foreground">
+                        Kelola password akun Anda di halaman khusus untuk
+                        menjaga keamanan data.
+                      </p>
+                    </div>
+                    <Button
+                      variant="outline"
+                      @click="router.push({ name: 'profile-change-password' })"
+                    >
+                      <KeyRound class="mr-2 h-4 w-4" />
+                      Ubah Password
+                    </Button>
+                  </div>
+                </TabsContent>
+              </div>
+            </div>
+          </div>
         </Tabs>
       </Card>
     </div>

@@ -1,28 +1,11 @@
 <script setup lang="ts">
-import {
-  User,
-  Fingerprint,
-  Calendar,
-  Phone,
-  Mail,
-  GraduationCap,
-  Briefcase,
-  Wallet,
-} from 'lucide-vue-next'
-import { Card, CardContent } from '@/ui/card'
+import { Input } from '@/ui/input'
 import type {
   ProfileParentsData,
   IncomeRange,
 } from '@/features/platform/profile'
 
 defineProps<{ data: ProfileParentsData }>()
-
-function getParentLabel(type?: string) {
-  if (type === 'FATHER') return 'Data Ayah'
-  if (type === 'MOTHER') return 'Data Ibu'
-  if (type === 'GUARDIAN') return 'Data Wali'
-  return 'Data Orang Tua'
-}
 
 const incomeLabels: Record<IncomeRange, string> = {
   BELOW_500K: '< Rp 500.000',
@@ -35,123 +18,129 @@ const incomeLabels: Record<IncomeRange, string> = {
 function formatIncome(val?: IncomeRange | null): string {
   return val ? (incomeLabels[val] ?? '-') : '-'
 }
+
+function getParentLabel(type?: string) {
+  if (type === 'FATHER') return 'Data Ayah'
+  if (type === 'MOTHER') return 'Data Ibu'
+  if (type === 'GUARDIAN') return 'Data Wali'
+  return 'Data Orang Tua'
+}
 </script>
 
 <template>
   <div class="py-4">
     <div
       v-if="data.parents && data.parents.length > 0"
-      class="flex flex-col gap-6"
+      class="space-y-8"
     >
-      <Card
+      <div
         v-for="(parent, i) in data.parents"
         :key="i"
-        class="flex flex-col shadow-sm overflow-hidden transition-all duration-200 w-full"
+        class="space-y-2"
       >
-        <div class="border-b px-5 py-4 bg-muted/20">
-          <h3 class="font-bold text-xl text-foreground leading-none truncate">
-            {{ getParentLabel(parent.type) }}
-          </h3>
-        </div>
-        <CardContent class="p-4 bg-muted/5 flex-1">
-          <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            <div class="rounded-lg border bg-background p-4 shadow-sm">
-              <div class="flex items-start justify-between gap-3">
-                <p class="text-xs font-medium text-muted-foreground">
-                  Nama Lengkap
-                </p>
-                <User class="mt-0.5 size-4 shrink-0 text-muted-foreground" />
-              </div>
-              <p class="mt-2 text-sm leading-6 font-semibold text-foreground">
-                {{ parent.name || '-' }}
-              </p>
-            </div>
-            <div class="rounded-lg border bg-background p-4 shadow-sm">
-              <div class="flex items-start justify-between gap-3">
-                <p class="text-xs font-medium text-muted-foreground">NIK</p>
-                <Fingerprint
-                  class="mt-0.5 size-4 shrink-0 text-muted-foreground"
-                />
-              </div>
-              <p class="mt-2 text-sm leading-6 font-semibold text-foreground">
-                {{ parent.nik || '-' }}
-              </p>
-            </div>
-            <div class="rounded-lg border bg-background p-4 shadow-sm">
-              <div class="flex items-start justify-between gap-3">
-                <p class="text-xs font-medium text-muted-foreground">
-                  Tempat, Tanggal Lahir
-                </p>
-                <Calendar
-                  class="mt-0.5 size-4 shrink-0 text-muted-foreground"
-                />
-              </div>
-              <p class="mt-2 text-sm leading-6 font-semibold text-foreground">
-                {{ parent.birthPlace || '-' }}, {{ parent.birthDate || '-' }}
-              </p>
-            </div>
-            <div class="rounded-lg border bg-background p-4 shadow-sm">
-              <div class="flex items-start justify-between gap-3">
-                <p class="text-xs font-medium text-muted-foreground">
-                  No. Handphone
-                </p>
-                <Phone class="mt-0.5 size-4 shrink-0 text-muted-foreground" />
-              </div>
-              <p class="mt-2 text-sm leading-6 font-semibold text-foreground">
-                {{ parent.phone || '-' }}
-              </p>
-            </div>
-            <div class="rounded-lg border bg-background p-4 shadow-sm">
-              <div class="flex items-start justify-between gap-3">
-                <p class="text-xs font-medium text-muted-foreground">
-                  Email Pribadi
-                </p>
-                <Mail class="mt-0.5 size-4 shrink-0 text-muted-foreground" />
-              </div>
-              <p class="mt-2 text-sm leading-6 font-semibold text-foreground">
-                {{ parent.email || '-' }}
-              </p>
-            </div>
-            <div class="rounded-lg border bg-background p-4 shadow-sm">
-              <div class="flex items-start justify-between gap-3">
-                <p class="text-xs font-medium text-muted-foreground">
-                  Pendidikan Terakhir
-                </p>
-                <GraduationCap
-                  class="mt-0.5 size-4 shrink-0 text-muted-foreground"
-                />
-              </div>
-              <p class="mt-2 text-sm leading-6 font-semibold text-foreground">
-                {{ parent.education || '-' }}
-              </p>
-            </div>
-            <div class="rounded-lg border bg-background p-4 shadow-sm">
-              <div class="flex items-start justify-between gap-3">
-                <p class="text-xs font-medium text-muted-foreground">
-                  Pekerjaan
-                </p>
-                <Briefcase
-                  class="mt-0.5 size-4 shrink-0 text-muted-foreground"
-                />
-              </div>
-              <p class="mt-2 text-sm leading-6 font-semibold text-foreground">
-                {{ parent.occupation || '-' }}
-              </p>
-            </div>
-            <div class="rounded-lg border bg-background p-4 shadow-sm">
-              <div class="flex items-start justify-between gap-3">
-                <p class="text-xs font-medium text-muted-foreground">
-                  Penghasilan Bulanan
-                </p>
-                <Wallet class="mt-0.5 size-4 shrink-0 text-muted-foreground" />
-              </div>
-              <p class="mt-2 text-sm leading-6 font-semibold text-foreground">
-                {{ formatIncome(parent.income) }}
-              </p>
-            </div>
+        <h4 class="text-sm font-bold tracking-tight text-foreground">
+          {{ getParentLabel(parent.type) }}
+        </h4>
+        <div class="grid gap-5 md:grid-cols-2">
+          <!-- Nama Lengkap -->
+          <div class="space-y-1.5">
+            <label class="text-xs font-semibold text-foreground"
+              >Nama Lengkap</label
+            >
+            <Input
+              :model-value="parent.name || '-'"
+              disabled
+              class="disabled:opacity-100 disabled:bg-muted/20 disabled:cursor-default disabled:text-foreground disabled:border-border/80"
+            />
           </div>
-        </CardContent>
-      </Card>
+
+          <!-- NIK -->
+          <div class="space-y-1.5">
+            <label class="text-xs font-semibold text-foreground">NIK</label>
+            <Input
+              :model-value="parent.nik || '-'"
+              disabled
+              class="disabled:opacity-100 disabled:bg-muted/20 disabled:cursor-default disabled:text-foreground disabled:border-border/80"
+            />
+          </div>
+
+          <!-- Tempat, Tanggal Lahir -->
+          <div class="space-y-1.5">
+            <label class="text-xs font-semibold text-foreground"
+              >Tempat, Tanggal Lahir</label
+            >
+            <Input
+              :model-value="
+                parent.birthPlace && parent.birthDate
+                  ? `${parent.birthPlace}, ${parent.birthDate}`
+                  : parent.birthPlace || parent.birthDate || '-'
+              "
+              disabled
+              class="disabled:opacity-100 disabled:bg-muted/20 disabled:cursor-default disabled:text-foreground disabled:border-border/80"
+            />
+          </div>
+
+          <!-- No. Handphone -->
+          <div class="space-y-1.5">
+            <label class="text-xs font-semibold text-foreground"
+              >No. Handphone</label
+            >
+            <Input
+              :model-value="parent.phone || '-'"
+              disabled
+              class="disabled:opacity-100 disabled:bg-muted/20 disabled:cursor-default disabled:text-foreground disabled:border-border/80"
+            />
+          </div>
+
+          <!-- Email Pribadi -->
+          <div class="space-y-1.5">
+            <label class="text-xs font-semibold text-foreground"
+              >Email Pribadi</label
+            >
+            <Input
+              :model-value="parent.email || '-'"
+              disabled
+              class="disabled:opacity-100 disabled:bg-muted/20 disabled:cursor-default disabled:text-foreground disabled:border-border/80"
+            />
+          </div>
+
+          <!-- Pendidikan Terakhir -->
+          <div class="space-y-1.5">
+            <label class="text-xs font-semibold text-foreground"
+              >Pendidikan Terakhir</label
+            >
+            <Input
+              :model-value="parent.education || '-'"
+              disabled
+              class="disabled:opacity-100 disabled:bg-muted/20 disabled:cursor-default disabled:text-foreground disabled:border-border/80"
+            />
+          </div>
+
+          <!-- Pekerjaan -->
+          <div class="space-y-1.5">
+            <label class="text-xs font-semibold text-foreground"
+              >Pekerjaan</label
+            >
+            <Input
+              :model-value="parent.occupation || '-'"
+              disabled
+              class="disabled:opacity-100 disabled:bg-muted/20 disabled:cursor-default disabled:text-foreground disabled:border-border/80"
+            />
+          </div>
+
+          <!-- Penghasilan Bulanan -->
+          <div class="space-y-1.5">
+            <label class="text-xs font-semibold text-foreground"
+              >Penghasilan Bulanan</label
+            >
+            <Input
+              :model-value="formatIncome(parent.income)"
+              disabled
+              class="disabled:opacity-100 disabled:bg-muted/20 disabled:cursor-default disabled:text-foreground disabled:border-border/80"
+            />
+          </div>
+        </div>
+      </div>
     </div>
     <div
       v-else

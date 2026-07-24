@@ -102,13 +102,7 @@ const onSubmit = handleSubmit(async (values) => {
         <DialogTitle
           >{{ initialData ? 'Edit' : 'Tambah' }} Tipe Kalender</DialogTitle
         >
-        <DialogDescription>
-          {{
-            initialData
-              ? 'Perbarui data tipe kalender.'
-              : 'Tambahkan tipe kalender baru ke dalam sistem.'
-          }}
-        </DialogDescription>
+        <DialogDescription class="sr-only"> </DialogDescription>
       </DialogHeader>
 
       <ScrollArea class="flex-1 min-h-0">

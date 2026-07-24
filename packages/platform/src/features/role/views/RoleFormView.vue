@@ -1,4 +1,4 @@
-﻿<script setup lang="ts">
+<script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
@@ -106,12 +106,11 @@ onMounted(async () => {
 <template>
   <AppLayout :breadcrumbs="breadcrumbs">
     <div class="p-4 md:p-6 lg:p-8">
-      <!-- Outer Card container exactly matching ClassroomManageView.vue -->
       <Card
         class="overflow-hidden rounded-2xl shadow-sm shadow-black/5 ring-1 ring-black/4 flex flex-col gap-0"
       >
         <CardHeader
-          class="flex flex-row items-center justify-between border-b px-6 py-5 shrink-0"
+          class="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b px-6 py-5 shrink-0 gap-4"
         >
           <div class="flex items-center gap-3">
             <Button
@@ -122,36 +121,34 @@ onMounted(async () => {
             >
               <ArrowLeft class="h-4 w-4" />
             </Button>
-            <CardTitle class="text-2xl font-bold tracking-tight">
-              {{ isEditing ? 'Ubah Hak Akses Role' : 'Tambah Role Baru' }}
-            </CardTitle>
+            <div>
+              <CardTitle class="text-2xl font-bold tracking-tight">
+                {{ isEditing ? 'Ubah Hak Akses Role' : 'Tambah Role Baru' }}
+              </CardTitle>
+            </div>
           </div>
         </CardHeader>
 
-        <div class="p-6">
-          <!-- Loading State for full page -->
-          <div
-            v-if="isLoadingRole"
-            class="flex flex-col items-center justify-center py-20 space-y-4"
+        <!-- Loading State for full page -->
+        <div
+          v-if="isLoadingRole"
+          class="p-6 flex flex-col items-center justify-center py-20 space-y-4"
+        >
+          <span class="text-sm text-muted-foreground animate-pulse"
+            >Memuat data detail role...</span
           >
-            <span class="text-sm text-muted-foreground animate-pulse"
-              >Memuat data detail role...</span
-            >
-          </div>
-
-          <!-- Role Form Component containing inner side-by-side cards -->
-          <RoleForm
-            v-else
-            v-slot="{}"
-            :edit-data="selectedRole"
-            :is-saving="isSaving"
-            :form-error="formError"
-            :permissions="permissions"
-            :is-loading-permissions="isLoadingPermissions"
-            @save="handleSaveRole"
-            @cancel="handleCancel"
-          />
         </div>
+
+        <RoleForm
+          v-else
+          :edit-data="selectedRole"
+          :is-saving="isSaving"
+          :form-error="formError"
+          :permissions="permissions"
+          :is-loading-permissions="isLoadingPermissions"
+          @save="handleSaveRole"
+          @cancel="handleCancel"
+        />
       </Card>
     </div>
   </AppLayout>

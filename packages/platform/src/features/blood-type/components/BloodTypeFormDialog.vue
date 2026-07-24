@@ -101,13 +101,7 @@ const onSubmit = handleSubmit(async (values) => {
         <DialogTitle
           >{{ initialData ? 'Edit' : 'Tambah' }} Golongan Darah</DialogTitle
         >
-        <DialogDescription>
-          {{
-            initialData
-              ? 'Perbarui data golongan darah.'
-              : 'Tambahkan golongan darah baru ke dalam sistem.'
-          }}
-        </DialogDescription>
+        <DialogDescription class="sr-only"> </DialogDescription>
       </DialogHeader>
 
       <ScrollArea class="flex-1 min-h-0">

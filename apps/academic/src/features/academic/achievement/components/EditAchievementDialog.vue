@@ -72,13 +72,7 @@ onMounted(async () => {
           <DialogTitle class="text-xl">
             {{ isCreate ? 'Tambah Prestasi' : 'Edit Prestasi' }}
           </DialogTitle>
-          <DialogDescription>
-            {{
-              isCreate
-                ? 'Catat prestasi baru yang telah diraih.'
-                : 'Perbarui data prestasi yang sudah ada.'
-            }}
-          </DialogDescription>
+          <DialogDescription class="sr-only"> </DialogDescription>
         </DialogHeader>
 
         <ScrollArea class="flex-1 min-h-0">

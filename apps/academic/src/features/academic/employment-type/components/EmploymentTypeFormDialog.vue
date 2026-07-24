@@ -98,13 +98,7 @@ const onSubmit = handleSubmit(async (values) => {
         <DialogTitle
           >{{ initialData ? 'Edit' : 'Tambah' }} Status Kepegawaian</DialogTitle
         >
-        <DialogDescription>
-          {{
-            initialData
-              ? 'Perbarui data status kepegawaian.'
-              : 'Tambahkan status kepegawaian baru ke dalam sistem.'
-          }}
-        </DialogDescription>
+        <DialogDescription class="sr-only"> </DialogDescription>
       </DialogHeader>
 
       <ScrollArea class="flex-1 min-h-0">

@@ -3,6 +3,7 @@ import { computed, toRefs } from 'vue'
 import { useSemesterForm } from '../composables/useSemesterForm'
 import type { AcademicYearRef, Semester } from '../types'
 import { DatePicker } from '@/ui'
+import { Input } from '@/ui/input'
 import { Alert, AlertDescription } from '@/ui/alert'
 import { Button } from '@/ui/button'
 import {
@@ -21,6 +22,7 @@ import {
   SelectValue,
 } from '@/ui/select'
 import { AlertCircle, Loader2 } from 'lucide-vue-next'
+import { ScrollArea } from '@/ui/scroll-area'
 import {
   FormControl,
   FormField,
@@ -60,139 +62,171 @@ const semesterForm = useSemesterForm({
 
 <template>
   <Dialog v-model:open="open">
-    <DialogContent class="sm:max-w-md">
-      <DialogHeader>
+    <DialogContent class="sm:max-w-md flex flex-col gap-0 p-0 overflow-hidden">
+      <DialogHeader class="px-6 py-5 border-b shrink-0 bg-muted/20">
         <DialogTitle>{{
           semesterForm.isEditing.value ? 'Edit Semester' : 'Tambah Semester'
         }}</DialogTitle>
-        <DialogDescription>
-          {{
-            semesterForm.isEditing.value
-              ? 'Perbarui informasi data semester. Klik simpan untuk menerapkan.'
-              : 'Tambahkan data semester baru ke dalam sistem.'
-          }}
-        </DialogDescription>
+        <DialogDescription class="sr-only"> </DialogDescription>
       </DialogHeader>
 
-      <form
-        id="semester-form"
-        class="space-y-4 py-2"
-        @submit.prevent="semesterForm.onSubmit"
-      >
-        <FormField
-          v-slot="{ value, handleChange }"
-          name="academicYearId"
+      <ScrollArea class="flex-1 min-h-0">
+        <form
+          id="semester-form"
+          class="space-y-4 px-6 py-4"
+          @submit.prevent="semesterForm.onSubmit"
         >
-          <FormItem>
-            <FormLabel
-              >Tahun Ajaran <span class="text-destructive">*</span></FormLabel
-            >
-            <Select
-              :model-value="value"
-              disabled
-              @update:model-value="handleChange"
-            >
-              <FormControl>
-                <SelectTrigger class="w-full">
-                  <SelectValue placeholder="Memuat..." />
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                <SelectItem
-                  v-for="ay in academicYears"
-                  :key="ay.id"
-                  :value="ay.id"
-                >
-                  {{ ay.name }}
-                </SelectItem>
-              </SelectContent>
-            </Select>
-            <FormMessage />
-          </FormItem>
-        </FormField>
-
-        <FormField
-          v-slot="{ value, handleChange }"
-          name="typeId"
-        >
-          <FormItem>
-            <FormLabel
-              >Semester <span class="text-destructive">*</span></FormLabel
-            >
-            <Select
-              :model-value="value"
-              @update:model-value="handleChange"
-            >
-              <FormControl>
-                <SelectTrigger class="w-full">
-                  <SelectValue placeholder="Pilih Semester" />
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                <SelectItem
-                  v-for="st in semesterForm.semesterTypes.value"
-                  :key="st.id"
-                  :value="st.id"
-                >
-                  {{ st.name === 'ODD' ? 'Ganjil' : 'Genap' }}
-                </SelectItem>
-              </SelectContent>
-            </Select>
-            <FormMessage />
-          </FormItem>
-        </FormField>
-
-        <div class="grid gap-4 sm:grid-cols-2">
           <FormField
             v-slot="{ value, handleChange }"
-            name="startDate"
+            name="academicYearId"
           >
             <FormItem>
-              <FormLabel> Tanggal Mulai </FormLabel>
-              <FormControl>
-                <DatePicker
-                  :model-value="value ?? ''"
-                  placeholder="Pilih tanggal mulai"
-                  :allow-future-dates="true"
-                  @update:model-value="handleChange"
-                />
-              </FormControl>
+              <FormLabel
+                >Tahun Ajaran <span class="text-destructive">*</span></FormLabel
+              >
+              <Select
+                :model-value="value"
+                disabled
+                @update:model-value="handleChange"
+              >
+                <FormControl>
+                  <SelectTrigger class="w-full">
+                    <SelectValue placeholder="Memuat..." />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem
+                    v-for="ay in academicYears"
+                    :key="ay.id"
+                    :value="ay.id"
+                  >
+                    {{ ay.name }}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
             </FormItem>
           </FormField>
 
           <FormField
             v-slot="{ value, handleChange }"
-            name="endDate"
+            name="typeId"
           >
             <FormItem>
-              <FormLabel>Tanggal Selesai</FormLabel>
+              <FormLabel
+                >Tipe Semester
+                <span class="text-destructive">*</span></FormLabel
+              >
+              <Select
+                :model-value="value"
+                :disabled="semesterForm.isSaving.value"
+                @update:model-value="handleChange"
+              >
+                <FormControl>
+                  <SelectTrigger class="w-full">
+                    <SelectValue placeholder="Pilih tipe semester" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem
+                    v-for="type in semesterForm.semesterTypes.value"
+                    :key="type.id"
+                    :value="type.id"
+                  >
+                    {{
+                      type.name === 'ODD'
+                        ? 'Ganjil'
+                        : type.name === 'EVEN'
+                          ? 'Genap'
+                          : type.name
+                    }}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          </FormField>
+
+          <FormField
+            v-slot="{ componentField }"
+            name="name"
+          >
+            <FormItem>
+              <FormLabel
+                >Nama Semester
+                <span class="text-destructive">*</span></FormLabel
+              >
               <FormControl>
-                <DatePicker
-                  :model-value="value ?? ''"
-                  placeholder="Pilih tanggal selesai"
-                  :allow-future-dates="true"
-                  :min-date="semesterForm.form.values.startDate"
-                  @update:model-value="handleChange"
+                <Input
+                  placeholder="Contoh: Semester Ganjil 2024/2025"
+                  v-bind="componentField"
                 />
               </FormControl>
               <FormMessage />
             </FormItem>
           </FormField>
-        </div>
 
-        <Alert
-          v-if="semesterForm.formError.value"
-          variant="destructive"
-          class="mt-2"
-        >
-          <AlertCircle class="size-4" />
-          <AlertDescription>{{
-            semesterForm.formError.value
-          }}</AlertDescription>
-        </Alert>
-      </form>
+          <div class="grid grid-cols-2 gap-4">
+            <FormField
+              v-slot="{ value, handleChange }"
+              name="startDate"
+            >
+              <FormItem class="content-start">
+                <FormLabel
+                  >Tanggal Mulai
+                  <span class="text-destructive">*</span></FormLabel
+                >
+                <FormControl>
+                  <DatePicker
+                    :model-value="value ?? ''"
+                    placeholder="Pilih tanggal mulai"
+                    :allow-future-dates="true"
+                    @update:model-value="handleChange"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            </FormField>
 
-      <DialogFooter class="flex sm:justify-between gap-2">
+            <FormField
+              v-slot="{ value, handleChange }"
+              name="endDate"
+            >
+              <FormItem class="content-start">
+                <FormLabel
+                  >Tanggal Selesai
+                  <span class="text-destructive">*</span></FormLabel
+                >
+                <FormControl>
+                  <DatePicker
+                    :model-value="value ?? ''"
+                    placeholder="Pilih tanggal selesai"
+                    :allow-future-dates="true"
+                    :min-date="semesterForm.form.values.startDate"
+                    @update:model-value="handleChange"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            </FormField>
+          </div>
+
+          <Alert
+            v-if="semesterForm.formError.value"
+            variant="destructive"
+            class="mt-2"
+          >
+            <AlertCircle class="size-4" />
+            <AlertDescription>{{
+              semesterForm.formError.value
+            }}</AlertDescription>
+          </Alert>
+        </form>
+      </ScrollArea>
+
+      <DialogFooter
+        class="px-6 py-4 border-t shrink-0 flex sm:justify-between w-full bg-background mt-auto"
+      >
         <Button
           type="button"
           variant="outline"

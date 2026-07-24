@@ -28,7 +28,9 @@ const { user, syncAuthenticatedUserProfile } = useAuthSession()
 const { filteredSections } = useMenuVisibility()
 const { logoSrc } = useBranding()
 const settingsStore = useSettingsStore()
-const appTitle = computed(() => settingsStore.settings?.appTitle ?? 'SIAKAD 241')
+const appTitle = computed(
+  () => settingsStore.settings?.appTitle ?? 'SIAKAD 241',
+)
 const activeAcademicInfo = ref({ academicYear: 'Memuat...', semester: '' })
 
 const scrollContainer = ref<HTMLDivElement | null>(null)
@@ -101,7 +103,9 @@ async function fetchActiveAcademicInfo() {
                 class="size-8 rounded-lg object-contain"
               />
               <div class="grid flex-1 text-left text-sm leading-tight">
-                <span class="truncate font-semibold text-base">{{ appTitle }}</span>
+                <span class="truncate font-semibold text-base">{{
+                  appTitle
+                }}</span>
                 <span
                   class="truncate text-xs text-muted-foreground font-medium"
                 >
@@ -121,7 +125,7 @@ async function fetchActiveAcademicInfo() {
     <SidebarContent>
       <div
         ref="scrollContainer"
-        class="h-full w-full overflow-y-auto"
+        class="h-full w-full overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:w-0 [&::-webkit-scrollbar]:h-0"
         @scroll="handleScroll"
       >
         <NavMain :sections="filteredSections" />

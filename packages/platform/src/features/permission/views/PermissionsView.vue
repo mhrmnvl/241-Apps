@@ -1,20 +1,15 @@
-﻿<script setup lang="ts">
+<script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { toast } from 'vue-sonner'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { DataTable } from '@/ui'
 import { Button } from '@/ui/button'
 import { Card, CardHeader, CardTitle } from '@/ui/card'
-import { Plus, RefreshCw } from 'lucide-vue-next'
+import { RefreshCw } from 'lucide-vue-next'
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
 import { permissionsApi } from '../api/permissionsApi'
 import { getColumns } from '../components/permissionColumns'
-import PermissionFormDialog from '../components/PermissionFormDialog.vue'
-import type {
-  Permission,
-  CreatePermissionPayload,
-  UpdatePermissionPayload,
-} from '../types'
+import type { Permission } from '../types'
 
 const breadcrumbs = [
   { title: 'Pengaturan', href: '#' },
@@ -23,12 +18,7 @@ const breadcrumbs = [
 
 const permissions = ref<Permission[]>([])
 const isLoading = ref(false)
-const isSaving = ref(false)
 const isSyncing = ref(false)
-const formError = ref<string | null>(null)
-
-const isSheetOpen = ref(false)
-const selectedPermission = ref<Permission | null>(null)
 
 const fetchPermissions = async () => {
   isLoading.value = true
@@ -41,67 +31,6 @@ const fetchPermissions = async () => {
     )
   } finally {
     isLoading.value = false
-  }
-}
-
-const handleAddClick = () => {
-  selectedPermission.value = null
-  formError.value = null
-  isSheetOpen.value = true
-}
-
-const handleEditClick = (permission: Permission) => {
-  selectedPermission.value = permission
-  formError.value = null
-  isSheetOpen.value = true
-}
-
-const handleDelete = async (
-  permission: Permission,
-  {
-    closeAlert,
-    setLoading,
-  }: { closeAlert: () => void; setLoading: (state: boolean) => void },
-) => {
-  setLoading(true)
-  try {
-    await permissionsApi.deletePermission(permission.id)
-    toast.success('Berhasil menghapus permission')
-    closeAlert()
-    await fetchPermissions()
-  } catch (error) {
-    toast.error(getIndonesianErrorMessage(error, 'Gagal menghapus permission.'))
-  } finally {
-    setLoading(false)
-  }
-}
-
-const handleSave = async (
-  payload: CreatePermissionPayload | UpdatePermissionPayload,
-) => {
-  isSaving.value = true
-  formError.value = null
-  try {
-    if (selectedPermission.value) {
-      await permissionsApi.updatePermission(
-        selectedPermission.value.id,
-        payload as UpdatePermissionPayload,
-      )
-      toast.success('Berhasil memperbarui permission')
-    } else {
-      await permissionsApi.createPermission(payload as CreatePermissionPayload)
-      toast.success('Berhasil menambahkan permission baru')
-    }
-    isSheetOpen.value = false
-    await fetchPermissions()
-  } catch (error) {
-    formError.value = getIndonesianErrorMessage(
-      error,
-      'Gagal menyimpan permission.',
-    )
-    toast.error(formError.value)
-  } finally {
-    isSaving.value = false
   }
 }
 
@@ -120,7 +49,7 @@ const handleSync = async () => {
   }
 }
 
-const columns = getColumns(handleEditClick, handleDelete)
+const columns = getColumns()
 
 onMounted(() => {
   void fetchPermissions()
@@ -154,12 +83,6 @@ onMounted(() => {
               />
               {{ isSyncing ? 'Menyinkronkan...' : 'Sinkronkan' }}
             </Button>
-            <Button
-              class="w-full sm:w-auto"
-              @click="handleAddClick"
-            >
-              <Plus class="mr-2 h-4 w-4" /> Tambah Permission
-            </Button>
           </div>
         </CardHeader>
 
@@ -172,15 +95,6 @@ onMounted(() => {
           />
         </div>
       </Card>
-
-      <PermissionFormDialog
-        v-if="isSheetOpen"
-        v-model:open="isSheetOpen"
-        :edit-data="selectedPermission"
-        :is-saving="isSaving"
-        :form-error="formError"
-        @save="handleSave"
-      />
     </div>
   </AppLayout>
 </template>

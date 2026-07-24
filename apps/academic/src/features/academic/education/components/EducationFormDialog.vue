@@ -102,13 +102,7 @@ const onSubmit = handleSubmit(async (values) => {
         <DialogTitle
           >{{ initialData ? 'Edit' : 'Tambah' }} Tingkat Pendidikan</DialogTitle
         >
-        <DialogDescription>
-          {{
-            initialData
-              ? 'Perbarui data tingkat pendidikan.'
-              : 'Tambahkan tingkat pendidikan baru ke dalam sistem.'
-          }}
-        </DialogDescription>
+        <DialogDescription class="sr-only"> </DialogDescription>
       </DialogHeader>
 
       <ScrollArea class="flex-1 min-h-0">

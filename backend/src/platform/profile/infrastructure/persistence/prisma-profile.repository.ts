@@ -130,14 +130,35 @@ export class PrismaProfileRepository extends IProfileRepository {
     userId: string,
     dto: Prisma.ProfileUpdateInput,
   ): Promise<ProfileWithDetails> {
+    const { religionId, bloodTypeId, ...rest } =
+      dto as Prisma.ProfileUpdateInput & {
+        religionId?: string | null;
+        bloodTypeId?: string | null;
+      };
+
+    const updateData: Prisma.ProfileUpdateInput = {
+      ...rest,
+    };
+
+    if (religionId !== undefined) {
+      updateData.religion = religionId
+        ? { connect: { id: religionId } }
+        : { disconnect: true };
+    }
+
+    if (bloodTypeId !== undefined) {
+      updateData.bloodType = bloodTypeId
+        ? { connect: { id: bloodTypeId } }
+        : { disconnect: true };
+    }
+
+    if (dto.birthDate) {
+      updateData.birthDate = new Date(dto.birthDate as string | Date);
+    }
+
     return this.prisma.profile.update({
       where: { userId },
-      data: {
-        ...dto,
-        ...(dto.birthDate && {
-          birthDate: new Date(dto.birthDate as string | Date),
-        }),
-      },
+      data: updateData,
       include: PROFILE_INCLUDE,
     });
   }

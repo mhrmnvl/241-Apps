@@ -156,13 +156,7 @@ function categoryLabel(cat?: string) {
         <DialogTitle class="text-xl">
           {{ editData ? 'Edit Riwayat Jabatan' : 'Tambah Jabatan' }}
         </DialogTitle>
-        <DialogDescription>
-          {{
-            editData
-              ? 'Perbarui detail jabatan yang sedang aktif.'
-              : 'Tambahkan catatan posisi/jabatan baru (utama maupun tambahan).'
-          }}
-        </DialogDescription>
+        <DialogDescription class="sr-only"></DialogDescription>
       </DialogHeader>
 
       <form

@@ -148,13 +148,7 @@ const onSubmit = form.handleSubmit(async (values) => {
           <DialogTitle class="text-xl">
             {{ isCreate ? 'Tambah Beasiswa' : 'Edit Beasiswa' }}
           </DialogTitle>
-          <DialogDescription>
-            {{
-              isCreate
-                ? 'Catat program beasiswa baru.'
-                : 'Perbarui data beasiswa yang sudah ada.'
-            }}
-          </DialogDescription>
+          <DialogDescription class="sr-only"> </DialogDescription>
         </DialogHeader>
 
         <ScrollArea class="flex-1 min-h-0">

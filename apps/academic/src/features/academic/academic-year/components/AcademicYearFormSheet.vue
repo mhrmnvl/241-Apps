@@ -12,6 +12,7 @@ import {
 } from '@/ui/dialog'
 import { Loader2, AlertCircle } from 'lucide-vue-next'
 import { Input } from '@/ui/input'
+import { ScrollArea } from '@/ui/scroll-area'
 import {
   Select,
   SelectContent,
@@ -70,8 +71,8 @@ const academicYearForm = useAcademicYearForm({
 
 <template>
   <Dialog v-model:open="open">
-    <DialogContent class="sm:max-w-md">
-      <DialogHeader>
+    <DialogContent class="sm:max-w-md flex flex-col gap-0 p-0 overflow-hidden">
+      <DialogHeader class="px-6 py-5 border-b shrink-0 bg-muted/20">
         <DialogTitle>
           {{
             academicYearForm.isEditing.value
@@ -79,76 +80,74 @@ const academicYearForm = useAcademicYearForm({
               : 'Tambah Tahun Ajaran'
           }}
         </DialogTitle>
-        <DialogDescription>
-          {{
-            academicYearForm.isEditing.value
-              ? 'Perbarui informasi tahun ajaran ini.'
-              : 'Masukkan informasi tahun ajaran dan pilih kurikulum yang berlaku.'
-          }}
-        </DialogDescription>
+        <DialogDescription class="sr-only"> </DialogDescription>
       </DialogHeader>
 
-      <form
-        id="academic-year-form"
-        class="space-y-4 py-2"
-        @submit.prevent="academicYearForm.onSubmit"
-      >
-        <FormField
-          v-slot="{ componentField }"
-          name="name"
+      <ScrollArea class="flex-1 min-h-0">
+        <form
+          id="academic-year-form"
+          class="space-y-4 px-6 py-4"
+          @submit.prevent="academicYearForm.onSubmit"
         >
-          <FormItem>
-            <FormLabel
-              >Nama Tahun Ajaran
-              <span class="text-destructive">*</span></FormLabel
-            >
-            <FormControl>
-              <Input
-                placeholder="Contoh: 2024/2025"
-                v-bind="componentField"
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        </FormField>
-
-        <FormField
-          v-slot="{ value, handleChange }"
-          name="isActive"
-        >
-          <FormItem>
-            <FormLabel>Status</FormLabel>
-            <Select
-              :model-value="String(value)"
-              :disabled="academicYearForm.isSaving.value"
-              @update:model-value="handleChange($event === 'true')"
-            >
+          <FormField
+            v-slot="{ componentField }"
+            name="name"
+          >
+            <FormItem>
+              <FormLabel
+                >Nama Tahun Ajaran
+                <span class="text-destructive">*</span></FormLabel
+              >
               <FormControl>
-                <SelectTrigger class="w-full">
-                  <SelectValue placeholder="Pilih status" />
-                </SelectTrigger>
+                <Input
+                  placeholder="Contoh: 2024/2025"
+                  v-bind="componentField"
+                />
               </FormControl>
-              <SelectContent>
-                <SelectItem value="true">Aktif</SelectItem>
-                <SelectItem value="false">Tidak Aktif</SelectItem>
-              </SelectContent>
-            </Select>
-          </FormItem>
-        </FormField>
+              <FormMessage />
+            </FormItem>
+          </FormField>
 
-        <Alert
-          v-if="academicYearForm.formError.value"
-          variant="destructive"
-          class="mt-2"
-        >
-          <AlertCircle class="h-4 w-4" />
-          <AlertDescription>{{
-            academicYearForm.formError.value
-          }}</AlertDescription>
-        </Alert>
-      </form>
+          <FormField
+            v-slot="{ value, handleChange }"
+            name="isActive"
+          >
+            <FormItem>
+              <FormLabel>Status</FormLabel>
+              <Select
+                :model-value="String(value)"
+                :disabled="academicYearForm.isSaving.value"
+                @update:model-value="handleChange($event === 'true')"
+              >
+                <FormControl>
+                  <SelectTrigger class="w-full">
+                    <SelectValue placeholder="Pilih status" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="true">Aktif</SelectItem>
+                  <SelectItem value="false">Tidak Aktif</SelectItem>
+                </SelectContent>
+              </Select>
+            </FormItem>
+          </FormField>
 
-      <DialogFooter class="flex sm:justify-between gap-2">
+          <Alert
+            v-if="academicYearForm.formError.value"
+            variant="destructive"
+            class="mt-2"
+          >
+            <AlertCircle class="h-4 w-4" />
+            <AlertDescription>{{
+              academicYearForm.formError.value
+            }}</AlertDescription>
+          </Alert>
+        </form>
+      </ScrollArea>
+
+      <DialogFooter
+        class="px-6 py-4 border-t shrink-0 flex sm:justify-between w-full bg-background mt-auto"
+      >
         <Button
           type="button"
           variant="outline"

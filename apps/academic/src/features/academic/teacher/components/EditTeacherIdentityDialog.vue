@@ -145,9 +145,7 @@ const onSubmit = form.handleSubmit(async (values) => {
           <DialogTitle class="text-xl">
             Ubah Identitas Kepegawaian
           </DialogTitle>
-          <DialogDescription>
-            Perbarui data nomor induk dan status kepegawaian Anda di institusi.
-          </DialogDescription>
+          <DialogDescription class="sr-only"> </DialogDescription>
         </DialogHeader>
 
         <ScrollArea class="flex-1 min-h-0">

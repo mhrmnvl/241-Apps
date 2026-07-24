@@ -3,7 +3,7 @@ import {
   type ExtraTabPropsContext,
   type ExtraSheetContext,
 } from '@/features/platform/profile'
-import { PencilLine, Plus } from 'lucide-vue-next'
+import { Plus } from 'lucide-vue-next'
 
 import SchoolIdentityTab from './components/SchoolIdentityTab.vue'
 import ParentInfoTab from './components/ParentInfoTab.vue'
@@ -61,11 +61,11 @@ export function setupProfileFeature() {
         value: 'identity',
         label: 'Identitas Pokok',
         component: SchoolIdentityTab,
+        props: (ctx: ExtraTabPropsContext) => ({
+          data: ctx.profileData,
+          rawProfile: ctx.rawProfile,
+        }),
         isEditable: true,
-        actionConfig: { text: 'Ubah Identitas', icon: PencilLine },
-        onActionClick: () => {
-          showEditIdentity.value = true
-        },
       },
       {
         value: 'parent',
@@ -156,7 +156,7 @@ export function setupProfileFeature() {
           'onUpdate:open': (val: boolean) => {
             showEditIdentity.value = val
           },
-          teacherId: ctx.rawProfile?.teacher?.id,
+          teacherId: ctx.rawProfile?.teacher?.id ?? '',
           initialData: ctx.rawProfile?.teacher,
           onReload: ctx.reloadProfile,
         }),
@@ -172,7 +172,7 @@ export function setupProfileFeature() {
           'onUpdate:open': (val: boolean) => {
             showEditIdentity.value = val
           },
-          studentId: ctx.rawProfile?.student?.id,
+          studentId: ctx.rawProfile?.student?.id ?? '',
           initialData: ctx.rawProfile?.student,
           onReload: ctx.reloadProfile,
         }),
@@ -221,7 +221,7 @@ export function setupProfileFeature() {
             showEditPosition.value = val
           },
           editData: editingPositionItem.value,
-          teacherId: ctx.rawProfile?.teacher?.id,
+          teacherId: ctx.rawProfile?.teacher?.id ?? '',
           onReload: ctx.reloadProfile,
         }),
       },

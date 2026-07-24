@@ -69,12 +69,8 @@ const { isCreate, isSaving, educationLevels, onSubmit } =
               isCreate ? 'Tambah Riwayat Pendidikan' : 'Edit Riwayat Pendidikan'
             }}
           </DialogTitle>
-          <DialogDescription>
-            {{
-              isCreate
-                ? 'Tambahkan riwayat pendidikan baru.'
-                : 'Perbarui data riwayat pendidikan yang sudah ada.'
-            }}
+          <DialogDescription class="sr-only">
+            Formulir untuk mengisi atau memperbarui riwayat pendidikan.
           </DialogDescription>
         </DialogHeader>
 
@@ -132,7 +128,7 @@ const { isCreate, isSaving, educationLevels, onSubmit } =
                 v-slot="{ componentField }"
                 name="major"
               >
-                <FormItem class="md:col-span-2 content-start">
+                <FormItem class="content-start">
                   <FormLabel>Jurusan / Bidang Studi</FormLabel>
                   <FormControl>
                     <Input
@@ -140,6 +136,31 @@ const { isCreate, isSaving, educationLevels, onSubmit } =
                       v-bind="componentField"
                     />
                   </FormControl>
+                  <FormMessage />
+                </FormItem>
+              </FormField>
+
+              <FormField
+                v-slot="{ componentField }"
+                name="status"
+              >
+                <FormItem class="content-start">
+                  <FormLabel>Keterangan</FormLabel>
+                  <Select v-bind="componentField">
+                    <FormControl>
+                      <SelectTrigger class="w-full">
+                        <SelectValue placeholder="Pilih status (opsional)" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="Lulus"> Lulus </SelectItem>
+                      <SelectItem value="Aktif">
+                        Aktif / Masih Berjalan
+                      </SelectItem>
+                      <SelectItem value="Pindahan"> Pindahan </SelectItem>
+                      <SelectItem value="Keluar"> Keluar </SelectItem>
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               </FormField>
@@ -177,31 +198,6 @@ const { isCreate, isSaving, educationLevels, onSubmit } =
                       v-bind="componentField"
                     />
                   </FormControl>
-                  <FormMessage />
-                </FormItem>
-              </FormField>
-
-              <FormField
-                v-slot="{ componentField }"
-                name="status"
-              >
-                <FormItem class="md:col-span-2 content-start">
-                  <FormLabel>Keterangan</FormLabel>
-                  <Select v-bind="componentField">
-                    <FormControl>
-                      <SelectTrigger class="w-full">
-                        <SelectValue placeholder="Pilih status (opsional)" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="Lulus"> Lulus </SelectItem>
-                      <SelectItem value="Aktif">
-                        Aktif / Masih Berjalan
-                      </SelectItem>
-                      <SelectItem value="Pindahan"> Pindahan </SelectItem>
-                      <SelectItem value="Keluar"> Keluar </SelectItem>
-                    </SelectContent>
-                  </Select>
                   <FormMessage />
                 </FormItem>
               </FormField>

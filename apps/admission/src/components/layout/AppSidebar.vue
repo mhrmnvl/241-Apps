@@ -62,7 +62,9 @@ function handleScroll(e: Event) {
                 class="size-8 rounded-lg object-contain"
               />
               <div class="grid flex-1 text-left text-sm leading-tight">
-                <span class="truncate font-semibold text-base">{{ appTitle }}</span>
+                <span class="truncate font-semibold text-base">{{
+                  appTitle
+                }}</span>
                 <span
                   class="truncate text-xs text-muted-foreground font-medium"
                 >
@@ -77,7 +79,7 @@ function handleScroll(e: Event) {
     <SidebarContent>
       <div
         ref="scrollContainer"
-        class="h-full w-full overflow-y-auto"
+        class="h-full w-full overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:w-0 [&::-webkit-scrollbar]:h-0"
         @scroll="handleScroll"
       >
         <NavMain :sections="filteredSections" />

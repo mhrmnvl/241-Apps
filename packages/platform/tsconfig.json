@@ -15,5 +15,5 @@
     }
   },
   "include": ["src/**/*.ts", "src/**/*.vue"],
-  "references": [{ "path": "../shared" }]
+  "references": [{ "path": "../shared" }, { "path": "../ui" }]
 }

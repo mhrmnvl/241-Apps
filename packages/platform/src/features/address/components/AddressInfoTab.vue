@@ -1,133 +1,236 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { Home, MapPin, Map, Navigation, Mail } from 'lucide-vue-next'
-import type { AddressData } from '../types'
+import { reactive, watch } from 'vue'
+import { Input } from '@/ui/input'
+import { Button } from '@/ui/button'
+import { Loader2 } from 'lucide-vue-next'
+import { useAddress } from '../composables/useAddress'
+import type { AddressData, AddressRecord, AddressSavePayload } from '../types'
 
-const props = defineProps<{ data: AddressData }>()
+const props = defineProps<{
+  data: AddressData
+  rawAddress?: AddressRecord | null
+  isEditable: boolean
+}>()
 
-const fullAddress = computed(() => {
-  if (!props.data?.address) return '-'
-  const a = props.data.address
-  const parts = []
-  if (a.street) parts.push(a.street)
-  if (a.rt || a.rw) parts.push(`RT ${a.rt ?? '-'} / RW ${a.rw ?? '-'}`)
-  if (a.village) parts.push(`Desa/Kel. ${a.village}`)
-  if (a.district) parts.push(`Kec. ${a.district}`)
-  if (a.city) parts.push(a.city)
-  if (a.province) parts.push(`Prov. ${a.province}`)
-  if (a.postalCode) parts.push(a.postalCode)
-  return parts.join(', ') || '-'
+const emit = defineEmits<{
+  save: [payload: AddressSavePayload]
+}>()
+
+const { isSaving } = useAddress()
+
+const form = reactive({
+  street: '',
+  rt: '',
+  rw: '',
+  village: '',
+  district: '',
+  city: '',
+  province: '',
+  country: 'Indonesia',
+  postalCode: '',
 })
+
+watch(
+  () => [props.rawAddress, props.data.address] as const,
+  ([rawAddr, dataAddr]) => {
+    const addr = rawAddr || dataAddr
+    if (addr) {
+      form.street = addr.street ?? ''
+      form.rt = addr.rt ?? ''
+      form.rw = addr.rw ?? ''
+      form.village = addr.village ?? ''
+      form.district = addr.district ?? ''
+      form.city = addr.city ?? ''
+      form.province = addr.province ?? ''
+      form.country = addr.country ?? 'Indonesia'
+      form.postalCode = addr.postalCode ?? ''
+    }
+  },
+  { immediate: true },
+)
+
+function handleSubmit() {
+  if (!props.isEditable) return
+  emit('save', {
+    street: form.street,
+    rt: form.rt === '' ? null : form.rt,
+    rw: form.rw === '' ? null : form.rw,
+    village: form.village,
+    district: form.district,
+    city: form.city,
+    province: form.province,
+    country: form.country,
+    postalCode: form.postalCode === '' ? null : form.postalCode,
+  })
+}
 </script>
+
 <template>
   <div class="py-4">
-    <div
-      v-if="data.address"
-      class="grid gap-4 md:grid-cols-2 xl:grid-cols-3"
+    <form
+      class="space-y-6"
+      @submit.prevent="handleSubmit"
     >
-      <div
-        class="rounded-lg border bg-background p-4 shadow-sm md:col-span-2 xl:col-span-3"
-      >
-        <div class="flex items-start justify-between gap-3">
-          <p class="text-xs font-medium text-muted-foreground">
-            Alamat Lengkap
-          </p>
-          <MapPin class="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+      <div class="grid gap-5 md:grid-cols-2">
+        <!-- Jalan / Dusun -->
+        <div class="space-y-1.5 md:col-span-2">
+          <label class="text-xs font-semibold text-foreground">
+            Jalan / Dusun
+            <span
+              v-if="isEditable"
+              class="text-destructive"
+              >*</span
+            >
+          </label>
+          <Input
+            v-model="form.street"
+            placeholder="Nama Jalan, Gedung, No. Rumah"
+            :disabled="!isEditable"
+            class="disabled:opacity-100 disabled:bg-muted/20 disabled:cursor-default disabled:text-foreground disabled:border-border/80"
+            required
+          />
         </div>
-        <p class="mt-2 text-sm leading-6 font-semibold text-foreground">
-          {{ fullAddress }}
-        </p>
-      </div>
 
-      <div class="rounded-lg border bg-background p-4 shadow-sm">
-        <div class="flex items-start justify-between gap-3">
-          <p class="text-xs font-medium text-muted-foreground">Jalan / Dusun</p>
-          <Home class="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+        <!-- RT -->
+        <div class="space-y-1.5">
+          <label class="text-xs font-semibold text-foreground">RT</label>
+          <Input
+            v-model="form.rt"
+            placeholder="RT"
+            maxlength="5"
+            :disabled="!isEditable"
+            class="disabled:opacity-100 disabled:bg-muted/20 disabled:cursor-default disabled:text-foreground disabled:border-border/80"
+          />
         </div>
-        <p class="mt-2 text-sm leading-6 font-semibold text-foreground">
-          {{ data.address.street || '-' }}
-        </p>
-      </div>
 
-      <div class="rounded-lg border bg-background p-4 shadow-sm">
-        <div class="flex items-start justify-between gap-3">
-          <p class="text-xs font-medium text-muted-foreground">RT / RW</p>
-          <MapPin class="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+        <!-- RW -->
+        <div class="space-y-1.5">
+          <label class="text-xs font-semibold text-foreground">RW</label>
+          <Input
+            v-model="form.rw"
+            placeholder="RW"
+            maxlength="5"
+            :disabled="!isEditable"
+            class="disabled:opacity-100 disabled:bg-muted/20 disabled:cursor-default disabled:text-foreground disabled:border-border/80"
+          />
         </div>
-        <p class="mt-2 text-sm leading-6 font-semibold text-foreground">
-          {{ data.address.rt || '-' }} / {{ data.address.rw || '-' }}
-        </p>
-      </div>
 
-      <div class="rounded-lg border bg-background p-4 shadow-sm">
-        <div class="flex items-start justify-between gap-3">
-          <p class="text-xs font-medium text-muted-foreground">
+        <!-- Desa / Kelurahan -->
+        <div class="space-y-1.5">
+          <label class="text-xs font-semibold text-foreground">
             Desa / Kelurahan
-          </p>
-          <Map class="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+            <span
+              v-if="isEditable"
+              class="text-destructive"
+              >*</span
+            >
+          </label>
+          <Input
+            v-model="form.village"
+            placeholder="Nama Desa atau Kelurahan"
+            :disabled="!isEditable"
+            class="disabled:opacity-100 disabled:bg-muted/20 disabled:cursor-default disabled:text-foreground disabled:border-border/80"
+            required
+          />
         </div>
-        <p class="mt-2 text-sm leading-6 font-semibold text-foreground">
-          {{ data.address.village || '-' }}
-        </p>
-      </div>
 
-      <div class="rounded-lg border bg-background p-4 shadow-sm">
-        <div class="flex items-start justify-between gap-3">
-          <p class="text-xs font-medium text-muted-foreground">Kecamatan</p>
-          <Map class="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+        <!-- Kecamatan -->
+        <div class="space-y-1.5">
+          <label class="text-xs font-semibold text-foreground">
+            Kecamatan
+            <span
+              v-if="isEditable"
+              class="text-destructive"
+              >*</span
+            >
+          </label>
+          <Input
+            v-model="form.district"
+            placeholder="Nama Kecamatan"
+            :disabled="!isEditable"
+            class="disabled:opacity-100 disabled:bg-muted/20 disabled:cursor-default disabled:text-foreground disabled:border-border/80"
+            required
+          />
         </div>
-        <p class="mt-2 text-sm leading-6 font-semibold text-foreground">
-          {{ data.address.district || '-' }}
-        </p>
-      </div>
 
-      <div class="rounded-lg border bg-background p-4 shadow-sm">
-        <div class="flex items-start justify-between gap-3">
-          <p class="text-xs font-medium text-muted-foreground">
+        <!-- Kabupaten / Kota -->
+        <div class="space-y-1.5">
+          <label class="text-xs font-semibold text-foreground">
             Kabupaten / Kota
-          </p>
-          <Navigation class="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+            <span
+              v-if="isEditable"
+              class="text-destructive"
+              >*</span
+            >
+          </label>
+          <Input
+            v-model="form.city"
+            placeholder="Nama Kabupaten atau Kota"
+            :disabled="!isEditable"
+            class="disabled:opacity-100 disabled:bg-muted/20 disabled:cursor-default disabled:text-foreground disabled:border-border/80"
+            required
+          />
         </div>
-        <p class="mt-2 text-sm leading-6 font-semibold text-foreground">
-          {{ data.address.city || '-' }}
-        </p>
+
+        <!-- Provinsi -->
+        <div class="space-y-1.5">
+          <label class="text-xs font-semibold text-foreground">
+            Provinsi
+            <span
+              v-if="isEditable"
+              class="text-destructive"
+              >*</span
+            >
+          </label>
+          <Input
+            v-model="form.province"
+            placeholder="Nama Provinsi"
+            :disabled="!isEditable"
+            class="disabled:opacity-100 disabled:bg-muted/20 disabled:cursor-default disabled:text-foreground disabled:border-border/80"
+            required
+          />
+        </div>
+
+        <!-- Negara -->
+        <div class="space-y-1.5">
+          <label class="text-xs font-semibold text-foreground">Negara</label>
+          <Input
+            v-model="form.country"
+            placeholder="Negara"
+            disabled
+            class="disabled:opacity-100 disabled:bg-muted/20 disabled:cursor-default disabled:text-foreground disabled:border-border/80"
+          />
+        </div>
+
+        <!-- Kode Pos -->
+        <div class="space-y-1.5">
+          <label class="text-xs font-semibold text-foreground">Kode Pos</label>
+          <Input
+            v-model="form.postalCode"
+            placeholder="Kode Pos"
+            maxlength="10"
+            :disabled="!isEditable"
+            class="disabled:opacity-100 disabled:bg-muted/20 disabled:cursor-default disabled:text-foreground disabled:border-border/80"
+          />
+        </div>
       </div>
 
-      <div class="rounded-lg border bg-background p-4 shadow-sm">
-        <div class="flex items-start justify-between gap-3">
-          <p class="text-xs font-medium text-muted-foreground">Provinsi</p>
-          <Map class="mt-0.5 size-4 shrink-0 text-muted-foreground" />
-        </div>
-        <p class="mt-2 text-sm leading-6 font-semibold text-foreground">
-          {{ data.address.province || '-' }}
-        </p>
+      <!-- Action Buttons -->
+      <div
+        v-if="isEditable"
+        class="flex justify-end gap-3 pt-4"
+      >
+        <Button
+          type="submit"
+          :disabled="isSaving"
+        >
+          <Loader2
+            v-if="isSaving"
+            class="mr-2 h-4 w-4 animate-spin"
+          />
+          {{ isSaving ? 'Menyimpan...' : 'Simpan Perubahan' }}
+        </Button>
       </div>
-
-      <div class="rounded-lg border bg-background p-4 shadow-sm">
-        <div class="flex items-start justify-between gap-3">
-          <p class="text-xs font-medium text-muted-foreground">Negara</p>
-          <MapPin class="mt-0.5 size-4 shrink-0 text-muted-foreground" />
-        </div>
-        <p class="mt-2 text-sm leading-6 font-semibold text-foreground">
-          {{ data.address.country || 'Indonesia' }}
-        </p>
-      </div>
-
-      <div class="rounded-lg border bg-background p-4 shadow-sm">
-        <div class="flex items-start justify-between gap-3">
-          <p class="text-xs font-medium text-muted-foreground">Kode Pos</p>
-          <Mail class="mt-0.5 size-4 shrink-0 text-muted-foreground" />
-        </div>
-        <p class="mt-2 text-sm leading-6 font-semibold text-foreground">
-          {{ data.address.postalCode || '-' }}
-        </p>
-      </div>
-    </div>
-    <div
-      v-else
-      class="text-center p-8 bg-muted/20 border-2 border-dashed rounded-lg"
-    >
-      <p class="text-muted-foreground">Belum ada data alamat tercatat.</p>
-    </div>
+    </form>
   </div>
 </template>

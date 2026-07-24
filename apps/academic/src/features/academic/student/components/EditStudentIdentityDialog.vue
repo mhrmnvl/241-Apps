@@ -109,9 +109,7 @@ const onSubmit = form.handleSubmit(async (values) => {
       >
         <DialogHeader class="px-6 py-6 border-b shrink-0">
           <DialogTitle class="text-xl"> Ubah Identitas Kesiswaan </DialogTitle>
-          <DialogDescription>
-            Perbarui data nomor induk siswa Anda di institusi.
-          </DialogDescription>
+          <DialogDescription class="sr-only"> </DialogDescription>
         </DialogHeader>
 
         <ScrollArea class="flex-1 min-h-0">
