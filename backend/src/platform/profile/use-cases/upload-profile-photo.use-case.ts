@@ -68,7 +68,7 @@ export class UploadProfilePhotoUseCase {
     );
 
     const updated = await this.profileRepo.update(userId, {
-      avatarFileId: newFile.id,
+      avatarFile: { connect: { id: newFile.id } },
     });
 
     return withAvatarUrl(updated, this.storage);
