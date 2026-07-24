@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, computed, unref } from 'vue'
+import { onMounted, computed, unref, ref } from 'vue'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { Card } from '@/ui/card'
 import {
@@ -14,6 +14,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/tabs'
 import { Button } from '@/ui/button'
 import { Loader2, Camera, Trash2 } from 'lucide-vue-next'
 import { Avatar, AvatarImage, AvatarFallback } from '@/ui/avatar'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/ui/dialog'
 
 import PersonalInfoTab from '../components/PersonalInfoTab.vue'
 import ProfileSheets from '../components/ProfileSheets.vue'
@@ -64,6 +71,8 @@ const handleUpdateAddress = async (payload: AddressSavePayload) => {
   }
 }
 
+const isPhotoDialogOpen = ref(false)
+
 function triggerPhotoUpload() {
   if (isUploadingPhoto.value) return
   const input = document.getElementById(
@@ -72,10 +81,18 @@ function triggerPhotoUpload() {
   if (input) input.click()
 }
 
-function handleFileChange(e: Event) {
+async function handleFileChange(e: Event) {
   const file = (e.target as HTMLInputElement).files?.[0]
-  if (file) handlePhotoChange(file)
+  if (file) {
+    await handlePhotoChange(file)
+    isPhotoDialogOpen.value = false
+  }
   ;(e.target as HTMLInputElement).value = ''
+}
+
+async function onPhotoDeleteClick() {
+  await handlePhotoDelete()
+  isPhotoDialogOpen.value = false
 }
 
 const activeTabLabel = computed(() => {
@@ -144,32 +161,13 @@ onMounted(() => {
                   </Avatar>
 
                   <template v-if="isOwnProfile">
-                    <input
-                      id="profile-photo-input"
-                      type="file"
-                      accept="image/*"
-                      class="hidden"
-                      :disabled="isUploadingPhoto"
-                      @change="handleFileChange"
-                    />
                     <button
                       type="button"
-                      title="Ganti foto profil"
-                      class="absolute -bottom-1 -right-1 flex size-8 items-center justify-center rounded-full border-2 border-background bg-primary text-primary-foreground shadow-sm transition-opacity hover:opacity-90 disabled:opacity-50"
-                      :disabled="isUploadingPhoto"
-                      @click="triggerPhotoUpload"
+                      title="Kelola foto profil"
+                      class="absolute -bottom-1 -right-1 flex size-8 items-center justify-center rounded-full border-2 border-background bg-primary text-primary-foreground shadow-sm transition-opacity hover:opacity-90 disabled:opacity-50 cursor-pointer"
+                      @click="isPhotoDialogOpen = true"
                     >
                       <Camera class="size-4" />
-                    </button>
-                    <button
-                      v-if="avatarUrl"
-                      type="button"
-                      title="Hapus foto profil"
-                      class="absolute -bottom-1 -left-1 flex size-8 items-center justify-center rounded-full border-2 border-background bg-destructive text-destructive-foreground shadow-sm transition-opacity hover:opacity-90 disabled:opacity-50"
-                      :disabled="isUploadingPhoto"
-                      @click="handlePhotoDelete"
-                    >
-                      <Trash2 class="size-4" />
                     </button>
                   </template>
                 </div>
@@ -365,5 +363,63 @@ onMounted(() => {
         })
       "
     />
+
+    <!-- Dialog untuk Kelola Foto Profil -->
+    <Dialog v-model:open="isPhotoDialogOpen">
+      <DialogContent class="sm:max-w-sm rounded-2xl p-6">
+        <DialogHeader class="items-center text-center">
+          <DialogTitle>Foto Profil</DialogTitle>
+          <DialogDescription>
+            Ubah atau hapus foto profil Anda saat ini.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div class="flex flex-col items-center gap-6 py-4">
+          <Avatar class="size-32 border-4 border-primary/10">
+            <AvatarImage
+              v-if="avatarUrl"
+              :src="avatarUrl"
+              :alt="profileData.fullName"
+            />
+            <AvatarFallback
+              class="bg-primary/10 text-4xl font-bold text-primary"
+            >
+              {{ initials }}
+            </AvatarFallback>
+          </Avatar>
+
+          <div class="flex flex-col w-full gap-2">
+            <input
+              id="profile-photo-input"
+              type="file"
+              accept="image/*"
+              class="hidden"
+              :disabled="isUploadingPhoto"
+              @change="handleFileChange"
+            />
+            <Button
+              type="button"
+              class="w-full gap-2 cursor-pointer"
+              :disabled="isUploadingPhoto"
+              @click="triggerPhotoUpload"
+            >
+              <Camera class="size-4" />
+              {{ isUploadingPhoto ? 'Mengunggah...' : 'Unggah Foto Baru' }}
+            </Button>
+            <Button
+              v-if="avatarUrl"
+              type="button"
+              variant="destructive"
+              class="w-full gap-2 cursor-pointer"
+              :disabled="isUploadingPhoto"
+              @click="onPhotoDeleteClick"
+            >
+              <Trash2 class="size-4" />
+              Hapus Foto Saat Ini
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   </AppLayout>
 </template>
