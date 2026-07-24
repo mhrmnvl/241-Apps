@@ -8,7 +8,6 @@ import { createYear, createYearRange, toDate } from 'reka-ui/date'
 import { computed, ref, toRaw } from 'vue'
 import { cn } from '@/ui/utils'
 import { buttonVariants } from '@/ui/button'
-import { ChevronDown } from 'lucide-vue-next'
 import {
   Select,
   SelectContent,
@@ -58,10 +57,6 @@ const placeholder = useVModel(props, 'placeholder', emits, {
 
 const formatter = useDateFormatter(props.locale ?? 'en')
 
-// ========================
-// MULTI-VIEW STATE
-// ========================
-
 const currentView = ref<ViewType>('day')
 
 // Year page anchor for year grid
@@ -70,31 +65,48 @@ const yearPageStart = ref(
 )
 
 const yearRange = computed(() => {
-  return (
-    props.yearRange ??
-    createYearRange({
-      start:
-        props?.minValue ??
-        (
-          toRaw(props.placeholder) ??
-          props.defaultPlaceholder ??
-          today(getLocalTimeZone())
-        ).cycle('year', -100),
-      end:
-        props?.maxValue ??
-        (
-          toRaw(props.placeholder) ??
-          props.defaultPlaceholder ??
-          today(getLocalTimeZone())
-        ).cycle('year', 10),
-    })
-  )
+  return createYearRange({
+    start: (
+      toRaw(placeholder.value) ??
+      props.defaultPlaceholder ??
+      today(getLocalTimeZone())
+    ).cycle('year', -100),
+    end: (
+      toRaw(placeholder.value) ??
+      props.defaultPlaceholder ??
+      today(getLocalTimeZone())
+    ).cycle('year', 100),
+  })
+})
+
+const canGoPrev = computed(() => {
+  if (currentView.value === 'month') {
+    if (!props.minValue) return true
+    return placeholder.value.year - 1 >= props.minValue.year
+  }
+  if (currentView.value === 'year') {
+    if (!props.minValue) return true
+    return yearPageStart.value - 1 >= props.minValue.year
+  }
+  return true
+})
+
+const canGoNext = computed(() => {
+  if (currentView.value === 'month') {
+    if (!props.maxValue) return true
+    return placeholder.value.year + 1 <= props.maxValue.year
+  }
+  if (currentView.value === 'year') {
+    if (!props.maxValue) return true
+    return yearPageStart.value + 12 <= props.maxValue.year
+  }
+  return true
 })
 
 const monthsInYear = computed(() =>
   createYear({ dateObj: placeholder.value }).map((m) => ({
     month: m.month,
-    label: formatter.custom(toDate(m), { month: 'long' }),
+    label: formatter.custom(toDate(m), { month: 'short' }),
   })),
 )
 
@@ -133,6 +145,27 @@ function selectYear(year: number) {
   currentView.value = 'month'
 }
 
+function isMonthDisabled(month: number) {
+  const currentYear = placeholder.value.year
+  if (props.minValue) {
+    if (currentYear < props.minValue.year) return true
+    if (currentYear === props.minValue.year && month < props.minValue.month)
+      return true
+  }
+  if (props.maxValue) {
+    if (currentYear > props.maxValue.year) return true
+    if (currentYear === props.maxValue.year && month > props.maxValue.month)
+      return true
+  }
+  return false
+}
+
+function isYearDisabled(year: number) {
+  if (props.minValue && year < props.minValue.year) return true
+  if (props.maxValue && year > props.maxValue.year) return true
+  return false
+}
+
 function handlePrevPage() {
   if (currentView.value === 'month') {
     placeholder.value = placeholder.value.set({
@@ -153,6 +186,8 @@ function handleNextPage() {
   }
 }
 
+const WEEKDAY_MAP = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']
+
 // Month/Year select handlers (for layout prop on day view)
 const forwarded = useForwardPropsEmits(delegatedProps, emits)
 </script>
@@ -168,22 +203,25 @@ const forwarded = useForwardPropsEmits(delegatedProps, emits)
     <CalendarHeader class="pt-0">
       <!-- Nav buttons: normal in day view, custom in month/year view -->
       <nav
-        class="flex items-center gap-1 absolute top-0 inset-x-0 justify-between"
+        class="flex items-center gap-1 absolute top-0 inset-x-0 justify-between pointer-events-none"
       >
         <template v-if="currentView === 'day'">
-          <CalendarPrevButton>
+          <CalendarPrevButton class="pointer-events-auto shadow-none">
             <slot name="calendar-prev-icon" />
           </CalendarPrevButton>
-          <CalendarNextButton>
+          <CalendarNextButton class="pointer-events-auto shadow-none">
             <slot name="calendar-next-icon" />
           </CalendarNextButton>
         </template>
         <template v-else>
           <button
+            :disabled="!canGoPrev"
             :class="
               cn(
                 buttonVariants({ variant: 'outline' }),
-                'size-7 bg-transparent p-0 opacity-50 hover:opacity-100',
+                'size-7 bg-transparent p-0 opacity-50 hover:opacity-100 pointer-events-auto shadow-none',
+                !canGoPrev &&
+                  'opacity-20 pointer-events-none cursor-not-allowed',
               )
             "
             @click="handlePrevPage"
@@ -205,10 +243,13 @@ const forwarded = useForwardPropsEmits(delegatedProps, emits)
             </slot>
           </button>
           <button
+            :disabled="!canGoNext"
             :class="
               cn(
                 buttonVariants({ variant: 'outline' }),
-                'size-7 bg-transparent p-0 opacity-50 hover:opacity-100',
+                'size-7 bg-transparent p-0 opacity-50 hover:opacity-100 pointer-events-auto shadow-none',
+                !canGoNext &&
+                  'opacity-20 pointer-events-none cursor-not-allowed',
               )
             "
             @click="handleNextPage"
@@ -237,33 +278,42 @@ const forwarded = useForwardPropsEmits(delegatedProps, emits)
         <button
           :class="
             cn(
-              'flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium',
-              'hover:bg-accent hover:text-accent-foreground transition-colors',
-              'ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+              buttonVariants({ variant: 'outline' }),
+              'h-7 px-3 text-xs font-medium bg-transparent pointer-events-auto shadow-none',
+              currentView === 'year' &&
+                'cursor-default hover:bg-transparent hover:text-foreground active:scale-100',
             )
           "
-          @click="onHeadingClick"
+          @click="currentView === 'month' ? onHeadingClick() : null"
         >
           {{ headingLabel }}
-          <ChevronDown class="h-3.5 w-3.5 opacity-60" />
         </button>
       </template>
       <template v-else-if="layout === 'month-and-year'">
-        <button
-          :class="
-            cn(
-              'flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium',
-              'hover:bg-accent hover:text-accent-foreground transition-colors',
-              'ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-            )
-          "
-          @click="onHeadingClick"
-        >
-          {{
-            formatter.custom(toDate(date), { month: 'long', year: 'numeric' })
-          }}
-          <ChevronDown class="h-3.5 w-3.5 opacity-60" />
-        </button>
+        <div class="flex items-center gap-1">
+          <button
+            :class="
+              cn(
+                buttonVariants({ variant: 'outline' }),
+                'h-7 px-2.5 text-xs font-medium bg-transparent pointer-events-auto shadow-none capitalize',
+              )
+            "
+            @click="currentView = 'month'"
+          >
+            {{ formatter.custom(toDate(date), { month: 'long' }) }}
+          </button>
+          <button
+            :class="
+              cn(
+                buttonVariants({ variant: 'outline' }),
+                'h-7 px-2.5 text-xs font-medium bg-transparent pointer-events-auto shadow-none',
+              )
+            "
+            @click="currentView = 'year'"
+          >
+            {{ formatter.custom(toDate(date), { year: 'numeric' }) }}
+          </button>
+        </div>
       </template>
       <template v-else-if="layout === 'month-only'">
         <div class="flex items-center justify-center gap-1">
@@ -323,21 +373,25 @@ const forwarded = useForwardPropsEmits(delegatedProps, emits)
         <CalendarHeading />
       </template>
     </CalendarHeader>
+    <div class="border-b border-border/80 my-2" />
 
     <!-- MONTH VIEW -->
     <div
       v-if="currentView === 'month'"
-      class="grid grid-cols-3 gap-2 mt-4"
+      class="grid grid-cols-3 gap-2 mt-3"
     >
       <button
         v-for="m in monthsInYear"
         :key="m.month"
+        :disabled="isMonthDisabled(m.month)"
         :class="
           cn(
             buttonVariants({
               variant: date.month === m.month ? 'default' : 'ghost',
             }),
-            'h-9 text-sm w-full',
+            'h-9 text-sm w-full shadow-none',
+            isMonthDisabled(m.month) &&
+              'opacity-30 pointer-events-none cursor-not-allowed',
           )
         "
         @click="selectMonth(m.month)"
@@ -349,15 +403,18 @@ const forwarded = useForwardPropsEmits(delegatedProps, emits)
     <!-- YEAR VIEW -->
     <div
       v-else-if="currentView === 'year'"
-      class="grid grid-cols-3 gap-2 mt-4"
+      class="grid grid-cols-3 gap-2 mt-3"
     >
       <button
         v-for="yr in yearsInView"
         :key="yr"
+        :disabled="isYearDisabled(yr)"
         :class="
           cn(
             buttonVariants({ variant: date.year === yr ? 'default' : 'ghost' }),
-            'h-9 text-sm w-full',
+            'h-9 text-sm w-full shadow-none',
+            isYearDisabled(yr) &&
+              'opacity-30 pointer-events-none cursor-not-allowed',
           )
         "
         @click="selectYear(yr)"
@@ -378,10 +435,11 @@ const forwarded = useForwardPropsEmits(delegatedProps, emits)
         <CalendarGridHead>
           <CalendarGridRow>
             <CalendarHeadCell
-              v-for="day in weekDays"
-              :key="day"
+              v-for="(_, index) in weekDays"
+              :key="index"
+              class="font-semibold text-foreground"
             >
-              {{ day }}
+              {{ WEEKDAY_MAP[index] }}
             </CalendarHeadCell>
           </CalendarGridRow>
         </CalendarGridHead>

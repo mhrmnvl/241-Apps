@@ -115,263 +115,267 @@ function handleSubmit() {
 <template>
   <div class="py-4">
     <form
-      class="space-y-8 animate-in fade-in-50 duration-200"
+      class="space-y-4 animate-in fade-in-50 duration-200"
       @submit.prevent="handleSubmit"
     >
-      <!-- SECTION 1: Identitas -->
-      <div class="space-y-2">
-        <h4 class="text-sm font-bold tracking-tight text-foreground">
-          Identitas
-        </h4>
-        <div class="grid gap-5 md:grid-cols-2">
-          <!-- Nama Lengkap -->
-          <div class="space-y-1.5">
-            <label class="text-xs font-semibold text-foreground">
-              Nama Lengkap
-              <span
-                v-if="isEditable"
-                class="text-destructive"
-                >*</span
+      <div class="space-y-6">
+        <!-- SECTION 1: Identitas -->
+        <div class="space-y-2">
+          <h4 class="text-sm font-bold tracking-tight text-foreground">
+            Identitas
+          </h4>
+          <div class="grid gap-5 md:grid-cols-2">
+            <!-- Nama Lengkap -->
+            <div class="space-y-1.5">
+              <label class="text-xs font-semibold text-foreground">
+                Nama Lengkap
+                <span
+                  v-if="isEditable"
+                  class="text-destructive"
+                  >*</span
+                >
+              </label>
+              <Input
+                v-model="form.name"
+                placeholder="John Doe"
+                maxlength="100"
+                :disabled="!isEditable"
+                class="disabled:opacity-100 disabled:bg-muted/20 disabled:cursor-default disabled:text-foreground disabled:border-border/80"
+                required
+              />
+            </div>
+
+            <!-- NIK -->
+            <div class="space-y-1.5">
+              <label class="text-xs font-semibold text-foreground">
+                NIK
+                <span
+                  v-if="isEditable"
+                  class="text-destructive"
+                  >*</span
+                >
+              </label>
+              <Input
+                v-model="form.nik"
+                placeholder="16 digit NIK"
+                maxlength="16"
+                :disabled="!isEditable"
+                class="disabled:opacity-100 disabled:bg-muted/20 disabled:cursor-default disabled:text-foreground disabled:border-border/80"
+                required
+              />
+            </div>
+
+            <!-- No. Kartu Keluarga -->
+            <div class="space-y-1.5">
+              <label class="text-xs font-semibold text-foreground"
+                >No. Kartu Keluarga</label
               >
-            </label>
-            <Input
-              v-model="form.name"
-              placeholder="John Doe"
-              maxlength="100"
-              :disabled="!isEditable"
-              class="disabled:opacity-100 disabled:bg-muted/20 disabled:cursor-default disabled:text-foreground disabled:border-border/80"
-              required
-            />
-          </div>
+              <Input
+                v-model="form.kk"
+                placeholder="16 digit No. KK"
+                maxlength="16"
+                :disabled="!isEditable"
+                class="disabled:opacity-100 disabled:bg-muted/20 disabled:cursor-default disabled:text-foreground disabled:border-border/80"
+              />
+            </div>
 
-          <!-- NIK -->
-          <div class="space-y-1.5">
-            <label class="text-xs font-semibold text-foreground">
-              NIK
-              <span
-                v-if="isEditable"
-                class="text-destructive"
-                >*</span
-              >
-            </label>
-            <Input
-              v-model="form.nik"
-              placeholder="16 digit NIK"
-              maxlength="16"
-              :disabled="!isEditable"
-              class="disabled:opacity-100 disabled:bg-muted/20 disabled:cursor-default disabled:text-foreground disabled:border-border/80"
-              required
-            />
-          </div>
-
-          <!-- No. Kartu Keluarga -->
-          <div class="space-y-1.5">
-            <label class="text-xs font-semibold text-foreground"
-              >No. Kartu Keluarga</label
-            >
-            <Input
-              v-model="form.kk"
-              placeholder="16 digit No. KK"
-              maxlength="16"
-              :disabled="!isEditable"
-              class="disabled:opacity-100 disabled:bg-muted/20 disabled:cursor-default disabled:text-foreground disabled:border-border/80"
-            />
-          </div>
-
-          <!-- NPWP -->
-          <div class="space-y-1.5">
-            <label class="text-xs font-semibold text-foreground">NPWP</label>
-            <Input
-              v-model="form.npwp"
-              placeholder="NPWP"
-              maxlength="20"
-              :disabled="!isEditable"
-              class="disabled:opacity-100 disabled:bg-muted/20 disabled:cursor-default disabled:text-foreground disabled:border-border/80"
-            />
+            <!-- NPWP -->
+            <div class="space-y-1.5">
+              <label class="text-xs font-semibold text-foreground">NPWP</label>
+              <Input
+                v-model="form.npwp"
+                placeholder="NPWP"
+                maxlength="20"
+                :disabled="!isEditable"
+                class="disabled:opacity-100 disabled:bg-muted/20 disabled:cursor-default disabled:text-foreground disabled:border-border/80"
+              />
+            </div>
           </div>
         </div>
-      </div>
 
-      <!-- SECTION 2: Biodata -->
-      <div class="space-y-2">
-        <h4 class="text-sm font-bold tracking-tight text-foreground">
-          Biodata
-        </h4>
-        <div class="grid gap-5 md:grid-cols-2">
-          <!-- Tempat Lahir -->
-          <div class="space-y-1.5">
-            <label class="text-xs font-semibold text-foreground">
-              Tempat Lahir
-              <span
-                v-if="isEditable"
-                class="text-destructive"
-                >*</span
-              >
-            </label>
-            <Input
-              v-model="form.birthPlace"
-              placeholder="Mis. Jakarta"
-              maxlength="100"
-              :disabled="!isEditable"
-              class="disabled:opacity-100 disabled:bg-muted/20 disabled:cursor-default disabled:text-foreground disabled:border-border/80"
-              required
-            />
-          </div>
-
-          <!-- Tanggal Lahir -->
-          <div class="space-y-1.5">
-            <label class="text-xs font-semibold text-foreground">
-              Tanggal Lahir
-              <span
-                v-if="isEditable"
-                class="text-destructive"
-                >*</span
-              >
-            </label>
-            <Input
-              v-model="form.birthDate"
-              type="date"
-              :disabled="!isEditable"
-              class="disabled:opacity-100 disabled:bg-muted/20 disabled:cursor-default disabled:text-foreground disabled:border-border/80"
-              required
-            />
-          </div>
-
-          <!-- Jenis Kelamin -->
-          <div class="space-y-1.5">
-            <label class="text-xs font-semibold text-foreground">
-              Jenis Kelamin
-              <span
-                v-if="isEditable"
-                class="text-destructive"
-                >*</span
-              >
-            </label>
-            <Select
-              v-model="form.gender"
-              :disabled="!isEditable"
-            >
-              <SelectTrigger
-                class="w-full disabled:opacity-100 disabled:bg-muted/20 disabled:cursor-default disabled:text-foreground disabled:border-border/80"
-              >
-                <SelectValue placeholder="Pilih Jenis Kelamin" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="MALE">Laki-laki</SelectItem>
-                <SelectItem value="FEMALE">Perempuan</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <!-- Agama -->
-          <div class="space-y-1.5">
-            <label class="text-xs font-semibold text-foreground">Agama</label>
-            <Select
-              v-model="form.religionId"
-              :disabled="!isEditable"
-            >
-              <SelectTrigger
-                class="w-full disabled:opacity-100 disabled:bg-muted/20 disabled:cursor-default disabled:text-foreground disabled:border-border/80"
-              >
-                <SelectValue placeholder="Pilih Agama" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">Tidak Tahu / Kosong</SelectItem>
-                <SelectItem
-                  v-for="r in religions"
-                  :key="r.id"
-                  :value="r.id"
+        <!-- SECTION 2: Biodata -->
+        <div class="space-y-2">
+          <h4 class="text-sm font-bold tracking-tight text-foreground">
+            Biodata
+          </h4>
+          <div class="grid gap-5 md:grid-cols-2">
+            <!-- Tempat Lahir -->
+            <div class="space-y-1.5">
+              <label class="text-xs font-semibold text-foreground">
+                Tempat Lahir
+                <span
+                  v-if="isEditable"
+                  class="text-destructive"
+                  >*</span
                 >
-                  {{ r.name }}
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+              </label>
+              <Input
+                v-model="form.birthPlace"
+                placeholder="Mis. Jakarta"
+                maxlength="100"
+                :disabled="!isEditable"
+                class="disabled:opacity-100 disabled:bg-muted/20 disabled:cursor-default disabled:text-foreground disabled:border-border/80"
+                required
+              />
+            </div>
 
-          <!-- Golongan Darah -->
-          <div class="space-y-1.5">
-            <label class="text-xs font-semibold text-foreground"
-              >Golongan Darah</label
-            >
-            <Select
-              v-model="form.bloodTypeId"
-              :disabled="!isEditable"
-            >
-              <SelectTrigger
-                class="w-full disabled:opacity-100 disabled:bg-muted/20 disabled:cursor-default disabled:text-foreground disabled:border-border/80"
-              >
-                <SelectValue placeholder="Pilih Golongan Darah" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">Tidak Tahu / Kosong</SelectItem>
-                <SelectItem
-                  v-for="b in bloodTypes"
-                  :key="b.id"
-                  :value="b.id"
+            <!-- Tanggal Lahir -->
+            <div class="space-y-1.5">
+              <label class="text-xs font-semibold text-foreground">
+                Tanggal Lahir
+                <span
+                  v-if="isEditable"
+                  class="text-destructive"
+                  >*</span
                 >
-                  {{ b.name }}
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+              </label>
+              <Input
+                v-model="form.birthDate"
+                type="date"
+                :disabled="!isEditable"
+                class="disabled:opacity-100 disabled:bg-muted/20 disabled:cursor-default disabled:text-foreground disabled:border-border/80"
+                required
+              />
+            </div>
 
-          <!-- Status Pernikahan -->
-          <div class="space-y-1.5">
-            <label class="text-xs font-semibold text-foreground"
-              >Status Pernikahan</label
-            >
-            <Select
-              v-model="form.maritalStatus"
-              :disabled="!isEditable"
-            >
-              <SelectTrigger
-                class="w-full disabled:opacity-100 disabled:bg-muted/20 disabled:cursor-default disabled:text-foreground disabled:border-border/80"
+            <!-- Jenis Kelamin -->
+            <div class="space-y-1.5">
+              <label class="text-xs font-semibold text-foreground">
+                Jenis Kelamin
+                <span
+                  v-if="isEditable"
+                  class="text-destructive"
+                  >*</span
+                >
+              </label>
+              <Select
+                v-model="form.gender"
+                :disabled="!isEditable"
               >
-                <SelectValue placeholder="Pilih Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">Tidak Tahu / Kosong</SelectItem>
-                <SelectItem value="SINGLE">Belum Menikah</SelectItem>
-                <SelectItem value="MARRIED">Menikah</SelectItem>
-                <SelectItem value="DIVORCED">Cerai Hidup</SelectItem>
-                <SelectItem value="WIDOWED">Cerai Mati</SelectItem>
-              </SelectContent>
-            </Select>
+                <SelectTrigger
+                  class="w-full disabled:opacity-100 disabled:bg-muted/20 disabled:cursor-default disabled:text-foreground disabled:border-border/80"
+                >
+                  <SelectValue placeholder="Pilih Jenis Kelamin" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="MALE">Laki-laki</SelectItem>
+                  <SelectItem value="FEMALE">Perempuan</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <!-- Agama -->
+            <div class="space-y-1.5">
+              <label class="text-xs font-semibold text-foreground">Agama</label>
+              <Select
+                v-model="form.religionId"
+                :disabled="!isEditable"
+              >
+                <SelectTrigger
+                  class="w-full disabled:opacity-100 disabled:bg-muted/20 disabled:cursor-default disabled:text-foreground disabled:border-border/80"
+                >
+                  <SelectValue placeholder="Pilih Agama" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Tidak Tahu / Kosong</SelectItem>
+                  <SelectItem
+                    v-for="r in religions"
+                    :key="r.id"
+                    :value="r.id"
+                  >
+                    {{ r.name }}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <!-- Golongan Darah -->
+            <div class="space-y-1.5">
+              <label class="text-xs font-semibold text-foreground"
+                >Golongan Darah</label
+              >
+              <Select
+                v-model="form.bloodTypeId"
+                :disabled="!isEditable"
+              >
+                <SelectTrigger
+                  class="w-full disabled:opacity-100 disabled:bg-muted/20 disabled:cursor-default disabled:text-foreground disabled:border-border/80"
+                >
+                  <SelectValue placeholder="Pilih Golongan Darah" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Tidak Tahu / Kosong</SelectItem>
+                  <SelectItem
+                    v-for="b in bloodTypes"
+                    :key="b.id"
+                    :value="b.id"
+                  >
+                    {{ b.name }}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <!-- Status Pernikahan -->
+            <div class="space-y-1.5">
+              <label class="text-xs font-semibold text-foreground"
+                >Status Pernikahan</label
+              >
+              <Select
+                v-model="form.maritalStatus"
+                :disabled="!isEditable"
+              >
+                <SelectTrigger
+                  class="w-full disabled:opacity-100 disabled:bg-muted/20 disabled:cursor-default disabled:text-foreground disabled:border-border/80"
+                >
+                  <SelectValue placeholder="Pilih Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Tidak Tahu / Kosong</SelectItem>
+                  <SelectItem value="SINGLE">Belum Menikah</SelectItem>
+                  <SelectItem value="MARRIED">Menikah</SelectItem>
+                  <SelectItem value="DIVORCED">Cerai Hidup</SelectItem>
+                  <SelectItem value="WIDOWED">Cerai Mati</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </div>
-      </div>
 
-      <!-- SECTION 3: Kontak -->
-      <div class="space-y-2">
-        <h4 class="text-sm font-bold tracking-tight text-foreground">Kontak</h4>
-        <div class="grid gap-5 md:grid-cols-2">
-          <!-- Email Pribadi -->
-          <div class="space-y-1.5">
-            <label class="text-xs font-semibold text-foreground"
-              >Email Pribadi</label
-            >
-            <Input
-              v-model="form.email"
-              type="email"
-              placeholder="example@mail.com"
-              maxlength="255"
-              :disabled="!isEditable"
-              class="disabled:opacity-100 disabled:bg-muted/20 disabled:cursor-default disabled:text-foreground disabled:border-border/80"
-            />
-          </div>
+        <!-- SECTION 3: Kontak -->
+        <div class="space-y-2">
+          <h4 class="text-sm font-bold tracking-tight text-foreground">
+            Kontak
+          </h4>
+          <div class="grid gap-5 md:grid-cols-2">
+            <!-- Email Pribadi -->
+            <div class="space-y-1.5">
+              <label class="text-xs font-semibold text-foreground"
+                >Email Pribadi</label
+              >
+              <Input
+                v-model="form.email"
+                type="email"
+                placeholder="example@mail.com"
+                maxlength="255"
+                :disabled="!isEditable"
+                class="disabled:opacity-100 disabled:bg-muted/20 disabled:cursor-default disabled:text-foreground disabled:border-border/80"
+              />
+            </div>
 
-          <!-- Nomor Telepon/HP -->
-          <div class="space-y-1.5">
-            <label class="text-xs font-semibold text-foreground"
-              >Nomor Telepon/HP</label
-            >
-            <Input
-              v-model="form.phone"
-              placeholder="0812xxxx"
-              maxlength="15"
-              :disabled="!isEditable"
-              class="disabled:opacity-100 disabled:bg-muted/20 disabled:cursor-default disabled:text-foreground disabled:border-border/80"
-            />
+            <!-- Nomor Telepon/HP -->
+            <div class="space-y-1.5">
+              <label class="text-xs font-semibold text-foreground"
+                >Nomor Telepon/HP</label
+              >
+              <Input
+                v-model="form.phone"
+                placeholder="0812xxxx"
+                maxlength="15"
+                :disabled="!isEditable"
+                class="disabled:opacity-100 disabled:bg-muted/20 disabled:cursor-default disabled:text-foreground disabled:border-border/80"
+              />
+            </div>
           </div>
         </div>
       </div>

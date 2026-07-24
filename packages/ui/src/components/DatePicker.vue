@@ -1,14 +1,11 @@
 <script setup lang="ts">
-/**
- * Komponen: Date Picker
- * Deskripsi: Komponen input tanggal berbasis popover dan kalender shadcn
- *
- * Digunakan pada:
- * - Formulir-formulir pengisian yang membutuhkan input tanggal
- */
-import { computed } from 'vue'
-import type { CalendarDate } from '@internationalized/date'
-import { parseDate, getLocalTimeZone, today } from '@internationalized/date'
+import { computed, ref } from 'vue'
+import {
+  parseDate,
+  getLocalTimeZone,
+  today,
+  CalendarDate,
+} from '@internationalized/date'
 import { Calendar as CalendarIcon } from 'lucide-vue-next'
 import { Calendar } from '@/ui/calendar'
 import { Button } from '@/ui/button'
@@ -35,6 +32,8 @@ const emit = defineEmits<{
   'update:modelValue': [value: string]
 }>()
 
+const isOpen = ref(false)
+
 const calendarValue = computed(() => {
   if (!props.modelValue) return undefined
   try {
@@ -58,7 +57,9 @@ const minCalendarValue = computed(() => {
       return undefined
     }
   }
-  return undefined
+  const currentYear = today(getLocalTimeZone()).year
+  const minYear = Math.floor((currentYear - 24) / 12) * 12
+  return new CalendarDate(minYear, 1, 1)
 })
 
 const maxCalendarValue = computed(() => {
@@ -69,27 +70,23 @@ const maxCalendarValue = computed(() => {
       return undefined
     }
   }
-  return props.allowFutureDates
-    ? today(getLocalTimeZone()).add({ years: 10 })
-    : today(getLocalTimeZone())
+  if (props.allowFutureDates) {
+    const currentYear = today(getLocalTimeZone()).year
+    const maxYear = Math.floor((currentYear + 24) / 12) * 12 + 11
+    return new CalendarDate(maxYear, 12, 31)
+  }
+  return today(getLocalTimeZone())
 })
 
-/**
- * Fungsi: Menangani seleksi tanggal pada kalender
- * Parameter:
- * - date (CalendarDate | undefined): Nilai tanggal yang dipilih dari kalender
- *
- * Mengembalikan:
- * - Emit pembaruan string pada modelValue
- */
 function onSelect(date: CalendarDate | undefined) {
   if (!date) return
   emit('update:modelValue', date.toString())
+  isOpen.value = false
 }
 </script>
 
 <template>
-  <Popover>
+  <Popover v-model:open="isOpen">
     <PopoverTrigger as-child>
       <Button
         variant="outline"

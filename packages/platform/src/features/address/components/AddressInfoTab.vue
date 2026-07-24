@@ -68,7 +68,7 @@ function handleSubmit() {
 <template>
   <div class="py-4">
     <form
-      class="space-y-6"
+      class="space-y-4"
       @submit.prevent="handleSubmit"
     >
       <div class="grid gap-5 md:grid-cols-2">

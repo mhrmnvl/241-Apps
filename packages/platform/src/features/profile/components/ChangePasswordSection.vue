@@ -50,93 +50,83 @@ const onSubmit = handleSubmit(async (values) => {
 </script>
 
 <template>
-  <div class="max-w-xl py-4">
-    <div class="space-y-6">
-      <div>
-        <h3 class="text-lg font-medium text-slate-900">Ubah Password</h3>
-        <p class="text-sm text-muted-foreground">
-          Perbarui password akun Anda secara berkala untuk menjaga keamanan
-          data.
-        </p>
-      </div>
-
-      <form
-        class="space-y-4"
-        @submit.prevent="onSubmit"
+  <div class="py-4">
+    <form
+      class="space-y-4"
+      @submit.prevent="onSubmit"
+    >
+      <FormField
+        v-slot="{ componentField }"
+        name="currentPassword"
       >
-        <FormField
-          v-slot="{ componentField }"
-          name="currentPassword"
-        >
-          <FormItem>
-            <FormLabel
-              >Password Saat Ini
-              <span class="text-destructive">*</span></FormLabel
-            >
-            <FormControl>
-              <Input
-                type="password"
-                placeholder="Masukkan password saat ini"
-                v-bind="componentField"
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        </FormField>
-
-        <FormField
-          v-slot="{ componentField }"
-          name="newPassword"
-        >
-          <FormItem>
-            <FormLabel
-              >Password Baru <span class="text-destructive">*</span></FormLabel
-            >
-            <FormControl>
-              <Input
-                type="password"
-                placeholder="Masukkan password baru (minimal 8 karakter)"
-                v-bind="componentField"
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        </FormField>
-
-        <FormField
-          v-slot="{ componentField }"
-          name="confirmPassword"
-        >
-          <FormItem>
-            <FormLabel
-              >Konfirmasi Password Baru
-              <span class="text-destructive">*</span></FormLabel
-            >
-            <FormControl>
-              <Input
-                type="password"
-                placeholder="Masukkan kembali password baru"
-                v-bind="componentField"
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        </FormField>
-
-        <div class="pt-2 flex justify-end">
-          <Button
-            type="submit"
-            :disabled="isSubmitting"
-            class="w-full sm:w-auto h-10 px-6 rounded-xl font-semibold shadow-md active:scale-[0.98] transition-transform"
-          >
-            <Loader2
-              v-if="isSubmitting"
-              class="mr-2 h-4 w-4 animate-spin"
+        <FormItem class="space-y-1.5">
+          <FormLabel class="text-xs font-semibold text-foreground">
+            Password Saat Ini
+            <span class="text-destructive">*</span>
+          </FormLabel>
+          <FormControl>
+            <Input
+              type="password"
+              placeholder="Masukkan password saat ini"
+              v-bind="componentField"
             />
-            Ubah Password
-          </Button>
-        </div>
-      </form>
-    </div>
+          </FormControl>
+          <FormMessage />
+        </FormItem>
+      </FormField>
+
+      <FormField
+        v-slot="{ componentField }"
+        name="newPassword"
+      >
+        <FormItem class="space-y-1.5">
+          <FormLabel class="text-xs font-semibold text-foreground">
+            Password Baru
+            <span class="text-destructive">*</span>
+          </FormLabel>
+          <FormControl>
+            <Input
+              type="password"
+              placeholder="Masukkan password baru (minimal 8 karakter)"
+              v-bind="componentField"
+            />
+          </FormControl>
+          <FormMessage />
+        </FormItem>
+      </FormField>
+
+      <FormField
+        v-slot="{ componentField }"
+        name="confirmPassword"
+      >
+        <FormItem class="space-y-1.5">
+          <FormLabel class="text-xs font-semibold text-foreground">
+            Konfirmasi Password Baru
+            <span class="text-destructive">*</span>
+          </FormLabel>
+          <FormControl>
+            <Input
+              type="password"
+              placeholder="Masukkan kembali password baru"
+              v-bind="componentField"
+            />
+          </FormControl>
+          <FormMessage />
+        </FormItem>
+      </FormField>
+
+      <div class="flex justify-end pt-4">
+        <Button
+          type="submit"
+          :disabled="isSubmitting"
+        >
+          <Loader2
+            v-if="isSubmitting"
+            class="mr-2 h-4 w-4 animate-spin"
+          />
+          {{ isSubmitting ? 'Menyimpan...' : 'Ubah Password' }}
+        </Button>
+      </div>
+    </form>
   </div>
 </template>
