@@ -56,9 +56,10 @@ watch(
   ([isOpen]) => {
     if (!isOpen) return
     if (props.initialData) {
+      const initialData = props.initialData as Record<string, unknown>
       const values: Record<string, unknown> = {}
       for (const field of props.fields) {
-        values[field.key] = props.initialData[field.key]
+        values[field.key] = initialData[field.key]
       }
       setValues(values)
     } else {

@@ -20,9 +20,14 @@ export function useReligionConfig(): MasterDataConfig<Religion> {
     service: {
       list: () => religionService.getReligions(),
       create: (payload) =>
-        religionService.createReligion(payload as ReligionCreatePayload),
+        religionService.createReligion(
+          payload as unknown as ReligionCreatePayload,
+        ),
       update: (id, payload) =>
-        religionService.updateReligion(id, payload as ReligionUpdatePayload),
+        religionService.updateReligion(
+          id,
+          payload as unknown as ReligionUpdatePayload,
+        ),
       remove: (id, callbacks) => religionService.deleteReligion(id, callbacks),
     },
     fields: [

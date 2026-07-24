@@ -17,7 +17,8 @@
     "zod": "^3.25.76",
     "vee-validate": "^4.15.1",
     "@vee-validate/zod": "^4.15.1",
-    "@tanstack/vue-table": "^8.21.3"
+    "@tanstack/vue-table": "^8.21.3",
+    "lucide-vue-next": "^0.577.0"
   },
   "peerDependencies": {
     "vue": "^3.5.35",

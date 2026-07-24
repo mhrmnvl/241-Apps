@@ -71,7 +71,7 @@ onMounted(() => {
     <div class="p-6">
       <DataTable
         :columns="columns"
-        :data="data"
+        :data="data as T[]"
         :is-loading="isLoading"
         :item-label="config.entityLabel.plural.toLowerCase()"
         :filter-column="firstTextFieldKey"
