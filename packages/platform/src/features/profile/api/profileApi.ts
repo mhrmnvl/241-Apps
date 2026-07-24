@@ -42,6 +42,10 @@ export const profileApi = {
     )
   },
 
+  deleteMyPhoto: () => {
+    return api.delete<ApiSingleResponse<ProfileRecord>>('/profiles/me/photo')
+  },
+
   updateProfileByUserId: (userId: string, payload: ProfileUpdatePayload) => {
     return api.patch<ApiSingleResponse<ProfileApiResponse>>(
       `/profiles/${userId}`,
