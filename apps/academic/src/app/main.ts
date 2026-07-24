@@ -29,22 +29,13 @@ void restoreSession().finally(() => {
   // no loading gate blocking the app shell.
   void useSettingsStore().fetchSettings('ACADEMIC')
 
-  const { faviconSrc, appTitle } = useBranding()
+  const { faviconSrc } = useBranding()
   watchEffect(() => {
     const link =
       document.querySelector<HTMLLinkElement>('link[rel="icon"]') ??
       document.head.appendChild(document.createElement('link'))
     link.rel = 'icon'
     link.href = faviconSrc.value
-  })
-
-  watchEffect(() => {
-    const routeTitle = router.currentRoute.value.meta.title as
-      | string
-      | undefined
-    document.title = routeTitle
-      ? `${routeTitle} — ${appTitle.value}`
-      : appTitle.value
   })
 
   app.use(router).mount('#app')
