@@ -40,3 +40,18 @@ export function buildInitialValues(
 
   return values
 }
+
+/** Drops fields marked `readOnlyOnEdit` from an update payload — they can only be set on create. */
+export function omitReadOnlyOnEditFields(
+  fields: MasterDataField[],
+  values: Record<string, unknown>,
+): Record<string, unknown> {
+  const payload: Record<string, unknown> = {}
+
+  for (const field of fields) {
+    if (field.kind === 'text' && field.readOnlyOnEdit) continue
+    payload[field.key] = values[field.key]
+  }
+
+  return payload
+}

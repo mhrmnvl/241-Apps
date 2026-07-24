@@ -2,12 +2,21 @@ import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
 import { toast } from 'vue-sonner'
 import { schoolUnitTypeApi } from '../api/schoolUnitTypeApi'
 import type {
+  SchoolUnitType,
   SchoolUnitTypeCreatePayload,
   SchoolUnitTypeUpdatePayload,
-  SchoolUnitTypeQuery,
 } from '../types'
 
 export const schoolUnitTypeService = {
+  getSchoolUnitTypes: async (): Promise<SchoolUnitType[]> => {
+    try {
+      const res = await schoolUnitTypeApi.getSchoolUnitTypes({ limit: 100 })
+      return res.data.data
+    } catch {
+      return []
+    }
+  },
+
   createSchoolUnitType: async (payload: SchoolUnitTypeCreatePayload) => {
     try {
       await schoolUnitTypeApi.createSchoolUnitType(payload)
@@ -57,15 +66,6 @@ export const schoolUnitTypeService = {
       return false
     } finally {
       if (callbacks) callbacks.setLoading(false)
-    }
-  },
-
-  fetchSchoolUnitTypes: async (params?: SchoolUnitTypeQuery) => {
-    const res = await schoolUnitTypeApi.getSchoolUnitTypes(params)
-    const envelope = res.data
-    return {
-      data: envelope?.data ?? [],
-      meta: envelope?.meta ?? { page: 1, limit: 10, total: 0, totalPages: 0 },
     }
   },
 }

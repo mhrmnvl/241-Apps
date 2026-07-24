@@ -25,6 +25,7 @@ import { Loader2 } from 'lucide-vue-next'
 import {
   buildFieldSchema,
   buildInitialValues,
+  omitReadOnlyOnEditFields,
 } from '../schema/buildFieldSchema'
 import type { MasterDataEntity, MasterDataField } from '../types/config'
 
@@ -70,7 +71,10 @@ watch(
 )
 
 const onSubmit = handleSubmit((values) => {
-  emit('save', values)
+  const payload = isEditing.value
+    ? omitReadOnlyOnEditFields(props.fields, values)
+    : values
+  emit('save', payload)
 })
 </script>
 
@@ -111,7 +115,9 @@ const onSubmit = handleSubmit((values) => {
               <FormControl>
                 <Input
                   :placeholder="field.placeholder"
-                  :disabled="isSubmitting"
+                  :disabled="
+                    isSubmitting || (isEditing && field.readOnlyOnEdit)
+                  "
                   v-bind="componentField"
                 />
               </FormControl>
