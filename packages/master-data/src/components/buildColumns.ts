@@ -19,7 +19,9 @@ export function buildColumns<T extends MasterDataEntity>(
         header: field.label,
         meta: { align: 'center' },
         cell: ({ row }) => {
-          const value = Boolean(row.original[field.key])
+          const value = Boolean(
+            (row.original as Record<string, unknown>)[field.key],
+          )
           return h(Badge, { variant: value ? 'default' : 'outline' }, () =>
             value
               ? (field.trueLabel ?? 'Aktif')

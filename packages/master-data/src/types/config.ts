@@ -20,7 +20,6 @@ export type MasterDataField = MasterDataTextField | MasterDataBooleanField
 
 export interface MasterDataEntity {
   id: string
-  [key: string]: unknown
 }
 
 export interface MasterDataDeleteCallbacks {
