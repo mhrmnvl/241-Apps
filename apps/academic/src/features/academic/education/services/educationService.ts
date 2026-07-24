@@ -5,7 +5,6 @@ import type {
   EducationLevel,
   EducationLevelCreatePayload,
   EducationLevelUpdatePayload,
-  EducationLevelQuery,
 } from '../types'
 
 const FALLBACK_LEVELS: EducationLevel[] = [
@@ -83,15 +82,6 @@ export const educationService = {
       return false
     } finally {
       if (callbacks) callbacks.setLoading(false)
-    }
-  },
-
-  fetchEducationLevels: async (params?: EducationLevelQuery) => {
-    const res = await educationApi.getEducationLevels(params)
-    const envelope = res.data
-    return {
-      data: envelope?.data ?? [],
-      meta: envelope?.meta ?? { page: 1, limit: 10, total: 0, totalPages: 0 },
     }
   },
 }

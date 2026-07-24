@@ -1,109 +1,20 @@
-﻿<script setup lang="ts">
+<script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue'
-import { DataTable } from '@/ui'
-import { Button } from '@/ui/button'
-import { Card, CardHeader, CardTitle } from '@/ui/card'
-import { Input } from '@/ui/input'
-import { Plus, Search } from 'lucide-vue-next'
-import { onMounted } from 'vue'
-import BloodTypeFormDialog from '../components/BloodTypeFormDialog.vue'
-import { useBloodTypeList } from '../composables/useBloodTypeList'
-import { useRoleGuard } from '@/features/platform/auth'
-import { createColumns } from '../components/columns'
+import { MasterDataListView } from '@/master-data'
+import { useBloodTypeConfig } from '../config'
 
-const {
-  data,
-  isLoading,
-  fetchBloodTypes,
-  deleteBloodType,
-  searchQuery,
-  isAddOpen,
-  isEditDialogOpen,
-  selectedItem,
-  openEditDialog,
-} = useBloodTypeList()
-
-const { can } = useRoleGuard()
-const columns = createColumns(
-  openEditDialog,
-  (item, callbacks) => {
-    void deleteBloodType(item.id, callbacks)
-  },
-  can('blood-types.update') || can('blood-types.delete'),
-)
+const config = useBloodTypeConfig()
 
 const breadcrumbs = [
   { title: 'Pengaturan', href: '#' },
   { title: 'Golongan Darah', href: '/setting/blood-type' },
 ]
-
-onMounted(() => {
-  void fetchBloodTypes()
-})
 </script>
 
 <template>
   <AppLayout :breadcrumbs="breadcrumbs">
     <div class="p-4 md:p-6 lg:p-8">
-      <Card
-        class="overflow-hidden rounded-2xl shadow-sm shadow-black/5 ring-1 ring-black/4"
-      >
-        <CardHeader
-          class="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b px-6 py-5 gap-4"
-        >
-          <div>
-            <CardTitle class="text-2xl font-bold tracking-tight">
-              Golongan Darah
-            </CardTitle>
-          </div>
-          <div
-            v-if="can('blood-types.create')"
-            class="flex flex-col sm:flex-row w-full sm:w-auto gap-2"
-          >
-            <Button
-              class="w-full sm:w-auto"
-              @click="isAddOpen = true"
-            >
-              <Plus class="mr-2 h-4 w-4" /> Tambah Golongan Darah
-            </Button>
-          </div>
-        </CardHeader>
-
-        <div class="p-6">
-          <DataTable
-            :columns="columns"
-            :data="data"
-            :is-loading="isLoading"
-            item-label="golongan darah"
-          >
-            <template #header-right>
-              <div class="relative w-full sm:w-[240px]">
-                <Search
-                  class="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
-                />
-                <Input
-                  v-model="searchQuery"
-                  placeholder="Cari golongan darah..."
-                  class="pl-9 h-8 w-full text-sm"
-                />
-              </div>
-            </template>
-          </DataTable>
-        </div>
-      </Card>
-
-      <BloodTypeFormDialog
-        v-if="can('blood-types.create')"
-        v-model:open="isAddOpen"
-        @success="fetchBloodTypes"
-      />
-
-      <BloodTypeFormDialog
-        v-if="can('blood-types.update')"
-        v-model:open="isEditDialogOpen"
-        :initial-data="selectedItem"
-        @success="fetchBloodTypes"
-      />
+      <MasterDataListView :config="config" />
     </div>
   </AppLayout>
 </template>

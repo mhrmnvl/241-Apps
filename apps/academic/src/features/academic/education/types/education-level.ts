@@ -20,15 +20,3 @@ export interface EducationLevelQuery {
   search?: string
   isActive?: boolean
 }
-
-export interface EducationLevelColumnActions {
-  showActions?: boolean
-  onEdit?: (item: EducationLevel) => void
-  onDelete?: (
-    item: EducationLevel,
-    callbacks: {
-      closeAlert: () => void
-      setLoading: (state: boolean) => void
-    },
-  ) => void
-}

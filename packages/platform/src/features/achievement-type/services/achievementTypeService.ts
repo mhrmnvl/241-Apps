@@ -5,7 +5,6 @@ import type {
   AchievementType,
   AchievementTypeCreatePayload,
   AchievementTypeUpdatePayload,
-  AchievementTypeQuery,
 } from '../types'
 
 export const achievementTypeService = {
@@ -67,15 +66,6 @@ export const achievementTypeService = {
       return false
     } finally {
       if (callbacks) callbacks.setLoading(false)
-    }
-  },
-
-  fetchAchievementTypes: async (params?: AchievementTypeQuery) => {
-    const res = await achievementTypeApi.getAchievementTypes(params)
-    const envelope = res.data
-    return {
-      data: envelope?.data ?? [],
-      meta: envelope?.meta ?? { page: 1, limit: 10, total: 0, totalPages: 0 },
     }
   },
 }

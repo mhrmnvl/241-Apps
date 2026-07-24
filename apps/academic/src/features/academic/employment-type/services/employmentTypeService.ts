@@ -2,12 +2,21 @@ import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
 import { toast } from 'vue-sonner'
 import { employmentTypeApi } from '../api/employmentTypeApi'
 import type {
+  EmploymentType,
   EmploymentTypeCreatePayload,
   EmploymentTypeUpdatePayload,
-  EmploymentTypeQuery,
 } from '../types'
 
 export const employmentTypeService = {
+  getEmploymentTypes: async (): Promise<EmploymentType[]> => {
+    try {
+      const res = await employmentTypeApi.getEmploymentTypes({ limit: 100 })
+      return res.data.data
+    } catch {
+      return []
+    }
+  },
+
   createEmploymentType: async (payload: EmploymentTypeCreatePayload) => {
     try {
       await employmentTypeApi.createEmploymentType(payload)
@@ -63,15 +72,6 @@ export const employmentTypeService = {
       return false
     } finally {
       if (callbacks) callbacks.setLoading(false)
-    }
-  },
-
-  fetchEmploymentTypes: async (params?: EmploymentTypeQuery) => {
-    const res = await employmentTypeApi.getEmploymentTypes(params)
-    const envelope = res.data
-    return {
-      data: envelope?.data ?? [],
-      meta: envelope?.meta ?? { page: 1, limit: 10, total: 0, totalPages: 0 },
     }
   },
 }
