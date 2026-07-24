@@ -153,12 +153,12 @@ const { isCreate, isSaving, educationLevels, onSubmit } =
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="Lulus"> Lulus </SelectItem>
-                      <SelectItem value="Aktif">
+                      <SelectItem value="GRADUATED"> Lulus </SelectItem>
+                      <SelectItem value="ACTIVE">
                         Aktif / Masih Berjalan
                       </SelectItem>
-                      <SelectItem value="Pindahan"> Pindahan </SelectItem>
-                      <SelectItem value="Keluar"> Keluar </SelectItem>
+                      <SelectItem value="TRANSFERRED"> Pindahan </SelectItem>
+                      <SelectItem value="DROPPED"> Keluar </SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />

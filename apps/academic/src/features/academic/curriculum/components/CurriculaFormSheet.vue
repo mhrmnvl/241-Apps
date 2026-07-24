@@ -80,13 +80,7 @@ const curriculaForm = useCurriculaForm({
               : 'Tambah Kurikulum Baru'
           }}
         </DialogTitle>
-        <DialogDescription class="sr-only">
-          {{
-            curriculaForm.isEditing.value
-              ? 'Perbarui nama atau status kurikulum ini.'
-              : 'Masukkan nama kurikulum (misal: Kurikulum Merdeka).'
-          }}
-        </DialogDescription>
+        <DialogDescription class="sr-only"> </DialogDescription>
       </DialogHeader>
 
       <ScrollArea class="flex-1 min-h-0">

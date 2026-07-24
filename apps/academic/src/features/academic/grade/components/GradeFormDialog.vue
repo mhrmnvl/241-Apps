@@ -166,13 +166,7 @@ onMounted(async () => {
               : 'Tambah Tingkat Kelas'
           }}
         </DialogTitle>
-        <DialogDescription class="sr-only">
-          {{
-            levelForm.isEditing.value
-              ? 'Perbarui data tingkat kelas yang sudah ada.'
-              : 'Isi data untuk menambahkan tingkat kelas baru.'
-          }}
-        </DialogDescription>
+        <DialogDescription class="sr-only"> </DialogDescription>
       </DialogHeader>
 
       <ScrollArea class="flex-1 min-h-0">
