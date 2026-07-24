@@ -3,10 +3,7 @@ import { toTypedSchema } from '@vee-validate/zod'
 import { useForm } from 'vee-validate'
 import * as z from 'zod'
 import { useAchievement } from './useAchievement'
-import type {
-  AchievementSavePayload,
-  UseAchievementFormOptions,
-} from '../types'
+import type { UseAchievementFormOptions } from '../types'
 
 export function useAchievementForm({ props, emit }: UseAchievementFormOptions) {
   const { isSaving, saveAchievement } = useAchievement()
@@ -70,8 +67,7 @@ export function useAchievementForm({ props, emit }: UseAchievementFormOptions) {
   )
 
   const onSubmit = form.handleSubmit(async (values) => {
-    const payload: AchievementSavePayload = {
-      profileId: props.profileId,
+    const basePayload = {
       name: values.name,
       level: values.level,
       typeId: values.typeId,
@@ -80,7 +76,9 @@ export function useAchievementForm({ props, emit }: UseAchievementFormOptions) {
     }
 
     const { success } = await saveAchievement(
-      payload,
+      isCreate.value
+        ? { ...basePayload, profileId: props.profileId }
+        : basePayload,
       isCreate.value,
       props.editingItem?.id,
     )

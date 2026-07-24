@@ -86,7 +86,12 @@ export function useProfileView(): ProfileViewReturn {
     const extraTab = profileConfig.value.extraTabs.find(
       (t) => t.value === activeTab.value,
     )
-    if (extraTab) return extraTab.isEditable ?? false
+    if (extraTab) {
+      if (extraTab.value === 'positions') {
+        return isAdmin.value
+      }
+      return extraTab.isEditable ?? false
+    }
     return false
   })
 

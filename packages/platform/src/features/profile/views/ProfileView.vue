@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, computed } from 'vue'
+import { onMounted, computed, unref } from 'vue'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { Card } from '@/ui/card'
 import {
@@ -293,8 +293,8 @@ onMounted(() => {
                       v-bind="
                         tab.props
                           ? tab.props({
-                              profileData,
-                              rawProfile,
+                              profileData: unref(profileData),
+                              rawProfile: unref(rawProfile),
                               isAdmin,
                               reloadProfile,
                             })
@@ -366,8 +366,8 @@ onMounted(() => {
       v-bind="
         sheet.props({
           userId: getUserId,
-          rawProfile,
-          profileData,
+          rawProfile: unref(rawProfile),
+          profileData: unref(profileData),
           reloadProfile,
           isAdmin,
         })

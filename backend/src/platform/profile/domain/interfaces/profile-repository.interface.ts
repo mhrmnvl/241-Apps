@@ -5,7 +5,10 @@ export const PROFILE_INCLUDE = {
     where: { deletedAt: null },
     include: { socialMedia: true },
   },
-  achievements: { where: { deletedAt: null } },
+  achievements: {
+    where: { deletedAt: null },
+    include: { type: true },
+  },
   scholarships: { where: { deletedAt: null } },
   educationalHistories: { where: { deletedAt: null } },
   religion: true,

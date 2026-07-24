@@ -2,6 +2,7 @@ import { h } from 'vue'
 import type { ColumnDef } from '@tanstack/vue-table'
 import { ActionCell } from '@/ui'
 import type { Scholarship, ScholarshipColumnActions } from '../types'
+import { getScholarshipStatusLabel } from '../types'
 
 export const createScholarshipColumns = (
   isAdmin: boolean,
@@ -11,11 +12,13 @@ export const createScholarshipColumns = (
     {
       accessorKey: 'name',
       header: 'Nama Program Beasiswa',
+      meta: { align: 'left' },
       cell: ({ row }) => row.original.name,
     },
     {
       accessorKey: 'provider',
       header: 'Instansi / Penyelenggara',
+      meta: { align: 'left' },
       cell: ({ row }) => row.original.provider || '-',
     },
     {
@@ -28,7 +31,10 @@ export const createScholarshipColumns = (
       accessorKey: 'status',
       header: 'Status',
       meta: { align: 'center' },
-      cell: ({ row }) => row.original.status || '-',
+      cell: ({ row }) =>
+        row.original.status
+          ? getScholarshipStatusLabel(row.original.status)
+          : '-',
     },
   ]
 

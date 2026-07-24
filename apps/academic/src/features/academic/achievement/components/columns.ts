@@ -17,6 +17,7 @@ export const createAchievementColumns = (
     {
       accessorKey: 'name',
       header: 'Nama Prestasi',
+      meta: { align: 'left' },
       cell: ({ row }) => row.original.name,
     },
     {
@@ -34,6 +35,7 @@ export const createAchievementColumns = (
     {
       accessorKey: 'description',
       header: 'Keterangan Singkat',
+      meta: { align: 'left' },
       cell: ({ row }) =>
         h(
           'span',

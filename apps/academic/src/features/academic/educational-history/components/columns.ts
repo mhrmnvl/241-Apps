@@ -21,11 +21,13 @@ export const createEducationalHistoryColumns = (
     {
       accessorKey: 'institution',
       header: 'Nama Institusi',
+      meta: { align: 'left' },
       cell: ({ row }) => row.original.institution,
     },
     {
       accessorKey: 'major',
       header: 'Jurusan / Bidang Studi',
+      meta: { align: 'left' },
       cell: ({ row }) => row.original.major ?? '-',
     },
     {
@@ -47,6 +49,7 @@ export const createEducationalHistoryColumns = (
     {
       accessorKey: 'institution',
       header: 'Asal Sekolah',
+      meta: { align: 'left' },
       cell: ({ row }) => row.original.institution,
     },
     {

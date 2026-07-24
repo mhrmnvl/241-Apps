@@ -4,6 +4,7 @@ import {
   type ExtraSheetContext,
 } from '@/features/platform/profile'
 import { Plus } from 'lucide-vue-next'
+import { toast } from 'vue-sonner'
 
 import SchoolIdentityTab from './components/SchoolIdentityTab.vue'
 import ParentInfoTab from './components/ParentInfoTab.vue'
@@ -138,7 +139,14 @@ export function setupProfileFeature() {
         }),
         isEditable: true,
         actionConfig: { text: 'Tambah Jabatan', icon: Plus },
-        onActionClick: () => {
+        onActionClick: (ctx) => {
+          if (!ctx.rawProfile?.teacher?.id) {
+            toast.error('Gagal membuka form', {
+              description:
+                'Pengguna ini tidak memiliki data kepegawaian (Staf/Guru). Silakan buat data kepegawaian terlebih dahulu.',
+            })
+            return
+          }
           editingPositionItem.value = null
           showEditPosition.value = true
         },
@@ -216,7 +224,7 @@ export function setupProfileFeature() {
       {
         component: EditPositionDialog,
         props: (ctx: ExtraSheetContext) => ({
-          open: showEditPosition.value && ctx.rawProfile?.teacher?.id,
+          open: showEditPosition.value,
           'onUpdate:open': (val: boolean) => {
             showEditPosition.value = val
           },

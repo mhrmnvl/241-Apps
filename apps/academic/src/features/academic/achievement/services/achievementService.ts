@@ -6,7 +6,7 @@ import type { AchievementSavePayload } from '../types'
 
 export const achievementService = {
   saveAchievement: async (
-    payload: AchievementSavePayload,
+    payload: AchievementSavePayload | Omit<AchievementSavePayload, 'profileId'>,
     isCreate: boolean,
     itemId?: string,
   ) => {
@@ -14,10 +14,15 @@ export const achievementService = {
     store.isSaving = true
     try {
       if (isCreate) {
-        await achievementApi.createAchievement(payload)
+        await achievementApi.createAchievement(
+          payload as AchievementSavePayload,
+        )
         toast.success('Prestasi berhasil ditambahkan')
       } else {
-        await achievementApi.updateAchievement(itemId!, payload)
+        await achievementApi.updateAchievement(
+          itemId!,
+          payload as Omit<AchievementSavePayload, 'profileId'>,
+        )
         toast.success('Prestasi berhasil diperbarui')
       }
       return { success: true }

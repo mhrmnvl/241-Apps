@@ -16,7 +16,10 @@ export const achievementApi = {
     return api.post<ApiSingleResponse<Achievement>>('/achievements', payload)
   },
 
-  updateAchievement: (id: string, payload: AchievementSavePayload) => {
+  updateAchievement: (
+    id: string,
+    payload: Omit<AchievementSavePayload, 'profileId'>,
+  ) => {
     return api.patch<ApiSingleResponse<Achievement>>(
       `/achievements/${id}`,
       payload,
