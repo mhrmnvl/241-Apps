@@ -60,11 +60,11 @@ describe('buildColumns', () => {
     const vnode = (
       statusColumn.cell as (ctx: { row: { original: FakeEntity } }) => {
         props: { variant: string }
-        children: () => string
+        children: { default: () => string }
       }
     )({ row: { original: { id: '1', name: 'A', isActive: false } } })
 
     expect(vnode.props.variant).toBe('outline')
-    expect(vnode.children()).toBe('Tidak Aktif')
+    expect(vnode.children.default()).toBe('Tidak Aktif')
   })
 })
