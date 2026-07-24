@@ -6,20 +6,12 @@
     "baseUrl": ".",
     "outDir": "./node_modules/.tmp",
     "paths": {
-      "@/shared/*": ["../shared/src/*"],
       "@/ui": ["../ui/src/index.ts"],
       "@/ui/*": ["../ui/src/components/ui/*/index.ts"],
       "@/ui/utils": ["../ui/src/utils/index.ts"],
-      "@/master-data": ["../master-data/src/index.ts"],
-      "@/master-data/*": ["../master-data/src/*"],
-      "@/features/platform/*": ["./src/features/*"],
-      "@/layouts/*": ["../../apps/academic/src/layouts/*"]
+      "@/shared/*": ["../shared/src/*"]
     }
   },
   "include": ["src/**/*.ts", "src/**/*.vue"],
-  "references": [
-    { "path": "../shared" },
-    { "path": "../ui" },
-    { "path": "../master-data" }
-  ]
+  "references": [{ "path": "../ui" }, { "path": "../shared" }]
 }

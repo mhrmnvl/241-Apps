@@ -20,15 +20,3 @@ export interface ReligionQuery {
   search?: string
   isActive?: boolean
 }
-
-export interface ReligionColumnActions {
-  showActions?: boolean
-  onEdit?: (item: Religion) => void
-  onDelete?: (
-    item: Religion,
-    callbacks: {
-      closeAlert: () => void
-      setLoading: (state: boolean) => void
-    },
-  ) => void
-}

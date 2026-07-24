@@ -5,7 +5,6 @@ import type {
   Religion,
   ReligionCreatePayload,
   ReligionUpdatePayload,
-  ReligionQuery,
 } from '../types'
 
 export const religionService = {
@@ -58,15 +57,6 @@ export const religionService = {
       return false
     } finally {
       if (callbacks) callbacks.setLoading(false)
-    }
-  },
-
-  fetchReligions: async (params?: ReligionQuery) => {
-    const res = await religionApi.getReligions(params)
-    const envelope = res.data
-    return {
-      data: envelope?.data ?? [],
-      meta: envelope?.meta ?? { page: 1, limit: 10, total: 0, totalPages: 0 },
     }
   },
 }
