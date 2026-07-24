@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useLoginForm } from '../composables/useLoginForm'
 import { cn } from '@/shared/utils/utils'
 import { Button } from '@/ui/button'
@@ -11,6 +11,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/ui/form'
+import { Eye, EyeOff } from 'lucide-vue-next'
 
 import { authConfig } from '../config'
 import { useSettingsStore } from '../../settings/stores/settingsStore'
@@ -20,6 +21,8 @@ const props = defineProps<{
 }>()
 
 const { isSubmitting, errorMessage, onSubmit } = useLoginForm()
+
+const showPassword = ref(false)
 
 const settingsStore = useSettingsStore()
 const loginTitle = computed(
@@ -63,12 +66,25 @@ const loginTitle = computed(
         <FormItem>
           <FormLabel for="password"> Password </FormLabel>
           <FormControl>
-            <Input
-              id="password"
-              type="password"
-              placeholder="Kata sandi"
-              v-bind="componentField"
-            />
+            <div class="relative">
+              <Input
+                id="password"
+                :type="showPassword ? 'text' : 'password'"
+                placeholder="Kata sandi"
+                class="pr-10"
+                v-bind="componentField"
+              />
+              <button
+                type="button"
+                class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer focus:outline-none"
+                @click="showPassword = !showPassword"
+              >
+                <component
+                  :is="showPassword ? EyeOff : Eye"
+                  class="size-4"
+                />
+              </button>
+            </div>
           </FormControl>
           <div class="flex justify-end mt-1">
             <router-link

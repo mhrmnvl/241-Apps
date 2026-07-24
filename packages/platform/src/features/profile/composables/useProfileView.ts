@@ -89,7 +89,7 @@ export function useProfileView(): ProfileViewReturn {
       (t) => t.value === activeTab.value,
     )
     if (extraTab) {
-      if (extraTab.value === 'positions') {
+      if (extraTab.value === 'positions' || extraTab.value === 'identity') {
         return isAdmin.value
       }
       return extraTab.isEditable ?? false

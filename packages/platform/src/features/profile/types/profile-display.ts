@@ -1,5 +1,13 @@
 import type { UserGender, MaritalStatus, IncomeRange } from './profile-enums'
-import type { TeacherRecord, StudentRecord, AddressRecord } from './profile'
+import type {
+  TeacherRecord,
+  StudentRecord,
+  AddressRecord,
+  AchievementRecord,
+  ScholarshipRecord,
+  EducationalHistoryRecord,
+  TeacherPositionRecord,
+} from './profile'
 
 export interface SchoolIdentity {
   employmentStatus?: string | null
@@ -29,11 +37,11 @@ export interface ProfileDisplayData {
   npwp?: string | null
   schoolIdentity?: SchoolIdentity
   parents?: ParentDisplayData[]
-  educationHistory?: any[]
-  studentHistory?: any[]
-  achievements?: any[]
-  scholarships?: any[]
-  positions?: any[]
+  educationHistory?: EducationalHistoryRecord[]
+  studentHistory?: EducationalHistoryRecord[]
+  achievements?: AchievementRecord[]
+  scholarships?: ScholarshipRecord[]
+  positions?: TeacherPositionRecord[]
 }
 
 export interface SchoolProfileData {
@@ -96,11 +104,11 @@ export interface ProfileStoreData {
   schoolIdentity?: SchoolIdentity
   address?: AddressData | null
   parents?: ParentDisplayData[]
-  educationHistory?: any[]
-  studentHistory?: any[]
-  achievements?: any[]
-  scholarships?: any[]
-  positions?: any[]
+  educationHistory?: EducationalHistoryRecord[]
+  studentHistory?: EducationalHistoryRecord[]
+  achievements?: AchievementRecord[]
+  scholarships?: ScholarshipRecord[]
+  positions?: TeacherPositionRecord[]
 }
 
 export interface RawProfileData {

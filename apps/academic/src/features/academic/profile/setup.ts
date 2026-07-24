@@ -62,6 +62,8 @@ export function setupProfileFeature() {
         value: 'identity',
         label: 'Identitas Pokok',
         component: SchoolIdentityTab,
+        show: (roles: string[]) =>
+          roles.includes('STUDENT') || roles.includes('TEACHER'),
         props: (ctx: ExtraTabPropsContext) => ({
           data: ctx.profileData,
           rawProfile: ctx.rawProfile,

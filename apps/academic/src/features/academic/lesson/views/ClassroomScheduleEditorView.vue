@@ -1,4 +1,4 @@
-﻿<script setup lang="ts">
+<script setup lang="ts">
 import { useLessonEditor } from '../composables/useLessonEditor'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { Button } from '@/ui/button'
@@ -418,9 +418,9 @@ onMounted(fetchData)
               </div>
 
               <div
-                class="flex flex-col sm:flex-row sm:items-center justify-between pt-4 gap-4 pb-6"
+                class="flex flex-wrap items-center justify-between pt-4 gap-3 pb-6"
               >
-                <div class="flex flex-col sm:flex-row sm:items-center gap-2">
+                <div class="flex flex-wrap items-center gap-2">
                   <Button
                     variant="outline"
                     size="sm"
@@ -445,7 +445,7 @@ onMounted(fetchData)
                 <Button
                   size="sm"
                   :disabled="isSaving ? isSaving[day.value] : false"
-                  class="w-full sm:w-auto"
+                  class="w-full sm:w-auto shrink-0"
                   @click="saveDay(day.value)"
                 >
                   <div

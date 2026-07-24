@@ -34,6 +34,23 @@ const { isSaving: isSavingStudent, saveStudent } = useStudent()
 const { isSaving: isSavingTeacher, saveTeacher } = useTeacher()
 const isSaving = computed(() => isSavingStudent.value || isSavingTeacher.value)
 
+const additionalPositions = computed(() => {
+  return (
+    props.rawProfile?.teacher?.teacherPositions
+      ?.filter((tp) => !tp.isPrimary)
+      ?.map((tp) => tp.position?.name)
+      ?.filter(Boolean) ?? []
+  )
+})
+
+const taughtSubjects = computed(() => {
+  return (
+    props.rawProfile?.teacher?.teachingAssignments
+      ?.map((sa) => sa.subject?.name)
+      ?.filter(Boolean) ?? []
+  )
+})
+
 const form = reactive({
   nis: '',
   nisn: '',
@@ -234,42 +251,6 @@ async function handleSubmit() {
               </Select>
             </div>
 
-            <!-- Golongan / Kategori -->
-            <div class="space-y-1.5">
-              <label class="text-xs font-semibold text-foreground"
-                >Golongan / Kategori</label
-              >
-              <Input
-                :model-value="data.schoolIdentity.positionCategory || '-'"
-                disabled
-                class="disabled:opacity-100 disabled:bg-muted/20 disabled:cursor-default disabled:text-foreground disabled:border-border/80"
-              />
-            </div>
-
-            <!-- Tugas / Jabatan Utama -->
-            <div class="space-y-1.5">
-              <label class="text-xs font-semibold text-foreground"
-                >Tugas / Jabatan Utama</label
-              >
-              <Input
-                :model-value="data.schoolIdentity.primaryPosition || '-'"
-                disabled
-                class="disabled:opacity-100 disabled:bg-muted/20 disabled:cursor-default disabled:text-foreground disabled:border-border/80"
-              />
-            </div>
-
-            <!-- Tugas / Jabatan Tambahan -->
-            <div class="space-y-1.5">
-              <label class="text-xs font-semibold text-foreground"
-                >Tugas / Jabatan Tambahan</label
-              >
-              <Input
-                :model-value="data.schoolIdentity.additionalDuties || '-'"
-                disabled
-                class="disabled:opacity-100 disabled:bg-muted/20 disabled:cursor-default disabled:text-foreground disabled:border-border/80"
-              />
-            </div>
-
             <!-- Tanggal Bergabung -->
             <div class="space-y-1.5">
               <label class="text-xs font-semibold text-foreground"
@@ -282,19 +263,59 @@ async function handleSubmit() {
               />
             </div>
 
+            <!-- Jabatan Utama -->
+            <div class="space-y-1.5">
+              <label class="text-xs font-semibold text-foreground"
+                >Jabatan Utama</label
+              >
+              <Input
+                :model-value="data.schoolIdentity.primaryPosition || '-'"
+                disabled
+                class="disabled:opacity-100 disabled:bg-muted/20 disabled:cursor-default disabled:text-foreground disabled:border-border/80"
+              />
+            </div>
+
             <!-- Mata Pelajaran Diampu -->
             <div class="space-y-1.5">
               <label class="text-xs font-semibold text-foreground"
                 >Mata Pelajaran Diampu</label
               >
-              <Input
-                :model-value="
-                  data.schoolIdentity.taughtSubjects ||
-                  'Tidak mengajar kelas spesifik'
-                "
-                disabled
-                class="disabled:opacity-100 disabled:bg-muted/20 disabled:cursor-default disabled:text-foreground disabled:border-border/80"
-              />
+              <div class="space-y-1.5">
+                <template v-if="taughtSubjects.length > 0">
+                  <Input
+                    v-for="(sub, idx) in taughtSubjects"
+                    :key="idx"
+                    :model-value="sub"
+                    disabled
+                    class="disabled:opacity-100 disabled:bg-muted/20 disabled:cursor-default disabled:text-foreground disabled:border-border/80"
+                  />
+                </template>
+                <Input
+                  v-else
+                  model-value="-"
+                  disabled
+                  class="disabled:opacity-100 disabled:bg-muted/20 disabled:cursor-default disabled:text-foreground disabled:border-border/80"
+                />
+              </div>
+            </div>
+
+            <!-- Jabatan Tambahan (Hanya muncul jika ada data) -->
+            <div
+              v-if="additionalPositions.length > 0"
+              class="space-y-1.5 md:col-span-2"
+            >
+              <label class="text-xs font-semibold text-foreground"
+                >Jabatan Tambahan</label
+              >
+              <div class="space-y-1.5">
+                <Input
+                  v-for="(pos, idx) in additionalPositions"
+                  :key="idx"
+                  :model-value="pos"
+                  disabled
+                  class="disabled:opacity-100 disabled:bg-muted/20 disabled:cursor-default disabled:text-foreground disabled:border-border/80"
+                />
+              </div>
             </div>
           </div>
         </div>

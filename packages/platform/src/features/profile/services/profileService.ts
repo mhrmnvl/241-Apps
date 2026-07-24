@@ -113,10 +113,22 @@ export const profileService = {
               .map((sa) => sa.subject?.name)
               .filter(Boolean)
               .join(', ') || '-',
-          className: student?.class?.name ?? '-',
-          gradeLevel: student?.class?.level ?? '-',
-          supervisorName:
-            student?.class?.supervisor?.user?.profile?.name ?? '-',
+          className: (() => {
+            const enroll = student?.enrollments?.[0]
+            return enroll?.classroom?.name || enroll?.classroom?.code || '-'
+          })(),
+          gradeLevel: (() => {
+            const enroll = student?.enrollments?.[0]
+            return enroll?.classroom?.grade?.name || '-'
+          })(),
+          supervisorName: (() => {
+            const enroll = student?.enrollments?.[0]
+            if (!enroll) return '-'
+            const supervisor = enroll.classroom?.classroomSupervisors?.find(
+              (s) => s.semesterId === enroll.semesterId,
+            )
+            return supervisor?.teacher?.user?.profile?.name || '-'
+          })(),
         },
 
         address: primaryAddress

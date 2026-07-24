@@ -34,6 +34,46 @@ export interface SubjectAssignment {
   subject?: { name: string }
 }
 
+export interface AchievementRecord {
+  id?: string
+  name?: string
+  level?: string
+  year?: number
+  description?: string | null
+  type?: { id?: string; name?: string; code?: string }
+}
+
+export interface ScholarshipRecord {
+  id?: string
+  name?: string
+  provider?: string
+  year?: number
+  status?: 'ACTIVE' | 'COMPLETED' | 'REVOKED'
+}
+
+export interface EducationalHistoryRecord {
+  id?: string
+  level?: string
+  institution?: string
+  major?: string | null
+  startYear?: number
+  endYear?: number | null
+  status?: 'GRADUATED' | 'ACTIVE' | 'TRANSFERRED' | 'DROPPED'
+}
+
+export interface TeacherPositionRecord {
+  id?: string
+  teacherId?: string
+  positionId?: string
+  hireDate?: string
+  isPrimary?: boolean
+  position?: {
+    id?: string
+    name?: string
+    category?: { id?: string; code?: string; name?: string }
+  }
+}
+
 export interface ProfileRecord {
   id?: string
   userId?: string
@@ -55,9 +95,9 @@ export interface ProfileRecord {
     platform?: { name?: string; baseUrl?: string }
     username?: string
   }[]
-  achievements?: any[]
-  scholarships?: any[]
-  educationalHistories?: any[]
+  achievements?: AchievementRecord[]
+  scholarships?: ScholarshipRecord[]
+  educationalHistories?: EducationalHistoryRecord[]
 }
 
 export interface TeacherRecord {
@@ -68,7 +108,7 @@ export interface TeacherRecord {
   employmentStatus?: string
   employmentType?: { id: string; code: string; name: string }
   addresses?: AddressRecord[]
-  teacherPositions?: any[]
+  teacherPositions?: TeacherPositionRecord[]
   teachingAssignments?: SubjectAssignment[]
   user?: { role?: string }
 }
@@ -79,11 +119,26 @@ export interface StudentRecord {
   nisn?: string
   userId?: string
   addresses?: AddressRecord[]
-  class?: {
-    name?: string
-    level?: string
-    supervisor?: { user?: { profile?: { name?: string } } }
-  }
+  enrollments?: {
+    id?: string
+    semesterId?: string
+    classroom?: {
+      id?: string
+      code?: string
+      name?: string
+      grade?: { id?: string; level?: number; name?: string } | null
+      classroomSupervisors?: {
+        semesterId?: string
+        teacher?: {
+          user?: {
+            profile?: {
+              name?: string
+            } | null
+          } | null
+        } | null
+      }[]
+    } | null
+  }[]
   parents?: ParentRecord[]
 }
 

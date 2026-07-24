@@ -17,6 +17,7 @@ export const createColumns = (
   {
     id: 'nik',
     header: 'NIK',
+    meta: { align: 'center' },
     cell: ({ row }) => row.original.user?.profile?.nik ?? '-',
     accessorFn: (row) => row.user?.profile?.nik,
   },

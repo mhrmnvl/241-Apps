@@ -20,6 +20,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from '@/ui/dialog'
 
 import PersonalInfoTab from '../components/PersonalInfoTab.vue'
@@ -366,20 +367,22 @@ onMounted(() => {
 
     <!-- Dialog untuk Kelola Foto Profil -->
     <Dialog v-model:open="isPhotoDialogOpen">
-      <DialogContent class="sm:max-w-sm rounded-2xl p-6">
-        <DialogHeader class="items-center text-center">
+      <DialogContent
+        class="sm:max-w-md flex flex-col gap-0 p-0 overflow-hidden"
+      >
+        <DialogHeader class="px-6 py-5 border-b shrink-0 bg-muted/20">
           <DialogTitle>Foto Profil</DialogTitle>
-          <DialogDescription>
-            Ubah atau hapus foto profil Anda saat ini.
+          <DialogDescription class="sr-only">
+            Kelola foto profil Anda saat ini.
           </DialogDescription>
         </DialogHeader>
 
-        <div class="flex flex-col items-center gap-6 py-4">
+        <div class="flex flex-col items-center gap-6 p-6">
           <Avatar class="size-32 border-4 border-primary/10">
             <AvatarImage
               v-if="avatarUrl"
               :src="avatarUrl"
-              :alt="profileData.fullName"
+              :alt="profileData?.fullName ?? ''"
             />
             <AvatarFallback
               class="bg-primary/10 text-4xl font-bold text-primary"
@@ -388,37 +391,56 @@ onMounted(() => {
             </AvatarFallback>
           </Avatar>
 
-          <div class="flex flex-col w-full gap-2">
-            <input
-              id="profile-photo-input"
-              type="file"
-              accept="image/*"
-              class="hidden"
-              :disabled="isUploadingPhoto"
-              @change="handleFileChange"
-            />
-            <Button
-              type="button"
-              class="w-full gap-2 cursor-pointer"
-              :disabled="isUploadingPhoto"
-              @click="triggerPhotoUpload"
-            >
-              <Camera class="size-4" />
-              {{ isUploadingPhoto ? 'Mengunggah...' : 'Unggah Foto Baru' }}
-            </Button>
+          <p class="text-sm text-center text-muted-foreground">
+            Pilih tindakan untuk memperbarui atau menghapus foto profil Anda.
+          </p>
+
+          <input
+            id="profile-photo-input"
+            type="file"
+            accept="image/*"
+            class="hidden"
+            :disabled="isUploadingPhoto"
+            @change="handleFileChange"
+          />
+        </div>
+
+        <DialogFooter
+          class="px-6 py-4 border-t shrink-0 flex sm:justify-between w-full bg-background gap-2"
+        >
+          <Button
+            type="button"
+            variant="outline"
+            class="cursor-pointer"
+            @click="isPhotoDialogOpen = false"
+          >
+            Batal
+          </Button>
+
+          <div class="flex items-center gap-2">
             <Button
               v-if="avatarUrl"
               type="button"
               variant="destructive"
-              class="w-full gap-2 cursor-pointer"
+              class="gap-2 cursor-pointer"
               :disabled="isUploadingPhoto"
               @click="onPhotoDeleteClick"
             >
               <Trash2 class="size-4" />
-              Hapus Foto Saat Ini
+              Hapus Foto
+            </Button>
+
+            <Button
+              type="button"
+              class="gap-2 cursor-pointer"
+              :disabled="isUploadingPhoto"
+              @click="triggerPhotoUpload"
+            >
+              <Camera class="size-4" />
+              {{ isUploadingPhoto ? 'Mengunggah...' : 'Unggah Foto' }}
             </Button>
           </div>
-        </div>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   </AppLayout>

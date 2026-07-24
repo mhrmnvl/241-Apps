@@ -38,9 +38,16 @@ export const USER_DETAIL_SELECT = {
   teacher: {
     include: {
       addresses: { where: { deletedAt: null } },
+      employmentType: true,
       teacherPositions: {
         where: { deletedAt: null },
-        include: { position: true },
+        include: {
+          position: {
+            include: {
+              category: true,
+            },
+          },
+        },
         orderBy: [
           { isPrimary: 'desc' as const },
           { hireDate: 'desc' as const },
@@ -58,7 +65,25 @@ export const USER_DETAIL_SELECT = {
       enrollments: {
         where: { deletedAt: null },
         include: {
-          classroom: true,
+          classroom: {
+            include: {
+              grade: true,
+              classroomSupervisors: {
+                where: { deletedAt: null },
+                include: {
+                  teacher: {
+                    include: {
+                      user: {
+                        include: {
+                          profile: true,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
           semester: { include: { academicYear: true } },
         },
         orderBy: { enrolledAt: 'desc' as const },
