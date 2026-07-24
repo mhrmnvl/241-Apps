@@ -185,7 +185,7 @@ export function setupProfileFeature() {
             showEditEdu.value = val
           },
           editingItem: editingEduItem.value,
-          userId: ctx.userId,
+          userId: ctx.rawProfile?.id ?? '',
           onReload: ctx.reloadProfile,
         }),
       },
@@ -197,7 +197,7 @@ export function setupProfileFeature() {
             showEditAchievement.value = val
           },
           editingItem: editingAchievementItem.value,
-          profileId: ctx.userId,
+          profileId: ctx.rawProfile?.id ?? '',
           onReload: ctx.reloadProfile,
         }),
       },
@@ -209,7 +209,7 @@ export function setupProfileFeature() {
             showEditScholarship.value = val
           },
           editingItem: editingScholarshipItem.value,
-          userId: ctx.userId,
+          userId: ctx.rawProfile?.id ?? '',
           onReload: ctx.reloadProfile,
         }),
       },
