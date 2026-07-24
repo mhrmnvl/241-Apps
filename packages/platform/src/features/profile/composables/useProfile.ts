@@ -17,5 +17,6 @@ export function useProfile() {
     fetchProfileData: profileService.fetchProfileData,
     updateProfile: profileService.updateProfile,
     uploadPhoto: profileService.uploadPhoto,
+    deletePhoto: profileService.deletePhoto,
   }
 }

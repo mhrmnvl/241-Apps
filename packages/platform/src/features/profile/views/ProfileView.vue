@@ -12,7 +12,7 @@ import {
 } from '@/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/tabs'
 import { Button } from '@/ui/button'
-import { Loader2, Camera } from 'lucide-vue-next'
+import { Loader2, Camera, Trash2 } from 'lucide-vue-next'
 import { Avatar, AvatarImage, AvatarFallback } from '@/ui/avatar'
 
 import PersonalInfoTab from '../components/PersonalInfoTab.vue'
@@ -50,6 +50,7 @@ const {
   handleActionClick,
   handleUpdateProfile,
   handlePhotoChange,
+  handlePhotoDelete,
 } = useProfileView()
 
 const { saveAddress } = useAddress()
@@ -159,6 +160,16 @@ onMounted(() => {
                       @click="triggerPhotoUpload"
                     >
                       <Camera class="size-4" />
+                    </button>
+                    <button
+                      v-if="avatarUrl"
+                      type="button"
+                      title="Hapus foto profil"
+                      class="absolute -bottom-1 -left-1 flex size-8 items-center justify-center rounded-full border-2 border-background bg-destructive text-destructive-foreground shadow-sm transition-opacity hover:opacity-90 disabled:opacity-50"
+                      :disabled="isUploadingPhoto"
+                      @click="handlePhotoDelete"
+                    >
+                      <Trash2 class="size-4" />
                     </button>
                   </template>
                 </div>

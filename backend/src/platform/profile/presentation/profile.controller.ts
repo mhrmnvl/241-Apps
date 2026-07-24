@@ -2,6 +2,7 @@ import { RequirePermissions } from '../../access-control/permission/decorators/r
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   ParseEnumPipe,
@@ -35,6 +36,7 @@ import { UpdateProfileDto } from '../dto/request/update-profile.dto.js';
 import { GetProfileUseCase } from '../use-cases/get-profile.use-case.js';
 import { UpdateProfileUseCase } from '../use-cases/update-profile.use-case.js';
 import { UploadProfilePhotoUseCase } from '../use-cases/upload-profile-photo.use-case.js';
+import { DeleteProfilePhotoUseCase } from '../use-cases/delete-profile-photo.use-case.js';
 
 @ApiTags('Profiles')
 @ApiBearerAuth()
@@ -45,6 +47,7 @@ export class ProfileController {
     private readonly getProfileUseCase: GetProfileUseCase,
     private readonly updateProfileUseCase: UpdateProfileUseCase,
     private readonly uploadProfilePhotoUseCase: UploadProfilePhotoUseCase,
+    private readonly deleteProfilePhotoUseCase: DeleteProfilePhotoUseCase,
   ) {}
 
   @Get('me')
@@ -84,6 +87,13 @@ export class ProfileController {
     @Query('appKey', new ParseEnumPipe(AppKey)) appKey: AppKey,
   ) {
     return this.uploadProfilePhotoUseCase.execute(userId, appKey, file);
+  }
+
+  @Delete('me/photo')
+  @ApiOperation({ summary: "Delete current user's profile photo" })
+  @ApiResponse({ status: 200, type: ProfileResponseDto })
+  async deleteOwnPhoto(@CurrentUser('id') userId: string) {
+    return this.deleteProfilePhotoUseCase.execute(userId);
   }
 
   @Get(':userId')

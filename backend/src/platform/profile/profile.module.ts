@@ -12,6 +12,7 @@ import { PrismaProfileSocialMediaRepository } from './infrastructure/persistence
 import { GetProfileUseCase } from './use-cases/get-profile.use-case.js';
 import { UpdateProfileUseCase } from './use-cases/update-profile.use-case.js';
 import { UploadProfilePhotoUseCase } from './use-cases/upload-profile-photo.use-case.js';
+import { DeleteProfilePhotoUseCase } from './use-cases/delete-profile-photo.use-case.js';
 import { AddProfileAddressUseCase } from './use-cases/add-profile-address.use-case.js';
 import { GetProfileAddressesUseCase } from './use-cases/get-profile-addresses.use-case.js';
 import { UpdateProfileAddressUseCase } from './use-cases/update-profile-address.use-case.js';
@@ -42,6 +43,7 @@ import { RemoveProfileSocialMediaUseCase } from './use-cases/remove-profile-soci
     GetProfileUseCase,
     UpdateProfileUseCase,
     UploadProfilePhotoUseCase,
+    DeleteProfilePhotoUseCase,
     AddProfileAddressUseCase,
     GetProfileAddressesUseCase,
     UpdateProfileAddressUseCase,

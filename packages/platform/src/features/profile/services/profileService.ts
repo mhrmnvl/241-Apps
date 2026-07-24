@@ -217,6 +217,41 @@ export const profileService = {
     }
   },
 
+  deletePhoto: async () => {
+    const store = useProfileStore()
+    store.isUploadingPhoto = true
+    try {
+      await profileApi.deleteMyPhoto()
+      const avatar = null
+
+      store.rawProfile = { ...store.rawProfile, avatar }
+      store.profileData = { ...store.profileData, avatar }
+
+      const authStore = useAuthStore()
+      if (authStore.user) {
+        authStore.setUser({
+          ...authStore.user,
+          profile: { ...authStore.user.profile, avatar },
+        })
+      }
+
+      toast.success('Berhasil', {
+        description: 'Foto profil berhasil dihapus',
+      })
+      return { success: true }
+    } catch (err: unknown) {
+      toast.error('Gagal menghapus foto profil', {
+        description: getIndonesianErrorMessage(
+          err,
+          'Terjadi kesalahan saat menghapus foto.',
+        ),
+      })
+      return { success: false }
+    } finally {
+      store.isUploadingPhoto = false
+    }
+  },
+
   fetchSocialMedias: async (params: {
     page: number
     limit: number

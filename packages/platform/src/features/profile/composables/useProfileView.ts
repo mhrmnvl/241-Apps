@@ -33,6 +33,7 @@ export interface ProfileViewReturn {
   handleActionClick: (tabId: string) => void
   handleUpdateProfile: (payload: ProfileUpdatePayload) => Promise<void>
   handlePhotoChange: (file: File) => Promise<void>
+  handlePhotoDelete: () => Promise<void>
 }
 
 export function useProfileView(): ProfileViewReturn {
@@ -57,6 +58,7 @@ export function useProfileView(): ProfileViewReturn {
     fetchProfileData,
     updateProfile,
     uploadPhoto,
+    deletePhoto,
   } = useProfile()
 
   const isOwnProfile = computed(() => !isViewingOther.value)
@@ -170,6 +172,11 @@ export function useProfileView(): ProfileViewReturn {
     if (success) reloadProfile()
   }
 
+  const handlePhotoDelete = async () => {
+    const { success } = await deletePhoto()
+    if (success) reloadProfile()
+  }
+
   return {
     activeTab,
     ...sheets,
@@ -190,5 +197,6 @@ export function useProfileView(): ProfileViewReturn {
     handleActionClick,
     handleUpdateProfile,
     handlePhotoChange,
+    handlePhotoDelete,
   }
 }
