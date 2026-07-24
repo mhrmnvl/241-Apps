@@ -5,6 +5,8 @@ export interface MasterDataTextField {
   required?: boolean
   maxLength?: number
   placeholder?: string
+  /** Editable on create; rendered read-only and dropped from the update payload once a record exists. */
+  readOnlyOnEdit?: boolean
 }
 
 export interface MasterDataBooleanField {

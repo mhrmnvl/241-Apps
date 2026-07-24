@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { buildFieldSchema, buildInitialValues } from './buildFieldSchema'
+import {
+  buildFieldSchema,
+  buildInitialValues,
+  omitReadOnlyOnEditFields,
+} from './buildFieldSchema'
 import type { MasterDataField } from '../types/config'
 
 const fields: MasterDataField[] = [
@@ -57,5 +61,39 @@ describe('buildInitialValues', () => {
       name: '',
       isActive: true,
     })
+  })
+})
+
+describe('omitReadOnlyOnEditFields', () => {
+  const fieldsWithReadOnlyCode: MasterDataField[] = [
+    {
+      key: 'code',
+      kind: 'text',
+      label: 'Kode',
+      required: true,
+      readOnlyOnEdit: true,
+    },
+    { key: 'name', kind: 'text', label: 'Nama', required: true },
+    { key: 'isActive', kind: 'boolean', label: 'Status', default: true },
+  ]
+
+  it('drops fields marked readOnlyOnEdit from the payload', () => {
+    const payload = omitReadOnlyOnEditFields(fieldsWithReadOnlyCode, {
+      code: 'SMA',
+      name: 'Sekolah Menengah Atas',
+      isActive: true,
+    })
+
+    expect(payload).toEqual({ name: 'Sekolah Menengah Atas', isActive: true })
+  })
+
+  it('keeps every field when none are marked readOnlyOnEdit', () => {
+    const payload = omitReadOnlyOnEditFields(fields, {
+      code: 'ABC',
+      name: 'ok',
+      isActive: true,
+    })
+
+    expect(payload).toEqual({ code: 'ABC', name: 'ok', isActive: true })
   })
 })
