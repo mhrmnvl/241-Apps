@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import ImportExportDialog from '../components/ImportExportDialog.vue'
-import ImportPreviewDialog from '../components/ImportPreviewDialog.vue'
 import { createColumns } from '../components/columns'
+import { ImportPreviewDialog } from '@/features/academic/shared/import-preview'
+import { studentImportColumns } from '../importPreviewColumns'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { DataTable } from '@/ui'
 import { formatEntityName } from '@/shared/utils/utils'
@@ -406,7 +407,8 @@ onMounted(async () => {
 
     <ImportPreviewDialog
       v-model:open="isConflictDialogOpen"
-      :conflicts="conflictRows"
+      :rows="conflictRows"
+      :columns="studentImportColumns"
       :loading="isResolvingConflicts"
       @resolve="handleResolveConflicts"
     />
