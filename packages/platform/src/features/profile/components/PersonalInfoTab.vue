@@ -12,6 +12,7 @@ import {
 } from '@/ui/select'
 import { religionApi } from '@/features/platform/religion/api/religionApi'
 import { bloodTypeApi } from '@/features/platform/blood-type/api/bloodTypeApi'
+import { DatePicker } from '@/ui'
 import type {
   ProfileDisplayData,
   UserGender,
@@ -229,12 +230,9 @@ function handleSubmit() {
                   >*</span
                 >
               </label>
-              <Input
+              <DatePicker
                 v-model="form.birthDate"
-                type="date"
                 :disabled="!isEditable"
-                class="disabled:opacity-100 disabled:bg-muted/20 disabled:cursor-default disabled:text-foreground disabled:border-border/80"
-                required
               />
             </div>
 
