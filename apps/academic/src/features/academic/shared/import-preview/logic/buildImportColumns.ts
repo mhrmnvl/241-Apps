@@ -111,13 +111,18 @@ export function buildImportColumns<TData>(
     id: 'identifier',
     header: 'Identifier',
     meta: { align: 'center' },
-    cell: ({ row }) =>
-      renderCellWithError(
+    cell: ({ row }) => {
+      // An empty-string identifier counts as missing here, so it must fall
+      // through to the row-level identifier -- not just a `??` default.
+      const resolvedIdentifier = dataOf(row.original)?.identifier
+      const identifierIsMissing =
+        resolvedIdentifier === undefined || resolvedIdentifier === ''
+      return renderCellWithError(
         row.original,
         IDENTIFIER_ERROR_ALIASES,
-
-        dataOf(row.original)?.identifier || row.original.identifier,
-      ),
+        identifierIsMissing ? row.original.identifier : resolvedIdentifier,
+      )
+    },
   }
 
   const dataColumns: ColumnDef<ImportPreviewRow<TData>>[] = descriptors.map(
