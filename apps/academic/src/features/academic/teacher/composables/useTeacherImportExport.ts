@@ -84,7 +84,7 @@ export function useTeacherImportExport(options: {
 
   async function handleResolveConflicts(
     decisions: {
-      existingId: string
+      existingId?: string
       action: 'update' | 'skip'
       data: NonNullable<BulkImportRowResult['data']>
     }[],

@@ -197,7 +197,7 @@ export interface BulkImportResult {
 }
 
 export interface ResolveBulkImportConflict {
-  existingId: string
+  existingId?: string
   action: 'update' | 'skip'
   data: BulkImportTeacherRow
 }
