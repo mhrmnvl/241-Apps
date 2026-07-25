@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import ImportExportDialog from '../components/ImportExportDialog.vue'
 import { createColumns } from '../components/columns'
 import { ImportPreviewDialog } from '@/features/academic/shared/import-preview'
 import { studentImportColumns } from '../importPreviewColumns'
+import { ImportExportDialog } from '@/features/academic/shared/import-export'
+import { studentImportExportLabels } from '../importExportLabels'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { DataTable } from '@/ui'
 import { formatEntityName } from '@/shared/utils/utils'
@@ -400,6 +401,7 @@ onMounted(async () => {
       v-if="can('students.create')"
       v-model:open="isImportExportOpen"
       :is-processing="isImporting"
+      :labels="studentImportExportLabels"
       @download-template="downloadTemplate"
       @export-data="exportData"
       @import-data="handleFileUpload"

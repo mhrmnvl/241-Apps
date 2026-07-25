@@ -34,9 +34,10 @@ import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { createColumns } from '../components/columns'
 import TeacherFormDialog from '../components/TeacherFormDialog.vue'
-import ImportExportTeacherDialog from '../components/ImportExportTeacherDialog.vue'
 import { ImportPreviewDialog } from '@/features/academic/shared/import-preview'
 import { teacherImportColumns } from '../importPreviewColumns'
+import { ImportExportDialog } from '@/features/academic/shared/import-export'
+import { teacherImportExportLabels } from '../importExportLabels'
 import { useTeacher } from '../composables/useTeacher'
 import { useTeacherImportExport } from '../composables/useTeacherImportExport'
 import type {
@@ -494,10 +495,11 @@ onMounted(() => {
       @save-position="handleSavePosition"
     />
 
-    <ImportExportTeacherDialog
+    <ImportExportDialog
       v-if="can('teachers.create')"
       v-model:open="isImportExportOpen"
       :is-processing="isImporting"
+      :labels="teacherImportExportLabels"
       @download-template="downloadTemplate"
       @export-data="exportData"
       @import-data="handleFileUpload"

@@ -19,10 +19,14 @@ import {
   XCircle,
 } from 'lucide-vue-next'
 import { computed, ref, watch } from 'vue'
+import type { ImportExportLabels } from '../types'
+import { formatSize } from '../logic/formatSize'
+import { isValidExcelFile } from '../logic/isValidExcelFile'
 
 const props = defineProps<{
   open: boolean
   isProcessing: boolean
+  labels: ImportExportLabels
 }>()
 
 const emit = defineEmits<{
@@ -77,11 +81,7 @@ function onFileChange(e: Event) {
 }
 
 function handleFileSelect(file: File) {
-  if (
-    file.type ===
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
-    file.name.endsWith('.xlsx')
-  ) {
+  if (isValidExcelFile(file)) {
     selectedFile.value = file
   } else {
     alert(
@@ -101,14 +101,6 @@ function handleImport() {
   if (selectedFile.value) {
     emit('importData', selectedFile.value)
   }
-}
-
-function formatSize(bytes: number) {
-  if (bytes === 0) return '0 B'
-  const k = 1024
-  const sizes = ['B', 'KB', 'MB', 'GB']
-  const i = Math.floor(Math.log(bytes) / Math.log(k))
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
 }
 
 function handleDialogClose() {
@@ -141,7 +133,7 @@ watch(
           Manajemen Data Excel
         </DialogTitle>
         <DialogDescription class="sr-only">
-          Dialog untuk mengelola data siswa melalui impor dan ekspor file Excel.
+          {{ labels.dialogDescription }}
         </DialogDescription>
       </DialogHeader>
 
@@ -150,7 +142,7 @@ watch(
         class="w-full px-6 pb-4"
       >
         <TabsList class="grid w-full grid-cols-2">
-          <TabsTrigger value="import"> Import Siswa </TabsTrigger>
+          <TabsTrigger value="import">{{ labels.importTabLabel }}</TabsTrigger>
           <TabsTrigger value="export"> Export Data </TabsTrigger>
         </TabsList>
 
@@ -281,12 +273,11 @@ watch(
               >
                 <Inbox class="size-6" />
               </div>
-              <h3 class="font-medium">Export Detail Siswa</h3>
+              <h3 class="font-medium">{{ labels.exportHeading }}</h3>
               <p
                 class="text-xs text-muted-foreground leading-relaxed max-w-[300px] mx-auto"
               >
-                Semua data siswa yang muncul di tabel saat ini (berdasarkan
-                filter tingkat & kelas) akan diekspor ke dalam format Excel.
+                {{ labels.exportDescription }}
               </p>
             </div>
 
