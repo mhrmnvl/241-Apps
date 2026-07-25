@@ -2,12 +2,23 @@ import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
 import { toast } from 'vue-sonner'
 import { positionCategoryApi } from '../api/positionCategoryApi'
 import type {
+  PositionCategory,
   PositionCategoryCreatePayload,
   PositionCategoryUpdatePayload,
-  PositionCategoryQuery,
 } from '../types'
 
 export const positionCategoryService = {
+  getPositionCategories: async (): Promise<PositionCategory[]> => {
+    try {
+      const res = await positionCategoryApi.getPositionCategories({
+        limit: 100,
+      })
+      return res.data.data
+    } catch {
+      return []
+    }
+  },
+
   createPositionCategory: async (payload: PositionCategoryCreatePayload) => {
     try {
       await positionCategoryApi.createPositionCategory(payload)
@@ -57,15 +68,6 @@ export const positionCategoryService = {
       return false
     } finally {
       if (callbacks) callbacks.setLoading(false)
-    }
-  },
-
-  fetchPositionCategories: async (params?: PositionCategoryQuery) => {
-    const res = await positionCategoryApi.getPositionCategories(params)
-    const envelope = res.data
-    return {
-      data: envelope?.data ?? [],
-      meta: envelope?.meta ?? { page: 1, limit: 10, total: 0, totalPages: 0 },
     }
   },
 }

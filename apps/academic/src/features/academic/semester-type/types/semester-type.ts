@@ -20,11 +20,3 @@ export interface SemesterTypeQuery {
   search?: string
   isActive?: boolean
 }
-
-export interface SemesterTypeColumnActions {
-  onEdit?: (item: SemesterType) => void
-  onDelete?: (
-    item: SemesterType,
-    callbacks: { onSuccess: () => void; onError: (msg: string) => void },
-  ) => void
-}

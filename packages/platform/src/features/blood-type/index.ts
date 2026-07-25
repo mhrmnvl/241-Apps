@@ -1,5 +1,4 @@
 export * from './types'
 export * from './api/bloodTypeApi'
 export * from './services/bloodTypeService'
-export * from './composables/useBloodType'
 export * from './routes'

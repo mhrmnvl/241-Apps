@@ -4,7 +4,6 @@ import { semesterTypeApi } from '../api/semesterTypeApi'
 import type {
   SemesterType,
   SemesterTypeCreatePayload,
-  SemesterTypeQuery,
   SemesterTypeUpdatePayload,
 } from '../types'
 
@@ -67,15 +66,6 @@ export const semesterTypeService = {
       return false
     } finally {
       if (callbacks) callbacks.setLoading(false)
-    }
-  },
-
-  fetchSemesterTypes: async (params?: SemesterTypeQuery) => {
-    const res = await semesterTypeApi.getSemesterTypes(params)
-    const envelope = res.data
-    return {
-      data: envelope?.data ?? [],
-      meta: envelope?.meta ?? { page: 1, limit: 10, total: 0, totalPages: 0 },
     }
   },
 }

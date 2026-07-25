@@ -20,15 +20,3 @@ export interface AchievementTypeQuery {
   search?: string
   isActive?: boolean
 }
-
-export interface AchievementTypeColumnActions {
-  showActions?: boolean
-  onEdit?: (item: AchievementType) => void
-  onDelete?: (
-    item: AchievementType,
-    callbacks: {
-      closeAlert: () => void
-      setLoading: (state: boolean) => void
-    },
-  ) => void
-}

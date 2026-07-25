@@ -5,7 +5,6 @@ import type {
   AcademicCalendarType,
   AcademicCalendarTypeCreatePayload,
   AcademicCalendarTypeUpdatePayload,
-  AcademicCalendarTypeQuery,
 } from '../types'
 
 export const academicCalendarTypeService = {
@@ -71,15 +70,6 @@ export const academicCalendarTypeService = {
       return false
     } finally {
       if (callbacks) callbacks.setLoading(false)
-    }
-  },
-
-  fetchAcademicCalendarTypes: async (params?: AcademicCalendarTypeQuery) => {
-    const res = await academicCalendarTypeApi.getAcademicCalendarTypes(params)
-    const envelope = res.data
-    return {
-      data: envelope?.data ?? [],
-      meta: envelope?.meta ?? { page: 1, limit: 10, total: 0, totalPages: 0 },
     }
   },
 }

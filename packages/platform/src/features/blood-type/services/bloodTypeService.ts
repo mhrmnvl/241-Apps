@@ -5,7 +5,6 @@ import type {
   BloodType,
   BloodTypeCreatePayload,
   BloodTypeUpdatePayload,
-  BloodTypeQuery,
 } from '../types'
 
 export const bloodTypeService = {
@@ -64,15 +63,6 @@ export const bloodTypeService = {
       return false
     } finally {
       if (callbacks) callbacks.setLoading(false)
-    }
-  },
-
-  fetchBloodTypes: async (params?: BloodTypeQuery) => {
-    const res = await bloodTypeApi.getBloodTypes(params)
-    const envelope = res.data
-    return {
-      data: envelope?.data ?? [],
-      meta: envelope?.meta ?? { page: 1, limit: 10, total: 0, totalPages: 0 },
     }
   },
 }

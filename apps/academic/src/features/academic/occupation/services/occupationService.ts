@@ -2,12 +2,21 @@ import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
 import { toast } from 'vue-sonner'
 import { occupationApi } from '../api/occupationApi'
 import type {
+  Occupation,
   OccupationCreatePayload,
   OccupationUpdatePayload,
-  OccupationQuery,
 } from '../types'
 
 export const occupationService = {
+  getOccupations: async (): Promise<Occupation[]> => {
+    try {
+      const res = await occupationApi.getOccupations({ limit: 100 })
+      return res.data.data
+    } catch {
+      return []
+    }
+  },
+
   createOccupation: async (payload: OccupationCreatePayload) => {
     try {
       await occupationApi.createOccupation(payload)
@@ -54,15 +63,6 @@ export const occupationService = {
       return false
     } finally {
       if (callbacks) callbacks.setLoading(false)
-    }
-  },
-
-  fetchOccupations: async (params?: OccupationQuery) => {
-    const res = await occupationApi.getOccupations(params)
-    const envelope = res.data
-    return {
-      data: envelope?.data ?? [],
-      meta: envelope?.meta ?? { page: 1, limit: 10, total: 0, totalPages: 0 },
     }
   },
 }

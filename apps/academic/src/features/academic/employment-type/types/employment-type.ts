@@ -19,15 +19,3 @@ export interface EmploymentTypeQuery {
   limit?: number
   search?: string
 }
-
-export interface EmploymentTypeColumnActions {
-  showActions?: boolean
-  onEdit?: (item: EmploymentType) => void
-  onDelete?: (
-    item: EmploymentType,
-    callbacks: {
-      closeAlert: () => void
-      setLoading: (state: boolean) => void
-    },
-  ) => void
-}

@@ -20,15 +20,3 @@ export interface AcademicCalendarTypeQuery {
   search?: string
   isActive?: boolean
 }
-
-export interface AcademicCalendarTypeColumnActions {
-  showActions?: boolean
-  onEdit?: (item: AcademicCalendarType) => void
-  onDelete?: (
-    item: AcademicCalendarType,
-    callbacks: {
-      closeAlert: () => void
-      setLoading: (state: boolean) => void
-    },
-  ) => void
-}

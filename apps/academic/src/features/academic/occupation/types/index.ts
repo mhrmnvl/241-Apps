@@ -5,5 +5,3 @@ export type {
   OccupationUpdatePayload,
   OccupationQuery,
 } from './payloads'
-
-export type { OccupationColumnActions } from './columns'

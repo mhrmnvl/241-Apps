@@ -18,15 +18,3 @@ export interface PositionCategoryQuery {
   limit?: number
   search?: string
 }
-
-export interface PositionCategoryColumnActions {
-  showActions?: boolean
-  onEdit?: (item: PositionCategory) => void
-  onDelete?: (
-    item: PositionCategory,
-    callbacks: {
-      closeAlert: () => void
-      setLoading: (state: boolean) => void
-    },
-  ) => void
-}
