@@ -35,7 +35,8 @@ import { toast } from 'vue-sonner'
 import { createColumns } from '../components/columns'
 import TeacherFormDialog from '../components/TeacherFormDialog.vue'
 import ImportExportTeacherDialog from '../components/ImportExportTeacherDialog.vue'
-import ImportPreviewDialog from '../components/ImportPreviewDialog.vue'
+import { ImportPreviewDialog } from '@/features/academic/shared/import-preview'
+import { teacherImportColumns } from '../importPreviewColumns'
 import { useTeacher } from '../composables/useTeacher'
 import { useTeacherImportExport } from '../composables/useTeacherImportExport'
 import type {
@@ -504,7 +505,8 @@ onMounted(() => {
 
     <ImportPreviewDialog
       v-model:open="isConflictDialogOpen"
-      :conflicts="conflictRows"
+      :rows="conflictRows"
+      :columns="teacherImportColumns"
       :loading="isResolvingConflicts"
       @resolve="handleResolveConflicts"
     />
