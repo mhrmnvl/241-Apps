@@ -66,38 +66,12 @@ export function useStudentImportExport(options: {
         return
       }
 
-      const conflicts = result.results.filter(
-        (r) => r.status === 'CONFLICT' || r.status === 'FAILED',
-      )
-
-      const parts: string[] = []
-      if (result.success > 0)
-        parts.push(`${result.success} berhasil ditambahkan`)
-      const failedCount = result.results.filter(
-        (r) => r.status === 'FAILED',
-      ).length
-      const conflictCount = result.results.filter(
-        (r) => r.status === 'CONFLICT',
-      ).length
-      if (failedCount > 0) parts.push(`${failedCount} gagal`)
-      if (conflictCount > 0) parts.push(`${conflictCount} sudah terdaftar`)
-
-      if (conflicts.length === 0) {
-        const summary = `Import selesai: ${parts.join(', ')} dari ${result.total} baris.`
-        if (result.success === 0 && failedCount > 0 && conflictCount === 0) {
-          toast.error(summary, { duration: 8000 })
-        } else if (failedCount > 0 || conflictCount > 0) {
-          toast.warning(summary, { duration: 6000 })
-        } else {
-          toast.success(summary)
-        }
-      }
-
       conflictRows.value = result.results
       isImportExportOpen.value = false
       isConflictDialogOpen.value = true
 
-      if (result.success > 0 || (failedCount === 0 && conflictCount === 0)) {
+      const hasSuccess = result.results.some((r) => r.status === 'SUCCESS')
+      if (result.success > 0 || hasSuccess) {
         options.onImportSuccess()
       }
     } catch (err) {

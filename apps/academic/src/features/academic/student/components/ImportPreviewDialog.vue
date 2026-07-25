@@ -85,17 +85,10 @@ const summary = computed(() => {
 
 function handleApply() {
   const decisions: Parameters<typeof emit>[1] = props.conflicts
-    .filter(
-      (row) =>
-        (row.status === 'CONFLICT' && row.existingId && row.data) ||
-        (row.status === 'SUCCESS' && row.data),
-    )
+    .filter((row) => row.status === 'CONFLICT' && row.existingId && row.data)
     .map((row) => ({
-      existingId: row.existingId || '',
-      action:
-        row.status === 'SUCCESS'
-          ? 'update'
-          : (actions.value[row.row] ?? 'skip'),
+      existingId: row.existingId!,
+      action: actions.value[row.row] ?? 'skip',
       data: row.data!,
     }))
   emit('resolve', decisions)
