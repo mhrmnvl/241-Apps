@@ -28,9 +28,7 @@ const router = createRouter({
       path: '/setting/general',
       name: 'setting-general',
       component: () =>
-        import('@/features/platform/settings').then((m) => ({
-          default: m.AppSettingsView,
-        })),
+        import('@/features/platform/settings/views/AppSettingsView.vue'),
       props: { appKey: 'ADMISSION', menuSections },
       meta: {
         requiresAuth: true,
@@ -52,9 +50,7 @@ const router = createRouter({
       path: '/:pathMatch(.*)*',
       name: 'not-found',
       component: () =>
-        import('@/features/platform/auth').then((m) => ({
-          default: m.NotFoundView,
-        })),
+        import('@/features/platform/auth/views/NotFoundView.vue'),
       meta: { title: 'Halaman Tidak Ditemukan' },
     },
   ],
@@ -132,8 +128,8 @@ router.beforeEach((to) => {
 })
 
 router.afterEach((to) => {
-  const title = to.meta.title as string | undefined
-  if (title) document.title = title
+  const title = to.meta.title
+  if (typeof title === 'string') document.title = title
 })
 
 export default router

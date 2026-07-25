@@ -201,8 +201,8 @@ router.beforeEach((to) => {
 })
 
 router.afterEach((to) => {
-  const title = to.meta.title as string | undefined
-  if (title) document.title = title
+  const title = to.meta.title
+  if (typeof title === 'string') document.title = title
 })
 
 export default router

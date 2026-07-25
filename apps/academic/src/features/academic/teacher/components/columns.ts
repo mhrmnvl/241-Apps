@@ -142,7 +142,7 @@ export const createAccountColumns = (
               deleteDescription: `Yakin ingin menghapus akun "${teacher.user?.identifier || ''}"? Tindakan ini tidak dapat dibatalkan.`,
               onManage: () => {
                 if (actions.onToggleActive)
-                  actions.onToggleActive(teacher, !isActive)
+                  void actions.onToggleActive(teacher, !isActive)
               },
               onDelete: (callbacks: {
                 closeAlert: () => void
