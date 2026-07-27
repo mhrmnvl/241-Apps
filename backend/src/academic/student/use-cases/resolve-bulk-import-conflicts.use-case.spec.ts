@@ -164,6 +164,33 @@ describe('ResolveBulkImportConflictsUseCase', () => {
       expect(result).toEqual({ total: 1, updated: 1, skipped: 0, errors: [] });
     });
 
+    it('looks up a repeated classroom code only once across conflicts', async () => {
+      mockClassroomRepo.findByCode.mockResolvedValue({ id: 'cls-2' });
+      mockCreateStudent.execute.mockResolvedValue({ id: 'stu-new' });
+
+      const dto: ResolveBulkImportConflictsDto = {
+        conflicts: [
+          {
+            existingId: 'stu-1',
+            action: 'update',
+            data: makeRow({ classroomCode: 'VIII-B' }) as never,
+          },
+          {
+            action: 'update',
+            data: makeRow({
+              nis: '2024002',
+              nisn: '0012345679',
+              classroomCode: 'VIII-B',
+            }) as never,
+          },
+        ],
+      };
+
+      await useCase.execute(dto);
+
+      expect(mockClassroomRepo.findByCode).toHaveBeenCalledTimes(1);
+    });
+
     it('records the error and continues when ensuring enrollment fails, instead of swallowing it', async () => {
       mockClassroomRepo.findByCode.mockResolvedValue({ id: 'cls-2' });
       mockEnsureStudentEnrollment.execute.mockRejectedValue(

@@ -25,11 +25,40 @@ export class BulkImportStudentsUseCase {
 
   async execute(buffer: Buffer): Promise<BulkImportStudentsResponseDto> {
     const rows = await this.excelParser.parse(buffer);
+    const dtos = rows.map((row) =>
+      plainToInstance(BulkImportStudentRowDto, row),
+    );
+
+    const uniqueGrades = [
+      ...new Set(dtos.map((d) => d.grade).filter((g): g is number => !!g)),
+    ];
+    const uniqueClassroomCodes = [
+      ...new Set(
+        dtos.map((d) => d.classroomCode).filter((c): c is string => !!c),
+      ),
+    ];
+    const [gradeEntries, classroomEntries] = await Promise.all([
+      Promise.all(
+        uniqueGrades.map(
+          async (level) =>
+            [level, await this.gradeRepo.findByLevel(level)] as const,
+        ),
+      ),
+      Promise.all(
+        uniqueClassroomCodes.map(
+          async (code) =>
+            [code, await this.classroomRepo.findByCode(code)] as const,
+        ),
+      ),
+    ]);
+    const gradeByLevel = new Map(gradeEntries);
+    const classroomByCode = new Map(classroomEntries);
+
     const results: BulkImportRowResultDto[] = [];
 
-    for (let i = 0; i < rows.length; i++) {
+    for (let i = 0; i < dtos.length; i++) {
       const rowNumber = i + 2;
-      const dto = plainToInstance(BulkImportStudentRowDto, rows[i]);
+      const dto = dtos[i];
 
       const [dupNis, dupNisn] = await Promise.all([
         dto.nis ? this.repo.findByNis(dto.nis) : null,
@@ -65,7 +94,7 @@ export class BulkImportStudentsUseCase {
       try {
         let resolvedGradeId: string | undefined;
         if (dto.grade) {
-          const level = await this.gradeRepo.findByLevel(dto.grade);
+          const level = gradeByLevel.get(dto.grade);
           if (!level) {
             results.push({
               row: rowNumber,
@@ -81,9 +110,7 @@ export class BulkImportStudentsUseCase {
 
         let resolvedClassroomId: string | undefined;
         if (dto.classroomCode) {
-          const classroom = await this.classroomRepo.findByCode(
-            dto.classroomCode,
-          );
+          const classroom = classroomByCode.get(dto.classroomCode);
           if (!classroom) {
             results.push({
               row: rowNumber,

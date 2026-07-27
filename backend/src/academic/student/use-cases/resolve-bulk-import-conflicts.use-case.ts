@@ -24,6 +24,37 @@ export class ResolveBulkImportConflictsUseCase {
   async execute(
     dto: ResolveBulkImportConflictsDto,
   ): Promise<ResolveBulkImportResponseDto> {
+    const uniqueGrades = [
+      ...new Set(
+        dto.conflicts
+          .map((item) => item.data.grade)
+          .filter((g): g is number => !!g),
+      ),
+    ];
+    const uniqueClassroomCodes = [
+      ...new Set(
+        dto.conflicts
+          .map((item) => item.data.classroomCode)
+          .filter((c): c is string => !!c),
+      ),
+    ];
+    const [gradeEntries, classroomEntries] = await Promise.all([
+      Promise.all(
+        uniqueGrades.map(
+          async (level) =>
+            [level, await this.gradeRepo.findByLevel(level)] as const,
+        ),
+      ),
+      Promise.all(
+        uniqueClassroomCodes.map(
+          async (code) =>
+            [code, await this.classroomRepo.findByCode(code)] as const,
+        ),
+      ),
+    ]);
+    const gradeByLevel = new Map(gradeEntries);
+    const classroomByCode = new Map(classroomEntries);
+
     let updated = 0;
     let skipped = 0;
     const errors: { existingId: string; error: string }[] = [];
@@ -35,19 +66,12 @@ export class ResolveBulkImportConflictsUseCase {
       }
 
       try {
-        let gradeId: string | undefined;
-        if (item.data.grade) {
-          const grade = await this.gradeRepo.findByLevel(item.data.grade);
-          gradeId = grade?.id;
-        }
-
-        let classroomId: string | undefined;
-        if (item.data.classroomCode) {
-          const classroom = await this.classroomRepo.findByCode(
-            item.data.classroomCode,
-          );
-          classroomId = classroom?.id;
-        }
+        const gradeId = item.data.grade
+          ? gradeByLevel.get(item.data.grade)?.id
+          : undefined;
+        const classroomId = item.data.classroomCode
+          ? classroomByCode.get(item.data.classroomCode)?.id
+          : undefined;
 
         if (!item.existingId) {
           // classroomId is passed through; CreateStudentUseCase itself calls

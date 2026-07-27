@@ -21,6 +21,21 @@ export class ResolveBulkImportConflictsUseCase {
   async execute(
     dto: ResolveBulkImportConflictsDto,
   ): Promise<ResolveBulkImportResponseDto> {
+    const uniqueEmploymentTypeCodes = [
+      ...new Set(
+        dto.conflicts
+          .map((item) => item.data.employmentTypeCode)
+          .filter(Boolean),
+      ),
+    ];
+    const employmentTypeEntries = await Promise.all(
+      uniqueEmploymentTypeCodes.map(
+        async (code) =>
+          [code, await this.repo.resolveEmploymentTypeId(code)] as const,
+      ),
+    );
+    const employmentTypeIdByCode = new Map(employmentTypeEntries);
+
     let updated = 0;
     let skipped = 0;
     const errors: { existingId: string; error: string }[] = [];
@@ -32,9 +47,9 @@ export class ResolveBulkImportConflictsUseCase {
       }
 
       try {
-        const employmentTypeId = await this.repo.resolveEmploymentTypeId(
+        const employmentTypeId = employmentTypeIdByCode.get(
           item.data.employmentTypeCode,
-        );
+        ) as string;
 
         if (!item.existingId) {
           const createDto: CreateTeacherDto = {

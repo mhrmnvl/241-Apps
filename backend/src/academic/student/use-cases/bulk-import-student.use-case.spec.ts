@@ -208,6 +208,24 @@ describe('BulkImportStudentsUseCase', () => {
       expect(result.results[0].error).toBe('Database connection lost');
     });
 
+    it('should look up a repeated classroom code only once across rows', async () => {
+      mockClassroomRepo.findByCode.mockResolvedValue({
+        id: 'cls-1',
+        code: 'VII-A',
+        gradeId: 'lvl-7',
+      });
+      mockStudentRepo.findByNis.mockResolvedValue(null);
+      mockStudentRepo.findByNisn.mockResolvedValue(null);
+      mockCreateStudent.execute.mockResolvedValue({ id: 'stu-1' });
+
+      const row2 = { ...validRow, NIS: '2024002', NISN: '0012345679' };
+      const buffer = await makeExcelBuffer([validRow, row2]);
+      const result = await useCase.execute(buffer);
+
+      expect(result.success).toBe(2);
+      expect(mockClassroomRepo.findByCode).toHaveBeenCalledTimes(1);
+    });
+
     it('should correctly number rows starting at 2 (row 1 = header)', async () => {
       const ppdbRow = { ...validRow, Kelas: '' };
       mockStudentRepo.findByNis.mockResolvedValue(null);

@@ -223,6 +223,27 @@ describe('BulkImportTeachersUseCase', () => {
       expect(result.results[1].status).toBe('FAILED');
     });
 
+    it('should resolve a repeated employment type code only once across rows', async () => {
+      const row2 = {
+        ...validRow,
+        identifier: 'guru002',
+        nik: '9999000000000002',
+        nip: '999',
+        nuptk: '9999999999999999',
+      };
+      mockRepo.findUserByIdentifier.mockResolvedValue(null);
+      mockRepo.findProfileByNik.mockResolvedValue(null);
+      mockRepo.findByNip.mockResolvedValue(null);
+      mockRepo.findByNuptk.mockResolvedValue(null);
+      mockCreateTeacher.execute.mockResolvedValue({ id: 'emp-1' });
+
+      const buffer = await makeExcelBuffer([validRow, row2]);
+      const result = await useCase.execute(buffer);
+
+      expect(result.success).toBe(2);
+      expect(mockRepo.resolveEmploymentTypeId).toHaveBeenCalledTimes(1);
+    });
+
     it('should correctly number rows starting at 2 (row 1 = header)', async () => {
       mockRepo.findUserByIdentifier.mockResolvedValue(null);
       mockRepo.findProfileByNik.mockResolvedValue(null);
