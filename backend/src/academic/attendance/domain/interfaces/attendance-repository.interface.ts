@@ -37,6 +37,12 @@ export interface AttendanceRecap {
   percentage: number;
 }
 
+export interface AttendanceStatusCounts {
+  sick: number;
+  excused: number;
+  absent: number;
+}
+
 export interface AttendanceMonthlyTrendPoint {
   year: number;
   /** 1-12. */
@@ -99,6 +105,10 @@ export abstract class IAttendanceRepository {
   ): Promise<{ saved: number }>;
 
   abstract getRecap(query: AttendanceRecapQueryDto): Promise<AttendanceRecap[]>;
+
+  abstract getStatusCounts(
+    enrollmentId: string,
+  ): Promise<AttendanceStatusCounts>;
 
   abstract getMonthlyTrend(
     query: AttendanceTrendQueryDto,

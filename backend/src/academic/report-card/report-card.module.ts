@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { EnrollmentModule } from '../enrollment/enrollment.module.js';
 import { AssessmentModule } from '../assessment/assessment.module.js';
+import { AttendanceModule } from '../attendance/attendance.module.js';
 import { SchoolUnitModule } from '../../platform/school-unit/school-unit.module.js';
 import { ReportCardController } from './presentation/report-card.controller.js';
 import { PrismaReportCardRepository } from './infrastructure/persistence/prisma-report-card.repository.js';
@@ -15,7 +16,12 @@ import { ExportReportCardPdfUseCase } from './use-cases/export-report-card-pdf.u
 import { IReportCardRepository } from './domain/interfaces/report-card-repository.interface.js';
 
 @Module({
-  imports: [AssessmentModule, EnrollmentModule, SchoolUnitModule],
+  imports: [
+    AssessmentModule,
+    EnrollmentModule,
+    AttendanceModule,
+    SchoolUnitModule,
+  ],
   controllers: [ReportCardController],
   providers: [
     {

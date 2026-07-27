@@ -25,12 +25,32 @@ export type StudentScoreWithDetails = Prisma.StudentScoreGetPayload<{
   include: typeof STUDENT_SCORE_INCLUDE;
 }>;
 
+export const REPORT_CARD_SCORE_INCLUDE = {
+  assessmentItem: {
+    include: {
+      teachingAssignment: {
+        include: {
+          subject: true,
+        },
+      },
+    },
+  },
+} satisfies Prisma.StudentScoreInclude;
+
+export type ReportCardScoreRow = Prisma.StudentScoreGetPayload<{
+  include: typeof REPORT_CARD_SCORE_INCLUDE;
+}>;
+
 export abstract class IStudentScoresRepository {
   abstract findAll(
     query: StudentScoreQueryDto,
   ): Promise<PaginatedResult<StudentScoreWithDetails>>;
 
   abstract findById(id: string): Promise<StudentScoreWithDetails | null>;
+
+  abstract findAllForReportCard(
+    enrollmentId: string,
+  ): Promise<ReportCardScoreRow[]>;
 
   abstract findDuplicate(
     enrollmentId: string,
