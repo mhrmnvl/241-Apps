@@ -10,6 +10,7 @@ import { DeleteTeacherUseCase } from '../use-cases/delete-teacher.use-case.js';
 import { ExportTeachersUseCase } from '../use-cases/export-teacher.use-case.js';
 import { GetTeacherByIdUseCase } from '../use-cases/get-teacher-by-id.use-case.js';
 import { GetTeachersUseCase } from '../use-cases/get-teachers.use-case.js';
+import { ResolveBulkImportConflictsUseCase } from '../use-cases/resolve-bulk-import-conflicts.use-case.js';
 import { ToggleTeacherActiveUseCase } from '../use-cases/toggle-teacher-active.use-case.js';
 import { UpdateTeacherProfileUseCase } from '../use-cases/update-teacher-profile.use-case.js';
 import { UpdateTeacherUseCase } from '../use-cases/update-teacher.use-case.js';
@@ -27,6 +28,7 @@ describe('TeacherController', () => {
   const mockToggleTeacherActiveUseCase = { execute: jest.fn() };
   const mockUpdateProfileUseCase = { execute: jest.fn() };
   const mockBulkImportTeachersUseCase = { execute: jest.fn() };
+  const mockResolveBulkImportConflictsUseCase = { execute: jest.fn() };
   const mockExportTeachersUseCase = { execute: jest.fn() };
 
   const mockUser: AuthenticatedUser = {
@@ -59,6 +61,10 @@ describe('TeacherController', () => {
         {
           provide: BulkImportTeachersUseCase,
           useValue: mockBulkImportTeachersUseCase,
+        },
+        {
+          provide: ResolveBulkImportConflictsUseCase,
+          useValue: mockResolveBulkImportConflictsUseCase,
         },
         {
           provide: ExportTeachersUseCase,

@@ -10,6 +10,7 @@ import { DeleteStudentUseCase } from '../use-cases/delete-student.use-case.js';
 import { ExportStudentsUseCase } from '../use-cases/export-student.use-case.js';
 import { GetStudentByIdUseCase } from '../use-cases/get-student-by-id.use-case.js';
 import { GetStudentsUseCase } from '../use-cases/get-students.use-case.js';
+import { ResolveBulkImportConflictsUseCase } from '../use-cases/resolve-bulk-import-conflicts.use-case.js';
 import { ToggleStudentActiveUseCase } from '../use-cases/toggle-student-active.use-case.js';
 import { UpdateStudentUseCase } from '../use-cases/update-student.use-case.js';
 import { StudentController } from './student.controller.js';
@@ -25,6 +26,7 @@ describe('StudentController', () => {
   const mockDeleteStudentService = { execute: jest.fn() };
   const mockToggleStudentActiveService = { execute: jest.fn() };
   const mockBulkImportStudentsService = { execute: jest.fn() };
+  const mockResolveBulkImportConflictsService = { execute: jest.fn() };
   const mockExportStudentsService = { execute: jest.fn() };
 
   const mockUser: AuthenticatedUser = {
@@ -50,6 +52,10 @@ describe('StudentController', () => {
         {
           provide: BulkImportStudentsUseCase,
           useValue: mockBulkImportStudentsService,
+        },
+        {
+          provide: ResolveBulkImportConflictsUseCase,
+          useValue: mockResolveBulkImportConflictsService,
         },
         {
           provide: ExportStudentsUseCase,
