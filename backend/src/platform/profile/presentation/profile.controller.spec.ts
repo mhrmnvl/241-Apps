@@ -3,13 +3,25 @@ import { UserGender } from '@prisma/client';
 import { UpdateProfileDto } from '../dto/request/update-profile.dto.js';
 import { GetProfileUseCase } from '../use-cases/get-profile.use-case.js';
 import { UpdateProfileUseCase } from '../use-cases/update-profile.use-case.js';
+import { UploadProfilePhotoUseCase } from '../use-cases/upload-profile-photo.use-case.js';
+import { DeleteProfilePhotoUseCase } from '../use-cases/delete-profile-photo.use-case.js';
 import { ProfileController } from './profile.controller.js';
+
+// UploadProfilePhotoUseCase imports 'file-type' (ESM-only), which Jest can't
+// transform. A plain jest.mock() still evaluates the real module to build an
+// automatic mock, so a factory is required to keep the real file from ever
+// loading.
+jest.mock('../use-cases/upload-profile-photo.use-case.js', () => ({
+  UploadProfilePhotoUseCase: jest.fn(),
+}));
 
 describe('ProfileController', () => {
   let controller: ProfileController;
 
   const mockGetProfileUseCase = { execute: jest.fn() };
   const mockUpdateProfileUseCase = { execute: jest.fn() };
+  const mockUploadProfilePhotoUseCase = { execute: jest.fn() };
+  const mockDeleteProfilePhotoUseCase = { execute: jest.fn() };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -17,6 +29,14 @@ describe('ProfileController', () => {
       providers: [
         { provide: GetProfileUseCase, useValue: mockGetProfileUseCase },
         { provide: UpdateProfileUseCase, useValue: mockUpdateProfileUseCase },
+        {
+          provide: UploadProfilePhotoUseCase,
+          useValue: mockUploadProfilePhotoUseCase,
+        },
+        {
+          provide: DeleteProfilePhotoUseCase,
+          useValue: mockDeleteProfilePhotoUseCase,
+        },
       ],
     }).compile();
 

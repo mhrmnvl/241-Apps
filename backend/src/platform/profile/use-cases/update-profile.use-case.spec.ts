@@ -3,6 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { UserGender } from '@prisma/client';
 import { UpdateProfileDto } from '../dto/request/update-profile.dto.js';
 import { ProfileRepository } from '../repositories/profile.repository.js';
+import { StorageService } from '../../../core/storage/storage.service.js';
 import { UpdateProfileUseCase } from './update-profile.use-case.js';
 
 describe('UpdateProfileUseCase', () => {
@@ -15,12 +16,16 @@ describe('UpdateProfileUseCase', () => {
     findByPhone: jest.fn(),
     update: jest.fn(),
   };
+  const mockStorage = {
+    getSignedUrl: jest.fn(),
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         UpdateProfileUseCase,
         { provide: ProfileRepository, useValue: mockRepo },
+        { provide: StorageService, useValue: mockStorage },
       ],
     }).compile();
 
@@ -54,7 +59,7 @@ describe('UpdateProfileUseCase', () => {
       expect(mockRepo.findByEmail).not.toHaveBeenCalled();
       expect(mockRepo.findByPhone).not.toHaveBeenCalled();
       expect(mockRepo.update).toHaveBeenCalledWith(userId, dto);
-      expect(result).toEqual(updated);
+      expect(result).toEqual({ ...updated, avatar: null });
     });
 
     it('should throw NotFoundException when profile not found', async () => {

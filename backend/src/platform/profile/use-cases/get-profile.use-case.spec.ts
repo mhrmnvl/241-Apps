@@ -1,6 +1,7 @@
 ﻿import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { ProfileRepository } from '../repositories/profile.repository.js';
+import { StorageService } from '../../../core/storage/storage.service.js';
 import { GetProfileUseCase } from './get-profile.use-case.js';
 
 describe('GetProfileUseCase', () => {
@@ -9,12 +10,16 @@ describe('GetProfileUseCase', () => {
   const mockRepo = {
     findDetailByUserId: jest.fn(),
   };
+  const mockStorage = {
+    getSignedUrl: jest.fn(),
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         GetProfileUseCase,
         { provide: ProfileRepository, useValue: mockRepo },
+        { provide: StorageService, useValue: mockStorage },
       ],
     }).compile();
 
@@ -42,7 +47,10 @@ describe('GetProfileUseCase', () => {
       const result = await service.execute(userId);
 
       expect(mockRepo.findDetailByUserId).toHaveBeenCalledWith(userId);
-      expect(result).toEqual(mockUser);
+      expect(result).toEqual({
+        ...mockUser,
+        profile: { ...mockUser.profile, avatar: null },
+      });
     });
 
     it('should throw NotFoundException when user not found', async () => {
