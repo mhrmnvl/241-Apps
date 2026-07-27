@@ -1,5 +1,5 @@
 ﻿<script setup lang="ts">
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { toTypedSchema } from '@vee-validate/zod'
 import { useForm } from 'vee-validate'
@@ -36,6 +36,12 @@ import {
 import { classroomApi, type Classroom } from '@/features/academic/classroom'
 import { occupationApi } from '@/features/academic/occupation'
 import type { IncomeRange } from '@/features/academic/parent'
+import {
+  AddressFields,
+  useAddressSubform,
+  useDynamicEntryList,
+  useMultiStepForm,
+} from '@/features/academic/shared/multi-step-form'
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
 import api from '@/shared/utils/api'
 import type { ApiPaginatedResponse } from '@/shared/types/api'
@@ -55,14 +61,6 @@ const steps = [
   { value: 4, title: 'Orang Tua' },
   { value: 5, title: 'Ringkasan' },
 ]
-const activeStep = ref(1)
-const mobileVisibleStepValues = computed(() => {
-  if (activeStep.value <= 2) return [1, 2, 3]
-  if (activeStep.value >= steps.length - 1)
-    return [steps.length - 2, steps.length - 1, steps.length]
-  return [activeStep.value - 1, activeStep.value, activeStep.value + 1]
-})
-const submitting = ref(false)
 
 const grades = ref<GradeOption[]>([])
 const classrooms = ref<Classroom[]>([])
@@ -137,38 +135,24 @@ const { values, validateField, setFieldValue } = useForm({
   },
 })
 
-const address = reactive({
-  street: '',
-  rt: '',
-  rw: '',
-  village: '',
-  district: '',
-  city: '',
-  province: '',
-  postalCode: '',
-  country: 'Indonesia',
-})
-const hasAddress = computed(() => address.street.trim() !== '')
+const { address, hasAddress, validateAddress } = useAddressSubform()
 
-const parents = ref<StudentParentInput[]>([])
-
-function addParent() {
-  parents.value.push({
-    relation: 'FATHER',
-    name: '',
-    nik: '',
-    birthPlace: '',
-    birthDate: '',
-    email: '',
-    phone: '',
-    occupationId: '',
-    income: undefined,
-    isPrimary: parents.value.length === 0,
-  })
-}
-function removeParent(index: number) {
-  parents.value.splice(index, 1)
-}
+const {
+  items: parents,
+  addItem: addParent,
+  removeItem: removeParent,
+} = useDynamicEntryList<StudentParentInput>((index) => ({
+  relation: 'FATHER',
+  name: '',
+  nik: '',
+  birthPlace: '',
+  birthDate: '',
+  email: '',
+  phone: '',
+  occupationId: '',
+  income: undefined,
+  isPrimary: index === 0,
+}))
 
 const filteredClassrooms = computed(() => {
   if (!values.gradeId) return classrooms.value
@@ -179,11 +163,6 @@ const filteredClassrooms = computed(() => {
 })
 
 type FieldName = Parameters<typeof validateField>[0]
-async function validateFields(fields: FieldName[]): Promise<boolean> {
-  const results = await Promise.all(fields.map((f) => validateField(f)))
-  return results.every((r) => r.valid)
-}
-
 const PROFIL_FIELDS: FieldName[] = [
   'name',
   'nik',
@@ -193,32 +172,23 @@ const PROFIL_FIELDS: FieldName[] = [
 ]
 const AKADEMIK_FIELDS: FieldName[] = ['nis', 'nisn']
 
-async function goToStep(target: number) {
-  if (target <= activeStep.value) {
-    activeStep.value = target
-    return
-  }
-  if (!(await validateFields(PROFIL_FIELDS))) {
-    activeStep.value = 1
-    return
-  }
-  if (target >= 3 && !(await validateFields(AKADEMIK_FIELDS))) {
-    activeStep.value = 2
-    return
-  }
-  activeStep.value = target
-}
-
-function next() {
-  void goToStep(activeStep.value + 1)
-}
-function back() {
-  if (activeStep.value === 1) {
-    void router.push('/student')
-    return
-  }
-  activeStep.value -= 1
-}
+const {
+  activeStep,
+  submitting,
+  mobileVisibleStepValues,
+  goToStep,
+  next,
+  back,
+  validateAllGates,
+} = useMultiStepForm<FieldName>({
+  steps,
+  validateField,
+  gates: [
+    { fields: PROFIL_FIELDS, unlocksStep: 2 },
+    { fields: AKADEMIK_FIELDS, unlocksStep: 3 },
+  ],
+  onCancel: () => void router.push('/student'),
+})
 
 function isValidParent(p: StudentParentInput): boolean {
   return (
@@ -232,27 +202,13 @@ function isValidParent(p: StudentParentInput): boolean {
 }
 
 async function submit() {
-  if (!(await validateFields(PROFIL_FIELDS))) {
-    activeStep.value = 1
+  if (!(await validateAllGates())) {
     return
   }
-  if (!(await validateFields(AKADEMIK_FIELDS))) {
-    activeStep.value = 2
+  if (!validateAddress()) {
+    activeStep.value = 3
+    toast.error('Lengkapi alamat (desa, kecamatan, kota, provinsi, negara).')
     return
-  }
-  if (hasAddress.value) {
-    const required = [
-      address.village,
-      address.district,
-      address.city,
-      address.province,
-      address.country,
-    ]
-    if (required.some((v) => v.trim() === '')) {
-      activeStep.value = 3
-      toast.error('Lengkapi alamat (desa, kecamatan, kota, provinsi, negara).')
-      return
-    }
   }
   const invalidParent = parents.value.find((p) => !isValidParent(p))
   if (invalidParent) {
@@ -281,7 +237,7 @@ async function submit() {
         identifier: values.nis || undefined,
         password: values.nis || undefined,
       },
-      address: hasAddress.value ? { ...address } : null,
+      address: hasAddress.value ? { ...address.value } : null,
       parents: parents.value,
     })
 
@@ -628,73 +584,7 @@ onMounted(async () => {
 
             <!-- Step 3: Alamat (optional) -->
             <div v-if="activeStep === 3">
-              <div class="grid gap-5 md:grid-cols-2 items-start">
-                <div class="md:col-span-2 space-y-2">
-                  <label class="text-sm font-medium">Jalan / Alamat</label>
-                  <Input
-                    v-model="address.street"
-                    placeholder="Nama jalan, nomor rumah"
-                  />
-                </div>
-                <div class="grid grid-cols-2 gap-3 md:col-span-2">
-                  <div class="space-y-2">
-                    <label class="text-sm font-medium">RT</label>
-                    <Input
-                      v-model="address.rt"
-                      placeholder="RT"
-                    />
-                  </div>
-                  <div class="space-y-2">
-                    <label class="text-sm font-medium">RW</label>
-                    <Input
-                      v-model="address.rw"
-                      placeholder="RW"
-                    />
-                  </div>
-                </div>
-                <div class="space-y-2">
-                  <label class="text-sm font-medium">Desa / Kelurahan</label>
-                  <Input
-                    v-model="address.village"
-                    placeholder="Desa / kelurahan"
-                  />
-                </div>
-                <div class="space-y-2">
-                  <label class="text-sm font-medium">Kecamatan</label>
-                  <Input
-                    v-model="address.district"
-                    placeholder="Kecamatan"
-                  />
-                </div>
-                <div class="space-y-2">
-                  <label class="text-sm font-medium">Kota / Kabupaten</label>
-                  <Input
-                    v-model="address.city"
-                    placeholder="Kota / kabupaten"
-                  />
-                </div>
-                <div class="space-y-2">
-                  <label class="text-sm font-medium">Provinsi</label>
-                  <Input
-                    v-model="address.province"
-                    placeholder="Provinsi"
-                  />
-                </div>
-                <div class="space-y-2">
-                  <label class="text-sm font-medium">Kode Pos</label>
-                  <Input
-                    v-model="address.postalCode"
-                    placeholder="Kode pos"
-                  />
-                </div>
-                <div class="space-y-2">
-                  <label class="text-sm font-medium">Negara</label>
-                  <Input
-                    v-model="address.country"
-                    placeholder="Negara"
-                  />
-                </div>
-              </div>
+              <AddressFields v-model="address" />
             </div>
 
             <div
