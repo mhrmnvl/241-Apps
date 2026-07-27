@@ -4,15 +4,13 @@ import {
   CreateScheduleDto,
   UpdateScheduleDto,
 } from '../dto/request/schedule.dto.js';
-import {
-  CreateScheduleUseCase,
-  DeleteScheduleUseCase,
-  GetScheduleByIdUseCase,
-  GetSchedulesUseCase,
-  GetSchedulesByClassroomUseCase,
-  UpdateScheduleUseCase,
-  BatchUpsertScheduleUseCase,
-} from '../use-cases/schedule.use-case.js';
+import { CreateScheduleUseCase } from '../use-cases/create-schedule.use-case.js';
+import { DeleteScheduleUseCase } from '../use-cases/delete-schedule.use-case.js';
+import { GetScheduleByIdUseCase } from '../use-cases/get-schedule-by-id.use-case.js';
+import { GetSchedulesUseCase } from '../use-cases/get-schedules.use-case.js';
+import { GetSchedulesByClassroomUseCase } from '../use-cases/get-schedules-by-classroom.use-case.js';
+import { UpdateScheduleUseCase } from '../use-cases/update-schedule.use-case.js';
+import { BatchUpsertScheduleUseCase } from '../use-cases/batch-upsert-schedule.use-case.js';
 import { ScheduleController } from './schedule.controller.js';
 import type { AuthenticatedUser } from '../../../core/types/authenticated-user.type.js';
 
