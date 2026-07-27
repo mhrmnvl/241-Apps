@@ -15,6 +15,7 @@ import {
   FileType,
   Inbox,
   Info,
+  Loader2,
   UploadCloud,
   XCircle,
 } from 'lucide-vue-next'
@@ -220,12 +221,15 @@ watch(
               v-else
               class="space-y-4 bg-muted/10 p-5 rounded-xl border"
             >
-              <div class="flex items-center justify-between text-sm">
-                <span class="font-medium">Memproses Data</span>
+              <div class="flex flex-col items-center gap-3 py-2">
+                <Loader2 class="size-8 text-primary animate-spin" />
+                <div class="text-center">
+                  <p class="text-sm font-medium">Memproses Data</p>
+                  <p class="text-xs text-muted-foreground mt-1">
+                    Mohon tunggu sementara data sedang diproses di server...
+                  </p>
+                </div>
               </div>
-              <p class="text-xs text-center text-muted-foreground">
-                Mohon tunggu sementara data sedang diproses di server...
-              </p>
             </div>
 
             <Alert
@@ -256,6 +260,10 @@ watch(
                 :disabled="!selectedFile || isProcessing"
                 @click="handleImport"
               >
+                <Loader2
+                  v-if="isProcessing"
+                  class="size-4 mr-2 animate-spin"
+                />
                 {{ isProcessing ? 'Memproses...' : 'Mulai Import' }}
               </Button>
             </div>
