@@ -60,12 +60,18 @@ export class PrismaSubjectRepository extends ISubjectRepository {
   }
 
   async create(dto: CreateSubjectDto): Promise<Subject> {
-    return this.prisma.subject.create({
+    const subject = await this.prisma.subject.create({
       data: {
         code: dto.code,
         name: dto.name,
       },
     });
+
+    if (dto.teacherIds && dto.teacherIds.length > 0) {
+      await this.syncTeachingAssignments(subject.id, dto.teacherIds);
+    }
+
+    return subject;
   }
 
   async update(id: string, dto: UpdateSubjectDto): Promise<Subject> {
@@ -76,11 +82,73 @@ export class PrismaSubjectRepository extends ISubjectRepository {
         ...(dto.name && { name: dto.name }),
       },
     });
+
+    if (dto.teacherIds !== undefined) {
+      await this.syncTeachingAssignments(id, dto.teacherIds);
+    }
+
     const updated = await this.findById(id);
     if (!updated) {
       throw new Error(`Subject with ID ${id} not found after update`);
     }
     return updated;
+  }
+
+  private async syncTeachingAssignments(
+    subjectId: string,
+    teacherIds: string[],
+  ): Promise<void> {
+    const activeSemester = await this.prisma.semester.findFirst({
+      where: { isActive: true, deletedAt: null },
+    });
+    if (!activeSemester) return;
+
+    const classrooms = await this.prisma.classroom.findMany({
+      where: { deletedAt: null },
+    });
+    if (classrooms.length === 0) return;
+
+    for (const classroom of classrooms) {
+      for (const teacherId of teacherIds) {
+        const existing = await this.prisma.teachingAssignment.findFirst({
+          where: {
+            teacherId,
+            subjectId,
+            classroomId: classroom.id,
+            semesterId: activeSemester.id,
+          },
+        });
+
+        if (existing) {
+          if (existing.deletedAt) {
+            await this.prisma.teachingAssignment.update({
+              where: { id: existing.id },
+              data: { deletedAt: null },
+            });
+          }
+        } else {
+          await this.prisma.teachingAssignment.create({
+            data: {
+              teacherId,
+              subjectId,
+              classroomId: classroom.id,
+              semesterId: activeSemester.id,
+            },
+          });
+        }
+      }
+
+      await this.prisma.teachingAssignment.updateMany({
+        where: {
+          subjectId,
+          classroomId: classroom.id,
+          semesterId: activeSemester.id,
+          teacherId: { notIn: teacherIds },
+          deletedAt: null,
+        },
+        data: { deletedAt: new Date() },
+      });
+    }
   }
 
   async remove(id: string): Promise<Subject> {
