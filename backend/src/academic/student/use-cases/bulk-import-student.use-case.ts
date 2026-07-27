@@ -12,6 +12,7 @@ import { CreateStudentDto } from '../dto/request/create-student.dto.js';
 import { StudentRepository } from '../repositories/student.repository.js';
 import { ExcelStudentParser } from '../infrastructure/parsers/excel-student.parser.js';
 import { CreateStudentUseCase } from './create-student.use-case.js';
+import { resolveOnceByKey } from '../../../shared/utils/resolve-once-by-key.helper.js';
 
 @Injectable()
 export class BulkImportStudentsUseCase {
@@ -29,30 +30,16 @@ export class BulkImportStudentsUseCase {
       plainToInstance(BulkImportStudentRowDto, row),
     );
 
-    const uniqueGrades = [
-      ...new Set(dtos.map((d) => d.grade).filter((g): g is number => !!g)),
-    ];
-    const uniqueClassroomCodes = [
-      ...new Set(
-        dtos.map((d) => d.classroomCode).filter((c): c is string => !!c),
+    const [gradeByLevel, classroomByCode] = await Promise.all([
+      resolveOnceByKey(
+        dtos.map((d) => d.grade),
+        (level) => this.gradeRepo.findByLevel(level),
       ),
-    ];
-    const [gradeEntries, classroomEntries] = await Promise.all([
-      Promise.all(
-        uniqueGrades.map(
-          async (level) =>
-            [level, await this.gradeRepo.findByLevel(level)] as const,
-        ),
-      ),
-      Promise.all(
-        uniqueClassroomCodes.map(
-          async (code) =>
-            [code, await this.classroomRepo.findByCode(code)] as const,
-        ),
+      resolveOnceByKey(
+        dtos.map((d) => d.classroomCode),
+        (code) => this.classroomRepo.findByCode(code),
       ),
     ]);
-    const gradeByLevel = new Map(gradeEntries);
-    const classroomByCode = new Map(classroomEntries);
 
     const results: BulkImportRowResultDto[] = [];
 
