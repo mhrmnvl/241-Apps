@@ -3,6 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import ExcelJS from 'exceljs';
 import { TeacherRepository } from '../repositories/teacher.repository.js';
 import { BulkImportTeachersUseCase } from './bulk-import-teacher.use-case.js';
+import { CreateTeacherUseCase } from './create-teacher.use-case.js';
 
 async function makeExcelBuffer(
   rows: Record<string, ExcelJS.CellValue>[],
@@ -45,7 +46,10 @@ describe('BulkImportTeachersUseCase', () => {
     findByNip: jest.fn(),
     findByNuptk: jest.fn(),
     resolveEmploymentTypeId: jest.fn().mockResolvedValue('employment-type-id'),
-    create: jest.fn(),
+  };
+
+  const mockCreateTeacher = {
+    execute: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -53,6 +57,7 @@ describe('BulkImportTeachersUseCase', () => {
       providers: [
         BulkImportTeachersUseCase,
         { provide: TeacherRepository, useValue: mockRepo },
+        { provide: CreateTeacherUseCase, useValue: mockCreateTeacher },
       ],
     }).compile();
 
@@ -78,7 +83,7 @@ describe('BulkImportTeachersUseCase', () => {
       mockRepo.findProfileByNik.mockResolvedValue(null);
       mockRepo.findByNip.mockResolvedValue(null);
       mockRepo.findByNuptk.mockResolvedValue(null);
-      mockRepo.create.mockResolvedValue({ id: 'emp-1' });
+      mockCreateTeacher.execute.mockResolvedValue({ id: 'emp-1' });
 
       const buffer = await makeExcelBuffer([validRow]);
       const result = await useCase.execute(buffer);
@@ -89,9 +94,8 @@ describe('BulkImportTeachersUseCase', () => {
       expect(result.results[0].status).toBe('SUCCESS');
       expect(result.results[0].row).toBe(2);
       expect(mockRepo.findUserByIdentifier).toHaveBeenCalledWith('guru001');
-      expect(mockRepo.create).toHaveBeenCalledWith(
-        expect.anything(),
-        expect.anything(),
+      expect(mockCreateTeacher.execute).toHaveBeenCalledWith(
+        expect.objectContaining({ employmentTypeId: 'employment-type-id' }),
       );
     });
 
@@ -106,7 +110,7 @@ describe('BulkImportTeachersUseCase', () => {
 
       expect(result.failed).toBe(1);
       expect(result.results[0].error).toContain('Identifier');
-      expect(mockRepo.create).not.toHaveBeenCalled();
+      expect(mockCreateTeacher.execute).not.toHaveBeenCalled();
     });
 
     it('should flag row as CONFLICT when NIK is duplicated', async () => {
@@ -166,7 +170,7 @@ describe('BulkImportTeachersUseCase', () => {
 
       expect(result.failed).toBe(1);
       expect(result.results[0].error).toContain('Validation failed');
-      expect(mockRepo.create).not.toHaveBeenCalled();
+      expect(mockCreateTeacher.execute).not.toHaveBeenCalled();
     });
 
     it('should skip NIP/NUPTK duplicate check when fields are absent', async () => {
@@ -177,7 +181,7 @@ describe('BulkImportTeachersUseCase', () => {
       };
       mockRepo.findUserByIdentifier.mockResolvedValue(null);
       mockRepo.findProfileByNik.mockResolvedValue(null);
-      mockRepo.create.mockResolvedValue({ id: 'emp-1' });
+      mockCreateTeacher.execute.mockResolvedValue({ id: 'emp-1' });
 
       const buffer = await makeExcelBuffer([rowWithoutNipNuptk]);
       const result = await useCase.execute(buffer);
@@ -207,7 +211,7 @@ describe('BulkImportTeachersUseCase', () => {
       mockRepo.findByNuptk
         .mockResolvedValueOnce(null)
         .mockResolvedValueOnce(null);
-      mockRepo.create.mockResolvedValue({ id: 'emp-1' });
+      mockCreateTeacher.execute.mockResolvedValue({ id: 'emp-1' });
 
       const buffer = await makeExcelBuffer([validRow, row2]);
       const result = await useCase.execute(buffer);
@@ -224,12 +228,29 @@ describe('BulkImportTeachersUseCase', () => {
       mockRepo.findProfileByNik.mockResolvedValue(null);
       mockRepo.findByNip.mockResolvedValue(null);
       mockRepo.findByNuptk.mockResolvedValue(null);
-      mockRepo.create.mockResolvedValue({ id: 'emp-1' });
+      mockCreateTeacher.execute.mockResolvedValue({ id: 'emp-1' });
 
       const buffer = await makeExcelBuffer([validRow]);
       const result = await useCase.execute(buffer);
 
       expect(result.results[0].row).toBe(2);
+    });
+
+    it('should fail the row with the specific error message when creation throws', async () => {
+      mockRepo.findUserByIdentifier.mockResolvedValue(null);
+      mockRepo.findProfileByNik.mockResolvedValue(null);
+      mockRepo.findByNip.mockResolvedValue(null);
+      mockRepo.findByNuptk.mockResolvedValue(null);
+      mockCreateTeacher.execute.mockRejectedValue(
+        new Error('Database connection lost'),
+      );
+
+      const buffer = await makeExcelBuffer([validRow]);
+      const result = await useCase.execute(buffer);
+
+      expect(result.failed).toBe(1);
+      expect(result.results[0].status).toBe('FAILED');
+      expect(result.results[0].error).toBe('Database connection lost');
     });
   });
 });

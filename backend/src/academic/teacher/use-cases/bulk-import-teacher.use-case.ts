@@ -9,14 +9,17 @@ import {
 import { BulkImportTeacherRowDto } from '../dto/request/bulk-import-teacher.dto.js';
 import { CreateTeacherDto } from '../dto/request/create-teacher.dto.js';
 import { TeacherRepository } from '../repositories/teacher.repository.js';
-import { hashPassword } from '../../../shared/utils/hash.helper.js';
+import { CreateTeacherUseCase } from './create-teacher.use-case.js';
 
 type ExcelRow = Record<string, ExcelJS.CellValue>;
 type MappedRow = Record<string, string | undefined>;
 
 @Injectable()
 export class BulkImportTeachersUseCase {
-  constructor(private readonly repo: TeacherRepository) {}
+  constructor(
+    private readonly repo: TeacherRepository,
+    private readonly createTeacher: CreateTeacherUseCase,
+  ) {}
 
   async execute(buffer: Buffer): Promise<BulkImportTeachersResponseDto> {
     const rows = await this.parseExcel(buffer);
@@ -122,19 +125,24 @@ export class BulkImportTeachersUseCase {
           employmentTypeId,
         };
 
+        await this.createTeacher.execute(createDto);
+
         results.push({
           row: rowNumber,
           status: 'SUCCESS',
           identifier: dto.identifier,
           data: dto,
         });
-      } catch {
+      } catch (err) {
         results.push({
           row: rowNumber,
           status: 'FAILED',
           identifier: dto.identifier,
           data: dto,
-          error: 'Unexpected error during import',
+          error:
+            err instanceof Error
+              ? err.message
+              : 'Unexpected error during import',
         });
       }
     }
