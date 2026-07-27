@@ -30,13 +30,27 @@ export class BulkImportTeachersUseCase {
       );
     }
 
+    const dtos = rows.map((row) =>
+      plainToInstance(BulkImportTeacherRowDto, this.mapColumns(row)),
+    );
+
+    const uniqueEmploymentTypeCodes = [
+      ...new Set(dtos.map((d) => d.employmentTypeCode).filter(Boolean)),
+    ];
+    const employmentTypeEntries = await Promise.all(
+      uniqueEmploymentTypeCodes.map(
+        async (code) =>
+          [code, await this.repo.resolveEmploymentTypeId(code)] as const,
+      ),
+    );
+    const employmentTypeIdByCode = new Map(employmentTypeEntries);
+
     const results: BulkImportTeacherRowResultDto[] = [];
 
-    for (let i = 0; i < rows.length; i++) {
+    for (let i = 0; i < dtos.length; i++) {
       const rowNumber = i + 2; // row 1 = header
-      const rawRow: MappedRow = this.mapColumns(rows[i]);
+      const dto = dtos[i];
 
-      const dto = plainToInstance(BulkImportTeacherRowDto, rawRow);
       const [dupUsername, dupNik, dupNip, dupNuptk] = await Promise.all([
         dto.identifier ? this.repo.findUserByIdentifier(dto.identifier) : null,
         dto.nik ? this.repo.findProfileByNik(dto.nik) : null,
@@ -78,7 +92,7 @@ export class BulkImportTeachersUseCase {
         results.push({
           row: rowNumber,
           status: 'FAILED',
-          identifier: rawRow.identifier,
+          identifier: dto.identifier,
           existingId,
           data: dto,
           error: `Validation failed: ${messages}${conflictMsg}`,
@@ -117,9 +131,9 @@ export class BulkImportTeachersUseCase {
           continue;
         }
 
-        const employmentTypeId = await this.repo.resolveEmploymentTypeId(
+        const employmentTypeId = employmentTypeIdByCode.get(
           dto.employmentTypeCode,
-        );
+        ) as string;
         const createDto: CreateTeacherDto = {
           ...dto,
           employmentTypeId,
