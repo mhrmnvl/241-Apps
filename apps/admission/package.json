@@ -13,6 +13,8 @@
     "format": "prettier --write \"src/**/*.{ts,vue,json,css,scss,html,md}\"",
     "format:check": "prettier --check \"src/**/*.{ts,vue,json,css,scss,html,md}\"",
     "typecheck": "vue-tsc -b --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "check": "pnpm run format:check && pnpm run lint",
     "validate": "pnpm run format:check && pnpm run lint && pnpm run typecheck && pnpm run lint:strict && pnpm run build"
   },
@@ -40,5 +42,8 @@
     "vue-sonner": "^2.0.9",
     "zod": "^3.25.76"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^6.0.7",
+    "vitest": "^3.2.4"
+  }
 }
