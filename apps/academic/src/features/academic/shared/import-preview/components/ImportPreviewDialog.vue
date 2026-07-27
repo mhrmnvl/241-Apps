@@ -21,6 +21,7 @@ import {
   AlertCircle,
   CheckCircle2,
   ChevronDown,
+  Loader2,
 } from 'lucide-vue-next'
 import type { ImportColumnDescriptor, ImportPreviewRow } from '../types'
 import { buildResolveDecisions } from '../logic/buildResolveDecisions'
@@ -183,6 +184,10 @@ const tableColumns = computed<ColumnDef<ImportPreviewRow<TData>>[]>(() =>
               :disabled="loading"
               @click="handleApply"
             >
+              <Loader2
+                v-if="loading"
+                class="size-4 mr-2 animate-spin"
+              />
               {{ loading ? 'Memproses...' : 'Terapkan' }}
             </Button>
           </div>
