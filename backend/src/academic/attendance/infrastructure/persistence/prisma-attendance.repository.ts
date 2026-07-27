@@ -12,6 +12,7 @@ import {
   IAttendanceRepository,
   ATTENDANCE_INCLUDE,
   AttendanceMonthlyTrendPoint,
+  AttendanceStatusCounts,
 } from '../../domain/interfaces/attendance-repository.interface.js';
 
 const MONTH_LABELS = [
@@ -293,6 +294,22 @@ export class PrismaAttendanceRepository extends IAttendanceRepository {
         percentage: calcPercentage({ ...entry, total }),
       };
     });
+  }
+
+  async getStatusCounts(enrollmentId: string): Promise<AttendanceStatusCounts> {
+    const grouped = await this.prisma.attendance.groupBy({
+      by: ['status'],
+      where: { enrollmentId, deletedAt: null },
+      _count: { _all: true },
+    });
+
+    const counts: AttendanceStatusCounts = { sick: 0, excused: 0, absent: 0 };
+    for (const group of grouped) {
+      if (group.status === 'SICK') counts.sick = group._count._all;
+      else if (group.status === 'EXCUSED') counts.excused = group._count._all;
+      else if (group.status === 'ABSENT') counts.absent = group._count._all;
+    }
+    return counts;
   }
 
   async getMonthlyTrend(query: AttendanceTrendQueryDto) {

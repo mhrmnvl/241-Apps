@@ -6,7 +6,9 @@ import type { BulkStudentScoreRecordDto } from '../../dto/request/bulk-upsert-st
 import {
   IStudentScoresRepository,
   STUDENT_SCORE_INCLUDE,
+  REPORT_CARD_SCORE_INCLUDE,
   StudentScoreRosterItem,
+  ReportCardScoreRow,
 } from '../../domain/interfaces/student-scores-repository.interface.js';
 
 @Injectable()
@@ -42,6 +44,15 @@ export class PrismaStudentScoresRepository extends IStudentScoresRepository {
         deletedAt: null,
       },
       include: STUDENT_SCORE_INCLUDE,
+    });
+  }
+
+  async findAllForReportCard(
+    enrollmentId: string,
+  ): Promise<ReportCardScoreRow[]> {
+    return this.prisma.studentScore.findMany({
+      where: { enrollmentId, deletedAt: null },
+      include: REPORT_CARD_SCORE_INCLUDE,
     });
   }
 
