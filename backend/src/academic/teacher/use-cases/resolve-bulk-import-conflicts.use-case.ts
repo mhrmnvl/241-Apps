@@ -6,6 +6,8 @@ import { UpdateTeacherUseCase } from './update-teacher.use-case.js';
 import { UpdateTeacherProfileUseCase } from './update-teacher-profile.use-case.js';
 import { CreateTeacherUseCase } from './create-teacher.use-case.js';
 import { CreateTeacherDto } from '../dto/request/create-teacher.dto.js';
+import { resolveOnceByKey } from '../../../shared/utils/resolve-once-by-key.helper.js';
+import { processBulkImportConflicts } from '../../../shared/utils/process-bulk-import-conflicts.helper.js';
 
 @Injectable()
 export class ResolveBulkImportConflictsUseCase {
@@ -21,32 +23,16 @@ export class ResolveBulkImportConflictsUseCase {
   async execute(
     dto: ResolveBulkImportConflictsDto,
   ): Promise<ResolveBulkImportResponseDto> {
-    const uniqueEmploymentTypeCodes = [
-      ...new Set(
-        dto.conflicts
-          .map((item) => item.data.employmentTypeCode)
-          .filter(Boolean),
-      ),
-    ];
-    const employmentTypeEntries = await Promise.all(
-      uniqueEmploymentTypeCodes.map(
-        async (code) =>
-          [code, await this.repo.resolveEmploymentTypeId(code)] as const,
-      ),
+    const employmentTypeIdByCode = await resolveOnceByKey(
+      dto.conflicts.map((item) => item.data.employmentTypeCode),
+      (code) => this.repo.resolveEmploymentTypeId(code),
     );
-    const employmentTypeIdByCode = new Map(employmentTypeEntries);
 
-    let updated = 0;
-    let skipped = 0;
-    const errors: { existingId: string; error: string }[] = [];
-
-    for (const item of dto.conflicts) {
-      if (item.action === 'skip') {
-        skipped++;
-        continue;
-      }
-
-      try {
+    return processBulkImportConflicts(
+      dto.conflicts,
+      'teacher',
+      this.logger,
+      async (item) => {
         const employmentTypeId = employmentTypeIdByCode.get(
           item.data.employmentTypeCode,
         ) as string;
@@ -57,7 +43,6 @@ export class ResolveBulkImportConflictsUseCase {
             employmentTypeId,
           };
           await this.createTeacher.execute(createDto);
-          updated++;
         } else {
           await this.updateTeacher.execute(item.existingId, {
             nip: item.data.nip,
@@ -73,21 +58,8 @@ export class ResolveBulkImportConflictsUseCase {
             email: item.data.email,
             phone: item.data.phone,
           });
-          updated++;
         }
-      } catch (err) {
-        skipped++;
-        const message = err instanceof Error ? err.message : 'Unexpected error';
-        errors.push({
-          existingId: item.existingId || 'NEW_ROW',
-          error: message,
-        });
-        this.logger.warn(
-          `Failed to resolve conflict/creation for teacher ${item.existingId || 'new'}: ${message}`,
-        );
-      }
-    }
-
-    return { total: dto.conflicts.length, updated, skipped, errors };
+      },
+    );
   }
 }

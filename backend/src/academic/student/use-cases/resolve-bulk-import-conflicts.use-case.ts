@@ -7,6 +7,8 @@ import { UpdateStudentUseCase } from './update-student.use-case.js';
 import { UpdateStudentProfileUseCase } from './update-student-profile.use-case.js';
 import { CreateStudentUseCase } from './create-student.use-case.js';
 import { EnsureStudentEnrollmentUseCase } from '../../enrollment/use-cases/ensure-student-enrollment.use-case.js';
+import { resolveOnceByKey } from '../../../shared/utils/resolve-once-by-key.helper.js';
+import { processBulkImportConflicts } from '../../../shared/utils/process-bulk-import-conflicts.helper.js';
 
 @Injectable()
 export class ResolveBulkImportConflictsUseCase {
@@ -24,48 +26,22 @@ export class ResolveBulkImportConflictsUseCase {
   async execute(
     dto: ResolveBulkImportConflictsDto,
   ): Promise<ResolveBulkImportResponseDto> {
-    const uniqueGrades = [
-      ...new Set(
-        dto.conflicts
-          .map((item) => item.data.grade)
-          .filter((g): g is number => !!g),
+    const [gradeByLevel, classroomByCode] = await Promise.all([
+      resolveOnceByKey(
+        dto.conflicts.map((item) => item.data.grade),
+        (level) => this.gradeRepo.findByLevel(level),
       ),
-    ];
-    const uniqueClassroomCodes = [
-      ...new Set(
-        dto.conflicts
-          .map((item) => item.data.classroomCode)
-          .filter((c): c is string => !!c),
-      ),
-    ];
-    const [gradeEntries, classroomEntries] = await Promise.all([
-      Promise.all(
-        uniqueGrades.map(
-          async (level) =>
-            [level, await this.gradeRepo.findByLevel(level)] as const,
-        ),
-      ),
-      Promise.all(
-        uniqueClassroomCodes.map(
-          async (code) =>
-            [code, await this.classroomRepo.findByCode(code)] as const,
-        ),
+      resolveOnceByKey(
+        dto.conflicts.map((item) => item.data.classroomCode),
+        (code) => this.classroomRepo.findByCode(code),
       ),
     ]);
-    const gradeByLevel = new Map(gradeEntries);
-    const classroomByCode = new Map(classroomEntries);
 
-    let updated = 0;
-    let skipped = 0;
-    const errors: { existingId: string; error: string }[] = [];
-
-    for (const item of dto.conflicts) {
-      if (item.action === 'skip') {
-        skipped++;
-        continue;
-      }
-
-      try {
+    return processBulkImportConflicts(
+      dto.conflicts,
+      'student',
+      this.logger,
+      async (item) => {
         const gradeId = item.data.grade
           ? gradeByLevel.get(item.data.grade)?.id
           : undefined;
@@ -91,7 +67,6 @@ export class ResolveBulkImportConflictsUseCase {
             nis: item.data.nis,
             nisn: item.data.nisn,
           });
-          updated++;
         } else {
           await this.updateStudent.execute(item.existingId, {
             nis: item.data.nis,
@@ -113,21 +88,8 @@ export class ResolveBulkImportConflictsUseCase {
               classroomId,
             );
           }
-          updated++;
         }
-      } catch (err) {
-        skipped++;
-        const message = err instanceof Error ? err.message : 'Unexpected error';
-        errors.push({
-          existingId: item.existingId || 'NEW_ROW',
-          error: message,
-        });
-        this.logger.warn(
-          `Failed to resolve conflict/creation for student ${item.existingId || 'new'}: ${message}`,
-        );
-      }
-    }
-
-    return { total: dto.conflicts.length, updated, skipped, errors };
+      },
+    );
   }
 }

@@ -10,6 +10,7 @@ import { BulkImportTeacherRowDto } from '../dto/request/bulk-import-teacher.dto.
 import { CreateTeacherDto } from '../dto/request/create-teacher.dto.js';
 import { TeacherRepository } from '../repositories/teacher.repository.js';
 import { CreateTeacherUseCase } from './create-teacher.use-case.js';
+import { resolveOnceByKey } from '../../../shared/utils/resolve-once-by-key.helper.js';
 
 type ExcelRow = Record<string, ExcelJS.CellValue>;
 type MappedRow = Record<string, string | undefined>;
@@ -34,16 +35,10 @@ export class BulkImportTeachersUseCase {
       plainToInstance(BulkImportTeacherRowDto, this.mapColumns(row)),
     );
 
-    const uniqueEmploymentTypeCodes = [
-      ...new Set(dtos.map((d) => d.employmentTypeCode).filter(Boolean)),
-    ];
-    const employmentTypeEntries = await Promise.all(
-      uniqueEmploymentTypeCodes.map(
-        async (code) =>
-          [code, await this.repo.resolveEmploymentTypeId(code)] as const,
-      ),
+    const employmentTypeIdByCode = await resolveOnceByKey(
+      dtos.map((d) => d.employmentTypeCode),
+      (code) => this.repo.resolveEmploymentTypeId(code),
     );
-    const employmentTypeIdByCode = new Map(employmentTypeEntries);
 
     const results: BulkImportTeacherRowResultDto[] = [];
 
