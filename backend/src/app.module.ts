@@ -11,7 +11,6 @@ import { HttpExceptionFilter } from './core/filters/http-exception.filter.js';
 import { HealthModule } from './core/health/health.module.js';
 import { ResponseInterceptor } from './core/interceptors/response.interceptor.js';
 import { pinoLoggerConfig } from './core/logger/logger.config.js';
-import { EventsModule } from './core/events/events.module.js';
 import { AppCacheModule } from './core/cache/cache.module.js';
 import { AcademicYearModule } from './academic/academic-year/academic-year.module.js';
 import { AchievementModule } from './platform/profile/achievement/achievement.module.js';
@@ -69,7 +68,6 @@ import { AdmissionModule } from './admission/admission.module.js';
     StorageModule,
     LoggerModule.forRoot(pinoLoggerConfig),
     ScheduleModule.forRoot(),
-    EventsModule,
     AppCacheModule,
     ThrottlerModule.forRootAsync({
       inject: [ConfigService],
