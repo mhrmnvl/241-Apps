@@ -11,7 +11,7 @@ import { BulkImportStudentRowDto } from '../dto/request/bulk-import-student.dto.
 import { CreateStudentDto } from '../dto/request/create-student.dto.js';
 import { StudentRepository } from '../repositories/student.repository.js';
 import { ExcelStudentParser } from '../infrastructure/parsers/excel-student.parser.js';
-import { hashPassword } from '../../../shared/utils/hash.helper.js';
+import { CreateStudentUseCase } from './create-student.use-case.js';
 
 @Injectable()
 export class BulkImportStudentsUseCase {
@@ -20,6 +20,7 @@ export class BulkImportStudentsUseCase {
     private readonly classroomRepo: ClassroomRepository,
     private readonly gradeRepo: IGradeRepository,
     private readonly excelParser: ExcelStudentParser,
+    private readonly createStudent: CreateStudentUseCase,
   ) {}
 
   async execute(buffer: Buffer): Promise<BulkImportStudentsResponseDto> {
@@ -121,9 +122,12 @@ export class BulkImportStudentsUseCase {
           email: dto.email,
           phone: dto.phone,
           gradeId: resolvedGradeId,
+          classroomId: resolvedClassroomId,
           nis: dto.nis,
           nisn: dto.nisn,
         };
+
+        await this.createStudent.execute(createDto);
 
         results.push({
           row: rowNumber,
@@ -131,13 +135,16 @@ export class BulkImportStudentsUseCase {
           identifier: dto.identifier,
           data: dto,
         });
-      } catch {
+      } catch (err) {
         results.push({
           row: rowNumber,
           status: 'FAILED',
           identifier: dto.identifier,
           data: dto,
-          error: 'Unexpected error during import',
+          error:
+            err instanceof Error
+              ? err.message
+              : 'Unexpected error during import',
         });
       }
     }
