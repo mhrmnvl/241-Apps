@@ -1,9 +1,8 @@
 import { ConflictException, Injectable, Logger } from '@nestjs/common';
-import { EventEmitter2 } from '@nestjs/event-emitter';
 import { CreateStudentDto } from '../dto/request/create-student.dto.js';
 import { StudentResponseDto } from '../dto/response/student-response.dto.js';
 import { StudentRepository } from '../repositories/student.repository.js';
-import { StudentCreatedEvent } from '../domain/events/student.events.js';
+import { EnsureStudentEnrollmentUseCase } from '../../enrollment/use-cases/ensure-student-enrollment.use-case.js';
 import { hashPassword } from '../../../shared/utils/hash.helper.js';
 
 @Injectable()
@@ -12,7 +11,7 @@ export class CreateStudentUseCase {
 
   constructor(
     private readonly repo: StudentRepository,
-    private readonly eventEmitter: EventEmitter2,
+    private readonly ensureStudentEnrollment: EnsureStudentEnrollmentUseCase,
   ) {}
 
   async execute(dto: CreateStudentDto): Promise<StudentResponseDto> {
@@ -42,13 +41,7 @@ export class CreateStudentUseCase {
     }
 
     if (dto.classroomId) {
-      this.eventEmitter.emit(
-        'student.created',
-        new StudentCreatedEvent(student.id, dto.classroomId),
-      );
-      this.logger.log(
-        `Dispatched student.created event for student ${nis || dto.identifier} with classroomId ${dto.classroomId}`,
-      );
+      await this.ensureStudentEnrollment.execute(student.id, dto.classroomId);
     }
 
     this.logger.log(`Student created: ${nis || dto.identifier}`);

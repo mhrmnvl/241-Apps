@@ -1,11 +1,10 @@
 import { ConflictException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserGender } from '@prisma/client';
-import { EventEmitter2 } from '@nestjs/event-emitter';
 import { CreateStudentDto } from '../dto/request/create-student.dto.js';
 import { StudentRepository } from '../repositories/student.repository.js';
 import { CreateStudentUseCase } from './create-student.use-case.js';
-import { StudentCreatedEvent } from '../domain/events/student.events.js';
+import { EnsureStudentEnrollmentUseCase } from '../../enrollment/use-cases/ensure-student-enrollment.use-case.js';
 
 describe('CreateStudentUseCase', () => {
   let useCase: CreateStudentUseCase;
@@ -16,8 +15,8 @@ describe('CreateStudentUseCase', () => {
     create: jest.fn(),
   };
 
-  const mockEventEmitter = {
-    emit: jest.fn(),
+  const mockEnsureStudentEnrollment = {
+    execute: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -25,7 +24,10 @@ describe('CreateStudentUseCase', () => {
       providers: [
         CreateStudentUseCase,
         { provide: StudentRepository, useValue: mockStudentRepo },
-        { provide: EventEmitter2, useValue: mockEventEmitter },
+        {
+          provide: EnsureStudentEnrollmentUseCase,
+          useValue: mockEnsureStudentEnrollment,
+        },
       ],
     }).compile();
 
@@ -61,7 +63,7 @@ describe('CreateStudentUseCase', () => {
       gradeId: '550e8400-e29b-41d4-a716-446655440099',
     };
 
-    it('should create a student and emit student.created event', async () => {
+    it('should create a student and ensure classroom enrollment', async () => {
       mockStudentRepo.findByNis.mockResolvedValue(null);
       mockStudentRepo.findByNisn.mockResolvedValue(null);
       mockStudentRepo.create.mockResolvedValue({ student: mockStudent });
@@ -74,9 +76,9 @@ describe('CreateStudentUseCase', () => {
         dto,
         expect.any(String),
       );
-      expect(mockEventEmitter.emit).toHaveBeenCalledWith(
-        'student.created',
-        new StudentCreatedEvent('stu-1', dto.classroomId),
+      expect(mockEnsureStudentEnrollment.execute).toHaveBeenCalledWith(
+        'stu-1',
+        dto.classroomId,
       );
       expect(result).toEqual({
         id: 'stu-1',
@@ -88,7 +90,7 @@ describe('CreateStudentUseCase', () => {
       });
     });
 
-    it('should create a student without emitting event (no classroomId)', async () => {
+    it('should create a student without ensuring enrollment (no classroomId)', async () => {
       const ppdbDto: CreateStudentDto = { ...dto, classroomId: undefined };
       mockStudentRepo.findByNis.mockResolvedValue(null);
       mockStudentRepo.findByNisn.mockResolvedValue(null);
@@ -96,7 +98,7 @@ describe('CreateStudentUseCase', () => {
 
       const result = await useCase.execute(ppdbDto);
 
-      expect(mockEventEmitter.emit).not.toHaveBeenCalled();
+      expect(mockEnsureStudentEnrollment.execute).not.toHaveBeenCalled();
       expect(result).toEqual({
         id: 'stu-1',
         userId: 'usr-1',
