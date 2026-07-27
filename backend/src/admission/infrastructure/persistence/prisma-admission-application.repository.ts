@@ -10,6 +10,10 @@ import {
 import { PrismaService } from '../../../core/database/prisma.service.js';
 import { AdmissionApplicationQueryDto } from '../../dto/request/admission-query.dto.js';
 import { EnrollApplicantDto } from '../../dto/request/admin-actions.dto.js';
+import {
+  isEligibleAdmissionParent,
+  hasCompleteAddress,
+} from '../../domain/enroll-as-student.rules.js';
 import { PaginatedResult } from '../../../shared/domain/interfaces/repository.interface.js';
 import {
   applicationAdminDetailInclude,
@@ -354,7 +358,7 @@ export class PrismaAdmissionApplicationRepository extends IAdmissionApplicationR
       //    parents missing required fields are skipped, not blocking.
       let parentsLinked = 0;
       for (const ap of application.parents) {
-        if (!ap.nik || !ap.birthPlace || !ap.birthDate || !ap.occupationId) {
+        if (!isEligibleAdmissionParent(ap)) {
           this.logger.warn(
             `Skipping incomplete admission parent ${ap.relation} for ${application.registrationNumber}`,
           );
@@ -385,15 +389,7 @@ export class PrismaAdmissionApplicationRepository extends IAdmissionApplicationR
       }
 
       // 4. Address from the application's domicile section.
-      if (
-        application.street &&
-        application.rt &&
-        application.rw &&
-        application.village &&
-        application.district &&
-        application.city &&
-        application.province
-      ) {
+      if (hasCompleteAddress(application)) {
         await tx.address.create({
           data: {
             studentId: student.id,
