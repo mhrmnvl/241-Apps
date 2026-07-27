@@ -6,6 +6,14 @@
   "exports": {
     "./*": "./src/features/*/index.ts"
   },
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^6.0.7",
+    "vitest": "^3.2.4"
+  },
   "dependencies": {
     "@241/ui": "workspace:*",
     "@241/shared": "workspace:*",
