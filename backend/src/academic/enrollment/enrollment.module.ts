@@ -11,8 +11,8 @@ import { GetStudentEnrollmentsUseCase } from './use-cases/get-student-enrollment
 import { TransferStudentUseCase } from './use-cases/transfer-student.use-case.js';
 import { BulkTransferStudentUseCase } from './use-cases/bulk-transfer-student.use-case.js';
 import { UpdateStudentEnrollmentUseCase } from './use-cases/update-student-enrollment.use-case.js';
+import { EnsureStudentEnrollmentUseCase } from './use-cases/ensure-student-enrollment.use-case.js';
 import { IEnrollmentRepository } from './domain/interfaces/enrollment-repository.interface.js';
-import { StudentEventListener } from './presentation/listeners/student-event.listener.js';
 
 @Module({
   imports: [SemesterModule],
@@ -31,8 +31,8 @@ import { StudentEventListener } from './presentation/listeners/student-event.lis
     TransferStudentUseCase,
     BulkTransferStudentUseCase,
     DropStudentUseCase,
-    StudentEventListener,
+    EnsureStudentEnrollmentUseCase,
   ],
-  exports: [IEnrollmentRepository],
+  exports: [IEnrollmentRepository, EnsureStudentEnrollmentUseCase],
 })
 export class EnrollmentModule {}

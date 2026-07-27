@@ -1,5 +1,4 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { EventEmitter2 } from '@nestjs/event-emitter';
 import { IGradeRepository } from '../../grade/domain/interfaces/grade-repository.interface.js';
 import { ClassroomRepository } from '../../classroom/index.js';
 import { ResolveBulkImportConflictsDto } from '../dto/request/resolve-bulk-import-conflicts.dto.js';
@@ -7,7 +6,7 @@ import { ResolveBulkImportResponseDto } from '../dto/response/resolve-bulk-impor
 import { UpdateStudentUseCase } from './update-student.use-case.js';
 import { UpdateStudentProfileUseCase } from './update-student-profile.use-case.js';
 import { CreateStudentUseCase } from './create-student.use-case.js';
-import { StudentCreatedEvent } from '../domain/events/student.events.js';
+import { EnsureStudentEnrollmentUseCase } from '../../enrollment/use-cases/ensure-student-enrollment.use-case.js';
 
 @Injectable()
 export class ResolveBulkImportConflictsUseCase {
@@ -16,10 +15,10 @@ export class ResolveBulkImportConflictsUseCase {
   constructor(
     private readonly gradeRepo: IGradeRepository,
     private readonly classroomRepo: ClassroomRepository,
-    private readonly eventEmitter: EventEmitter2,
     private readonly updateStudent: UpdateStudentUseCase,
     private readonly updateStudentProfile: UpdateStudentProfileUseCase,
     private readonly createStudent: CreateStudentUseCase,
+    private readonly ensureStudentEnrollment: EnsureStudentEnrollmentUseCase,
   ) {}
 
   async execute(
@@ -42,15 +41,17 @@ export class ResolveBulkImportConflictsUseCase {
           gradeId = grade?.id;
         }
 
-        if (!item.existingId) {
-          let classroomId: string | undefined;
-          if (item.data.classroomCode) {
-            const classroom = await this.classroomRepo.findByCode(
-              item.data.classroomCode,
-            );
-            classroomId = classroom?.id;
-          }
+        let classroomId: string | undefined;
+        if (item.data.classroomCode) {
+          const classroom = await this.classroomRepo.findByCode(
+            item.data.classroomCode,
+          );
+          classroomId = classroom?.id;
+        }
 
+        if (!item.existingId) {
+          // classroomId is passed through; CreateStudentUseCase itself calls
+          // EnsureStudentEnrollmentUseCase when it's set.
           await this.createStudent.execute({
             identifier: item.data.identifier,
             password: item.data.password,
@@ -68,21 +69,11 @@ export class ResolveBulkImportConflictsUseCase {
           });
           updated++;
         } else {
-          let classroomId: string | undefined;
-          if (item.data.classroomCode) {
-            const classroom = await this.classroomRepo.findByCode(
-              item.data.classroomCode,
-            );
-            classroomId = classroom?.id;
-          }
-          const updatedStudent = await this.updateStudent.execute(
-            item.existingId,
-            {
-              nis: item.data.nis,
-              nisn: item.data.nisn,
-              ...(gradeId && { gradeId }),
-            },
-          );
+          await this.updateStudent.execute(item.existingId, {
+            nis: item.data.nis,
+            nisn: item.data.nisn,
+            ...(gradeId && { gradeId }),
+          });
           await this.updateStudentProfile.execute(item.existingId, {
             name: item.data.name,
             nik: item.data.nik,
@@ -93,15 +84,10 @@ export class ResolveBulkImportConflictsUseCase {
             phone: item.data.phone,
           });
           if (classroomId) {
-            const alreadyEnrolled = updatedStudent.enrollments.some(
-              (e) => e.classroomId === classroomId,
+            await this.ensureStudentEnrollment.execute(
+              item.existingId,
+              classroomId,
             );
-            if (!alreadyEnrolled) {
-              this.eventEmitter.emit(
-                'student.created',
-                new StudentCreatedEvent(item.existingId, classroomId),
-              );
-            }
           }
           updated++;
         }

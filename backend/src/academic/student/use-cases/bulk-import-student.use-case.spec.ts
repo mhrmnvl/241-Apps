@@ -1,13 +1,11 @@
 import { BadRequestException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import ExcelJS from 'exceljs';
-import { EventEmitter2 } from '@nestjs/event-emitter';
 import { IGradeRepository } from '../../grade/domain/interfaces/grade-repository.interface.js';
 import { ClassroomRepository } from '../../classroom/index.js';
 import { StudentRepository } from '../repositories/student.repository.js';
 import { BulkImportStudentsUseCase } from './bulk-import-student.use-case.js';
 import { ExcelStudentParser } from '../infrastructure/parsers/excel-student.parser.js';
-import { StudentCreatedEvent } from '../domain/events/student.events.js';
 
 async function makeExcelBuffer(
   rows: Record<string, ExcelJS.CellValue>[],
@@ -56,10 +54,6 @@ describe('BulkImportStudentsUseCase', () => {
     findByLevel: jest.fn(),
   };
 
-  const mockEventEmitter = {
-    emit: jest.fn(),
-  };
-
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -70,7 +64,6 @@ describe('BulkImportStudentsUseCase', () => {
           provide: IGradeRepository,
           useValue: mockClassroomLevelRepo,
         },
-        { provide: EventEmitter2, useValue: mockEventEmitter },
         ExcelStudentParser,
       ],
     }).compile();
@@ -92,7 +85,7 @@ describe('BulkImportStudentsUseCase', () => {
       );
     });
 
-    it('should import a valid row with classroom code successfully and emit student.created event', async () => {
+    it('should import a valid row with classroom code successfully', async () => {
       mockClassroomRepo.findByCode.mockResolvedValue({
         id: 'cls-1',
         code: 'VII-A',
@@ -110,13 +103,9 @@ describe('BulkImportStudentsUseCase', () => {
       expect(result.failed).toBe(0);
       expect(result.results[0].status).toBe('SUCCESS');
       expect(mockClassroomRepo.findByCode).toHaveBeenCalledWith('VII-A');
-      expect(mockEventEmitter.emit).toHaveBeenCalledWith(
-        'student.created',
-        new StudentCreatedEvent('stu-1', 'cls-1'),
-      );
     });
 
-    it('should import a PPDB student without classroom code and not emit event', async () => {
+    it('should import a PPDB student without classroom code', async () => {
       const ppdbRow = { ...validRow, Kelas: '' };
       mockStudentRepo.findByNis.mockResolvedValue(null);
       mockStudentRepo.findByNisn.mockResolvedValue(null);
@@ -127,7 +116,6 @@ describe('BulkImportStudentsUseCase', () => {
 
       expect(result.success).toBe(1);
       expect(mockClassroomRepo.findByCode).not.toHaveBeenCalled();
-      expect(mockEventEmitter.emit).not.toHaveBeenCalled();
     });
 
     it('should fail row when classroom code is not found', async () => {

@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
-import { EventEmitter2 } from '@nestjs/event-emitter';
 import { IGradeRepository } from '../../grade/domain/interfaces/grade-repository.interface.js';
 import { ClassroomRepository } from '../../classroom/index.js';
 import {
@@ -12,7 +11,6 @@ import { BulkImportStudentRowDto } from '../dto/request/bulk-import-student.dto.
 import { CreateStudentDto } from '../dto/request/create-student.dto.js';
 import { StudentRepository } from '../repositories/student.repository.js';
 import { ExcelStudentParser } from '../infrastructure/parsers/excel-student.parser.js';
-import { StudentCreatedEvent } from '../domain/events/student.events.js';
 import { hashPassword } from '../../../shared/utils/hash.helper.js';
 
 @Injectable()
@@ -21,7 +19,6 @@ export class BulkImportStudentsUseCase {
     private readonly repo: StudentRepository,
     private readonly classroomRepo: ClassroomRepository,
     private readonly gradeRepo: IGradeRepository,
-    private readonly eventEmitter: EventEmitter2,
     private readonly excelParser: ExcelStudentParser,
   ) {}
 
