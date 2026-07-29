@@ -15,6 +15,7 @@ import { PrismaStudentAddressRepository } from './infrastructure/persistence/pri
 import { PrismaStudentParentRepository } from './infrastructure/persistence/prisma-student-parent.repository.js';
 import { ExcelStudentParser } from './infrastructure/parsers/excel-student.parser.js';
 import { CreateStudentUseCase } from './use-cases/create-student.use-case.js';
+import { CreateStudentWithRelationsUseCase } from './use-cases/create-student-with-relations.use-case.js';
 import { DeleteStudentUseCase } from './use-cases/delete-student.use-case.js';
 import { GetStudentByIdUseCase } from './use-cases/get-student-by-id.use-case.js';
 import { GetStudentsUseCase } from './use-cases/get-students.use-case.js';
@@ -54,6 +55,7 @@ import { UpdateStudentProfileUseCase } from './use-cases/update-student-profile.
     },
     ExcelStudentParser,
     CreateStudentUseCase,
+    CreateStudentWithRelationsUseCase,
     DeleteStudentUseCase,
     GetStudentByIdUseCase,
     GetStudentsUseCase,

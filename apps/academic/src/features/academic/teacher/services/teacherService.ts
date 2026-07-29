@@ -21,9 +21,16 @@ export const teacherService = {
     const store = useTeacherStore()
     store.loading = true
     try {
-      const params: TeacherQueryParams = { page: 1, limit: 100 }
+      const params: TeacherQueryParams = {
+        page: store.currentPage,
+        limit: store.pageSize,
+      }
       if (store.filters.keyword.trim())
         params.search = store.filters.keyword.trim()
+      if (store.filters.positionCategoryId)
+        params.positionCategoryId = store.filters.positionCategoryId
+      if (store.filters.statusFilter !== 'all')
+        params.isActive = store.filters.statusFilter === 'active'
 
       const res = await teacherApi.getTeachers(params)
       store.teachers = res.data.data

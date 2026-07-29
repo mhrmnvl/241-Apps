@@ -49,6 +49,7 @@ import { ResolveBulkImportResponseDto } from '../dto/response/resolve-bulk-impor
 import { BulkImportStudentsUseCase } from '../use-cases/bulk-import-student.use-case.js';
 import { ResolveBulkImportConflictsUseCase } from '../use-cases/resolve-bulk-import-conflicts.use-case.js';
 import { CreateStudentUseCase } from '../use-cases/create-student.use-case.js';
+import { CreateStudentWithRelationsUseCase } from '../use-cases/create-student-with-relations.use-case.js';
 import { DeleteStudentUseCase } from '../use-cases/delete-student.use-case.js';
 import { ExportStudentsUseCase } from '../use-cases/export-student.use-case.js';
 import { GetStudentByIdUseCase } from '../use-cases/get-student-by-id.use-case.js';
@@ -56,6 +57,7 @@ import { GetStudentsUseCase } from '../use-cases/get-students.use-case.js';
 import { ToggleStudentActiveUseCase } from '../use-cases/toggle-student-active.use-case.js';
 import { UpdateStudentUseCase } from '../use-cases/update-student.use-case.js';
 import { StudentWithDetails } from '../domain/interfaces/student-repository.interface.js';
+import { CreateStudentWithRelationsDto } from '../dto/request/create-student-with-relations.dto.js';
 
 @ApiTags('Students')
 @ApiBearerAuth()
@@ -66,6 +68,7 @@ export class StudentController {
     private readonly getStudentsService: GetStudentsUseCase,
     private readonly getStudentByIdService: GetStudentByIdUseCase,
     private readonly createStudentService: CreateStudentUseCase,
+    private readonly createStudentWithRelationsService: CreateStudentWithRelationsUseCase,
     private readonly updateStudentService: UpdateStudentUseCase,
     private readonly deleteStudentService: DeleteStudentUseCase,
     private readonly toggleStudentActiveService: ToggleStudentActiveUseCase,
@@ -161,6 +164,23 @@ export class StudentController {
     @CurrentUser() creator: AuthenticatedUser,
   ): Promise<StudentResponseDto> {
     return this.createStudentService.execute(dto);
+  }
+
+  @Post('with-relations')
+  @RequirePermissions('students.create')
+  @ApiOperation({
+    summary:
+      'Create a student with address and parents atomically (single transaction)',
+  })
+  @ApiResponse({ status: 201, type: StudentResponseDto })
+  @ApiResponse({
+    status: 409,
+    description: 'Duplicate NIS, NISN, or parent NIK',
+  })
+  async createWithRelations(
+    @Body() dto: CreateStudentWithRelationsDto,
+  ): Promise<StudentWithDetails> {
+    return this.createStudentWithRelationsService.execute(dto);
   }
 
   @Post('bulk-import')

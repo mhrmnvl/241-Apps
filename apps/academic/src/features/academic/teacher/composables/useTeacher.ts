@@ -10,25 +10,38 @@ export function useTeacher() {
     positions,
     positionCategories,
     totalTeachers,
+    currentPage,
+    pageSize,
     filters,
     loading,
     isSaving,
     isSavingPosition,
     formError,
-    filteredTeachers,
   } = storeToRefs(store)
+
+  const setPage = async (page: number) => {
+    store.currentPage = page
+    await teacherService.fetchTeachers()
+  }
+
+  const setPageSize = async (size: number) => {
+    store.pageSize = size
+    store.currentPage = 1
+    await teacherService.fetchTeachers()
+  }
 
   return {
     teachers,
     positions,
     positionCategories,
     totalTeachers,
+    currentPage,
+    pageSize,
     filters,
     loading,
     isSaving,
     isSavingPosition,
     formError,
-    filteredTeachers,
     fetchTeachers: teacherService.fetchTeachers,
     fetchPositions: teacherService.fetchPositions,
     fetchPositionCategories: teacherService.fetchPositionCategories,
@@ -39,5 +52,7 @@ export function useTeacher() {
     deleteTeacher: teacherService.deleteTeacher,
     toggleActive: teacherService.toggleActive,
     changePassword: teacherService.changePassword,
+    setPage,
+    setPageSize,
   }
 }

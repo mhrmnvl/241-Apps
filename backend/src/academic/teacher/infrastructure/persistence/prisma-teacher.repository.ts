@@ -41,6 +41,7 @@ export class PrismaTeacherRepository extends ITeacherRepository {
       search,
       employmentTypeId,
       academicYearId,
+      positionCategoryId,
       isActive,
     } = query;
     const skip = (page - 1) * limit;
@@ -55,6 +56,15 @@ export class PrismaTeacherRepository extends ITeacherRepository {
         ...(isActive !== undefined && { isActive }),
       },
       ...(employmentTypeId && { employmentTypeId }),
+      ...(positionCategoryId && {
+        teacherPositions: {
+          some: {
+            isPrimary: true,
+            deletedAt: null,
+            position: { categoryId: positionCategoryId },
+          },
+        },
+      }),
       ...(resolvedAcademicYearId && {
         OR: [
           {

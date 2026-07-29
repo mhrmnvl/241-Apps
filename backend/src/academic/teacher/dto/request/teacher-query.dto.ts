@@ -28,6 +28,14 @@ export class TeacherQueryDto extends PaginationQueryDto {
   academicYearId?: string;
 
   @ApiPropertyOptional({
+    description: 'Filter by position category ID (primary position)',
+    format: 'uuid',
+  })
+  @IsOptional()
+  @IsUUID()
+  positionCategoryId?: string;
+
+  @ApiPropertyOptional({
     description: 'Filter by active status (user.isActive)',
   })
   @IsOptional()

@@ -112,20 +112,13 @@ export interface StudentParentInput {
   phone?: string
   occupationId: string
   income?: IncomeRange
-  isPrimary: boolean
+  isPrimary?: boolean
 }
 
-export interface CreateStudentWithRelationsInput {
-  core: StudentSavePayload
+// Flat payload matching POST /students/with-relations DTO
+export interface CreateStudentWithRelationsInput extends StudentSavePayload {
   address?: AddressSavePayload | null
   parents?: StudentParentInput[]
-}
-
-export interface CreateStudentWithRelationsResult {
-  success: boolean
-  studentId?: string
-  userId?: string
-  warnings: string[]
 }
 
 export interface StudentExportParams {

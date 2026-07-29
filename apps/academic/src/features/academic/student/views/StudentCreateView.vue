@@ -1,4 +1,4 @@
-﻿<script setup lang="ts">
+<script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { toTypedSchema } from '@vee-validate/zod'
@@ -222,21 +222,19 @@ async function submit() {
   submitting.value = true
   try {
     const result = await studentService.createStudentWithRelations({
-      core: {
-        name: values.name ?? '',
-        nik: values.nik ?? '',
-        gender: values.gender ?? 'MALE',
-        birthPlace: values.birthPlace ?? '',
-        birthDate: values.birthDate ?? '',
-        email: values.email || undefined,
-        phone: values.phone || undefined,
-        nis: values.nis || undefined,
-        nisn: values.nisn || undefined,
-        gradeId: values.gradeId || undefined,
-        classroomId: values.classroomId || undefined,
-        identifier: values.nis || undefined,
-        password: values.nis || undefined,
-      },
+      name: values.name ?? '',
+      nik: values.nik ?? '',
+      gender: values.gender ?? 'MALE',
+      birthPlace: values.birthPlace ?? '',
+      birthDate: values.birthDate ?? '',
+      email: values.email || undefined,
+      phone: values.phone || undefined,
+      nis: values.nis || undefined,
+      nisn: values.nisn || undefined,
+      gradeId: values.gradeId || undefined,
+      classroomId: values.classroomId || undefined,
+      identifier: values.nis || undefined,
+      password: values.nis || undefined,
       address: hasAddress.value ? { ...address.value } : null,
       parents: parents.value,
     })
@@ -246,7 +244,6 @@ async function submit() {
       return
     }
     toast.success('Siswa baru berhasil disimpan.')
-    result.warnings.forEach((w) => toast.warning(w))
     if (result.userId) {
       void router.push(`/profile/STUDENT/${result.userId}`)
     } else {

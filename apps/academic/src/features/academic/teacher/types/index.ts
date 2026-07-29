@@ -58,6 +58,7 @@ export interface TeacherQueryParams {
   search?: string
   employmentTypeId?: string
   academicYearId?: string
+  positionCategoryId?: string
   isActive?: boolean
 }
 

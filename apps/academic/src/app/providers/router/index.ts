@@ -33,6 +33,7 @@ import { attendanceRoutes } from '@/features/academic/attendance'
 import { timeSlotRoutes } from '@/features/academic/time-slot'
 import { raporRoutes } from '@/features/academic/rapor/routes'
 import { announcementRoutes } from '@/features/academic/announcement'
+import { academicInfoRoutes } from '@/features/academic/academic-info'
 import { parentRoutes } from '@/features/academic/parent'
 import { studentParentRoutes } from '@/features/academic/student-parent'
 import { positionCategoryRoutes } from '@/features/academic/position-category'
@@ -91,6 +92,7 @@ const router = createRouter({
     ...studentScoreRoutes,
     ...raporRoutes,
     ...announcementRoutes,
+    ...academicInfoRoutes,
     ...parentRoutes,
     ...studentParentRoutes,
     ...positionCategoryRoutes,

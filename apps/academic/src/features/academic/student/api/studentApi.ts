@@ -13,6 +13,7 @@ import type {
   BulkImportResult,
   ResolveBulkImportConflict,
   ResolveBulkImportResult,
+  CreateStudentWithRelationsInput,
 } from '../types'
 
 export const studentApi = {
@@ -33,6 +34,13 @@ export const studentApi = {
   createStudent: (payload: StudentSavePayload) => {
     return api.post<ApiSingleResponse<StudentCreateResult>>(
       '/students',
+      payload,
+    )
+  },
+
+  createStudentWithRelations: (payload: CreateStudentWithRelationsInput) => {
+    return api.post<ApiSingleResponse<Student>>(
+      '/students/with-relations',
       payload,
     )
   },

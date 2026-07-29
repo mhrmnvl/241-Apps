@@ -72,11 +72,15 @@ const {
   grades,
   loading,
   filters,
+  totalStudents,
+  currentPage,
+  pageSize,
   fetchStudents,
   fetchClassrooms,
   fetchGrades,
   deleteStudent,
-  filteredStudents,
+  setPage,
+  setPageSize,
 } = useStudent()
 
 const tableColumns = computed(() =>
@@ -130,6 +134,7 @@ watch(
   () => filters.value.gradeId,
   async (newGradeId) => {
     filters.value.classroomId = 'all'
+    currentPage.value = 1
     await fetchClassrooms(newGradeId === 'all' ? undefined : newGradeId)
     await fetchStudents()
   },
@@ -137,12 +142,18 @@ watch(
 
 watch(
   () => filters.value.classroomId,
-  () => fetchStudents(),
+  () => {
+    currentPage.value = 1
+    void fetchStudents()
+  },
 )
 
 watchDebounced(
   () => filters.value.keyword,
-  () => fetchStudents(),
+  () => {
+    currentPage.value = 1
+    void fetchStudents()
+  },
   { debounce: 400 },
 )
 
@@ -290,9 +301,14 @@ onMounted(async () => {
 
           <DataTable
             :columns="tableColumns"
-            :data="filteredStudents"
+            :data="students"
             :is-loading="loading"
+            :total-items="totalStudents"
+            :page="currentPage"
+            :page-size="pageSize"
             item-label="siswa"
+            @update:page="setPage"
+            @update:page-size="setPageSize"
           >
             <template #header-right>
               <div class="relative w-full sm:w-48 max-w-[200px]">

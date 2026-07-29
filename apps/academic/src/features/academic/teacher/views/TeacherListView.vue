@@ -50,10 +50,14 @@ const breadcrumbs = [{ title: 'Guru', href: '#' }, { title: 'Daftar Guru' }]
 const router = useRouter()
 
 const {
+  teachers,
   positions,
   positionCategories,
   loading,
   filters,
+  totalTeachers,
+  currentPage,
+  pageSize,
   isSaving,
   formError,
   fetchTeachers,
@@ -63,7 +67,8 @@ const {
   savePosition,
   deletePosition,
   deleteTeacher,
-  filteredTeachers,
+  setPage,
+  setPageSize,
 } = useTeacher()
 
 const {
@@ -77,7 +82,7 @@ const {
   handleFileUpload,
   handleResolveConflicts,
 } = useTeacherImportExport({
-  teachers: filteredTeachers,
+  teachers: teachers,
   onImportSuccess: () => {
     void fetchTeachers()
   },
@@ -163,29 +168,51 @@ const isFilterDialogOpen = ref(false)
 
 const activeFiltersCount = computed(() => {
   let count = 0
-  if (filters.value.categoryFilter !== 'all') count++
-  if (filters.value.positionFilter !== 'all') count++
+  if (filters.value.positionCategoryId) count++
   if (filters.value.statusFilter !== 'all') count++
   return count
 })
 
 function resetAllFilters() {
-  filters.value.categoryFilter = 'all'
-  filters.value.positionFilter = 'all'
+  filters.value.positionCategoryId = ''
   filters.value.statusFilter = 'all'
 }
 
 function handleFilterChange(
-  key: 'categoryFilter' | 'positionFilter' | 'statusFilter',
+  key: 'positionCategoryId' | 'statusFilter',
   value: unknown,
 ) {
-  filters.value[key] = typeof value === 'string' ? value : 'all'
+  if (key === 'positionCategoryId') {
+    filters.value[key] =
+      typeof value === 'string' && value !== 'all' ? value : ''
+  } else {
+    filters.value[key] = typeof value === 'string' ? value : 'all'
+  }
 }
 
 watchDebounced(
   () => filters.value.keyword,
-  () => fetchTeachers(),
+  () => {
+    currentPage.value = 1
+    void fetchTeachers()
+  },
   { debounce: 400 },
+)
+
+watch(
+  () => filters.value.positionCategoryId,
+  () => {
+    currentPage.value = 1
+    void fetchTeachers()
+  },
+)
+
+watch(
+  () => filters.value.statusFilter,
+  () => {
+    currentPage.value = 1
+    void fetchTeachers()
+  },
 )
 
 onMounted(() => {
@@ -272,9 +299,9 @@ onMounted(() => {
             <!-- Desktop Layout: Inline selects -->
             <div class="hidden lg:flex lg:flex-row lg:items-center gap-3">
               <Select
-                :model-value="filters.categoryFilter"
+                :model-value="filters.positionCategoryId || 'all'"
                 @update:model-value="
-                  handleFilterChange('categoryFilter', $event)
+                  handleFilterChange('positionCategoryId', $event)
                 "
               >
                 <SelectTrigger
@@ -290,29 +317,6 @@ onMounted(() => {
                     :value="cat.id"
                   >
                     {{ cat.name }}
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Select
-                :model-value="filters.positionFilter"
-                @update:model-value="
-                  handleFilterChange('positionFilter', $event)
-                "
-              >
-                <SelectTrigger
-                  class="w-full lg:w-fit lg:min-w-[150px] px-3! gap-2!"
-                >
-                  <SelectValue placeholder="Semua Jabatan" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all"> Semua Jabatan </SelectItem>
-                  <SelectItem
-                    v-for="pos in positions"
-                    :key="pos.id"
-                    :value="pos.id"
-                  >
-                    {{ pos.name }}
                   </SelectItem>
                 </SelectContent>
               </Select>
@@ -356,9 +360,14 @@ onMounted(() => {
           <div class="mt-0">
             <DataTable
               :columns="tableColumns"
-              :data="filteredTeachers"
+              :data="teachers"
               :is-loading="loading"
+              :total-items="totalTeachers"
+              :page="currentPage"
+              :page-size="pageSize"
               item-label="guru"
+              @update:page="setPage"
+              @update:page-size="setPageSize"
             >
               <template #header-right>
                 <div class="relative w-full sm:w-48 max-w-[200px]">
@@ -397,8 +406,10 @@ onMounted(() => {
               >Kategori</label
             >
             <Select
-              :model-value="filters.categoryFilter"
-              @update:model-value="handleFilterChange('categoryFilter', $event)"
+              :model-value="filters.positionCategoryId || 'all'"
+              @update:model-value="
+                handleFilterChange('positionCategoryId', $event)
+              "
             >
               <SelectTrigger class="w-full">
                 <SelectValue placeholder="Semua Kategori" />
@@ -411,31 +422,6 @@ onMounted(() => {
                   :value="cat.id"
                 >
                   {{ cat.name }}
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <!-- Position -->
-          <div class="space-y-1.5">
-            <label class="text-xs font-semibold text-muted-foreground"
-              >Jabatan</label
-            >
-            <Select
-              :model-value="filters.positionFilter"
-              @update:model-value="handleFilterChange('positionFilter', $event)"
-            >
-              <SelectTrigger class="w-full">
-                <SelectValue placeholder="Semua Jabatan" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all"> Semua Jabatan </SelectItem>
-                <SelectItem
-                  v-for="pos in positions"
-                  :key="pos.id"
-                  :value="pos.id"
-                >
-                  {{ pos.name }}
                 </SelectItem>
               </SelectContent>
             </Select>

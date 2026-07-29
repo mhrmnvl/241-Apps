@@ -3,6 +3,7 @@ import { StudentQueryDto } from '../../dto/request/student-query.dto.js';
 import { ExportStudentQueryDto } from '../../dto/request/export-student-query.dto.js';
 import { CreateStudentDto } from '../../dto/request/create-student.dto.js';
 import { UpdateStudentDto } from '../../dto/request/update-student.dto.js';
+import { CreateStudentWithRelationsDto } from '../../dto/request/create-student-with-relations.dto.js';
 import { UpdateProfileDto } from '../../../../platform/profile/index.js';
 import { PaginatedResult } from '../../../../shared/domain/interfaces/repository.interface.js';
 
@@ -53,6 +54,10 @@ export abstract class IStudentRepository {
     dto: CreateStudentDto,
     passwordHash: string,
   ): Promise<CreateStudentResult>;
+  abstract createWithRelations(
+    dto: CreateStudentWithRelationsDto,
+    passwordHash: string,
+  ): Promise<StudentWithDetails>;
   abstract update(
     id: string,
     dto: UpdateStudentDto,

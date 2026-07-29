@@ -3,6 +3,7 @@ import { Prisma, Student, User, Profile, StudentStatus } from '@prisma/client';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
 import { AccountProvisioningService } from '../../../../platform/user/index.js';
 import { CreateStudentDto } from '../../dto/request/create-student.dto.js';
+import { CreateStudentWithRelationsDto } from '../../dto/request/create-student-with-relations.dto.js';
 import { ExportStudentQueryDto } from '../../dto/request/export-student-query.dto.js';
 import { StudentQueryDto } from '../../dto/request/student-query.dto.js';
 import { UpdateStudentDto } from '../../dto/request/update-student.dto.js';
@@ -83,7 +84,10 @@ export class PrismaStudentRepository extends IStudentRepository {
         include: STUDENT_INCLUDE,
         skip,
         take: limit,
-        orderBy: { user: { profile: { name: 'asc' } } },
+        orderBy: [
+          { grade: { level: 'asc' } },
+          { user: { profile: { name: 'asc' } } },
+        ],
       }),
       this.prisma.student.count({ where }),
     ]);
@@ -310,5 +314,87 @@ export class PrismaStudentRepository extends IStudentRepository {
       orderBy: { code: 'asc' },
     });
     return classrooms.map((c) => c.code);
+  }
+
+  async createWithRelations(
+    dto: CreateStudentWithRelationsDto,
+    passwordHash: string,
+  ): Promise<StudentWithDetails> {
+    return this.prisma.$transaction(async (tx) => {
+      // 1. Create user + student
+      const user = await this.accountProvisioning.provision(tx, {
+        identifier: dto.identifier!,
+        passwordHash,
+        roleCode: 'STUDENT',
+        profile: {
+          name: dto.name,
+          nik: dto.nik,
+          gender: dto.gender,
+          birthPlace: dto.birthPlace,
+          birthDate: new Date(dto.birthDate),
+          email: dto.email,
+          phone: dto.phone,
+        },
+      });
+
+      const student = await tx.student.create({
+        data: {
+          userId: user.id,
+          nis: dto.nis ?? '',
+          nisn: dto.nisn ?? '',
+          status: StudentStatus.ACTIVE,
+          ...(dto.gradeId && { gradeId: dto.gradeId }),
+        },
+      });
+
+      // 2. Create address (optional)
+      if (dto.address) {
+        await tx.address.create({
+          data: {
+            studentId: student.id,
+            street: dto.address.street,
+            rt: dto.address.rt,
+            rw: dto.address.rw,
+            village: dto.address.village,
+            district: dto.address.district,
+            city: dto.address.city,
+            province: dto.address.province,
+            country: dto.address.country ?? 'Indonesia',
+            postalCode: dto.address.postalCode,
+            isPrimary: dto.address.isPrimary ?? true,
+          },
+        });
+      }
+
+      // 3. Create parents + links (optional)
+      for (const parentInput of dto.parents ?? []) {
+        const parent = await tx.parent.create({
+          data: {
+            name: parentInput.name,
+            nik: parentInput.nik,
+            birthPlace: parentInput.birthPlace,
+            birthDate: new Date(parentInput.birthDate),
+            email: parentInput.email,
+            phone: parentInput.phone,
+            occupationId: parentInput.occupationId,
+            income: parentInput.income,
+          },
+        });
+        await tx.studentParent.create({
+          data: {
+            studentId: student.id,
+            parentId: parent.id,
+            relation: parentInput.relation,
+            isPrimary: parentInput.isPrimary ?? false,
+          },
+        });
+      }
+
+      // 4. Return full student with details
+      return tx.student.findUniqueOrThrow({
+        where: { id: student.id },
+        include: STUDENT_INCLUDE,
+      });
+    });
   }
 }

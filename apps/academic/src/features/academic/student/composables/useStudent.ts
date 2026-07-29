@@ -6,6 +6,17 @@ export function useStudent() {
   const store = useStudentStore()
   const refs = storeToRefs(store)
 
+  const setPage = async (page: number) => {
+    store.currentPage = page
+    await studentService.fetchStudents()
+  }
+
+  const setPageSize = async (size: number) => {
+    store.pageSize = size
+    store.currentPage = 1
+    await studentService.fetchStudents()
+  }
+
   return {
     ...refs,
 
@@ -20,5 +31,7 @@ export function useStudent() {
     bulkImport: studentService.bulkImport,
     updateStudentAccount: studentService.updateStudentAccount,
     updateStudentCredentials: studentService.updateStudentCredentials,
+    setPage,
+    setPageSize,
   }
 }
