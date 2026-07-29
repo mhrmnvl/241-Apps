@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { toTypedSchema } from '@vee-validate/zod'
 import { useForm } from 'vee-validate'
@@ -43,10 +43,10 @@ import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
 import api from '@/shared/utils/api'
 import { teacherApi } from '../api/teacherApi'
 import { teacherService } from '../services/teacherService'
+import { usePositionCategoryFilter } from '../composables/usePositionCategoryFilter'
 import type {
   EmploymentTypeOption,
   PositionListItem,
-  PositionCategoryRef,
   TeacherPositionInput,
 } from '../types'
 import { positionCategoryLabel } from '../utils'
@@ -67,7 +67,6 @@ const steps = [
 
 const employmentTypes = ref<EmploymentTypeOption[]>([])
 const positions = ref<PositionListItem[]>([])
-const kategori = ref('')
 
 const formSchema = toTypedSchema(
   z.object({
@@ -119,18 +118,8 @@ const { values, validateField, setFieldValue } = useForm({
   },
 })
 
-const categoryOptions = computed(() => {
-  const map = new Map<string, PositionCategoryRef>()
-  for (const p of positions.value) {
-    if (p.category) map.set(p.category.id, p.category)
-  }
-  return [...map.values()]
-})
-
-const filteredPositions = computed(() => {
-  if (!kategori.value) return positions.value
-  return positions.value.filter((p) => p.category?.id === kategori.value)
-})
+const { kategori, categoryOptions, filteredPositions } =
+  usePositionCategoryFilter(positions)
 
 const { address, hasAddress, validateAddress } = useAddressSubform()
 

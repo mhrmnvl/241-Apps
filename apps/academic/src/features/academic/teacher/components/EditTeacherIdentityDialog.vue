@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, watch } from 'vue'
 import { toTypedSchema } from '@vee-validate/zod'
 import { useForm } from 'vee-validate'
 import * as z from 'zod'
-import api from '@/shared/utils/api'
 
 import { Button } from '@/ui/button'
 import {
@@ -31,7 +30,8 @@ import {
   SelectValue,
 } from '@/ui/select'
 import { useTeacher } from '../composables/useTeacher'
-import type { TeacherUpdatePayload, EmploymentTypeOption } from '../types'
+import { useEmploymentTypeOptions } from '../composables/useEmploymentTypeOptions'
+import type { TeacherUpdatePayload } from '../types'
 
 const props = defineProps<{
   open: boolean
@@ -58,21 +58,7 @@ const open = computed({
   },
 })
 
-const employmentTypes = ref<EmploymentTypeOption[]>([])
-
-onMounted(async () => {
-  try {
-    const res = await api.get<{ data: EmploymentTypeOption[] }>(
-      '/employment-types',
-      {
-        params: { limit: 100 },
-      },
-    )
-    employmentTypes.value = res.data.data ?? []
-  } catch {
-    // non-blocking
-  }
-})
+const { employmentTypes } = useEmploymentTypeOptions()
 
 const formSchema = toTypedSchema(
   z.object({

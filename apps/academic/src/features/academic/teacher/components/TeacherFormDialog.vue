@@ -1,19 +1,21 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, toRefs, watch } from 'vue'
+import { computed, ref, toRefs, watch } from 'vue'
 import { toTypedSchema } from '@vee-validate/zod'
 import { useForm } from 'vee-validate'
 import * as z from 'zod'
-import api from '@/shared/utils/api'
 import type {
   TeacherSavePayload,
   TeacherUpdatePayload,
   TeacherEditData,
   PositionListItem,
-  PositionCategoryRef,
-  EmploymentTypeOption,
 } from '../types'
-import { positionCategoryLabel } from '../utils'
-import { DatePicker } from '@/ui'
+import {
+  buildTeacherCreatePayload,
+  buildTeacherUpdatePayload,
+  resolvePositionChange,
+} from '../utils'
+import { useEmploymentTypeOptions } from '../composables/useEmploymentTypeOptions'
+import { usePositionCategoryFilter } from '../composables/usePositionCategoryFilter'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,15 +27,7 @@ import {
   AlertDialogTitle,
 } from '@/ui/alert-dialog'
 import { Button } from '@/ui/button'
-import { Input } from '@/ui/input'
 import { ScrollArea } from '@/ui/scroll-area'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/ui/select'
 import {
   Dialog,
   DialogContent,
@@ -42,13 +36,8 @@ import {
   DialogTitle,
 } from '@/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/tabs'
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/ui/form'
+import TeacherProfileTabFields from './TeacherProfileTabFields.vue'
+import TeacherEmploymentTabFields from './TeacherEmploymentTabFields.vue'
 
 const props = defineProps<{
   open: boolean
@@ -95,39 +84,13 @@ const activeTab = computed({
 
 const showConfirmAlert = ref(false)
 
-const kategori = ref('')
 const originalPositionId = ref('')
 const originalPositionLinkId = ref<string | null>(null)
 
-const employmentTypes = ref<EmploymentTypeOption[]>([])
-
-onMounted(async () => {
-  try {
-    const res = await api.get<{ data: EmploymentTypeOption[] }>(
-      '/employment-types',
-      {
-        params: { limit: 100 },
-      },
-    )
-    employmentTypes.value = res.data.data ?? []
-  } catch {
-    // non-blocking
-  }
-})
-
-const categoryOptions = computed(() => {
-  const map = new Map<string, PositionCategoryRef>()
-  for (const p of props.positions ?? []) {
-    if (p.category) map.set(p.category.id, p.category)
-  }
-  return [...map.values()]
-})
-
-const filteredPositions = computed(() => {
-  const list = props.positions ?? []
-  if (!kategori.value) return list
-  return list.filter((p) => p.category?.id === kategori.value)
-})
+const { employmentTypes } = useEmploymentTypeOptions()
+const positionsRef = computed(() => props.positions ?? [])
+const { kategori, categoryOptions, filteredPositions } =
+  usePositionCategoryFilter(positionsRef)
 
 const profilFields = [
   'name',
@@ -293,46 +256,26 @@ function confirmSave() {
 
 function emitSave(values: Record<string, unknown>) {
   if (isEditing.value) {
-    const newPositionId = (values.positionId as string) || ''
+    emit('save', buildTeacherUpdatePayload(values))
 
-    const updatePayload: TeacherUpdatePayload = {
-      nip: (values.nip as string) || undefined,
-      nuptk: (values.nuptk as string) || undefined,
-      employmentTypeId: values.employmentTypeId as string,
-    }
-    emit('save', updatePayload)
-
-    if (newPositionId && newPositionId !== originalPositionId.value) {
-      const teacherId = editData?.value?.id
-      if (teacherId) {
-        emit(
-          'save-position',
-          teacherId,
-          newPositionId,
-          originalPositionLinkId.value,
-        )
-      }
+    const positionChange = resolvePositionChange(
+      editData?.value?.id,
+      (values.positionId as string) || '',
+      originalPositionId.value,
+      originalPositionLinkId.value,
+    )
+    if (positionChange) {
+      emit(
+        'save-position',
+        positionChange.teacherId,
+        positionChange.positionId,
+        positionChange.oldPositionLinkId,
+      )
     }
     return
   }
 
-  const payload: TeacherSavePayload = {
-    name: values.name as string,
-    nik: values.nik as string,
-    gender: values.gender as 'MALE' | 'FEMALE',
-    birthPlace: values.birthPlace as string,
-    birthDate: values.birthDate as string,
-    employmentTypeId: values.employmentTypeId as string,
-    positionId: (values.positionId as string) || undefined,
-    identifier: (values.nip as string) || (values.nik as string),
-    password: (values.nip as string) || (values.nik as string),
-    email: (values.email as string) || undefined,
-    phone: (values.phone as string) || undefined,
-    nip: (values.nip as string) || undefined,
-    nuptk: (values.nuptk as string) || undefined,
-  }
-
-  emit('save', payload)
+  emit('save', buildTeacherCreatePayload(values))
 }
 </script>
 
@@ -384,276 +327,20 @@ function emitSave(values: Record<string, unknown>) {
               value="profil"
               class="mt-0"
             >
-              <div class="grid gap-5 md:grid-cols-2 p-1">
-                <FormField
-                  v-slot="{ componentField }"
-                  name="name"
-                >
-                  <FormItem class="md:col-span-2 content-start">
-                    <FormLabel
-                      >Nama Lengkap
-                      <span class="text-destructive">*</span></FormLabel
-                    >
-                    <FormControl>
-                      <Input
-                        placeholder="Budi Santoso, S.Pd"
-                        maxlength="100"
-                        v-bind="componentField"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                </FormField>
-                <FormField
-                  v-slot="{ componentField }"
-                  name="nik"
-                >
-                  <FormItem class="content-start">
-                    <FormLabel
-                      >NIK <span class="text-destructive">*</span></FormLabel
-                    >
-                    <FormControl>
-                      <Input
-                        placeholder="16 digit NIK"
-                        maxlength="16"
-                        v-bind="componentField"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                </FormField>
-                <FormField
-                  v-slot="{ value, handleChange }"
-                  name="gender"
-                >
-                  <FormItem class="content-start">
-                    <FormLabel
-                      >Jenis Kelamin
-                      <span class="text-destructive">*</span></FormLabel
-                    >
-                    <Select
-                      :model-value="value"
-                      @update:model-value="handleChange"
-                    >
-                      <FormControl>
-                        <SelectTrigger class="w-full">
-                          <SelectValue placeholder="Pilih jenis kelamin" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="MALE"> Laki-laki </SelectItem>
-                        <SelectItem value="FEMALE"> Perempuan </SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                </FormField>
-                <FormField
-                  v-slot="{ componentField }"
-                  name="birthPlace"
-                >
-                  <FormItem class="content-start">
-                    <FormLabel
-                      >Tempat Lahir
-                      <span class="text-destructive">*</span></FormLabel
-                    >
-                    <FormControl>
-                      <Input
-                        placeholder="Surabaya"
-                        maxlength="100"
-                        v-bind="componentField"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                </FormField>
-                <FormField
-                  v-slot="{ value, handleChange }"
-                  name="birthDate"
-                >
-                  <FormItem class="content-start">
-                    <FormLabel
-                      >Tanggal Lahir
-                      <span class="text-destructive">*</span></FormLabel
-                    >
-                    <FormControl>
-                      <DatePicker
-                        :model-value="value"
-                        placeholder="Pilih tanggal lahir"
-                        @update:model-value="handleChange"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                </FormField>
-                <FormField
-                  v-slot="{ componentField }"
-                  name="email"
-                >
-                  <FormItem class="content-start">
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="email"
-                        placeholder="contoh@email.com (ops/)"
-                        maxlength="255"
-                        v-bind="componentField"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                </FormField>
-                <FormField
-                  v-slot="{ componentField }"
-                  name="phone"
-                >
-                  <FormItem class="content-start">
-                    <FormLabel>No. HP</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="08123456789 (ops/)"
-                        maxlength="15"
-                        v-bind="componentField"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                </FormField>
-              </div>
+              <TeacherProfileTabFields />
             </TabsContent>
 
             <TabsContent
               value="kepegawaian"
               class="mt-0"
             >
-              <div class="grid gap-5 md:grid-cols-2 p-1">
-                <FormField
-                  v-slot="{ componentField }"
-                  name="nip"
-                >
-                  <FormItem class="content-start">
-                    <FormLabel>NIP</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Masukkan NIP (opsional)"
-                        maxlength="20"
-                        v-bind="componentField"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                </FormField>
-                <FormField
-                  v-slot="{ componentField }"
-                  name="nuptk"
-                >
-                  <FormItem class="content-start">
-                    <FormLabel>NUPTK</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Punya NUPTK? (opsional)"
-                        maxlength="20"
-                        v-bind="componentField"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                </FormField>
-                <div class="space-y-2 content-start">
-                  <label class="text-sm font-medium leading-none">
-                    Kategori
-                    <span class="text-xs font-normal text-muted-foreground"
-                      >(filter)</span
-                    >
-                  </label>
-                  <Select
-                    :model-value="kategori"
-                    @update:model-value="
-                      (v) => {
-                        kategori = String(v ?? '')
-                        setFieldValue('positionId', '')
-                      }
-                    "
-                  >
-                    <SelectTrigger class="w-full">
-                      <SelectValue placeholder="Semua kategori" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem
-                        v-for="cat in categoryOptions"
-                        :key="cat.id"
-                        :value="cat.id"
-                      >
-                        {{ positionCategoryLabel(cat.code, cat.name) }}
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <FormField
-                  v-slot="{ value, handleChange }"
-                  name="positionId"
-                >
-                  <FormItem class="content-start">
-                    <FormLabel>
-                      Jabatan Utama
-                      <span class="text-xs font-normal text-muted-foreground"
-                        >(opsional)</span
-                      >
-                    </FormLabel>
-                    <Select
-                      :model-value="value"
-                      @update:model-value="handleChange"
-                    >
-                      <FormControl>
-                        <SelectTrigger class="w-full">
-                          <SelectValue placeholder="Pilih jabatan..." />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem
-                          v-for="pos in filteredPositions"
-                          :key="pos.id"
-                          :value="pos.id"
-                        >
-                          {{ pos.name }}
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                </FormField>
-                <FormField
-                  v-slot="{ value, handleChange }"
-                  name="employmentTypeId"
-                >
-                  <FormItem class="content-start">
-                    <FormLabel
-                      >Status Kepegawaian
-                      <span class="text-destructive">*</span></FormLabel
-                    >
-                    <Select
-                      :model-value="value"
-                      @update:model-value="handleChange"
-                    >
-                      <FormControl>
-                        <SelectTrigger class="w-full">
-                          <SelectValue placeholder="Pilih status saat ini" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem
-                          v-for="et in employmentTypes"
-                          :key="et.id"
-                          :value="et.id"
-                        >
-                          {{ et.name }}
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                </FormField>
-              </div>
+              <TeacherEmploymentTabFields
+                v-model="kategori"
+                :employment-types="employmentTypes"
+                :category-options="categoryOptions"
+                :filtered-positions="filteredPositions"
+                @category-select="setFieldValue('positionId', '')"
+              />
             </TabsContent>
           </div>
 
