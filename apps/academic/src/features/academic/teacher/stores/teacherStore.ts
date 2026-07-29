@@ -42,8 +42,7 @@ export const useTeacherStore = defineStore('teacher', () => {
       const matchCategory =
         filters.value.categoryFilter === 'all' ||
         t.teacherPositions?.some(
-          (tp) =>
-            tp.position?.positionCategory?.id === filters.value.categoryFilter,
+          (tp) => tp.position?.category?.id === filters.value.categoryFilter,
         )
 
       const matchPosition =
