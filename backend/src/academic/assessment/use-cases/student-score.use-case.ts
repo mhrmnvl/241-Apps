@@ -4,7 +4,8 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { PrismaService } from '../../../core/database/prisma.service.js';
+import { IAssessmentItemsRepository } from '../domain/interfaces/assessment-items-repository.interface.js';
+import { IEnrollmentRepository } from '../../enrollment/domain/interfaces/enrollment-repository.interface.js';
 import { IStudentScoresRepository } from '../domain/interfaces/student-scores-repository.interface.js';
 import { CreateStudentScoreDto } from '../dto/request/create-student-score.dto.js';
 import { UpdateStudentScoreDto } from '../dto/request/update-student-score.dto.js';
@@ -14,17 +15,21 @@ import { StudentScoreRosterQueryDto } from '../dto/request/student-score-roster-
 
 @Injectable()
 export class GetStudentScoresUseCase {
-  constructor(private readonly repo: IStudentScoresRepository) {}
+  constructor(
+    private readonly studentScoreRepository: IStudentScoresRepository,
+  ) {}
   async execute(query: StudentScoreQueryDto) {
-    return this.repo.findAll(query);
+    return this.studentScoreRepository.findAll(query);
   }
 }
 
 @Injectable()
 export class GetStudentScoreByIdUseCase {
-  constructor(private readonly repo: IStudentScoresRepository) {}
+  constructor(
+    private readonly studentScoreRepository: IStudentScoresRepository,
+  ) {}
   async execute(id: string) {
-    const r = await this.repo.findById(id);
+    const r = await this.studentScoreRepository.findById(id);
     if (!r) throw new NotFoundException(`StudentScore ${id} not found`);
     return r;
   }
@@ -33,32 +38,34 @@ export class GetStudentScoreByIdUseCase {
 @Injectable()
 export class CreateStudentScoreUseCase {
   constructor(
-    private readonly repo: IStudentScoresRepository,
-    private readonly prisma: PrismaService,
+    private readonly studentScoreRepository: IStudentScoresRepository,
+    private readonly assessmentItemRepository: IAssessmentItemsRepository,
+    private readonly enrollmentRepository: IEnrollmentRepository,
   ) {}
   async execute(dto: CreateStudentScoreDto) {
-    const enrollment = await this.prisma.studentEnrollment.findFirst({
-      where: {
-        id: dto.enrollmentId,
-      },
-    });
-    if (!enrollment) {
-      throw new BadRequestException('Enrollment not found');
-    }
-
-    const assessmentItem = await this.prisma.assessmentItem.findFirst({
-      where: {
-        id: dto.assessmentItemId,
-        teachingAssignment: {
-          classroom: { academicYear: { deletedAt: null } },
-        },
-      },
-    });
+    const assessmentItem = await this.assessmentItemRepository.findById(
+      dto.assessmentItemId,
+    );
     if (!assessmentItem) {
       throw new BadRequestException('Assessment item not found');
     }
 
-    const dup = await this.repo.findDuplicate(
+    const enrollment = await this.enrollmentRepository.findById(
+      dto.enrollmentId,
+    );
+    if (enrollment?.status !== 'ACTIVE') {
+      throw new BadRequestException('Enrollment not found or is not active');
+    }
+
+    if (
+      enrollment.classroomId !== assessmentItem.teachingAssignment.classroomId
+    ) {
+      throw new BadRequestException(
+        'Student enrollment classroom does not match assessment item classroom',
+      );
+    }
+
+    const dup = await this.studentScoreRepository.findDuplicate(
       dto.enrollmentId,
       dto.assessmentItemId,
     );
@@ -67,64 +74,62 @@ export class CreateStudentScoreUseCase {
         'Score already exists for this enrollment and assessment',
       );
 
-    const softDeleted = await this.repo.findSoftDeleted(
+    const softDeleted = await this.studentScoreRepository.findSoftDeleted(
       dto.enrollmentId,
       dto.assessmentItemId,
     );
     if (softDeleted) {
-      return this.repo.restore(softDeleted.id, {
+      return this.studentScoreRepository.restore(softDeleted.id, {
         score: dto.score,
         note: dto.note,
       });
     }
 
-    return this.repo.create(dto);
+    return this.studentScoreRepository.create(dto);
   }
 }
 
 @Injectable()
 export class UpdateStudentScoreUseCase {
-  constructor(private readonly repo: IStudentScoresRepository) {}
+  constructor(
+    private readonly studentScoreRepository: IStudentScoresRepository,
+  ) {}
   async execute(id: string, dto: UpdateStudentScoreDto) {
-    const r = await this.repo.findById(id);
+    const r = await this.studentScoreRepository.findById(id);
     if (!r) throw new NotFoundException(`StudentScore ${id} not found`);
-    return this.repo.update(id, dto);
+    return this.studentScoreRepository.update(id, dto);
   }
 }
 
 @Injectable()
 export class DeleteStudentScoreUseCase {
-  constructor(private readonly repo: IStudentScoresRepository) {}
+  constructor(
+    private readonly studentScoreRepository: IStudentScoresRepository,
+  ) {}
   async execute(id: string) {
-    const r = await this.repo.findById(id);
+    const r = await this.studentScoreRepository.findById(id);
     if (!r) throw new NotFoundException(`StudentScore ${id} not found`);
-    return this.repo.softDelete(id);
+    return this.studentScoreRepository.softDelete(id);
   }
 }
 
 @Injectable()
 export class GetStudentScoreRosterUseCase {
   constructor(
-    private readonly repo: IStudentScoresRepository,
-    private readonly prisma: PrismaService,
+    private readonly studentScoreRepository: IStudentScoresRepository,
+    private readonly assessmentItemRepository: IAssessmentItemsRepository,
   ) {}
   async execute(query: StudentScoreRosterQueryDto) {
-    const assessmentItem = await this.prisma.assessmentItem.findFirst({
-      where: {
-        id: query.assessmentItemId,
-        teachingAssignment: {
-          classroom: { academicYear: { deletedAt: null } },
-        },
-      },
-      include: { teachingAssignment: true },
-    });
+    const assessmentItem = await this.assessmentItemRepository.findById(
+      query.assessmentItemId,
+    );
     if (!assessmentItem) {
       throw new NotFoundException(
         `AssessmentItem ${query.assessmentItemId} not found`,
       );
     }
 
-    const items = await this.repo.getRoster(
+    const items = await this.studentScoreRepository.getRoster(
       assessmentItem.id,
       assessmentItem.teachingAssignment.classroomId,
       assessmentItem.teachingAssignment.semesterId,
@@ -146,30 +151,43 @@ export class GetStudentScoreRosterUseCase {
 @Injectable()
 export class BulkUpsertStudentScoresUseCase {
   constructor(
-    private readonly repo: IStudentScoresRepository,
-    private readonly prisma: PrismaService,
+    private readonly studentScoreRepository: IStudentScoresRepository,
+    private readonly assessmentItemRepository: IAssessmentItemsRepository,
+    private readonly enrollmentRepository: IEnrollmentRepository,
   ) {}
   async execute(dto: BulkUpsertStudentScoreDto) {
-    const assessmentItem = await this.prisma.assessmentItem.findFirst({
-      where: {
-        id: dto.assessmentItemId,
-        teachingAssignment: {
-          classroom: { academicYear: { deletedAt: null } },
-        },
-      },
-    });
+    const assessmentItem = await this.assessmentItemRepository.findById(
+      dto.assessmentItemId,
+    );
     if (!assessmentItem) {
       throw new BadRequestException('Assessment item not found');
     }
 
-    const enrollmentIds = dto.records.map((r) => r.enrollmentId);
-    const count = await this.prisma.studentEnrollment.count({
-      where: { id: { in: enrollmentIds } },
-    });
-    if (count !== enrollmentIds.length) {
-      throw new BadRequestException('Some enrollments were not found');
+    const enrollmentIds = Array.from(
+      new Set(dto.records.map((r) => r.enrollmentId)),
+    );
+    const enrollments =
+      await this.enrollmentRepository.findManyActiveByIds(enrollmentIds);
+
+    if (enrollments.length !== enrollmentIds.length) {
+      throw new BadRequestException(
+        'Some enrollments were not found or are not active',
+      );
     }
 
-    return this.repo.bulkUpsert(dto.assessmentItemId, dto.records);
+    const targetClassroomId = assessmentItem.teachingAssignment.classroomId;
+    const invalidClassroom = enrollments.some(
+      (e) => e.classroomId !== targetClassroomId,
+    );
+    if (invalidClassroom) {
+      throw new BadRequestException(
+        'Some enrollments do not belong to the assessment item classroom',
+      );
+    }
+
+    return this.studentScoreRepository.bulkUpsert(
+      dto.assessmentItemId,
+      dto.records,
+    );
   }
 }

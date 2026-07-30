@@ -192,6 +192,7 @@ export class AuthController {
     return { success: true, message: 'Password berhasil diubah' };
   }
 
+  @Throttle({ auth: {} })
   @Post('forgot-password')
   @Public()
   @HttpCode(HttpStatus.OK)
@@ -204,6 +205,7 @@ export class AuthController {
     return this.requestPasswordResetUseCase.execute(dto.identifier);
   }
 
+  @Throttle({ auth: {} })
   @Post('reset-password')
   @Public()
   @HttpCode(HttpStatus.OK)

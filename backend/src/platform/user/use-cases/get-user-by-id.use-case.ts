@@ -3,10 +3,10 @@ import { IUserRepository } from '../interfaces/user-repository.interface.js';
 
 @Injectable()
 export class GetUserByIdUseCase {
-  constructor(private readonly usersRepository: IUserRepository) {}
+  constructor(private readonly userRepository: IUserRepository) {}
 
   async execute(id: string) {
-    const user = await this.usersRepository.findById(id);
+    const user = await this.userRepository.findById(id);
     if (!user) {
       throw new NotFoundException('User not found');
     }

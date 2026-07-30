@@ -155,7 +155,7 @@ describe('Admission workflow use-cases', () => {
       });
 
       await expect(
-        enroll.execute('app1', { nis: '1', nisn: '2' }),
+        enroll.execute('app1', { nis: '1', nisn: '2', gradeId: 'grade-1' }),
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -166,7 +166,7 @@ describe('Admission workflow use-cases', () => {
       repo.isNikTakenInProfiles.mockResolvedValue(false);
 
       await expect(
-        enroll.execute('app1', { nis: '1', nisn: '2' }),
+        enroll.execute('app1', { nis: '1', nisn: '2', gradeId: 'grade-1' }),
       ).rejects.toThrow(ConflictException);
       expect(repo.enrollAsStudent).not.toHaveBeenCalled();
     });
@@ -184,11 +184,12 @@ describe('Admission workflow use-cases', () => {
         enrollmentCreated: false,
       });
 
-      const result = await enroll.execute('app1', { nis: '1', nisn: '2' });
+      const dto = { nis: '1', nisn: '2', gradeId: 'grade-1' };
+      const result = await enroll.execute('app1', dto);
 
       expect(repo.enrollAsStudent).toHaveBeenCalledWith(
         acceptedApplication,
-        { nis: '1', nisn: '2' },
+        dto,
         'role-student',
       );
       expect(notifications.notify).toHaveBeenCalled();

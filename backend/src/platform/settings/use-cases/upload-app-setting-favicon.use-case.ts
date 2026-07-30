@@ -22,11 +22,7 @@ export class UploadAppSettingFaviconUseCase {
     private readonly keyBuilder: StorageKeyBuilder,
   ) {}
 
-  async execute(
-    appKey: AppKey,
-    file: Express.Multer.File,
-    updatedBy: string,
-  ) {
+  async execute(appKey: AppKey, file: Express.Multer.File, updatedBy: string) {
     const detectedType = await fileTypeFromBuffer(file.buffer);
     if (
       !detectedType ||
@@ -72,10 +68,7 @@ export class UploadAppSettingFaviconUseCase {
       updatedBy,
     );
 
-    const entity = await this.appSettingRepo.setFaviconFile(
-      appKey,
-      newFile.id,
-    );
+    const entity = await this.appSettingRepo.setFaviconFile(appKey, newFile.id);
     return toAppSettingResponseDto(entity, this.storage);
   }
 }

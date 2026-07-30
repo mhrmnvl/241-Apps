@@ -1,15 +1,12 @@
 import {
   BadRequestException,
   Injectable,
-  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { IAcademicYearRepository } from '../domain/interfaces/academic-year-repository.interface.js';
 
 @Injectable()
 export class DeactivateAcademicYearUseCase {
-  private readonly logger = new Logger(DeactivateAcademicYearUseCase.name);
-
   constructor(private readonly repository: IAcademicYearRepository) {}
 
   async execute(id: string) {
@@ -31,20 +28,16 @@ export class DeactivateAcademicYearUseCase {
 
     const hasData = await this.repository.hasRelatedData(id);
     if (hasData) {
-      this.logger.warn(
-        `Deactivating academic year ${id} that has enrollment data`,
+      throw new BadRequestException(
+        'Cannot deactivate academic year that has active enrollment data. ' +
+          'Complete, promote, or drop all active enrollments first.',
       );
     }
 
     const deactivated = await this.repository.update(id, { isActive: false });
 
-    const { count } =
-      await this.repository.deactivateSemestersByAcademicYearId(id);
-    if (count > 0) {
-      this.logger.log(`Cascade deactivated ${count} semester(s) for AY ${id}`);
-    }
+    await this.repository.deactivateSemestersByAcademicYearId(id);
 
-    this.logger.log(`Academic Year deactivated: ${id}`);
     return deactivated;
   }
 }

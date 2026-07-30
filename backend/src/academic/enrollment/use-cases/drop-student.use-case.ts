@@ -4,18 +4,22 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { EnrollmentStatus } from '@prisma/client';
+import { EnrollmentStatus, StudentStatus } from '@prisma/client';
 import { DropStudentDto } from '../dto/request/drop-student.dto.js';
 import { IEnrollmentRepository } from '../domain/interfaces/enrollment-repository.interface.js';
+import { IStudentRepository } from '../../student/domain/interfaces/student-repository.interface.js';
 
 @Injectable()
 export class DropStudentUseCase {
   private readonly logger = new Logger(DropStudentUseCase.name);
 
-  constructor(private readonly repo: IEnrollmentRepository) {}
+  constructor(
+    private readonly enrollmentRepository: IEnrollmentRepository,
+    private readonly studentRepository: IStudentRepository,
+  ) {}
 
   async execute(enrollmentId: string, dto: DropStudentDto) {
-    const enrollment = await this.repo.findById(enrollmentId);
+    const enrollment = await this.enrollmentRepository.findById(enrollmentId);
     if (!enrollment) {
       throw new NotFoundException(
         `StudentEnrollment ${enrollmentId} not found`,
@@ -28,11 +32,18 @@ export class DropStudentUseCase {
       );
     }
 
-    const updated = await this.repo.update(enrollmentId, {
+    const updated = await this.enrollmentRepository.update(enrollmentId, {
       status: EnrollmentStatus.DROPPED,
       endedAt: new Date(),
       ...(dto.note && { note: dto.note }),
     });
+
+    if (enrollment.studentId) {
+      await this.studentRepository.updateStatus(
+        enrollment.studentId,
+        StudentStatus.DROPPED,
+      );
+    }
 
     this.logger.log(`Dropped enrollment ${enrollmentId}`);
 

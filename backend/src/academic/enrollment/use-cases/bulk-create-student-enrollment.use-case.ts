@@ -36,9 +36,7 @@ export class BulkCreateStudentEnrollmentUseCase {
     }
 
     const created =
-      toCreate.length > 0
-        ? await this.repo.createMany(toCreate)
-        : { count: 0 };
+      toCreate.length > 0 ? await this.repo.createMany(toCreate) : { count: 0 };
 
     return {
       created: created.count + restored.length,

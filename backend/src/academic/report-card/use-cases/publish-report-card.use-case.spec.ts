@@ -26,8 +26,16 @@ describe('PublishReportCardUseCase', () => {
 
   describe('execute', () => {
     it('should toggle publish from false to true', async () => {
-      mockRepo.findById.mockResolvedValue({ id: 'rap-1', isPublished: false });
-      mockRepo.update.mockResolvedValue({ id: 'rap-1', isPublished: true });
+      mockRepo.findById.mockResolvedValue({
+        id: 'rap-1',
+        isPublished: false,
+        totalAverage: 85,
+      });
+      mockRepo.update.mockResolvedValue({
+        id: 'rap-1',
+        isPublished: true,
+        totalAverage: 85,
+      });
 
       const result = await useCase.execute('rap-1');
 
@@ -37,9 +45,28 @@ describe('PublishReportCardUseCase', () => {
       expect(result.isPublished).toBe(true);
     });
 
+    it('should throw BadRequestException when totalAverage is null', async () => {
+      mockRepo.findById.mockResolvedValue({
+        id: 'rap-1',
+        isPublished: false,
+        totalAverage: null,
+      });
+
+      await expect(useCase.execute('rap-1')).rejects.toThrow();
+      expect(mockRepo.update).not.toHaveBeenCalled();
+    });
+
     it('should toggle publish from true to false', async () => {
-      mockRepo.findById.mockResolvedValue({ id: 'rap-1', isPublished: true });
-      mockRepo.update.mockResolvedValue({ id: 'rap-1', isPublished: false });
+      mockRepo.findById.mockResolvedValue({
+        id: 'rap-1',
+        isPublished: true,
+        totalAverage: 85,
+      });
+      mockRepo.update.mockResolvedValue({
+        id: 'rap-1',
+        isPublished: false,
+        totalAverage: 85,
+      });
 
       const result = await useCase.execute('rap-1');
 

@@ -5,6 +5,7 @@ import { ClassroomSupervisorsController } from './presentation/classroom-supervi
 import { ClassroomRepository } from './repositories/classroom.repository.js';
 import { ClassroomStructuresRepository } from './repositories/classroom-structures.repository.js';
 import { ClassroomSupervisorsRepository } from './repositories/classroom-supervisors.repository.js';
+import { IClassroomRepository } from './domain/interfaces/classroom-repository.interface.js';
 import { PrismaClassroomRepository } from './infrastructure/persistence/prisma-classroom.repository.js';
 import { PrismaClassroomStructuresRepository } from './infrastructure/persistence/prisma-classroom-structures.repository.js';
 import { PrismaClassroomSupervisorsRepository } from './infrastructure/persistence/prisma-classroom-supervisors.repository.js';
@@ -30,6 +31,7 @@ import { UpdateClassroomSupervisorUseCase } from './use-cases/update-classroom-s
     ClassroomSupervisorsController,
   ],
   providers: [
+    { provide: IClassroomRepository, useClass: PrismaClassroomRepository },
     { provide: ClassroomRepository, useClass: PrismaClassroomRepository },
     {
       provide: ClassroomStructuresRepository,
@@ -55,6 +57,7 @@ import { UpdateClassroomSupervisorUseCase } from './use-cases/update-classroom-s
     UpdateClassroomSupervisorUseCase,
   ],
   exports: [
+    IClassroomRepository,
     ClassroomRepository,
     ClassroomStructuresRepository,
     ClassroomSupervisorsRepository,

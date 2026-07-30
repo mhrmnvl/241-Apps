@@ -128,7 +128,7 @@ export class BulkImportTeachersUseCase {
 
         const employmentTypeId = employmentTypeIdByCode.get(
           dto.employmentTypeCode,
-        ) as string;
+        )!;
         const createDto: CreateTeacherDto = {
           ...dto,
           employmentTypeId,

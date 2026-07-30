@@ -25,6 +25,12 @@ export abstract class IEnrollmentRepository {
     classroomId: string,
     semesterId: string,
   ): Promise<EnrollmentWithDetails[]>;
+  abstract countActiveByClassroomAndSemester(
+    classroomId: string,
+    semesterId: string,
+  ): Promise<number>;
+  abstract countActiveByIds(ids: string[]): Promise<number>;
+  abstract findManyActiveByIds(ids: string[]): Promise<EnrollmentWithDetails[]>;
   abstract findDuplicate(
     studentId: string,
     semesterId: string,

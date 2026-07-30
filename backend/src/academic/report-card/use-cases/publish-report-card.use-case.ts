@@ -1,4 +1,9 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { IReportCardRepository } from '../domain/interfaces/report-card-repository.interface.js';
 
 @Injectable()
@@ -11,6 +16,15 @@ export class PublishReportCardUseCase {
     const existing = await this.repo.findById(id);
     if (!existing)
       throw new NotFoundException(`ReportCard with ID ${id} not found`);
+
+    if (
+      !existing.isPublished &&
+      (existing.totalAverage === null || existing.totalAverage === undefined)
+    ) {
+      throw new BadRequestException(
+        'Cannot publish report card without calculated total average grades',
+      );
+    }
 
     const updated = await this.repo.update(id, {
       isPublished: !existing.isPublished,

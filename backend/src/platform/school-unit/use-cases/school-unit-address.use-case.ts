@@ -21,11 +21,7 @@ export class SchoolUnitAddressUseCase {
   ) {}
 
   async getAddress() {
-    const address = await this.repo.find();
-    if (!address) {
-      throw new NotFoundException('School unit address has not been set yet');
-    }
-    return address;
+    return this.repo.find();
   }
 
   async setAddress(dto: CreateAddressDto) {

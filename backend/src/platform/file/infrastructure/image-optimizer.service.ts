@@ -34,9 +34,12 @@ export class ImageOptimizerService {
       withoutEnlargement: true,
     });
 
-    const optimized = await (format === 'png'
-      ? pipeline.png()
-      : pipeline.webp({ quality: opts.quality ?? IMAGE_OPTIMIZATION_OPTIONS.quality })
+    const optimized = await (
+      format === 'png'
+        ? pipeline.png()
+        : pipeline.webp({
+            quality: opts.quality ?? IMAGE_OPTIMIZATION_OPTIONS.quality,
+          })
     ).toBuffer();
 
     return {

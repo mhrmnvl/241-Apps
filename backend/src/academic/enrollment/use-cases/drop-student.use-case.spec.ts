@@ -2,6 +2,7 @@ import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { EnrollmentStatus } from '@prisma/client';
 import { IEnrollmentRepository } from '../domain/interfaces/enrollment-repository.interface.js';
+import { IStudentRepository } from '../../student/domain/interfaces/student-repository.interface.js';
 import { DropStudentUseCase } from './drop-student.use-case.js';
 
 describe('DropStudentUseCase', () => {
@@ -12,11 +13,16 @@ describe('DropStudentUseCase', () => {
     update: jest.fn(),
   };
 
+  const mockStudentRepo = {
+    updateStatus: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         DropStudentUseCase,
         { provide: IEnrollmentRepository, useValue: mockRepo },
+        { provide: IStudentRepository, useValue: mockStudentRepo },
       ],
     }).compile();
 

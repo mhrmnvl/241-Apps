@@ -205,6 +205,21 @@ export class PrismaPromotionRepository implements IPromotionRepository {
               },
             });
 
+            // Keep Student.gradeId in sync with the classroom they've been
+            // promoted/repeated into, so the "Tingkat" filter in the student
+            // list reflects the current grade level without relying on
+            // enrollment-based fallback.
+            const targetClassroom = await tx.classroom.findFirst({
+              where: { id: student.targetClassroomId! },
+              select: { gradeId: true },
+            });
+            if (targetClassroom) {
+              await tx.student.update({
+                where: { id: enrollment.studentId },
+                data: { gradeId: targetClassroom.gradeId },
+              });
+            }
+
             if (student.action === PromotionAction.PROMOTE) {
               result.promoted++;
             } else {

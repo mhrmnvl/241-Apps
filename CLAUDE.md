@@ -255,3 +255,17 @@ already described above — prefer them over general knowledge when they overlap
   only shows a generic `postgresql://...?sslmode=require&pgbouncer=true` URL with no
   explicit Neon reference, so verify against the actual `DATABASE_URL` before
   assuming Neon-specific tooling (branching, Management API, etc.) applies.
+
+## Agent skills
+
+### Issue tracker
+
+Issues live in GitHub Issues on `mhrmnvl/241-Apps` (uses `gh` CLI). See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Default mattpocock labels in use: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context layout: one `CONTEXT.md` at the repo root + `docs/adr/` for architectural decisions. See `docs/agents/domain.md`.

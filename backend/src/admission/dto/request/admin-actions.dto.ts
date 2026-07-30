@@ -71,10 +71,10 @@ export class EnrollApplicantDto {
   @MaxLength(20)
   nisn: string;
 
-  @ApiPropertyOptional({ format: 'uuid' })
-  @IsOptional()
+  @ApiProperty({ format: 'uuid', description: 'Tingkat kelas siswa (wajib)' })
   @IsUUID()
-  gradeId?: string;
+  @IsNotEmpty()
+  gradeId: string;
 
   @ApiPropertyOptional({
     format: 'uuid',

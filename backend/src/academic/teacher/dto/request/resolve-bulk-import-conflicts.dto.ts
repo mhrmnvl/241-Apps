@@ -1,10 +1,19 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsArray, IsIn, IsUUID, ValidateNested, IsOptional } from 'class-validator';
+import {
+  IsArray,
+  IsIn,
+  IsUUID,
+  ValidateNested,
+  IsOptional,
+} from 'class-validator';
 import { BulkImportTeacherRowDto } from './bulk-import-teacher.dto.js';
 
 export class ResolveBulkImportConflictDto {
-  @ApiProperty({ description: 'Existing teacher ID this row conflicts with', required: false })
+  @ApiProperty({
+    description: 'Existing teacher ID this row conflicts with',
+    required: false,
+  })
   @IsOptional()
   @IsUUID()
   existingId?: string;

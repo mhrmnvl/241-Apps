@@ -114,6 +114,22 @@ export class ProcessApprovalUseCase {
           data: { statusId: availStatus.id },
         });
 
+        const txType = await tx.inventoryTransactionType.findFirst();
+
+        // Write history entries for rejected units
+        for (const unitId of unitIds) {
+          await tx.inventoryHistory.create({
+            data: {
+              unitId,
+              transactionTypeId: txType?.id ?? '',
+              previousStatusId: pendingStatus.id,
+              newStatusId: availStatus.id,
+              note: `Peminjaman ditolak (${dto.note ?? 'Tanpa catatan'})`,
+              changedById: userId,
+            },
+          });
+        }
+
         return { success: true, action: 'REJECT', log };
       } else {
         // --- PROCESS APPROVAL ---

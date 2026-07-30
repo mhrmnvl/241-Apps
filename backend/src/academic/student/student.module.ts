@@ -10,6 +10,7 @@ import { StudentProfileController } from './presentation/student-profile.control
 import { StudentRepository } from './repositories/student.repository.js';
 import { StudentAddressRepository } from './repositories/student-address.repository.js';
 import { StudentParentRepository } from './repositories/student-parent.repository.js';
+import { IStudentRepository } from './domain/interfaces/student-repository.interface.js';
 import { PrismaStudentRepository } from './infrastructure/persistence/prisma-student.repository.js';
 import { PrismaStudentAddressRepository } from './infrastructure/persistence/prisma-student-address.repository.js';
 import { PrismaStudentParentRepository } from './infrastructure/persistence/prisma-student-parent.repository.js';
@@ -44,6 +45,7 @@ import { UpdateStudentProfileUseCase } from './use-cases/update-student-profile.
     StudentProfileController,
   ],
   providers: [
+    { provide: IStudentRepository, useClass: PrismaStudentRepository },
     { provide: StudentRepository, useClass: PrismaStudentRepository },
     {
       provide: StudentAddressRepository,
@@ -76,6 +78,7 @@ import { UpdateStudentProfileUseCase } from './use-cases/update-student-profile.
     UpdateStudentProfileUseCase,
   ],
   exports: [
+    IStudentRepository,
     StudentRepository,
     StudentAddressRepository,
     StudentParentRepository,

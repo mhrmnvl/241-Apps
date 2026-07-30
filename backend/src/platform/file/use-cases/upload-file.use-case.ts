@@ -12,6 +12,7 @@ import {
 } from '../constants/file-upload.constants.js';
 
 const UNCATEGORIZED_FOLDER = 'Umum';
+const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024; // 10MB
 
 @Injectable()
 export class UploadFileUseCase {
@@ -28,6 +29,12 @@ export class UploadFileUseCase {
     categoryId?: string,
     uploadedBy?: string,
   ) {
+    if (file.buffer.length > MAX_FILE_SIZE_BYTES) {
+      throw new BadRequestException(
+        'File size exceeds the maximum limit of 10MB',
+      );
+    }
+
     // Trust the magic bytes, not the client-supplied mimetype/extension.
     const detectedType = await fileTypeFromBuffer(file.buffer);
     if (

@@ -100,6 +100,41 @@ export class PrismaEnrollmentRepository extends IEnrollmentRepository {
     });
   }
 
+  async countActiveByClassroomAndSemester(
+    classroomId: string,
+    semesterId: string,
+  ): Promise<number> {
+    return this.prisma.studentEnrollment.count({
+      where: {
+        classroomId,
+        semesterId,
+        status: EnrollmentStatus.ACTIVE,
+        deletedAt: null,
+      },
+    });
+  }
+
+  async countActiveByIds(ids: string[]): Promise<number> {
+    return this.prisma.studentEnrollment.count({
+      where: {
+        id: { in: ids },
+        status: EnrollmentStatus.ACTIVE,
+        deletedAt: null,
+      },
+    });
+  }
+
+  async findManyActiveByIds(ids: string[]): Promise<EnrollmentWithDetails[]> {
+    return this.prisma.studentEnrollment.findMany({
+      where: {
+        id: { in: ids },
+        status: EnrollmentStatus.ACTIVE,
+        deletedAt: null,
+      },
+      include: ENROLLMENT_INCLUDE,
+    });
+  }
+
   async findDuplicate(
     studentId: string,
     semesterId: string,

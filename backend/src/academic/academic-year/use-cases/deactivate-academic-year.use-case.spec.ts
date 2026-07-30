@@ -86,19 +86,18 @@ describe('DeactivateAcademicYearUseCase', () => {
       expect(result.isActive).toBe(false);
     });
 
-    it('should still deactivate even with related data (with warning)', async () => {
-      const deactivatedYear = { ...activeYear, isActive: false };
+    it('should throw BadRequestException when academic year has active enrollment data', async () => {
       mockRepository.findById.mockResolvedValue(activeYear);
       mockRepository.countActive.mockResolvedValue(2);
       mockRepository.hasRelatedData.mockResolvedValue(true);
-      mockRepository.update.mockResolvedValue(deactivatedYear);
-      mockRepository.deactivateSemestersByAcademicYearId.mockResolvedValue({
-        count: 0,
-      });
 
-      const result = await useCase.execute('ay-1');
-
-      expect(result.isActive).toBe(false);
+      await expect(useCase.execute('ay-1')).rejects.toThrow(
+        BadRequestException,
+      );
+      expect(mockRepository.update).not.toHaveBeenCalled();
+      expect(
+        mockRepository.deactivateSemestersByAcademicYearId,
+      ).not.toHaveBeenCalled();
     });
   });
 });

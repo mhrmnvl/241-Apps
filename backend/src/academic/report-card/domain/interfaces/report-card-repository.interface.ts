@@ -62,5 +62,10 @@ export abstract class IReportCardRepository {
     id: string,
     data: UpdateReportCardRepositoryInput,
   ): Promise<ReportCardWithDetails>;
+  abstract calculateAndApplyClassroomRanks(
+    classroomId: string,
+    semesterId: string,
+    targetEnrollmentId: string,
+  ): Promise<number | null>;
   abstract softDelete(id: string): Promise<ReportCard>;
 }

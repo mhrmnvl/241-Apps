@@ -35,7 +35,7 @@ export class ResolveBulkImportConflictsUseCase {
       async (item) => {
         const employmentTypeId = employmentTypeIdByCode.get(
           item.data.employmentTypeCode,
-        ) as string;
+        )!;
 
         if (!item.existingId) {
           const createDto: CreateTeacherDto = {

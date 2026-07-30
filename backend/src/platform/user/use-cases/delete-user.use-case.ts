@@ -5,15 +5,15 @@ import { IUserRepository } from '../interfaces/user-repository.interface.js';
 export class DeleteUserUseCase {
   private readonly logger = new Logger(DeleteUserUseCase.name);
 
-  constructor(private readonly usersRepository: IUserRepository) {}
+  constructor(private readonly userRepository: IUserRepository) {}
 
   async execute(id: string) {
-    const exists = await this.usersRepository.existsById(id);
+    const exists = await this.userRepository.existsById(id);
     if (!exists) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException(`User with ID ${id} not found`);
     }
 
-    await this.usersRepository.remove(id);
+    await this.userRepository.remove(id);
     this.logger.log(`User deleted: ${id}`);
   }
 }

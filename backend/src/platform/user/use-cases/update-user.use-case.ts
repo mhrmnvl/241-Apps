@@ -4,7 +4,6 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
 import { UpdateUserDto } from '../dto/request/update-user.dto.js';
 import { IUserRepository } from '../interfaces/user-repository.interface.js';
 import { hashPassword } from '../../../shared/utils/hash.helper.js';
@@ -13,24 +12,30 @@ import { hashPassword } from '../../../shared/utils/hash.helper.js';
 export class UpdateUserUseCase {
   private readonly logger = new Logger(UpdateUserUseCase.name);
 
-  constructor(private readonly usersRepository: IUserRepository) {}
+  constructor(private readonly userRepository: IUserRepository) {}
 
   async execute(id: string, dto: UpdateUserDto) {
-    const currentUser = await this.usersRepository.findById(id);
+    const currentUser = await this.userRepository.findById(id);
     if (!currentUser) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException(`User with ID ${id} not found`);
     }
 
-    if (dto.identifier) {
-      const existing = await this.usersRepository.findByIdentifier(
+    if (dto.identifier && dto.identifier !== currentUser.identifier) {
+      const existing = await this.userRepository.findByIdentifier(
         dto.identifier,
       );
-      if (existing && existing.id !== id) {
-        throw new ConflictException('Identifier already taken');
+      if (existing) {
+        throw new ConflictException(
+          `Identifier ${dto.identifier} is already in use`,
+        );
       }
     }
 
-    const data: Prisma.UserUpdateInput = {};
+    const data: Partial<{
+      identifier: string;
+      passwordHash: string;
+      isActive: boolean;
+    }> = {};
 
     if (dto.identifier) {
       data.identifier = dto.identifier;
@@ -40,7 +45,7 @@ export class UpdateUserUseCase {
       data.passwordHash = await hashPassword(dto.password);
     }
 
-    const updated = await this.usersRepository.update(id, data);
+    const updated = await this.userRepository.update(id, data);
     this.logger.log(`User updated: ${id}`);
     return updated;
   }

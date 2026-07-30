@@ -4,11 +4,11 @@ import { UserQueryDto } from '../dto/request/user-query.dto.js';
 
 @Injectable()
 export class GetUsersUseCase {
-  constructor(private readonly usersRepository: IUserRepository) {}
+  constructor(private readonly userRepository: IUserRepository) {}
 
   async execute(query: UserQueryDto) {
     const { data, total, page, limit } =
-      await this.usersRepository.findAll(query);
+      await this.userRepository.findAll(query);
 
     return {
       data,

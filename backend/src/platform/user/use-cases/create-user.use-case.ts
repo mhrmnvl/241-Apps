@@ -7,15 +7,17 @@ import { hashPassword } from '../../../shared/utils/hash.helper.js';
 export class CreateUserUseCase {
   private readonly logger = new Logger(CreateUserUseCase.name);
 
-  constructor(private readonly usersRepository: IUserRepository) {}
+  constructor(private readonly userRepository: IUserRepository) {}
 
   async execute(dto: CreateUserDto) {
-    const taken = await this.usersRepository.existsByIdentifier(dto.identifier);
+    const taken = await this.userRepository.existsByIdentifier(dto.identifier);
     if (taken) {
-      throw new ConflictException('Identifier already taken');
+      throw new ConflictException(
+        `Identifier ${dto.identifier} already in use`,
+      );
     }
 
-    const user = await this.usersRepository.create({
+    const user = await this.userRepository.create({
       identifier: dto.identifier,
       passwordHash: await hashPassword(dto.password),
     });

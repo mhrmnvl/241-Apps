@@ -1,5 +1,7 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { SemesterModule } from '../semester/semester.module.js';
+import { ClassroomModule } from '../classroom/classroom.module.js';
+import { StudentModule } from '../student/student.module.js';
 import { EnrollmentController } from './presentation/enrollment.controller.js';
 import { PrismaEnrollmentRepository } from './infrastructure/persistence/prisma-enrollment.repository.js';
 import { BulkCreateStudentEnrollmentUseCase } from './use-cases/bulk-create-student-enrollment.use-case.js';
@@ -15,7 +17,7 @@ import { EnsureStudentEnrollmentUseCase } from './use-cases/ensure-student-enrol
 import { IEnrollmentRepository } from './domain/interfaces/enrollment-repository.interface.js';
 
 @Module({
-  imports: [SemesterModule],
+  imports: [SemesterModule, ClassroomModule, forwardRef(() => StudentModule)],
   controllers: [EnrollmentController],
   providers: [
     {

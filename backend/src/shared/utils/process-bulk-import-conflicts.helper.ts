@@ -37,11 +37,11 @@ export async function processBulkImportConflicts<
       skipped++;
       const message = err instanceof Error ? err.message : 'Unexpected error';
       errors.push({
-        existingId: item.existingId || 'NEW_ROW',
+        existingId: item.existingId ?? 'NEW_ROW',
         error: message,
       });
       logger.warn(
-        `Failed to resolve conflict/creation for ${entityLabel} ${item.existingId || 'new'}: ${message}`,
+        `Failed to resolve conflict/creation for ${entityLabel} ${item.existingId ?? 'new'}: ${message}`,
       );
     }
   }

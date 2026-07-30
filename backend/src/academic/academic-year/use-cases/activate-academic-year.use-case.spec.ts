@@ -1,4 +1,4 @@
-import { NotFoundException } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { IAcademicYearRepository } from '../domain/interfaces/academic-year-repository.interface.js';
 import { ActivateAcademicYearUseCase } from './activate-academic-year.use-case.js';
@@ -9,6 +9,7 @@ describe('ActivateAcademicYearUseCase', () => {
   const mockRepository = {
     findById: jest.fn(),
     activateById: jest.fn(),
+    countSemesters: jest.fn(),
   };
 
   const inactiveYear = {
@@ -52,9 +53,20 @@ describe('ActivateAcademicYearUseCase', () => {
       expect(mockRepository.activateById).not.toHaveBeenCalled();
     });
 
-    it('should activate using atomic activateById', async () => {
+    it('should throw BadRequestException if academic year has no semesters', async () => {
+      mockRepository.findById.mockResolvedValue(inactiveYear);
+      mockRepository.countSemesters.mockResolvedValue(0);
+
+      await expect(useCase.execute('ay-1')).rejects.toThrow(
+        BadRequestException,
+      );
+      expect(mockRepository.activateById).not.toHaveBeenCalled();
+    });
+
+    it('should activate using atomic activateById when it has semesters', async () => {
       const activatedYear = { ...inactiveYear, isActive: true };
       mockRepository.findById.mockResolvedValue(inactiveYear);
+      mockRepository.countSemesters.mockResolvedValue(2);
       mockRepository.activateById.mockResolvedValue(activatedYear);
 
       const result = await useCase.execute('ay-1');

@@ -4,7 +4,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { PrismaService } from '../../../core/database/prisma.service.js';
+import { IEnrollmentRepository } from '../../enrollment/domain/interfaces/enrollment-repository.interface.js';
 import { IAttendanceRepository } from '../domain/interfaces/attendance-repository.interface.js';
 import {
   CreateAttendanceDto,
@@ -17,17 +17,17 @@ import {
 
 @Injectable()
 export class GetAttendancesUseCase {
-  constructor(private readonly repo: IAttendanceRepository) {}
+  constructor(private readonly attendanceRepository: IAttendanceRepository) {}
   async execute(query: AttendanceQueryDto) {
-    return this.repo.findAll(query);
+    return this.attendanceRepository.findAll(query);
   }
 }
 
 @Injectable()
 export class GetAttendanceByIdUseCase {
-  constructor(private readonly repo: IAttendanceRepository) {}
+  constructor(private readonly attendanceRepository: IAttendanceRepository) {}
   async execute(id: string) {
-    const r = await this.repo.findById(id);
+    const r = await this.attendanceRepository.findById(id);
     if (!r) throw new NotFoundException(`Attendance ${id} not found`);
     return r;
   }
@@ -36,20 +36,18 @@ export class GetAttendanceByIdUseCase {
 @Injectable()
 export class CreateAttendanceUseCase {
   constructor(
-    private readonly repo: IAttendanceRepository,
-    private readonly prisma: PrismaService,
+    private readonly attendanceRepository: IAttendanceRepository,
+    private readonly enrollmentRepository: IEnrollmentRepository,
   ) {}
   async execute(dto: CreateAttendanceDto) {
-    const enrollment = await this.prisma.studentEnrollment.findFirst({
-      where: {
-        id: dto.enrollmentId,
-      },
-    });
-    if (!enrollment) {
-      throw new BadRequestException('Enrollment not found');
+    const enrollment = await this.enrollmentRepository.findById(
+      dto.enrollmentId,
+    );
+    if (enrollment?.status !== 'ACTIVE') {
+      throw new BadRequestException('Enrollment not found or is not active');
     }
 
-    const dup = await this.repo.findDuplicate(
+    const dup = await this.attendanceRepository.findDuplicate(
       dto.enrollmentId,
       new Date(dto.date),
       dto.scheduleId,
@@ -57,63 +55,63 @@ export class CreateAttendanceUseCase {
     if (dup)
       throw new ConflictException('Attendance already recorded for this date');
 
-    const softDeleted = await this.repo.findSoftDeleted(
+    const softDeleted = await this.attendanceRepository.findSoftDeleted(
       dto.enrollmentId,
       new Date(dto.date),
       dto.scheduleId,
     );
     if (softDeleted) {
-      return this.repo.restore(softDeleted.id, {
+      return this.attendanceRepository.restore(softDeleted.id, {
         status: dto.status,
         note: dto.note,
       });
     }
 
-    return this.repo.create({ ...dto, date: new Date(dto.date) });
+    return this.attendanceRepository.create({
+      ...dto,
+      date: new Date(dto.date),
+    });
   }
 }
 
 @Injectable()
 export class UpdateAttendanceUseCase {
-  constructor(private readonly repo: IAttendanceRepository) {}
+  constructor(private readonly attendanceRepository: IAttendanceRepository) {}
   async execute(id: string, dto: UpdateAttendanceDto) {
-    const r = await this.repo.findById(id);
+    const r = await this.attendanceRepository.findById(id);
     if (!r) throw new NotFoundException(`Attendance ${id} not found`);
-    return this.repo.update(id, dto);
+    return this.attendanceRepository.update(id, dto);
   }
 }
 
 @Injectable()
 export class DeleteAttendanceUseCase {
-  constructor(private readonly repo: IAttendanceRepository) {}
+  constructor(private readonly attendanceRepository: IAttendanceRepository) {}
   async execute(id: string) {
-    const r = await this.repo.findById(id);
+    const r = await this.attendanceRepository.findById(id);
     if (!r) throw new NotFoundException(`Attendance ${id} not found`);
-    return this.repo.softDelete(id);
+    return this.attendanceRepository.softDelete(id);
   }
 }
 
 @Injectable()
 export class BulkUpsertAttendanceUseCase {
   constructor(
-    private readonly repo: IAttendanceRepository,
-    private readonly prisma: PrismaService,
+    private readonly attendanceRepository: IAttendanceRepository,
+    private readonly enrollmentRepository: IEnrollmentRepository,
   ) {}
   async execute(dto: BulkUpsertAttendanceDto) {
     const enrollmentIds = dto.records.map((r) => r.enrollmentId);
     if (enrollmentIds.length > 0) {
-      const count = await this.prisma.studentEnrollment.count({
-        where: {
-          id: { in: enrollmentIds },
-        },
-      });
+      const count =
+        await this.enrollmentRepository.countActiveByIds(enrollmentIds);
       if (count !== enrollmentIds.length) {
         throw new BadRequestException(
-          'Some enrollments do not belong to this school unit',
+          'Some enrollments were not found or are not active',
         );
       }
     }
-    return this.repo.bulkUpsert(
+    return this.attendanceRepository.bulkUpsert(
       new Date(dto.date),
       dto.records,
       dto.scheduleId,
@@ -123,16 +121,16 @@ export class BulkUpsertAttendanceUseCase {
 
 @Injectable()
 export class GetAttendanceRecapUseCase {
-  constructor(private readonly repo: IAttendanceRepository) {}
+  constructor(private readonly attendanceRepository: IAttendanceRepository) {}
   async execute(query: AttendanceRecapQueryDto) {
-    return this.repo.getRecap(query);
+    return this.attendanceRepository.getRecap(query);
   }
 }
 
 @Injectable()
 export class GetAttendanceTrendUseCase {
-  constructor(private readonly repo: IAttendanceRepository) {}
+  constructor(private readonly attendanceRepository: IAttendanceRepository) {}
   async execute(query: AttendanceTrendQueryDto) {
-    return this.repo.getMonthlyTrend(query);
+    return this.attendanceRepository.getMonthlyTrend(query);
   }
 }

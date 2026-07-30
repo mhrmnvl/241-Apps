@@ -17,7 +17,9 @@ export class AppSettingResponseDto {
   @ApiProperty({ example: 'Masuk ke SIAKAD' })
   loginTitle!: string;
 
-  @ApiProperty({ example: 'Sistem Informasi Akademik MTs Persis 241 Al-Ikhlash' })
+  @ApiProperty({
+    example: 'Sistem Informasi Akademik MTs Persis 241 Al-Ikhlash',
+  })
   metaDescription!: string;
 
   @ApiPropertyOptional({

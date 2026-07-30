@@ -26,6 +26,7 @@ export abstract class IAcademicYearRepository {
   abstract deactivateAll(): Promise<Prisma.BatchPayload>;
   abstract activateById(id: string): Promise<AcademicYear>;
   abstract hasRelatedData(id: string): Promise<boolean>;
+  abstract countSemesters(academicYearId: string): Promise<number>;
   abstract countActive(): Promise<number>;
   abstract deactivateSemestersByAcademicYearId(
     academicYearId: string,

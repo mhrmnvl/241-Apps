@@ -6,6 +6,7 @@ import { StudentQueryDto } from '../dto/request/student-query.dto.js';
 import { UpdateStudentDto } from '../dto/request/update-student.dto.js';
 import { BulkImportStudentsUseCase } from '../use-cases/bulk-import-student.use-case.js';
 import { CreateStudentUseCase } from '../use-cases/create-student.use-case.js';
+import { CreateStudentWithRelationsUseCase } from '../use-cases/create-student-with-relations.use-case.js';
 import { DeleteStudentUseCase } from '../use-cases/delete-student.use-case.js';
 import { ExportStudentsUseCase } from '../use-cases/export-student.use-case.js';
 import { GetStudentByIdUseCase } from '../use-cases/get-student-by-id.use-case.js';
@@ -43,6 +44,10 @@ describe('StudentController', () => {
         { provide: GetStudentsUseCase, useValue: mockGetStudentsService },
         { provide: GetStudentByIdUseCase, useValue: mockGetStudentByIdService },
         { provide: CreateStudentUseCase, useValue: mockCreateStudentService },
+        {
+          provide: CreateStudentWithRelationsUseCase,
+          useValue: { execute: jest.fn() },
+        },
         { provide: UpdateStudentUseCase, useValue: mockUpdateStudentService },
         { provide: DeleteStudentUseCase, useValue: mockDeleteStudentService },
         {

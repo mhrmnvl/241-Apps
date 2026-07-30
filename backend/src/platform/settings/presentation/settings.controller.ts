@@ -48,9 +48,7 @@ export class SettingsController {
   @ApiParam({ name: 'appKey', enum: AppKey })
   @ApiOperation({ summary: 'Get app settings (public — needed pre-login)' })
   @ApiResponse({ status: 200, type: AppSettingResponseDto })
-  async get(
-    @Param('appKey', new ParseEnumPipe(AppKey)) appKey: AppKey,
-  ) {
+  async get(@Param('appKey', new ParseEnumPipe(AppKey)) appKey: AppKey) {
     return this.getUseCase.execute(appKey);
   }
 
@@ -76,7 +74,11 @@ export class SettingsController {
   @ApiParam({ name: 'appKey', enum: AppKey })
   @ApiOperation({ summary: 'Upload app logo' })
   @ApiBody({
-    schema: { type: 'object', properties: { file: { type: 'string', format: 'binary' } }, required: ['file'] },
+    schema: {
+      type: 'object',
+      properties: { file: { type: 'string', format: 'binary' } },
+      required: ['file'],
+    },
   })
   @ApiResponse({ status: 200, type: AppSettingResponseDto })
   async uploadLogo(
@@ -95,7 +97,11 @@ export class SettingsController {
   @ApiParam({ name: 'appKey', enum: AppKey })
   @ApiOperation({ summary: 'Upload app favicon' })
   @ApiBody({
-    schema: { type: 'object', properties: { file: { type: 'string', format: 'binary' } }, required: ['file'] },
+    schema: {
+      type: 'object',
+      properties: { file: { type: 'string', format: 'binary' } },
+      required: ['file'],
+    },
   })
   @ApiResponse({ status: 200, type: AppSettingResponseDto })
   async uploadFavicon(

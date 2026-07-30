@@ -103,6 +103,40 @@ export class PrismaReportCardRepository extends IReportCardRepository {
     });
   }
 
+  async calculateAndApplyClassroomRanks(
+    classroomId: string,
+    semesterId: string,
+    targetEnrollmentId: string,
+  ): Promise<number | null> {
+    const reportCardsInClass = await this.prisma.reportCard.findMany({
+      where: {
+        deletedAt: null,
+        totalAverage: { not: null },
+        enrollment: {
+          classroomId,
+          semesterId,
+          deletedAt: null,
+        },
+      },
+      select: { id: true, enrollmentId: true, totalAverage: true },
+      orderBy: { totalAverage: 'desc' },
+    });
+
+    let targetRank: number | null = null;
+    for (let i = 0; i < reportCardsInClass.length; i++) {
+      const item = reportCardsInClass[i];
+      const rankValue = i + 1;
+      await this.prisma.reportCard.update({
+        where: { id: item.id },
+        data: { rank: rankValue },
+      });
+      if (item.enrollmentId === targetEnrollmentId) {
+        targetRank = rankValue;
+      }
+    }
+    return targetRank;
+  }
+
   async softDelete(id: string): Promise<ReportCard> {
     return this.prisma.reportCard.update({
       where: { id },

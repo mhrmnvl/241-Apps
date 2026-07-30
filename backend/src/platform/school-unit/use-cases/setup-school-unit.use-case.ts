@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { ConflictException, Injectable, Logger } from '@nestjs/common';
 import { CreateSchoolUnitDto } from '../dto/request/create-school-unit.dto.js';
 import { SchoolUnitRepository } from '../repositories/school-unit.repository.js';
 
@@ -9,6 +9,10 @@ export class SetupSchoolUnitUseCase {
   constructor(private readonly repo: SchoolUnitRepository) {}
 
   async execute(dto: CreateSchoolUnitDto) {
+    const existing = await this.repo.findFirst();
+    if (existing) {
+      throw new ConflictException('School unit has already been set up');
+    }
     const schoolUnit = await this.repo.create(dto);
     this.logger.log(`School unit created: ${schoolUnit.name}`);
     return schoolUnit;

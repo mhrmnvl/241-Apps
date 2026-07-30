@@ -9,8 +9,11 @@ import { GenerateReportCardUseCase } from './generate-report-card.use-case.js';
 describe('GenerateReportCardUseCase', () => {
   let useCase: GenerateReportCardUseCase;
 
-  const mockRepo = { upsert: jest.fn() };
-  const mockScoreRepo = { findAll: jest.fn() };
+  const mockRepo = {
+    upsert: jest.fn(),
+    calculateAndApplyClassroomRanks: jest.fn(),
+  };
+  const mockScoreRepo = { findAllForReportCard: jest.fn() };
   const mockEnrollmentRepo = { findById: jest.fn() };
 
   beforeEach(async () => {
@@ -36,24 +39,30 @@ describe('GenerateReportCardUseCase', () => {
       enrollmentId: 'enr-1',
     };
 
-    it('should generate reportCard successfully', async () => {
+    it('should generate reportCard with weighted average successfully', async () => {
       mockEnrollmentRepo.findById.mockResolvedValue({ id: 'enr-1' });
-      mockScoreRepo.findAll.mockResolvedValue({
-        data: [{ score: 80 }, { score: 90 }],
-      });
-      const reportCard = { id: 'rap-1', totalAverage: 85 };
+      // Score 80 with weight 2, Score 100 with weight 1 => (80*2 + 100*1) / 3 = 86.666...
+      mockScoreRepo.findAllForReportCard.mockResolvedValue([
+        { score: 80, assessmentItem: { weight: 2 } },
+        { score: 100, assessmentItem: { weight: 1 } },
+      ]);
+      const reportCard = { id: 'rap-1', totalAverage: 86.66666666666667 };
       mockRepo.upsert.mockResolvedValue(reportCard);
 
       const result = await useCase.execute(dto);
 
       expect(mockEnrollmentRepo.findById).toHaveBeenCalledWith('enr-1');
-      expect(mockRepo.upsert).toHaveBeenCalled();
+      expect(mockRepo.upsert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          totalAverage: 86.66666666666667,
+        }),
+      );
       expect(result).toEqual(reportCard);
     });
 
     it('should handle empty scores with null average', async () => {
       mockEnrollmentRepo.findById.mockResolvedValue({ id: 'enr-1' });
-      mockScoreRepo.findAll.mockResolvedValue({ data: [] });
+      mockScoreRepo.findAllForReportCard.mockResolvedValue([]);
       mockRepo.upsert.mockResolvedValue({ id: 'rap-1', totalAverage: null });
 
       const result = await useCase.execute(dto);
