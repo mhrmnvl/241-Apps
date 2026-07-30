@@ -12,54 +12,12 @@ import { HealthModule } from './core/health/health.module.js';
 import { ResponseInterceptor } from './core/interceptors/response.interceptor.js';
 import { pinoLoggerConfig } from './core/logger/logger.config.js';
 import { AppCacheModule } from './core/cache/cache.module.js';
-import { AcademicYearModule } from './academic/academic-year/academic-year.module.js';
-import { AchievementModule } from './platform/profile/achievement/achievement.module.js';
-import { AnnouncementModule } from './platform/announcement/announcement.module.js';
-import { AttendanceModule } from './academic/attendance/attendance.module.js';
-import { AuthModule } from './platform/auth/auth.module.js';
-import { ClassroomModule } from './academic/classroom/classroom.module.js';
-import { DashboardModule } from './platform/dashboard/dashboard.module.js';
-import { CurriculumModule } from './academic/curriculum/curriculum.module.js';
-import { AssessmentModule } from './academic/assessment/assessment.module.js';
-import { CalendarModule } from './academic/calendar/calendar.module.js';
-import { EducationModule } from './platform/master-data/education/education.module.js';
-import { EducationalHistoryModule } from './platform/profile/educational-history/educational-history.module.js';
-import { TeacherModule } from './academic/teacher/teacher.module.js';
-import { SchoolUnitModule } from './platform/school-unit/school-unit.module.js';
-import { OccupationModule } from './academic/master-data/occupation/occupation.module.js';
-import { ParentModule } from './academic/parent/parent.module.js';
-import { SocialMediaModule } from './platform/master-data/social-media/social-media.module.js';
-import { PositionModule } from './academic/master-data/position/position.module.js';
-import { EmploymentTypeModule } from './academic/master-data/employment-type/employment-type.module.js';
-import { PositionCategoryModule } from './academic/master-data/position-category/position-category.module.js';
-import { ProfileModule } from './platform/profile/profile.module.js';
-import { ReportCardModule } from './academic/report-card/report-card.module.js';
-import { ScheduleModule as AcademicScheduleModule } from './academic/schedule/schedule.module.js';
-import { ScholarshipModule } from './platform/profile/scholarship/scholarship.module.js';
-import { SemesterModule } from './academic/semester/semester.module.js';
-import { EnrollmentModule } from './academic/enrollment/enrollment.module.js';
-import { GraduationModule } from './academic/graduation/graduation.module.js';
-import { StudentModule } from './academic/student/student.module.js';
-import { SubjectModule } from './academic/subject/subject.module.js';
-import { TeachingAssignmentModule } from './academic/teaching-assignment/teaching-assignment.module.js';
-import { UserModule } from './platform/user/user.module.js';
-import { GradeModule } from './academic/grade/grade.module.js';
-import { RoleModule } from './platform/access-control/role/role.module.js';
-import { PermissionModule } from './platform/access-control/permission/permission.module.js';
-import { SessionModule } from './platform/session/session.module.js';
-import { AuditLogModule } from './platform/audit-log/audit-log.module.js';
-import { JwtAuthGuard } from './platform/auth/index.js';
-import { PermissionGuard } from './platform/access-control/permission/guards/permission.guard.js';
-import { SettingsModule } from './platform/settings/settings.module.js';
-import { NotificationModule } from './platform/notification/notification.module.js';
-import { FileModule } from './platform/file/file.module.js';
-import { ReligionModule } from './platform/master-data/religion/religion.module.js';
-import { BloodTypeModule } from './platform/master-data/blood-type/blood-type.module.js';
-import { AchievementTypeModule } from './platform/master-data/achievement-type/achievement-type.module.js';
-import { AcademicCalendarTypeModule } from './academic/master-data/academic-calendar-type/academic-calendar-type.module.js';
-import { SemesterTypeModule } from './academic/master-data/semester-type/semester-type.module.js';
+import { AcademicModule } from './academic/academic.module.js';
+import { PlatformModule } from './platform/platform.module.js';
 import { InventoryModule } from './inventory/inventory.module.js';
 import { AdmissionModule } from './admission/admission.module.js';
+import { JwtAuthGuard } from './platform/auth/index.js';
+import { PermissionGuard } from './platform/access-control/permission/guards/permission.guard.js';
 
 @Module({
   imports: [
@@ -98,50 +56,8 @@ import { AdmissionModule } from './admission/admission.module.js';
       },
     }),
     HealthModule,
-    DashboardModule,
-    AuthModule,
-    UserModule,
-    RoleModule,
-    PermissionModule,
-    SessionModule,
-    AuditLogModule,
-    TeacherModule,
-    SchoolUnitModule,
-    OccupationModule,
-    ParentModule,
-    SocialMediaModule,
-    PositionModule,
-    EmploymentTypeModule,
-    PositionCategoryModule,
-    ProfileModule,
-    StudentModule,
-    ClassroomModule,
-    GradeModule,
-    SubjectModule,
-    EducationModule,
-    CurriculumModule,
-    AssessmentModule,
-    CalendarModule,
-    AcademicYearModule,
-    SemesterModule,
-    EnrollmentModule,
-    GraduationModule,
-    TeachingAssignmentModule,
-    AcademicScheduleModule,
-    AttendanceModule,
-    AnnouncementModule,
-    AchievementModule,
-    ScholarshipModule,
-    EducationalHistoryModule,
-    ReportCardModule,
-    SettingsModule,
-    NotificationModule,
-    FileModule,
-    ReligionModule,
-    BloodTypeModule,
-    AchievementTypeModule,
-    AcademicCalendarTypeModule,
-    SemesterTypeModule,
+    PlatformModule,
+    AcademicModule,
     InventoryModule,
     AdmissionModule,
   ],
