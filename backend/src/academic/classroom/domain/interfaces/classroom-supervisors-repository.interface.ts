@@ -49,7 +49,7 @@ export interface RestoreClassroomSupervisorRepositoryInput {
   teacherId: string;
 }
 
-export abstract class IClassroomSupervisorsRepository {
+export abstract class IClassroomSupervisorRepository {
   abstract findAll(
     query: ClassroomSupervisorQueryDto,
   ): Promise<PaginatedResult<ClassroomSupervisorWithDetails>>;

@@ -1,11 +1,11 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { ClassroomSupervisorsRepository } from '../repositories/classroom-supervisors.repository.js';
+import { ClassroomSupervisorRepository } from '../repositories/classroom-supervisors.repository.js';
 
 @Injectable()
 export class DeleteClassroomSupervisorUseCase {
   private readonly logger = new Logger(DeleteClassroomSupervisorUseCase.name);
 
-  constructor(private readonly repository: ClassroomSupervisorsRepository) {}
+  constructor(private readonly repository: ClassroomSupervisorRepository) {}
 
   async execute(id: string) {
     const existing = await this.repository.findById(id);

@@ -3,12 +3,12 @@ import { ClassroomController } from './presentation/classroom.controller.js';
 import { ClassroomStructuresController } from './presentation/classroom-structures.controller.js';
 import { ClassroomSupervisorsController } from './presentation/classroom-supervisors.controller.js';
 import { ClassroomRepository } from './repositories/classroom.repository.js';
-import { ClassroomStructuresRepository } from './repositories/classroom-structures.repository.js';
-import { ClassroomSupervisorsRepository } from './repositories/classroom-supervisors.repository.js';
+import { ClassroomStructureRepository } from './repositories/classroom-structures.repository.js';
+import { ClassroomSupervisorRepository } from './repositories/classroom-supervisors.repository.js';
 import { IClassroomRepository } from './domain/interfaces/classroom-repository.interface.js';
 import { PrismaClassroomRepository } from './infrastructure/persistence/prisma-classroom.repository.js';
-import { PrismaClassroomStructuresRepository } from './infrastructure/persistence/prisma-classroom-structures.repository.js';
-import { PrismaClassroomSupervisorsRepository } from './infrastructure/persistence/prisma-classroom-supervisors.repository.js';
+import { PrismaClassroomStructureRepository } from './infrastructure/persistence/prisma-classroom-structures.repository.js';
+import { PrismaClassroomSupervisorRepository } from './infrastructure/persistence/prisma-classroom-supervisors.repository.js';
 import { CreateClassroomUseCase } from './use-cases/create-classroom.use-case.js';
 import { DeleteClassroomUseCase } from './use-cases/delete-classroom.use-case.js';
 import { GetClassroomByIdUseCase } from './use-cases/get-classroom-by-id.use-case.js';
@@ -34,12 +34,12 @@ import { UpdateClassroomSupervisorUseCase } from './use-cases/update-classroom-s
     { provide: IClassroomRepository, useClass: PrismaClassroomRepository },
     { provide: ClassroomRepository, useClass: PrismaClassroomRepository },
     {
-      provide: ClassroomStructuresRepository,
-      useClass: PrismaClassroomStructuresRepository,
+      provide: ClassroomStructureRepository,
+      useClass: PrismaClassroomStructureRepository,
     },
     {
-      provide: ClassroomSupervisorsRepository,
-      useClass: PrismaClassroomSupervisorsRepository,
+      provide: ClassroomSupervisorRepository,
+      useClass: PrismaClassroomSupervisorRepository,
     },
     CreateClassroomUseCase,
     DeleteClassroomUseCase,
@@ -59,8 +59,8 @@ import { UpdateClassroomSupervisorUseCase } from './use-cases/update-classroom-s
   exports: [
     IClassroomRepository,
     ClassroomRepository,
-    ClassroomStructuresRepository,
-    ClassroomSupervisorsRepository,
+    ClassroomStructureRepository,
+    ClassroomSupervisorRepository,
   ],
 })
 export class ClassroomModule {}

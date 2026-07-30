@@ -6,7 +6,7 @@ import {
 import { Test, TestingModule } from '@nestjs/testing';
 import { CreateTeacherPositionDto } from '../dto/request/create-teacher-position.dto.js';
 import { UpdateTeacherPositionDto } from '../dto/request/update-teacher-position.dto.js';
-import { TeacherPositionsRepository } from '../repositories/teacher-position.repository.js';
+import { TeacherPositionRepository } from '../repositories/teacher-position.repository.js';
 import { TeacherRepository } from '../index.js';
 import { TeacherPositionUseCase } from './teacher-position.use-case.js';
 
@@ -33,7 +33,7 @@ describe('TeacherPositionUseCase', () => {
         TeacherPositionUseCase,
         { provide: TeacherRepository, useValue: mockTeacherRepository },
         {
-          provide: TeacherPositionsRepository,
+          provide: TeacherPositionRepository,
           useValue: mockPositionRepository,
         },
       ],

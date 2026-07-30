@@ -10,7 +10,7 @@ export type TeacherPositionWithDetails = Prisma.TeacherPositionGetPayload<{
   include: typeof TEACHER_POSITION_INCLUDE;
 }>;
 
-export abstract class ITeacherPositionsRepository {
+export abstract class ITeacherPositionRepository {
   abstract findAll(teacherId: string): Promise<TeacherPositionWithDetails[]>;
   abstract findLinkById(
     teacherId: string,

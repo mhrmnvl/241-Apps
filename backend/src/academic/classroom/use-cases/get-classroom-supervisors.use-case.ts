@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { ClassroomSupervisorQueryDto } from '../dto/request/classroom-supervisor-query.dto.js';
-import { ClassroomSupervisorsRepository } from '../repositories/classroom-supervisors.repository.js';
+import { ClassroomSupervisorRepository } from '../repositories/classroom-supervisors.repository.js';
 
 @Injectable()
 export class GetClassroomSupervisorsUseCase {
-  constructor(private readonly repository: ClassroomSupervisorsRepository) {}
+  constructor(private readonly repository: ClassroomSupervisorRepository) {}
 
   async execute(query: ClassroomSupervisorQueryDto) {
     const { data, total, page, limit } = await this.repository.findAll(query);

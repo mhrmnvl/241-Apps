@@ -1,9 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { ClassroomSupervisorsRepository } from '../repositories/classroom-supervisors.repository.js';
+import { ClassroomSupervisorRepository } from '../repositories/classroom-supervisors.repository.js';
 
 @Injectable()
 export class GetClassroomSupervisorByIdUseCase {
-  constructor(private readonly repository: ClassroomSupervisorsRepository) {}
+  constructor(private readonly repository: ClassroomSupervisorRepository) {}
 
   async execute(id: string) {
     const supervisor = await this.repository.findById(id);

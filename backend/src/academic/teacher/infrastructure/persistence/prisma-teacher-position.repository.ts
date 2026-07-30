@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Position, TeacherPosition } from '@prisma/client';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
 import {
-  ITeacherPositionsRepository,
+  ITeacherPositionRepository,
   TEACHER_POSITION_INCLUDE,
   TeacherPositionWithDetails,
 } from '../../domain/interfaces/teacher-position-repository.interface.js';
@@ -10,7 +10,7 @@ import { CreateTeacherPositionDto } from '../../dto/request/create-teacher-posit
 import { UpdateTeacherPositionDto } from '../../dto/request/update-teacher-position.dto.js';
 
 @Injectable()
-export class PrismaTeacherPositionsRepository extends ITeacherPositionsRepository {
+export class PrismaTeacherPositionRepository extends ITeacherPositionRepository {
   constructor(private readonly prisma: PrismaService) {
     super();
   }

@@ -3,7 +3,7 @@ import { ClassroomSupervisor, Prisma, Teacher } from '@prisma/client';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
 import { resolveSemesterId } from '../../../../shared/utils/active-academic-year.helper.js';
 import {
-  IClassroomSupervisorsRepository,
+  IClassroomSupervisorRepository,
   CLASS_SUPERVISOR_INCLUDE,
   ClassroomSupervisorWithDetails,
   ClassroomWithAcademicYear,
@@ -16,7 +16,7 @@ import { ClassroomSupervisorQueryDto } from '../../dto/request/classroom-supervi
 import { PaginatedResult } from '../../../../shared/domain/interfaces/repository.interface.js';
 
 @Injectable()
-export class PrismaClassroomSupervisorsRepository extends IClassroomSupervisorsRepository {
+export class PrismaClassroomSupervisorRepository extends IClassroomSupervisorRepository {
   constructor(private readonly prisma: PrismaService) {
     super();
   }

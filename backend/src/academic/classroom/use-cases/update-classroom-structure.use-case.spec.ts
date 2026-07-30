@@ -4,7 +4,7 @@ import {
   ConflictException,
   NotFoundException,
 } from '@nestjs/common';
-import { ClassroomStructuresRepository } from '../repositories/classroom-structures.repository.js';
+import { ClassroomStructureRepository } from '../repositories/classroom-structures.repository.js';
 import { UpdateClassroomStructureUseCase } from './update-classroom-structure.use-case.js';
 
 describe('UpdateClassroomStructureUseCase', () => {
@@ -31,7 +31,7 @@ describe('UpdateClassroomStructureUseCase', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         UpdateClassroomStructureUseCase,
-        { provide: ClassroomStructuresRepository, useValue: mockRepo },
+        { provide: ClassroomStructureRepository, useValue: mockRepo },
       ],
     }).compile();
 

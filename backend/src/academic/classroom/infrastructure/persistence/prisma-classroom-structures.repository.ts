@@ -9,7 +9,7 @@ import {
 import { PrismaService } from '../../../../core/database/prisma.service.js';
 import { resolveSemesterId } from '../../../../shared/utils/active-academic-year.helper.js';
 import {
-  IClassroomStructuresRepository,
+  IClassroomStructureRepository,
   CLASSROOM_STRUCTURE_INCLUDE,
   ClassroomStructureWithDetails,
   StudentSemesterStructureResult,
@@ -20,7 +20,7 @@ import { ClassroomStructureQueryDto } from '../../dto/request/classroom-structur
 import { PaginatedResult } from '../../../../shared/domain/interfaces/repository.interface.js';
 
 @Injectable()
-export class PrismaClassroomStructuresRepository extends IClassroomStructuresRepository {
+export class PrismaClassroomStructureRepository extends IClassroomStructureRepository {
   constructor(private readonly prisma: PrismaService) {
     super();
   }

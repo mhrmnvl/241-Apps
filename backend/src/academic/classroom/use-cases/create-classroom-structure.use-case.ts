@@ -6,13 +6,13 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { CreateClassroomStructureDto } from '../dto/request/create-classroom-structure.dto.js';
-import { ClassroomStructuresRepository } from '../repositories/classroom-structures.repository.js';
+import { ClassroomStructureRepository } from '../repositories/classroom-structures.repository.js';
 
 @Injectable()
 export class CreateClassroomStructureUseCase {
   private readonly logger = new Logger(CreateClassroomStructureUseCase.name);
 
-  constructor(private readonly repository: ClassroomStructuresRepository) {}
+  constructor(private readonly repository: ClassroomStructureRepository) {}
 
   async execute(dto: CreateClassroomStructureDto) {
     const [classroom, semester, existing] = await Promise.all([

@@ -54,7 +54,7 @@ export interface UpdateClassroomStructureRepositoryInput {
   treasurerId?: string | null;
 }
 
-export abstract class IClassroomStructuresRepository {
+export abstract class IClassroomStructureRepository {
   abstract findAll(
     query: ClassroomStructureQueryDto,
   ): Promise<PaginatedResult<ClassroomStructureWithDetails>>;

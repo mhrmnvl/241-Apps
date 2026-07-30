@@ -6,10 +6,10 @@ import { TeacherAddressController } from './presentation/teacher-address.control
 import { TeacherPositionsController } from './presentation/teacher-position.controller.js';
 import { TeacherRepository } from './repositories/teacher.repository.js';
 import { TeacherAddressRepository } from './repositories/teacher-address.repository.js';
-import { TeacherPositionsRepository } from './repositories/teacher-position.repository.js';
+import { TeacherPositionRepository } from './repositories/teacher-position.repository.js';
 import { PrismaTeacherRepository } from './infrastructure/persistence/prisma-teacher.repository.js';
 import { PrismaTeacherAddressRepository } from './infrastructure/persistence/prisma-teacher-address.repository.js';
-import { PrismaTeacherPositionsRepository } from './infrastructure/persistence/prisma-teacher-position.repository.js';
+import { PrismaTeacherPositionRepository } from './infrastructure/persistence/prisma-teacher-position.repository.js';
 import { ExcelTeacherParser } from './infrastructure/parsers/excel-teacher.parser.js';
 import { CreateTeacherUseCase } from './use-cases/create-teacher.use-case.js';
 import { DeleteTeacherUseCase } from './use-cases/delete-teacher.use-case.js';
@@ -39,8 +39,8 @@ import { TeacherPositionUseCase } from './use-cases/teacher-position.use-case.js
       useClass: PrismaTeacherAddressRepository,
     },
     {
-      provide: TeacherPositionsRepository,
-      useClass: PrismaTeacherPositionsRepository,
+      provide: TeacherPositionRepository,
+      useClass: PrismaTeacherPositionRepository,
     },
     ExcelTeacherParser,
     CreateTeacherUseCase,
@@ -59,7 +59,7 @@ import { TeacherPositionUseCase } from './use-cases/teacher-position.use-case.js
   exports: [
     TeacherRepository,
     TeacherAddressRepository,
-    TeacherPositionsRepository,
+    TeacherPositionRepository,
   ],
 })
 export class TeacherModule {}

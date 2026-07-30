@@ -1,1 +1,1 @@
-export { PrismaTeacherPositionsRepository as TeacherPositionsRepository } from '../infrastructure/persistence/prisma-teacher-position.repository.js';
+export { PrismaTeacherPositionRepository as TeacherPositionRepository } from '../infrastructure/persistence/prisma-teacher-position.repository.js';

@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { CreateTeacherPositionDto } from '../dto/request/create-teacher-position.dto.js';
 import { UpdateTeacherPositionDto } from '../dto/request/update-teacher-position.dto.js';
-import { TeacherPositionsRepository } from '../repositories/teacher-position.repository.js';
+import { TeacherPositionRepository } from '../repositories/teacher-position.repository.js';
 import { TeacherRepository } from '../index.js';
 
 @Injectable()
@@ -16,7 +16,7 @@ export class TeacherPositionUseCase {
 
   constructor(
     private readonly repository: TeacherRepository,
-    private readonly teacherPositionRepository: TeacherPositionsRepository,
+    private readonly teacherPositionRepository: TeacherPositionRepository,
   ) {}
 
   async findAll(teacherId: string) {

@@ -1,6 +1,6 @@
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { ClassroomSupervisorsRepository } from '../repositories/classroom-supervisors.repository.js';
+import { ClassroomSupervisorRepository } from '../repositories/classroom-supervisors.repository.js';
 import { DeleteClassroomSupervisorUseCase } from './delete-classroom-supervisor.use-case.js';
 
 describe('DeleteClassroomSupervisorUseCase', () => {
@@ -15,7 +15,7 @@ describe('DeleteClassroomSupervisorUseCase', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         DeleteClassroomSupervisorUseCase,
-        { provide: ClassroomSupervisorsRepository, useValue: mockRepo },
+        { provide: ClassroomSupervisorRepository, useValue: mockRepo },
       ],
     }).compile();
 
