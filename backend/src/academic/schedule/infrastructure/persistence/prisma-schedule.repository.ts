@@ -175,4 +175,73 @@ export class PrismaScheduleRepository extends IScheduleRepository {
       data: { deletedAt: new Date() },
     });
   }
+
+  async findTeachingAssignmentById(id: string): Promise<{ id: string } | null> {
+    return this.prisma.teachingAssignment.findFirst({
+      where: {
+        id,
+        classroom: { academicYear: { deletedAt: null } },
+        deletedAt: null,
+      },
+      select: { id: true },
+    });
+  }
+
+  async findValidClassroomById(id: string): Promise<{ id: string } | null> {
+    return this.prisma.classroom.findFirst({
+      where: {
+        id,
+        academicYear: { deletedAt: null },
+        deletedAt: null,
+      },
+      select: { id: true },
+    });
+  }
+
+  async findActiveSemester(): Promise<{ id: string } | null> {
+    return this.prisma.semester.findFirst({
+      where: {
+        isActive: true,
+        deletedAt: null,
+        academicYear: { deletedAt: null },
+      },
+      select: { id: true },
+    });
+  }
+
+  async findTeachingAssignmentBySubjectAndSemester(
+    classroomId: string,
+    subjectId: string,
+    semesterId: string,
+  ): Promise<{ id: string } | null> {
+    return this.prisma.teachingAssignment.findFirst({
+      where: {
+        classroomId,
+        subjectId,
+        semesterId,
+        deletedAt: null,
+      },
+      select: { id: true },
+    });
+  }
+
+  async findAnyTeacherIdForSubject(subjectId: string): Promise<string | null> {
+    const res = await this.prisma.teachingAssignment.findFirst({
+      where: { subjectId, deletedAt: null },
+      select: { teacherId: true },
+    });
+    return res?.teacherId ?? null;
+  }
+
+  async createTeachingAssignment(data: {
+    classroomId: string;
+    subjectId: string;
+    teacherId: string;
+    semesterId: string;
+  }): Promise<{ id: string }> {
+    return this.prisma.teachingAssignment.create({
+      data,
+      select: { id: true },
+    });
+  }
 }

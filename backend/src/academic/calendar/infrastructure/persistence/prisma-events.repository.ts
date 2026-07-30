@@ -123,4 +123,11 @@ export class PrismaEventsRepository extends IEventsRepository {
       data: { deletedAt: new Date() },
     });
   }
+
+  async findAllAudienceGroups() {
+    return this.prisma.audienceGroup.findMany({
+      where: { deletedAt: null },
+      orderBy: { name: 'asc' },
+    });
+  }
 }

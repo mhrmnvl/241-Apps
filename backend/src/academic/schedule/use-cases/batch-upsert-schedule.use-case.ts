@@ -3,36 +3,20 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { PrismaService } from '../../../core/database/prisma.service.js';
 import { BatchUpsertScheduleDto } from '../dto/request/schedule.dto.js';
 import { IScheduleRepository } from '../domain/interfaces/schedule-repository.interface.js';
 
 @Injectable()
 export class BatchUpsertScheduleUseCase {
-  constructor(
-    private readonly repo: IScheduleRepository,
-    private readonly prisma: PrismaService,
-  ) {}
+  constructor(private readonly repo: IScheduleRepository) {}
 
   async execute(classroomId: string, dto: BatchUpsertScheduleDto) {
-    const classroom = await this.prisma.classroom.findFirst({
-      where: {
-        id: classroomId,
-        academicYear: { deletedAt: null },
-        deletedAt: null,
-      },
-    });
+    const classroom = await this.repo.findValidClassroomById(classroomId);
     if (!classroom) {
       throw new NotFoundException('Classroom not found');
     }
 
-    const semester = await this.prisma.semester.findFirst({
-      where: {
-        isActive: true,
-        deletedAt: null,
-        academicYear: { deletedAt: null },
-      },
-    });
+    const semester = await this.repo.findActiveSemester();
     if (!semester) {
       throw new BadRequestException('Tidak ada semester aktif');
     }
@@ -45,34 +29,28 @@ export class BatchUpsertScheduleUseCase {
 
     let created = 0;
     for (const row of dto.lessons) {
-      let ta = await this.prisma.teachingAssignment.findFirst({
-        where: {
-          classroomId,
-          subjectId: row.subjectId,
-          semesterId: semester.id,
-          deletedAt: null,
-        },
-      });
+      let ta = await this.repo.findTeachingAssignmentBySubjectAndSemester(
+        classroomId,
+        row.subjectId,
+        semester.id,
+      );
 
       if (!ta) {
-        const existingTa = await this.prisma.teachingAssignment.findFirst({
-          where: { subjectId: row.subjectId, deletedAt: null },
-          select: { teacherId: true },
-        });
+        const teacherId = await this.repo.findAnyTeacherIdForSubject(
+          row.subjectId,
+        );
 
-        if (!existingTa) {
+        if (!teacherId) {
           throw new BadRequestException(
             `Tidak ada guru yang mengajar mapel dengan ID ${row.subjectId}`,
           );
         }
 
-        ta = await this.prisma.teachingAssignment.create({
-          data: {
-            classroomId,
-            subjectId: row.subjectId,
-            teacherId: existingTa.teacherId,
-            semesterId: semester.id,
-          },
+        ta = await this.repo.createTeachingAssignment({
+          classroomId,
+          subjectId: row.subjectId,
+          teacherId,
+          semesterId: semester.id,
         });
       }
 

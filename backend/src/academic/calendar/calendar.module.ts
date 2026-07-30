@@ -21,6 +21,7 @@ import { DeleteEventUseCase } from './use-cases/delete-event.use-case.js';
 import { GetEventByIdUseCase } from './use-cases/get-event-by-id.use-case.js';
 import { GetEventsUseCase } from './use-cases/get-events.use-case.js';
 import { UpdateEventUseCase } from './use-cases/update-event.use-case.js';
+import { GetAudienceGroupsUseCase } from './use-cases/get-audience-groups.use-case.js';
 
 @Module({
   imports: [AcademicYearModule, SemesterModule, ClassroomModule],
@@ -50,6 +51,7 @@ import { UpdateEventUseCase } from './use-cases/update-event.use-case.js';
     CreateEventUseCase,
     UpdateEventUseCase,
     DeleteEventUseCase,
+    GetAudienceGroupsUseCase,
   ],
   exports: [IAcademicCalendarRepository, IEventsRepository],
 })

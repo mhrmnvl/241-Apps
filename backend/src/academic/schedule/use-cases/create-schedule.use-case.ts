@@ -3,24 +3,16 @@ import {
   ConflictException,
   Injectable,
 } from '@nestjs/common';
-import { PrismaService } from '../../../core/database/prisma.service.js';
 import { CreateScheduleDto } from '../dto/request/schedule.dto.js';
 import { IScheduleRepository } from '../domain/interfaces/schedule-repository.interface.js';
 
 @Injectable()
 export class CreateScheduleUseCase {
-  constructor(
-    private readonly repo: IScheduleRepository,
-    private readonly prisma: PrismaService,
-  ) {}
+  constructor(private readonly repo: IScheduleRepository) {}
   async execute(dto: CreateScheduleDto) {
-    const ta = await this.prisma.teachingAssignment.findFirst({
-      where: {
-        id: dto.teachingAssignmentId,
-        classroom: { academicYear: { deletedAt: null } },
-        deletedAt: null,
-      },
-    });
+    const ta = await this.repo.findTeachingAssignmentById(
+      dto.teachingAssignmentId,
+    );
     if (!ta) {
       throw new BadRequestException('Teaching assignment not found');
     }

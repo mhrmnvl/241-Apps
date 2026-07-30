@@ -61,4 +61,23 @@ export abstract class IScheduleRepository {
     classroomId: string,
     day: Day,
   ): Promise<Prisma.BatchPayload>;
+  abstract findTeachingAssignmentById(
+    id: string,
+  ): Promise<{ id: string } | null>;
+  abstract findValidClassroomById(id: string): Promise<{ id: string } | null>;
+  abstract findActiveSemester(): Promise<{ id: string } | null>;
+  abstract findTeachingAssignmentBySubjectAndSemester(
+    classroomId: string,
+    subjectId: string,
+    semesterId: string,
+  ): Promise<{ id: string } | null>;
+  abstract findAnyTeacherIdForSubject(
+    subjectId: string,
+  ): Promise<string | null>;
+  abstract createTeachingAssignment(data: {
+    classroomId: string;
+    subjectId: string;
+    teacherId: string;
+    semesterId: string;
+  }): Promise<{ id: string }>;
 }

@@ -25,4 +25,8 @@ export abstract class IEventsRepository {
   abstract update(id: string, dto: UpdateEventDto): Promise<EventWithDetails>;
 
   abstract softDelete(id: string): Promise<Event>;
+
+  abstract findAllAudienceGroups(): Promise<
+    { id: string; name: string; description: string | null }[]
+  >;
 }
