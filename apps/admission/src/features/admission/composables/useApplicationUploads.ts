@@ -21,19 +21,32 @@ export interface UseApplicationUploadsOptions {
   refresh: () => Promise<void>
 }
 
+const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
+
 export function useApplicationUploads(options: UseApplicationUploadsOptions) {
   const documentFiles = ref<Record<string, File | null>>({})
   const uploadingDoc = ref<string | null>(null)
 
   function onDocumentFileChange(typeCode: string, event: Event) {
     const input = event.target as HTMLInputElement
-    documentFiles.value[typeCode] = input.files?.[0] ?? null
+    const selected = input.files?.[0] ?? null
+    if (selected && selected.size > MAX_FILE_SIZE) {
+      toast.error('Ukuran berkas melebihi batas maksimal 10MB.')
+      input.value = ''
+      documentFiles.value[typeCode] = null
+      return
+    }
+    documentFiles.value[typeCode] = selected
   }
 
   async function uploadDocument(typeCode: string) {
     const file = documentFiles.value[typeCode]
     if (!file) {
       toast.error('Pilih berkas terlebih dahulu.')
+      return
+    }
+    if (file.size > MAX_FILE_SIZE) {
+      toast.error('Ukuran berkas melebihi batas maksimal 10MB.')
       return
     }
     uploadingDoc.value = typeCode
@@ -51,7 +64,14 @@ export function useApplicationUploads(options: UseApplicationUploadsOptions) {
 
   function onPaymentFileChange(event: Event) {
     const input = event.target as HTMLInputElement
-    paymentFile.value = input.files?.[0] ?? null
+    const selected = input.files?.[0] ?? null
+    if (selected && selected.size > MAX_FILE_SIZE) {
+      toast.error('Ukuran berkas melebihi batas maksimal 10MB.')
+      input.value = ''
+      paymentFile.value = null
+      return
+    }
+    paymentFile.value = selected
   }
 
   async function uploadPayment() {
@@ -64,6 +84,10 @@ export function useApplicationUploads(options: UseApplicationUploadsOptions) {
     }
     if (!paymentFile.value) {
       toast.error('Pilih berkas bukti transfer.')
+      return
+    }
+    if (paymentFile.value.size > MAX_FILE_SIZE) {
+      toast.error('Ukuran berkas melebihi batas maksimal 10MB.')
       return
     }
     uploadingPayment.value = true

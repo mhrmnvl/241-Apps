@@ -1,4 +1,4 @@
-﻿<script setup lang="ts">
+<script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import {
   Search,
@@ -32,6 +32,7 @@ import RaporFormDialog from '../components/RaporFormDialog.vue'
 import RaporDetailDialog from '../components/RaporDetailDialog.vue'
 import type { RaporData } from '../types'
 import { useRoleGuard } from '@/features/platform/auth'
+import { toast } from 'vue-sonner'
 
 const breadcrumbs = [
   { title: 'Manajemen Akademik', href: '#' },
@@ -122,7 +123,15 @@ const tableColumns = [
               {
                 label: rapor.isPublished ? 'Unpublish' : 'Publish',
                 icon: rapor.isPublished ? ToggleLeft : ToggleRight,
-                onClick: () => togglePublish(rapor.id, rapor.isPublished),
+                onClick: () => {
+                  if (!rapor.isPublished && rapor.totalAverage === null) {
+                    toast.error(
+                      'Rapor belum bisa dipublish karena nilai belum digenerate.',
+                    )
+                    return
+                  }
+                  togglePublish(rapor.id, rapor.isPublished)
+                },
               },
             ]
           : []),

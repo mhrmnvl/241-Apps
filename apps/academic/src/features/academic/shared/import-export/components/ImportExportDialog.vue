@@ -82,6 +82,10 @@ function onFileChange(e: Event) {
 }
 
 function handleFileSelect(file: File) {
+  if (file.size > 10 * 1024 * 1024) {
+    alert('Maaf, ukuran file melebihi batas maksimal 10MB.')
+    return
+  }
   if (isValidExcelFile(file)) {
     selectedFile.value = file
   } else {
