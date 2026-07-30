@@ -4,7 +4,10 @@ import {
   ConflictException,
   Logger,
 } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import {
+  ISchoolUnitRepository,
+  Prisma,
+} from '../domain/interfaces/school-unit-repository.interface.js';
 import { SchoolUnitTypeRepository } from '../repositories/school-unit-types.repository.js';
 
 @Injectable()

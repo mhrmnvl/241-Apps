@@ -6,7 +6,8 @@ import { ClassroomRepository } from '../../classroom/index.js';
 import { StudentRepository } from '../repositories/student.repository.js';
 import { BulkImportStudentsUseCase } from './bulk-import-student.use-case.js';
 import { CreateStudentUseCase } from './create-student.use-case.js';
-import { ExcelStudentParser } from '../infrastructure/parsers/excel-student.parser.js';
+import { ExcelStudentParser } from '../domain/interfaces/student-excel-parser.interface.js';
+import { ExcelStudentParser as ConcreteExcelStudentParser } from '../infrastructure/parsers/excel-student.parser.js';
 
 async function makeExcelBuffer(
   rows: Record<string, ExcelJS.CellValue>[],
@@ -69,7 +70,7 @@ describe('BulkImportStudentsUseCase', () => {
           useValue: mockClassroomLevelRepository,
         },
         { provide: CreateStudentUseCase, useValue: mockCreateStudent },
-        ExcelStudentParser,
+        { provide: ExcelStudentParser, useClass: ConcreteExcelStudentParser },
       ],
     }).compile();
 

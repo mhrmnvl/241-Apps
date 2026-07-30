@@ -8,6 +8,8 @@ import {
   Prisma,
   User,
 } from '@prisma/client';
+
+export { Prisma };
 import { ApplicationDetail } from '../admission.includes.js';
 import {
   AdmissionDocumentWithTypeAndFile,

@@ -3,12 +3,12 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
 import { isEditable } from '../domain/admission-status.transitions.js';
 import { serializeApplicationDetail } from '../domain/admission.serializers.js';
 import {
   AdmissionApplicationParentInput,
   IAdmissionApplicantRepository,
+  Prisma,
 } from '../domain/interfaces/admission-applicant-repository.interface.js';
 import { UpdateMyApplicationDto } from '../dto/request/update-my-application.dto.js';
 

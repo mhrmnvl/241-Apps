@@ -1,12 +1,13 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import ExcelJS from 'exceljs';
 import { BulkImportStudentRowDto } from '../../dto/request/bulk-import-student.dto.js';
+import { ExcelStudentParser as IExcelStudentParser } from '../../domain/interfaces/student-excel-parser.interface.js';
 
 type ExcelRow = Record<string, ExcelJS.CellValue>;
 type MappedRow = Record<string, string | number | undefined>;
 
 @Injectable()
-export class ExcelStudentParser {
+export class ExcelStudentParser implements IExcelStudentParser {
   async parse(buffer: Buffer): Promise<BulkImportStudentRowDto[]> {
     const rows = await this.parseExcel(buffer);
 

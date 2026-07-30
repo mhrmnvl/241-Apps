@@ -1,14 +1,16 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { AppKey } from '@prisma/client';
 import { fileTypeFromBuffer } from 'file-type';
 import { FileRepository } from '../../file/repositories/file.repository.js';
-import { ImageOptimizerService } from '../../file/infrastructure/image-optimizer.service.js';
+import { ImageOptimizerService } from '../../file/index.js';
 import { ALLOWED_UPLOAD_MIME_TYPES } from '../../file/constants/file-upload.constants.js';
 import { StorageService } from '../../../core/storage/storage.service.js';
 import { StorageKeyBuilder } from '../../../core/storage/storage-key-builder.service.js';
-import { AppSettingRepository } from '../repositories/app-setting.repository.js';
+import {
+  AppKey,
+  AppSettingRepository,
+} from '../repositories/app-setting.repository.js';
 import { BRANDING_FILE_CATEGORY_CODE } from '../constants/branding-file-category.constant.js';
-import { toAppSettingResponseDto } from '../infrastructure/app-setting.mapper.js';
+import { toAppSettingResponseDto } from '../mappers/app-setting.mapper.js';
 
 @Injectable()
 export class UploadAppSettingLogoUseCase {

@@ -1,7 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { SemesterType } from '@prisma/client';
+import {
+  ISemesterTypeRepository,
+  SemesterType,
+} from '../domain/interfaces/semester-type-repository.interface.js';
 import { SemesterTypeQueryDto } from '../dto/request/semester-type-query.dto.js';
-import { ISemesterTypeRepository } from '../domain/interfaces/semester-type-repository.interface.js';
 
 @Injectable()
 export class GetSemesterTypesUseCase {

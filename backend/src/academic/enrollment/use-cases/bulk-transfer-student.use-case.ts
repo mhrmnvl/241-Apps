@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { EnrollmentStatus } from '@prisma/client';
+import { EnrollmentStatus } from '../domain/interfaces/enrollment-repository.interface.js';
 import { BulkTransferStudentDto } from '../dto/request/bulk-transfer-student.dto.js';
 import { IEnrollmentRepository } from '../domain/interfaces/enrollment-repository.interface.js';
 

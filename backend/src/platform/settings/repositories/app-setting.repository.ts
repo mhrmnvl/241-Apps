@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { AppKey, Prisma } from '@prisma/client';
 import { PrismaService } from '../../../core/database/prisma.service.js';
 
+export { AppKey };
+
 const WITH_FILES = {
   include: { logoFile: true, faviconFile: true },
 } satisfies Prisma.AppSettingDefaultArgs;

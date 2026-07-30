@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
+import { AppKey } from '@prisma/client';
 import { PrismaService } from '../../../core/database/prisma.service.js';
 import { CreateFileDto } from '../dto/request/create-file.dto.js';
+
+export { AppKey };
 
 @Injectable()
 export class FileRepository {

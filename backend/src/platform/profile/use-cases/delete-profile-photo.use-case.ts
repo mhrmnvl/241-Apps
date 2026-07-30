@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { ProfileRepository } from '../repositories/profile.repository.js';
 import { StorageService } from '../../../core/storage/storage.service.js';
-import { withAvatarUrl } from '../infrastructure/profile-avatar.mapper.js';
+import { withAvatarUrl } from '../mappers/profile-avatar.mapper.js';
 
 @Injectable()
 export class DeleteProfilePhotoUseCase {

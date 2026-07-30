@@ -1,6 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { SemesterType } from '@prisma/client';
-import { ISemesterTypeRepository } from '../domain/interfaces/semester-type-repository.interface.js';
+import {
+  ISemesterTypeRepository,
+  SemesterType,
+} from '../domain/interfaces/semester-type-repository.interface.js';
 
 @Injectable()
 export class GetSemesterTypeByIdUseCase {

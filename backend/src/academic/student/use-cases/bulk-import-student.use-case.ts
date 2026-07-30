@@ -10,7 +10,7 @@ import {
 import { BulkImportStudentRowDto } from '../dto/request/bulk-import-student.dto.js';
 import { CreateStudentDto } from '../dto/request/create-student.dto.js';
 import { StudentRepository } from '../repositories/student.repository.js';
-import { ExcelStudentParser } from '../infrastructure/parsers/excel-student.parser.js';
+import { ExcelStudentParser } from '../domain/interfaces/student-excel-parser.interface.js';
 import { CreateStudentUseCase } from './create-student.use-case.js';
 import { resolveOnceByKey } from '../../../shared/utils/resolve-once-by-key.helper.js';
 

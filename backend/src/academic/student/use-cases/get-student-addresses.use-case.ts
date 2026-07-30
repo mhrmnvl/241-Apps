@@ -3,7 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Address } from '@prisma/client';
+import { Address } from '../domain/interfaces/student-repository.interface.js';
 import { StudentAddressRepository } from '../repositories/student-address.repository.js';
 import { StudentRepository, RequestUser } from '../index.js';
 

@@ -1,7 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
 import { CreateAssetDto } from '../dto/request/create-asset.dto.js';
-import { IAssetRepository } from '../domain/interfaces/asset-repository.interface.js';
+import {
+  IAssetRepository,
+  Prisma,
+} from '../domain/interfaces/asset-repository.interface.js';
 
 @Injectable()
 export class CreateAssetUseCase {

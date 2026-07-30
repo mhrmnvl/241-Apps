@@ -1,13 +1,15 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { AppKey } from '@prisma/client';
 import { fileTypeFromBuffer } from 'file-type';
 import { ProfileRepository } from '../repositories/profile.repository.js';
-import { FileRepository } from '../../file/repositories/file.repository.js';
-import { ImageOptimizerService } from '../../file/infrastructure/image-optimizer.service.js';
+import {
+  AppKey,
+  FileRepository,
+} from '../../file/repositories/file.repository.js';
+import { ImageOptimizerService } from '../../file/index.js';
 import { ALLOWED_UPLOAD_MIME_TYPES } from '../../file/constants/file-upload.constants.js';
 import { StorageService } from '../../../core/storage/storage.service.js';
 import { StorageKeyBuilder } from '../../../core/storage/storage-key-builder.service.js';
-import { withAvatarUrl } from '../infrastructure/profile-avatar.mapper.js';
+import { withAvatarUrl } from '../mappers/profile-avatar.mapper.js';
 
 const PROFILE_PHOTO_CATEGORY_CODE = 'PROFILE_PHOTO';
 const AVATAR_MAX_DIMENSION = 512;

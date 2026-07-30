@@ -1,6 +1,15 @@
-import { Prisma, Student, User, Profile, StudentStatus } from '@prisma/client';
+import {
+  Prisma,
+  Student,
+  User,
+  Profile,
+  StudentStatus,
+  Address,
+} from '@prisma/client';
 import { StudentQueryDto } from '../../dto/request/student-query.dto.js';
 import { ExportStudentQueryDto } from '../../dto/request/export-student-query.dto.js';
+
+export { Address, User, StudentStatus };
 import { CreateStudentDto } from '../../dto/request/create-student.dto.js';
 import { UpdateStudentDto } from '../../dto/request/update-student.dto.js';
 import { CreateStudentWithRelationsDto } from '../../dto/request/create-student-with-relations.dto.js';

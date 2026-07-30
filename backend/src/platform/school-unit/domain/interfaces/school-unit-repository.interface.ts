@@ -1,5 +1,7 @@
 import { Prisma } from '@prisma/client';
 
+export { Prisma };
+
 export const SCHOOL_UNIT_INCLUDE = {
   socialMedias: { include: { socialMedia: true } },
   type: true,

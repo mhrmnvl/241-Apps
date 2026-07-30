@@ -1,9 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { AppKey } from '@prisma/client';
-import { AppSettingRepository } from '../repositories/app-setting.repository.js';
+import {
+  AppKey,
+  AppSettingRepository,
+} from '../repositories/app-setting.repository.js';
 import { StorageService } from '../../../core/storage/storage.service.js';
 import { DEFAULT_APP_SETTINGS } from '../constants/default-app-settings.constant.js';
-import { toAppSettingResponseDto } from '../infrastructure/app-setting.mapper.js';
+import { toAppSettingResponseDto } from '../mappers/app-setting.mapper.js';
 
 @Injectable()
 export class GetAppSettingUseCase {

@@ -1,6 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
-import { AuditLogRepository } from '../repositories/audit-log.repository.js';
+import {
+  AuditLogRepository,
+  Prisma,
+} from '../repositories/audit-log.repository.js';
 
 @Injectable()
 export class CreateAuditLogUseCase {

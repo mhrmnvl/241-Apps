@@ -1,9 +1,8 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { AppKey } from '@prisma/client';
 import { fileTypeFromBuffer } from 'file-type';
-import { FileRepository } from '../repositories/file.repository.js';
+import { AppKey, FileRepository } from '../repositories/file.repository.js';
 import { CreateFileDto } from '../dto/request/create-file.dto.js';
-import { ImageOptimizerService } from '../infrastructure/image-optimizer.service.js';
+import { ImageOptimizerService } from '../domain/interfaces/image-optimizer.interface.js';
 import { StorageService } from '../../../core/storage/storage.service.js';
 import { StorageKeyBuilder } from '../../../core/storage/storage-key-builder.service.js';
 import {

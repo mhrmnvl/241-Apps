@@ -1,22 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import sharp from 'sharp';
 import { IMAGE_OPTIMIZATION_OPTIONS } from '../constants/file-upload.constants.js';
+import {
+  ImageOptimizerService,
+  OptimizedImage,
+  OptimizeOptions,
+} from '../domain/interfaces/image-optimizer.interface.js';
 
-export interface OptimizedImage {
-  buffer: Buffer;
-  mimeType: string;
-  extension: string;
-}
-
-export interface OptimizeOptions {
-  maxWidth?: number;
-  maxHeight?: number;
-  format?: 'webp' | 'png';
-  quality?: number;
-}
+export { OptimizedImage, OptimizeOptions };
 
 @Injectable()
-export class ImageOptimizerService {
+export class SharpImageOptimizerService implements ImageOptimizerService {
   async optimize(
     buffer: Buffer,
     opts: OptimizeOptions = {},

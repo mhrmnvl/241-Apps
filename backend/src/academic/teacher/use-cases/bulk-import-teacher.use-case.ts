@@ -9,7 +9,7 @@ import { BulkImportTeacherRowDto } from '../dto/request/bulk-import-teacher.dto.
 import { CreateTeacherDto } from '../dto/request/create-teacher.dto.js';
 import { TeacherRepository } from '../repositories/teacher.repository.js';
 import { CreateTeacherUseCase } from './create-teacher.use-case.js';
-import { ExcelTeacherParser } from '../infrastructure/parsers/excel-teacher.parser.js';
+import { ExcelTeacherParser } from '../domain/interfaces/teacher-excel-parser.interface.js';
 import { resolveOnceByKey } from '../../../shared/utils/resolve-once-by-key.helper.js';
 
 @Injectable()

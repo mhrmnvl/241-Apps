@@ -3,6 +3,8 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../../core/database/prisma.service.js';
 import { AuditLogQueryDto } from '../dto/request/audit-log-query.dto.js';
 
+export { Prisma };
+
 @Injectable()
 export class AuditLogRepository {
   constructor(private readonly prisma: PrismaService) {}
