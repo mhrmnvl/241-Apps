@@ -1,24 +1,8 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { toTypedSchema } from '@vee-validate/zod'
-import { useForm } from 'vee-validate'
-import * as z from 'zod'
-import { toast } from 'vue-sonner'
-import { Check, Plus, Trash2 } from 'lucide-vue-next'
+import { Check } from 'lucide-vue-next'
 import AppLayout from '@/layouts/AppLayout.vue'
-import { DatePicker } from '@/ui'
 import { Button } from '@/ui/button'
 import { Card, CardHeader, CardTitle } from '@/ui/card'
-import { Input } from '@/ui/input'
-
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/ui/select'
 import {
   Stepper,
   StepperIndicator,
@@ -26,213 +10,40 @@ import {
   StepperSeparator,
   StepperTrigger,
 } from '@/ui/stepper'
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/ui/form'
-import {
-  AddressFields,
-  useAddressSubform,
-  useDynamicEntryList,
-  useMultiStepForm,
-} from '@/features/academic/shared/multi-step-form'
-import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
-import api from '@/shared/utils/api'
-import { teacherApi } from '../api/teacherApi'
-import { teacherService } from '../services/teacherService'
-import { usePositionCategoryFilter } from '../composables/usePositionCategoryFilter'
-import type {
-  EmploymentTypeOption,
-  PositionListItem,
-  TeacherPositionInput,
-} from '../types'
-import { positionCategoryLabel } from '../utils'
+import { AddressFields } from '@/features/academic/shared/multi-step-form'
+import { useTeacherCreateForm } from '../composables/useTeacherCreateForm'
+import TeacherProfileStep from '../components/create/TeacherProfileStep.vue'
+import TeacherEmploymentStep from '../components/create/TeacherEmploymentStep.vue'
+import TeacherPositionStep from '../components/create/TeacherPositionStep.vue'
+import TeacherReviewStep from '../components/create/TeacherReviewStep.vue'
 
-const router = useRouter()
 const breadcrumbs = [
   { title: 'Guru', href: '/teacher' },
   { title: 'Tambah Guru' },
 ]
 
-const steps = [
-  { value: 1, title: 'Profil' },
-  { value: 2, title: 'Kepegawaian' },
-  { value: 3, title: 'Alamat' },
-  { value: 4, title: 'Jabatan' },
-  { value: 5, title: 'Ringkasan' },
-]
-
-const employmentTypes = ref<EmploymentTypeOption[]>([])
-const positions = ref<PositionListItem[]>([])
-
-const formSchema = toTypedSchema(
-  z.object({
-    name: z
-      .string()
-      .min(1, 'Mohon masukkan nama lengkap guru.')
-      .max(100, 'Nama tidak boleh lebih dari 100 karakter.'),
-    nik: z
-      .string()
-      .min(1, 'Nomor Induk Kependudukan (NIK) wajib diisi.')
-      .length(16, 'NIK harus berjumlah tepat 16 digit angka.'),
-    gender: z.string().min(1, 'Silakan pilih jenis kelamin guru.'),
-    birthPlace: z
-      .string()
-      .min(1, 'Kota tempat lahir wajib dicantumkan.')
-      .max(100, 'Tempat lahir tidak boleh lebih dari 100 karakter.'),
-    birthDate: z.string().min(1, 'Mohon tentukan tanggal lahir guru.'),
-    email: z
-      .string()
-      .max(255)
-      .email('Format alamat email tidak valid.')
-      .optional()
-      .or(z.literal('')),
-    phone: z.string().max(15).optional().or(z.literal('')),
-    nip: z.string().max(20).optional().or(z.literal('')),
-    nuptk: z.string().max(20).optional().or(z.literal('')),
-    employmentTypeId: z
-      .string()
-      .min(1, 'Silakan pilih status kepegawaian saat ini.'),
-    positionId: z.string().optional().default(''),
-  }),
-)
-
-const { values, validateField, setFieldValue } = useForm({
-  validationSchema: formSchema,
-  keepValuesOnUnmount: true,
-  initialValues: {
-    name: '',
-    nik: '',
-    gender: 'MALE',
-    birthPlace: '',
-    birthDate: '',
-    email: '',
-    phone: '',
-    nip: '',
-    nuptk: '',
-    employmentTypeId: '',
-    positionId: '',
-  },
-})
-
-const { kategori, categoryOptions, filteredPositions } =
-  usePositionCategoryFilter(positions)
-
-const { address, hasAddress, validateAddress } = useAddressSubform()
-
 const {
-  items: extraPositions,
-  addItem: addPosition,
-  removeItem: removePosition,
-} = useDynamicEntryList<TeacherPositionInput>(() => ({
-  positionId: '',
-  hireDate: new Date().toISOString().substring(0, 10),
-  isPrimary: false,
-}))
-
-type FieldName = Parameters<typeof validateField>[0]
-const PROFIL_FIELDS: FieldName[] = [
-  'name',
-  'nik',
-  'gender',
-  'birthPlace',
-  'birthDate',
-]
-const KEPEG_FIELDS: FieldName[] = ['employmentTypeId']
-
-const {
+  steps,
   activeStep,
   submitting,
   mobileVisibleStepValues,
   goToStep,
   next,
   back,
-  validateAllGates,
-} = useMultiStepForm<FieldName>({
-  steps,
-  validateField,
-  gates: [
-    { fields: PROFIL_FIELDS, unlocksStep: 2 },
-    { fields: KEPEG_FIELDS, unlocksStep: 3 },
-  ],
-  onCancel: () => void router.push('/teacher'),
-})
-
-function isValidPosition(p: TeacherPositionInput): boolean {
-  return p.positionId !== '' && p.hireDate !== ''
-}
-
-async function submit() {
-  if (!(await validateAllGates())) {
-    return
-  }
-  if (!validateAddress()) {
-    activeStep.value = 3
-    toast.error('Lengkapi alamat (desa, kecamatan, kota, provinsi, negara).')
-    return
-  }
-  const invalidPosition = extraPositions.value.find((p) => !isValidPosition(p))
-  if (invalidPosition) {
-    activeStep.value = 4
-    toast.error('Lengkapi jabatan: pilih jabatan dan tanggal mulai.')
-    return
-  }
-
-  submitting.value = true
-  try {
-    const result = await teacherService.createTeacherWithRelations({
-      core: {
-        name: values.name ?? '',
-        nik: values.nik ?? '',
-        gender: (values.gender ?? 'MALE') as 'MALE' | 'FEMALE',
-        birthPlace: values.birthPlace ?? '',
-        birthDate: values.birthDate ?? '',
-        employmentTypeId: values.employmentTypeId ?? '',
-        positionId: values.positionId ?? undefined,
-        identifier: values.nip ?? values.nik ?? '',
-        password: values.nip ?? values.nik ?? '',
-        email: values.email || undefined,
-        phone: values.phone || undefined,
-        nip: values.nip || undefined,
-        nuptk: values.nuptk || undefined,
-      },
-      address: hasAddress.value ? { ...address.value } : null,
-      positions: extraPositions.value,
-    })
-
-    if (!result.success) {
-      toast.error('Gagal menyimpan data guru. Periksa kembali isian Anda.')
-      return
-    }
-    toast.success('Guru baru berhasil disimpan.')
-    result.warnings.forEach((w) => toast.warning(w))
-    if (result.userId) {
-      void router.push(`/profile/TEACHER/${result.userId}`)
-    } else {
-      void router.push('/teacher')
-    }
-  } finally {
-    submitting.value = false
-  }
-}
-
-onMounted(async () => {
-  try {
-    const [empRes, posRes] = await Promise.all([
-      api.get<{ data: EmploymentTypeOption[] }>('/employment-types', {
-        params: { limit: 100 },
-      }),
-      teacherApi.getPositions({ limit: 100, isActive: true }),
-    ])
-    employmentTypes.value = empRes.data.data ?? []
-    positions.value = posRes.data.data ?? []
-  } catch (error: unknown) {
-    toast.error(getIndonesianErrorMessage(error, 'Gagal memuat data pilihan.'))
-  }
-})
+  values,
+  setFieldValue,
+  kategori,
+  categoryOptions,
+  filteredPositions,
+  address,
+  hasAddress,
+  extraPositions,
+  addPosition,
+  removePosition,
+  employmentTypes,
+  positions,
+  submit,
+} = useTeacherCreateForm()
 </script>
 
 <template>
@@ -300,392 +111,36 @@ onMounted(async () => {
 
         <div class="max-h-[60vh] overflow-y-auto">
           <div class="px-6 py-5">
-            <!-- Step 1: Profil -->
-            <div
-              v-show="activeStep === 1"
-              class="grid gap-5 md:grid-cols-2 items-start"
-            >
-              <FormField
-                v-slot="{ componentField }"
-                name="name"
-              >
-                <FormItem class="md:col-span-2">
-                  <FormLabel
-                    >Nama Lengkap
-                    <span class="text-destructive">*</span></FormLabel
-                  >
-                  <FormControl>
-                    <Input
-                      placeholder="Budi Santoso, S.Pd"
-                      maxlength="100"
-                      v-bind="componentField"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              </FormField>
-              <FormField
-                v-slot="{ componentField }"
-                name="nik"
-              >
-                <FormItem>
-                  <FormLabel
-                    >NIK <span class="text-destructive">*</span></FormLabel
-                  >
-                  <FormControl>
-                    <Input
-                      placeholder="16 digit NIK"
-                      maxlength="16"
-                      v-bind="componentField"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              </FormField>
-              <FormField
-                v-slot="{ value, handleChange }"
-                name="gender"
-              >
-                <FormItem>
-                  <FormLabel
-                    >Jenis Kelamin
-                    <span class="text-destructive">*</span></FormLabel
-                  >
-                  <Select
-                    :model-value="value"
-                    @update:model-value="handleChange"
-                  >
-                    <FormControl>
-                      <SelectTrigger class="w-full">
-                        <SelectValue placeholder="Pilih jenis kelamin" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="MALE"> Laki-laki </SelectItem>
-                      <SelectItem value="FEMALE"> Perempuan </SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              </FormField>
-              <FormField
-                v-slot="{ componentField }"
-                name="birthPlace"
-              >
-                <FormItem>
-                  <FormLabel
-                    >Tempat Lahir
-                    <span class="text-destructive">*</span></FormLabel
-                  >
-                  <FormControl>
-                    <Input
-                      placeholder="Kota lahir"
-                      maxlength="100"
-                      v-bind="componentField"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              </FormField>
-              <FormField
-                v-slot="{ value, handleChange }"
-                name="birthDate"
-              >
-                <FormItem>
-                  <FormLabel
-                    >Tanggal Lahir
-                    <span class="text-destructive">*</span></FormLabel
-                  >
-                  <FormControl>
-                    <DatePicker
-                      :model-value="value"
-                      placeholder="Pilih tanggal lahir"
-                      @update:model-value="handleChange"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              </FormField>
-              <FormField
-                v-slot="{ componentField }"
-                name="email"
-              >
-                <FormItem>
-                  <FormLabel>Email</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="email"
-                      placeholder="contoh@email.com (opsional)"
-                      maxlength="255"
-                      v-bind="componentField"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              </FormField>
-              <FormField
-                v-slot="{ componentField }"
-                name="phone"
-              >
-                <FormItem>
-                  <FormLabel>No. HP</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="08123456789 (opsional)"
-                      maxlength="15"
-                      v-bind="componentField"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              </FormField>
-            </div>
+            <TeacherProfileStep v-show="activeStep === 1" />
 
-            <!-- Step 2: Kepegawaian -->
-            <div
+            <TeacherEmploymentStep
               v-show="activeStep === 2"
-              class="grid gap-5 md:grid-cols-2 items-start"
-            >
-              <FormField
-                v-slot="{ componentField }"
-                name="nip"
-              >
-                <FormItem>
-                  <FormLabel>NIP</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Masukkan NIP (opsional)"
-                      maxlength="20"
-                      v-bind="componentField"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              </FormField>
-              <FormField
-                v-slot="{ componentField }"
-                name="nuptk"
-              >
-                <FormItem>
-                  <FormLabel>NUPTK</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Punya NUPTK? (opsional)"
-                      maxlength="20"
-                      v-bind="componentField"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              </FormField>
-              <FormField
-                v-slot="{ value, handleChange }"
-                name="employmentTypeId"
-              >
-                <FormItem>
-                  <FormLabel
-                    >Status Kepegawaian
-                    <span class="text-destructive">*</span></FormLabel
-                  >
-                  <Select
-                    :model-value="value"
-                    @update:model-value="handleChange"
-                  >
-                    <FormControl>
-                      <SelectTrigger class="w-full">
-                        <SelectValue placeholder="Pilih status saat ini" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem
-                        v-for="et in employmentTypes"
-                        :key="et.id"
-                        :value="et.id"
-                      >
-                        {{ et.name }}
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              </FormField>
-              <div class="space-y-2">
-                <label class="text-sm font-medium">
-                  Kategori
-                  <span class="text-xs font-normal text-muted-foreground"
-                    >(filter)</span
-                  >
-                </label>
-                <Select
-                  :model-value="kategori"
-                  @update:model-value="
-                    (v) => {
-                      kategori = String(v ?? '')
-                      setFieldValue('positionId', '')
-                    }
-                  "
-                >
-                  <SelectTrigger class="w-full">
-                    <SelectValue placeholder="Semua kategori" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem
-                      v-for="cat in categoryOptions"
-                      :key="cat.id"
-                      :value="cat.id"
-                    >
-                      {{ positionCategoryLabel(cat.code, cat.name) }}
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <FormField
-                v-slot="{ value, handleChange }"
-                name="positionId"
-              >
-                <FormItem class="md:col-span-2">
-                  <FormLabel>
-                    Jabatan Utama
-                    <span class="text-xs font-normal text-muted-foreground"
-                      >(opsional)</span
-                    >
-                  </FormLabel>
-                  <Select
-                    :model-value="value"
-                    @update:model-value="handleChange"
-                  >
-                    <FormControl>
-                      <SelectTrigger class="w-full">
-                        <SelectValue placeholder="Pilih jabatan..." />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem
-                        v-for="pos in filteredPositions"
-                        :key="pos.id"
-                        :value="pos.id"
-                      >
-                        {{ pos.name }}
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </FormItem>
-              </FormField>
-            </div>
+              v-model:kategori="kategori"
+              :employment-types="employmentTypes"
+              :category-options="categoryOptions"
+              :filtered-positions="filteredPositions"
+              :set-field-value="setFieldValue"
+            />
 
-            <!-- Step 3: Alamat (optional) -->
             <div v-if="activeStep === 3">
               <AddressFields v-model="address" />
             </div>
 
-            <!-- Step 4: Jabatan tambahan (optional) -->
-            <div
+            <TeacherPositionStep
               v-if="activeStep === 4"
-              class="flex flex-col"
-            >
-              <div class="flex items-center justify-end -mt-3 mb-2">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  class="h-8 shadow-xs gap-1.5"
-                  @click="addPosition"
-                >
-                  <Plus class="size-3.5" />
-                  Tambah Jabatan
-                </Button>
-              </div>
+              :extra-positions="extraPositions"
+              :positions="positions"
+              @add-position="addPosition"
+              @remove-position="removePosition"
+            />
 
-              <div class="max-h-[48vh] overflow-y-auto space-y-4 pr-1">
-                <p
-                  v-if="extraPositions.length === 0"
-                  class="text-sm text-muted-foreground italic py-6 text-center border border-dashed rounded-xl bg-muted/5"
-                >
-                  Belum ada jabatan tambahan.
-                </p>
-
-                <template v-else>
-                  <Card
-                    v-for="(pos, index) in extraPositions"
-                    :key="index"
-                    class="overflow-hidden rounded-xl border bg-card shadow-xs transition-all hover:border-primary/20"
-                  >
-                    <CardHeader
-                      class="flex flex-row items-center justify-between border-b px-5 py-3 bg-muted/20"
-                    >
-                      <CardTitle class="text-xs font-semibold">
-                        Jabatan {{ index + 1 }}
-                      </CardTitle>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        class="text-muted-foreground hover:text-destructive hover:bg-destructive/10 h-7 w-7 rounded-lg transition-colors"
-                        @click="removePosition(index)"
-                      >
-                        <Trash2 class="size-4" />
-                      </Button>
-                    </CardHeader>
-                    <div class="p-5 grid gap-4 md:grid-cols-2 items-start">
-                      <div class="space-y-2">
-                        <label class="text-sm font-medium">Jabatan</label>
-                        <Select v-model="pos.positionId">
-                          <SelectTrigger class="w-full">
-                            <SelectValue placeholder="Pilih jabatan" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem
-                              v-for="p in positions"
-                              :key="p.id"
-                              :value="p.id"
-                            >
-                              {{ p.name }}
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div class="space-y-2">
-                        <label class="text-sm font-medium">Tanggal Mulai</label>
-                        <Input
-                          v-model="pos.hireDate"
-                          type="date"
-                        />
-                      </div>
-                    </div>
-                  </Card>
-                </template>
-              </div>
-            </div>
-
-            <!-- Step 5: Ringkasan -->
-            <div
+            <TeacherReviewStep
               v-if="activeStep === 5"
-              class="space-y-4 text-sm"
-            >
-              <div class="rounded-xl border p-4">
-                <p class="font-semibold mb-2">Profil & Kepegawaian</p>
-                <div class="grid gap-1 md:grid-cols-2 text-muted-foreground">
-                  <span>Nama: {{ values.name || '-' }}</span>
-                  <span>NIK: {{ values.nik || '-' }}</span>
-                  <span>NIP: {{ values.nip || '-' }}</span>
-                  <span>NUPTK: {{ values.nuptk || '-' }}</span>
-                </div>
-              </div>
-              <div class="rounded-xl border p-4">
-                <p class="font-semibold mb-1">Alamat</p>
-                <p class="text-muted-foreground">
-                  {{ hasAddress ? address.street : 'Dilewati' }}
-                </p>
-              </div>
-              <div class="rounded-xl border p-4">
-                <p class="font-semibold mb-1">Jabatan Tambahan</p>
-                <p class="text-muted-foreground">
-                  {{
-                    extraPositions.length > 0
-                      ? `${extraPositions.length} jabatan`
-                      : 'Dilewati'
-                  }}
-                </p>
-              </div>
-            </div>
+              :values="values"
+              :address="address"
+              :has-address="hasAddress"
+              :extra-positions="extraPositions"
+            />
           </div>
         </div>
 
