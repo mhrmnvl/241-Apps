@@ -36,4 +36,26 @@ export abstract class IApprovalRepository {
   abstract findPendingInstancesForRoles(
     roleCodes: string[],
   ): Promise<ApprovalInstanceWithRelations[]>;
+
+  abstract findLoanDetailsForInstance(
+    referenceId: string,
+  ): Promise<Record<string, unknown> | null>;
+
+  abstract findUserRoleCodes(userId: string): Promise<string[]>;
+
+  abstract findStatusBySystemKey(
+    key: InventoryStatusKey,
+  ): Promise<{ id: string } | null>;
+
+  abstract processApprovalTransaction(params: {
+    instanceId: string;
+    referenceId: string;
+    currentStepSequence: number;
+    action: 'APPROVE' | 'REJECT';
+    userId: string;
+    note?: string | null;
+    pendingStatusId: string;
+    hasNextStep: boolean;
+    nextStepSequence?: number;
+  }): Promise<unknown>;
 }

@@ -168,4 +168,166 @@ export class PrismaCirculationRepository extends ICirculationRepository {
       where: { code },
     });
   }
+
+  async findUnitsByIds(ids: string[]): Promise<
+    {
+      id: string;
+      unitNumber: string;
+      statusId: string;
+      asset: { name: string };
+      status: { allowTransactions: boolean } | null;
+    }[]
+  > {
+    return this.prisma.inventoryAssetUnit.findMany({
+      where: {
+        id: { in: ids },
+        deletedAt: null,
+      },
+      include: { asset: true, status: true },
+    });
+  }
+
+  async processCreateLoanTransaction(params: {
+    loanNumber: string;
+    requesterId: string;
+    expectedReturnDate: Date;
+    purpose: string;
+    pendingStatusId: string;
+    unitIds: string[];
+    units: { id: string; statusId: string }[];
+  }): Promise<unknown> {
+    return this.prisma.$transaction(async (tx) => {
+      const loan = await tx.inventoryLoan.create({
+        data: {
+          loanNumber: params.loanNumber,
+          requesterId: params.requesterId,
+          expectedReturnDate: params.expectedReturnDate,
+          purpose: params.purpose,
+          statusId: params.pendingStatusId,
+          items: {
+            create: params.unitIds.map((unitId) => ({
+              unitId,
+            })),
+          },
+        },
+      });
+
+      await tx.inventoryAssetUnit.updateMany({
+        where: { id: { in: params.unitIds } },
+        data: { statusId: params.pendingStatusId },
+      });
+
+      const activeWorkflow = await tx.approvalWorkflow.findFirst({
+        where: { targetEntity: 'InventoryLoan', isActive: true },
+      });
+
+      if (activeWorkflow) {
+        const instance = await tx.approvalInstance.create({
+          data: {
+            workflowId: activeWorkflow.id,
+            referenceId: loan.id,
+            currentStepSequence: 1,
+            statusId: params.pendingStatusId,
+          },
+        });
+
+        return tx.inventoryLoan.update({
+          where: { id: loan.id },
+          data: { workflowInstanceId: instance.id },
+          include: {
+            items: {
+              include: {
+                unit: true,
+              },
+            },
+          },
+        });
+      } else {
+        const approvedStatus = await tx.inventoryStatus.findUnique({
+          where: { systemKey: 'LOAN_APPROVED' },
+        });
+        const loanedStatus = await tx.inventoryStatus.findUnique({
+          where: { systemKey: 'LOANED' },
+        });
+        const txType = await tx.inventoryTransactionType.findUnique({
+          where: { code: 'TX-LOAN-OUT' },
+        });
+
+        if (!approvedStatus || !loanedStatus || !txType) {
+          throw new Error(
+            'Peran status "Pinjam Disetujui"/"Dipinjam" belum diatur, atau tipe transaksi TX-LOAN-OUT belum tersedia.',
+          );
+        }
+
+        const approvedLoan = await tx.inventoryLoan.update({
+          where: { id: loan.id },
+          data: { statusId: approvedStatus.id },
+        });
+
+        await tx.inventoryAssetUnit.updateMany({
+          where: { id: { in: params.unitIds } },
+          data: { statusId: loanedStatus.id },
+        });
+
+        for (const unit of params.units) {
+          await tx.inventoryHistory.create({
+            data: {
+              unitId: unit.id,
+              transactionTypeId: txType.id,
+              previousStatusId: unit.statusId,
+              newStatusId: loanedStatus.id,
+              note: `Peminjaman otomatis disetujui (No. ${params.loanNumber})`,
+              changedById: params.requesterId,
+            },
+          });
+        }
+
+        return approvedLoan;
+      }
+    });
+  }
+
+  async processReturnLoanTransaction(params: {
+    loanId: string;
+    returnedStatusId: string;
+    availStatusId: string;
+    txTypeId: string;
+    changedById: string;
+    loanNumber: string;
+    items: { unitId: string; conditionId: string; note?: string }[];
+  }): Promise<unknown> {
+    return this.prisma.$transaction(async (tx) => {
+      const updatedLoan = await tx.inventoryLoan.update({
+        where: { id: params.loanId },
+        data: {
+          actualReturnDate: new Date(),
+          statusId: params.returnedStatusId,
+        },
+      });
+
+      for (const itemDto of params.items) {
+        await tx.inventoryAssetUnit.update({
+          where: { id: itemDto.unitId },
+          data: {
+            statusId: params.availStatusId,
+            conditionId: itemDto.conditionId,
+          },
+        });
+
+        await tx.inventoryHistory.create({
+          data: {
+            unitId: itemDto.unitId,
+            transactionTypeId: params.txTypeId,
+            newStatusId: params.availStatusId,
+            note:
+              itemDto.note ??
+              `Pengembalian pinjaman (No. ${params.loanNumber})`,
+            changedById: params.changedById,
+          },
+        });
+      }
+
+      return updatedLoan;
+    });
+  }
 }

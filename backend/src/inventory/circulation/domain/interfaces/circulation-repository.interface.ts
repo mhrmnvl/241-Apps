@@ -62,4 +62,34 @@ export abstract class ICirculationRepository {
   abstract findTransactionTypeByCode(
     code: string,
   ): Promise<InventoryTransactionType | null>;
+
+  abstract findUnitsByIds(ids: string[]): Promise<
+    {
+      id: string;
+      unitNumber: string;
+      statusId: string;
+      asset: { name: string };
+      status: { allowTransactions: boolean } | null;
+    }[]
+  >;
+
+  abstract processCreateLoanTransaction(params: {
+    loanNumber: string;
+    requesterId: string;
+    expectedReturnDate: Date;
+    purpose: string;
+    pendingStatusId: string;
+    unitIds: string[];
+    units: { id: string; statusId: string }[];
+  }): Promise<unknown>;
+
+  abstract processReturnLoanTransaction(params: {
+    loanId: string;
+    returnedStatusId: string;
+    availStatusId: string;
+    txTypeId: string;
+    changedById: string;
+    loanNumber: string;
+    items: { unitId: string; conditionId: string; note?: string }[];
+  }): Promise<unknown>;
 }

@@ -1,20 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { IApprovalRepository } from '../domain/interfaces/approval-repository.interface.js';
-import { PrismaService } from '../../../core/database/prisma.service.js';
 
 @Injectable()
 export class GetPendingApprovalsUseCase {
-  constructor(
-    private readonly repository: IApprovalRepository,
-    private readonly prisma: PrismaService,
-  ) {}
+  constructor(private readonly repository: IApprovalRepository) {}
 
   async execute(userId: string) {
-    const userRoles = await this.prisma.userRole.findMany({
-      where: { userId },
-      include: { role: true },
-    });
-    const roleCodes = userRoles.map((ur) => ur.role.code);
+    const roleCodes = await this.repository.findUserRoleCodes(userId);
 
     const instances =
       await this.repository.findPendingInstancesForRoles(roleCodes);
@@ -23,16 +15,7 @@ export class GetPendingApprovalsUseCase {
       instances.map(async (inst) => {
         const details =
           inst.workflow.targetEntity === 'InventoryLoan'
-            ? await this.prisma.inventoryLoan.findUnique({
-                where: { id: inst.referenceId },
-                include: {
-                  items: {
-                    include: {
-                      unit: { include: { asset: true } },
-                    },
-                  },
-                },
-              })
+            ? await this.repository.findLoanDetailsForInstance(inst.referenceId)
             : null;
         return { ...inst, details };
       }),

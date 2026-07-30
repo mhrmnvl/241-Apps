@@ -3,6 +3,7 @@ import {
   ApprovalWorkflow,
   ApprovalInstance,
   ApprovalLog,
+  InventoryStatusKey,
   Prisma,
 } from '@prisma/client';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
@@ -109,6 +110,180 @@ export class PrismaApprovalRepository extends IApprovalRepository {
         (s) => s.stepSequence === inst.currentStepSequence,
       );
       return activeStep && roleCodes.includes(activeStep.approverRoleId);
+    });
+  }
+
+  async findUserRoleCodes(userId: string): Promise<string[]> {
+    const userRoles = await this.prisma.userRole.findMany({
+      where: { userId },
+      include: { role: true },
+    });
+    return userRoles.map((ur) => ur.role.code);
+  }
+
+  async findStatusBySystemKey(
+    key: InventoryStatusKey,
+  ): Promise<{ id: string } | null> {
+    return this.prisma.inventoryStatus.findUnique({
+      where: { systemKey: key },
+      select: { id: true },
+    });
+  }
+
+  async processApprovalTransaction(params: {
+    instanceId: string;
+    referenceId: string;
+    currentStepSequence: number;
+    action: 'APPROVE' | 'REJECT';
+    userId: string;
+    note?: string | null;
+    pendingStatusId: string;
+    hasNextStep: boolean;
+    nextStepSequence?: number;
+  }): Promise<unknown> {
+    const ACTION_APPROVE = '00000000-0000-0000-0000-000000000001';
+    const ACTION_REJECT = '00000000-0000-0000-0000-000000000002';
+
+    return this.prisma.$transaction(async (tx) => {
+      const log = await tx.approvalLog.create({
+        data: {
+          instanceId: params.instanceId,
+          stepSequence: params.currentStepSequence,
+          approverId: params.userId,
+          actionId:
+            params.action === 'APPROVE' ? ACTION_APPROVE : ACTION_REJECT,
+          note: params.note ?? null,
+        },
+      });
+
+      if (params.action === 'REJECT') {
+        const rejectedStatus = await tx.inventoryStatus.findUnique({
+          where: { systemKey: 'LOAN_REJECTED' },
+        });
+        const availStatus = await tx.inventoryStatus.findUnique({
+          where: { systemKey: 'AVAILABLE' },
+        });
+        if (!rejectedStatus || !availStatus) {
+          throw new Error(
+            'Peran status "Pinjam Ditolak"/"Tersedia" belum diatur di Referensi > Status Aset.',
+          );
+        }
+
+        await tx.approvalInstance.update({
+          where: { id: params.instanceId },
+          data: { statusId: rejectedStatus.id },
+        });
+
+        await tx.inventoryLoan.update({
+          where: { id: params.referenceId },
+          data: { statusId: rejectedStatus.id },
+        });
+
+        const loanItems = await tx.inventoryLoanItem.findMany({
+          where: { loanId: params.referenceId },
+        });
+        const unitIds = loanItems.map((item) => item.unitId);
+        await tx.inventoryAssetUnit.updateMany({
+          where: { id: { in: unitIds } },
+          data: { statusId: availStatus.id },
+        });
+
+        const txType = await tx.inventoryTransactionType.findFirst();
+
+        for (const unitId of unitIds) {
+          await tx.inventoryHistory.create({
+            data: {
+              unitId,
+              transactionTypeId: txType?.id ?? '',
+              previousStatusId: params.pendingStatusId,
+              newStatusId: availStatus.id,
+              note: `Peminjaman ditolak (${params.note ?? 'Tanpa catatan'})`,
+              changedById: params.userId,
+            },
+          });
+        }
+
+        return { success: true, action: 'REJECT', log };
+      } else {
+        if (params.hasNextStep && params.nextStepSequence !== undefined) {
+          await tx.approvalInstance.update({
+            where: { id: params.instanceId },
+            data: { currentStepSequence: params.nextStepSequence },
+          });
+
+          return {
+            success: true,
+            action: 'APPROVE_STEP',
+            nextStepSequence: params.nextStepSequence,
+            log,
+          };
+        } else {
+          const approvedStatus = await tx.inventoryStatus.findUnique({
+            where: { systemKey: 'LOAN_APPROVED' },
+          });
+          const loanedStatus = await tx.inventoryStatus.findUnique({
+            where: { systemKey: 'LOANED' },
+          });
+          const txType = await tx.inventoryTransactionType.findUnique({
+            where: { code: 'TX-LOAN-OUT' },
+          });
+
+          if (!approvedStatus || !loanedStatus || !txType) {
+            throw new Error(
+              'Peran status "Pinjam Disetujui"/"Dipinjam" belum diatur, atau tipe transaksi TX-LOAN-OUT belum tersedia.',
+            );
+          }
+
+          await tx.approvalInstance.update({
+            where: { id: params.instanceId },
+            data: { statusId: approvedStatus.id },
+          });
+
+          const loan = await tx.inventoryLoan.update({
+            where: { id: params.referenceId },
+            data: { statusId: approvedStatus.id },
+          });
+
+          const loanItems = await tx.inventoryLoanItem.findMany({
+            where: { loanId: params.referenceId },
+          });
+          const unitIds = loanItems.map((item) => item.unitId);
+          await tx.inventoryAssetUnit.updateMany({
+            where: { id: { in: unitIds } },
+            data: { statusId: loanedStatus.id },
+          });
+
+          for (const unitId of unitIds) {
+            await tx.inventoryHistory.create({
+              data: {
+                unitId,
+                transactionTypeId: txType.id,
+                previousStatusId: params.pendingStatusId,
+                newStatusId: loanedStatus.id,
+                note: `Peminjaman disetujui penuh oleh Kepala Sekolah (No. Peminjaman: ${loan.loanNumber})`,
+                changedById: params.userId,
+              },
+            });
+          }
+
+          return { success: true, action: 'APPROVE_FINAL', log };
+        }
+      }
+    });
+  }
+
+  async findLoanDetailsForInstance(
+    referenceId: string,
+  ): Promise<Record<string, unknown> | null> {
+    return this.prisma.inventoryLoan.findUnique({
+      where: { id: referenceId },
+      include: {
+        items: {
+          include: {
+            unit: { include: { asset: true } },
+          },
+        },
+      },
     });
   }
 }

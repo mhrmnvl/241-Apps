@@ -5,14 +5,10 @@ import {
 } from '@nestjs/common';
 import { ICirculationRepository } from '../domain/interfaces/circulation-repository.interface.js';
 import { ReturnLoanDto } from '../dto/request/return-loan.dto.js';
-import { PrismaService } from '../../../core/database/prisma.service.js';
 
 @Injectable()
 export class ReturnLoanUseCase {
-  constructor(
-    private readonly repository: ICirculationRepository,
-    private readonly prisma: PrismaService,
-  ) {}
+  constructor(private readonly repository: ICirculationRepository) {}
 
   async execute(id: string, dto: ReturnLoanDto, changedById: string) {
     const loan = await this.repository.findLoanById(id);
@@ -39,61 +35,23 @@ export class ReturnLoanUseCase {
       );
     }
 
-    return this.prisma.$transaction(async (tx) => {
-      // 1. Update loan transaction status
-      const updatedLoan = await tx.inventoryLoan.update({
-        where: { id },
-        data: {
-          actualReturnDate: new Date(),
-          statusId: returnedStatus.id,
-        },
-      });
-
-      // 2. Process each item being returned
-      for (const itemDto of dto.items) {
-        const loanItem = loan.items.find((i) => i.unitId === itemDto.unitId);
-        if (!loanItem) {
-          throw new BadRequestException(
-            `Unit ID ${itemDto.unitId} is not part of this loan.`,
-          );
-        }
-
-        const unit = loanItem.unit;
-
-        // Update returned condition on the loan item
-        await tx.inventoryLoanItem.update({
-          where: { id: loanItem.id },
-          data: {
-            returnedConditionId: itemDto.returnedConditionId,
-            notes: itemDto.notes ?? null,
-          },
-        });
-
-        // Revert unit status to "available" and set new condition
-        await tx.inventoryAssetUnit.update({
-          where: { id: unit.id },
-          data: {
-            statusId: availStatus.id,
-            conditionId: itemDto.returnedConditionId,
-          },
-        });
-
-        // Record history log
-        await tx.inventoryHistory.create({
-          data: {
-            unitId: unit.id,
-            transactionTypeId: txType.id,
-            previousConditionId: unit.conditionId,
-            newConditionId: itemDto.returnedConditionId,
-            previousStatusId: unit.statusId,
-            newStatusId: availStatus.id,
-            note: `Pengembalian aset dari peminjaman (No. ${loan.loanNumber}). ${itemDto.notes ?? ''}`,
-            changedById,
-          },
-        });
+    for (const itemDto of dto.items) {
+      const loanItem = loan.items.find((i) => i.unitId === itemDto.unitId);
+      if (!loanItem) {
+        throw new BadRequestException(
+          `Unit ID ${itemDto.unitId} is not part of this loan.`,
+        );
       }
+    }
 
-      return updatedLoan;
+    return this.repository.processReturnLoanTransaction({
+      loanId: id,
+      returnedStatusId: returnedStatus.id,
+      availStatusId: availStatus.id,
+      txTypeId: txType.id,
+      changedById,
+      loanNumber: loan.loanNumber,
+      items: dto.items,
     });
   }
 }
