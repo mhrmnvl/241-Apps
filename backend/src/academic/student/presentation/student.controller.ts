@@ -8,21 +8,14 @@ import {
   HttpStatus,
   Param,
   ParseBoolPipe,
-  ParseFilePipe,
   ParseUUIDPipe,
   Patch,
   Post,
   Query,
-  StreamableFile,
-  UploadedFile,
   UseGuards,
-  UseInterceptors,
 } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
 import {
   ApiBearerAuth,
-  ApiBody,
-  ApiConsumes,
   ApiOperation,
   ApiParam,
   ApiResponse,
@@ -35,23 +28,16 @@ import type { RequestUser } from '../types/student.types.js';
 
 import { JwtAuthGuard } from '../../../platform/auth/index.js';
 
-import { BulkImportStudentsResponseDto } from '../dto/response/bulk-import-student-response.dto.js';
 import { CreateStudentDto } from '../dto/request/create-student.dto.js';
-import { ExportStudentQueryDto } from '../dto/request/export-student-query.dto.js';
 import { StudentQueryDto } from '../dto/request/student-query.dto.js';
 import {
   StudentListResponseDto,
   StudentResponseDto,
 } from '../dto/response/student-response.dto.js';
 import { UpdateStudentDto } from '../dto/request/update-student.dto.js';
-import { ResolveBulkImportConflictsDto } from '../dto/request/resolve-bulk-import-conflicts.dto.js';
-import { ResolveBulkImportResponseDto } from '../dto/response/resolve-bulk-import-response.dto.js';
-import { BulkImportStudentsUseCase } from '../use-cases/bulk-import-student.use-case.js';
-import { ResolveBulkImportConflictsUseCase } from '../use-cases/resolve-bulk-import-conflicts.use-case.js';
 import { CreateStudentUseCase } from '../use-cases/create-student.use-case.js';
 import { CreateStudentWithRelationsUseCase } from '../use-cases/create-student-with-relations.use-case.js';
 import { DeleteStudentUseCase } from '../use-cases/delete-student.use-case.js';
-import { ExportStudentsUseCase } from '../use-cases/export-student.use-case.js';
 import { GetStudentByIdUseCase } from '../use-cases/get-student-by-id.use-case.js';
 import { GetStudentsUseCase } from '../use-cases/get-students.use-case.js';
 import { ToggleStudentActiveUseCase } from '../use-cases/toggle-student-active.use-case.js';
@@ -72,9 +58,6 @@ export class StudentController {
     private readonly updateStudentService: UpdateStudentUseCase,
     private readonly deleteStudentService: DeleteStudentUseCase,
     private readonly toggleStudentActiveService: ToggleStudentActiveUseCase,
-    private readonly bulkImportStudentsService: BulkImportStudentsUseCase,
-    private readonly resolveBulkImportConflictsService: ResolveBulkImportConflictsUseCase,
-    private readonly exportStudentsService: ExportStudentsUseCase,
   ) {}
 
   @Get()
@@ -82,60 +65,13 @@ export class StudentController {
   @ApiOperation({ summary: 'List all students (paginated, searchable)' })
   @ApiResponse({ status: 200, type: StudentListResponseDto })
   async findAll(
-    @CurrentUser() user: AuthenticatedUser,
+    @CurrentUser() _user: AuthenticatedUser,
     @Query() query: StudentQueryDto,
   ): Promise<{
     data: StudentWithDetails[];
     meta: { page: number; limit: number; total: number; totalPages: number };
   }> {
     return this.getStudentsService.execute(query);
-  }
-
-  @Get('export')
-  @RequirePermissions('students.read')
-  @ApiOperation({ summary: 'Export students to Excel (.xlsx)' })
-  @ApiResponse({
-    status: 200,
-    description: 'Returns an Excel file as attachment',
-    headers: {
-      'Content-Disposition': {
-        description: 'attachment; filename="students.xlsx"',
-        schema: { type: 'string' },
-      },
-    },
-  })
-  async export(
-    @CurrentUser() user: AuthenticatedUser,
-    @Query() query: ExportStudentQueryDto,
-  ): Promise<StreamableFile> {
-    const buffer = await this.exportStudentsService.execute(query);
-    return new StreamableFile(buffer, {
-      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      disposition: 'attachment; filename="students.xlsx"',
-    });
-  }
-
-  @Get('import-template')
-  @RequirePermissions('students.read')
-  @ApiOperation({
-    summary: 'Download blank import template (.xlsx) for students',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Returns a blank Excel template file',
-    headers: {
-      'Content-Disposition': {
-        description: 'attachment; filename="template_import_siswa.xlsx"',
-        schema: { type: 'string' },
-      },
-    },
-  })
-  async downloadImportTemplate(): Promise<StreamableFile> {
-    const buffer = await this.exportStudentsService.buildImportTemplate();
-    return new StreamableFile(buffer, {
-      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      disposition: 'attachment; filename="template_import_siswa.xlsx"',
-    });
   }
 
   @Get(':id')
@@ -161,7 +97,7 @@ export class StudentController {
   @ApiResponse({ status: 409, description: 'Duplicate NIS or NISN' })
   async create(
     @Body() dto: CreateStudentDto,
-    @CurrentUser() creator: AuthenticatedUser,
+    @CurrentUser() _creator: AuthenticatedUser,
   ): Promise<StudentResponseDto> {
     return this.createStudentService.execute(dto);
   }
@@ -183,49 +119,6 @@ export class StudentController {
     return this.createStudentWithRelationsService.execute(dto);
   }
 
-  @Post('bulk-import')
-  @RequirePermissions('students.create')
-  @UseInterceptors(FileInterceptor('file'))
-  @ApiConsumes('multipart/form-data')
-  @ApiOperation({ summary: 'Bulk import students from Excel file (.xlsx)' })
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        file: { type: 'string', format: 'binary' },
-      },
-      required: ['file'],
-    },
-  })
-  @ApiResponse({ status: 201, type: BulkImportStudentsResponseDto })
-  @ApiResponse({ status: 400, description: 'Invalid file or empty sheet' })
-  async bulkImport(
-    @UploadedFile(
-      new ParseFilePipe({
-        fileIsRequired: true,
-      }),
-    )
-    file: Express.Multer.File,
-    @CurrentUser() creator: AuthenticatedUser,
-  ): Promise<BulkImportStudentsResponseDto> {
-    return this.bulkImportStudentsService.execute(file.buffer);
-  }
-
-  @Post('bulk-import/resolve')
-  @RequirePermissions('students.update')
-  @ApiOperation({
-    summary:
-      'Resolve CONFLICT rows from a bulk import: update the matching ' +
-      'student or skip it',
-  })
-  @ApiResponse({ status: 201, type: ResolveBulkImportResponseDto })
-  async resolveBulkImportConflicts(
-    @CurrentUser() user: AuthenticatedUser,
-    @Body() dto: ResolveBulkImportConflictsDto,
-  ): Promise<ResolveBulkImportResponseDto> {
-    return this.resolveBulkImportConflictsService.execute(dto);
-  }
-
   @Patch(':id')
   @RequirePermissions('students.update')
   @ApiOperation({ summary: 'Update student master data (NIS, NISN, status)' })
@@ -234,7 +127,7 @@ export class StudentController {
   @ApiResponse({ status: 404, description: 'Student not found' })
   @ApiResponse({ status: 409, description: 'Duplicate NIS or NISN' })
   async update(
-    @CurrentUser() user: AuthenticatedUser,
+    @CurrentUser() _user: AuthenticatedUser,
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateStudentDto,
   ): Promise<StudentWithDetails> {
@@ -249,7 +142,7 @@ export class StudentController {
   @ApiResponse({ status: 204, description: 'Student deleted' })
   @ApiResponse({ status: 404, description: 'Student not found' })
   async remove(
-    @CurrentUser() user: AuthenticatedUser,
+    @CurrentUser() _user: AuthenticatedUser,
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<void> {
     await this.deleteStudentService.execute(id);
@@ -264,7 +157,7 @@ export class StudentController {
   @ApiResponse({ status: 200, description: 'Account status updated' })
   @ApiResponse({ status: 404, description: 'Student not found' })
   async toggleActive(
-    @CurrentUser() user: AuthenticatedUser,
+    @CurrentUser() _user: AuthenticatedUser,
     @Param('id', ParseUUIDPipe) id: string,
     @Query('isActive', new ParseBoolPipe()) isActive: boolean,
   ): Promise<User> {

@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { AcademicYearModule } from '../academic-year/academic-year.module.js';
 import { SemesterController } from './presentation/semester.controller.js';
+import { SemesterRolloverController } from './presentation/semester-rollover.controller.js';
+import { SemesterPromotionController } from './presentation/semester-promotion.controller.js';
 import { PrismaSemesterRepository } from './infrastructure/persistence/prisma-semester.repository.js';
 import { PrismaRolloverRepository } from './infrastructure/persistence/prisma-rollover.repository.js';
 import { PrismaPromotionRepository } from './infrastructure/persistence/prisma-promotion.repository.js';
@@ -21,7 +23,11 @@ import { IPromotionRepository } from './domain/interfaces/promotion-repository.i
 
 @Module({
   imports: [AcademicYearModule],
-  controllers: [SemesterController],
+  controllers: [
+    SemesterRolloverController,
+    SemesterPromotionController,
+    SemesterController,
+  ],
   providers: [
     { provide: ISemesterRepository, useClass: PrismaSemesterRepository },
     { provide: IRolloverRepository, useClass: PrismaRolloverRepository },

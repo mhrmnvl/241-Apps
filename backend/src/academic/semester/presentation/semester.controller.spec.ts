@@ -13,10 +13,14 @@ import { PromoteStudentsUseCase } from '../use-cases/promote-student.use-case.js
 import { RolloverSemesterUseCase } from '../use-cases/rollover-semester.use-case.js';
 import { UpdateSemesterUseCase } from '../use-cases/update-semester.use-case.js';
 import { SemesterController } from './semester.controller.js';
+import { SemesterRolloverController } from './semester-rollover.controller.js';
+import { SemesterPromotionController } from './semester-promotion.controller.js';
 import type { AuthenticatedUser } from '../../../core/types/authenticated-user.type.js';
 
-describe('SemesterController', () => {
+describe('Semester Controllers', () => {
   let controller: SemesterController;
+  let rolloverController: SemesterRolloverController;
+  let promotionController: SemesterPromotionController;
 
   const mockGetSemesters = { execute: jest.fn() };
   const mockGetSemesterById = { execute: jest.fn() };
@@ -39,7 +43,11 @@ describe('SemesterController', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [SemesterController],
+      controllers: [
+        SemesterRolloverController,
+        SemesterPromotionController,
+        SemesterController,
+      ],
       providers: [
         { provide: GetSemestersUseCase, useValue: mockGetSemesters },
         { provide: GetSemesterByIdUseCase, useValue: mockGetSemesterById },
@@ -65,11 +73,19 @@ describe('SemesterController', () => {
     }).compile();
 
     controller = module.get<SemesterController>(SemesterController);
+    rolloverController = module.get<SemesterRolloverController>(
+      SemesterRolloverController,
+    );
+    promotionController = module.get<SemesterPromotionController>(
+      SemesterPromotionController,
+    );
     jest.clearAllMocks();
   });
 
   it('should be defined', () => {
     expect(controller).toBeDefined();
+    expect(rolloverController).toBeDefined();
+    expect(promotionController).toBeDefined();
   });
 
   describe('findAll', () => {
@@ -129,7 +145,7 @@ describe('SemesterController', () => {
         classrooms: { created: 5, skipped: 0 },
       });
 
-      await controller.rollover(mockUser, dto);
+      await rolloverController.rollover(mockUser, dto);
 
       expect(mockRolloverSemester.execute).toHaveBeenCalledWith(dto);
     });
@@ -156,7 +172,7 @@ describe('SemesterController', () => {
         skipped: 0,
       });
 
-      await controller.promote(mockUser, dto);
+      await promotionController.promote(mockUser, dto);
 
       expect(mockPromoteStudents.execute).toHaveBeenCalledWith(dto);
     });
@@ -183,7 +199,7 @@ describe('SemesterController', () => {
         graduatedCount: 0,
       });
 
-      await controller.previewPromotion(mockUser, dto);
+      await promotionController.previewPromotion(mockUser, dto);
 
       expect(mockPreviewPromotion.execute).toHaveBeenCalledWith(dto);
     });
@@ -200,7 +216,7 @@ describe('SemesterController', () => {
         totalStudents: 0,
       });
 
-      await controller.recommend(mockUser, dto);
+      await promotionController.recommend(mockUser, dto);
 
       expect(mockGenerateRecommendation.execute).toHaveBeenCalledWith(dto);
     });

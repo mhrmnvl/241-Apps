@@ -4,6 +4,7 @@ import { GradeModule } from '../grade/grade.module.js';
 import { ClassroomModule } from '../classroom/classroom.module.js';
 import { EnrollmentModule } from '../enrollment/enrollment.module.js';
 import { StudentController } from './presentation/student.controller.js';
+import { StudentImportExportController } from './presentation/student-import-export.controller.js';
 import { StudentAddressController } from './presentation/student-address.controller.js';
 import { StudentParentController } from './presentation/student-parent.controller.js';
 import { StudentProfileController } from './presentation/student-profile.controller.js';
@@ -39,6 +40,7 @@ import { UpdateStudentProfileUseCase } from './use-cases/update-student-profile.
 @Module({
   imports: [UserModule, GradeModule, ClassroomModule, EnrollmentModule],
   controllers: [
+    StudentImportExportController,
     StudentController,
     StudentAddressController,
     StudentParentController,

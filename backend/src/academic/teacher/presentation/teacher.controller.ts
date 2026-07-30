@@ -8,21 +8,14 @@ import {
   HttpStatus,
   Param,
   ParseBoolPipe,
-  ParseFilePipe,
   ParseUUIDPipe,
   Patch,
   Post,
   Query,
-  StreamableFile,
-  UploadedFile,
   UseGuards,
-  UseInterceptors,
 } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
 import {
   ApiBearerAuth,
-  ApiBody,
-  ApiConsumes,
   ApiOperation,
   ApiParam,
   ApiResponse,
@@ -35,22 +28,15 @@ import { CurrentUser } from '../../../core/decorators/current-user.decorator.js'
 import type { AuthenticatedUser } from '../../../core/types/authenticated-user.type.js';
 
 import { UpdateProfileDto } from '../../../platform/profile/index.js';
-import { BulkImportTeachersResponseDto } from '../dto/response/bulk-import-teacher-response.dto.js';
 import { CreateTeacherDto } from '../dto/request/create-teacher.dto.js';
 import { TeacherQueryDto } from '../dto/request/teacher-query.dto.js';
 import {
   TeacherListResponseDto,
   TeacherResponseDto,
 } from '../dto/response/teacher-response.dto.js';
-import { ExportTeacherQueryDto } from '../dto/request/export-teacher-query.dto.js';
 import { UpdateTeacherDto } from '../dto/request/update-teacher.dto.js';
-import { ResolveBulkImportConflictsDto } from '../dto/request/resolve-bulk-import-conflicts.dto.js';
-import { ResolveBulkImportResponseDto } from '../dto/response/resolve-bulk-import-response.dto.js';
-import { BulkImportTeachersUseCase } from '../use-cases/bulk-import-teacher.use-case.js';
-import { ResolveBulkImportConflictsUseCase } from '../use-cases/resolve-bulk-import-conflicts.use-case.js';
 import { CreateTeacherUseCase } from '../use-cases/create-teacher.use-case.js';
 import { DeleteTeacherUseCase } from '../use-cases/delete-teacher.use-case.js';
-import { ExportTeachersUseCase } from '../use-cases/export-teacher.use-case.js';
 import { GetTeacherByIdUseCase } from '../use-cases/get-teacher-by-id.use-case.js';
 import { GetTeachersUseCase } from '../use-cases/get-teachers.use-case.js';
 import { ToggleTeacherActiveUseCase } from '../use-cases/toggle-teacher-active.use-case.js';
@@ -74,9 +60,6 @@ export class TeacherController {
     private readonly deleteTeacherUseCase: DeleteTeacherUseCase,
     private readonly toggleTeacherActiveUseCase: ToggleTeacherActiveUseCase,
     private readonly updateProfileUseCase: UpdateTeacherProfileUseCase,
-    private readonly bulkImportTeachersUseCase: BulkImportTeachersUseCase,
-    private readonly resolveBulkImportConflictsUseCase: ResolveBulkImportConflictsUseCase,
-    private readonly exportTeachersUseCase: ExportTeachersUseCase,
   ) {}
 
   @Get()
@@ -85,60 +68,13 @@ export class TeacherController {
   @ApiResponse({ status: 200, type: TeacherListResponseDto })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async findAll(
-    @CurrentUser() user: AuthenticatedUser,
+    @CurrentUser() _user: AuthenticatedUser,
     @Query() query: TeacherQueryDto,
   ): Promise<{
     data: TeacherListWithDetails[];
     meta: { page: number; limit: number; total: number; totalPages: number };
   }> {
     return this.getTeachersUseCase.execute(query);
-  }
-
-  @Get('export')
-  @RequirePermissions('teachers.read')
-  @ApiOperation({ summary: 'Export teachers to Excel (.xlsx)' })
-  @ApiResponse({
-    status: 200,
-    description: 'Returns an Excel file as attachment',
-    headers: {
-      'Content-Disposition': {
-        description: 'attachment; filename="teachers.xlsx"',
-        schema: { type: 'string' },
-      },
-    },
-  })
-  async export(
-    @CurrentUser() user: AuthenticatedUser,
-    @Query() query: ExportTeacherQueryDto,
-  ): Promise<StreamableFile> {
-    const buffer = await this.exportTeachersUseCase.execute(query);
-    return new StreamableFile(buffer, {
-      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      disposition: 'attachment; filename="teachers.xlsx"',
-    });
-  }
-
-  @Get('import-template')
-  @RequirePermissions('teachers.read')
-  @ApiOperation({
-    summary: 'Download blank import template (.xlsx) for teachers',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Returns a blank Excel template file',
-    headers: {
-      'Content-Disposition': {
-        description: 'attachment; filename="template_import_pegawai.xlsx"',
-        schema: { type: 'string' },
-      },
-    },
-  })
-  async downloadImportTemplate(): Promise<StreamableFile> {
-    const buffer = await this.exportTeachersUseCase.buildImportTemplate();
-    return new StreamableFile(buffer, {
-      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      disposition: 'attachment; filename="template_import_pegawai.xlsx"',
-    });
   }
 
   @Get(':id')
@@ -149,7 +85,7 @@ export class TeacherController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Teacher not found' })
   async findOne(
-    @CurrentUser() user: AuthenticatedUser,
+    @CurrentUser() _user: AuthenticatedUser,
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<TeacherWithDetails> {
     return this.getTeacherByIdUseCase.execute(id);
@@ -168,46 +104,9 @@ export class TeacherController {
   })
   async create(
     @Body() dto: CreateTeacherDto,
-    @CurrentUser() creator: AuthenticatedUser,
+    @CurrentUser() _creator: AuthenticatedUser,
   ): Promise<TeacherWithDetails> {
     return this.createTeacherUseCase.execute(dto);
-  }
-
-  @Post('bulk-import')
-  @RequirePermissions('teachers.create')
-  @UseInterceptors(FileInterceptor('file'))
-  @ApiConsumes('multipart/form-data')
-  @ApiOperation({ summary: 'Bulk import teachers from Excel file (.xlsx)' })
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: { file: { type: 'string', format: 'binary' } },
-      required: ['file'],
-    },
-  })
-  @ApiResponse({ status: 201, type: BulkImportTeachersResponseDto })
-  @ApiResponse({ status: 400, description: 'Invalid file or empty sheet' })
-  async bulkImport(
-    @UploadedFile(new ParseFilePipe({ fileIsRequired: true }))
-    file: Express.Multer.File,
-    @CurrentUser() creator: AuthenticatedUser,
-  ): Promise<BulkImportTeachersResponseDto> {
-    return this.bulkImportTeachersUseCase.execute(file.buffer);
-  }
-
-  @Post('bulk-import/resolve')
-  @RequirePermissions('teachers.update')
-  @ApiOperation({
-    summary:
-      'Resolve CONFLICT rows from a bulk import: update the matching ' +
-      'teacher or skip it',
-  })
-  @ApiResponse({ status: 201, type: ResolveBulkImportResponseDto })
-  async resolveBulkImportConflicts(
-    @CurrentUser() user: AuthenticatedUser,
-    @Body() dto: ResolveBulkImportConflictsDto,
-  ): Promise<ResolveBulkImportResponseDto> {
-    return this.resolveBulkImportConflictsUseCase.execute(dto);
   }
 
   @Patch(':id')
@@ -220,7 +119,7 @@ export class TeacherController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Teacher not found' })
   async update(
-    @CurrentUser() user: AuthenticatedUser,
+    @CurrentUser() _user: AuthenticatedUser,
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateTeacherDto,
   ): Promise<TeacherWithDetails> {
@@ -236,7 +135,7 @@ export class TeacherController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Teacher not found' })
   async remove(
-    @CurrentUser() user: AuthenticatedUser,
+    @CurrentUser() _user: AuthenticatedUser,
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<void> {
     await this.deleteTeacherUseCase.execute(id);
@@ -251,7 +150,7 @@ export class TeacherController {
   @ApiResponse({ status: 404, description: 'Teacher not found' })
   @ApiResponse({ status: 409, description: 'Duplicate NIK' })
   async updateProfile(
-    @CurrentUser() user: AuthenticatedUser,
+    @CurrentUser() _user: AuthenticatedUser,
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateProfileDto,
   ): Promise<Profile> {
@@ -267,7 +166,7 @@ export class TeacherController {
   @ApiResponse({ status: 200, description: 'Account status updated' })
   @ApiResponse({ status: 404, description: 'Teacher not found' })
   async toggleActive(
-    @CurrentUser() user: AuthenticatedUser,
+    @CurrentUser() _user: AuthenticatedUser,
     @Param('id', ParseUUIDPipe) id: string,
     @Query('isActive', new ParseBoolPipe()) isActive: boolean,
   ): Promise<User> {

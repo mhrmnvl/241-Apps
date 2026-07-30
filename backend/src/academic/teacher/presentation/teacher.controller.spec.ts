@@ -15,10 +15,12 @@ import { ToggleTeacherActiveUseCase } from '../use-cases/toggle-teacher-active.u
 import { UpdateTeacherProfileUseCase } from '../use-cases/update-teacher-profile.use-case.js';
 import { UpdateTeacherUseCase } from '../use-cases/update-teacher.use-case.js';
 import { TeacherController } from './teacher.controller.js';
+import { TeacherImportExportController } from './teacher-import-export.controller.js';
 import type { AuthenticatedUser } from '../../../core/types/authenticated-user.type.js';
 
-describe('TeacherController', () => {
+describe('TeacherController & TeacherImportExportController', () => {
   let controller: TeacherController;
+  let importExportController: TeacherImportExportController;
 
   const mockGetTeachersUseCase = { execute: jest.fn() };
   const mockGetTeacherByIdUseCase = { execute: jest.fn() };
@@ -40,7 +42,7 @@ describe('TeacherController', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [TeacherController],
+      controllers: [TeacherImportExportController, TeacherController],
       providers: [
         { provide: GetTeachersUseCase, useValue: mockGetTeachersUseCase },
         {
@@ -74,11 +76,15 @@ describe('TeacherController', () => {
     }).compile();
 
     controller = module.get<TeacherController>(TeacherController);
+    importExportController = module.get<TeacherImportExportController>(
+      TeacherImportExportController,
+    );
     jest.clearAllMocks();
   });
 
   it('should be defined', () => {
     expect(controller).toBeDefined();
+    expect(importExportController).toBeDefined();
   });
 
   describe('findAll', () => {
@@ -146,7 +152,10 @@ describe('TeacherController', () => {
       };
       mockBulkImportTeachersUseCase.execute.mockResolvedValue(expected);
 
-      const result = await controller.bulkImport(fakeFile, mockUser);
+      const result = await importExportController.bulkImport(
+        fakeFile,
+        mockUser,
+      );
 
       expect(mockBulkImportTeachersUseCase.execute).toHaveBeenCalledWith(
         fakeFile.buffer,
@@ -161,7 +170,7 @@ describe('TeacherController', () => {
       mockExportTeachersUseCase.execute.mockResolvedValue(fakeBuffer);
 
       const query: ExportTeacherQueryDto = { search: 'Budi' };
-      const result = await controller.export(mockUser, query);
+      const result = await importExportController.export(mockUser, query);
 
       expect(mockExportTeachersUseCase.execute).toHaveBeenCalledWith(query);
       expect(result).toBeDefined();
@@ -187,7 +196,7 @@ describe('TeacherController', () => {
       const id = 'emp-1';
       mockDeleteTeacherUseCase.execute.mockResolvedValue(undefined);
 
-      const result = await controller.remove(mockUser, id);
+      await controller.remove(mockUser, id);
 
       expect(mockDeleteTeacherUseCase.execute).toHaveBeenCalledWith(id);
     });
