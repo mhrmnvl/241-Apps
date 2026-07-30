@@ -36,6 +36,8 @@ const validRow = {
   employmentStatus: 'PNS',
 };
 
+import { ExcelTeacherParser } from '../infrastructure/parsers/excel-teacher.parser.js';
+
 describe('BulkImportTeachersUseCase', () => {
   let useCase: BulkImportTeachersUseCase;
 
@@ -56,6 +58,7 @@ describe('BulkImportTeachersUseCase', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         BulkImportTeachersUseCase,
+        ExcelTeacherParser,
         { provide: TeacherRepository, useValue: mockRepo },
         { provide: CreateTeacherUseCase, useValue: mockCreateTeacher },
       ],

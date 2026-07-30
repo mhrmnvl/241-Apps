@@ -10,6 +10,7 @@ import { TeacherPositionsRepository } from './repositories/teacher-position.repo
 import { PrismaTeacherRepository } from './infrastructure/persistence/prisma-teacher.repository.js';
 import { PrismaTeacherAddressRepository } from './infrastructure/persistence/prisma-teacher-address.repository.js';
 import { PrismaTeacherPositionsRepository } from './infrastructure/persistence/prisma-teacher-position.repository.js';
+import { ExcelTeacherParser } from './infrastructure/parsers/excel-teacher.parser.js';
 import { CreateTeacherUseCase } from './use-cases/create-teacher.use-case.js';
 import { DeleteTeacherUseCase } from './use-cases/delete-teacher.use-case.js';
 import { GetTeacherByIdUseCase } from './use-cases/get-teacher-by-id.use-case.js';
@@ -41,6 +42,7 @@ import { TeacherPositionUseCase } from './use-cases/teacher-position.use-case.js
       provide: TeacherPositionsRepository,
       useClass: PrismaTeacherPositionsRepository,
     },
+    ExcelTeacherParser,
     CreateTeacherUseCase,
     DeleteTeacherUseCase,
     GetTeacherByIdUseCase,
