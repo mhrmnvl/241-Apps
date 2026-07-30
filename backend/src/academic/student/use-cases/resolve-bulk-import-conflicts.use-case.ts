@@ -15,8 +15,8 @@ export class ResolveBulkImportConflictsUseCase {
   private readonly logger = new Logger(ResolveBulkImportConflictsUseCase.name);
 
   constructor(
-    private readonly gradeRepo: IGradeRepository,
-    private readonly classroomRepo: ClassroomRepository,
+    private readonly gradeRepository: IGradeRepository,
+    private readonly classroomRepository: ClassroomRepository,
     private readonly updateStudent: UpdateStudentUseCase,
     private readonly updateStudentProfile: UpdateStudentProfileUseCase,
     private readonly createStudent: CreateStudentUseCase,
@@ -29,11 +29,11 @@ export class ResolveBulkImportConflictsUseCase {
     const [gradeByLevel, classroomByCode] = await Promise.all([
       resolveOnceByKey(
         dto.conflicts.map((item) => item.data.grade),
-        (level) => this.gradeRepo.findByLevel(level),
+        (level) => this.gradeRepository.findByLevel(level),
       ),
       resolveOnceByKey(
         dto.conflicts.map((item) => item.data.classroomCode),
-        (code) => this.classroomRepo.findByCode(code),
+        (code) => this.classroomRepository.findByCode(code),
       ),
     ]);
 

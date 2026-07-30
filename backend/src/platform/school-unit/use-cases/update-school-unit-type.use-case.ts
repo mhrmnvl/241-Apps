@@ -1,20 +1,34 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { UpdateSchoolUnitTypeDto } from '../dto/request/update-school-unit-type.dto.js';
-import { SchoolUnitTypesRepository } from '../repositories/school-unit-types.repository.js';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+  Logger,
+} from '@nestjs/common';
+import { Prisma } from '@prisma/client';
+import { SchoolUnitTypeRepository } from '../repositories/school-unit-types.repository.js';
 
 @Injectable()
 export class UpdateSchoolUnitTypeUseCase {
   private readonly logger = new Logger(UpdateSchoolUnitTypeUseCase.name);
 
-  constructor(private readonly repo: SchoolUnitTypesRepository) {}
+  constructor(
+    private readonly schoolUnitTypeRepository: SchoolUnitTypeRepository,
+  ) {}
 
-  async execute(id: string, dto: UpdateSchoolUnitTypeDto) {
-    const existing = await this.repo.findById(id);
+  async execute(id: string, dto: Prisma.SchoolUnitTypeUpdateInput) {
+    const existing = await this.schoolUnitTypeRepository.findById(id);
     if (!existing) {
-      throw new NotFoundException('Tipe sekolah tidak ditemukan');
+      throw new NotFoundException('Jenis unit tidak ditemukan');
     }
 
-    const updated = await this.repo.update(id, dto);
+    if (dto.code && typeof dto.code === 'string') {
+      const dup = await this.schoolUnitTypeRepository.findByCode(dto.code, id);
+      if (dup) {
+        throw new ConflictException(`Jenis unit '${dto.code}' sudah ada`);
+      }
+    }
+
+    const updated = await this.schoolUnitTypeRepository.update(id, dto);
     this.logger.log(`School unit type updated: ${updated.code}`);
     return updated;
   }

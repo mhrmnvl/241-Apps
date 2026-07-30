@@ -7,16 +7,16 @@ export class RemoveProfileSocialMediaUseCase {
   private readonly logger = new Logger(RemoveProfileSocialMediaUseCase.name);
 
   constructor(
-    private readonly profileRepo: ProfileRepository,
-    private readonly socialRepo: ProfileSocialMediaRepository,
+    private readonly profileRepository: ProfileRepository,
+    private readonly socialMediaRepository: ProfileSocialMediaRepository,
   ) {}
 
   async execute(userId: string, socialMediaId: string): Promise<void> {
-    const profile = await this.profileRepo.findByUserId(userId);
+    const profile = await this.profileRepository.findByUserId(userId);
     if (!profile)
       throw new NotFoundException(`Profile for user ID ${userId} not found`);
 
-    const sm = await this.socialRepo.findByIdAndProfile(
+    const sm = await this.socialMediaRepository.findByIdAndProfile(
       socialMediaId,
       profile.id,
     );
@@ -25,7 +25,7 @@ export class RemoveProfileSocialMediaUseCase {
         `Social media with ID ${socialMediaId} not found for this profile`,
       );
 
-    await this.socialRepo.remove(socialMediaId);
+    await this.socialMediaRepository.remove(socialMediaId);
     this.logger.log(`Social media ${socialMediaId} removed for user ${userId}`);
   }
 }

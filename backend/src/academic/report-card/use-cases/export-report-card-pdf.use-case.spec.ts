@@ -1,7 +1,7 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { GetSchoolUnitUseCase } from '../../../platform/school-unit/index.js';
-import { IStudentScoresRepository } from '../../assessment/domain/interfaces/student-scores-repository.interface.js';
+import { IStudentScoreRepository } from '../../assessment/domain/interfaces/student-scores-repository.interface.js';
 import { IAttendanceRepository } from '../../attendance/domain/interfaces/attendance-repository.interface.js';
 import { IReportCardRepository } from '../domain/interfaces/report-card-repository.interface.js';
 import { PdfService } from '../services/pdf.service.js';
@@ -44,7 +44,7 @@ describe('ExportReportCardPdfUseCase', () => {
       providers: [
         ExportReportCardPdfUseCase,
         { provide: IReportCardRepository, useValue: mockRepo },
-        { provide: IStudentScoresRepository, useValue: mockStudentScoresRepo },
+        { provide: IStudentScoreRepository, useValue: mockStudentScoresRepo },
         { provide: IAttendanceRepository, useValue: mockAttendanceRepo },
         { provide: PdfService, useValue: mockPdfService },
         { provide: GetSchoolUnitUseCase, useValue: mockGetSchoolUnitUseCase },

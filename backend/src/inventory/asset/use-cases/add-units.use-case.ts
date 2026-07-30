@@ -6,18 +6,18 @@ import { CreateUnitsDto } from '../dto/request/create-units.dto.js';
 @Injectable()
 export class AddUnitsUseCase {
   constructor(
-    private readonly assetRepo: IAssetRepository,
-    private readonly unitRepo: IAssetUnitRepository,
+    private readonly assetRepository: IAssetRepository,
+    private readonly unitRepository: IAssetUnitRepository,
   ) {}
 
   async execute(assetId: string, dto: CreateUnitsDto) {
-    const asset = await this.assetRepo.findById(assetId);
+    const asset = await this.assetRepository.findById(assetId);
     if (!asset) {
       throw new NotFoundException(`Asset with ID ${assetId} not found`);
     }
     const quantity = dto.quantity && dto.quantity > 0 ? dto.quantity : 1;
 
-    const latest = await this.unitRepo.findLatestUnit(assetId);
+    const latest = await this.unitRepository.findLatestUnit(assetId);
     let start = 0;
     if (latest) {
       const suffix = latest.unitNumber.split('-').pop();
@@ -38,7 +38,7 @@ export class AddUnitsUseCase {
       };
     });
 
-    await this.unitRepo.createMany(rows);
-    return this.unitRepo.findByAsset(assetId);
+    await this.unitRepository.createMany(rows);
+    return this.unitRepository.findByAsset(assetId);
   }
 }

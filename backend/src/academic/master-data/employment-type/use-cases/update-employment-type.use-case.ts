@@ -6,15 +6,15 @@ import { IEmploymentTypeRepository } from '../interfaces/employment-type-reposit
 export class UpdateEmploymentTypeUseCase {
   private readonly logger = new Logger(UpdateEmploymentTypeUseCase.name);
 
-  constructor(private readonly repo: IEmploymentTypeRepository) {}
+  constructor(private readonly repository: IEmploymentTypeRepository) {}
 
   async execute(id: string, dto: UpdateEmploymentTypeDto) {
-    const existing = await this.repo.findById(id);
+    const existing = await this.repository.findById(id);
     if (!existing) {
       throw new NotFoundException(`Employment type with ID ${id} not found`);
     }
 
-    const type = await this.repo.update(id, dto);
+    const type = await this.repository.update(id, dto);
     this.logger.log(`Employment type updated: ${id}`);
     return type;
   }

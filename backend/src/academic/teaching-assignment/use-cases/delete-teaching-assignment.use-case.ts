@@ -3,12 +3,12 @@ import { ITeachingAssignmentRepository } from '../domain/interfaces/teaching-ass
 
 @Injectable()
 export class DeleteTeachingAssignmentUseCase {
-  constructor(private readonly repo: ITeachingAssignmentRepository) {}
+  constructor(private readonly repository: ITeachingAssignmentRepository) {}
 
   async execute(id: string) {
-    const result = await this.repo.findById(id);
+    const result = await this.repository.findById(id);
     if (!result)
       throw new NotFoundException(`Teaching assignment ${id} not found`);
-    return this.repo.softDelete(id);
+    return this.repository.softDelete(id);
   }
 }

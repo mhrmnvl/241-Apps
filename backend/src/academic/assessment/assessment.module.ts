@@ -4,10 +4,10 @@ import { SemesterModule } from '../semester/semester.module.js';
 import { EnrollmentModule } from '../enrollment/enrollment.module.js';
 import { AssessmentItemsController } from './presentation/assessment-items.controller.js';
 import { StudentScoresController } from './presentation/student-scores.controller.js';
-import { PrismaAssessmentItemsRepository } from './infrastructure/persistence/prisma-assessment-items.repository.js';
-import { PrismaStudentScoresRepository } from './infrastructure/persistence/prisma-student-scores.repository.js';
-import { IAssessmentItemsRepository } from './domain/interfaces/assessment-items-repository.interface.js';
-import { IStudentScoresRepository } from './domain/interfaces/student-scores-repository.interface.js';
+import { PrismaAssessmentItemRepository } from './infrastructure/persistence/prisma-assessment-items.repository.js';
+import { PrismaStudentScoreRepository } from './infrastructure/persistence/prisma-student-scores.repository.js';
+import { IAssessmentItemRepository } from './domain/interfaces/assessment-items-repository.interface.js';
+import { IStudentScoreRepository } from './domain/interfaces/student-scores-repository.interface.js';
 
 import { GetAssessmentItemsUseCase } from './use-cases/get-assessment-items.use-case.js';
 import { GetAssessmentItemByIdUseCase } from './use-cases/get-assessment-item-by-id.use-case.js';
@@ -28,12 +28,12 @@ import { BulkUpsertStudentScoresUseCase } from './use-cases/bulk-upsert-student-
   controllers: [AssessmentItemsController, StudentScoresController],
   providers: [
     {
-      provide: IAssessmentItemsRepository,
-      useClass: PrismaAssessmentItemsRepository,
+      provide: IAssessmentItemRepository,
+      useClass: PrismaAssessmentItemRepository,
     },
     {
-      provide: IStudentScoresRepository,
-      useClass: PrismaStudentScoresRepository,
+      provide: IStudentScoreRepository,
+      useClass: PrismaStudentScoreRepository,
     },
 
     GetAssessmentItemsUseCase,
@@ -50,6 +50,6 @@ import { BulkUpsertStudentScoresUseCase } from './use-cases/bulk-upsert-student-
     GetStudentScoreRosterUseCase,
     BulkUpsertStudentScoresUseCase,
   ],
-  exports: [IAssessmentItemsRepository, IStudentScoresRepository],
+  exports: [IAssessmentItemRepository, IStudentScoreRepository],
 })
 export class AssessmentModule {}

@@ -49,7 +49,7 @@ export class RoleController {
     private readonly deleteRoleUseCase: DeleteRoleUseCase,
     private readonly assignRoleToUserUseCase: AssignRoleToUserUseCase,
     private readonly removeRoleFromUserUseCase: RemoveRoleFromUserUseCase,
-    private readonly rolesRepo: IRoleRepository,
+    private readonly roleRepository: IRoleRepository,
   ) {}
 
   @Get()
@@ -57,7 +57,7 @@ export class RoleController {
   @ApiOperation({ summary: 'List all roles' })
   @ApiResponse({ status: 200, type: [RoleResponseDto] })
   async findAll(@CurrentUser() user: AuthenticatedUser) {
-    const userRoles = await this.rolesRepo.findUserRoles(user.id);
+    const userRoles = await this.roleRepository.findUserRoles(user.id);
     const isSuperAdmin = userRoles.some((ur) => ur.role.code === 'SUPER_ADMIN');
     return this.getRolesUseCase.execute(user.id, isSuperAdmin);
   }

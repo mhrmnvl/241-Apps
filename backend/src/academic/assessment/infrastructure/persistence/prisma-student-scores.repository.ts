@@ -4,15 +4,15 @@ import { PrismaService } from '../../../../core/database/prisma.service.js';
 import { StudentScoreQueryDto } from '../../dto/request/student-score-query.dto.js';
 import type { BulkStudentScoreRecordDto } from '../../dto/request/bulk-upsert-student-score.dto.js';
 import {
-  IStudentScoresRepository,
+  IStudentScoreRepository,
   STUDENT_SCORE_INCLUDE,
   REPORT_CARD_SCORE_INCLUDE,
-  StudentScoreRosterItem,
-  ReportCardScoreRow,
+  StudentScoreWithDetails,
+  StudentScoreWithReportCardDetails,
 } from '../../domain/interfaces/student-scores-repository.interface.js';
 
 @Injectable()
-export class PrismaStudentScoresRepository extends IStudentScoresRepository {
+export class PrismaStudentScoreRepository extends IStudentScoreRepository {
   constructor(private readonly prisma: PrismaService) {
     super();
   }

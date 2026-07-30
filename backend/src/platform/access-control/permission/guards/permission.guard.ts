@@ -12,7 +12,7 @@ import { IPermissionRepository } from '../interfaces/permission-repository.inter
 export class PermissionGuard implements CanActivate {
   constructor(
     private readonly reflector: Reflector,
-    private readonly permissionsRepo: IPermissionRepository,
+    private readonly permissionRepository: IPermissionRepository,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -35,7 +35,7 @@ export class PermissionGuard implements CanActivate {
     }
 
     // Admin and Super Admin bypass all permission checks
-    const userRoles = await this.permissionsRepo.findUserRoles(user.id);
+    const userRoles = await this.permissionRepository.findUserRoles(user.id);
     const isAdmin = userRoles.some(
       (ur) => ur.role.code === 'SUPER_ADMIN' || ur.role.code === 'ADMIN',
     );
@@ -43,7 +43,7 @@ export class PermissionGuard implements CanActivate {
       return true;
     }
 
-    const userPermissions = await this.permissionsRepo.findUserPermissions(
+    const userPermissions = await this.permissionRepository.findUserPermissions(
       user.id,
     );
 

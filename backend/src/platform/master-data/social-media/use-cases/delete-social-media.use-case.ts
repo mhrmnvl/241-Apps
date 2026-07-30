@@ -10,16 +10,16 @@ import { ISocialMediaRepository } from '../interfaces/social-media-repository.in
 @Injectable()
 export class DeleteSocialMediaUseCase {
   constructor(
-    private readonly repo: ISocialMediaRepository,
-    private readonly schoolUnitSocialMediaRepo: SchoolUnitSocialMediaRepository,
-    private readonly profileSocialMediaRepo: ProfileSocialMediaRepository,
+    private readonly repository: ISocialMediaRepository,
+    private readonly schoolUnitSocialMediaRepository: SchoolUnitSocialMediaRepository,
+    private readonly profileSocialMediaRepository: ProfileSocialMediaRepository,
   ) {}
 
   async execute(id: string): Promise<void> {
     const [platform, usageSchoolUnit, usageProfile] = await Promise.all([
-      this.repo.findById(id),
-      this.schoolUnitSocialMediaRepo.countByPlatformId(id),
-      this.profileSocialMediaRepo.countByPlatformId(id),
+      this.repository.findById(id),
+      this.schoolUnitSocialMediaRepository.countByPlatformId(id),
+      this.profileSocialMediaRepository.countByPlatformId(id),
     ]);
 
     if (!platform)
@@ -30,6 +30,6 @@ export class DeleteSocialMediaUseCase {
         'Cannot delete platform that is still in use by school units or profiles',
       );
 
-    await this.repo.remove(id);
+    await this.repository.remove(id);
   }
 }

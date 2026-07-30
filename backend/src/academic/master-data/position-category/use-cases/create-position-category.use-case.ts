@@ -6,17 +6,17 @@ import { IPositionCategoryRepository } from '../interfaces/position-category-rep
 export class CreatePositionCategoryUseCase {
   private readonly logger = new Logger(CreatePositionCategoryUseCase.name);
 
-  constructor(private readonly repo: IPositionCategoryRepository) {}
+  constructor(private readonly repository: IPositionCategoryRepository) {}
 
   async execute(dto: CreatePositionCategoryDto) {
-    const existing = await this.repo.findByCode(dto.code);
+    const existing = await this.repository.findByCode(dto.code);
     if (existing) {
       throw new ConflictException(
         `Position category code "${dto.code}" already exists`,
       );
     }
 
-    const category = await this.repo.create(dto);
+    const category = await this.repository.create(dto);
     this.logger.log(`Position category created: ${category.code}`);
     return category;
   }

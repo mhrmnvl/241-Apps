@@ -5,12 +5,12 @@ import { StorageService } from '../../../core/storage/storage.service.js';
 @Injectable()
 export class GetFilesUseCase {
   constructor(
-    private readonly repo: FileRepository,
+    private readonly repository: FileRepository,
     private readonly storage: StorageService,
   ) {}
 
   async execute() {
-    const files = await this.repo.findMany();
+    const files = await this.repository.findMany();
     return Promise.all(
       files.map(async (file) => ({
         ...file,

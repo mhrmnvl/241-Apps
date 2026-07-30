@@ -6,14 +6,14 @@ import { ISubjectRepository } from '../domain/interfaces/subject-repository.inte
 export class CreateSubjectUseCase {
   private readonly logger = new Logger(CreateSubjectUseCase.name);
 
-  constructor(private readonly repo: ISubjectRepository) {}
+  constructor(private readonly repository: ISubjectRepository) {}
 
   async execute(dto: CreateSubjectDto) {
-    const existing = await this.repo.findByName(dto.name);
+    const existing = await this.repository.findByName(dto.name);
     if (existing)
       throw new ConflictException(`Subject "${dto.name}" already exists`);
 
-    const subject = await this.repo.create(dto);
+    const subject = await this.repository.create(dto);
     this.logger.log(`Subject created: ${dto.name}`);
     return subject;
   }

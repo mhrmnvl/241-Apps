@@ -1,1 +1,1 @@
-export { PrismaEventsRepository as EventsRepository } from '../infrastructure/persistence/prisma-events.repository.js';
+export { PrismaEventRepository as EventRepository } from '../infrastructure/persistence/prisma-events.repository.js';

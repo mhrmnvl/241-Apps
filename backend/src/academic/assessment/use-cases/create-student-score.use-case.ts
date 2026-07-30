@@ -3,16 +3,16 @@ import {
   ConflictException,
   Injectable,
 } from '@nestjs/common';
-import { IAssessmentItemsRepository } from '../domain/interfaces/assessment-items-repository.interface.js';
+import { IAssessmentItemRepository } from '../domain/interfaces/assessment-items-repository.interface.js';
 import { IEnrollmentRepository } from '../../enrollment/domain/interfaces/enrollment-repository.interface.js';
-import { IStudentScoresRepository } from '../domain/interfaces/student-scores-repository.interface.js';
+import { IStudentScoreRepository } from '../domain/interfaces/student-scores-repository.interface.js';
 import { CreateStudentScoreDto } from '../dto/request/create-student-score.dto.js';
 
 @Injectable()
 export class CreateStudentScoreUseCase {
   constructor(
-    private readonly studentScoreRepository: IStudentScoresRepository,
-    private readonly assessmentItemRepository: IAssessmentItemsRepository,
+    private readonly studentScoreRepository: IStudentScoreRepository,
+    private readonly assessmentItemRepository: IAssessmentItemRepository,
     private readonly enrollmentRepository: IEnrollmentRepository,
   ) {}
   async execute(dto: CreateStudentScoreDto) {

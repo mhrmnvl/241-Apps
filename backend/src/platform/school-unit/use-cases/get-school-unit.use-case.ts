@@ -3,10 +3,10 @@ import { SchoolUnitRepository } from '../repositories/school-unit.repository.js'
 
 @Injectable()
 export class GetSchoolUnitUseCase {
-  constructor(private readonly repo: SchoolUnitRepository) {}
+  constructor(private readonly repository: SchoolUnitRepository) {}
 
   async execute() {
-    const schoolUnit = await this.repo.findFirst();
+    const schoolUnit = await this.repository.findFirst();
     if (!schoolUnit) {
       throw new NotFoundException('School unit has not been set up yet');
     }

@@ -4,10 +4,10 @@ import { ClassroomStructuresRepository } from '../repositories/classroom-structu
 
 @Injectable()
 export class GetClassroomStructuresUseCase {
-  constructor(private readonly repo: ClassroomStructuresRepository) {}
+  constructor(private readonly repository: ClassroomStructuresRepository) {}
 
   async execute(query: ClassroomStructureQueryDto) {
-    const { data, total, page, limit } = await this.repo.findAll(query);
+    const { data, total, page, limit } = await this.repository.findAll(query);
     const totalPages = Math.ceil(total / limit);
     return { data, meta: { page, limit, total, totalPages } };
   }

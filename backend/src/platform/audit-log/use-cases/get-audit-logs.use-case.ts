@@ -4,9 +4,9 @@ import { AuditLogQueryDto } from '../dto/request/audit-log-query.dto.js';
 
 @Injectable()
 export class GetAuditLogsUseCase {
-  constructor(private readonly auditLogsRepo: AuditLogRepository) {}
+  constructor(private readonly auditLogRepository: AuditLogRepository) {}
 
   async execute(query: AuditLogQueryDto) {
-    return this.auditLogsRepo.findAll(query);
+    return this.auditLogRepository.findAll(query);
   }
 }

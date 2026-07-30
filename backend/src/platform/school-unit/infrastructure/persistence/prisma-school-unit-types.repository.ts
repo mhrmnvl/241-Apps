@@ -2,13 +2,13 @@ import { Injectable } from '@nestjs/common';
 import { Prisma, SchoolUnitType } from '@prisma/client';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
 import {
-  ISchoolUnitTypesRepository,
+  ISchoolUnitTypeRepository,
   SchoolUnitTypeQueryInput,
 } from '../../domain/interfaces/school-unit-types-repository.interface.js';
 import { PaginatedResult } from '../../../../shared/domain/interfaces/repository.interface.js';
 
 @Injectable()
-export class PrismaSchoolUnitTypesRepository extends ISchoolUnitTypesRepository {
+export class PrismaSchoolUnitTypeRepository extends ISchoolUnitTypeRepository {
   constructor(private readonly prisma: PrismaService) {
     super();
   }

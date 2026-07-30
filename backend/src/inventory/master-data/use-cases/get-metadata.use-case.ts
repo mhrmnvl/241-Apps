@@ -8,21 +8,21 @@ import { IFundingSourceRepository } from '../funding-source/domain/interfaces/fu
 @Injectable()
 export class GetMetadataUseCase {
   constructor(
-    private readonly categoryRepo: ICategoryRepository,
-    private readonly locationRepo: ILocationRepository,
-    private readonly conditionRepo: IConditionRepository,
-    private readonly statusRepo: IStatusRepository,
-    private readonly fundingSourceRepo: IFundingSourceRepository,
+    private readonly categoryRepository: ICategoryRepository,
+    private readonly locationRepository: ILocationRepository,
+    private readonly conditionRepository: IConditionRepository,
+    private readonly statusRepository: IStatusRepository,
+    private readonly fundingSourceRepository: IFundingSourceRepository,
   ) {}
 
   async execute() {
     const [categories, locations, conditions, statuses, fundingSources] =
       await Promise.all([
-        this.categoryRepo.findMany(),
-        this.locationRepo.findMany(),
-        this.conditionRepo.findMany(),
-        this.statusRepo.findMany(),
-        this.fundingSourceRepo.findMany(),
+        this.categoryRepository.findMany(),
+        this.locationRepository.findMany(),
+        this.conditionRepository.findMany(),
+        this.statusRepository.findMany(),
+        this.fundingSourceRepository.findMany(),
       ]);
 
     return {

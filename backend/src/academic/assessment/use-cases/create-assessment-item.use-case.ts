@@ -1,12 +1,12 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { IAssessmentItemsRepository } from '../domain/interfaces/assessment-items-repository.interface.js';
+import { IAssessmentItemRepository } from '../domain/interfaces/assessment-items-repository.interface.js';
 import { ITeachingAssignmentRepository } from '../../teaching-assignment/domain/interfaces/teaching-assignment-repository.interface.js';
 import { CreateAssessmentItemDto } from '../dto/request/create-assessment-item.dto.js';
 
 @Injectable()
 export class CreateAssessmentItemUseCase {
   constructor(
-    private readonly repo: IAssessmentItemsRepository,
+    private readonly assessmentItemRepository: IAssessmentItemRepository,
     private readonly teachingAssignmentRepository: ITeachingAssignmentRepository,
   ) {}
   async execute(dto: CreateAssessmentItemDto) {
@@ -16,6 +16,6 @@ export class CreateAssessmentItemUseCase {
     if (!ta) {
       throw new BadRequestException('Teaching assignment not found');
     }
-    return this.repo.create(dto);
+    return this.assessmentItemRepository.create(dto);
   }
 }

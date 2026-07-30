@@ -9,8 +9,8 @@ export class UpdateStudentAddressUseCase {
   private readonly logger = new Logger(UpdateStudentAddressUseCase.name);
 
   constructor(
-    private readonly repo: StudentRepository,
-    private readonly addressRepo: StudentAddressRepository,
+    private readonly repository: StudentRepository,
+    private readonly addressRepository: StudentAddressRepository,
   ) {}
 
   async execute(
@@ -18,20 +18,20 @@ export class UpdateStudentAddressUseCase {
     addressId: string,
     dto: UpdateAddressDto,
   ): Promise<Address> {
-    const student = await this.repo.findById(studentId);
+    const student = await this.repository.findById(studentId);
     if (!student)
       throw new NotFoundException(`Student with ID ${studentId} not found`);
 
-    const address = await this.addressRepo.findOne(studentId, addressId);
+    const address = await this.addressRepository.findOne(studentId, addressId);
     if (!address)
       throw new NotFoundException(
         `Address with ID ${addressId} not found for this student`,
       );
 
     if (dto.isPrimary)
-      await this.addressRepo.clearPrimaryExclude(studentId, addressId);
+      await this.addressRepository.clearPrimaryExclude(studentId, addressId);
 
-    const updated = await this.addressRepo.update(addressId, dto);
+    const updated = await this.addressRepository.update(addressId, dto);
     this.logger.log(`Address ${addressId} updated for student ${studentId}`);
     return updated;
   }

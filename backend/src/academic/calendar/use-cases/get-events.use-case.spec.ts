@@ -1,20 +1,21 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { EventQueryDto } from '../dto/request/event-query.dto.js';
-import { IEventsRepository } from '../domain/interfaces/events-repository.interface.js';
+import { IEventRepository } from '../domain/interfaces/events-repository.interface.js';
 import { GetEventsUseCase } from './get-events.use-case.js';
 
 describe('GetEventsUseCase', () => {
   let useCase: GetEventsUseCase;
-
-  const mockRepository = {
-    findAll: jest.fn(),
-  };
+  let mockRepository: Record<string, jest.Mock>;
 
   beforeEach(async () => {
+    mockRepository = {
+      findAll: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         GetEventsUseCase,
-        { provide: IEventsRepository, useValue: mockRepository },
+        { provide: IEventRepository, useValue: mockRepository },
       ],
     }).compile();
 

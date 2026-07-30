@@ -4,15 +4,15 @@ import { IPermissionRepository } from '../interfaces/permission-repository.inter
 
 @Injectable()
 export class UpdatePermissionUseCase {
-  constructor(private readonly permissionsRepo: IPermissionRepository) {}
+  constructor(private readonly permissionRepository: IPermissionRepository) {}
 
   async execute(id: string, dto: UpdatePermissionDto) {
-    const existing = await this.permissionsRepo.findById(id);
+    const existing = await this.permissionRepository.findById(id);
     if (!existing) {
       throw new NotFoundException(`Permission with ID ${id} not found`);
     }
 
-    return this.permissionsRepo.updatePermission(id, {
+    return this.permissionRepository.updatePermission(id, {
       description: dto.description ?? '',
     });
   }

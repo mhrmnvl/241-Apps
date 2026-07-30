@@ -3,10 +3,10 @@ import { ITimeSlotRepository } from '../domain/interfaces/time-slot-repository.i
 
 @Injectable()
 export class GetTimeSlotByIdUseCase {
-  constructor(private readonly repo: ITimeSlotRepository) {}
+  constructor(private readonly repository: ITimeSlotRepository) {}
 
   async execute(id: string) {
-    const ts = await this.repo.findById(id);
+    const ts = await this.repository.findById(id);
     if (!ts) throw new NotFoundException(`TimeSlot with ID ${id} not found`);
     return ts;
   }

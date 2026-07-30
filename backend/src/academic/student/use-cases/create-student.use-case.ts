@@ -10,7 +10,7 @@ export class CreateStudentUseCase {
   private readonly logger = new Logger(CreateStudentUseCase.name);
 
   constructor(
-    private readonly repo: StudentRepository,
+    private readonly repository: StudentRepository,
     private readonly ensureStudentEnrollment: EnsureStudentEnrollmentUseCase,
   ) {}
 
@@ -24,8 +24,8 @@ export class CreateStudentUseCase {
     dto.password ??= nis ? nis : dto.identifier;
 
     const [dupNis, dupNisn] = await Promise.all([
-      nis ? this.repo.findByNis(nis) : null,
-      nisn ? this.repo.findByNisn(nisn) : null,
+      nis ? this.repository.findByNis(nis) : null,
+      nisn ? this.repository.findByNisn(nisn) : null,
     ]);
     if (dupNis)
       throw new ConflictException(`NIS "${nis}" is already registered`);
@@ -34,7 +34,7 @@ export class CreateStudentUseCase {
 
     const passwordHash = await hashPassword(dto.password);
 
-    const userWithStudent = await this.repo.create(dto, passwordHash);
+    const userWithStudent = await this.repository.create(dto, passwordHash);
     const student = userWithStudent.student;
     if (!student) {
       throw new Error('Student creation failed');

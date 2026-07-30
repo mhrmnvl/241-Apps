@@ -2,7 +2,7 @@ import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { ClassroomRepository } from '../../classroom/index.js';
 import { UpdateEventDto } from '../dto/request/update-event.dto.js';
-import { IEventsRepository } from '../domain/interfaces/events-repository.interface.js';
+import { IEventRepository } from '../domain/interfaces/events-repository.interface.js';
 import { UpdateEventUseCase } from './update-event.use-case.js';
 
 describe('UpdateEventUseCase', () => {
@@ -21,7 +21,7 @@ describe('UpdateEventUseCase', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         UpdateEventUseCase,
-        { provide: IEventsRepository, useValue: mockRepository },
+        { provide: IEventRepository, useValue: mockRepository },
         { provide: ClassroomRepository, useValue: mockClassroomRepo },
       ],
     }).compile();

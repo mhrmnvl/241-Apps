@@ -12,10 +12,10 @@ import { ClassroomStructuresRepository } from '../repositories/classroom-structu
 export class UpdateClassroomStructureUseCase {
   private readonly logger = new Logger(UpdateClassroomStructureUseCase.name);
 
-  constructor(private readonly repo: ClassroomStructuresRepository) {}
+  constructor(private readonly repository: ClassroomStructuresRepository) {}
 
   async execute(id: string, dto: UpdateClassroomStructureDto) {
-    const current = await this.repo.findById(id);
+    const current = await this.repository.findById(id);
     if (!current)
       throw new NotFoundException(`ClassStructure with ID ${id} not found`);
 
@@ -59,7 +59,7 @@ export class UpdateClassroomStructureUseCase {
       }));
 
     for (const { field, id: studentId } of changedEntries) {
-      const enrollment = await this.repo.findActiveEnrollment(
+      const enrollment = await this.repository.findActiveEnrollment(
         studentId,
         classroomId,
         semesterId,
@@ -69,7 +69,7 @@ export class UpdateClassroomStructureUseCase {
           `Siswa ${studentId} tidak terdaftar aktif di kelas ini pada semester yang dipilih`,
         );
 
-      const existingPosition = await this.repo.findByStudentAndSemester(
+      const existingPosition = await this.repository.findByStudentAndSemester(
         studentId,
         semesterId,
       );
@@ -92,7 +92,7 @@ export class UpdateClassroomStructureUseCase {
       }
     }
 
-    const updated = await this.repo.update(id, updateData);
+    const updated = await this.repository.update(id, updateData);
     this.logger.log(`ClassStructure updated: ${id}`);
     return updated;
   }

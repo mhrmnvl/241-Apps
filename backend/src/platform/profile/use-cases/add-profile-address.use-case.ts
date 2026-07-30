@@ -8,18 +8,18 @@ export class AddProfileAddressUseCase {
   private readonly logger = new Logger(AddProfileAddressUseCase.name);
 
   constructor(
-    private readonly profileRepo: ProfileRepository,
-    private readonly addressRepo: ProfileAddressRepository,
+    private readonly profileRepository: ProfileRepository,
+    private readonly addressRepository: ProfileAddressRepository,
   ) {}
 
   async execute(userId: string, dto: CreateAddressDto) {
-    const profile = await this.profileRepo.findByUserId(userId);
+    const profile = await this.profileRepository.findByUserId(userId);
     if (!profile)
       throw new NotFoundException(`Profile for user ID ${userId} not found`);
 
-    const student = await this.addressRepo.findStudentByUserId(userId);
+    const student = await this.addressRepository.findStudentByUserId(userId);
     const teacher = !student
-      ? await this.addressRepo.findTeacherByUserId(userId)
+      ? await this.addressRepository.findTeacherByUserId(userId)
       : null;
 
     if (!student && !teacher)
@@ -28,12 +28,13 @@ export class AddProfileAddressUseCase {
       );
 
     if (dto.isPrimary) {
-      if (student) await this.addressRepo.clearPrimaryForStudent(student.id);
+      if (student)
+        await this.addressRepository.clearPrimaryForStudent(student.id);
       else if (teacher)
-        await this.addressRepo.clearPrimaryForTeacher(teacher.id);
+        await this.addressRepository.clearPrimaryForTeacher(teacher.id);
     }
 
-    const address = await this.addressRepo.create(dto, {
+    const address = await this.addressRepository.create(dto, {
       ...(student ? { studentId: student.id } : { teacherId: teacher!.id }),
     });
 

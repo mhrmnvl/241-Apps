@@ -6,11 +6,11 @@ import { SchoolUnitTypesController } from './presentation/school-unit-types.cont
 import { SchoolUnitRepository } from './repositories/school-unit.repository.js';
 import { SchoolUnitAddressRepository } from './repositories/school-unit-address.repository.js';
 import { SchoolUnitSocialMediaRepository } from './repositories/school-unit-social-media.repository.js';
-import { SchoolUnitTypesRepository } from './repositories/school-unit-types.repository.js';
+import { SchoolUnitTypeRepository } from './repositories/school-unit-types.repository.js';
 import { PrismaSchoolUnitRepository } from './infrastructure/persistence/prisma-school-unit.repository.js';
 import { PrismaSchoolUnitAddressRepository } from './infrastructure/persistence/prisma-school-unit-address.repository.js';
 import { PrismaSchoolUnitSocialMediaRepository } from './infrastructure/persistence/prisma-school-unit-social-media.repository.js';
-import { PrismaSchoolUnitTypesRepository } from './infrastructure/persistence/prisma-school-unit-types.repository.js';
+import { PrismaSchoolUnitTypeRepository } from './infrastructure/persistence/prisma-school-unit-types.repository.js';
 import { GetSchoolUnitUseCase } from './use-cases/get-school-unit.use-case.js';
 import { SetupSchoolUnitUseCase } from './use-cases/setup-school-unit.use-case.js';
 import { UpdateSchoolUnitUseCase } from './use-cases/update-school-unit.use-case.js';
@@ -40,8 +40,8 @@ import { GetSchoolUnitTypeByIdUseCase } from './use-cases/get-school-unit-type-b
       useClass: PrismaSchoolUnitSocialMediaRepository,
     },
     {
-      provide: SchoolUnitTypesRepository,
-      useClass: PrismaSchoolUnitTypesRepository,
+      provide: SchoolUnitTypeRepository,
+      useClass: PrismaSchoolUnitTypeRepository,
     },
     GetSchoolUnitUseCase,
     SetupSchoolUnitUseCase,
@@ -58,7 +58,7 @@ import { GetSchoolUnitTypeByIdUseCase } from './use-cases/get-school-unit-type-b
     SchoolUnitRepository,
     SchoolUnitAddressRepository,
     SchoolUnitSocialMediaRepository,
-    SchoolUnitTypesRepository,
+    SchoolUnitTypeRepository,
     GetSchoolUnitUseCase,
   ],
 })

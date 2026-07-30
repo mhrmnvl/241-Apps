@@ -7,16 +7,16 @@ export class RemoveProfileAddressUseCase {
   private readonly logger = new Logger(RemoveProfileAddressUseCase.name);
 
   constructor(
-    private readonly profileRepo: ProfileRepository,
-    private readonly addressRepo: ProfileAddressRepository,
+    private readonly profileRepository: ProfileRepository,
+    private readonly addressRepository: ProfileAddressRepository,
   ) {}
 
   async execute(userId: string, addressId: string): Promise<void> {
-    const profile = await this.profileRepo.findByUserId(userId);
+    const profile = await this.profileRepository.findByUserId(userId);
     if (!profile)
       throw new NotFoundException(`Profile for user ID ${userId} not found`);
 
-    const address = await this.addressRepo.findAddressForUser(
+    const address = await this.addressRepository.findAddressForUser(
       addressId,
       userId,
     );
@@ -25,7 +25,7 @@ export class RemoveProfileAddressUseCase {
         `Address with ID ${addressId} not found for this profile`,
       );
 
-    await this.addressRepo.remove(addressId);
+    await this.addressRepository.remove(addressId);
     this.logger.log(`Address ${addressId} removed for user ${userId}`);
   }
 }

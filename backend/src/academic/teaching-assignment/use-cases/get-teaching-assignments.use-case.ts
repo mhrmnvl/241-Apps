@@ -4,9 +4,9 @@ import { ITeachingAssignmentRepository } from '../domain/interfaces/teaching-ass
 
 @Injectable()
 export class GetTeachingAssignmentsUseCase {
-  constructor(private readonly repo: ITeachingAssignmentRepository) {}
+  constructor(private readonly repository: ITeachingAssignmentRepository) {}
 
   async execute(query: TeachingAssignmentQueryDto) {
-    return this.repo.findAll(query);
+    return this.repository.findAll(query);
   }
 }

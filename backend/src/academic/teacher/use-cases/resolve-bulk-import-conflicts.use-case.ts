@@ -14,7 +14,7 @@ export class ResolveBulkImportConflictsUseCase {
   private readonly logger = new Logger(ResolveBulkImportConflictsUseCase.name);
 
   constructor(
-    private readonly repo: TeacherRepository,
+    private readonly repository: TeacherRepository,
     private readonly updateTeacher: UpdateTeacherUseCase,
     private readonly updateTeacherProfile: UpdateTeacherProfileUseCase,
     private readonly createTeacher: CreateTeacherUseCase,
@@ -25,7 +25,7 @@ export class ResolveBulkImportConflictsUseCase {
   ): Promise<ResolveBulkImportResponseDto> {
     const employmentTypeIdByCode = await resolveOnceByKey(
       dto.conflicts.map((item) => item.data.employmentTypeCode),
-      (code) => this.repo.resolveEmploymentTypeId(code),
+      (code) => this.repository.resolveEmploymentTypeId(code),
     );
 
     return processBulkImportConflicts(

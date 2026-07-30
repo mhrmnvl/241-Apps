@@ -4,10 +4,10 @@ import { ParentRepository } from '../repositories/parent.repository.js';
 
 @Injectable()
 export class GetParentsUseCase {
-  constructor(private readonly repo: ParentRepository) {}
+  constructor(private readonly repository: ParentRepository) {}
 
   async execute(query: ParentQueryDto) {
-    const { data, total, page, limit } = await this.repo.findAll(query);
+    const { data, total, page, limit } = await this.repository.findAll(query);
     return {
       data,
       meta: { page, limit, total, totalPages: Math.ceil(total / limit) },

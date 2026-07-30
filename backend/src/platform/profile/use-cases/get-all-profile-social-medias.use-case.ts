@@ -8,7 +8,7 @@ import { ProfileRepository } from '../index.js';
 
 @Injectable()
 export class GetAllProfileSocialMediasUseCase {
-  constructor(private readonly profileRepo: ProfileRepository) {}
+  constructor(private readonly profileRepository: ProfileRepository) {}
 
   async execute(
     query: ProfileSocialMediaQueryDto,
@@ -17,13 +17,13 @@ export class GetAllProfileSocialMediasUseCase {
     const skip = (page - 1) * limit;
 
     const [profiles, total] = await Promise.all([
-      this.profileRepo.findAllWithSocialMedias({
+      this.profileRepository.findAllWithSocialMedias({
         skip,
         take: limit,
         search,
         roleCode,
       }),
-      this.profileRepo.countAllWithSocialMedias({ search, roleCode }),
+      this.profileRepository.countAllWithSocialMedias({ search, roleCode }),
     ]);
 
     const data: ProfileSocialMediaListDto[] = profiles.flatMap((profile) =>

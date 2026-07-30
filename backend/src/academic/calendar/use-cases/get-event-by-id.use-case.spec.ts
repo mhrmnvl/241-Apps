@@ -1,20 +1,21 @@
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { IEventsRepository } from '../domain/interfaces/events-repository.interface.js';
+import { IEventRepository } from '../domain/interfaces/events-repository.interface.js';
 import { GetEventByIdUseCase } from './get-event-by-id.use-case.js';
 
 describe('GetEventByIdUseCase', () => {
   let useCase: GetEventByIdUseCase;
-
-  const mockRepository = {
-    findById: jest.fn(),
-  };
+  let mockRepository: Record<string, jest.Mock>;
 
   beforeEach(async () => {
+    mockRepository = {
+      findById: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         GetEventByIdUseCase,
-        { provide: IEventsRepository, useValue: mockRepository },
+        { provide: IEventRepository, useValue: mockRepository },
       ],
     }).compile();
 

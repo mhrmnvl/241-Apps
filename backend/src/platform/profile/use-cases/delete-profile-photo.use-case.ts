@@ -6,12 +6,12 @@ import { withAvatarUrl } from '../infrastructure/profile-avatar.mapper.js';
 @Injectable()
 export class DeleteProfilePhotoUseCase {
   constructor(
-    private readonly profileRepo: ProfileRepository,
+    private readonly profileRepository: ProfileRepository,
     private readonly storage: StorageService,
   ) {}
 
   async execute(userId: string) {
-    const profile = await this.profileRepo.findByUserId(userId);
+    const profile = await this.profileRepository.findByUserId(userId);
     if (!profile) throw new NotFoundException('Profile not found');
 
     const storageKey = profile.avatarFile?.storageKey;
@@ -21,7 +21,7 @@ export class DeleteProfilePhotoUseCase {
       });
     }
 
-    const updated = await this.profileRepo.update(userId, {
+    const updated = await this.profileRepository.update(userId, {
       avatarFile: { disconnect: true },
     });
 

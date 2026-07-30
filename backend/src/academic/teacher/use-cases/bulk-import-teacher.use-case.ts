@@ -15,7 +15,7 @@ import { resolveOnceByKey } from '../../../shared/utils/resolve-once-by-key.help
 @Injectable()
 export class BulkImportTeachersUseCase {
   constructor(
-    private readonly repo: TeacherRepository,
+    private readonly teacherRepository: TeacherRepository,
     private readonly createTeacher: CreateTeacherUseCase,
     private readonly parser: ExcelTeacherParser,
   ) {}
@@ -29,7 +29,7 @@ export class BulkImportTeachersUseCase {
 
     const employmentTypeIdByCode = await resolveOnceByKey(
       dtos.map((d) => d.employmentTypeCode),
-      (code) => this.repo.resolveEmploymentTypeId(code),
+      (code) => this.teacherRepository.resolveEmploymentTypeId(code),
     );
 
     const results: BulkImportTeacherRowResultDto[] = [];
@@ -39,10 +39,12 @@ export class BulkImportTeachersUseCase {
       const dto = dtos[i];
 
       const [dupUsername, dupNik, dupNip, dupNuptk] = await Promise.all([
-        dto.identifier ? this.repo.findUserByIdentifier(dto.identifier) : null,
-        dto.nik ? this.repo.findProfileByNik(dto.nik) : null,
-        dto.nip ? this.repo.findByNip(dto.nip) : null,
-        dto.nuptk ? this.repo.findByNuptk(dto.nuptk) : null,
+        dto.identifier
+          ? this.teacherRepository.findUserByIdentifier(dto.identifier)
+          : null,
+        dto.nik ? this.teacherRepository.findProfileByNik(dto.nik) : null,
+        dto.nip ? this.teacherRepository.findByNip(dto.nip) : null,
+        dto.nuptk ? this.teacherRepository.findByNuptk(dto.nuptk) : null,
       ]);
 
       const existingId = dupNip
@@ -50,7 +52,7 @@ export class BulkImportTeachersUseCase {
         : dupNuptk
           ? dupNuptk.id
           : dupNik
-            ? (await this.repo.findByUserId(dupNik.userId))?.id
+            ? (await this.teacherRepository.findByUserId(dupNik.userId))?.id
             : undefined;
 
       const errors = await validate(dto, {

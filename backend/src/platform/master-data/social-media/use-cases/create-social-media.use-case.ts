@@ -6,14 +6,14 @@ import { ISocialMediaRepository } from '../interfaces/social-media-repository.in
 export class CreateSocialMediaUseCase {
   private readonly logger = new Logger(CreateSocialMediaUseCase.name);
 
-  constructor(private readonly repo: ISocialMediaRepository) {}
+  constructor(private readonly repository: ISocialMediaRepository) {}
 
   async execute(dto: CreateSocialMediaDto) {
-    const existing = await this.repo.findByName(dto.name);
+    const existing = await this.repository.findByName(dto.name);
     if (existing)
       throw new ConflictException(`Platform "${dto.name}" already exists`);
 
-    const platform = await this.repo.create(dto);
+    const platform = await this.repository.create(dto);
     this.logger.log(`Platform created: ${platform.name}`);
     return platform;
   }

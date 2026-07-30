@@ -3,8 +3,8 @@ import { IScheduleRepository } from '../domain/interfaces/schedule-repository.in
 
 @Injectable()
 export class GetSchedulesByClassroomUseCase {
-  constructor(private readonly repo: IScheduleRepository) {}
+  constructor(private readonly repository: IScheduleRepository) {}
   async execute(classroomId: string) {
-    return this.repo.findByClassroom(classroomId);
+    return this.repository.findByClassroom(classroomId);
   }
 }

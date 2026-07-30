@@ -4,8 +4,8 @@ import { IGraduationRepository } from '../domain/interfaces/graduation-repositor
 
 @Injectable()
 export class GetStudentGraduationsUseCase {
-  constructor(private readonly repo: IGraduationRepository) {}
+  constructor(private readonly repository: IGraduationRepository) {}
   async execute(query: StudentGraduationQueryDto) {
-    return this.repo.findAll(query);
+    return this.repository.findAll(query);
   }
 }

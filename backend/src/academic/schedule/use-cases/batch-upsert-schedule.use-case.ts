@@ -8,20 +8,20 @@ import { IScheduleRepository } from '../domain/interfaces/schedule-repository.in
 
 @Injectable()
 export class BatchUpsertScheduleUseCase {
-  constructor(private readonly repo: IScheduleRepository) {}
+  constructor(private readonly repository: IScheduleRepository) {}
 
   async execute(classroomId: string, dto: BatchUpsertScheduleDto) {
-    const classroom = await this.repo.findValidClassroomById(classroomId);
+    const classroom = await this.repository.findValidClassroomById(classroomId);
     if (!classroom) {
       throw new NotFoundException('Classroom not found');
     }
 
-    const semester = await this.repo.findActiveSemester();
+    const semester = await this.repository.findActiveSemester();
     if (!semester) {
       throw new BadRequestException('Tidak ada semester aktif');
     }
 
-    await this.repo.softDeleteByClassroomAndDay(classroomId, dto.day);
+    await this.repository.softDeleteByClassroomAndDay(classroomId, dto.day);
 
     if (dto.lessons.length === 0) {
       return { created: 0, day: dto.day };
@@ -29,14 +29,14 @@ export class BatchUpsertScheduleUseCase {
 
     let created = 0;
     for (const row of dto.lessons) {
-      let ta = await this.repo.findTeachingAssignmentBySubjectAndSemester(
+      let ta = await this.repository.findTeachingAssignmentBySubjectAndSemester(
         classroomId,
         row.subjectId,
         semester.id,
       );
 
       if (!ta) {
-        const teacherId = await this.repo.findAnyTeacherIdForSubject(
+        const teacherId = await this.repository.findAnyTeacherIdForSubject(
           row.subjectId,
         );
 
@@ -46,7 +46,7 @@ export class BatchUpsertScheduleUseCase {
           );
         }
 
-        ta = await this.repo.createTeachingAssignment({
+        ta = await this.repository.createTeachingAssignment({
           classroomId,
           subjectId: row.subjectId,
           teacherId,
@@ -54,15 +54,15 @@ export class BatchUpsertScheduleUseCase {
         });
       }
 
-      const softDeleted = await this.repo.findSoftDeleted(
+      const softDeleted = await this.repository.findSoftDeleted(
         ta.id,
         dto.day,
         row.timeSlotId,
       );
       if (softDeleted) {
-        await this.repo.restore(softDeleted.id, {});
+        await this.repository.restore(softDeleted.id, {});
       } else {
-        await this.repo.create({
+        await this.repository.create({
           teachingAssignmentId: ta.id,
           timeSlotId: row.timeSlotId,
           day: dto.day,

@@ -4,8 +4,8 @@ import { IEnrollmentRepository } from '../domain/interfaces/enrollment-repositor
 
 @Injectable()
 export class GetStudentEnrollmentsUseCase {
-  constructor(private readonly repo: IEnrollmentRepository) {}
+  constructor(private readonly repository: IEnrollmentRepository) {}
   async execute(query: StudentEnrollmentQueryDto) {
-    return this.repo.findAll(query);
+    return this.repository.findAll(query);
   }
 }

@@ -7,7 +7,7 @@ import { IAcademicCalendarRepository } from '../domain/interfaces/academic-calen
 @Injectable()
 export class CreateAcademicCalendarUseCase {
   constructor(
-    private readonly repo: IAcademicCalendarRepository,
+    private readonly repository: IAcademicCalendarRepository,
     private readonly academicYearRepository: IAcademicYearRepository,
     private readonly semesterRepository: ISemesterRepository,
   ) {}
@@ -31,6 +31,6 @@ export class CreateAcademicCalendarUseCase {
       }
     }
 
-    return this.repo.create(dto);
+    return this.repository.create(dto);
   }
 }

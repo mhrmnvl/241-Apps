@@ -8,16 +8,16 @@ import { IScheduleRepository } from '../domain/interfaces/schedule-repository.in
 
 @Injectable()
 export class CreateScheduleUseCase {
-  constructor(private readonly repo: IScheduleRepository) {}
+  constructor(private readonly repository: IScheduleRepository) {}
   async execute(dto: CreateScheduleDto) {
-    const ta = await this.repo.findTeachingAssignmentById(
+    const ta = await this.repository.findTeachingAssignmentById(
       dto.teachingAssignmentId,
     );
     if (!ta) {
       throw new BadRequestException('Teaching assignment not found');
     }
 
-    const dup = await this.repo.findDuplicate(
+    const dup = await this.repository.findDuplicate(
       dto.teachingAssignmentId,
       dto.day,
       dto.timeSlotId,
@@ -27,17 +27,17 @@ export class CreateScheduleUseCase {
         'Schedule already exists for this assignment, day and timeslot',
       );
 
-    const softDeleted = await this.repo.findSoftDeleted(
+    const softDeleted = await this.repository.findSoftDeleted(
       dto.teachingAssignmentId,
       dto.day,
       dto.timeSlotId,
     );
     if (softDeleted) {
-      return this.repo.restore(softDeleted.id, {
+      return this.repository.restore(softDeleted.id, {
         room: dto.room ?? undefined,
       });
     }
 
-    return this.repo.create(dto);
+    return this.repository.create(dto);
   }
 }

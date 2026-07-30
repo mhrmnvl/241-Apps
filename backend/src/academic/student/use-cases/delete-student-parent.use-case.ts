@@ -1,20 +1,22 @@
-﻿import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { StudentParentRepository } from '../repositories/student-parent.repository.js';
 
 @Injectable()
 export class DeleteStudentParentUseCase {
   private readonly logger = new Logger(DeleteStudentParentUseCase.name);
 
-  constructor(private readonly repo: StudentParentRepository) {}
+  constructor(
+    private readonly studentParentRepository: StudentParentRepository,
+  ) {}
 
   async execute(id: string): Promise<void> {
-    const link = await this.repo.findById(id);
+    const link = await this.studentParentRepository.findById(id);
     if (!link)
       throw new NotFoundException(
         `Student-parent link with ID ${id} not found`,
       );
 
-    await this.repo.remove(id);
+    await this.studentParentRepository.remove(id);
     this.logger.log(`Student-parent link deleted: ${id}`);
   }
 }

@@ -6,16 +6,16 @@ import { IOccupationRepository } from '../interfaces/occupation-repository.inter
 export class CreateOccupationUseCase {
   private readonly logger = new Logger(CreateOccupationUseCase.name);
 
-  constructor(private readonly repo: IOccupationRepository) {}
+  constructor(private readonly repository: IOccupationRepository) {}
 
   async execute(dto: CreateOccupationDto) {
-    const existing = await this.repo.findByName(dto.name);
+    const existing = await this.repository.findByName(dto.name);
     if (existing)
       throw new ConflictException(
         `Occupation name "${dto.name}" is already taken`,
       );
 
-    const occupation = await this.repo.create(dto);
+    const occupation = await this.repository.create(dto);
     this.logger.log(`Occupation created: ${occupation.name}`);
     return occupation;
   }

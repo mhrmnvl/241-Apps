@@ -1,14 +1,14 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { IAssessmentItemsRepository } from '../domain/interfaces/assessment-items-repository.interface.js';
+import { IAssessmentItemRepository } from '../domain/interfaces/assessment-items-repository.interface.js';
 import { IEnrollmentRepository } from '../../enrollment/domain/interfaces/enrollment-repository.interface.js';
-import { IStudentScoresRepository } from '../domain/interfaces/student-scores-repository.interface.js';
+import { IStudentScoreRepository } from '../domain/interfaces/student-scores-repository.interface.js';
 import { BulkUpsertStudentScoreDto } from '../dto/request/bulk-upsert-student-score.dto.js';
 
 @Injectable()
 export class BulkUpsertStudentScoresUseCase {
   constructor(
-    private readonly studentScoreRepository: IStudentScoresRepository,
-    private readonly assessmentItemRepository: IAssessmentItemsRepository,
+    private readonly studentScoreRepository: IStudentScoreRepository,
+    private readonly assessmentItemRepository: IAssessmentItemRepository,
     private readonly enrollmentRepository: IEnrollmentRepository,
   ) {}
   async execute(dto: BulkUpsertStudentScoreDto) {

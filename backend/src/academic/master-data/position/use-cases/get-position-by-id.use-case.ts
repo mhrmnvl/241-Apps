@@ -3,10 +3,10 @@ import { IPositionRepository } from '../interfaces/position-repository.interface
 
 @Injectable()
 export class GetPositionByIdUseCase {
-  constructor(private readonly repo: IPositionRepository) {}
+  constructor(private readonly repository: IPositionRepository) {}
 
   async execute(id: string) {
-    const position = await this.repo.findById(id);
+    const position = await this.repository.findById(id);
     if (!position)
       throw new NotFoundException(`Position with ID ${id} not found`);
     return position;

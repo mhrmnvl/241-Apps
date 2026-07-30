@@ -15,10 +15,10 @@ type ExcelRow = Record<string, ExcelJS.CellValue>;
 
 @Injectable()
 export class ExportStudentsUseCase {
-  constructor(private readonly repo: StudentRepository) {}
+  constructor(private readonly studentRepository: StudentRepository) {}
 
   async execute(filters: ExportStudentQueryDto): Promise<Buffer> {
-    const students = await this.repo.findAllForExport(filters);
+    const students = await this.studentRepository.findAllForExport(filters);
 
     const rows = students.map((s) => {
       const user = s.user;
@@ -93,12 +93,13 @@ export class ExportStudentsUseCase {
       },
     ];
 
-    const activeLevels = await this.repo.getActiveGradeLevels();
+    const activeLevels = await this.studentRepository.getActiveGradeLevels();
     const levelsFormula =
       activeLevels.length > 0 ? `"${activeLevels.join(',')}"` : '"7,8,9"';
     const sampleLevel = activeLevels.length > 0 ? activeLevels[0] : 7;
 
-    const activeClassrooms = await this.repo.getActiveClassroomCodes();
+    const activeClassrooms =
+      await this.studentRepository.getActiveClassroomCodes();
     const classroomsFormula =
       activeClassrooms.length > 0 ? `"${activeClassrooms.join(',')}"` : '""';
     const sampleClassroom =

@@ -12,14 +12,16 @@ import { StudentParentWithDetails } from '../domain/interfaces/student-parent-re
 export class CreateStudentParentUseCase {
   private readonly logger = new Logger(CreateStudentParentUseCase.name);
 
-  constructor(private readonly repo: StudentParentRepository) {}
+  constructor(
+    private readonly studentParentRepository: StudentParentRepository,
+  ) {}
 
   async execute(
     dto: CreateStudentParentDto,
   ): Promise<StudentParentWithDetails> {
     const [student, parent] = await Promise.all([
-      this.repo.findStudent(dto.studentId),
-      this.repo.findParent(dto.parentId),
+      this.studentParentRepository.findStudent(dto.studentId),
+      this.studentParentRepository.findParent(dto.parentId),
     ]);
 
     if (!student)
@@ -27,14 +29,17 @@ export class CreateStudentParentUseCase {
     if (!parent)
       throw new NotFoundException(`Parent with ID ${dto.parentId} not found`);
 
-    const existing = await this.repo.findPair(dto.studentId, dto.parentId);
+    const existing = await this.studentParentRepository.findPair(
+      dto.studentId,
+      dto.parentId,
+    );
     if (existing) {
       throw new ConflictException(
         'This parent is already linked to the specified student',
       );
     }
 
-    const link = await this.repo.create(dto);
+    const link = await this.studentParentRepository.create(dto);
     this.logger.log(
       `Student-parent link created (student: ${dto.studentId}, parent: ${dto.parentId})`,
     );

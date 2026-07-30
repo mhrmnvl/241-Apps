@@ -3,10 +3,10 @@ import { IPermissionRepository } from '../interfaces/permission-repository.inter
 
 @Injectable()
 export class GetPermissionByIdUseCase {
-  constructor(private readonly permissionsRepo: IPermissionRepository) {}
+  constructor(private readonly permissionRepository: IPermissionRepository) {}
 
   async execute(id: string) {
-    const permission = await this.permissionsRepo.findById(id);
+    const permission = await this.permissionRepository.findById(id);
     if (!permission) {
       throw new NotFoundException(`Permission with ID ${id} not found`);
     }

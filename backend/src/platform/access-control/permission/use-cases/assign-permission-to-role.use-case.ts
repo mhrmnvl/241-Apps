@@ -13,12 +13,12 @@ export class AssignPermissionToRoleUseCase {
   private readonly logger = new Logger(AssignPermissionToRoleUseCase.name);
 
   constructor(
-    private readonly permissionsRepo: IPermissionRepository,
-    private readonly rolesRepo: IRoleRepository,
+    private readonly permissionRepository: IPermissionRepository,
+    private readonly roleRepository: IRoleRepository,
   ) {}
 
   async execute(roleId: string, permissionId: string) {
-    const role = await this.rolesRepo.findById(roleId);
+    const role = await this.roleRepository.findById(roleId);
     if (!role) {
       throw new NotFoundException(`Role with ID ${roleId} not found`);
     }
@@ -29,14 +29,14 @@ export class AssignPermissionToRoleUseCase {
       );
     }
 
-    const permission = await this.permissionsRepo.findById(permissionId);
+    const permission = await this.permissionRepository.findById(permissionId);
     if (!permission) {
       throw new NotFoundException(
         `Permission with ID ${permissionId} not found`,
       );
     }
 
-    const existingRelation = await this.permissionsRepo.findRolePermission(
+    const existingRelation = await this.permissionRepository.findRolePermission(
       roleId,
       permissionId,
     );
@@ -44,7 +44,10 @@ export class AssignPermissionToRoleUseCase {
       throw new ConflictException('Role already has this permission');
     }
 
-    await this.permissionsRepo.assignPermissionToRole(roleId, permissionId);
+    await this.permissionRepository.assignPermissionToRole(
+      roleId,
+      permissionId,
+    );
     this.logger.log(
       `Permission ${permission.code} assigned to role ${role.code}`,
     );

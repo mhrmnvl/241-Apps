@@ -1,1 +1,1 @@
-export { PrismaSchoolUnitTypesRepository as SchoolUnitTypesRepository } from '../infrastructure/persistence/prisma-school-unit-types.repository.js';
+export { PrismaSchoolUnitTypeRepository as SchoolUnitTypeRepository } from '../infrastructure/persistence/prisma-school-unit-types.repository.js';

@@ -9,10 +9,10 @@ import { ITeachingAssignmentRepository } from '../domain/interfaces/teaching-ass
 
 @Injectable()
 export class UpdateTeachingAssignmentUseCase {
-  constructor(private readonly repo: ITeachingAssignmentRepository) {}
+  constructor(private readonly repository: ITeachingAssignmentRepository) {}
 
   async execute(id: string, dto: UpdateTeachingAssignmentDto) {
-    const current = await this.repo.findById(id);
+    const current = await this.repository.findById(id);
     if (!current)
       throw new NotFoundException(`Teaching assignment ${id} not found`);
 
@@ -23,8 +23,8 @@ export class UpdateTeachingAssignmentUseCase {
 
     if (dto.classroomId || dto.semesterId) {
       const [classroom, semester] = await Promise.all([
-        this.repo.findClassroomById(cId),
-        this.repo.findSemesterById(smId),
+        this.repository.findClassroomById(cId),
+        this.repository.findSemesterById(smId),
       ]);
 
       if (
@@ -44,11 +44,11 @@ export class UpdateTeachingAssignmentUseCase {
       sId !== current.subjectId ||
       smId !== current.semesterId
     ) {
-      const dup = await this.repo.findDuplicate(eId, cId, sId, smId, id);
+      const dup = await this.repository.findDuplicate(eId, cId, sId, smId, id);
       if (dup)
         throw new ConflictException('Teaching assignment already exists');
     }
 
-    return this.repo.update(id, dto);
+    return this.repository.update(id, dto);
   }
 }

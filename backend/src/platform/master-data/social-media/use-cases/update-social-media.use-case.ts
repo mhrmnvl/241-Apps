@@ -11,20 +11,20 @@ import { ISocialMediaRepository } from '../interfaces/social-media-repository.in
 export class UpdateSocialMediaUseCase {
   private readonly logger = new Logger(UpdateSocialMediaUseCase.name);
 
-  constructor(private readonly repo: ISocialMediaRepository) {}
+  constructor(private readonly repository: ISocialMediaRepository) {}
 
   async execute(id: string, dto: UpdateSocialMediaDto) {
-    const existing = await this.repo.findById(id);
+    const existing = await this.repository.findById(id);
     if (!existing)
       throw new NotFoundException(`Platform with ID ${id} not found`);
 
     if (dto.name) {
-      const duplicate = await this.repo.findByName(dto.name, id);
+      const duplicate = await this.repository.findByName(dto.name, id);
       if (duplicate)
         throw new ConflictException(`Platform "${dto.name}" already exists`);
     }
 
-    const platform = await this.repo.update(id, dto);
+    const platform = await this.repository.update(id, dto);
     this.logger.log(`Platform updated: ${platform.name}`);
     return platform;
   }

@@ -10,22 +10,22 @@ import { IPositionCategoryRepository } from '../interfaces/position-category-rep
 export class DeletePositionCategoryUseCase {
   private readonly logger = new Logger(DeletePositionCategoryUseCase.name);
 
-  constructor(private readonly repo: IPositionCategoryRepository) {}
+  constructor(private readonly repository: IPositionCategoryRepository) {}
 
   async execute(id: string) {
-    const existing = await this.repo.findById(id);
+    const existing = await this.repository.findById(id);
     if (!existing) {
       throw new NotFoundException(`Position category with ID ${id} not found`);
     }
 
-    const inUseCount = await this.repo.countPositionsWithCategory(id);
+    const inUseCount = await this.repository.countPositionsWithCategory(id);
     if (inUseCount > 0) {
       throw new ConflictException(
         `Position category is in use by ${inUseCount} positions and cannot be deleted`,
       );
     }
 
-    await this.repo.remove(id);
+    await this.repository.remove(id);
     this.logger.log(`Position category deleted: ${id}`);
   }
 }

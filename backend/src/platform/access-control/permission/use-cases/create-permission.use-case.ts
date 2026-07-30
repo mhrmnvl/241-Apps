@@ -4,19 +4,19 @@ import { IPermissionRepository } from '../interfaces/permission-repository.inter
 
 @Injectable()
 export class CreatePermissionUseCase {
-  constructor(private readonly permissionsRepo: IPermissionRepository) {}
+  constructor(private readonly permissionRepository: IPermissionRepository) {}
 
   async execute(dto: CreatePermissionDto) {
     // The code is always `module.action` so it matches the string a
     // `@RequirePermissions(...)` guard checks — it is derived, never free-form.
     const code = `${dto.module}.${dto.action}`;
 
-    const existing = await this.permissionsRepo.findByCode(code);
+    const existing = await this.permissionRepository.findByCode(code);
     if (existing) {
       throw new ConflictException(`Permission "${code}" already exists`);
     }
 
-    return this.permissionsRepo.createPermission({
+    return this.permissionRepository.createPermission({
       module: dto.module,
       action: dto.action,
       code,

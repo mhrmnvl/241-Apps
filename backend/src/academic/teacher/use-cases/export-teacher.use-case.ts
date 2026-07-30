@@ -15,10 +15,10 @@ type ExcelRow = Record<string, ExcelJS.CellValue>;
 
 @Injectable()
 export class ExportTeachersUseCase {
-  constructor(private readonly repo: TeacherRepository) {}
+  constructor(private readonly teacherRepository: TeacherRepository) {}
 
   async execute(filters: ExportTeacherQueryDto): Promise<Buffer> {
-    const teachers = await this.repo.findAllForExport(filters);
+    const teachers = await this.teacherRepository.findAllForExport(filters);
 
     const rows = teachers.map((e) => ({
       Nama: e.user.profile?.name ?? '',
@@ -85,7 +85,8 @@ export class ExportTeachersUseCase {
       },
     ];
 
-    const activeCodes = await this.repo.getActiveEmploymentTypeCodes();
+    const activeCodes =
+      await this.teacherRepository.getActiveEmploymentTypeCodes();
     const empFormula =
       activeCodes.length > 0
         ? `"${activeCodes.join(',')}"`

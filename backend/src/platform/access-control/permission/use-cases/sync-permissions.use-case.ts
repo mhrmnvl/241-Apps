@@ -6,14 +6,14 @@ import { SYSTEM_PERMISSIONS } from '../constants/permission-codes.constants.js';
 export class SyncPermissionsUseCase {
   private readonly logger = new Logger(SyncPermissionsUseCase.name);
 
-  constructor(private readonly permissionsRepo: IPermissionRepository) {}
+  constructor(private readonly permissionRepository: IPermissionRepository) {}
 
   async execute(): Promise<void> {
     this.logger.log('Syncing system permissions with the database...');
     let count = 0;
 
     for (const permission of SYSTEM_PERMISSIONS) {
-      await this.permissionsRepo.upsertPermission(permission);
+      await this.permissionRepository.upsertPermission(permission);
       count++;
     }
 

@@ -6,9 +6,9 @@ import { AcademicCalendarController } from './presentation/academic-calendar.con
 import { EventsController } from './presentation/events.controller.js';
 import { AudienceGroupsController } from './presentation/audience-groups.controller.js';
 import { PrismaAcademicCalendarRepository } from './infrastructure/persistence/prisma-academic-calendar.repository.js';
-import { PrismaEventsRepository } from './infrastructure/persistence/prisma-events.repository.js';
+import { PrismaEventRepository } from './infrastructure/persistence/prisma-events.repository.js';
 import { IAcademicCalendarRepository } from './domain/interfaces/academic-calendar-repository.interface.js';
-import { IEventsRepository } from './domain/interfaces/events-repository.interface.js';
+import { IEventRepository } from './domain/interfaces/events-repository.interface.js';
 
 import { CreateAcademicCalendarUseCase } from './use-cases/create-academic-calendar.use-case.js';
 import { DeleteAcademicCalendarUseCase } from './use-cases/delete-academic-calendar.use-case.js';
@@ -36,8 +36,8 @@ import { GetAudienceGroupsUseCase } from './use-cases/get-audience-groups.use-ca
       useClass: PrismaAcademicCalendarRepository,
     },
     {
-      provide: IEventsRepository,
-      useClass: PrismaEventsRepository,
+      provide: IEventRepository,
+      useClass: PrismaEventRepository,
     },
 
     GetAcademicCalendarsUseCase,
@@ -53,6 +53,6 @@ import { GetAudienceGroupsUseCase } from './use-cases/get-audience-groups.use-ca
     DeleteEventUseCase,
     GetAudienceGroupsUseCase,
   ],
-  exports: [IAcademicCalendarRepository, IEventsRepository],
+  exports: [IAcademicCalendarRepository, IEventRepository],
 })
 export class CalendarModule {}

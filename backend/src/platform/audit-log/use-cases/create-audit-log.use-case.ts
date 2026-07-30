@@ -6,7 +6,7 @@ import { AuditLogRepository } from '../repositories/audit-log.repository.js';
 export class CreateAuditLogUseCase {
   private readonly logger = new Logger(CreateAuditLogUseCase.name);
 
-  constructor(private readonly auditLogsRepo: AuditLogRepository) {}
+  constructor(private readonly auditLogRepository: AuditLogRepository) {}
 
   async execute(data: {
     userId?: string | null;
@@ -17,7 +17,7 @@ export class CreateAuditLogUseCase {
     ipAddress?: string | null;
     userAgent?: string | null;
   }) {
-    const log = await this.auditLogsRepo.create(data);
+    const log = await this.auditLogRepository.create(data);
     this.logger.log(`Audit log created: ${log.action} on ${log.resource}`);
     return log;
   }

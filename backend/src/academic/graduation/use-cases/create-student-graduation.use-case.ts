@@ -4,12 +4,12 @@ import { IGraduationRepository } from '../domain/interfaces/graduation-repositor
 
 @Injectable()
 export class CreateStudentGraduationUseCase {
-  constructor(private readonly repo: IGraduationRepository) {}
+  constructor(private readonly repository: IGraduationRepository) {}
   async execute(dto: CreateStudentGraduationDto) {
-    const existing = await this.repo.findByStudentId(dto.studentId);
+    const existing = await this.repository.findByStudentId(dto.studentId);
     if (existing) {
       throw new ConflictException('Student already has a graduation record');
     }
-    return this.repo.create(dto);
+    return this.repository.create(dto);
   }
 }

@@ -13,7 +13,7 @@ export type EventWithDetails = Prisma.EventGetPayload<{
   include: typeof EVENT_INCLUDE;
 }>;
 
-export abstract class IEventsRepository {
+export abstract class IEventRepository {
   abstract findAll(
     query: EventQueryDto,
   ): Promise<PaginatedResult<EventWithDetails>>;

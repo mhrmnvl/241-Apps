@@ -4,9 +4,9 @@ import { IPositionCategoryRepository } from '../interfaces/position-category-rep
 
 @Injectable()
 export class GetPositionCategoriesUseCase {
-  constructor(private readonly repo: IPositionCategoryRepository) {}
+  constructor(private readonly repository: IPositionCategoryRepository) {}
 
   async execute(query: PositionCategoryQueryDto) {
-    return this.repo.findAll(query);
+    return this.repository.findAll(query);
   }
 }

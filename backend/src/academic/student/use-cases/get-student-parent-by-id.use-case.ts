@@ -4,10 +4,12 @@ import { StudentParentWithDetails } from '../domain/interfaces/student-parent-re
 
 @Injectable()
 export class GetStudentParentByIdUseCase {
-  constructor(private readonly repo: StudentParentRepository) {}
+  constructor(
+    private readonly studentParentRepository: StudentParentRepository,
+  ) {}
 
   async execute(id: string): Promise<StudentParentWithDetails> {
-    const link = await this.repo.findById(id);
+    const link = await this.studentParentRepository.findById(id);
     if (!link)
       throw new NotFoundException(
         `Student-parent link with ID ${id} not found`,

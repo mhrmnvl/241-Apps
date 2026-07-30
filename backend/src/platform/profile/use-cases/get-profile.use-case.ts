@@ -6,12 +6,12 @@ import { withAvatarUrl } from '../infrastructure/profile-avatar.mapper.js';
 @Injectable()
 export class GetProfileUseCase {
   constructor(
-    private readonly repo: ProfileRepository,
+    private readonly repository: ProfileRepository,
     private readonly storage: StorageService,
   ) {}
 
   async execute(userId: string) {
-    const user = await this.repo.findDetailByUserId(userId);
+    const user = await this.repository.findDetailByUserId(userId);
 
     if (!user?.profile) {
       throw new NotFoundException(`Profile for user ID ${userId} not found`);

@@ -4,13 +4,13 @@ import { ITimeSlotRepository } from '../domain/interfaces/time-slot-repository.i
 
 @Injectable()
 export class CreateTimeSlotTypeUseCase {
-  constructor(private readonly repo: ITimeSlotRepository) {}
+  constructor(private readonly repository: ITimeSlotRepository) {}
 
   async execute(dto: CreateTimeSlotTypeDto) {
-    const existing = await this.repo.findTypeByCode(dto.code);
+    const existing = await this.repository.findTypeByCode(dto.code);
     if (existing) {
       throw new ConflictException(`Kode tipe "${dto.code}" sudah digunakan`);
     }
-    return this.repo.createType(dto);
+    return this.repository.createType(dto);
   }
 }

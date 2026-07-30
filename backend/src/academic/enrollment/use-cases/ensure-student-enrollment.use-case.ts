@@ -17,14 +17,14 @@ export class EnsureStudentEnrollmentUseCase {
   private readonly logger = new Logger(EnsureStudentEnrollmentUseCase.name);
 
   constructor(
-    private readonly enrollmentRepo: IEnrollmentRepository,
-    private readonly semesterRepo: SemesterRepository,
+    private readonly enrollmentRepository: IEnrollmentRepository,
+    private readonly semesterRepository: SemesterRepository,
     private readonly createStudentEnrollment: CreateStudentEnrollmentUseCase,
     private readonly transferStudent: TransferStudentUseCase,
   ) {}
 
   async execute(studentId: string, classroomId: string): Promise<void> {
-    const activeSemester = await this.semesterRepo.findActive();
+    const activeSemester = await this.semesterRepository.findActive();
     if (!activeSemester) {
       this.logger.warn(
         `No active semester found; skipping enrollment for student ${studentId}`,
@@ -32,7 +32,7 @@ export class EnsureStudentEnrollmentUseCase {
       return;
     }
 
-    const existing = await this.enrollmentRepo.findDuplicate(
+    const existing = await this.enrollmentRepository.findDuplicate(
       studentId,
       activeSemester.id,
     );

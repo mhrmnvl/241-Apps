@@ -4,10 +4,10 @@ import { IOccupationRepository } from '../interfaces/occupation-repository.inter
 
 @Injectable()
 export class GetOccupationsUseCase {
-  constructor(private readonly repo: IOccupationRepository) {}
+  constructor(private readonly repository: IOccupationRepository) {}
 
   async execute(query: OccupationQueryDto) {
-    const { data, total, page, limit } = await this.repo.findAll(query);
+    const { data, total, page, limit } = await this.repository.findAll(query);
     return {
       data,
       meta: { page, limit, total, totalPages: Math.ceil(total / limit) },

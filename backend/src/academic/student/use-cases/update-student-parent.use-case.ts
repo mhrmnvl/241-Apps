@@ -7,19 +7,25 @@ import { StudentParentWithDetails } from '../domain/interfaces/student-parent-re
 export class UpdateStudentParentUseCase {
   private readonly logger = new Logger(UpdateStudentParentUseCase.name);
 
-  constructor(private readonly repo: StudentParentRepository) {}
+  constructor(
+    private readonly studentParentRepository: StudentParentRepository,
+  ) {}
 
   async execute(
     id: string,
     dto: UpdateStudentParentDto,
   ): Promise<StudentParentWithDetails> {
-    const current = await this.repo.findById(id);
+    const current = await this.studentParentRepository.findById(id);
     if (!current)
       throw new NotFoundException(
         `Student-parent link with ID ${id} not found`,
       );
 
-    const updated = await this.repo.update(id, current.studentId, dto);
+    const updated = await this.studentParentRepository.update(
+      id,
+      current.studentId,
+      dto,
+    );
     this.logger.log(`Student-parent link updated: ${id}`);
     return updated;
   }

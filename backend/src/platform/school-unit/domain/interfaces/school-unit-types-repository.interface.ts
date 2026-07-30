@@ -7,7 +7,7 @@ export interface SchoolUnitTypeQueryInput {
   search?: string;
 }
 
-export abstract class ISchoolUnitTypesRepository {
+export abstract class ISchoolUnitTypeRepository {
   abstract findAll(
     query: SchoolUnitTypeQueryInput,
   ): Promise<PaginatedResult<SchoolUnitType>>;

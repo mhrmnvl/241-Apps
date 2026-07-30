@@ -8,10 +8,10 @@ import { IRoleRepository } from '../domain/interfaces/role-repository.interface.
 
 @Injectable()
 export class UpdateRoleUseCase {
-  constructor(private readonly rolesRepo: IRoleRepository) {}
+  constructor(private readonly roleRepository: IRoleRepository) {}
 
   async execute(id: string, dto: UpdateRoleDto) {
-    const role = await this.rolesRepo.findById(id);
+    const role = await this.roleRepository.findById(id);
     if (!role) throw new NotFoundException('Role not found');
     // SUPER_ADMIN is all-powerful (it bypasses every permission check), so it is
     // never editable. Other roles — including built-in system roles like ADMIN or
@@ -20,6 +20,6 @@ export class UpdateRoleUseCase {
     if (role.code === 'SUPER_ADMIN') {
       throw new ForbiddenException('The SUPER_ADMIN role cannot be modified');
     }
-    return this.rolesRepo.update(id, dto);
+    return this.roleRepository.update(id, dto);
   }
 }

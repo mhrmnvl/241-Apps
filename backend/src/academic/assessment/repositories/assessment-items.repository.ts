@@ -1,1 +1,1 @@
-export { PrismaAssessmentItemsRepository as AssessmentItemsRepository } from '../infrastructure/persistence/prisma-assessment-items.repository.js';
+export { PrismaAssessmentItemRepository as AssessmentItemRepository } from '../infrastructure/persistence/prisma-assessment-items.repository.js';

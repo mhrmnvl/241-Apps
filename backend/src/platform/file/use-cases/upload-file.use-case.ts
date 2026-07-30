@@ -17,7 +17,7 @@ const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024; // 10MB
 @Injectable()
 export class UploadFileUseCase {
   constructor(
-    private readonly repo: FileRepository,
+    private readonly repository: FileRepository,
     private readonly imageOptimizer: ImageOptimizerService,
     private readonly storage: StorageService,
     private readonly keyBuilder: StorageKeyBuilder,
@@ -62,7 +62,7 @@ export class UploadFileUseCase {
     }
 
     const category = categoryId
-      ? await this.repo.findCategoryById(categoryId)
+      ? await this.repository.findCategoryById(categoryId)
       : null;
 
     const uniqueFilename = `${Date.now()}-${Math.round(Math.random() * 1e9)}${fileExt}`;
@@ -82,7 +82,7 @@ export class UploadFileUseCase {
       storageKey,
     };
 
-    const entity = await this.repo.create(dto, uploadedBy);
+    const entity = await this.repository.create(dto, uploadedBy);
     return { ...entity, url: await this.storage.getSignedUrl(storageKey) };
   }
 }

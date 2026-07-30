@@ -6,15 +6,15 @@ import { IPositionCategoryRepository } from '../interfaces/position-category-rep
 export class UpdatePositionCategoryUseCase {
   private readonly logger = new Logger(UpdatePositionCategoryUseCase.name);
 
-  constructor(private readonly repo: IPositionCategoryRepository) {}
+  constructor(private readonly repository: IPositionCategoryRepository) {}
 
   async execute(id: string, dto: UpdatePositionCategoryDto) {
-    const existing = await this.repo.findById(id);
+    const existing = await this.repository.findById(id);
     if (!existing) {
       throw new NotFoundException(`Position category with ID ${id} not found`);
     }
 
-    const category = await this.repo.update(id, dto);
+    const category = await this.repository.update(id, dto);
     this.logger.log(`Position category updated: ${id}`);
     return category;
   }

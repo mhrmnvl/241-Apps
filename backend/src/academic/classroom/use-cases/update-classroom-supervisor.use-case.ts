@@ -12,17 +12,19 @@ import { ClassroomSupervisorsRepository } from '../repositories/classroom-superv
 export class UpdateClassroomSupervisorUseCase {
   private readonly logger = new Logger(UpdateClassroomSupervisorUseCase.name);
 
-  constructor(private readonly repo: ClassroomSupervisorsRepository) {}
+  constructor(private readonly repository: ClassroomSupervisorsRepository) {}
 
   async execute(id: string, dto: UpdateClassroomSupervisorDto) {
-    const existing = await this.repo.findById(id);
+    const existing = await this.repository.findById(id);
     if (!existing)
       throw new NotFoundException(
         `ClassroomSupervisor with ID ${id} not found`,
       );
 
     if (dto.classroomId && dto.classroomId !== existing.classroomId) {
-      const classroom = await this.repo.findClassroomById(dto.classroomId);
+      const classroom = await this.repository.findClassroomById(
+        dto.classroomId,
+      );
       if (!classroom)
         throw new NotFoundException(
           `Classroom with ID ${dto.classroomId} not found`,
@@ -30,7 +32,7 @@ export class UpdateClassroomSupervisorUseCase {
     }
 
     if (dto.teacherId && dto.teacherId !== existing.teacherId) {
-      const teacher = await this.repo.findTeacherById(dto.teacherId);
+      const teacher = await this.repository.findTeacherById(dto.teacherId);
       if (!teacher)
         throw new NotFoundException(
           `Teacher with ID ${dto.teacherId} not found`,
@@ -38,7 +40,7 @@ export class UpdateClassroomSupervisorUseCase {
     }
 
     if (dto.semesterId && dto.semesterId !== existing.semesterId) {
-      const semester = await this.repo.findSemesterById(dto.semesterId);
+      const semester = await this.repository.findSemesterById(dto.semesterId);
       if (!semester)
         throw new NotFoundException(
           `Semester with ID ${dto.semesterId} not found`,
@@ -50,8 +52,8 @@ export class UpdateClassroomSupervisorUseCase {
 
     if (dto.classroomId || dto.semesterId) {
       const [classroom, semester] = await Promise.all([
-        this.repo.findClassroomById(newClassroomId),
-        this.repo.findSemesterById(newSemesterId),
+        this.repository.findClassroomById(newClassroomId),
+        this.repository.findSemesterById(newSemesterId),
       ]);
 
       if (
@@ -69,7 +71,7 @@ export class UpdateClassroomSupervisorUseCase {
       newClassroomId !== existing.classroomId ||
       newSemesterId !== existing.semesterId
     ) {
-      const dup = await this.repo.findByClassroomAndSemester(
+      const dup = await this.repository.findByClassroomAndSemester(
         newClassroomId,
         newSemesterId,
       );
@@ -79,7 +81,7 @@ export class UpdateClassroomSupervisorUseCase {
         );
     }
 
-    const updated = await this.repo.update(id, dto);
+    const updated = await this.repository.update(id, dto);
     this.logger.log(`ClassroomSupervisor updated: ${id}`);
     return updated;
   }

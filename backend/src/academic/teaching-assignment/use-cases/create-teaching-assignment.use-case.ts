@@ -8,12 +8,12 @@ import { ITeachingAssignmentRepository } from '../domain/interfaces/teaching-ass
 
 @Injectable()
 export class CreateTeachingAssignmentUseCase {
-  constructor(private readonly repo: ITeachingAssignmentRepository) {}
+  constructor(private readonly repository: ITeachingAssignmentRepository) {}
 
   async execute(dto: CreateTeachingAssignmentDto) {
     const [classroom, semester] = await Promise.all([
-      this.repo.findClassroomById(dto.classroomId),
-      this.repo.findSemesterById(dto.semesterId),
+      this.repository.findClassroomById(dto.classroomId),
+      this.repository.findSemesterById(dto.semesterId),
     ]);
 
     if (
@@ -33,7 +33,7 @@ export class CreateTeachingAssignmentUseCase {
       throw new BadRequestException('Semester not found');
     }
 
-    const dup = await this.repo.findDuplicate(
+    const dup = await this.repository.findDuplicate(
       dto.teacherId,
       dto.classroomId,
       dto.subjectId,
@@ -41,14 +41,14 @@ export class CreateTeachingAssignmentUseCase {
     );
     if (dup) throw new ConflictException('Teaching assignment already exists');
 
-    const softDeleted = await this.repo.findSoftDeleted(
+    const softDeleted = await this.repository.findSoftDeleted(
       dto.teacherId,
       dto.classroomId,
       dto.subjectId,
       dto.semesterId,
     );
     if (softDeleted) {
-      return this.repo.restore(softDeleted.id, {
+      return this.repository.restore(softDeleted.id, {
         teacherId: dto.teacherId,
         classroomId: dto.classroomId,
         subjectId: dto.subjectId,
@@ -56,6 +56,6 @@ export class CreateTeachingAssignmentUseCase {
       });
     }
 
-    return this.repo.create(dto);
+    return this.repository.create(dto);
   }
 }

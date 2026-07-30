@@ -3,9 +3,9 @@ import { ITimeSlotRepository } from '../domain/interfaces/time-slot-repository.i
 
 @Injectable()
 export class GetTimeSlotTypesUseCase {
-  constructor(private readonly repo: ITimeSlotRepository) {}
+  constructor(private readonly repository: ITimeSlotRepository) {}
 
   async execute() {
-    return this.repo.findAllTypes();
+    return this.repository.findAllTypes();
   }
 }

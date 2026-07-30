@@ -17,9 +17,9 @@ import { resolveOnceByKey } from '../../../shared/utils/resolve-once-by-key.help
 @Injectable()
 export class BulkImportStudentsUseCase {
   constructor(
-    private readonly repo: StudentRepository,
-    private readonly classroomRepo: ClassroomRepository,
-    private readonly gradeRepo: IGradeRepository,
+    private readonly studentRepository: StudentRepository,
+    private readonly classroomRepository: ClassroomRepository,
+    private readonly gradeRepository: IGradeRepository,
     private readonly excelParser: ExcelStudentParser,
     private readonly createStudent: CreateStudentUseCase,
   ) {}
@@ -33,11 +33,11 @@ export class BulkImportStudentsUseCase {
     const [gradeByLevel, classroomByCode] = await Promise.all([
       resolveOnceByKey(
         dtos.map((d) => d.grade),
-        (level) => this.gradeRepo.findByLevel(level),
+        (level) => this.gradeRepository.findByLevel(level),
       ),
       resolveOnceByKey(
         dtos.map((d) => d.classroomCode),
-        (code) => this.classroomRepo.findByCode(code),
+        (code) => this.classroomRepository.findByCode(code),
       ),
     ]);
 
@@ -48,8 +48,8 @@ export class BulkImportStudentsUseCase {
       const dto = dtos[i];
 
       const [dupNis, dupNisn] = await Promise.all([
-        dto.nis ? this.repo.findByNis(dto.nis) : null,
-        dto.nisn ? this.repo.findByNisn(dto.nisn) : null,
+        dto.nis ? this.studentRepository.findByNis(dto.nis) : null,
+        dto.nisn ? this.studentRepository.findByNisn(dto.nisn) : null,
       ]);
       const existing = dupNis ?? dupNisn;
 

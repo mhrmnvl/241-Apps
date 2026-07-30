@@ -6,12 +6,12 @@ import { IAcademicCalendarRepository } from '../domain/interfaces/academic-calen
 @Injectable()
 export class UpdateAcademicCalendarUseCase {
   constructor(
-    private readonly repo: IAcademicCalendarRepository,
+    private readonly repository: IAcademicCalendarRepository,
     private readonly semesterRepository: ISemesterRepository,
   ) {}
 
   async execute(id: string, dto: UpdateAcademicCalendarDto) {
-    const calendar = await this.repo.findById(id);
+    const calendar = await this.repository.findById(id);
     if (!calendar) {
       throw new NotFoundException(`Academic calendar with id ${id} not found`);
     }
@@ -25,6 +25,6 @@ export class UpdateAcademicCalendarUseCase {
       }
     }
 
-    return this.repo.update(id, dto);
+    return this.repository.update(id, dto);
   }
 }

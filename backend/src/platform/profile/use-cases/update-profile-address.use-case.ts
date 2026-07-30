@@ -8,16 +8,16 @@ export class UpdateProfileAddressUseCase {
   private readonly logger = new Logger(UpdateProfileAddressUseCase.name);
 
   constructor(
-    private readonly profileRepo: ProfileRepository,
-    private readonly addressRepo: ProfileAddressRepository,
+    private readonly profileRepository: ProfileRepository,
+    private readonly addressRepository: ProfileAddressRepository,
   ) {}
 
   async execute(userId: string, addressId: string, dto: UpdateAddressDto) {
-    const profile = await this.profileRepo.findByUserId(userId);
+    const profile = await this.profileRepository.findByUserId(userId);
     if (!profile)
       throw new NotFoundException(`Profile for user ID ${userId} not found`);
 
-    const address = await this.addressRepo.findAddressForUser(
+    const address = await this.addressRepository.findAddressForUser(
       addressId,
       userId,
     );
@@ -28,18 +28,18 @@ export class UpdateProfileAddressUseCase {
 
     if (dto.isPrimary) {
       if (address.studentId)
-        await this.addressRepo.clearPrimaryForStudentExclude(
+        await this.addressRepository.clearPrimaryForStudentExclude(
           address.studentId,
           addressId,
         );
       else if (address.teacherId)
-        await this.addressRepo.clearPrimaryForTeacherExclude(
+        await this.addressRepository.clearPrimaryForTeacherExclude(
           address.teacherId,
           addressId,
         );
     }
 
-    const updated = await this.addressRepo.update(addressId, dto);
+    const updated = await this.addressRepository.update(addressId, dto);
     this.logger.log(`Address ${addressId} updated for user ${userId}`);
     return updated;
   }

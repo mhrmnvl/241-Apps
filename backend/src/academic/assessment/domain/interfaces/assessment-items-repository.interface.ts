@@ -10,7 +10,7 @@ export type AssessmentItemWithDetails = Prisma.AssessmentItemGetPayload<{
   include: typeof ASSESSMENT_ITEM_INCLUDE;
 }>;
 
-export abstract class IAssessmentItemsRepository {
+export abstract class IAssessmentItemRepository {
   abstract findAll(
     query: AssessmentItemQueryDto,
   ): Promise<PaginatedResult<AssessmentItemWithDetails>>;

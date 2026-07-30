@@ -5,14 +5,14 @@ import { ProfileSocialMediaRepository } from '../repositories/profile-social-med
 @Injectable()
 export class GetProfileSocialMediasUseCase {
   constructor(
-    private readonly profileRepo: ProfileRepository,
-    private readonly socialRepo: ProfileSocialMediaRepository,
+    private readonly profileRepository: ProfileRepository,
+    private readonly socialMediaRepository: ProfileSocialMediaRepository,
   ) {}
 
   async execute(userId: string) {
-    const profile = await this.profileRepo.findByUserId(userId);
+    const profile = await this.profileRepository.findByUserId(userId);
     if (!profile)
       throw new NotFoundException(`Profile for user ID ${userId} not found`);
-    return this.socialRepo.findAllByProfileId(profile.id);
+    return this.socialMediaRepository.findAllByProfileId(profile.id);
   }
 }

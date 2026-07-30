@@ -5,13 +5,16 @@ import { StudentParentWithDetails } from '../domain/interfaces/student-parent-re
 
 @Injectable()
 export class GetStudentParentsListUseCase {
-  constructor(private readonly repo: StudentParentRepository) {}
+  constructor(
+    private readonly studentParentRepository: StudentParentRepository,
+  ) {}
 
   async execute(query: StudentParentQueryDto): Promise<{
     data: StudentParentWithDetails[];
     meta: { page: number; limit: number; total: number; totalPages: number };
   }> {
-    const { data, total, page, limit } = await this.repo.findAll(query);
+    const { data, total, page, limit } =
+      await this.studentParentRepository.findAll(query);
     return {
       data,
       meta: { page, limit, total, totalPages: Math.ceil(total / limit) },

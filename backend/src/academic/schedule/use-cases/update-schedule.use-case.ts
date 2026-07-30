@@ -8,9 +8,9 @@ import { IScheduleRepository } from '../domain/interfaces/schedule-repository.in
 
 @Injectable()
 export class UpdateScheduleUseCase {
-  constructor(private readonly repo: IScheduleRepository) {}
+  constructor(private readonly repository: IScheduleRepository) {}
   async execute(id: string, dto: UpdateScheduleDto) {
-    const current = await this.repo.findById(id);
+    const current = await this.repository.findById(id);
     if (!current) throw new NotFoundException(`Schedule ${id} not found`);
     const taId = dto.teachingAssignmentId ?? current.teachingAssignmentId;
     const day = dto.day ?? current.day;
@@ -20,9 +20,9 @@ export class UpdateScheduleUseCase {
       day !== current.day ||
       tsId !== current.timeSlotId
     ) {
-      const dup = await this.repo.findDuplicate(taId, day, tsId, id);
+      const dup = await this.repository.findDuplicate(taId, day, tsId, id);
       if (dup) throw new ConflictException('Schedule already exists');
     }
-    return this.repo.update(id, dto);
+    return this.repository.update(id, dto);
   }
 }

@@ -10,12 +10,12 @@ import { IOccupationRepository } from '../interfaces/occupation-repository.inter
 export class DeleteOccupationUseCase {
   private readonly logger = new Logger(DeleteOccupationUseCase.name);
 
-  constructor(private readonly repo: IOccupationRepository) {}
+  constructor(private readonly repository: IOccupationRepository) {}
 
   async execute(id: string): Promise<void> {
     const [occupation, inUse] = await Promise.all([
-      this.repo.findById(id),
-      this.repo.countActiveParents(id),
+      this.repository.findById(id),
+      this.repository.countActiveParents(id),
     ]);
 
     if (!occupation)
@@ -26,7 +26,7 @@ export class DeleteOccupationUseCase {
         `Occupation is used by ${inUse} active parent(s) and cannot be deleted`,
       );
 
-    await this.repo.remove(id);
+    await this.repository.remove(id);
     this.logger.log(`Occupation deleted: ${id}`);
   }
 }

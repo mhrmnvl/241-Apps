@@ -6,15 +6,15 @@ import { ProfileRepository } from '../index.js';
 @Injectable()
 export class AddProfileSocialMediaUseCase {
   constructor(
-    private readonly profileRepo: ProfileRepository,
-    private readonly socialRepo: ProfileSocialMediaRepository,
+    private readonly profileRepository: ProfileRepository,
+    private readonly socialMediaRepository: ProfileSocialMediaRepository,
   ) {}
 
   async execute(userId: string, dto: CreateProfileSocialMediaDto) {
-    const profile = await this.profileRepo.findByUserId(userId);
+    const profile = await this.profileRepository.findByUserId(userId);
     if (!profile)
       throw new NotFoundException(`Profile for user ID ${userId} not found`);
 
-    return this.socialRepo.create(profile.id, dto);
+    return this.socialMediaRepository.create(profile.id, dto);
   }
 }

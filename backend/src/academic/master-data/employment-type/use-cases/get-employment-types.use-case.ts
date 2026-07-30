@@ -4,9 +4,9 @@ import { IEmploymentTypeRepository } from '../interfaces/employment-type-reposit
 
 @Injectable()
 export class GetEmploymentTypesUseCase {
-  constructor(private readonly repo: IEmploymentTypeRepository) {}
+  constructor(private readonly repository: IEmploymentTypeRepository) {}
 
   async execute(query: EmploymentTypeQueryDto) {
-    return this.repo.findAll(query);
+    return this.repository.findAll(query);
   }
 }

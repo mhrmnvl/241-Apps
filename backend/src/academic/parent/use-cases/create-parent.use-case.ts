@@ -1,4 +1,4 @@
-﻿import {
+import {
   ConflictException,
   Injectable,
   Logger,
@@ -11,12 +11,12 @@ import { ParentRepository } from '../repositories/parent.repository.js';
 export class CreateParentUseCase {
   private readonly logger = new Logger(CreateParentUseCase.name);
 
-  constructor(private readonly repo: ParentRepository) {}
+  constructor(private readonly repository: ParentRepository) {}
 
   async execute(dto: CreateParentDto) {
     const [existingNik, occupation] = await Promise.all([
-      this.repo.findByNik(dto.nik),
-      this.repo.findOccupationById(dto.occupationId),
+      this.repository.findByNik(dto.nik),
+      this.repository.findOccupationById(dto.occupationId),
     ]);
 
     if (existingNik)
@@ -32,7 +32,7 @@ export class CreateParentUseCase {
         `Occupation "${occupation.name}" is inactive and cannot be assigned`,
       );
 
-    const parent = await this.repo.create(dto);
+    const parent = await this.repository.create(dto);
     this.logger.log(`Parent created: ${parent.name}`);
     return parent;
   }

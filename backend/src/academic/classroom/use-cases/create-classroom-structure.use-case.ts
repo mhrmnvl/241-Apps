@@ -12,13 +12,16 @@ import { ClassroomStructuresRepository } from '../repositories/classroom-structu
 export class CreateClassroomStructureUseCase {
   private readonly logger = new Logger(CreateClassroomStructureUseCase.name);
 
-  constructor(private readonly repo: ClassroomStructuresRepository) {}
+  constructor(private readonly repository: ClassroomStructuresRepository) {}
 
   async execute(dto: CreateClassroomStructureDto) {
     const [classroom, semester, existing] = await Promise.all([
-      this.repo.findClassroomById(dto.classroomId),
-      this.repo.findSemesterById(dto.semesterId),
-      this.repo.findByClassroomAndSemester(dto.classroomId, dto.semesterId),
+      this.repository.findClassroomById(dto.classroomId),
+      this.repository.findSemesterById(dto.semesterId),
+      this.repository.findByClassroomAndSemester(
+        dto.classroomId,
+        dto.semesterId,
+      ),
     ]);
 
     if (!classroom)
@@ -50,7 +53,7 @@ export class CreateClassroomStructureUseCase {
     }
 
     for (const { field, id } of positionEntries) {
-      const enrollment = await this.repo.findActiveEnrollment(
+      const enrollment = await this.repository.findActiveEnrollment(
         id,
         dto.classroomId,
         dto.semesterId,
@@ -60,7 +63,7 @@ export class CreateClassroomStructureUseCase {
           `Siswa ${id} tidak terdaftar aktif di kelas ini pada semester yang dipilih`,
         );
 
-      const existingPosition = await this.repo.findByStudentAndSemester(
+      const existingPosition = await this.repository.findByStudentAndSemester(
         id,
         dto.semesterId,
       );
@@ -71,7 +74,7 @@ export class CreateClassroomStructureUseCase {
       }
     }
 
-    const structure = await this.repo.create({
+    const structure = await this.repository.create({
       classroomId: dto.classroomId,
       semesterId: dto.semesterId,
       presidentId: dto.presidentId,

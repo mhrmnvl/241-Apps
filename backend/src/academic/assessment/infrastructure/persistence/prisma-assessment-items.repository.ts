@@ -3,12 +3,13 @@ import { AssessmentType, Prisma } from '@prisma/client';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
 import { AssessmentItemQueryDto } from '../../dto/request/assessment-item-query.dto.js';
 import {
-  IAssessmentItemsRepository,
+  IAssessmentItemRepository,
   ASSESSMENT_ITEM_INCLUDE,
+  AssessmentItemWithDetails,
 } from '../../domain/interfaces/assessment-items-repository.interface.js';
 
 @Injectable()
-export class PrismaAssessmentItemsRepository extends IAssessmentItemsRepository {
+export class PrismaAssessmentItemRepository extends IAssessmentItemRepository {
   constructor(private readonly prisma: PrismaService) {
     super();
   }

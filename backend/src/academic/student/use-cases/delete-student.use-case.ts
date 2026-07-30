@@ -5,14 +5,14 @@ import { StudentRepository } from '../repositories/student.repository.js';
 export class DeleteStudentUseCase {
   private readonly logger = new Logger(DeleteStudentUseCase.name);
 
-  constructor(private readonly repo: StudentRepository) {}
+  constructor(private readonly repository: StudentRepository) {}
 
   async execute(id: string): Promise<void> {
-    const student = await this.repo.findById(id);
+    const student = await this.repository.findById(id);
     if (!student)
       throw new NotFoundException(`Student with ID ${id} not found`);
 
-    await this.repo.softDelete(id, student.user.id);
+    await this.repository.softDelete(id, student.user.id);
     this.logger.log(`Student soft-deleted: ${id}`);
   }
 }

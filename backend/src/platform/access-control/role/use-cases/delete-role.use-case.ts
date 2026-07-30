@@ -7,13 +7,13 @@ import { IRoleRepository } from '../domain/interfaces/role-repository.interface.
 
 @Injectable()
 export class DeleteRoleUseCase {
-  constructor(private readonly rolesRepo: IRoleRepository) {}
+  constructor(private readonly roleRepository: IRoleRepository) {}
 
   async execute(id: string) {
-    const role = await this.rolesRepo.findById(id);
+    const role = await this.roleRepository.findById(id);
     if (!role) throw new NotFoundException('Role not found');
     if (role.isSystem)
       throw new ForbiddenException('System roles cannot be deleted');
-    return this.rolesRepo.delete(id);
+    return this.roleRepository.delete(id);
   }
 }

@@ -1,10 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { IStudentScoresRepository } from '../domain/interfaces/student-scores-repository.interface.js';
+import { IStudentScoreRepository } from '../domain/interfaces/student-scores-repository.interface.js';
 
 @Injectable()
 export class GetStudentScoreByIdUseCase {
   constructor(
-    private readonly studentScoreRepository: IStudentScoresRepository,
+    private readonly studentScoreRepository: IStudentScoreRepository,
   ) {}
   async execute(id: string) {
     const r = await this.studentScoreRepository.findById(id);

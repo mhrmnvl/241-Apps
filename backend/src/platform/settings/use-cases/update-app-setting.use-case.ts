@@ -8,12 +8,12 @@ import { toAppSettingResponseDto } from '../infrastructure/app-setting.mapper.js
 @Injectable()
 export class UpdateAppSettingUseCase {
   constructor(
-    private readonly repo: AppSettingRepository,
+    private readonly repository: AppSettingRepository,
     private readonly storage: StorageService,
   ) {}
 
   async execute(appKey: AppKey, dto: UpdateAppSettingDto, updatedBy: string) {
-    const entity = await this.repo.upsert(appKey, { ...dto, updatedBy });
+    const entity = await this.repository.upsert(appKey, { ...dto, updatedBy });
     return toAppSettingResponseDto(entity, this.storage);
   }
 }

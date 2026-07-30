@@ -3,10 +3,10 @@ import { ISocialMediaRepository } from '../interfaces/social-media-repository.in
 
 @Injectable()
 export class GetSocialMediaByIdUseCase {
-  constructor(private readonly repo: ISocialMediaRepository) {}
+  constructor(private readonly repository: ISocialMediaRepository) {}
 
   async execute(id: string) {
-    const platform = await this.repo.findById(id);
+    const platform = await this.repository.findById(id);
     if (!platform)
       throw new NotFoundException(`Platform with ID ${id} not found`);
     return platform;

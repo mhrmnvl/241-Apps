@@ -8,8 +8,8 @@ export class UpdateProfileSocialMediaUseCase {
   private readonly logger = new Logger(UpdateProfileSocialMediaUseCase.name);
 
   constructor(
-    private readonly profileRepo: ProfileRepository,
-    private readonly socialRepo: ProfileSocialMediaRepository,
+    private readonly profileRepository: ProfileRepository,
+    private readonly socialMediaRepository: ProfileSocialMediaRepository,
   ) {}
 
   async execute(
@@ -17,11 +17,11 @@ export class UpdateProfileSocialMediaUseCase {
     socialMediaId: string,
     dto: UpdateProfileSocialMediaDto,
   ) {
-    const profile = await this.profileRepo.findByUserId(userId);
+    const profile = await this.profileRepository.findByUserId(userId);
     if (!profile)
       throw new NotFoundException(`Profile for user ID ${userId} not found`);
 
-    const sm = await this.socialRepo.findByIdAndProfile(
+    const sm = await this.socialMediaRepository.findByIdAndProfile(
       socialMediaId,
       profile.id,
     );
@@ -30,7 +30,7 @@ export class UpdateProfileSocialMediaUseCase {
         `Social media with ID ${socialMediaId} not found for this profile`,
       );
 
-    const updated = await this.socialRepo.update(socialMediaId, dto);
+    const updated = await this.socialMediaRepository.update(socialMediaId, dto);
     this.logger.log(`Social media ${socialMediaId} updated for user ${userId}`);
     return updated;
   }

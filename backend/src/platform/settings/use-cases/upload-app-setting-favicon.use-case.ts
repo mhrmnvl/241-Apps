@@ -15,8 +15,8 @@ const FAVICON_MAX_DIMENSION = 256;
 @Injectable()
 export class UploadAppSettingFaviconUseCase {
   constructor(
-    private readonly appSettingRepo: AppSettingRepository,
-    private readonly fileRepo: FileRepository,
+    private readonly appSettingRepository: AppSettingRepository,
+    private readonly fileRepository: FileRepository,
     private readonly imageOptimizer: ImageOptimizerService,
     private readonly storage: StorageService,
     private readonly keyBuilder: StorageKeyBuilder,
@@ -52,11 +52,11 @@ export class UploadAppSettingFaviconUseCase {
       optimized.mimeType,
     );
 
-    const category = await this.fileRepo.findCategoryByCode(
+    const category = await this.fileRepository.findCategoryByCode(
       BRANDING_FILE_CATEGORY_CODE,
     );
 
-    const newFile = await this.fileRepo.create(
+    const newFile = await this.fileRepository.create(
       {
         categoryId: category?.id,
         filename: uniqueFilename,
@@ -68,7 +68,10 @@ export class UploadAppSettingFaviconUseCase {
       updatedBy,
     );
 
-    const entity = await this.appSettingRepo.setFaviconFile(appKey, newFile.id);
+    const entity = await this.appSettingRepository.setFaviconFile(
+      appKey,
+      newFile.id,
+    );
     return toAppSettingResponseDto(entity, this.storage);
   }
 }

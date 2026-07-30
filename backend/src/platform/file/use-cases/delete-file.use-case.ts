@@ -7,18 +7,18 @@ export class DeleteFileUseCase {
   private readonly logger = new Logger(DeleteFileUseCase.name);
 
   constructor(
-    private readonly repo: FileRepository,
+    private readonly repository: FileRepository,
     private readonly storage: StorageService,
   ) {}
 
   async execute(id: string) {
-    const existing = await this.repo.findById(id);
+    const existing = await this.repository.findById(id);
     if (!existing) {
       throw new NotFoundException(`File with ID ${id} not found`);
     }
 
     // Soft delete in the database
-    await this.repo.softDelete(id);
+    await this.repository.softDelete(id);
 
     // Clean up the object in storage to save space
     try {

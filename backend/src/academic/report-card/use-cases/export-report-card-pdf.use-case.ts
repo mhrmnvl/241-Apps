@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { GetSchoolUnitUseCase } from '../../../platform/school-unit/index.js';
-import { IStudentScoresRepository } from '../../assessment/domain/interfaces/student-scores-repository.interface.js';
+import { IStudentScoreRepository } from '../../assessment/domain/interfaces/student-scores-repository.interface.js';
 import { IAttendanceRepository } from '../../attendance/domain/interfaces/attendance-repository.interface.js';
 import { IReportCardRepository } from '../domain/interfaces/report-card-repository.interface.js';
 import { PdfService } from '../services/pdf.service.js';
@@ -20,15 +20,15 @@ import {
 @Injectable()
 export class ExportReportCardPdfUseCase {
   constructor(
-    private readonly repo: IReportCardRepository,
-    private readonly studentScoresRepo: IStudentScoresRepository,
-    private readonly attendanceRepo: IAttendanceRepository,
+    private readonly repository: IReportCardRepository,
+    private readonly studentScoreRepository: IStudentScoreRepository,
+    private readonly attendanceRepository: IAttendanceRepository,
     private readonly pdfService: PdfService,
     private readonly getSchoolUnitUseCase: GetSchoolUnitUseCase,
   ) {}
 
   async execute(id: string): Promise<Buffer> {
-    const reportCard = await this.repo.findById(id);
+    const reportCard = await this.repository.findById(id);
     if (!reportCard) {
       throw new NotFoundException('Rapor tidak ditemukan');
     }
@@ -38,8 +38,8 @@ export class ExportReportCardPdfUseCase {
     }
 
     const [scores, attendanceCounts] = await Promise.all([
-      this.studentScoresRepo.findAllForReportCard(reportCard.enrollmentId),
-      this.attendanceRepo.getStatusCounts(reportCard.enrollmentId),
+      this.studentScoreRepository.findAllForReportCard(reportCard.enrollmentId),
+      this.attendanceRepository.getStatusCounts(reportCard.enrollmentId),
     ]);
 
     // Fetch School Unit info

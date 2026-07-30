@@ -15,8 +15,8 @@ const AVATAR_MAX_DIMENSION = 512;
 @Injectable()
 export class UploadProfilePhotoUseCase {
   constructor(
-    private readonly profileRepo: ProfileRepository,
-    private readonly fileRepo: FileRepository,
+    private readonly profileRepository: ProfileRepository,
+    private readonly fileRepository: FileRepository,
     private readonly imageOptimizer: ImageOptimizerService,
     private readonly storage: StorageService,
     private readonly keyBuilder: StorageKeyBuilder,
@@ -51,11 +51,11 @@ export class UploadProfilePhotoUseCase {
       optimized.mimeType,
     );
 
-    const category = await this.fileRepo.findCategoryByCode(
+    const category = await this.fileRepository.findCategoryByCode(
       PROFILE_PHOTO_CATEGORY_CODE,
     );
 
-    const newFile = await this.fileRepo.create(
+    const newFile = await this.fileRepository.create(
       {
         categoryId: category?.id,
         filename: uniqueFilename,
@@ -67,7 +67,7 @@ export class UploadProfilePhotoUseCase {
       userId,
     );
 
-    const updated = await this.profileRepo.update(userId, {
+    const updated = await this.profileRepository.update(userId, {
       avatarFile: { connect: { id: newFile.id } },
     });
 

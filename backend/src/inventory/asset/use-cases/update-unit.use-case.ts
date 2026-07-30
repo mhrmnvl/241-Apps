@@ -4,14 +4,14 @@ import { UpdateUnitDto } from '../dto/request/update-unit.dto.js';
 
 @Injectable()
 export class UpdateUnitUseCase {
-  constructor(private readonly unitRepo: IAssetUnitRepository) {}
+  constructor(private readonly unitRepository: IAssetUnitRepository) {}
 
   async execute(id: string, dto: UpdateUnitDto) {
-    const unit = await this.unitRepo.findById(id);
+    const unit = await this.unitRepository.findById(id);
     if (!unit) {
       throw new NotFoundException(`Asset unit with ID ${id} not found`);
     }
-    return this.unitRepo.update(id, {
+    return this.unitRepository.update(id, {
       barcode: dto.barcode ?? undefined,
       notes: dto.notes ?? undefined,
       custodianId: dto.custodianId ?? undefined,

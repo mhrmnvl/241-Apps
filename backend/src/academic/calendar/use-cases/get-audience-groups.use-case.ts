@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { IEventsRepository } from '../domain/interfaces/events-repository.interface.js';
+import { IEventRepository } from '../domain/interfaces/events-repository.interface.js';
 
 @Injectable()
 export class GetAudienceGroupsUseCase {
-  constructor(private readonly repo: IEventsRepository) {}
+  constructor(private readonly eventRepository: IEventRepository) {}
 
   async execute() {
-    return this.repo.findAllAudienceGroups();
+    return this.eventRepository.findAllAudienceGroups();
   }
 }

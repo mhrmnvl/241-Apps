@@ -3,10 +3,10 @@ import { IEmploymentTypeRepository } from '../interfaces/employment-type-reposit
 
 @Injectable()
 export class GetEmploymentTypeByIdUseCase {
-  constructor(private readonly repo: IEmploymentTypeRepository) {}
+  constructor(private readonly repository: IEmploymentTypeRepository) {}
 
   async execute(id: string) {
-    const type = await this.repo.findById(id);
+    const type = await this.repository.findById(id);
     if (!type) {
       throw new NotFoundException(`Employment type with ID ${id} not found`);
     }

@@ -12,16 +12,19 @@ import { ClassroomSupervisorsRepository } from '../repositories/classroom-superv
 export class CreateClassroomSupervisorUseCase {
   private readonly logger = new Logger(CreateClassroomSupervisorUseCase.name);
 
-  constructor(private readonly repo: ClassroomSupervisorsRepository) {}
+  constructor(private readonly repository: ClassroomSupervisorsRepository) {}
 
   async execute(dto: CreateClassroomSupervisorDto) {
     const [classroom, teacher, semester, existing, softDeleted] =
       await Promise.all([
-        this.repo.findClassroomById(dto.classroomId),
-        this.repo.findTeacherById(dto.teacherId),
-        this.repo.findSemesterById(dto.semesterId),
-        this.repo.findByClassroomAndSemester(dto.classroomId, dto.semesterId),
-        this.repo.findSoftDeletedByClassroomAndSemester(
+        this.repository.findClassroomById(dto.classroomId),
+        this.repository.findTeacherById(dto.teacherId),
+        this.repository.findSemesterById(dto.semesterId),
+        this.repository.findByClassroomAndSemester(
+          dto.classroomId,
+          dto.semesterId,
+        ),
+        this.repository.findSoftDeletedByClassroomAndSemester(
           dto.classroomId,
           dto.semesterId,
         ),
@@ -47,14 +50,14 @@ export class CreateClassroomSupervisorUseCase {
       );
 
     if (softDeleted) {
-      const restored = await this.repo.restore(softDeleted.id, {
+      const restored = await this.repository.restore(softDeleted.id, {
         teacherId: dto.teacherId,
       });
       this.logger.log(`ClassroomSupervisor restored: ${softDeleted.id}`);
       return restored;
     }
 
-    const supervisor = await this.repo.create({
+    const supervisor = await this.repository.create({
       classroomId: dto.classroomId,
       teacherId: dto.teacherId,
       semesterId: dto.semesterId,

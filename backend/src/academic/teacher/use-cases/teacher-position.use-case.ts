@@ -15,19 +15,21 @@ export class TeacherPositionUseCase {
   private readonly logger = new Logger(TeacherPositionUseCase.name);
 
   constructor(
-    private readonly repo: TeacherRepository,
-    private readonly positionRepo: TeacherPositionsRepository,
+    private readonly repository: TeacherRepository,
+    private readonly teacherPositionRepository: TeacherPositionsRepository,
   ) {}
 
   async findAll(teacherId: string) {
     await this.ensureTeacherExists(teacherId);
-    return this.positionRepo.findAll(teacherId);
+    return this.teacherPositionRepository.findAll(teacherId);
   }
 
   async assign(teacherId: string, dto: CreateTeacherPositionDto) {
     await this.ensureTeacherExists(teacherId);
 
-    const position = await this.positionRepo.findPosition(dto.positionId);
+    const position = await this.teacherPositionRepository.findPosition(
+      dto.positionId,
+    );
     if (!position)
       throw new NotFoundException(
         `Position with ID ${dto.positionId} not found`,
@@ -38,7 +40,7 @@ export class TeacherPositionUseCase {
       );
     }
 
-    const existing = await this.positionRepo.findAssignment(
+    const existing = await this.teacherPositionRepository.findAssignment(
       teacherId,
       dto.positionId,
       new Date(dto.hireDate),
@@ -49,7 +51,7 @@ export class TeacherPositionUseCase {
       );
     }
 
-    const link = await this.positionRepo.assign(teacherId, dto);
+    const link = await this.teacherPositionRepository.assign(teacherId, dto);
     this.logger.log(
       `Position ${dto.positionId} assigned to teacher ${teacherId}`,
     );
@@ -63,7 +65,11 @@ export class TeacherPositionUseCase {
   ) {
     await this.ensureTeacherExists(teacherId);
     await this.ensureLinkExists(teacherId, linkId);
-    const updated = await this.positionRepo.update(teacherId, linkId, dto);
+    const updated = await this.teacherPositionRepository.update(
+      teacherId,
+      linkId,
+      dto,
+    );
     this.logger.log(`Position link ${linkId} updated for teacher ${teacherId}`);
     return updated;
   }
@@ -71,21 +77,24 @@ export class TeacherPositionUseCase {
   async remove(teacherId: string, linkId: string): Promise<void> {
     await this.ensureTeacherExists(teacherId);
     await this.ensureLinkExists(teacherId, linkId);
-    await this.positionRepo.remove(linkId);
+    await this.teacherPositionRepository.remove(linkId);
     this.logger.log(
       `Position link ${linkId} removed from teacher ${teacherId}`,
     );
   }
 
   private async ensureTeacherExists(id: string) {
-    const teacher = await this.repo.findById(id);
+    const teacher = await this.repository.findById(id);
     if (!teacher)
       throw new NotFoundException(`Teacher with ID ${id} not found`);
     return teacher;
   }
 
   private async ensureLinkExists(teacherId: string, linkId: string) {
-    const link = await this.positionRepo.findLinkById(teacherId, linkId);
+    const link = await this.teacherPositionRepository.findLinkById(
+      teacherId,
+      linkId,
+    );
     if (!link)
       throw new NotFoundException(
         `Position assignment with ID ${linkId} not found for this teacher`,

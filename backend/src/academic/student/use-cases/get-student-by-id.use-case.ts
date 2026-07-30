@@ -11,16 +11,16 @@ import { StudentWithDetails } from '../domain/interfaces/student-repository.inte
 
 @Injectable()
 export class GetStudentByIdUseCase {
-  constructor(private readonly repo: StudentRepository) {}
+  constructor(private readonly repository: StudentRepository) {}
 
   async execute(
     id: string,
     requester?: RequestUser,
   ): Promise<StudentWithDetails> {
     if (requester) {
-      const isStudent = await this.repo.isStudent(requester.id);
+      const isStudent = await this.repository.isStudent(requester.id);
       if (isStudent) {
-        const own = await this.repo.findByUserId(requester.id);
+        const own = await this.repository.findByUserId(requester.id);
         if (!own)
           throw new ForbiddenException(
             'Student account is not linked to an active student record',
@@ -32,7 +32,7 @@ export class GetStudentByIdUseCase {
       }
     }
 
-    const student = await this.repo.findById(id);
+    const student = await this.repository.findById(id);
     if (!student)
       throw new NotFoundException(`Student with ID ${id} not found`);
     return student;

@@ -3,9 +3,9 @@ import { IScheduleRepository } from '../domain/interfaces/schedule-repository.in
 
 @Injectable()
 export class GetScheduleByIdUseCase {
-  constructor(private readonly repo: IScheduleRepository) {}
+  constructor(private readonly repository: IScheduleRepository) {}
   async execute(id: string) {
-    const r = await this.repo.findById(id);
+    const r = await this.repository.findById(id);
     if (!r) throw new NotFoundException(`Schedule ${id} not found`);
     return r;
   }

@@ -4,11 +4,11 @@ import { IRoleRepository } from '../domain/interfaces/role-repository.interface.
 
 @Injectable()
 export class CreateRoleUseCase {
-  constructor(private readonly rolesRepo: IRoleRepository) {}
+  constructor(private readonly roleRepository: IRoleRepository) {}
 
   async execute(dto: CreateRoleDto) {
-    const existing = await this.rolesRepo.findByCode(dto.code);
+    const existing = await this.roleRepository.findByCode(dto.code);
     if (existing) throw new ConflictException('Role code already exists');
-    return this.rolesRepo.create(dto);
+    return this.roleRepository.create(dto);
   }
 }

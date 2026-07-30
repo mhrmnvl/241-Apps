@@ -12,12 +12,12 @@ export class RemovePermissionFromRoleUseCase {
   private readonly logger = new Logger(RemovePermissionFromRoleUseCase.name);
 
   constructor(
-    private readonly permissionsRepo: IPermissionRepository,
-    private readonly rolesRepo: IRoleRepository,
+    private readonly permissionRepository: IPermissionRepository,
+    private readonly roleRepository: IRoleRepository,
   ) {}
 
   async execute(roleId: string, permissionId: string) {
-    const role = await this.rolesRepo.findById(roleId);
+    const role = await this.roleRepository.findById(roleId);
     if (!role) {
       throw new NotFoundException(`Role with ID ${roleId} not found`);
     }
@@ -28,14 +28,14 @@ export class RemovePermissionFromRoleUseCase {
       );
     }
 
-    const permission = await this.permissionsRepo.findById(permissionId);
+    const permission = await this.permissionRepository.findById(permissionId);
     if (!permission) {
       throw new NotFoundException(
         `Permission with ID ${permissionId} not found`,
       );
     }
 
-    const relation = await this.permissionsRepo.findRolePermission(
+    const relation = await this.permissionRepository.findRolePermission(
       roleId,
       permissionId,
     );
@@ -43,7 +43,10 @@ export class RemovePermissionFromRoleUseCase {
       throw new NotFoundException('Role does not have this permission');
     }
 
-    await this.permissionsRepo.removePermissionFromRole(roleId, permissionId);
+    await this.permissionRepository.removePermissionFromRole(
+      roleId,
+      permissionId,
+    );
     this.logger.log(
       `Permission ${permission.code} removed from role ${role.code}`,
     );

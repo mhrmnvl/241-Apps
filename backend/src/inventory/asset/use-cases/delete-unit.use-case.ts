@@ -3,13 +3,13 @@ import { IAssetUnitRepository } from '../domain/interfaces/asset-unit-repository
 
 @Injectable()
 export class DeleteUnitUseCase {
-  constructor(private readonly unitRepo: IAssetUnitRepository) {}
+  constructor(private readonly unitRepository: IAssetUnitRepository) {}
 
   async execute(id: string) {
-    const unit = await this.unitRepo.findById(id);
+    const unit = await this.unitRepository.findById(id);
     if (!unit) {
       throw new NotFoundException(`Asset unit with ID ${id} not found`);
     }
-    await this.unitRepo.softDelete(id);
+    await this.unitRepository.softDelete(id);
   }
 }

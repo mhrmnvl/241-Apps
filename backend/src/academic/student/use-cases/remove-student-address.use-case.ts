@@ -7,22 +7,22 @@ export class RemoveStudentAddressUseCase {
   private readonly logger = new Logger(RemoveStudentAddressUseCase.name);
 
   constructor(
-    private readonly repo: StudentRepository,
-    private readonly addressRepo: StudentAddressRepository,
+    private readonly repository: StudentRepository,
+    private readonly addressRepository: StudentAddressRepository,
   ) {}
 
   async execute(studentId: string, addressId: string): Promise<void> {
-    const student = await this.repo.findById(studentId);
+    const student = await this.repository.findById(studentId);
     if (!student)
       throw new NotFoundException(`Student with ID ${studentId} not found`);
 
-    const address = await this.addressRepo.findOne(studentId, addressId);
+    const address = await this.addressRepository.findOne(studentId, addressId);
     if (!address)
       throw new NotFoundException(
         `Address with ID ${addressId} not found for this student`,
       );
 
-    await this.addressRepo.remove(addressId);
+    await this.addressRepository.remove(addressId);
     this.logger.log(`Address ${addressId} removed from student ${studentId}`);
   }
 }

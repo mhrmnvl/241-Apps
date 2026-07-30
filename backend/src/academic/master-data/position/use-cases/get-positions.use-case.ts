@@ -4,10 +4,10 @@ import { IPositionRepository } from '../interfaces/position-repository.interface
 
 @Injectable()
 export class GetPositionsUseCase {
-  constructor(private readonly repo: IPositionRepository) {}
+  constructor(private readonly repository: IPositionRepository) {}
 
   async execute(query: PositionQueryDto) {
-    const { data, total, page, limit } = await this.repo.findAll(query);
+    const { data, total, page, limit } = await this.repository.findAll(query);
     return {
       data,
       meta: { page, limit, total, totalPages: Math.ceil(total / limit) },

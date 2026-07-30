@@ -8,14 +8,17 @@ import { toAppSettingResponseDto } from '../infrastructure/app-setting.mapper.js
 @Injectable()
 export class GetAppSettingUseCase {
   constructor(
-    private readonly repo: AppSettingRepository,
+    private readonly repository: AppSettingRepository,
     private readonly storage: StorageService,
   ) {}
 
   async execute(appKey: AppKey) {
-    let entity = await this.repo.findByAppKey(appKey);
+    let entity = await this.repository.findByAppKey(appKey);
 
-    entity ??= await this.repo.upsert(appKey, DEFAULT_APP_SETTINGS[appKey]);
+    entity ??= await this.repository.upsert(
+      appKey,
+      DEFAULT_APP_SETTINGS[appKey],
+    );
     return toAppSettingResponseDto(entity, this.storage);
   }
 }

@@ -5,12 +5,13 @@ import { CreateEventDto } from '../../dto/request/create-event.dto.js';
 import { EventQueryDto } from '../../dto/request/event-query.dto.js';
 import { UpdateEventDto } from '../../dto/request/update-event.dto.js';
 import {
-  IEventsRepository,
+  IEventRepository,
   EVENT_INCLUDE,
+  EventWithDetails,
 } from '../../domain/interfaces/events-repository.interface.js';
 
 @Injectable()
-export class PrismaEventsRepository extends IEventsRepository {
+export class PrismaEventRepository extends IEventRepository {
   constructor(private readonly prisma: PrismaService) {
     super();
   }

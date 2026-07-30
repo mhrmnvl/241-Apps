@@ -6,14 +6,14 @@ import { StudentRepository } from '../index.js';
 export class UpdateStudentProfileUseCase {
   private readonly logger = new Logger(UpdateStudentProfileUseCase.name);
 
-  constructor(private readonly repo: StudentRepository) {}
+  constructor(private readonly repository: StudentRepository) {}
 
   async execute(id: string, dto: UpdateProfileDto) {
-    const student = await this.repo.findById(id);
+    const student = await this.repository.findById(id);
     if (!student)
       throw new NotFoundException(`Student with ID ${id} not found`);
 
-    const updated = await this.repo.updateProfile(id, dto);
+    const updated = await this.repository.updateProfile(id, dto);
     this.logger.log(`Student profile updated: ${id}`);
     return updated;
   }

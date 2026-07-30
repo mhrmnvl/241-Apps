@@ -5,13 +5,13 @@ import { StudentWithDetails } from '../domain/interfaces/student-repository.inte
 
 @Injectable()
 export class GetStudentsUseCase {
-  constructor(private readonly repo: StudentRepository) {}
+  constructor(private readonly repository: StudentRepository) {}
 
   async execute(query: StudentQueryDto): Promise<{
     data: StudentWithDetails[];
     meta: { page: number; limit: number; total: number; totalPages: number };
   }> {
-    const { data, total, page, limit } = await this.repo.findAll(query);
+    const { data, total, page, limit } = await this.repository.findAll(query);
     return {
       data,
       meta: { page, limit, total, totalPages: Math.ceil(total / limit) },

@@ -10,12 +10,12 @@ import { IPositionRepository } from '../interfaces/position-repository.interface
 export class DeletePositionUseCase {
   private readonly logger = new Logger(DeletePositionUseCase.name);
 
-  constructor(private readonly repo: IPositionRepository) {}
+  constructor(private readonly repository: IPositionRepository) {}
 
   async execute(id: string): Promise<void> {
     const [position, inUse] = await Promise.all([
-      this.repo.findById(id),
-      this.repo.countActiveAssignments(id),
+      this.repository.findById(id),
+      this.repository.countActiveAssignments(id),
     ]);
 
     if (!position)
@@ -26,7 +26,7 @@ export class DeletePositionUseCase {
         `Position is still assigned to ${inUse} teacher(s) and cannot be deleted`,
       );
 
-    await this.repo.remove(id);
+    await this.repository.remove(id);
     this.logger.log(`Position deleted: ${id}`);
   }
 }

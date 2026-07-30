@@ -4,13 +4,16 @@ import { ISocialMediaRepository } from '../interfaces/social-media-repository.in
 
 @Injectable()
 export class GetSocialMediasUseCase {
-  constructor(private readonly repo: ISocialMediaRepository) {}
+  constructor(private readonly repository: ISocialMediaRepository) {}
 
   async execute(query: SocialMediaQueryDto) {
     const { page = 1, limit = 10 } = query;
     const skip = (page - 1) * limit;
 
-    const { data, total } = await this.repo.findAll({ skip, take: limit });
+    const { data, total } = await this.repository.findAll({
+      skip,
+      take: limit,
+    });
 
     return {
       data,

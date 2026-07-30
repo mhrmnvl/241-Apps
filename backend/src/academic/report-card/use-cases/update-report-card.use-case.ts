@@ -6,14 +6,14 @@ import { IReportCardRepository } from '../domain/interfaces/report-card-reposito
 export class UpdateReportCardUseCase {
   private readonly logger = new Logger(UpdateReportCardUseCase.name);
 
-  constructor(private readonly repo: IReportCardRepository) {}
+  constructor(private readonly repository: IReportCardRepository) {}
 
   async execute(id: string, dto: UpdateReportCardDto) {
-    const existing = await this.repo.findById(id);
+    const existing = await this.repository.findById(id);
     if (!existing)
       throw new NotFoundException(`ReportCard with ID ${id} not found`);
 
-    const updated = await this.repo.update(id, {
+    const updated = await this.repository.update(id, {
       teacherNote: dto.teacherNote,
       rank: dto.rank,
       isPublished: dto.isPublished,

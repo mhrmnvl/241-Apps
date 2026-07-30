@@ -1,6 +1,6 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { IEnrollmentRepository } from '../../enrollment/domain/interfaces/enrollment-repository.interface.js';
-import { IStudentScoresRepository } from '../../assessment/domain/interfaces/student-scores-repository.interface.js';
+import { IStudentScoreRepository } from '../../assessment/domain/interfaces/student-scores-repository.interface.js';
 import { GenerateReportCardDto } from '../dto/request/generate-report-card.dto.js';
 import { IReportCardRepository } from '../domain/interfaces/report-card-repository.interface.js';
 
@@ -10,7 +10,7 @@ export class GenerateReportCardUseCase {
 
   constructor(
     private readonly reportCardRepository: IReportCardRepository,
-    private readonly studentScoreRepository: IStudentScoresRepository,
+    private readonly studentScoreRepository: IStudentScoreRepository,
     private readonly enrollmentRepository: IEnrollmentRepository,
   ) {}
 

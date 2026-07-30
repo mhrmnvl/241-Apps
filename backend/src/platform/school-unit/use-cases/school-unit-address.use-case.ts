@@ -16,53 +16,53 @@ export class SchoolUnitAddressUseCase {
   private readonly logger = new Logger(SchoolUnitAddressUseCase.name);
 
   constructor(
-    private readonly schoolUnitsRepo: SchoolUnitRepository,
-    private readonly repo: SchoolUnitAddressRepository,
+    private readonly schoolUnitRepository: SchoolUnitRepository,
+    private readonly repository: SchoolUnitAddressRepository,
   ) {}
 
   async getAddress() {
-    return this.repo.find();
+    return this.repository.find();
   }
 
   async setAddress(dto: CreateAddressDto) {
     const schoolUnit = await this.requireSchoolUnit();
-    const existing = await this.repo.find();
+    const existing = await this.repository.find();
     if (existing) {
       throw new ConflictException(
         'School unit address already exists. Use PATCH to update.',
       );
     }
 
-    const address = await this.repo.create(dto, schoolUnit.id);
+    const address = await this.repository.create(dto, schoolUnit.id);
     this.logger.log(`School unit address set`);
     return address;
   }
 
   async updateAddress(dto: UpdateAddressDto) {
     await this.requireSchoolUnit();
-    const existing = await this.repo.find();
+    const existing = await this.repository.find();
     if (!existing) {
       throw new NotFoundException('School unit address has not been set yet');
     }
 
-    const updated = await this.repo.update(existing.id, dto);
+    const updated = await this.repository.update(existing.id, dto);
     this.logger.log(`School unit address updated`);
     return updated;
   }
 
   async removeAddress(): Promise<void> {
     await this.requireSchoolUnit();
-    const existing = await this.repo.find();
+    const existing = await this.repository.find();
     if (!existing) {
       throw new NotFoundException('School unit address has not been set yet');
     }
 
-    await this.repo.remove(existing.id);
+    await this.repository.remove(existing.id);
     this.logger.log(`School unit address removed`);
   }
 
   private async requireSchoolUnit() {
-    const schoolUnit = await this.schoolUnitsRepo.findFirst();
+    const schoolUnit = await this.schoolUnitRepository.findFirst();
     if (!schoolUnit) {
       throw new NotFoundException('School unit has not been set up yet');
     }

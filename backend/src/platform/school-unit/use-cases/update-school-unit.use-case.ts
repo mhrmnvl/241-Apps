@@ -6,15 +6,15 @@ import { SchoolUnitRepository } from '../repositories/school-unit.repository.js'
 export class UpdateSchoolUnitUseCase {
   private readonly logger = new Logger(UpdateSchoolUnitUseCase.name);
 
-  constructor(private readonly repo: SchoolUnitRepository) {}
+  constructor(private readonly repository: SchoolUnitRepository) {}
 
   async execute(dto: UpdateSchoolUnitDto) {
-    const existing = await this.repo.findFirst();
+    const existing = await this.repository.findFirst();
     if (!existing) {
       throw new NotFoundException('School unit has not been set up yet');
     }
 
-    const schoolUnit = await this.repo.update(existing.id, dto);
+    const schoolUnit = await this.repository.update(existing.id, dto);
     this.logger.log(`School unit updated: ${schoolUnit.name}`);
     return schoolUnit;
   }

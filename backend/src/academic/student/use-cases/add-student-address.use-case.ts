@@ -9,18 +9,18 @@ export class AddStudentAddressUseCase {
   private readonly logger = new Logger(AddStudentAddressUseCase.name);
 
   constructor(
-    private readonly repo: StudentRepository,
-    private readonly addressRepo: StudentAddressRepository,
+    private readonly repository: StudentRepository,
+    private readonly addressRepository: StudentAddressRepository,
   ) {}
 
   async execute(studentId: string, dto: CreateAddressDto): Promise<Address> {
-    const student = await this.repo.findById(studentId);
+    const student = await this.repository.findById(studentId);
     if (!student)
       throw new NotFoundException(`Student with ID ${studentId} not found`);
 
-    if (dto.isPrimary) await this.addressRepo.clearPrimary(studentId);
+    if (dto.isPrimary) await this.addressRepository.clearPrimary(studentId);
 
-    const address = await this.addressRepo.create(studentId, dto);
+    const address = await this.addressRepository.create(studentId, dto);
     this.logger.log(`Address added to student ${studentId}`);
     return address;
   }

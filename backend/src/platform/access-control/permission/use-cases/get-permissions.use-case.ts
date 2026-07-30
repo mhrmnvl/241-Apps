@@ -3,9 +3,9 @@ import { IPermissionRepository } from '../interfaces/permission-repository.inter
 
 @Injectable()
 export class GetPermissionsUseCase {
-  constructor(private readonly permissionsRepo: IPermissionRepository) {}
+  constructor(private readonly permissionRepository: IPermissionRepository) {}
 
   async execute() {
-    return this.permissionsRepo.findAll();
+    return this.permissionRepository.findAll();
   }
 }

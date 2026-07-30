@@ -12,10 +12,10 @@ import { IEnrollmentRepository } from '../domain/interfaces/enrollment-repositor
 export class TransferStudentUseCase {
   private readonly logger = new Logger(TransferStudentUseCase.name);
 
-  constructor(private readonly repo: IEnrollmentRepository) {}
+  constructor(private readonly repository: IEnrollmentRepository) {}
 
   async execute(enrollmentId: string, dto: TransferStudentDto) {
-    const enrollment = await this.repo.findById(enrollmentId);
+    const enrollment = await this.repository.findById(enrollmentId);
     if (!enrollment) {
       throw new NotFoundException(
         `StudentEnrollment ${enrollmentId} not found`,
@@ -28,7 +28,7 @@ export class TransferStudentUseCase {
       );
     }
 
-    const updated = await this.repo.update(enrollmentId, {
+    const updated = await this.repository.update(enrollmentId, {
       classroomId: dto.targetClassroomId,
       note: dto.note,
     });

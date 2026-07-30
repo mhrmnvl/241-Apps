@@ -5,14 +5,14 @@ import { ClassroomStructuresRepository } from '../repositories/classroom-structu
 export class DeleteClassroomStructureUseCase {
   private readonly logger = new Logger(DeleteClassroomStructureUseCase.name);
 
-  constructor(private readonly repo: ClassroomStructuresRepository) {}
+  constructor(private readonly repository: ClassroomStructuresRepository) {}
 
   async execute(id: string) {
-    const existing = await this.repo.findById(id);
+    const existing = await this.repository.findById(id);
     if (!existing)
       throw new NotFoundException(`ClassStructure with ID ${id} not found`);
 
-    await this.repo.softDelete(id);
+    await this.repository.softDelete(id);
     this.logger.log(`ClassStructure deleted: ${id}`);
   }
 }
