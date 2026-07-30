@@ -162,10 +162,10 @@ export function useTeacherCreateForm() {
           positionId: values.positionId ?? undefined,
           identifier: values.nip ?? values.nik ?? '',
           password: values.nip ?? values.nik ?? '',
-          email: values.email || undefined,
-          phone: values.phone || undefined,
-          nip: values.nip || undefined,
-          nuptk: values.nuptk || undefined,
+          email: values.email,
+          phone: values.phone,
+          nip: values.nip,
+          nuptk: values.nuptk,
         },
         address: hasAddress.value ? { ...address.value } : null,
         positions: extraPositions.value,
@@ -207,7 +207,7 @@ export function useTeacherCreateForm() {
   const setFieldValueWrapper = (field: string, value: unknown) => {
     setFieldValue(
       field as unknown as Parameters<typeof setFieldValue>[0],
-      value as unknown as Parameters<typeof setFieldValue>[1],
+      value as Parameters<typeof setFieldValue>[1],
     )
   }
 

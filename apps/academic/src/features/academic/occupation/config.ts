@@ -1,11 +1,7 @@
 import { useRoleGuard } from '@/features/platform/auth'
 import type { MasterDataConfig } from '@/master-data'
 import { occupationService } from './services/occupationService'
-import type {
-  Occupation,
-  OccupationCreatePayload,
-  OccupationUpdatePayload,
-} from './types'
+import type { Occupation, OccupationCreatePayload } from './types'
 
 export function useOccupationConfig(): MasterDataConfig<Occupation> {
   const { can } = useRoleGuard()
@@ -23,11 +19,7 @@ export function useOccupationConfig(): MasterDataConfig<Occupation> {
         occupationService.createOccupation(
           payload as unknown as OccupationCreatePayload,
         ),
-      update: (id, payload) =>
-        occupationService.updateOccupation(
-          id,
-          payload as unknown as OccupationUpdatePayload,
-        ),
+      update: (id, payload) => occupationService.updateOccupation(id, payload),
       remove: (id, callbacks) =>
         occupationService.deleteOccupation(id, callbacks),
     },

@@ -7,7 +7,7 @@ import {
   OptimizeOptions,
 } from '../domain/interfaces/image-optimizer.interface.js';
 
-export { OptimizedImage, OptimizeOptions };
+export type { OptimizedImage, OptimizeOptions };
 
 @Injectable()
 export class SharpImageOptimizerService implements ImageOptimizerService {

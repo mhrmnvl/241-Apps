@@ -9,7 +9,7 @@ import {
 import { StudentQueryDto } from '../../dto/request/student-query.dto.js';
 import { ExportStudentQueryDto } from '../../dto/request/export-student-query.dto.js';
 
-export { Address, User, StudentStatus };
+export type { Address, User, StudentStatus };
 import { CreateStudentDto } from '../../dto/request/create-student.dto.js';
 import { UpdateStudentDto } from '../../dto/request/update-student.dto.js';
 import { CreateStudentWithRelationsDto } from '../../dto/request/create-student-with-relations.dto.js';

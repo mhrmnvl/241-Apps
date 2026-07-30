@@ -4,7 +4,6 @@ import { academicCalendarTypeService } from './services/academicCalendarTypeServ
 import type {
   AcademicCalendarType,
   AcademicCalendarTypeCreatePayload,
-  AcademicCalendarTypeUpdatePayload,
 } from './types'
 
 export function useAcademicCalendarTypeConfig(): MasterDataConfig<AcademicCalendarType> {
@@ -24,10 +23,7 @@ export function useAcademicCalendarTypeConfig(): MasterDataConfig<AcademicCalend
           payload as unknown as AcademicCalendarTypeCreatePayload,
         ),
       update: (id, payload) =>
-        academicCalendarTypeService.updateAcademicCalendarType(
-          id,
-          payload as unknown as AcademicCalendarTypeUpdatePayload,
-        ),
+        academicCalendarTypeService.updateAcademicCalendarType(id, payload),
       remove: (id, callbacks) =>
         academicCalendarTypeService.deleteAcademicCalendarType(id, callbacks),
     },

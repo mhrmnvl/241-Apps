@@ -111,8 +111,8 @@ export function useParentForm(options: {
       nik: values.nik,
       birthPlace: values.birthPlace,
       birthDate: values.birthDate,
-      email: values.email || undefined,
-      phone: values.phone || undefined,
+      email: values.email ?? undefined,
+      phone: values.phone ?? undefined,
       occupationId: values.occupationId,
       income: (values.income as IncomeRange) || undefined,
     }

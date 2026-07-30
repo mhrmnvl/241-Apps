@@ -194,14 +194,14 @@ export function useStudentCreateForm() {
         gender: values.gender ?? 'MALE',
         birthPlace: values.birthPlace ?? '',
         birthDate: values.birthDate ?? '',
-        email: values.email || undefined,
-        phone: values.phone || undefined,
-        nis: values.nis || undefined,
-        nisn: values.nisn || undefined,
-        gradeId: values.gradeId || undefined,
-        classroomId: values.classroomId || undefined,
-        identifier: values.nis || undefined,
-        password: values.nis || undefined,
+        email: values.email,
+        phone: values.phone,
+        nis: values.nis,
+        nisn: values.nisn,
+        gradeId: values.gradeId,
+        classroomId: values.classroomId,
+        identifier: values.nis,
+        password: values.nis,
         address: hasAddress.value ? { ...address.value } : null,
         parents: parents.value,
       })
@@ -243,7 +243,7 @@ export function useStudentCreateForm() {
   const setFieldValueWrapper = (field: string, value: unknown) => {
     setFieldValue(
       field as unknown as Parameters<typeof setFieldValue>[0],
-      value as unknown as Parameters<typeof setFieldValue>[1],
+      value as Parameters<typeof setFieldValue>[1],
     )
   }
 

@@ -2,6 +2,7 @@ import {
   AdmissionApplication,
   AdmissionDocumentType,
   AdmissionNotification,
+  AdmissionNotificationType,
   AdmissionWave,
   IncomeRange,
   ParentRelation,

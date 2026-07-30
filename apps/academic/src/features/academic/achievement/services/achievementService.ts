@@ -19,10 +19,7 @@ export const achievementService = {
         )
         toast.success('Prestasi berhasil ditambahkan')
       } else {
-        await achievementApi.updateAchievement(
-          itemId!,
-          payload as Omit<AchievementSavePayload, 'profileId'>,
-        )
+        await achievementApi.updateAchievement(itemId!, payload)
         toast.success('Prestasi berhasil diperbarui')
       }
       return { success: true }

@@ -1,11 +1,7 @@
 import { useRoleGuard } from '@/features/platform/auth'
 import type { MasterDataConfig } from '@/master-data'
 import { educationService } from './services/educationService'
-import type {
-  EducationLevel,
-  EducationLevelCreatePayload,
-  EducationLevelUpdatePayload,
-} from './types'
+import type { EducationLevel, EducationLevelCreatePayload } from './types'
 
 export function useEducationConfig(): MasterDataConfig<EducationLevel> {
   const { can } = useRoleGuard()
@@ -27,10 +23,7 @@ export function useEducationConfig(): MasterDataConfig<EducationLevel> {
           payload as unknown as EducationLevelCreatePayload,
         ),
       update: (id, payload) =>
-        educationService.updateEducationLevel(
-          id,
-          payload as unknown as EducationLevelUpdatePayload,
-        ),
+        educationService.updateEducationLevel(id, payload),
       remove: (id, callbacks) =>
         educationService.deleteEducationLevel(id, callbacks),
     },

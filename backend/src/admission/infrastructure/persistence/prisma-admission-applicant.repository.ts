@@ -3,6 +3,7 @@ import {
   AdmissionApplication,
   AdmissionDocumentType,
   AdmissionNotification,
+  AdmissionNotificationType,
   AdmissionWave,
   User,
 } from '@prisma/client';

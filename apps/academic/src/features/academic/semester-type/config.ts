@@ -1,11 +1,7 @@
 import { useRoleGuard } from '@/features/platform/auth'
 import type { MasterDataConfig } from '@/master-data'
 import { semesterTypeService } from './services/semesterTypeService'
-import type {
-  SemesterType,
-  SemesterTypeCreatePayload,
-  SemesterTypeUpdatePayload,
-} from './types'
+import type { SemesterType, SemesterTypeCreatePayload } from './types'
 
 export function useSemesterTypeConfig(): MasterDataConfig<SemesterType> {
   const { can } = useRoleGuard()
@@ -24,10 +20,7 @@ export function useSemesterTypeConfig(): MasterDataConfig<SemesterType> {
           payload as unknown as SemesterTypeCreatePayload,
         ),
       update: (id, payload) =>
-        semesterTypeService.updateSemesterType(
-          id,
-          payload as unknown as SemesterTypeUpdatePayload,
-        ),
+        semesterTypeService.updateSemesterType(id, payload),
       remove: (id, callbacks) =>
         semesterTypeService.deleteSemesterType(id, callbacks),
     },

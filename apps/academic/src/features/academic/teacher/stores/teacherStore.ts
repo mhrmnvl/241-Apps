@@ -14,7 +14,7 @@ export const useTeacherStore = defineStore('teacher', () => {
 
   const filters = ref({
     keyword: '',
-    positionCategoryId: '' as string,
+    positionCategoryId: '',
     statusFilter: 'all',
     categoryFilter: 'all',
     positionFilter: 'all',
@@ -29,9 +29,9 @@ export const useTeacherStore = defineStore('teacher', () => {
     return teachers.value.filter((t) => {
       const kw = filters.value.keyword.toLowerCase()
       const matchKeyword =
-        !kw ||
-        t.user?.profile?.name?.toLowerCase().includes(kw) ||
-        t.nip?.toLowerCase().includes(kw) ||
+        (!kw ||
+          t.user?.profile?.name?.toLowerCase().includes(kw) ||
+          t.nip?.toLowerCase().includes(kw)) ??
         false
 
       const matchStatus =

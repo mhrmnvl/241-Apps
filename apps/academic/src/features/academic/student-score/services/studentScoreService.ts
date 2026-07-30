@@ -38,7 +38,7 @@ export const studentScoreService = {
         .map((row) => ({
           enrollmentId: row.enrollmentId,
           score: row.score ?? undefined,
-          note: row.note?.trim() || undefined,
+          note: row.note?.trim() ? row.note.trim() : undefined,
         }))
 
       if (records.length === 0) {

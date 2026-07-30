@@ -1,4 +1,4 @@
-﻿<script setup lang="ts">
+<script setup lang="ts">
 import AssessmentItemFormDialog from '../components/AssessmentItemFormDialog.vue'
 import { createAssessmentItemColumns } from '../components/columns'
 import { useAssessmentItem } from '../composables/useAssessmentItem'
@@ -99,7 +99,7 @@ const columns = computed(() =>
       openForm.value = true
     },
     onGrade: (item) => {
-      router.push(`/academic/student-score/${item.id}/nilai`)
+      void router.push(`/academic/student-score/${item.id}/nilai`)
     },
     onDelete: async (item, { closeAlert, setLoading }) => {
       setLoading(true)

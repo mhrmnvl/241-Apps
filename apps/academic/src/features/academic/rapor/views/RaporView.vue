@@ -130,7 +130,7 @@ const tableColumns = [
                     )
                     return
                   }
-                  togglePublish(rapor.id, rapor.isPublished)
+                  void togglePublish(rapor.id, rapor.isPublished)
                 },
               },
             ]

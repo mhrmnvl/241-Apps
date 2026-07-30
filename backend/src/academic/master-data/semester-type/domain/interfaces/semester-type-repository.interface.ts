@@ -1,7 +1,7 @@
 import { SemesterType, Prisma } from '@prisma/client';
 import { SemesterTypeQueryDto } from '../../dto/request/semester-type-query.dto.js';
 
-export { SemesterType };
+export type { SemesterType };
 
 export abstract class ISemesterTypeRepository {
   abstract findAll(query: SemesterTypeQueryDto): Promise<{
