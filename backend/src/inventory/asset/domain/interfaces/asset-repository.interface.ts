@@ -16,4 +16,10 @@ export abstract class IAssetRepository {
   ): Promise<InventoryAsset>;
   abstract softDelete(id: string): Promise<InventoryAsset>;
   abstract findLatestAsset(): Promise<InventoryAsset | null>;
+  abstract findCategoryById(
+    id: string,
+  ): Promise<{ id: string; code: string } | null>;
+  abstract findLatestAssetByPrefix(
+    prefix: string,
+  ): Promise<{ assetNumber: string } | null>;
 }

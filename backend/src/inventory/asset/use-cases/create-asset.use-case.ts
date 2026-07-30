@@ -1,27 +1,22 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { CreateAssetDto } from '../dto/request/create-asset.dto.js';
-import { PrismaService } from '../../../core/database/prisma.service.js';
+import { IAssetRepository } from '../domain/interfaces/asset-repository.interface.js';
 
 @Injectable()
 export class CreateAssetUseCase {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly repository: IAssetRepository) {}
 
   async execute(dto: CreateAssetDto) {
     const quantity = dto.quantity && dto.quantity > 0 ? dto.quantity : 1;
 
-    const category = await this.prisma.inventoryCategory.findUnique({
-      where: { id: dto.categoryId },
-    });
+    const category = await this.repository.findCategoryById(dto.categoryId);
     const catCode = category ? category.code.toUpperCase() : 'GEN';
     const year = new Date(dto.purchaseDate).getFullYear();
     const prefix = `AST-${catCode}/${year}/`;
 
     // Next parent (batch) sequence, 3 digits, scoped to category+year prefix.
-    const latestParent = await this.prisma.inventoryAsset.findFirst({
-      where: { assetNumber: { startsWith: prefix } },
-      orderBy: { assetNumber: 'desc' },
-    });
+    const latestParent = await this.repository.findLatestAssetByPrefix(prefix);
     let seq = 1;
     if (latestParent) {
       const lastPart = latestParent.assetNumber.split('/').pop();
@@ -47,7 +42,7 @@ export class CreateAssetUseCase {
         };
       });
 
-    return this.prisma.inventoryAsset.create({
+    return this.repository.create({
       data: {
         assetNumber,
         name: dto.name,

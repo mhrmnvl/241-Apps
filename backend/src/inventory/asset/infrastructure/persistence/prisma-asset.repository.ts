@@ -130,4 +130,23 @@ export class PrismaAssetRepository extends IAssetRepository {
       orderBy: { createdAt: 'desc' },
     });
   }
+
+  async findCategoryById(
+    id: string,
+  ): Promise<{ id: string; code: string } | null> {
+    return this.prisma.inventoryCategory.findUnique({
+      where: { id },
+      select: { id: true, code: true },
+    });
+  }
+
+  async findLatestAssetByPrefix(
+    prefix: string,
+  ): Promise<{ assetNumber: string } | null> {
+    return this.prisma.inventoryAsset.findFirst({
+      where: { assetNumber: { startsWith: prefix } },
+      orderBy: { assetNumber: 'desc' },
+      select: { assetNumber: true },
+    });
+  }
 }

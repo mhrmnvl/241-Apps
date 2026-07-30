@@ -1,19 +1,17 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../../../core/database/prisma.service.js';
+import { IAssetRepository } from '../domain/interfaces/asset-repository.interface.js';
 import { IAssetUnitRepository } from '../domain/interfaces/asset-unit-repository.interface.js';
 import { CreateUnitsDto } from '../dto/request/create-units.dto.js';
 
 @Injectable()
 export class AddUnitsUseCase {
   constructor(
-    private readonly prisma: PrismaService,
+    private readonly assetRepo: IAssetRepository,
     private readonly unitRepo: IAssetUnitRepository,
   ) {}
 
   async execute(assetId: string, dto: CreateUnitsDto) {
-    const asset = await this.prisma.inventoryAsset.findFirst({
-      where: { id: assetId, deletedAt: null },
-    });
+    const asset = await this.assetRepo.findById(assetId);
     if (!asset) {
       throw new NotFoundException(`Asset with ID ${assetId} not found`);
     }
