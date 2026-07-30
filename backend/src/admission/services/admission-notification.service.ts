@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { AdmissionNotificationType, Prisma } from '@prisma/client';
-import { PrismaService } from '../../core/database/prisma.service.js';
+import { AdmissionNotificationType } from '@prisma/client';
+import { IAdmissionApplicantRepository } from '../domain/interfaces/admission-applicant-repository.interface.js';
 
 /**
  * Writes in-app notifications for admission workflow transitions.
@@ -9,18 +9,21 @@ import { PrismaService } from '../../core/database/prisma.service.js';
  */
 @Injectable()
 export class AdmissionNotificationService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly applicantRepository: IAdmissionApplicantRepository,
+  ) {}
 
   async notify(
     applicationId: string,
     type: AdmissionNotificationType,
     title: string,
     message: string,
-    tx?: Prisma.TransactionClient,
   ): Promise<void> {
-    const client = tx ?? this.prisma;
-    await client.admissionNotification.create({
-      data: { applicationId, type, title, message },
+    await this.applicantRepository.createNotification({
+      applicationId,
+      type,
+      title,
+      message,
     });
   }
 }

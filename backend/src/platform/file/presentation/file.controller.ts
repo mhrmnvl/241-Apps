@@ -14,7 +14,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { AppKey } from '@prisma/client';
+import { AppKey } from '../repositories/file.repository.js';
 import {
   ApiBearerAuth,
   ApiBody,

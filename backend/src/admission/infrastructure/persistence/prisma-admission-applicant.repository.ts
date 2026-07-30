@@ -315,6 +315,18 @@ export class PrismaAdmissionApplicantRepository extends IAdmissionApplicantRepos
     return application?.id ?? null;
   }
 
+  // ── Notifications ──
+  async createNotification(input: {
+    applicationId: string;
+    type: AdmissionNotificationType;
+    title: string;
+    message: string;
+  }): Promise<AdmissionNotification> {
+    return this.prisma.admissionNotification.create({
+      data: input,
+    });
+  }
+
   async findNotifications(
     applicationId: string,
   ): Promise<{ data: AdmissionNotification[]; unreadCount: number }> {

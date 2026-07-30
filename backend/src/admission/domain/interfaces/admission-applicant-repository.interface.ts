@@ -117,6 +117,12 @@ export abstract class IAdmissionApplicantRepository {
   ): Promise<AdmissionPaymentWithProof>;
 
   // ── Notifications ──
+  abstract createNotification(input: {
+    applicationId: string;
+    type: AdmissionNotificationType;
+    title: string;
+    message: string;
+  }): Promise<AdmissionNotification>;
   abstract findApplicationIdByUser(userId: string): Promise<string | null>;
   abstract findNotifications(
     applicationId: string,

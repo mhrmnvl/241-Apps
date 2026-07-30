@@ -4,7 +4,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { AppKey } from '../../platform/file/index.js';
+import { AppKey } from '../../platform/file/repositories/file.repository.js';
 import * as path from 'path';
 import { isEditable } from '../domain/admission-status.transitions.js';
 import { IAdmissionApplicantRepository } from '../domain/interfaces/admission-applicant-repository.interface.js';

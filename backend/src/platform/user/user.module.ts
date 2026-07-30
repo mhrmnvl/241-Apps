@@ -7,7 +7,7 @@ import { GetUserByIdUseCase } from './use-cases/get-user-by-id.use-case.js';
 import { GetUsersUseCase } from './use-cases/get-users.use-case.js';
 import { UpdateUserUseCase } from './use-cases/update-user.use-case.js';
 import { IUserRepository } from './interfaces/user-repository.interface.js';
-import { AccountProvisioningService } from './services/account-provisioning.service.js';
+import { AccountProvisioningService } from './infrastructure/account-provisioning.service.js';
 
 @Module({
   controllers: [UserController],
