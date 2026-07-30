@@ -2,13 +2,11 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AssessmentType } from '@prisma/client';
 import { CreateAssessmentItemDto } from '../dto/request/create-assessment-item.dto.js';
 import { UpdateAssessmentItemDto } from '../dto/request/update-assessment-item.dto.js';
-import {
-  CreateAssessmentItemUseCase,
-  DeleteAssessmentItemUseCase,
-  GetAssessmentItemByIdUseCase,
-  GetAssessmentItemsUseCase,
-  UpdateAssessmentItemUseCase,
-} from '../use-cases/assessment-item.use-case.js';
+import { GetAssessmentItemsUseCase } from '../use-cases/get-assessment-items.use-case.js';
+import { GetAssessmentItemByIdUseCase } from '../use-cases/get-assessment-item-by-id.use-case.js';
+import { CreateAssessmentItemUseCase } from '../use-cases/create-assessment-item.use-case.js';
+import { UpdateAssessmentItemUseCase } from '../use-cases/update-assessment-item.use-case.js';
+import { DeleteAssessmentItemUseCase } from '../use-cases/delete-assessment-item.use-case.js';
 import { AssessmentItemsController } from './assessment-items.controller.js';
 import type { AuthenticatedUser } from '../../../core/types/authenticated-user.type.js';
 

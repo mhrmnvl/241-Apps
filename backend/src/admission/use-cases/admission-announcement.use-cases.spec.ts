@@ -1,13 +1,11 @@
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { IAdmissionAnnouncementRepository } from '../domain/interfaces/admission-announcement-repository.interface.js';
-import {
-  CreateAdmissionAnnouncementUseCase,
-  DeleteAdmissionAnnouncementUseCase,
-  GetAdmissionAnnouncementsUseCase,
-  PublishAdmissionAnnouncementUseCase,
-  UpdateAdmissionAnnouncementUseCase,
-} from './admission-announcement.use-cases.js';
+import { GetAdmissionAnnouncementsUseCase } from './get-admission-announcements.use-case.js';
+import { CreateAdmissionAnnouncementUseCase } from './create-admission-announcement.use-case.js';
+import { UpdateAdmissionAnnouncementUseCase } from './update-admission-announcement.use-case.js';
+import { PublishAdmissionAnnouncementUseCase } from './publish-admission-announcement.use-case.js';
+import { DeleteAdmissionAnnouncementUseCase } from './delete-admission-announcement.use-case.js';
 
 describe('Admission Announcement use-cases', () => {
   const mockRepository = {

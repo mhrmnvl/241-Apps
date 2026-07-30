@@ -23,13 +23,11 @@ import { JwtAuthGuard } from '../../platform/auth/index.js';
 import { AdmissionWaveQueryDto } from '../dto/request/admission-wave-query.dto.js';
 import { CreateAdmissionWaveDto } from '../dto/request/create-admission-wave.dto.js';
 import { UpdateAdmissionWaveDto } from '../dto/request/update-admission-wave.dto.js';
-import {
-  CreateAdmissionWaveUseCase,
-  DeleteAdmissionWaveUseCase,
-  GetAdmissionWaveByIdUseCase,
-  GetAdmissionWavesUseCase,
-  UpdateAdmissionWaveUseCase,
-} from '../use-cases/admission-wave.use-cases.js';
+import { GetAdmissionWavesUseCase } from '../use-cases/get-admission-waves.use-case.js';
+import { GetAdmissionWaveByIdUseCase } from '../use-cases/get-admission-wave-by-id.use-case.js';
+import { CreateAdmissionWaveUseCase } from '../use-cases/create-admission-wave.use-case.js';
+import { UpdateAdmissionWaveUseCase } from '../use-cases/update-admission-wave.use-case.js';
+import { DeleteAdmissionWaveUseCase } from '../use-cases/delete-admission-wave.use-case.js';
 
 @ApiTags('Admission — Waves')
 @ApiBearerAuth()

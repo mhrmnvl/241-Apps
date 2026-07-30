@@ -1,13 +1,11 @@
 import { ConflictException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { IAdmissionWaveRepository } from '../domain/interfaces/admission-wave-repository.interface.js';
-import {
-  CreateAdmissionWaveUseCase,
-  DeleteAdmissionWaveUseCase,
-  GetAdmissionWaveByIdUseCase,
-  GetAdmissionWavesUseCase,
-  UpdateAdmissionWaveUseCase,
-} from './admission-wave.use-cases.js';
+import { GetAdmissionWavesUseCase } from './get-admission-waves.use-case.js';
+import { GetAdmissionWaveByIdUseCase } from './get-admission-wave-by-id.use-case.js';
+import { CreateAdmissionWaveUseCase } from './create-admission-wave.use-case.js';
+import { UpdateAdmissionWaveUseCase } from './update-admission-wave.use-case.js';
+import { DeleteAdmissionWaveUseCase } from './delete-admission-wave.use-case.js';
 
 describe('Admission Wave use-cases', () => {
   const mockRepository = {

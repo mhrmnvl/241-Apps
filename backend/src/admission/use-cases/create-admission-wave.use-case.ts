@@ -1,0 +1,29 @@
+import { ConflictException, Injectable } from '@nestjs/common';
+import { serializeWave } from '../domain/admission.serializers.js';
+import { IAdmissionWaveRepository } from '../domain/interfaces/admission-wave-repository.interface.js';
+import { CreateAdmissionWaveDto } from '../dto/request/create-admission-wave.dto.js';
+
+@Injectable()
+export class CreateAdmissionWaveUseCase {
+  constructor(private readonly repository: IAdmissionWaveRepository) {}
+
+  async execute(dto: CreateAdmissionWaveDto) {
+    const existing = await this.repository.findByCode(dto.code);
+    if (existing) {
+      throw new ConflictException(`Kode gelombang '${dto.code}' sudah dipakai`);
+    }
+
+    const created = await this.repository.create({
+      name: dto.name,
+      code: dto.code,
+      academicYearId: dto.academicYearId,
+      startDate: new Date(dto.startDate),
+      endDate: new Date(dto.endDate),
+      quota: dto.quota,
+      registrationFee: dto.registrationFee,
+      description: dto.description ?? null,
+      isActive: dto.isActive ?? true,
+    });
+    return serializeWave(created);
+  }
+}

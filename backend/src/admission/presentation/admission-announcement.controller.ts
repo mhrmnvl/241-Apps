@@ -25,13 +25,11 @@ import { JwtAuthGuard } from '../../platform/auth/index.js';
 import { AdmissionAnnouncementQueryDto } from '../dto/request/admission-announcement-query.dto.js';
 import { CreateAdmissionAnnouncementDto } from '../dto/request/create-admission-announcement.dto.js';
 import { UpdateAdmissionAnnouncementDto } from '../dto/request/update-admission-announcement.dto.js';
-import {
-  CreateAdmissionAnnouncementUseCase,
-  DeleteAdmissionAnnouncementUseCase,
-  GetAdmissionAnnouncementsUseCase,
-  PublishAdmissionAnnouncementUseCase,
-  UpdateAdmissionAnnouncementUseCase,
-} from '../use-cases/admission-announcement.use-cases.js';
+import { GetAdmissionAnnouncementsUseCase } from '../use-cases/get-admission-announcements.use-case.js';
+import { CreateAdmissionAnnouncementUseCase } from '../use-cases/create-admission-announcement.use-case.js';
+import { UpdateAdmissionAnnouncementUseCase } from '../use-cases/update-admission-announcement.use-case.js';
+import { PublishAdmissionAnnouncementUseCase } from '../use-cases/publish-admission-announcement.use-case.js';
+import { DeleteAdmissionAnnouncementUseCase } from '../use-cases/delete-admission-announcement.use-case.js';
 
 @ApiTags('Admission — Announcements')
 @ApiBearerAuth()

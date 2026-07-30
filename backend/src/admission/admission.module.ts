@@ -16,20 +16,17 @@ import { AdmissionPublicController } from './presentation/admission-public.contr
 import { AdmissionWaveController } from './presentation/admission-wave.controller.js';
 import { AdmissionNotificationService } from './services/admission-notification.service.js';
 import { AcceptApplicationUseCase } from './use-cases/accept-application.use-case.js';
-import {
-  CreateAdmissionAnnouncementUseCase,
-  DeleteAdmissionAnnouncementUseCase,
-  GetAdmissionAnnouncementsUseCase,
-  PublishAdmissionAnnouncementUseCase,
-  UpdateAdmissionAnnouncementUseCase,
-} from './use-cases/admission-announcement.use-cases.js';
-import {
-  CreateAdmissionWaveUseCase,
-  DeleteAdmissionWaveUseCase,
-  GetAdmissionWaveByIdUseCase,
-  GetAdmissionWavesUseCase,
-  UpdateAdmissionWaveUseCase,
-} from './use-cases/admission-wave.use-cases.js';
+import { GetAdmissionAnnouncementsUseCase } from './use-cases/get-admission-announcements.use-case.js';
+import { CreateAdmissionAnnouncementUseCase } from './use-cases/create-admission-announcement.use-case.js';
+import { UpdateAdmissionAnnouncementUseCase } from './use-cases/update-admission-announcement.use-case.js';
+import { PublishAdmissionAnnouncementUseCase } from './use-cases/publish-admission-announcement.use-case.js';
+import { DeleteAdmissionAnnouncementUseCase } from './use-cases/delete-admission-announcement.use-case.js';
+
+import { GetAdmissionWavesUseCase } from './use-cases/get-admission-waves.use-case.js';
+import { GetAdmissionWaveByIdUseCase } from './use-cases/get-admission-wave-by-id.use-case.js';
+import { CreateAdmissionWaveUseCase } from './use-cases/create-admission-wave.use-case.js';
+import { UpdateAdmissionWaveUseCase } from './use-cases/update-admission-wave.use-case.js';
+import { DeleteAdmissionWaveUseCase } from './use-cases/delete-admission-wave.use-case.js';
 import { EnrollApplicantUseCase } from './use-cases/enroll-applicant.use-case.js';
 import { GetActiveWavesUseCase } from './use-cases/get-active-waves.use-case.js';
 import { GetAdmissionStatsUseCase } from './use-cases/get-admission-stats.use-case.js';

@@ -29,15 +29,13 @@ import { UpdateStudentScoreDto } from '../dto/request/update-student-score.dto.j
 import { StudentScoreQueryDto } from '../dto/request/student-score-query.dto.js';
 import { StudentScoreRosterQueryDto } from '../dto/request/student-score-roster-query.dto.js';
 import { BulkUpsertStudentScoreDto } from '../dto/request/bulk-upsert-student-score.dto.js';
-import {
-  GetStudentScoresUseCase,
-  GetStudentScoreByIdUseCase,
-  CreateStudentScoreUseCase,
-  UpdateStudentScoreUseCase,
-  DeleteStudentScoreUseCase,
-  GetStudentScoreRosterUseCase,
-  BulkUpsertStudentScoresUseCase,
-} from '../use-cases/student-score.use-case.js';
+import { GetStudentScoresUseCase } from '../use-cases/get-student-scores.use-case.js';
+import { GetStudentScoreByIdUseCase } from '../use-cases/get-student-score-by-id.use-case.js';
+import { CreateStudentScoreUseCase } from '../use-cases/create-student-score.use-case.js';
+import { UpdateStudentScoreUseCase } from '../use-cases/update-student-score.use-case.js';
+import { DeleteStudentScoreUseCase } from '../use-cases/delete-student-score.use-case.js';
+import { GetStudentScoreRosterUseCase } from '../use-cases/get-student-score-roster.use-case.js';
+import { BulkUpsertStudentScoresUseCase } from '../use-cases/bulk-upsert-student-scores.use-case.js';
 
 @ApiTags('Student Scores')
 @ApiBearerAuth()
