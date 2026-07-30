@@ -43,29 +43,19 @@ export class CreateAssetUseCase {
       });
 
     return this.repository.create({
-      data: {
-        assetNumber,
-        name: dto.name,
-        brand: dto.brand ?? null,
-        model: dto.model ?? null,
-        purchaseDate: new Date(dto.purchaseDate),
-        purchasePrice: dto.purchasePrice,
-        usefulLifeMonths: dto.usefulLifeMonths ?? undefined,
-        notes: dto.notes ?? null,
-        category: { connect: { id: dto.categoryId } },
-        ...(dto.fundingSourceId && {
-          fundingSource: { connect: { id: dto.fundingSourceId } },
-        }),
-        units: { create: units },
-      },
-      include: {
-        category: true,
-        fundingSource: true,
-        units: {
-          where: { deletedAt: null },
-          include: { condition: true, status: true, location: true },
-        },
-      },
+      assetNumber,
+      name: dto.name,
+      brand: dto.brand ?? null,
+      model: dto.model ?? null,
+      purchaseDate: new Date(dto.purchaseDate),
+      purchasePrice: dto.purchasePrice,
+      usefulLifeMonths: dto.usefulLifeMonths ?? undefined,
+      notes: dto.notes ?? null,
+      category: { connect: { id: dto.categoryId } },
+      ...(dto.fundingSourceId && {
+        fundingSource: { connect: { id: dto.fundingSourceId } },
+      }),
+      units: { create: units },
     });
   }
 }

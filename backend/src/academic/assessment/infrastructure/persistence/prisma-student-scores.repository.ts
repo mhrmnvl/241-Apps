@@ -9,6 +9,8 @@ import {
   REPORT_CARD_SCORE_INCLUDE,
   StudentScoreWithDetails,
   StudentScoreWithReportCardDetails,
+  ReportCardScoreRow,
+  StudentScoreRosterItem,
 } from '../../domain/interfaces/student-scores-repository.interface.js';
 
 @Injectable()

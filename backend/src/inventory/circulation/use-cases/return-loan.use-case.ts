@@ -51,7 +51,11 @@ export class ReturnLoanUseCase {
       txTypeId: txType.id,
       changedById,
       loanNumber: loan.loanNumber,
-      items: dto.items,
+      items: dto.items.map((item) => ({
+        unitId: item.unitId,
+        conditionId: item.returnedConditionId,
+        note: item.notes,
+      })),
     });
   }
 }

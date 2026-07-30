@@ -41,6 +41,8 @@ export type ReportCardScoreRow = Prisma.StudentScoreGetPayload<{
   include: typeof REPORT_CARD_SCORE_INCLUDE;
 }>;
 
+export type StudentScoreWithReportCardDetails = ReportCardScoreRow;
+
 export abstract class IStudentScoreRepository {
   abstract findAll(
     query: StudentScoreQueryDto,

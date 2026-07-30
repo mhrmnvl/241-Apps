@@ -126,9 +126,14 @@ export class PrismaEventRepository extends IEventRepository {
   }
 
   async findAllAudienceGroups() {
-    return this.prisma.audienceGroup.findMany({
+    const groups = await this.prisma.audienceGroup.findMany({
       where: { deletedAt: null },
       orderBy: { name: 'asc' },
     });
+    return groups.map((g) => ({
+      id: g.id,
+      name: g.name,
+      description: null,
+    }));
   }
 }

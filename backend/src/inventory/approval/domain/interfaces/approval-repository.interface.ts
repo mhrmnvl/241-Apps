@@ -2,6 +2,7 @@ import {
   ApprovalWorkflow,
   ApprovalInstance,
   ApprovalLog,
+  InventoryStatusKey,
   Prisma,
 } from '@prisma/client';
 
