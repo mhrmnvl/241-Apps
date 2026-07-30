@@ -7,7 +7,7 @@ import { RolloverSemesterUseCase } from './rollover-semester.use-case.js';
 describe('RolloverSemesterUseCase', () => {
   let useCase: RolloverSemesterUseCase;
 
-  const mockRolloverRepo = {
+  const mockRolloverRepository = {
     findSemesterWithAcademicYear: jest.fn(),
     fetchSourceData: jest.fn(),
     executeRollover: jest.fn(),
@@ -17,7 +17,7 @@ describe('RolloverSemesterUseCase', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         RolloverSemesterUseCase,
-        { provide: IRolloverRepository, useValue: mockRolloverRepo },
+        { provide: IRolloverRepository, useValue: mockRolloverRepository },
       ],
     }).compile();
 
@@ -76,7 +76,7 @@ describe('RolloverSemesterUseCase', () => {
     });
 
     it('should throw NotFoundException when source semester not found', async () => {
-      mockRolloverRepo.findSemesterWithAcademicYear
+      mockRolloverRepository.findSemesterWithAcademicYear
         .mockResolvedValueOnce(null)
         .mockResolvedValueOnce(targetSemester);
 
@@ -84,7 +84,7 @@ describe('RolloverSemesterUseCase', () => {
     });
 
     it('should throw NotFoundException when target semester not found', async () => {
-      mockRolloverRepo.findSemesterWithAcademicYear
+      mockRolloverRepository.findSemesterWithAcademicYear
         .mockResolvedValueOnce(sourceSemester)
         .mockResolvedValueOnce(null);
 
@@ -98,7 +98,7 @@ describe('RolloverSemesterUseCase', () => {
         typeId: 'type-odd',
         academicYear: { id: 'ay-2', name: '2026/2027' },
       };
-      mockRolloverRepo.findSemesterWithAcademicYear
+      mockRolloverRepository.findSemesterWithAcademicYear
         .mockResolvedValueOnce(sourceSemester)
         .mockResolvedValueOnce(crossAyTarget);
 
@@ -117,7 +117,7 @@ describe('RolloverSemesterUseCase', () => {
         typeId: 'type-odd',
         academicYear: { id: 'ay-1', name: '2025/2026' },
       };
-      mockRolloverRepo.findSemesterWithAcademicYear
+      mockRolloverRepository.findSemesterWithAcademicYear
         .mockResolvedValueOnce(sourceSemester)
         .mockResolvedValueOnce(sameTypeTarget);
 
@@ -125,7 +125,7 @@ describe('RolloverSemesterUseCase', () => {
     });
 
     it('should rollover successfully', async () => {
-      mockRolloverRepo.findSemesterWithAcademicYear
+      mockRolloverRepository.findSemesterWithAcademicYear
         .mockResolvedValueOnce(sourceSemester)
         .mockResolvedValueOnce(targetSemester);
 
@@ -144,16 +144,16 @@ describe('RolloverSemesterUseCase', () => {
         schedules: { created: 1, skipped: 0 },
       };
 
-      mockRolloverRepo.fetchSourceData.mockResolvedValue(sourceData);
-      mockRolloverRepo.executeRollover.mockResolvedValue(summary);
+      mockRolloverRepository.fetchSourceData.mockResolvedValue(sourceData);
+      mockRolloverRepository.executeRollover.mockResolvedValue(summary);
 
       const result = await useCase.execute(dto);
 
-      expect(mockRolloverRepo.fetchSourceData).toHaveBeenCalledWith(
+      expect(mockRolloverRepository.fetchSourceData).toHaveBeenCalledWith(
         'sem-source',
         'ay-1',
       );
-      expect(mockRolloverRepo.executeRollover).toHaveBeenCalledWith(
+      expect(mockRolloverRepository.executeRollover).toHaveBeenCalledWith(
         sourceData,
         'sem-target',
         'ay-1',
@@ -166,12 +166,12 @@ describe('RolloverSemesterUseCase', () => {
     });
 
     it('should handle empty source data gracefully', async () => {
-      mockRolloverRepo.findSemesterWithAcademicYear
+      mockRolloverRepository.findSemesterWithAcademicYear
         .mockResolvedValueOnce(sourceSemester)
         .mockResolvedValueOnce(targetSemester);
 
-      mockRolloverRepo.fetchSourceData.mockResolvedValue(emptySourceData);
-      mockRolloverRepo.executeRollover.mockResolvedValue(defaultSummary);
+      mockRolloverRepository.fetchSourceData.mockResolvedValue(emptySourceData);
+      mockRolloverRepository.executeRollover.mockResolvedValue(defaultSummary);
 
       const result = await useCase.execute(dto);
 

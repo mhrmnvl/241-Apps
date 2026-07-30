@@ -13,11 +13,11 @@ import { TeacherPositionUseCase } from './teacher-position.use-case.js';
 describe('TeacherPositionUseCase', () => {
   let useCase: TeacherPositionUseCase;
 
-  const mockTeacherRepo = {
+  const mockTeacherRepository = {
     findById: jest.fn(),
   };
 
-  const mockPositionRepo = {
+  const mockPositionRepository = {
     findAll: jest.fn(),
     findPosition: jest.fn(),
     findAssignment: jest.fn(),
@@ -31,8 +31,11 @@ describe('TeacherPositionUseCase', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         TeacherPositionUseCase,
-        { provide: TeacherRepository, useValue: mockTeacherRepo },
-        { provide: TeacherPositionsRepository, useValue: mockPositionRepo },
+        { provide: TeacherRepository, useValue: mockTeacherRepository },
+        {
+          provide: TeacherPositionsRepository,
+          useValue: mockPositionRepository,
+        },
       ],
     }).compile();
 
@@ -53,23 +56,23 @@ describe('TeacherPositionUseCase', () => {
       const mockPositions = [
         { id: 'link-1', position: { name: 'Guru Kelas' } },
       ];
-      mockTeacherRepo.findById.mockResolvedValue(mockTeacher);
-      mockPositionRepo.findAll.mockResolvedValue(mockPositions);
+      mockTeacherRepository.findById.mockResolvedValue(mockTeacher);
+      mockPositionRepository.findAll.mockResolvedValue(mockPositions);
 
       const result = await useCase.findAll(teacherId);
 
-      expect(mockTeacherRepo.findById).toHaveBeenCalledWith(teacherId);
-      expect(mockPositionRepo.findAll).toHaveBeenCalledWith(teacherId);
+      expect(mockTeacherRepository.findById).toHaveBeenCalledWith(teacherId);
+      expect(mockPositionRepository.findAll).toHaveBeenCalledWith(teacherId);
       expect(result).toEqual(mockPositions);
     });
 
     it('should throw NotFoundException when teacher is not found', async () => {
-      mockTeacherRepo.findById.mockResolvedValue(null);
+      mockTeacherRepository.findById.mockResolvedValue(null);
 
       await expect(useCase.findAll(teacherId)).rejects.toThrow(
         NotFoundException,
       );
-      expect(mockPositionRepo.findAll).not.toHaveBeenCalled();
+      expect(mockPositionRepository.findAll).not.toHaveBeenCalled();
     });
   });
 
@@ -82,42 +85,45 @@ describe('TeacherPositionUseCase', () => {
     const mockLink = { id: 'link-1', positionId: 'pos-1' };
 
     it('should assign a position to an teacher successfully', async () => {
-      mockTeacherRepo.findById.mockResolvedValue(mockTeacher);
-      mockPositionRepo.findPosition.mockResolvedValue(activePosition);
-      mockPositionRepo.findAssignment.mockResolvedValue(null);
-      mockPositionRepo.assign.mockResolvedValue(mockLink);
+      mockTeacherRepository.findById.mockResolvedValue(mockTeacher);
+      mockPositionRepository.findPosition.mockResolvedValue(activePosition);
+      mockPositionRepository.findAssignment.mockResolvedValue(null);
+      mockPositionRepository.assign.mockResolvedValue(mockLink);
 
       const result = await useCase.assign(teacherId, dto);
 
-      expect(mockPositionRepo.findPosition).toHaveBeenCalledWith(
+      expect(mockPositionRepository.findPosition).toHaveBeenCalledWith(
         dto.positionId,
       );
-      expect(mockPositionRepo.assign).toHaveBeenCalledWith(teacherId, dto);
+      expect(mockPositionRepository.assign).toHaveBeenCalledWith(
+        teacherId,
+        dto,
+      );
       expect(result).toEqual(mockLink);
     });
 
     it('should throw NotFoundException when teacher is not found', async () => {
-      mockTeacherRepo.findById.mockResolvedValue(null);
+      mockTeacherRepository.findById.mockResolvedValue(null);
 
       await expect(useCase.assign(teacherId, dto)).rejects.toThrow(
         NotFoundException,
       );
-      expect(mockPositionRepo.assign).not.toHaveBeenCalled();
+      expect(mockPositionRepository.assign).not.toHaveBeenCalled();
     });
 
     it('should throw NotFoundException when position does not exist', async () => {
-      mockTeacherRepo.findById.mockResolvedValue(mockTeacher);
-      mockPositionRepo.findPosition.mockResolvedValue(null);
+      mockTeacherRepository.findById.mockResolvedValue(mockTeacher);
+      mockPositionRepository.findPosition.mockResolvedValue(null);
 
       await expect(useCase.assign(teacherId, dto)).rejects.toThrow(
         NotFoundException,
       );
-      expect(mockPositionRepo.assign).not.toHaveBeenCalled();
+      expect(mockPositionRepository.assign).not.toHaveBeenCalled();
     });
 
     it('should throw BadRequestException when position is inactive', async () => {
-      mockTeacherRepo.findById.mockResolvedValue(mockTeacher);
-      mockPositionRepo.findPosition.mockResolvedValue({
+      mockTeacherRepository.findById.mockResolvedValue(mockTeacher);
+      mockPositionRepository.findPosition.mockResolvedValue({
         ...activePosition,
         isActive: false,
       });
@@ -125,20 +131,20 @@ describe('TeacherPositionUseCase', () => {
       await expect(useCase.assign(teacherId, dto)).rejects.toThrow(
         BadRequestException,
       );
-      expect(mockPositionRepo.assign).not.toHaveBeenCalled();
+      expect(mockPositionRepository.assign).not.toHaveBeenCalled();
     });
 
     it('should throw ConflictException when same position already assigned on that date', async () => {
-      mockTeacherRepo.findById.mockResolvedValue(mockTeacher);
-      mockPositionRepo.findPosition.mockResolvedValue(activePosition);
-      mockPositionRepo.findAssignment.mockResolvedValue({
+      mockTeacherRepository.findById.mockResolvedValue(mockTeacher);
+      mockPositionRepository.findPosition.mockResolvedValue(activePosition);
+      mockPositionRepository.findAssignment.mockResolvedValue({
         id: 'existing-link',
       });
 
       await expect(useCase.assign(teacherId, dto)).rejects.toThrow(
         ConflictException,
       );
-      expect(mockPositionRepo.assign).not.toHaveBeenCalled();
+      expect(mockPositionRepository.assign).not.toHaveBeenCalled();
     });
   });
 
@@ -147,13 +153,13 @@ describe('TeacherPositionUseCase', () => {
 
     it('should update a position assignment successfully', async () => {
       const updatedLink = { id: 'link-1', isPrimary: true };
-      mockTeacherRepo.findById.mockResolvedValue(mockTeacher);
-      mockPositionRepo.findLinkById.mockResolvedValue({ id: 'link-1' });
-      mockPositionRepo.update.mockResolvedValue(updatedLink);
+      mockTeacherRepository.findById.mockResolvedValue(mockTeacher);
+      mockPositionRepository.findLinkById.mockResolvedValue({ id: 'link-1' });
+      mockPositionRepository.update.mockResolvedValue(updatedLink);
 
       const result = await useCase.update(teacherId, linkId, dto);
 
-      expect(mockPositionRepo.update).toHaveBeenCalledWith(
+      expect(mockPositionRepository.update).toHaveBeenCalledWith(
         teacherId,
         linkId,
         dto,
@@ -162,53 +168,53 @@ describe('TeacherPositionUseCase', () => {
     });
 
     it('should throw NotFoundException when teacher is not found', async () => {
-      mockTeacherRepo.findById.mockResolvedValue(null);
+      mockTeacherRepository.findById.mockResolvedValue(null);
 
       await expect(useCase.update(teacherId, linkId, dto)).rejects.toThrow(
         NotFoundException,
       );
-      expect(mockPositionRepo.update).not.toHaveBeenCalled();
+      expect(mockPositionRepository.update).not.toHaveBeenCalled();
     });
 
     it('should throw NotFoundException when position assignment is not found', async () => {
-      mockTeacherRepo.findById.mockResolvedValue(mockTeacher);
-      mockPositionRepo.findLinkById.mockResolvedValue(null);
+      mockTeacherRepository.findById.mockResolvedValue(mockTeacher);
+      mockPositionRepository.findLinkById.mockResolvedValue(null);
 
       await expect(useCase.update(teacherId, linkId, dto)).rejects.toThrow(
         NotFoundException,
       );
-      expect(mockPositionRepo.update).not.toHaveBeenCalled();
+      expect(mockPositionRepository.update).not.toHaveBeenCalled();
     });
   });
 
   describe('remove', () => {
     it('should remove a position assignment successfully', async () => {
-      mockTeacherRepo.findById.mockResolvedValue(mockTeacher);
-      mockPositionRepo.findLinkById.mockResolvedValue({ id: 'link-1' });
-      mockPositionRepo.remove.mockResolvedValue(undefined);
+      mockTeacherRepository.findById.mockResolvedValue(mockTeacher);
+      mockPositionRepository.findLinkById.mockResolvedValue({ id: 'link-1' });
+      mockPositionRepository.remove.mockResolvedValue(undefined);
 
       await useCase.remove(teacherId, linkId);
 
-      expect(mockPositionRepo.remove).toHaveBeenCalledWith(linkId);
+      expect(mockPositionRepository.remove).toHaveBeenCalledWith(linkId);
     });
 
     it('should throw NotFoundException when teacher is not found', async () => {
-      mockTeacherRepo.findById.mockResolvedValue(null);
+      mockTeacherRepository.findById.mockResolvedValue(null);
 
       await expect(useCase.remove(teacherId, linkId)).rejects.toThrow(
         NotFoundException,
       );
-      expect(mockPositionRepo.remove).not.toHaveBeenCalled();
+      expect(mockPositionRepository.remove).not.toHaveBeenCalled();
     });
 
     it('should throw NotFoundException when assignment is not found', async () => {
-      mockTeacherRepo.findById.mockResolvedValue(mockTeacher);
-      mockPositionRepo.findLinkById.mockResolvedValue(null);
+      mockTeacherRepository.findById.mockResolvedValue(mockTeacher);
+      mockPositionRepository.findLinkById.mockResolvedValue(null);
 
       await expect(useCase.remove(teacherId, linkId)).rejects.toThrow(
         NotFoundException,
       );
-      expect(mockPositionRepo.remove).not.toHaveBeenCalled();
+      expect(mockPositionRepository.remove).not.toHaveBeenCalled();
     });
   });
 });

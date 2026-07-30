@@ -11,7 +11,7 @@ describe('RemoveStudentAddressUseCase', () => {
     findById: jest.fn(),
   };
 
-  const mockAddressRepo = {
+  const mockAddressRepository = {
     findOne: jest.fn(),
     remove: jest.fn(),
   };
@@ -21,7 +21,7 @@ describe('RemoveStudentAddressUseCase', () => {
       providers: [
         RemoveStudentAddressUseCase,
         { provide: StudentRepository, useValue: mockRepo },
-        { provide: StudentAddressRepository, useValue: mockAddressRepo },
+        { provide: StudentAddressRepository, useValue: mockAddressRepository },
       ],
     }).compile();
 
@@ -41,17 +41,17 @@ describe('RemoveStudentAddressUseCase', () => {
 
     it('should remove an address successfully', async () => {
       mockRepo.findById.mockResolvedValue({ id: 'stu-1' });
-      mockAddressRepo.findOne.mockResolvedValue({ id: 'addr-1' });
-      mockAddressRepo.remove.mockResolvedValue(undefined);
+      mockAddressRepository.findOne.mockResolvedValue({ id: 'addr-1' });
+      mockAddressRepository.remove.mockResolvedValue(undefined);
 
       await useCase.execute(studentId, addressId);
 
       expect(mockRepo.findById).toHaveBeenCalledWith(studentId);
-      expect(mockAddressRepo.findOne).toHaveBeenCalledWith(
+      expect(mockAddressRepository.findOne).toHaveBeenCalledWith(
         studentId,
         addressId,
       );
-      expect(mockAddressRepo.remove).toHaveBeenCalledWith(addressId);
+      expect(mockAddressRepository.remove).toHaveBeenCalledWith(addressId);
     });
 
     it('should throw NotFoundException when student is not found', async () => {
@@ -60,17 +60,17 @@ describe('RemoveStudentAddressUseCase', () => {
       await expect(useCase.execute(studentId, addressId)).rejects.toThrow(
         NotFoundException,
       );
-      expect(mockAddressRepo.remove).not.toHaveBeenCalled();
+      expect(mockAddressRepository.remove).not.toHaveBeenCalled();
     });
 
     it('should throw NotFoundException when address is not found for student', async () => {
       mockRepo.findById.mockResolvedValue({ id: 'stu-1' });
-      mockAddressRepo.findOne.mockResolvedValue(null);
+      mockAddressRepository.findOne.mockResolvedValue(null);
 
       await expect(useCase.execute(studentId, addressId)).rejects.toThrow(
         NotFoundException,
       );
-      expect(mockAddressRepo.remove).not.toHaveBeenCalled();
+      expect(mockAddressRepository.remove).not.toHaveBeenCalled();
     });
   });
 });

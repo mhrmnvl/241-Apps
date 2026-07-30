@@ -41,16 +41,16 @@ const validRow = {
 describe('BulkImportStudentsUseCase', () => {
   let useCase: BulkImportStudentsUseCase;
 
-  const mockStudentRepo = {
+  const mockStudentRepository = {
     findByNis: jest.fn(),
     findByNisn: jest.fn(),
   };
 
-  const mockClassroomRepo = {
+  const mockClassroomRepository = {
     findByCode: jest.fn(),
   };
 
-  const mockClassroomLevelRepo = {
+  const mockClassroomLevelRepository = {
     findByLevel: jest.fn(),
   };
 
@@ -62,11 +62,11 @@ describe('BulkImportStudentsUseCase', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         BulkImportStudentsUseCase,
-        { provide: StudentRepository, useValue: mockStudentRepo },
-        { provide: ClassroomRepository, useValue: mockClassroomRepo },
+        { provide: StudentRepository, useValue: mockStudentRepository },
+        { provide: ClassroomRepository, useValue: mockClassroomRepository },
         {
           provide: IGradeRepository,
-          useValue: mockClassroomLevelRepo,
+          useValue: mockClassroomLevelRepository,
         },
         { provide: CreateStudentUseCase, useValue: mockCreateStudent },
         ExcelStudentParser,
@@ -91,13 +91,13 @@ describe('BulkImportStudentsUseCase', () => {
     });
 
     it('should import a valid row with classroom code successfully', async () => {
-      mockClassroomRepo.findByCode.mockResolvedValue({
+      mockClassroomRepository.findByCode.mockResolvedValue({
         id: 'cls-1',
         code: 'VII-A',
         gradeId: 'lvl-7',
       });
-      mockStudentRepo.findByNis.mockResolvedValue(null);
-      mockStudentRepo.findByNisn.mockResolvedValue(null);
+      mockStudentRepository.findByNis.mockResolvedValue(null);
+      mockStudentRepository.findByNisn.mockResolvedValue(null);
       mockCreateStudent.execute.mockResolvedValue({ id: 'stu-1' });
 
       const buffer = await makeExcelBuffer([validRow]);
@@ -107,7 +107,7 @@ describe('BulkImportStudentsUseCase', () => {
       expect(result.success).toBe(1);
       expect(result.failed).toBe(0);
       expect(result.results[0].status).toBe('SUCCESS');
-      expect(mockClassroomRepo.findByCode).toHaveBeenCalledWith('VII-A');
+      expect(mockClassroomRepository.findByCode).toHaveBeenCalledWith('VII-A');
       expect(mockCreateStudent.execute).toHaveBeenCalledWith(
         expect.objectContaining({ classroomId: 'cls-1' }),
       );
@@ -115,22 +115,22 @@ describe('BulkImportStudentsUseCase', () => {
 
     it('should import a PPDB student without classroom code', async () => {
       const ppdbRow = { ...validRow, Kelas: '' };
-      mockStudentRepo.findByNis.mockResolvedValue(null);
-      mockStudentRepo.findByNisn.mockResolvedValue(null);
+      mockStudentRepository.findByNis.mockResolvedValue(null);
+      mockStudentRepository.findByNisn.mockResolvedValue(null);
       mockCreateStudent.execute.mockResolvedValue({ id: 'stu-2' });
 
       const buffer = await makeExcelBuffer([ppdbRow]);
       const result = await useCase.execute(buffer);
 
       expect(result.success).toBe(1);
-      expect(mockClassroomRepo.findByCode).not.toHaveBeenCalled();
+      expect(mockClassroomRepository.findByCode).not.toHaveBeenCalled();
       expect(mockCreateStudent.execute).toHaveBeenCalledWith(
         expect.objectContaining({ classroomId: undefined }),
       );
     });
 
     it('should fail row when classroom code is not found', async () => {
-      mockClassroomRepo.findByCode.mockResolvedValue(null);
+      mockClassroomRepository.findByCode.mockResolvedValue(null);
 
       const buffer = await makeExcelBuffer([validRow]);
       const result = await useCase.execute(buffer);
@@ -142,13 +142,13 @@ describe('BulkImportStudentsUseCase', () => {
     });
 
     it('should flag row as CONFLICT when NIS is duplicated', async () => {
-      mockClassroomRepo.findByCode.mockResolvedValue({
+      mockClassroomRepository.findByCode.mockResolvedValue({
         id: 'cls-1',
         code: 'VII-A',
         gradeId: 'lvl-7',
       });
-      mockStudentRepo.findByNis.mockResolvedValue({ id: 'stu-existing' });
-      mockStudentRepo.findByNisn.mockResolvedValue(null);
+      mockStudentRepository.findByNis.mockResolvedValue({ id: 'stu-existing' });
+      mockStudentRepository.findByNisn.mockResolvedValue(null);
 
       const buffer = await makeExcelBuffer([validRow]);
       const result = await useCase.execute(buffer);
@@ -162,13 +162,15 @@ describe('BulkImportStudentsUseCase', () => {
     });
 
     it('should flag row as CONFLICT when NISN is duplicated', async () => {
-      mockClassroomRepo.findByCode.mockResolvedValue({
+      mockClassroomRepository.findByCode.mockResolvedValue({
         id: 'cls-1',
         code: 'VII-A',
         gradeId: 'lvl-7',
       });
-      mockStudentRepo.findByNis.mockResolvedValue(null);
-      mockStudentRepo.findByNisn.mockResolvedValue({ id: 'stu-existing' });
+      mockStudentRepository.findByNis.mockResolvedValue(null);
+      mockStudentRepository.findByNisn.mockResolvedValue({
+        id: 'stu-existing',
+      });
 
       const buffer = await makeExcelBuffer([validRow]);
       const result = await useCase.execute(buffer);
@@ -193,8 +195,8 @@ describe('BulkImportStudentsUseCase', () => {
     });
 
     it('should fail the row with the specific error message when creation throws', async () => {
-      mockStudentRepo.findByNis.mockResolvedValue(null);
-      mockStudentRepo.findByNisn.mockResolvedValue(null);
+      mockStudentRepository.findByNis.mockResolvedValue(null);
+      mockStudentRepository.findByNisn.mockResolvedValue(null);
       mockCreateStudent.execute.mockRejectedValue(
         new Error('Database connection lost'),
       );
@@ -209,13 +211,13 @@ describe('BulkImportStudentsUseCase', () => {
     });
 
     it('should look up a repeated classroom code only once across rows', async () => {
-      mockClassroomRepo.findByCode.mockResolvedValue({
+      mockClassroomRepository.findByCode.mockResolvedValue({
         id: 'cls-1',
         code: 'VII-A',
         gradeId: 'lvl-7',
       });
-      mockStudentRepo.findByNis.mockResolvedValue(null);
-      mockStudentRepo.findByNisn.mockResolvedValue(null);
+      mockStudentRepository.findByNis.mockResolvedValue(null);
+      mockStudentRepository.findByNisn.mockResolvedValue(null);
       mockCreateStudent.execute.mockResolvedValue({ id: 'stu-1' });
 
       const row2 = { ...validRow, NIS: '2024002', NISN: '0012345679' };
@@ -223,13 +225,13 @@ describe('BulkImportStudentsUseCase', () => {
       const result = await useCase.execute(buffer);
 
       expect(result.success).toBe(2);
-      expect(mockClassroomRepo.findByCode).toHaveBeenCalledTimes(1);
+      expect(mockClassroomRepository.findByCode).toHaveBeenCalledTimes(1);
     });
 
     it('should correctly number rows starting at 2 (row 1 = header)', async () => {
       const ppdbRow = { ...validRow, Kelas: '' };
-      mockStudentRepo.findByNis.mockResolvedValue(null);
-      mockStudentRepo.findByNisn.mockResolvedValue(null);
+      mockStudentRepository.findByNis.mockResolvedValue(null);
+      mockStudentRepository.findByNisn.mockResolvedValue(null);
       mockCreateStudent.execute.mockResolvedValue({ id: 'stu-1' });
 
       const buffer = await makeExcelBuffer([ppdbRow]);

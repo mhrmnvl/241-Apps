@@ -3,6 +3,8 @@ import ExcelJS from 'exceljs';
 import { ExportTeacherQueryDto } from '../dto/request/export-teacher-query.dto.js';
 import { TeacherRepository } from '../repositories/teacher.repository.js';
 
+import { mapTeacherToExportRow } from '../constants/teacher-export-columns.js';
+
 declare module 'exceljs' {
   interface Worksheet {
     dataValidations: {
@@ -19,30 +21,7 @@ export class ExportTeachersUseCase {
 
   async execute(filters: ExportTeacherQueryDto): Promise<Buffer> {
     const teachers = await this.teacherRepository.findAllForExport(filters);
-
-    const rows = teachers.map((e) => ({
-      Nama: e.user.profile?.name ?? '',
-      NIK: e.user.profile?.nik ?? '',
-      NIP: e.nip ?? '',
-      NUPTK: e.nuptk ?? '',
-      'Status Kepegawaian': e.employmentType?.name ?? '',
-      'Jenis Kelamin':
-        e.user.profile?.gender === 'MALE'
-          ? 'L'
-          : e.user.profile?.gender === 'FEMALE'
-            ? 'P'
-            : '',
-      'Tempat Lahir': e.user.profile?.birthPlace ?? '',
-      'Tanggal Lahir': e.user.profile?.birthDate
-        ? new Date(e.user.profile.birthDate).toISOString().split('T')[0]
-        : '',
-      Email: e.user.profile?.email ?? '',
-      Telepon: e.user.profile?.phone ?? '',
-      Jabatan: e.teacherPositions?.[0]?.position?.name ?? '',
-      Identifier: e.user.identifier,
-      Status: e.user.isActive ? 'Aktif' : 'Nonaktif',
-    }));
-
+    const rows = teachers.map(mapTeacherToExportRow);
     return this.buildExcel(rows, 'Teachers');
   }
 

@@ -13,7 +13,7 @@ describe('UpdateAnnouncementUseCase', () => {
     update: jest.fn(),
   };
 
-  const mockClassroomRepo = {
+  const mockClassroomRepository = {
     findById: jest.fn(),
   };
 
@@ -31,7 +31,7 @@ describe('UpdateAnnouncementUseCase', () => {
       providers: [
         UpdateAnnouncementUseCase,
         { provide: AnnouncementRepository, useValue: mockRepository },
-        { provide: ClassroomRepository, useValue: mockClassroomRepo },
+        { provide: ClassroomRepository, useValue: mockClassroomRepository },
       ],
     }).compile();
 
@@ -56,7 +56,7 @@ describe('UpdateAnnouncementUseCase', () => {
       const result = await useCase.execute(id, dto);
 
       expect(mockRepository.findById).toHaveBeenCalledWith(id);
-      expect(mockClassroomRepo.findById).not.toHaveBeenCalled();
+      expect(mockClassroomRepository.findById).not.toHaveBeenCalled();
       expect(mockRepository.update).toHaveBeenCalledWith(
         id,
         { title: 'Updated Title' },
@@ -88,7 +88,7 @@ describe('UpdateAnnouncementUseCase', () => {
       const dto: UpdateAnnouncementDto = { classroomIds: [classroomId] };
 
       mockRepository.findById.mockResolvedValue(mockExisting);
-      mockClassroomRepo.findById.mockResolvedValue({
+      mockClassroomRepository.findById.mockResolvedValue({
         id: classroomId,
         name: 'X IPA 1',
       });
@@ -96,7 +96,9 @@ describe('UpdateAnnouncementUseCase', () => {
 
       await useCase.execute(id, dto);
 
-      expect(mockClassroomRepo.findById).toHaveBeenCalledWith(classroomId);
+      expect(mockClassroomRepository.findById).toHaveBeenCalledWith(
+        classroomId,
+      );
       expect(mockRepository.update).toHaveBeenCalledWith(id, {}, [classroomId]);
     });
 
@@ -113,7 +115,7 @@ describe('UpdateAnnouncementUseCase', () => {
       const dto: UpdateAnnouncementDto = { classroomIds: [invalidId] };
 
       mockRepository.findById.mockResolvedValue(mockExisting);
-      mockClassroomRepo.findById.mockResolvedValue(null);
+      mockClassroomRepository.findById.mockResolvedValue(null);
 
       await expect(useCase.execute(id, dto)).rejects.toThrow(NotFoundException);
       expect(mockRepository.update).not.toHaveBeenCalled();

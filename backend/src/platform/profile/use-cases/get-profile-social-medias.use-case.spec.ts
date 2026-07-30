@@ -7,15 +7,18 @@ import { GetProfileSocialMediasUseCase } from './get-profile-social-medias.use-c
 describe('GetProfileSocialMediasUseCase', () => {
   let useCase: GetProfileSocialMediasUseCase;
 
-  const mockProfileRepo = { findByUserId: jest.fn() };
-  const mockSocialRepo = { findAllByProfileId: jest.fn() };
+  const mockProfileRepository = { findByUserId: jest.fn() };
+  const mockSocialRepository = { findAllByProfileId: jest.fn() };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         GetProfileSocialMediasUseCase,
-        { provide: ProfileRepository, useValue: mockProfileRepo },
-        { provide: ProfileSocialMediaRepository, useValue: mockSocialRepo },
+        { provide: ProfileRepository, useValue: mockProfileRepository },
+        {
+          provide: ProfileSocialMediaRepository,
+          useValue: mockSocialRepository,
+        },
       ],
     }).compile();
 
@@ -37,21 +40,25 @@ describe('GetProfileSocialMediasUseCase', () => {
       const mockSocialMedias = [
         { id: 'sm-1', socialMediaId: 'plt-1', username: 'ahmad_fauzi' },
       ];
-      mockProfileRepo.findByUserId.mockResolvedValue(mockProfile);
-      mockSocialRepo.findAllByProfileId.mockResolvedValue(mockSocialMedias);
+      mockProfileRepository.findByUserId.mockResolvedValue(mockProfile);
+      mockSocialRepository.findAllByProfileId.mockResolvedValue(
+        mockSocialMedias,
+      );
 
       const result = await useCase.execute(userId);
 
-      expect(mockProfileRepo.findByUserId).toHaveBeenCalledWith(userId);
-      expect(mockSocialRepo.findAllByProfileId).toHaveBeenCalledWith('prof-1');
+      expect(mockProfileRepository.findByUserId).toHaveBeenCalledWith(userId);
+      expect(mockSocialRepository.findAllByProfileId).toHaveBeenCalledWith(
+        'prof-1',
+      );
       expect(result).toEqual(mockSocialMedias);
     });
 
     it('should throw NotFoundException when profile is not found', async () => {
-      mockProfileRepo.findByUserId.mockResolvedValue(null);
+      mockProfileRepository.findByUserId.mockResolvedValue(null);
 
       await expect(useCase.execute(userId)).rejects.toThrow(NotFoundException);
-      expect(mockSocialRepo.findAllByProfileId).not.toHaveBeenCalled();
+      expect(mockSocialRepository.findAllByProfileId).not.toHaveBeenCalled();
     });
   });
 });

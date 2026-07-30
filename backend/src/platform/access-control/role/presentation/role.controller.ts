@@ -34,7 +34,6 @@ import { UpdateRoleUseCase } from '../use-cases/update-role.use-case.js';
 import { DeleteRoleUseCase } from '../use-cases/delete-role.use-case.js';
 import { AssignRoleToUserUseCase } from '../use-cases/assign-role-to-user.use-case.js';
 import { RemoveRoleFromUserUseCase } from '../use-cases/remove-role-from-user.use-case.js';
-import { IRoleRepository } from '../domain/interfaces/role-repository.interface.js';
 
 @ApiTags('Roles')
 @ApiBearerAuth()
@@ -49,7 +48,6 @@ export class RoleController {
     private readonly deleteRoleUseCase: DeleteRoleUseCase,
     private readonly assignRoleToUserUseCase: AssignRoleToUserUseCase,
     private readonly removeRoleFromUserUseCase: RemoveRoleFromUserUseCase,
-    private readonly roleRepository: IRoleRepository,
   ) {}
 
   @Get()
@@ -57,9 +55,7 @@ export class RoleController {
   @ApiOperation({ summary: 'List all roles' })
   @ApiResponse({ status: 200, type: [RoleResponseDto] })
   async findAll(@CurrentUser() user: AuthenticatedUser) {
-    const userRoles = await this.roleRepository.findUserRoles(user.id);
-    const isSuperAdmin = userRoles.some((ur) => ur.role.code === 'SUPER_ADMIN');
-    return this.getRolesUseCase.execute(user.id, isSuperAdmin);
+    return this.getRolesUseCase.execute(user.id);
   }
 
   @Get(':id')

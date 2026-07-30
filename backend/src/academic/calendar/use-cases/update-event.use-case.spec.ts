@@ -13,7 +13,7 @@ describe('UpdateEventUseCase', () => {
     update: jest.fn(),
   };
 
-  const mockClassroomRepo = {
+  const mockClassroomRepository = {
     findById: jest.fn(),
   };
 
@@ -22,7 +22,7 @@ describe('UpdateEventUseCase', () => {
       providers: [
         UpdateEventUseCase,
         { provide: IEventRepository, useValue: mockRepository },
-        { provide: ClassroomRepository, useValue: mockClassroomRepo },
+        { provide: ClassroomRepository, useValue: mockClassroomRepository },
       ],
     }).compile();
 
@@ -56,7 +56,7 @@ describe('UpdateEventUseCase', () => {
       const result = await useCase.execute(id, dto);
 
       expect(mockRepository.findById).toHaveBeenCalledWith(id);
-      expect(mockClassroomRepo.findById).not.toHaveBeenCalled();
+      expect(mockClassroomRepository.findById).not.toHaveBeenCalled();
       expect(mockRepository.update).toHaveBeenCalledWith(id, dto);
       expect(result).toEqual(updatedEvent);
     });
@@ -65,13 +65,13 @@ describe('UpdateEventUseCase', () => {
       const dto: UpdateEventDto = { classroomIds: ['cls-1', 'cls-2'] };
 
       mockRepository.findById.mockResolvedValue(currentEvent);
-      mockClassroomRepo.findById.mockResolvedValue({ id: 'cls-1' });
+      mockClassroomRepository.findById.mockResolvedValue({ id: 'cls-1' });
       mockRepository.update.mockResolvedValue(currentEvent);
 
       await useCase.execute(id, dto);
 
-      expect(mockClassroomRepo.findById).toHaveBeenCalledWith('cls-1');
-      expect(mockClassroomRepo.findById).toHaveBeenCalledWith('cls-2');
+      expect(mockClassroomRepository.findById).toHaveBeenCalledWith('cls-1');
+      expect(mockClassroomRepository.findById).toHaveBeenCalledWith('cls-2');
     });
 
     it('should throw NotFoundException when event is not found', async () => {
@@ -86,7 +86,7 @@ describe('UpdateEventUseCase', () => {
       const dto: UpdateEventDto = { classroomIds: ['cls-nonexistent'] };
 
       mockRepository.findById.mockResolvedValue(currentEvent);
-      mockClassroomRepo.findById.mockResolvedValue(null);
+      mockClassroomRepository.findById.mockResolvedValue(null);
 
       await expect(useCase.execute(id, dto)).rejects.toThrow(NotFoundException);
       expect(mockRepository.update).not.toHaveBeenCalled();
@@ -100,7 +100,7 @@ describe('UpdateEventUseCase', () => {
 
       await useCase.execute(id, dto);
 
-      expect(mockClassroomRepo.findById).not.toHaveBeenCalled();
+      expect(mockClassroomRepository.findById).not.toHaveBeenCalled();
     });
   });
 });

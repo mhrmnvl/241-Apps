@@ -10,22 +10,22 @@ describe('AssignRoleToUserUseCase', () => {
   let usersRepo: jest.Mocked<IUserRepository>;
 
   beforeEach(async () => {
-    const mockRolesRepo = {
+    const mockRolesRepository = {
       findById: jest.fn(),
       findUserRoles: jest.fn(),
       findUserRole: jest.fn(),
       assignRoleToUser: jest.fn(),
     };
 
-    const mockUsersRepo = {
+    const mockUsersRepository = {
       findById: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AssignRoleToUserUseCase,
-        { provide: IRoleRepository, useValue: mockRolesRepo },
-        { provide: IUserRepository, useValue: mockUsersRepo },
+        { provide: IRoleRepository, useValue: mockRolesRepository },
+        { provide: IUserRepository, useValue: mockUsersRepository },
       ],
     }).compile();
 

@@ -7,8 +7,8 @@ import { RemoveProfileSocialMediaUseCase } from './remove-profile-social-media.u
 describe('RemoveProfileSocialMediaUseCase', () => {
   let useCase: RemoveProfileSocialMediaUseCase;
 
-  const mockProfileRepo = { findByUserId: jest.fn() };
-  const mockSocialRepo = {
+  const mockProfileRepository = { findByUserId: jest.fn() };
+  const mockSocialRepository = {
     findByIdAndProfile: jest.fn(),
     remove: jest.fn(),
   };
@@ -17,8 +17,11 @@ describe('RemoveProfileSocialMediaUseCase', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         RemoveProfileSocialMediaUseCase,
-        { provide: ProfileRepository, useValue: mockProfileRepo },
-        { provide: ProfileSocialMediaRepository, useValue: mockSocialRepo },
+        { provide: ProfileRepository, useValue: mockProfileRepository },
+        {
+          provide: ProfileSocialMediaRepository,
+          useValue: mockSocialRepository,
+        },
       ],
     }).compile();
 
@@ -37,37 +40,37 @@ describe('RemoveProfileSocialMediaUseCase', () => {
     const socialMediaId = 'sm-1';
 
     it('should remove social media successfully', async () => {
-      mockProfileRepo.findByUserId.mockResolvedValue({ id: 'prof-1' });
-      mockSocialRepo.findByIdAndProfile.mockResolvedValue({ id: 'sm-1' });
-      mockSocialRepo.remove.mockResolvedValue(undefined);
+      mockProfileRepository.findByUserId.mockResolvedValue({ id: 'prof-1' });
+      mockSocialRepository.findByIdAndProfile.mockResolvedValue({ id: 'sm-1' });
+      mockSocialRepository.remove.mockResolvedValue(undefined);
 
       await useCase.execute(userId, socialMediaId);
 
-      expect(mockProfileRepo.findByUserId).toHaveBeenCalledWith(userId);
-      expect(mockSocialRepo.findByIdAndProfile).toHaveBeenCalledWith(
+      expect(mockProfileRepository.findByUserId).toHaveBeenCalledWith(userId);
+      expect(mockSocialRepository.findByIdAndProfile).toHaveBeenCalledWith(
         socialMediaId,
         'prof-1',
       );
-      expect(mockSocialRepo.remove).toHaveBeenCalledWith(socialMediaId);
+      expect(mockSocialRepository.remove).toHaveBeenCalledWith(socialMediaId);
     });
 
     it('should throw NotFoundException when profile is not found', async () => {
-      mockProfileRepo.findByUserId.mockResolvedValue(null);
+      mockProfileRepository.findByUserId.mockResolvedValue(null);
 
       await expect(useCase.execute(userId, socialMediaId)).rejects.toThrow(
         NotFoundException,
       );
-      expect(mockSocialRepo.remove).not.toHaveBeenCalled();
+      expect(mockSocialRepository.remove).not.toHaveBeenCalled();
     });
 
     it('should throw NotFoundException when social media is not found for profile', async () => {
-      mockProfileRepo.findByUserId.mockResolvedValue({ id: 'prof-1' });
-      mockSocialRepo.findByIdAndProfile.mockResolvedValue(null);
+      mockProfileRepository.findByUserId.mockResolvedValue({ id: 'prof-1' });
+      mockSocialRepository.findByIdAndProfile.mockResolvedValue(null);
 
       await expect(useCase.execute(userId, socialMediaId)).rejects.toThrow(
         NotFoundException,
       );
-      expect(mockSocialRepo.remove).not.toHaveBeenCalled();
+      expect(mockSocialRepository.remove).not.toHaveBeenCalled();
     });
   });
 });

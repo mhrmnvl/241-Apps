@@ -7,8 +7,8 @@ import { RemoveProfileAddressUseCase } from './remove-profile-address.use-case.j
 describe('RemoveProfileAddressUseCase', () => {
   let useCase: RemoveProfileAddressUseCase;
 
-  const mockProfileRepo = { findByUserId: jest.fn() };
-  const mockAddressRepo = {
+  const mockProfileRepository = { findByUserId: jest.fn() };
+  const mockAddressRepository = {
     findAddressForUser: jest.fn(),
     remove: jest.fn(),
   };
@@ -17,8 +17,8 @@ describe('RemoveProfileAddressUseCase', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         RemoveProfileAddressUseCase,
-        { provide: ProfileRepository, useValue: mockProfileRepo },
-        { provide: ProfileAddressRepository, useValue: mockAddressRepo },
+        { provide: ProfileRepository, useValue: mockProfileRepository },
+        { provide: ProfileAddressRepository, useValue: mockAddressRepository },
       ],
     }).compile();
 
@@ -37,37 +37,39 @@ describe('RemoveProfileAddressUseCase', () => {
     const addressId = 'addr-1';
 
     it('should remove address successfully', async () => {
-      mockProfileRepo.findByUserId.mockResolvedValue({ id: 'prof-1' });
-      mockAddressRepo.findAddressForUser.mockResolvedValue({ id: 'addr-1' });
-      mockAddressRepo.remove.mockResolvedValue(undefined);
+      mockProfileRepository.findByUserId.mockResolvedValue({ id: 'prof-1' });
+      mockAddressRepository.findAddressForUser.mockResolvedValue({
+        id: 'addr-1',
+      });
+      mockAddressRepository.remove.mockResolvedValue(undefined);
 
       await useCase.execute(userId, addressId);
 
-      expect(mockProfileRepo.findByUserId).toHaveBeenCalledWith(userId);
-      expect(mockAddressRepo.findAddressForUser).toHaveBeenCalledWith(
+      expect(mockProfileRepository.findByUserId).toHaveBeenCalledWith(userId);
+      expect(mockAddressRepository.findAddressForUser).toHaveBeenCalledWith(
         addressId,
         userId,
       );
-      expect(mockAddressRepo.remove).toHaveBeenCalledWith(addressId);
+      expect(mockAddressRepository.remove).toHaveBeenCalledWith(addressId);
     });
 
     it('should throw NotFoundException when profile is not found', async () => {
-      mockProfileRepo.findByUserId.mockResolvedValue(null);
+      mockProfileRepository.findByUserId.mockResolvedValue(null);
 
       await expect(useCase.execute(userId, addressId)).rejects.toThrow(
         NotFoundException,
       );
-      expect(mockAddressRepo.remove).not.toHaveBeenCalled();
+      expect(mockAddressRepository.remove).not.toHaveBeenCalled();
     });
 
     it('should throw NotFoundException when address is not found for user', async () => {
-      mockProfileRepo.findByUserId.mockResolvedValue({ id: 'prof-1' });
-      mockAddressRepo.findAddressForUser.mockResolvedValue(null);
+      mockProfileRepository.findByUserId.mockResolvedValue({ id: 'prof-1' });
+      mockAddressRepository.findAddressForUser.mockResolvedValue(null);
 
       await expect(useCase.execute(userId, addressId)).rejects.toThrow(
         NotFoundException,
       );
-      expect(mockAddressRepo.remove).not.toHaveBeenCalled();
+      expect(mockAddressRepository.remove).not.toHaveBeenCalled();
     });
   });
 });

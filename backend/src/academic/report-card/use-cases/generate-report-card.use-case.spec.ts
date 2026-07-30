@@ -13,16 +13,16 @@ describe('GenerateReportCardUseCase', () => {
     upsert: jest.fn(),
     calculateAndApplyClassroomRanks: jest.fn(),
   };
-  const mockScoreRepo = { findAllForReportCard: jest.fn() };
-  const mockEnrollmentRepo = { findById: jest.fn() };
+  const mockScoreRepository = { findAllForReportCard: jest.fn() };
+  const mockEnrollmentRepository = { findById: jest.fn() };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         GenerateReportCardUseCase,
         { provide: IReportCardRepository, useValue: mockRepo },
-        { provide: IStudentScoreRepository, useValue: mockScoreRepo },
-        { provide: IEnrollmentRepository, useValue: mockEnrollmentRepo },
+        { provide: IStudentScoreRepository, useValue: mockScoreRepository },
+        { provide: IEnrollmentRepository, useValue: mockEnrollmentRepository },
       ],
     }).compile();
 
@@ -40,9 +40,9 @@ describe('GenerateReportCardUseCase', () => {
     };
 
     it('should generate reportCard with weighted average successfully', async () => {
-      mockEnrollmentRepo.findById.mockResolvedValue({ id: 'enr-1' });
+      mockEnrollmentRepository.findById.mockResolvedValue({ id: 'enr-1' });
       // Score 80 with weight 2, Score 100 with weight 1 => (80*2 + 100*1) / 3 = 86.666...
-      mockScoreRepo.findAllForReportCard.mockResolvedValue([
+      mockScoreRepository.findAllForReportCard.mockResolvedValue([
         { score: 80, assessmentItem: { weight: 2 } },
         { score: 100, assessmentItem: { weight: 1 } },
       ]);
@@ -51,7 +51,7 @@ describe('GenerateReportCardUseCase', () => {
 
       const result = await useCase.execute(dto);
 
-      expect(mockEnrollmentRepo.findById).toHaveBeenCalledWith('enr-1');
+      expect(mockEnrollmentRepository.findById).toHaveBeenCalledWith('enr-1');
       expect(mockRepo.upsert).toHaveBeenCalledWith(
         expect.objectContaining({
           totalAverage: 86.66666666666667,
@@ -61,8 +61,8 @@ describe('GenerateReportCardUseCase', () => {
     });
 
     it('should handle empty scores with null average', async () => {
-      mockEnrollmentRepo.findById.mockResolvedValue({ id: 'enr-1' });
-      mockScoreRepo.findAllForReportCard.mockResolvedValue([]);
+      mockEnrollmentRepository.findById.mockResolvedValue({ id: 'enr-1' });
+      mockScoreRepository.findAllForReportCard.mockResolvedValue([]);
       mockRepo.upsert.mockResolvedValue({ id: 'rap-1', totalAverage: null });
 
       const result = await useCase.execute(dto);
@@ -74,7 +74,7 @@ describe('GenerateReportCardUseCase', () => {
     });
 
     it('should throw NotFoundException when enrollment not found', async () => {
-      mockEnrollmentRepo.findById.mockResolvedValue(null);
+      mockEnrollmentRepository.findById.mockResolvedValue(null);
 
       await expect(useCase.execute(dto)).rejects.toThrow(NotFoundException);
     });

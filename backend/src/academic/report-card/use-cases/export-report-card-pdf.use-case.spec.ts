@@ -19,8 +19,8 @@ describe('ExportReportCardPdfUseCase', () => {
   let useCase: ExportReportCardPdfUseCase;
 
   const mockRepo = { findById: jest.fn() };
-  const mockStudentScoresRepo = { findAllForReportCard: jest.fn() };
-  const mockAttendanceRepo = { getStatusCounts: jest.fn() };
+  const mockStudentScoresRepository = { findAllForReportCard: jest.fn() };
+  const mockAttendanceRepository = { getStatusCounts: jest.fn() };
   const mockPdfService = { generatePdf: jest.fn() };
   const mockGetSchoolUnitUseCase = { execute: jest.fn() };
 
@@ -44,8 +44,11 @@ describe('ExportReportCardPdfUseCase', () => {
       providers: [
         ExportReportCardPdfUseCase,
         { provide: IReportCardRepository, useValue: mockRepo },
-        { provide: IStudentScoreRepository, useValue: mockStudentScoresRepo },
-        { provide: IAttendanceRepository, useValue: mockAttendanceRepo },
+        {
+          provide: IStudentScoreRepository,
+          useValue: mockStudentScoresRepository,
+        },
+        { provide: IAttendanceRepository, useValue: mockAttendanceRepository },
         { provide: PdfService, useValue: mockPdfService },
         { provide: GetSchoolUnitUseCase, useValue: mockGetSchoolUnitUseCase },
       ],
@@ -56,8 +59,8 @@ describe('ExportReportCardPdfUseCase', () => {
     );
     jest.clearAllMocks();
 
-    mockStudentScoresRepo.findAllForReportCard.mockResolvedValue([]);
-    mockAttendanceRepo.getStatusCounts.mockResolvedValue({
+    mockStudentScoresRepository.findAllForReportCard.mockResolvedValue([]);
+    mockAttendanceRepository.getStatusCounts.mockResolvedValue({
       sick: 0,
       excused: 0,
       absent: 0,
@@ -76,7 +79,9 @@ describe('ExportReportCardPdfUseCase', () => {
     await expect(useCase.execute('rap-missing')).rejects.toThrow(
       NotFoundException,
     );
-    expect(mockStudentScoresRepo.findAllForReportCard).not.toHaveBeenCalled();
+    expect(
+      mockStudentScoresRepository.findAllForReportCard,
+    ).not.toHaveBeenCalled();
   });
 
   it('should throw BadRequestException when the report card is not published', async () => {
@@ -86,7 +91,9 @@ describe('ExportReportCardPdfUseCase', () => {
     });
 
     await expect(useCase.execute('rap-1')).rejects.toThrow(BadRequestException);
-    expect(mockStudentScoresRepo.findAllForReportCard).not.toHaveBeenCalled();
+    expect(
+      mockStudentScoresRepository.findAllForReportCard,
+    ).not.toHaveBeenCalled();
   });
 
   it('should fetch scores and attendance for the report card enrollment and generate a PDF', async () => {
@@ -94,17 +101,19 @@ describe('ExportReportCardPdfUseCase', () => {
 
     const result = await useCase.execute('rap-1');
 
-    expect(mockStudentScoresRepo.findAllForReportCard).toHaveBeenCalledWith(
+    expect(
+      mockStudentScoresRepository.findAllForReportCard,
+    ).toHaveBeenCalledWith('enr-1');
+    expect(mockAttendanceRepository.getStatusCounts).toHaveBeenCalledWith(
       'enr-1',
     );
-    expect(mockAttendanceRepo.getStatusCounts).toHaveBeenCalledWith('enr-1');
     expect(mockPdfService.generatePdf).toHaveBeenCalledWith(expect.any(String));
     expect(result).toEqual(Buffer.from('pdf'));
   });
 
   it('should exclude scores with a null value from the subject grade calculation', async () => {
     mockRepo.findById.mockResolvedValue(baseReportCard);
-    mockStudentScoresRepo.findAllForReportCard.mockResolvedValue([
+    mockStudentScoresRepository.findAllForReportCard.mockResolvedValue([
       {
         score: null,
         assessmentItem: {

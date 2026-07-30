@@ -13,7 +13,7 @@ describe('GetStudentAddressesUseCase', () => {
     findById: jest.fn(),
   };
 
-  const mockAddressRepo = {
+  const mockAddressRepository = {
     findAll: jest.fn(),
   };
 
@@ -22,7 +22,7 @@ describe('GetStudentAddressesUseCase', () => {
       providers: [
         GetStudentAddressesUseCase,
         { provide: StudentRepository, useValue: mockRepo },
-        { provide: StudentAddressRepository, useValue: mockAddressRepo },
+        { provide: StudentAddressRepository, useValue: mockAddressRepository },
       ],
     }).compile();
 
@@ -46,7 +46,7 @@ describe('GetStudentAddressesUseCase', () => {
       };
       mockRepo.isStudent.mockResolvedValue(false);
       mockRepo.findById.mockResolvedValue({ id: 'stu-1' });
-      mockAddressRepo.findAll.mockResolvedValue(addresses);
+      mockAddressRepository.findAll.mockResolvedValue(addresses);
 
       const result = await useCase.execute(studentId, requester);
 
@@ -61,7 +61,7 @@ describe('GetStudentAddressesUseCase', () => {
       mockRepo.isStudent.mockResolvedValue(true);
       mockRepo.findByUserId.mockResolvedValue({ id: 'stu-1' });
       mockRepo.findById.mockResolvedValue({ id: 'stu-1' });
-      mockAddressRepo.findAll.mockResolvedValue(addresses);
+      mockAddressRepository.findAll.mockResolvedValue(addresses);
 
       const result = await useCase.execute(studentId, requester);
 

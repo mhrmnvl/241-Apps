@@ -12,7 +12,7 @@ describe('UpdateStudentAddressUseCase', () => {
     findById: jest.fn(),
   };
 
-  const mockAddressRepo = {
+  const mockAddressRepository = {
     findOne: jest.fn(),
     clearPrimaryExclude: jest.fn(),
     update: jest.fn(),
@@ -23,7 +23,7 @@ describe('UpdateStudentAddressUseCase', () => {
       providers: [
         UpdateStudentAddressUseCase,
         { provide: StudentRepository, useValue: mockRepo },
-        { provide: StudentAddressRepository, useValue: mockAddressRepo },
+        { provide: StudentAddressRepository, useValue: mockAddressRepository },
       ],
     }).compile();
 
@@ -45,34 +45,34 @@ describe('UpdateStudentAddressUseCase', () => {
       const dto: UpdateAddressDto = { city: 'Surabaya' };
       const updated = { id: 'addr-1', city: 'Surabaya' };
       mockRepo.findById.mockResolvedValue({ id: 'stu-1' });
-      mockAddressRepo.findOne.mockResolvedValue({ id: 'addr-1' });
-      mockAddressRepo.update.mockResolvedValue(updated);
+      mockAddressRepository.findOne.mockResolvedValue({ id: 'addr-1' });
+      mockAddressRepository.update.mockResolvedValue(updated);
 
       const result = await useCase.execute(studentId, addressId, dto);
 
       expect(mockRepo.findById).toHaveBeenCalledWith(studentId);
-      expect(mockAddressRepo.findOne).toHaveBeenCalledWith(
+      expect(mockAddressRepository.findOne).toHaveBeenCalledWith(
         studentId,
         addressId,
       );
-      expect(mockAddressRepo.clearPrimaryExclude).not.toHaveBeenCalled();
-      expect(mockAddressRepo.update).toHaveBeenCalledWith(addressId, dto);
+      expect(mockAddressRepository.clearPrimaryExclude).not.toHaveBeenCalled();
+      expect(mockAddressRepository.update).toHaveBeenCalledWith(addressId, dto);
       expect(result).toEqual(updated);
     });
 
     it('should clear primary for other addresses when isPrimary is true', async () => {
       const dto: UpdateAddressDto = { isPrimary: true };
       mockRepo.findById.mockResolvedValue({ id: 'stu-1' });
-      mockAddressRepo.findOne.mockResolvedValue({ id: 'addr-1' });
-      mockAddressRepo.clearPrimaryExclude.mockResolvedValue(undefined);
-      mockAddressRepo.update.mockResolvedValue({
+      mockAddressRepository.findOne.mockResolvedValue({ id: 'addr-1' });
+      mockAddressRepository.clearPrimaryExclude.mockResolvedValue(undefined);
+      mockAddressRepository.update.mockResolvedValue({
         id: 'addr-1',
         isPrimary: true,
       });
 
       await useCase.execute(studentId, addressId, dto);
 
-      expect(mockAddressRepo.clearPrimaryExclude).toHaveBeenCalledWith(
+      expect(mockAddressRepository.clearPrimaryExclude).toHaveBeenCalledWith(
         studentId,
         addressId,
       );
@@ -84,17 +84,17 @@ describe('UpdateStudentAddressUseCase', () => {
       await expect(useCase.execute(studentId, addressId, {})).rejects.toThrow(
         NotFoundException,
       );
-      expect(mockAddressRepo.update).not.toHaveBeenCalled();
+      expect(mockAddressRepository.update).not.toHaveBeenCalled();
     });
 
     it('should throw NotFoundException when address is not found for student', async () => {
       mockRepo.findById.mockResolvedValue({ id: 'stu-1' });
-      mockAddressRepo.findOne.mockResolvedValue(null);
+      mockAddressRepository.findOne.mockResolvedValue(null);
 
       await expect(useCase.execute(studentId, addressId, {})).rejects.toThrow(
         NotFoundException,
       );
-      expect(mockAddressRepo.update).not.toHaveBeenCalled();
+      expect(mockAddressRepository.update).not.toHaveBeenCalled();
     });
   });
 });

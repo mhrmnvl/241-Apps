@@ -6,7 +6,7 @@ import { GetAllProfileSocialMediasUseCase } from './get-all-profile-social-media
 describe('GetAllProfileSocialMediasUseCase', () => {
   let useCase: GetAllProfileSocialMediasUseCase;
 
-  const mockProfileRepo = {
+  const mockProfileRepository = {
     findAllWithSocialMedias: jest.fn(),
     countAllWithSocialMedias: jest.fn(),
   };
@@ -15,7 +15,7 @@ describe('GetAllProfileSocialMediasUseCase', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         GetAllProfileSocialMediasUseCase,
-        { provide: ProfileRepository, useValue: mockProfileRepo },
+        { provide: ProfileRepository, useValue: mockProfileRepository },
       ],
     }).compile();
 
@@ -53,18 +53,24 @@ describe('GetAllProfileSocialMediasUseCase', () => {
     ];
 
     it('should return paginated list with correct shape', async () => {
-      mockProfileRepo.findAllWithSocialMedias.mockResolvedValue(mockProfiles);
-      mockProfileRepo.countAllWithSocialMedias.mockResolvedValue(1);
+      mockProfileRepository.findAllWithSocialMedias.mockResolvedValue(
+        mockProfiles,
+      );
+      mockProfileRepository.countAllWithSocialMedias.mockResolvedValue(1);
 
       const result = await useCase.execute(query);
 
-      expect(mockProfileRepo.findAllWithSocialMedias).toHaveBeenCalledWith({
+      expect(
+        mockProfileRepository.findAllWithSocialMedias,
+      ).toHaveBeenCalledWith({
         skip: 0,
         take: 10,
         search: undefined,
         roleCode: undefined,
       });
-      expect(mockProfileRepo.countAllWithSocialMedias).toHaveBeenCalledWith({
+      expect(
+        mockProfileRepository.countAllWithSocialMedias,
+      ).toHaveBeenCalledWith({
         search: undefined,
         roleCode: undefined,
       });
@@ -110,10 +116,10 @@ describe('GetAllProfileSocialMediasUseCase', () => {
         ],
       };
 
-      mockProfileRepo.findAllWithSocialMedias.mockResolvedValue([
+      mockProfileRepository.findAllWithSocialMedias.mockResolvedValue([
         profileWithMultipleSm,
       ]);
-      mockProfileRepo.countAllWithSocialMedias.mockResolvedValue(1);
+      mockProfileRepository.countAllWithSocialMedias.mockResolvedValue(1);
 
       const result = await useCase.execute(query);
 
@@ -121,8 +127,8 @@ describe('GetAllProfileSocialMediasUseCase', () => {
     });
 
     it('should return empty data when no profiles found', async () => {
-      mockProfileRepo.findAllWithSocialMedias.mockResolvedValue([]);
-      mockProfileRepo.countAllWithSocialMedias.mockResolvedValue(0);
+      mockProfileRepository.findAllWithSocialMedias.mockResolvedValue([]);
+      mockProfileRepository.countAllWithSocialMedias.mockResolvedValue(0);
 
       const result = await useCase.execute(query);
 
@@ -139,12 +145,14 @@ describe('GetAllProfileSocialMediasUseCase', () => {
         roleCode: 'STUDENT',
       };
 
-      mockProfileRepo.findAllWithSocialMedias.mockResolvedValue([]);
-      mockProfileRepo.countAllWithSocialMedias.mockResolvedValue(0);
+      mockProfileRepository.findAllWithSocialMedias.mockResolvedValue([]);
+      mockProfileRepository.countAllWithSocialMedias.mockResolvedValue(0);
 
       await useCase.execute(filteredQuery);
 
-      expect(mockProfileRepo.findAllWithSocialMedias).toHaveBeenCalledWith({
+      expect(
+        mockProfileRepository.findAllWithSocialMedias,
+      ).toHaveBeenCalledWith({
         skip: 0,
         take: 5,
         search: 'ahmad',
@@ -153,8 +161,8 @@ describe('GetAllProfileSocialMediasUseCase', () => {
     });
 
     it('should calculate correct totalPages', async () => {
-      mockProfileRepo.findAllWithSocialMedias.mockResolvedValue([]);
-      mockProfileRepo.countAllWithSocialMedias.mockResolvedValue(25);
+      mockProfileRepository.findAllWithSocialMedias.mockResolvedValue([]);
+      mockProfileRepository.countAllWithSocialMedias.mockResolvedValue(25);
 
       const result = await useCase.execute({ page: 1, limit: 10 });
 

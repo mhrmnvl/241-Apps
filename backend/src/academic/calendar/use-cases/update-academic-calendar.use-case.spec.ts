@@ -13,7 +13,7 @@ describe('UpdateAcademicCalendarUseCase', () => {
     update: jest.fn(),
   };
 
-  const mockSemesterRepo = {
+  const mockSemesterRepository = {
     findById: jest.fn(),
   };
 
@@ -22,7 +22,7 @@ describe('UpdateAcademicCalendarUseCase', () => {
       providers: [
         UpdateAcademicCalendarUseCase,
         { provide: IAcademicCalendarRepository, useValue: mockRepo },
-        { provide: ISemesterRepository, useValue: mockSemesterRepo },
+        { provide: ISemesterRepository, useValue: mockSemesterRepository },
       ],
     }).compile();
 
@@ -47,7 +47,7 @@ describe('UpdateAcademicCalendarUseCase', () => {
       const result = await useCase.execute(id, dto);
 
       expect(mockRepo.findById).toHaveBeenCalledWith(id);
-      expect(mockSemesterRepo.findById).not.toHaveBeenCalled();
+      expect(mockSemesterRepository.findById).not.toHaveBeenCalled();
       expect(mockRepo.update).toHaveBeenCalledWith(id, dto);
       expect(result).toEqual({ id, ...dto });
     });
@@ -57,12 +57,12 @@ describe('UpdateAcademicCalendarUseCase', () => {
         semesterId: 'sem-uuid',
       };
       mockRepo.findById.mockResolvedValue({ id });
-      mockSemesterRepo.findById.mockResolvedValue({ id: 'sem-uuid' });
+      mockSemesterRepository.findById.mockResolvedValue({ id: 'sem-uuid' });
       mockRepo.update.mockResolvedValue({ id });
 
       await useCase.execute(id, dtoWithSemester);
 
-      expect(mockSemesterRepo.findById).toHaveBeenCalledWith('sem-uuid');
+      expect(mockSemesterRepository.findById).toHaveBeenCalledWith('sem-uuid');
     });
 
     it('should throw NotFoundException when calendar not found', async () => {
@@ -77,7 +77,7 @@ describe('UpdateAcademicCalendarUseCase', () => {
         semesterId: 'sem-missing',
       };
       mockRepo.findById.mockResolvedValue({ id });
-      mockSemesterRepo.findById.mockResolvedValue(null);
+      mockSemesterRepository.findById.mockResolvedValue(null);
 
       await expect(useCase.execute(id, dtoWithSemester)).rejects.toThrow(
         NotFoundException,

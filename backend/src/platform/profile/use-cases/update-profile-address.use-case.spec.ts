@@ -8,8 +8,8 @@ import { UpdateProfileAddressUseCase } from './update-profile-address.use-case.j
 describe('UpdateProfileAddressUseCase', () => {
   let useCase: UpdateProfileAddressUseCase;
 
-  const mockProfileRepo = { findByUserId: jest.fn() };
-  const mockAddressRepo = {
+  const mockProfileRepository = { findByUserId: jest.fn() };
+  const mockAddressRepository = {
     findAddressForUser: jest.fn(),
     clearPrimaryForStudentExclude: jest.fn(),
     clearPrimaryForTeacherExclude: jest.fn(),
@@ -20,8 +20,8 @@ describe('UpdateProfileAddressUseCase', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         UpdateProfileAddressUseCase,
-        { provide: ProfileRepository, useValue: mockProfileRepo },
-        { provide: ProfileAddressRepository, useValue: mockAddressRepo },
+        { provide: ProfileRepository, useValue: mockProfileRepository },
+        { provide: ProfileAddressRepository, useValue: mockAddressRepository },
       ],
     }).compile();
 
@@ -48,18 +48,18 @@ describe('UpdateProfileAddressUseCase', () => {
       };
       const updated = { ...mockAddress, street: 'Jl. Baru No. 2' };
 
-      mockProfileRepo.findByUserId.mockResolvedValue({ id: 'prof-1' });
-      mockAddressRepo.findAddressForUser.mockResolvedValue(mockAddress);
-      mockAddressRepo.update.mockResolvedValue(updated);
+      mockProfileRepository.findByUserId.mockResolvedValue({ id: 'prof-1' });
+      mockAddressRepository.findAddressForUser.mockResolvedValue(mockAddress);
+      mockAddressRepository.update.mockResolvedValue(updated);
 
       const result = await useCase.execute(userId, addressId, dto);
 
-      expect(mockProfileRepo.findByUserId).toHaveBeenCalledWith(userId);
-      expect(mockAddressRepo.findAddressForUser).toHaveBeenCalledWith(
+      expect(mockProfileRepository.findByUserId).toHaveBeenCalledWith(userId);
+      expect(mockAddressRepository.findAddressForUser).toHaveBeenCalledWith(
         addressId,
         userId,
       );
-      expect(mockAddressRepo.update).toHaveBeenCalledWith(addressId, dto);
+      expect(mockAddressRepository.update).toHaveBeenCalledWith(addressId, dto);
       expect(result).toEqual(updated);
     });
 
@@ -71,12 +71,12 @@ describe('UpdateProfileAddressUseCase', () => {
       };
       const dtoPrimary: UpdateAddressDto = { isPrimary: true };
 
-      mockProfileRepo.findByUserId.mockResolvedValue({ id: 'prof-1' });
-      mockAddressRepo.findAddressForUser.mockResolvedValue(mockAddress);
-      mockAddressRepo.clearPrimaryForStudentExclude.mockResolvedValue(
+      mockProfileRepository.findByUserId.mockResolvedValue({ id: 'prof-1' });
+      mockAddressRepository.findAddressForUser.mockResolvedValue(mockAddress);
+      mockAddressRepository.clearPrimaryForStudentExclude.mockResolvedValue(
         undefined,
       );
-      mockAddressRepo.update.mockResolvedValue({
+      mockAddressRepository.update.mockResolvedValue({
         ...mockAddress,
         isPrimary: true,
       });
@@ -84,10 +84,10 @@ describe('UpdateProfileAddressUseCase', () => {
       await useCase.execute(userId, addressId, dtoPrimary);
 
       expect(
-        mockAddressRepo.clearPrimaryForStudentExclude,
+        mockAddressRepository.clearPrimaryForStudentExclude,
       ).toHaveBeenCalledWith('stu-1', addressId);
       expect(
-        mockAddressRepo.clearPrimaryForTeacherExclude,
+        mockAddressRepository.clearPrimaryForTeacherExclude,
       ).not.toHaveBeenCalled();
     });
 
@@ -99,12 +99,12 @@ describe('UpdateProfileAddressUseCase', () => {
       };
       const dtoPrimary: UpdateAddressDto = { isPrimary: true };
 
-      mockProfileRepo.findByUserId.mockResolvedValue({ id: 'prof-1' });
-      mockAddressRepo.findAddressForUser.mockResolvedValue(mockAddress);
-      mockAddressRepo.clearPrimaryForTeacherExclude.mockResolvedValue(
+      mockProfileRepository.findByUserId.mockResolvedValue({ id: 'prof-1' });
+      mockAddressRepository.findAddressForUser.mockResolvedValue(mockAddress);
+      mockAddressRepository.clearPrimaryForTeacherExclude.mockResolvedValue(
         undefined,
       );
-      mockAddressRepo.update.mockResolvedValue({
+      mockAddressRepository.update.mockResolvedValue({
         ...mockAddress,
         isPrimary: true,
       });
@@ -112,30 +112,30 @@ describe('UpdateProfileAddressUseCase', () => {
       await useCase.execute(userId, addressId, dtoPrimary);
 
       expect(
-        mockAddressRepo.clearPrimaryForTeacherExclude,
+        mockAddressRepository.clearPrimaryForTeacherExclude,
       ).toHaveBeenCalledWith('emp-1', addressId);
       expect(
-        mockAddressRepo.clearPrimaryForStudentExclude,
+        mockAddressRepository.clearPrimaryForStudentExclude,
       ).not.toHaveBeenCalled();
     });
 
     it('should throw NotFoundException when profile is not found', async () => {
-      mockProfileRepo.findByUserId.mockResolvedValue(null);
+      mockProfileRepository.findByUserId.mockResolvedValue(null);
 
       await expect(useCase.execute(userId, addressId, dto)).rejects.toThrow(
         NotFoundException,
       );
-      expect(mockAddressRepo.update).not.toHaveBeenCalled();
+      expect(mockAddressRepository.update).not.toHaveBeenCalled();
     });
 
     it('should throw NotFoundException when address is not found for user', async () => {
-      mockProfileRepo.findByUserId.mockResolvedValue({ id: 'prof-1' });
-      mockAddressRepo.findAddressForUser.mockResolvedValue(null);
+      mockProfileRepository.findByUserId.mockResolvedValue({ id: 'prof-1' });
+      mockAddressRepository.findAddressForUser.mockResolvedValue(null);
 
       await expect(useCase.execute(userId, addressId, dto)).rejects.toThrow(
         NotFoundException,
       );
-      expect(mockAddressRepo.update).not.toHaveBeenCalled();
+      expect(mockAddressRepository.update).not.toHaveBeenCalled();
     });
   });
 });

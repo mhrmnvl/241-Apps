@@ -13,11 +13,11 @@ describe('DeleteSocialMediaUseCase', () => {
     remove: jest.fn(),
   };
 
-  const mockSchoolUnitSocialMediaRepo = {
+  const mockSchoolUnitSocialMediaRepository = {
     countByPlatformId: jest.fn(),
   };
 
-  const mockProfileSocialMediaRepo = {
+  const mockProfileSocialMediaRepository = {
     countByPlatformId: jest.fn(),
   };
 
@@ -28,11 +28,11 @@ describe('DeleteSocialMediaUseCase', () => {
         { provide: ISocialMediaRepository, useValue: mockRepo },
         {
           provide: SchoolUnitSocialMediaRepository,
-          useValue: mockSchoolUnitSocialMediaRepo,
+          useValue: mockSchoolUnitSocialMediaRepository,
         },
         {
           provide: ProfileSocialMediaRepository,
-          useValue: mockProfileSocialMediaRepo,
+          useValue: mockProfileSocialMediaRepository,
         },
       ],
     }).compile();
@@ -50,26 +50,30 @@ describe('DeleteSocialMediaUseCase', () => {
 
     it('should delete a platform successfully when not in use', async () => {
       mockRepo.findById.mockResolvedValue({ id: 'plt-1', name: 'Instagram' });
-      mockSchoolUnitSocialMediaRepo.countByPlatformId.mockResolvedValue(0);
-      mockProfileSocialMediaRepo.countByPlatformId.mockResolvedValue(0);
+      mockSchoolUnitSocialMediaRepository.countByPlatformId.mockResolvedValue(
+        0,
+      );
+      mockProfileSocialMediaRepository.countByPlatformId.mockResolvedValue(0);
       mockRepo.remove.mockResolvedValue(undefined);
 
       await useCase.execute(id);
 
       expect(mockRepo.findById).toHaveBeenCalledWith(id);
       expect(
-        mockSchoolUnitSocialMediaRepo.countByPlatformId,
+        mockSchoolUnitSocialMediaRepository.countByPlatformId,
       ).toHaveBeenCalledWith(id);
-      expect(mockProfileSocialMediaRepo.countByPlatformId).toHaveBeenCalledWith(
-        id,
-      );
+      expect(
+        mockProfileSocialMediaRepository.countByPlatformId,
+      ).toHaveBeenCalledWith(id);
       expect(mockRepo.remove).toHaveBeenCalledWith(id);
     });
 
     it('should throw NotFoundException when platform is not found', async () => {
       mockRepo.findById.mockResolvedValue(null);
-      mockSchoolUnitSocialMediaRepo.countByPlatformId.mockResolvedValue(0);
-      mockProfileSocialMediaRepo.countByPlatformId.mockResolvedValue(0);
+      mockSchoolUnitSocialMediaRepository.countByPlatformId.mockResolvedValue(
+        0,
+      );
+      mockProfileSocialMediaRepository.countByPlatformId.mockResolvedValue(0);
 
       await expect(useCase.execute(id)).rejects.toThrow(NotFoundException);
       expect(mockRepo.remove).not.toHaveBeenCalled();
@@ -77,8 +81,10 @@ describe('DeleteSocialMediaUseCase', () => {
 
     it('should throw ConflictException when platform is used by school units', async () => {
       mockRepo.findById.mockResolvedValue({ id: 'plt-1', name: 'Instagram' });
-      mockSchoolUnitSocialMediaRepo.countByPlatformId.mockResolvedValue(2);
-      mockProfileSocialMediaRepo.countByPlatformId.mockResolvedValue(0);
+      mockSchoolUnitSocialMediaRepository.countByPlatformId.mockResolvedValue(
+        2,
+      );
+      mockProfileSocialMediaRepository.countByPlatformId.mockResolvedValue(0);
 
       await expect(useCase.execute(id)).rejects.toThrow(ConflictException);
       expect(mockRepo.remove).not.toHaveBeenCalled();
@@ -86,8 +92,10 @@ describe('DeleteSocialMediaUseCase', () => {
 
     it('should throw ConflictException when platform is used by profiles', async () => {
       mockRepo.findById.mockResolvedValue({ id: 'plt-1', name: 'Instagram' });
-      mockSchoolUnitSocialMediaRepo.countByPlatformId.mockResolvedValue(0);
-      mockProfileSocialMediaRepo.countByPlatformId.mockResolvedValue(5);
+      mockSchoolUnitSocialMediaRepository.countByPlatformId.mockResolvedValue(
+        0,
+      );
+      mockProfileSocialMediaRepository.countByPlatformId.mockResolvedValue(5);
 
       await expect(useCase.execute(id)).rejects.toThrow(ConflictException);
       expect(mockRepo.remove).not.toHaveBeenCalled();
@@ -95,8 +103,10 @@ describe('DeleteSocialMediaUseCase', () => {
 
     it('should throw ConflictException when platform is used by both school units and profiles', async () => {
       mockRepo.findById.mockResolvedValue({ id: 'plt-1', name: 'Instagram' });
-      mockSchoolUnitSocialMediaRepo.countByPlatformId.mockResolvedValue(1);
-      mockProfileSocialMediaRepo.countByPlatformId.mockResolvedValue(3);
+      mockSchoolUnitSocialMediaRepository.countByPlatformId.mockResolvedValue(
+        1,
+      );
+      mockProfileSocialMediaRepository.countByPlatformId.mockResolvedValue(3);
 
       await expect(useCase.execute(id)).rejects.toThrow(ConflictException);
       expect(mockRepo.remove).not.toHaveBeenCalled();

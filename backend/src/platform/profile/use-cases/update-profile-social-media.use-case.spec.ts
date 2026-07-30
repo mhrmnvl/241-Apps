@@ -8,8 +8,8 @@ import { UpdateProfileSocialMediaUseCase } from './update-profile-social-media.u
 describe('UpdateProfileSocialMediaUseCase', () => {
   let useCase: UpdateProfileSocialMediaUseCase;
 
-  const mockProfileRepo = { findByUserId: jest.fn() };
-  const mockSocialRepo = {
+  const mockProfileRepository = { findByUserId: jest.fn() };
+  const mockSocialRepository = {
     findByIdAndProfile: jest.fn(),
     update: jest.fn(),
   };
@@ -18,8 +18,11 @@ describe('UpdateProfileSocialMediaUseCase', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         UpdateProfileSocialMediaUseCase,
-        { provide: ProfileRepository, useValue: mockProfileRepo },
-        { provide: ProfileSocialMediaRepository, useValue: mockSocialRepo },
+        { provide: ProfileRepository, useValue: mockProfileRepository },
+        {
+          provide: ProfileSocialMediaRepository,
+          useValue: mockSocialRepository,
+        },
       ],
     }).compile();
 
@@ -45,38 +48,41 @@ describe('UpdateProfileSocialMediaUseCase', () => {
       const mockSm = { id: 'sm-1', socialMediaId: 'plt-1' };
       const updated = { ...mockSm, ...dto };
 
-      mockProfileRepo.findByUserId.mockResolvedValue(mockProfile);
-      mockSocialRepo.findByIdAndProfile.mockResolvedValue(mockSm);
-      mockSocialRepo.update.mockResolvedValue(updated);
+      mockProfileRepository.findByUserId.mockResolvedValue(mockProfile);
+      mockSocialRepository.findByIdAndProfile.mockResolvedValue(mockSm);
+      mockSocialRepository.update.mockResolvedValue(updated);
 
       const result = await useCase.execute(userId, socialMediaId, dto);
 
-      expect(mockProfileRepo.findByUserId).toHaveBeenCalledWith(userId);
-      expect(mockSocialRepo.findByIdAndProfile).toHaveBeenCalledWith(
+      expect(mockProfileRepository.findByUserId).toHaveBeenCalledWith(userId);
+      expect(mockSocialRepository.findByIdAndProfile).toHaveBeenCalledWith(
         socialMediaId,
         'prof-1',
       );
-      expect(mockSocialRepo.update).toHaveBeenCalledWith(socialMediaId, dto);
+      expect(mockSocialRepository.update).toHaveBeenCalledWith(
+        socialMediaId,
+        dto,
+      );
       expect(result).toEqual(updated);
     });
 
     it('should throw NotFoundException when profile is not found', async () => {
-      mockProfileRepo.findByUserId.mockResolvedValue(null);
+      mockProfileRepository.findByUserId.mockResolvedValue(null);
 
       await expect(useCase.execute(userId, socialMediaId, dto)).rejects.toThrow(
         NotFoundException,
       );
-      expect(mockSocialRepo.update).not.toHaveBeenCalled();
+      expect(mockSocialRepository.update).not.toHaveBeenCalled();
     });
 
     it('should throw NotFoundException when social media is not found for profile', async () => {
-      mockProfileRepo.findByUserId.mockResolvedValue({ id: 'prof-1' });
-      mockSocialRepo.findByIdAndProfile.mockResolvedValue(null);
+      mockProfileRepository.findByUserId.mockResolvedValue({ id: 'prof-1' });
+      mockSocialRepository.findByIdAndProfile.mockResolvedValue(null);
 
       await expect(useCase.execute(userId, socialMediaId, dto)).rejects.toThrow(
         NotFoundException,
       );
-      expect(mockSocialRepo.update).not.toHaveBeenCalled();
+      expect(mockSocialRepository.update).not.toHaveBeenCalled();
     });
   });
 });

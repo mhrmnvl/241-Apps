@@ -12,7 +12,7 @@ describe('AddStudentAddressUseCase', () => {
     findById: jest.fn(),
   };
 
-  const mockAddressRepo = {
+  const mockAddressRepository = {
     clearPrimary: jest.fn(),
     create: jest.fn(),
   };
@@ -22,7 +22,7 @@ describe('AddStudentAddressUseCase', () => {
       providers: [
         AddStudentAddressUseCase,
         { provide: StudentRepository, useValue: mockRepo },
-        { provide: StudentAddressRepository, useValue: mockAddressRepo },
+        { provide: StudentAddressRepository, useValue: mockAddressRepository },
       ],
     }).compile();
 
@@ -50,28 +50,30 @@ describe('AddStudentAddressUseCase', () => {
     it('should add an address to a student', async () => {
       const created = { id: 'addr-1', ...dto };
       mockRepo.findById.mockResolvedValue({ id: 'stu-1' });
-      mockAddressRepo.create.mockResolvedValue(created);
+      mockAddressRepository.create.mockResolvedValue(created);
 
       const result = await useCase.execute(studentId, dto);
 
       expect(mockRepo.findById).toHaveBeenCalledWith(studentId);
-      expect(mockAddressRepo.clearPrimary).not.toHaveBeenCalled();
-      expect(mockAddressRepo.create).toHaveBeenCalledWith(studentId, dto);
+      expect(mockAddressRepository.clearPrimary).not.toHaveBeenCalled();
+      expect(mockAddressRepository.create).toHaveBeenCalledWith(studentId, dto);
       expect(result).toEqual(created);
     });
 
     it('should clear primary before creating when isPrimary is true', async () => {
       const dtoPrimary: CreateAddressDto = { ...dto, isPrimary: true };
       mockRepo.findById.mockResolvedValue({ id: 'stu-1' });
-      mockAddressRepo.clearPrimary.mockResolvedValue(undefined);
-      mockAddressRepo.create.mockResolvedValue({
+      mockAddressRepository.clearPrimary.mockResolvedValue(undefined);
+      mockAddressRepository.create.mockResolvedValue({
         id: 'addr-1',
         isPrimary: true,
       });
 
       await useCase.execute(studentId, dtoPrimary);
 
-      expect(mockAddressRepo.clearPrimary).toHaveBeenCalledWith(studentId);
+      expect(mockAddressRepository.clearPrimary).toHaveBeenCalledWith(
+        studentId,
+      );
     });
 
     it('should throw NotFoundException when student is not found', async () => {
@@ -80,7 +82,7 @@ describe('AddStudentAddressUseCase', () => {
       await expect(useCase.execute(studentId, dto)).rejects.toThrow(
         NotFoundException,
       );
-      expect(mockAddressRepo.create).not.toHaveBeenCalled();
+      expect(mockAddressRepository.create).not.toHaveBeenCalled();
     });
   });
 });

@@ -2,10 +2,8 @@ import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../../platform/auth/index.js';
 import { RequirePermissions } from '../../../platform/access-control/permission/decorators/require-permissions.decorator.js';
-import {
-  GetHistoriesUseCase,
-  HistoryQueryDto,
-} from '../use-cases/get-histories.use-case.js';
+import { GetHistoriesUseCase } from '../use-cases/get-histories.use-case.js';
+import { HistoryQueryDto } from '../dto/request/history-query.dto.js';
 
 @ApiTags('Inventory Asset History')
 @ApiBearerAuth()

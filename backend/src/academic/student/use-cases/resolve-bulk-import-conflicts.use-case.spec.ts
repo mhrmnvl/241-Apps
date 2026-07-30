@@ -26,11 +26,11 @@ function makeRow(overrides: Record<string, unknown> = {}) {
 describe('ResolveBulkImportConflictsUseCase', () => {
   let useCase: ResolveBulkImportConflictsUseCase;
 
-  const mockGradeRepo = {
+  const mockGradeRepository = {
     findByLevel: jest.fn(),
   };
 
-  const mockClassroomRepo = {
+  const mockClassroomRepository = {
     findByCode: jest.fn(),
   };
 
@@ -54,8 +54,8 @@ describe('ResolveBulkImportConflictsUseCase', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ResolveBulkImportConflictsUseCase,
-        { provide: IGradeRepository, useValue: mockGradeRepo },
-        { provide: ClassroomRepository, useValue: mockClassroomRepo },
+        { provide: IGradeRepository, useValue: mockGradeRepository },
+        { provide: ClassroomRepository, useValue: mockClassroomRepository },
         { provide: UpdateStudentUseCase, useValue: mockUpdateStudent },
         {
           provide: UpdateStudentProfileUseCase,
@@ -95,7 +95,7 @@ describe('ResolveBulkImportConflictsUseCase', () => {
     });
 
     it('creates a new student when there is no existingId', async () => {
-      mockClassroomRepo.findByCode.mockResolvedValue({ id: 'cls-1' });
+      mockClassroomRepository.findByCode.mockResolvedValue({ id: 'cls-1' });
       mockCreateStudent.execute.mockResolvedValue({ id: 'stu-new' });
 
       const dto: ResolveBulkImportConflictsDto = {
@@ -117,7 +117,7 @@ describe('ResolveBulkImportConflictsUseCase', () => {
     });
 
     it('updates an existing student and ensures enrollment when classroomCode resolves', async () => {
-      mockClassroomRepo.findByCode.mockResolvedValue({ id: 'cls-2' });
+      mockClassroomRepository.findByCode.mockResolvedValue({ id: 'cls-2' });
 
       const dto: ResolveBulkImportConflictsDto = {
         conflicts: [
@@ -159,13 +159,13 @@ describe('ResolveBulkImportConflictsUseCase', () => {
 
       const result = await useCase.execute(dto);
 
-      expect(mockClassroomRepo.findByCode).not.toHaveBeenCalled();
+      expect(mockClassroomRepository.findByCode).not.toHaveBeenCalled();
       expect(mockEnsureStudentEnrollment.execute).not.toHaveBeenCalled();
       expect(result).toEqual({ total: 1, updated: 1, skipped: 0, errors: [] });
     });
 
     it('looks up a repeated classroom code only once across conflicts', async () => {
-      mockClassroomRepo.findByCode.mockResolvedValue({ id: 'cls-2' });
+      mockClassroomRepository.findByCode.mockResolvedValue({ id: 'cls-2' });
       mockCreateStudent.execute.mockResolvedValue({ id: 'stu-new' });
 
       const dto: ResolveBulkImportConflictsDto = {
@@ -188,11 +188,11 @@ describe('ResolveBulkImportConflictsUseCase', () => {
 
       await useCase.execute(dto);
 
-      expect(mockClassroomRepo.findByCode).toHaveBeenCalledTimes(1);
+      expect(mockClassroomRepository.findByCode).toHaveBeenCalledTimes(1);
     });
 
     it('records the error and continues when ensuring enrollment fails, instead of swallowing it', async () => {
-      mockClassroomRepo.findByCode.mockResolvedValue({ id: 'cls-2' });
+      mockClassroomRepository.findByCode.mockResolvedValue({ id: 'cls-2' });
       mockEnsureStudentEnrollment.execute.mockRejectedValue(
         new Error('Cannot transfer: enrollment status is DROPPED'),
       );

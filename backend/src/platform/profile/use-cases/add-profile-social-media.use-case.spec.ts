@@ -8,15 +8,18 @@ import { AddProfileSocialMediaUseCase } from './add-profile-social-media.use-cas
 describe('AddProfileSocialMediaUseCase', () => {
   let useCase: AddProfileSocialMediaUseCase;
 
-  const mockProfileRepo = { findByUserId: jest.fn() };
-  const mockSocialRepo = { create: jest.fn() };
+  const mockProfileRepository = { findByUserId: jest.fn() };
+  const mockSocialRepository = { create: jest.fn() };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AddProfileSocialMediaUseCase,
-        { provide: ProfileRepository, useValue: mockProfileRepo },
-        { provide: ProfileSocialMediaRepository, useValue: mockSocialRepo },
+        { provide: ProfileRepository, useValue: mockProfileRepository },
+        {
+          provide: ProfileSocialMediaRepository,
+          useValue: mockSocialRepository,
+        },
       ],
     }).compile();
 
@@ -41,23 +44,23 @@ describe('AddProfileSocialMediaUseCase', () => {
       const mockProfile = { id: 'prof-1' };
       const mockSm = { id: 'sm-new', ...dto };
 
-      mockProfileRepo.findByUserId.mockResolvedValue(mockProfile);
-      mockSocialRepo.create.mockResolvedValue(mockSm);
+      mockProfileRepository.findByUserId.mockResolvedValue(mockProfile);
+      mockSocialRepository.create.mockResolvedValue(mockSm);
 
       const result = await useCase.execute(userId, dto);
 
-      expect(mockProfileRepo.findByUserId).toHaveBeenCalledWith(userId);
-      expect(mockSocialRepo.create).toHaveBeenCalledWith('prof-1', dto);
+      expect(mockProfileRepository.findByUserId).toHaveBeenCalledWith(userId);
+      expect(mockSocialRepository.create).toHaveBeenCalledWith('prof-1', dto);
       expect(result).toEqual(mockSm);
     });
 
     it('should throw NotFoundException when profile is not found', async () => {
-      mockProfileRepo.findByUserId.mockResolvedValue(null);
+      mockProfileRepository.findByUserId.mockResolvedValue(null);
 
       await expect(useCase.execute(userId, dto)).rejects.toThrow(
         NotFoundException,
       );
-      expect(mockSocialRepo.create).not.toHaveBeenCalled();
+      expect(mockSocialRepository.create).not.toHaveBeenCalled();
     });
   });
 });

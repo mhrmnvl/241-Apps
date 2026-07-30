@@ -9,7 +9,7 @@ import { EnsureStudentEnrollmentUseCase } from '../../enrollment/use-cases/ensur
 describe('CreateStudentUseCase', () => {
   let useCase: CreateStudentUseCase;
 
-  const mockStudentRepo = {
+  const mockStudentRepository = {
     findByNis: jest.fn(),
     findByNisn: jest.fn(),
     create: jest.fn(),
@@ -23,7 +23,7 @@ describe('CreateStudentUseCase', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         CreateStudentUseCase,
-        { provide: StudentRepository, useValue: mockStudentRepo },
+        { provide: StudentRepository, useValue: mockStudentRepository },
         {
           provide: EnsureStudentEnrollmentUseCase,
           useValue: mockEnsureStudentEnrollment,
@@ -64,15 +64,15 @@ describe('CreateStudentUseCase', () => {
     };
 
     it('should create a student and ensure classroom enrollment', async () => {
-      mockStudentRepo.findByNis.mockResolvedValue(null);
-      mockStudentRepo.findByNisn.mockResolvedValue(null);
-      mockStudentRepo.create.mockResolvedValue({ student: mockStudent });
+      mockStudentRepository.findByNis.mockResolvedValue(null);
+      mockStudentRepository.findByNisn.mockResolvedValue(null);
+      mockStudentRepository.create.mockResolvedValue({ student: mockStudent });
 
       const result = await useCase.execute(dto);
 
-      expect(mockStudentRepo.findByNis).toHaveBeenCalledWith(dto.nis);
-      expect(mockStudentRepo.findByNisn).toHaveBeenCalledWith(dto.nisn);
-      expect(mockStudentRepo.create).toHaveBeenCalledWith(
+      expect(mockStudentRepository.findByNis).toHaveBeenCalledWith(dto.nis);
+      expect(mockStudentRepository.findByNisn).toHaveBeenCalledWith(dto.nisn);
+      expect(mockStudentRepository.create).toHaveBeenCalledWith(
         dto,
         expect.any(String),
       );
@@ -92,9 +92,9 @@ describe('CreateStudentUseCase', () => {
 
     it('should create a student without ensuring enrollment (no classroomId)', async () => {
       const ppdbDto: CreateStudentDto = { ...dto, classroomId: undefined };
-      mockStudentRepo.findByNis.mockResolvedValue(null);
-      mockStudentRepo.findByNisn.mockResolvedValue(null);
-      mockStudentRepo.create.mockResolvedValue({ student: mockStudent });
+      mockStudentRepository.findByNis.mockResolvedValue(null);
+      mockStudentRepository.findByNisn.mockResolvedValue(null);
+      mockStudentRepository.create.mockResolvedValue({ student: mockStudent });
 
       const result = await useCase.execute(ppdbDto);
 
@@ -110,25 +110,25 @@ describe('CreateStudentUseCase', () => {
     });
 
     it('should throw ConflictException when NIS is already registered', async () => {
-      mockStudentRepo.findByNis.mockResolvedValue({
+      mockStudentRepository.findByNis.mockResolvedValue({
         id: 'stu-existing',
         nis: '2024001',
       });
-      mockStudentRepo.findByNisn.mockResolvedValue(null);
+      mockStudentRepository.findByNisn.mockResolvedValue(null);
 
       await expect(useCase.execute(dto)).rejects.toThrow(ConflictException);
-      expect(mockStudentRepo.create).not.toHaveBeenCalled();
+      expect(mockStudentRepository.create).not.toHaveBeenCalled();
     });
 
     it('should throw ConflictException when NISN is already registered', async () => {
-      mockStudentRepo.findByNis.mockResolvedValue(null);
-      mockStudentRepo.findByNisn.mockResolvedValue({
+      mockStudentRepository.findByNis.mockResolvedValue(null);
+      mockStudentRepository.findByNisn.mockResolvedValue({
         id: 'stu-existing',
         nisn: '0012345678',
       });
 
       await expect(useCase.execute(dto)).rejects.toThrow(ConflictException);
-      expect(mockStudentRepo.create).not.toHaveBeenCalled();
+      expect(mockStudentRepository.create).not.toHaveBeenCalled();
     });
   });
 });

@@ -8,8 +8,8 @@ import { AddProfileAddressUseCase } from './add-profile-address.use-case.js';
 describe('AddProfileAddressUseCase', () => {
   let useCase: AddProfileAddressUseCase;
 
-  const mockProfileRepo = { findByUserId: jest.fn() };
-  const mockAddressRepo = {
+  const mockProfileRepository = { findByUserId: jest.fn() };
+  const mockAddressRepository = {
     findStudentByUserId: jest.fn(),
     findTeacherByUserId: jest.fn(),
     clearPrimaryForStudent: jest.fn(),
@@ -21,8 +21,8 @@ describe('AddProfileAddressUseCase', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AddProfileAddressUseCase,
-        { provide: ProfileRepository, useValue: mockProfileRepo },
-        { provide: ProfileAddressRepository, useValue: mockAddressRepo },
+        { provide: ProfileRepository, useValue: mockProfileRepository },
+        { provide: ProfileAddressRepository, useValue: mockAddressRepository },
       ],
     }).compile();
 
@@ -51,13 +51,13 @@ describe('AddProfileAddressUseCase', () => {
       const mockStudent = { id: 'stu-1' };
       const mockAddress = { id: 'addr-new', ...dto };
 
-      mockProfileRepo.findByUserId.mockResolvedValue({ id: 'prof-1' });
-      mockAddressRepo.findStudentByUserId.mockResolvedValue(mockStudent);
-      mockAddressRepo.create.mockResolvedValue(mockAddress);
+      mockProfileRepository.findByUserId.mockResolvedValue({ id: 'prof-1' });
+      mockAddressRepository.findStudentByUserId.mockResolvedValue(mockStudent);
+      mockAddressRepository.create.mockResolvedValue(mockAddress);
 
       const result = await useCase.execute(userId, dto);
 
-      expect(mockAddressRepo.create).toHaveBeenCalledWith(dto, {
+      expect(mockAddressRepository.create).toHaveBeenCalledWith(dto, {
         studentId: 'stu-1',
       });
       expect(result).toEqual(mockAddress);
@@ -67,14 +67,14 @@ describe('AddProfileAddressUseCase', () => {
       const mockTeacher = { id: 'emp-1' };
       const mockAddress = { id: 'addr-new', ...dto };
 
-      mockProfileRepo.findByUserId.mockResolvedValue({ id: 'prof-1' });
-      mockAddressRepo.findStudentByUserId.mockResolvedValue(null);
-      mockAddressRepo.findTeacherByUserId.mockResolvedValue(mockTeacher);
-      mockAddressRepo.create.mockResolvedValue(mockAddress);
+      mockProfileRepository.findByUserId.mockResolvedValue({ id: 'prof-1' });
+      mockAddressRepository.findStudentByUserId.mockResolvedValue(null);
+      mockAddressRepository.findTeacherByUserId.mockResolvedValue(mockTeacher);
+      mockAddressRepository.create.mockResolvedValue(mockAddress);
 
       const result = await useCase.execute(userId, dto);
 
-      expect(mockAddressRepo.create).toHaveBeenCalledWith(dto, {
+      expect(mockAddressRepository.create).toHaveBeenCalledWith(dto, {
         teacherId: 'emp-1',
       });
       expect(result).toEqual(mockAddress);
@@ -84,39 +84,39 @@ describe('AddProfileAddressUseCase', () => {
       const mockStudent = { id: 'stu-1' };
       const dtoPrimary: CreateAddressDto = { ...dto, isPrimary: true };
 
-      mockProfileRepo.findByUserId.mockResolvedValue({ id: 'prof-1' });
-      mockAddressRepo.findStudentByUserId.mockResolvedValue(mockStudent);
-      mockAddressRepo.clearPrimaryForStudent.mockResolvedValue(undefined);
-      mockAddressRepo.create.mockResolvedValue({
+      mockProfileRepository.findByUserId.mockResolvedValue({ id: 'prof-1' });
+      mockAddressRepository.findStudentByUserId.mockResolvedValue(mockStudent);
+      mockAddressRepository.clearPrimaryForStudent.mockResolvedValue(undefined);
+      mockAddressRepository.create.mockResolvedValue({
         id: 'addr-new',
         ...dtoPrimary,
       });
 
       await useCase.execute(userId, dtoPrimary);
 
-      expect(mockAddressRepo.clearPrimaryForStudent).toHaveBeenCalledWith(
+      expect(mockAddressRepository.clearPrimaryForStudent).toHaveBeenCalledWith(
         'stu-1',
       );
     });
 
     it('should throw NotFoundException when profile is not found', async () => {
-      mockProfileRepo.findByUserId.mockResolvedValue(null);
+      mockProfileRepository.findByUserId.mockResolvedValue(null);
 
       await expect(useCase.execute(userId, dto)).rejects.toThrow(
         NotFoundException,
       );
-      expect(mockAddressRepo.create).not.toHaveBeenCalled();
+      expect(mockAddressRepository.create).not.toHaveBeenCalled();
     });
 
     it('should throw NotFoundException when neither student nor teacher found', async () => {
-      mockProfileRepo.findByUserId.mockResolvedValue({ id: 'prof-1' });
-      mockAddressRepo.findStudentByUserId.mockResolvedValue(null);
-      mockAddressRepo.findTeacherByUserId.mockResolvedValue(null);
+      mockProfileRepository.findByUserId.mockResolvedValue({ id: 'prof-1' });
+      mockAddressRepository.findStudentByUserId.mockResolvedValue(null);
+      mockAddressRepository.findTeacherByUserId.mockResolvedValue(null);
 
       await expect(useCase.execute(userId, dto)).rejects.toThrow(
         NotFoundException,
       );
-      expect(mockAddressRepo.create).not.toHaveBeenCalled();
+      expect(mockAddressRepository.create).not.toHaveBeenCalled();
     });
   });
 });

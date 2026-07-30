@@ -12,7 +12,7 @@ describe('CreateAnnouncementUseCase', () => {
     create: jest.fn(),
   };
 
-  const mockClassroomRepo = {
+  const mockClassroomRepository = {
     findById: jest.fn(),
   };
 
@@ -21,7 +21,7 @@ describe('CreateAnnouncementUseCase', () => {
       providers: [
         CreateAnnouncementUseCase,
         { provide: AnnouncementRepository, useValue: mockRepository },
-        { provide: ClassroomRepository, useValue: mockClassroomRepo },
+        { provide: ClassroomRepository, useValue: mockClassroomRepository },
       ],
     }).compile();
 
@@ -54,7 +54,7 @@ describe('CreateAnnouncementUseCase', () => {
 
       const result = await useCase.execute(dto);
 
-      expect(mockClassroomRepo.findById).not.toHaveBeenCalled();
+      expect(mockClassroomRepository.findById).not.toHaveBeenCalled();
       expect(mockRepository.create).toHaveBeenCalledWith({
         title: dto.title,
         description: dto.description,
@@ -73,7 +73,7 @@ describe('CreateAnnouncementUseCase', () => {
         date: '2025-05-20',
         classroomIds: [classroomId],
       };
-      mockClassroomRepo.findById.mockResolvedValue({
+      mockClassroomRepository.findById.mockResolvedValue({
         id: classroomId,
         name: 'X IPA 1',
       });
@@ -84,7 +84,9 @@ describe('CreateAnnouncementUseCase', () => {
 
       const result = await useCase.execute(dto);
 
-      expect(mockClassroomRepo.findById).toHaveBeenCalledWith(classroomId);
+      expect(mockClassroomRepository.findById).toHaveBeenCalledWith(
+        classroomId,
+      );
       expect(mockRepository.create).toHaveBeenCalledWith({
         title: dto.title,
         description: dto.description,
@@ -103,7 +105,7 @@ describe('CreateAnnouncementUseCase', () => {
         date: '2025-05-20',
         classroomIds: [invalidClassroomId],
       };
-      mockClassroomRepo.findById.mockResolvedValue(null);
+      mockClassroomRepository.findById.mockResolvedValue(null);
 
       await expect(useCase.execute(dto)).rejects.toThrow(NotFoundException);
       expect(mockRepository.create).not.toHaveBeenCalled();
@@ -119,7 +121,7 @@ describe('CreateAnnouncementUseCase', () => {
         date: '2025-05-20',
         classroomIds: [validId, invalidId],
       };
-      mockClassroomRepo.findById
+      mockClassroomRepository.findById
         .mockResolvedValueOnce({ id: validId })
         .mockResolvedValueOnce(null);
 

@@ -9,11 +9,11 @@ import { EnsureStudentEnrollmentUseCase } from './ensure-student-enrollment.use-
 describe('EnsureStudentEnrollmentUseCase', () => {
   let useCase: EnsureStudentEnrollmentUseCase;
 
-  const mockEnrollmentRepo = {
+  const mockEnrollmentRepository = {
     findDuplicate: jest.fn(),
   };
 
-  const mockSemesterRepo = {
+  const mockSemesterRepository = {
     findActive: jest.fn(),
   };
 
@@ -31,8 +31,8 @@ describe('EnsureStudentEnrollmentUseCase', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         EnsureStudentEnrollmentUseCase,
-        { provide: IEnrollmentRepository, useValue: mockEnrollmentRepo },
-        { provide: SemesterRepository, useValue: mockSemesterRepo },
+        { provide: IEnrollmentRepository, useValue: mockEnrollmentRepository },
+        { provide: SemesterRepository, useValue: mockSemesterRepository },
         {
           provide: CreateStudentEnrollmentUseCase,
           useValue: mockCreateStudentEnrollment,
@@ -53,18 +53,18 @@ describe('EnsureStudentEnrollmentUseCase', () => {
 
   describe('execute', () => {
     it('does nothing when there is no active semester', async () => {
-      mockSemesterRepo.findActive.mockResolvedValue(null);
+      mockSemesterRepository.findActive.mockResolvedValue(null);
 
       await useCase.execute('stu-1', 'cls-1');
 
-      expect(mockEnrollmentRepo.findDuplicate).not.toHaveBeenCalled();
+      expect(mockEnrollmentRepository.findDuplicate).not.toHaveBeenCalled();
       expect(mockCreateStudentEnrollment.execute).not.toHaveBeenCalled();
       expect(mockTransferStudent.execute).not.toHaveBeenCalled();
     });
 
     it('creates a new enrollment when the student has none this semester', async () => {
-      mockSemesterRepo.findActive.mockResolvedValue(activeSemester);
-      mockEnrollmentRepo.findDuplicate.mockResolvedValue(null);
+      mockSemesterRepository.findActive.mockResolvedValue(activeSemester);
+      mockEnrollmentRepository.findDuplicate.mockResolvedValue(null);
 
       await useCase.execute('stu-1', 'cls-1');
 
@@ -77,8 +77,8 @@ describe('EnsureStudentEnrollmentUseCase', () => {
     });
 
     it('does nothing when already enrolled in the same classroom', async () => {
-      mockSemesterRepo.findActive.mockResolvedValue(activeSemester);
-      mockEnrollmentRepo.findDuplicate.mockResolvedValue({
+      mockSemesterRepository.findActive.mockResolvedValue(activeSemester);
+      mockEnrollmentRepository.findDuplicate.mockResolvedValue({
         id: 'enr-1',
         classroomId: 'cls-1',
       });
@@ -90,8 +90,8 @@ describe('EnsureStudentEnrollmentUseCase', () => {
     });
 
     it('transfers to the new classroom when already enrolled elsewhere', async () => {
-      mockSemesterRepo.findActive.mockResolvedValue(activeSemester);
-      mockEnrollmentRepo.findDuplicate.mockResolvedValue({
+      mockSemesterRepository.findActive.mockResolvedValue(activeSemester);
+      mockEnrollmentRepository.findDuplicate.mockResolvedValue({
         id: 'enr-1',
         classroomId: 'cls-old',
       });
@@ -105,8 +105,8 @@ describe('EnsureStudentEnrollmentUseCase', () => {
     });
 
     it('propagates errors from the transfer instead of swallowing them', async () => {
-      mockSemesterRepo.findActive.mockResolvedValue(activeSemester);
-      mockEnrollmentRepo.findDuplicate.mockResolvedValue({
+      mockSemesterRepository.findActive.mockResolvedValue(activeSemester);
+      mockEnrollmentRepository.findDuplicate.mockResolvedValue({
         id: 'enr-1',
         classroomId: 'cls-old',
       });
@@ -122,8 +122,8 @@ describe('EnsureStudentEnrollmentUseCase', () => {
     });
 
     it('propagates errors from creating the enrollment instead of swallowing them', async () => {
-      mockSemesterRepo.findActive.mockResolvedValue(activeSemester);
-      mockEnrollmentRepo.findDuplicate.mockResolvedValue(null);
+      mockSemesterRepository.findActive.mockResolvedValue(activeSemester);
+      mockEnrollmentRepository.findDuplicate.mockResolvedValue(null);
       mockCreateStudentEnrollment.execute.mockRejectedValue(
         new Error('unexpected failure'),
       );

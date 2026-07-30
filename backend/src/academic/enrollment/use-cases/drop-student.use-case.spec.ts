@@ -13,7 +13,7 @@ describe('DropStudentUseCase', () => {
     update: jest.fn(),
   };
 
-  const mockStudentRepo = {
+  const mockStudentRepository = {
     updateStatus: jest.fn(),
   };
 
@@ -22,7 +22,7 @@ describe('DropStudentUseCase', () => {
       providers: [
         DropStudentUseCase,
         { provide: IEnrollmentRepository, useValue: mockRepo },
-        { provide: IStudentRepository, useValue: mockStudentRepo },
+        { provide: IStudentRepository, useValue: mockStudentRepository },
       ],
     }).compile();
 

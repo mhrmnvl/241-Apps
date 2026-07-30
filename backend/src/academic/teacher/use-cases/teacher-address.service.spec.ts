@@ -11,11 +11,11 @@ import { TeacherAddressUseCase } from './teacher-address.use-case.js';
 describe('TeacherAddressUseCase', () => {
   let useCase: TeacherAddressUseCase;
 
-  const mockTeacherRepo = {
+  const mockTeacherRepository = {
     findById: jest.fn(),
   };
 
-  const mockAddressRepo = {
+  const mockAddressRepository = {
     findAll: jest.fn(),
     create: jest.fn(),
     update: jest.fn(),
@@ -27,8 +27,8 @@ describe('TeacherAddressUseCase', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         TeacherAddressUseCase,
-        { provide: TeacherRepository, useValue: mockTeacherRepo },
-        { provide: TeacherAddressRepository, useValue: mockAddressRepo },
+        { provide: TeacherRepository, useValue: mockTeacherRepository },
+        { provide: TeacherAddressRepository, useValue: mockAddressRepository },
       ],
     }).compile();
 
@@ -49,23 +49,23 @@ describe('TeacherAddressUseCase', () => {
       const mockAddresses = [
         { id: 'addr-1', street: 'Jl. Veteran No. 1', city: 'Malang' },
       ];
-      mockTeacherRepo.findById.mockResolvedValue(mockTeacher);
-      mockAddressRepo.findAll.mockResolvedValue(mockAddresses);
+      mockTeacherRepository.findById.mockResolvedValue(mockTeacher);
+      mockAddressRepository.findAll.mockResolvedValue(mockAddresses);
 
       const result = await useCase.findAll(teacherId);
 
-      expect(mockTeacherRepo.findById).toHaveBeenCalledWith(teacherId);
-      expect(mockAddressRepo.findAll).toHaveBeenCalledWith(teacherId);
+      expect(mockTeacherRepository.findById).toHaveBeenCalledWith(teacherId);
+      expect(mockAddressRepository.findAll).toHaveBeenCalledWith(teacherId);
       expect(result).toEqual(mockAddresses);
     });
 
     it('should throw NotFoundException when teacher is not found', async () => {
-      mockTeacherRepo.findById.mockResolvedValue(null);
+      mockTeacherRepository.findById.mockResolvedValue(null);
 
       await expect(useCase.findAll(teacherId)).rejects.toThrow(
         NotFoundException,
       );
-      expect(mockAddressRepo.findAll).not.toHaveBeenCalled();
+      expect(mockAddressRepository.findAll).not.toHaveBeenCalled();
     });
   });
 
@@ -83,23 +83,23 @@ describe('TeacherAddressUseCase', () => {
 
     it('should add an address to an teacher successfully', async () => {
       const mockAddress = { id: 'addr-1', ...dto };
-      mockTeacherRepo.findById.mockResolvedValue(mockTeacher);
-      mockAddressRepo.create.mockResolvedValue(mockAddress);
+      mockTeacherRepository.findById.mockResolvedValue(mockTeacher);
+      mockAddressRepository.create.mockResolvedValue(mockAddress);
 
       const result = await useCase.add(teacherId, dto);
 
-      expect(mockTeacherRepo.findById).toHaveBeenCalledWith(teacherId);
-      expect(mockAddressRepo.create).toHaveBeenCalledWith(teacherId, dto);
+      expect(mockTeacherRepository.findById).toHaveBeenCalledWith(teacherId);
+      expect(mockAddressRepository.create).toHaveBeenCalledWith(teacherId, dto);
       expect(result).toEqual(mockAddress);
     });
 
     it('should throw NotFoundException when teacher is not found', async () => {
-      mockTeacherRepo.findById.mockResolvedValue(null);
+      mockTeacherRepository.findById.mockResolvedValue(null);
 
       await expect(useCase.add(teacherId, dto)).rejects.toThrow(
         NotFoundException,
       );
-      expect(mockAddressRepo.create).not.toHaveBeenCalled();
+      expect(mockAddressRepository.create).not.toHaveBeenCalled();
     });
   });
 
@@ -111,13 +111,13 @@ describe('TeacherAddressUseCase', () => {
         id: 'addr-1',
         street: 'Jl. Soekarno Hatta No. 5',
       };
-      mockTeacherRepo.findById.mockResolvedValue(mockTeacher);
-      mockAddressRepo.findById.mockResolvedValue({ id: 'addr-1' });
-      mockAddressRepo.update.mockResolvedValue(updatedAddress);
+      mockTeacherRepository.findById.mockResolvedValue(mockTeacher);
+      mockAddressRepository.findById.mockResolvedValue({ id: 'addr-1' });
+      mockAddressRepository.update.mockResolvedValue(updatedAddress);
 
       const result = await useCase.update(teacherId, addressId, dto);
 
-      expect(mockAddressRepo.update).toHaveBeenCalledWith(
+      expect(mockAddressRepository.update).toHaveBeenCalledWith(
         teacherId,
         addressId,
         dto,
@@ -126,53 +126,53 @@ describe('TeacherAddressUseCase', () => {
     });
 
     it('should throw NotFoundException when teacher is not found', async () => {
-      mockTeacherRepo.findById.mockResolvedValue(null);
+      mockTeacherRepository.findById.mockResolvedValue(null);
 
       await expect(useCase.update(teacherId, addressId, dto)).rejects.toThrow(
         NotFoundException,
       );
-      expect(mockAddressRepo.update).not.toHaveBeenCalled();
+      expect(mockAddressRepository.update).not.toHaveBeenCalled();
     });
 
     it('should throw NotFoundException when address is not found', async () => {
-      mockTeacherRepo.findById.mockResolvedValue(mockTeacher);
-      mockAddressRepo.findById.mockResolvedValue(null);
+      mockTeacherRepository.findById.mockResolvedValue(mockTeacher);
+      mockAddressRepository.findById.mockResolvedValue(null);
 
       await expect(useCase.update(teacherId, addressId, dto)).rejects.toThrow(
         NotFoundException,
       );
-      expect(mockAddressRepo.update).not.toHaveBeenCalled();
+      expect(mockAddressRepository.update).not.toHaveBeenCalled();
     });
   });
 
   describe('remove', () => {
     it('should remove an address successfully', async () => {
-      mockTeacherRepo.findById.mockResolvedValue(mockTeacher);
-      mockAddressRepo.findById.mockResolvedValue({ id: 'addr-1' });
-      mockAddressRepo.remove.mockResolvedValue(undefined);
+      mockTeacherRepository.findById.mockResolvedValue(mockTeacher);
+      mockAddressRepository.findById.mockResolvedValue({ id: 'addr-1' });
+      mockAddressRepository.remove.mockResolvedValue(undefined);
 
       await useCase.remove(teacherId, addressId);
 
-      expect(mockAddressRepo.remove).toHaveBeenCalledWith(addressId);
+      expect(mockAddressRepository.remove).toHaveBeenCalledWith(addressId);
     });
 
     it('should throw NotFoundException when teacher is not found', async () => {
-      mockTeacherRepo.findById.mockResolvedValue(null);
+      mockTeacherRepository.findById.mockResolvedValue(null);
 
       await expect(useCase.remove(teacherId, addressId)).rejects.toThrow(
         NotFoundException,
       );
-      expect(mockAddressRepo.remove).not.toHaveBeenCalled();
+      expect(mockAddressRepository.remove).not.toHaveBeenCalled();
     });
 
     it('should throw NotFoundException when address is not found', async () => {
-      mockTeacherRepo.findById.mockResolvedValue(mockTeacher);
-      mockAddressRepo.findById.mockResolvedValue(null);
+      mockTeacherRepository.findById.mockResolvedValue(mockTeacher);
+      mockAddressRepository.findById.mockResolvedValue(null);
 
       await expect(useCase.remove(teacherId, addressId)).rejects.toThrow(
         NotFoundException,
       );
-      expect(mockAddressRepo.remove).not.toHaveBeenCalled();
+      expect(mockAddressRepository.remove).not.toHaveBeenCalled();
     });
   });
 });

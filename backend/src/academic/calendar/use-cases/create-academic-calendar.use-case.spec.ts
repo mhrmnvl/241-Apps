@@ -13,11 +13,11 @@ describe('CreateAcademicCalendarUseCase', () => {
     create: jest.fn(),
   };
 
-  const mockAcademicYearRepo = {
+  const mockAcademicYearRepository = {
     findById: jest.fn(),
   };
 
-  const mockSemesterRepo = {
+  const mockSemesterRepository = {
     findById: jest.fn(),
   };
 
@@ -26,8 +26,11 @@ describe('CreateAcademicCalendarUseCase', () => {
       providers: [
         CreateAcademicCalendarUseCase,
         { provide: IAcademicCalendarRepository, useValue: mockRepo },
-        { provide: IAcademicYearRepository, useValue: mockAcademicYearRepo },
-        { provide: ISemesterRepository, useValue: mockSemesterRepo },
+        {
+          provide: IAcademicYearRepository,
+          useValue: mockAcademicYearRepository,
+        },
+        { provide: ISemesterRepository, useValue: mockSemesterRepository },
       ],
     }).compile();
 
@@ -51,15 +54,15 @@ describe('CreateAcademicCalendarUseCase', () => {
     };
 
     it('should create calendar entry when academic year exists', async () => {
-      mockAcademicYearRepo.findById.mockResolvedValue({ id: 'ay-uuid' });
+      mockAcademicYearRepository.findById.mockResolvedValue({ id: 'ay-uuid' });
       mockRepo.create.mockResolvedValue({ id: 'cal-1', ...dto });
 
       const result = await useCase.execute(dto);
 
-      expect(mockAcademicYearRepo.findById).toHaveBeenCalledWith(
+      expect(mockAcademicYearRepository.findById).toHaveBeenCalledWith(
         dto.academicYearId,
       );
-      expect(mockSemesterRepo.findById).not.toHaveBeenCalled();
+      expect(mockSemesterRepository.findById).not.toHaveBeenCalled();
       expect(mockRepo.create).toHaveBeenCalledWith(dto);
       expect(result).toEqual({ id: 'cal-1', ...dto });
     });
@@ -69,17 +72,17 @@ describe('CreateAcademicCalendarUseCase', () => {
         ...dto,
         semesterId: 'sem-uuid',
       };
-      mockAcademicYearRepo.findById.mockResolvedValue({ id: 'ay-uuid' });
-      mockSemesterRepo.findById.mockResolvedValue({ id: 'sem-uuid' });
+      mockAcademicYearRepository.findById.mockResolvedValue({ id: 'ay-uuid' });
+      mockSemesterRepository.findById.mockResolvedValue({ id: 'sem-uuid' });
       mockRepo.create.mockResolvedValue({ id: 'cal-1', ...dtoWithSemester });
 
       await useCase.execute(dtoWithSemester);
 
-      expect(mockSemesterRepo.findById).toHaveBeenCalledWith('sem-uuid');
+      expect(mockSemesterRepository.findById).toHaveBeenCalledWith('sem-uuid');
     });
 
     it('should throw NotFoundException when academic year not found', async () => {
-      mockAcademicYearRepo.findById.mockResolvedValue(null);
+      mockAcademicYearRepository.findById.mockResolvedValue(null);
 
       await expect(useCase.execute(dto)).rejects.toThrow(NotFoundException);
       expect(mockRepo.create).not.toHaveBeenCalled();
@@ -90,8 +93,8 @@ describe('CreateAcademicCalendarUseCase', () => {
         ...dto,
         semesterId: 'sem-missing',
       };
-      mockAcademicYearRepo.findById.mockResolvedValue({ id: 'ay-uuid' });
-      mockSemesterRepo.findById.mockResolvedValue(null);
+      mockAcademicYearRepository.findById.mockResolvedValue({ id: 'ay-uuid' });
+      mockSemesterRepository.findById.mockResolvedValue(null);
 
       await expect(useCase.execute(dtoWithSemester)).rejects.toThrow(
         NotFoundException,
