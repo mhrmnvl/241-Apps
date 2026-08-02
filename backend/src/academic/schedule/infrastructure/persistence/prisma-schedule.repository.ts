@@ -1,14 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { Day, Prisma, Schedule } from '@prisma/client';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
-import { ScheduleQueryDto } from '../../dto/request/schedule.dto.js';
-import {
-  IScheduleRepository,
-  SCHEDULE_INCLUDE,
-  ScheduleWithDetails,
+import type {
+  ScheduleQueryInput,
   CreateScheduleRepositoryInput,
-  RestoreScheduleRepositoryInput,
+  UpdateScheduleRepositoryInput,
+  CreateTeachingAssignmentFromScheduleInput,
 } from '../../domain/interfaces/schedule-repository.interface.js';
+import { IScheduleRepository } from '../../domain/interfaces/schedule-repository.interface.js';
+import {
+  SCHEDULE_WITH_DETAILS_INCLUDE,
+  ScheduleWithDetails,
+} from './prisma-schedule.includes.js';
 import { PaginatedResult } from '../../../../shared/domain/interfaces/repository.interface.js';
 
 @Injectable()
@@ -18,7 +21,7 @@ export class PrismaScheduleRepository extends IScheduleRepository {
   }
 
   async findAll(
-    query: ScheduleQueryDto,
+    query: ScheduleQueryInput,
   ): Promise<PaginatedResult<ScheduleWithDetails>> {
     const {
       page = 1,
@@ -33,25 +36,25 @@ export class PrismaScheduleRepository extends IScheduleRepository {
       teachingAssignment: {
         classroom: { academicYear: { deletedAt: null } },
       },
-      ...(teachingAssignmentId && { teachingAssignmentId }),
-      ...(day && { day: day }),
-      ...(timeSlotId && { timeSlotId }),
+      ...(teachingAssignmentId ? { teachingAssignmentId } : {}),
+      ...(day ? { day: day } : {}),
+      ...(timeSlotId ? { timeSlotId } : {}),
     };
     const [data, total] = await Promise.all([
       this.prisma.schedule.findMany({
         where,
-        include: SCHEDULE_INCLUDE,
+        include: SCHEDULE_WITH_DETAILS_INCLUDE,
         skip,
         take: limit,
         orderBy: [{ day: 'asc' }, { timeSlot: { order: 'asc' } }],
       }),
       this.prisma.schedule.count({ where }),
     ]);
-    return { data: data, total, page, limit };
+    return { data, total, page, limit };
   }
 
   async findById(id: string): Promise<ScheduleWithDetails | null> {
-    const result = await this.prisma.schedule.findFirst({
+    return this.prisma.schedule.findFirst({
       where: {
         id,
         deletedAt: null,
@@ -59,9 +62,68 @@ export class PrismaScheduleRepository extends IScheduleRepository {
           classroom: { academicYear: { deletedAt: null } },
         },
       },
-      include: SCHEDULE_INCLUDE,
+      include: SCHEDULE_WITH_DETAILS_INCLUDE,
     });
-    return result;
+  }
+
+  async findConflictingSchedule(
+    teachingAssignmentId: string,
+    timeSlotId: string,
+    day: Day,
+    excludeId?: string,
+  ): Promise<ScheduleWithDetails | null> {
+    return this.prisma.schedule.findFirst({
+      where: {
+        teachingAssignmentId,
+        day,
+        timeSlotId,
+        deletedAt: null,
+        ...(excludeId ? { NOT: { id: excludeId } } : {}),
+      },
+      include: SCHEDULE_WITH_DETAILS_INCLUDE,
+    });
+  }
+
+  async findTeacherConflictingSchedule(
+    teacherId: string,
+    semesterId: string,
+    timeSlotId: string,
+    day: Day,
+    excludeId?: string,
+  ): Promise<ScheduleWithDetails | null> {
+    return this.prisma.schedule.findFirst({
+      where: {
+        day,
+        timeSlotId,
+        deletedAt: null,
+        teachingAssignment: { teacherId, semesterId, deletedAt: null },
+        ...(excludeId ? { NOT: { id: excludeId } } : {}),
+      },
+      include: SCHEDULE_WITH_DETAILS_INCLUDE,
+    });
+  }
+
+  async findClassroomConflictingSchedule(
+    classroomId: string,
+    semesterId: string,
+    timeSlotId: string,
+    day: Day,
+    excludeId?: string,
+  ): Promise<ScheduleWithDetails | null> {
+    return this.prisma.schedule.findFirst({
+      where: {
+        day,
+        timeSlotId,
+        deletedAt: null,
+        teachingAssignment: { classroomId, semesterId, deletedAt: null },
+        ...(excludeId ? { NOT: { id: excludeId } } : {}),
+      },
+      include: SCHEDULE_WITH_DETAILS_INCLUDE,
+    });
+  }
+
+  async remove(id: string): Promise<Schedule> {
+    return this.softDelete(id);
   }
 
   async findDuplicate(
@@ -76,7 +138,7 @@ export class PrismaScheduleRepository extends IScheduleRepository {
         day,
         timeSlotId,
         deletedAt: null,
-        ...(excludeId && { NOT: { id: excludeId } }),
+        ...(excludeId ? { NOT: { id: excludeId } } : {}),
       },
     });
   }
@@ -84,28 +146,34 @@ export class PrismaScheduleRepository extends IScheduleRepository {
   async create(
     data: CreateScheduleRepositoryInput,
   ): Promise<ScheduleWithDetails> {
-    const result = await this.prisma.schedule.create({
+    return this.prisma.schedule.create({
       data: {
         teachingAssignmentId: data.teachingAssignmentId,
         timeSlotId: data.timeSlotId,
-        day: data.day,
+        day: data.day as Day,
         room: data.room,
       },
-      include: SCHEDULE_INCLUDE,
+      include: SCHEDULE_WITH_DETAILS_INCLUDE,
     });
-    return result;
   }
 
   async update(
     id: string,
-    data: Prisma.ScheduleUpdateInput,
+    data: UpdateScheduleRepositoryInput,
   ): Promise<ScheduleWithDetails> {
-    const result = await this.prisma.schedule.update({
+    return this.prisma.schedule.update({
       where: { id },
-      data,
-      include: SCHEDULE_INCLUDE,
+      data: this.toPrismaScheduleData(data),
+      include: SCHEDULE_WITH_DETAILS_INCLUDE,
     });
-    return result;
+  }
+
+  /** Domain contract accepts `DayEnum | string`; Prisma wants its own `Day`. */
+  private toPrismaScheduleData(
+    data: UpdateScheduleRepositoryInput,
+  ): Prisma.ScheduleUncheckedUpdateInput {
+    const { day, ...rest } = data;
+    return { ...rest, ...(day !== undefined && { day: day as Day }) };
   }
 
   async findSoftDeleted(
@@ -125,14 +193,13 @@ export class PrismaScheduleRepository extends IScheduleRepository {
 
   async restore(
     id: string,
-    data: RestoreScheduleRepositoryInput,
+    data?: UpdateScheduleRepositoryInput,
   ): Promise<ScheduleWithDetails> {
-    const result = await this.prisma.schedule.update({
+    return this.prisma.schedule.update({
       where: { id },
-      data: { ...data, deletedAt: null },
-      include: SCHEDULE_INCLUDE,
+      data: { ...this.toPrismaScheduleData(data ?? {}), deletedAt: null },
+      include: SCHEDULE_WITH_DETAILS_INCLUDE,
     });
-    return result;
   }
 
   async softDelete(id: string): Promise<Schedule> {
@@ -143,7 +210,7 @@ export class PrismaScheduleRepository extends IScheduleRepository {
   }
 
   async findByClassroom(classroomId: string): Promise<ScheduleWithDetails[]> {
-    const result = await this.prisma.schedule.findMany({
+    return this.prisma.schedule.findMany({
       where: {
         deletedAt: null,
         teachingAssignment: {
@@ -152,10 +219,9 @@ export class PrismaScheduleRepository extends IScheduleRepository {
           classroom: { academicYear: { deletedAt: null } },
         },
       },
-      include: SCHEDULE_INCLUDE,
+      include: SCHEDULE_WITH_DETAILS_INCLUDE,
       orderBy: [{ day: 'asc' }, { timeSlot: { order: 'asc' } }],
     });
-    return result;
   }
 
   async softDeleteByClassroomAndDay(

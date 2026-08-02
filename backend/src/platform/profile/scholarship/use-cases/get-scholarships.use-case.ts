@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { ScholarshipRepository } from '../repositories/scholarship.repository.js';
+import { IScholarshipRepository } from '../domain/interfaces/scholarship-repository.interface.js';
 import { ScholarshipQueryDto } from '../dto/request/scholarship-query.dto.js';
 
 @Injectable()
 export class GetScholarshipsUseCase {
-  constructor(private readonly repository: ScholarshipRepository) {}
+  constructor(private readonly scholarshipRepository: IScholarshipRepository) {}
 
   async execute(query: ScholarshipQueryDto) {
-    return this.repository.findAll(query);
+    return this.scholarshipRepository.findAll(query);
   }
 }

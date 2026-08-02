@@ -4,10 +4,13 @@ import { AdmissionAnnouncementQueryDto } from '../dto/request/admission-announce
 
 @Injectable()
 export class GetAdmissionAnnouncementsUseCase {
-  constructor(private readonly repository: IAdmissionAnnouncementRepository) {}
+  constructor(
+    private readonly admissionAnnouncementRepository: IAdmissionAnnouncementRepository,
+  ) {}
 
   async execute(query: AdmissionAnnouncementQueryDto) {
-    const { data, total, page, limit } = await this.repository.findAll(query);
+    const { data, total, page, limit } =
+      await this.admissionAnnouncementRepository.findAll(query);
 
     return {
       data,

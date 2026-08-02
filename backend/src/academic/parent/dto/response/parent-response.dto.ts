@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IncomeRange } from '@prisma/client';
+import { IncomeRange } from '../../../../shared/domain/enums/income-range.enum.js';
 
 export class ParentResponseDto {
   @ApiProperty({ format: 'uuid' })

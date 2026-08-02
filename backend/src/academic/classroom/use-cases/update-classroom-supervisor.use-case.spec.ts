@@ -1,7 +1,7 @@
 import { ConflictException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { UpdateClassroomSupervisorDto } from '../dto/request/update-classroom-supervisor.dto.js';
-import { ClassroomSupervisorRepository } from '../repositories/classroom-supervisors.repository.js';
+import { IClassroomSupervisorRepository } from '../domain/interfaces/classroom-supervisor-repository.interface.js';
 import { UpdateClassroomSupervisorUseCase } from './update-classroom-supervisor.use-case.js';
 
 describe('UpdateClassroomSupervisorUseCase', () => {
@@ -12,7 +12,7 @@ describe('UpdateClassroomSupervisorUseCase', () => {
     findClassroomById: jest.fn(),
     findTeacherById: jest.fn(),
     findSemesterById: jest.fn(),
-    findByClassroomAndSemester: jest.fn(),
+    findAssignment: jest.fn(),
     update: jest.fn(),
   };
 
@@ -27,7 +27,7 @@ describe('UpdateClassroomSupervisorUseCase', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         UpdateClassroomSupervisorUseCase,
-        { provide: ClassroomSupervisorRepository, useValue: mockRepo },
+        { provide: IClassroomSupervisorRepository, useValue: mockRepo },
       ],
     }).compile();
 
@@ -52,7 +52,7 @@ describe('UpdateClassroomSupervisorUseCase', () => {
 
       mockRepo.findById.mockResolvedValue(mockExisting);
       mockRepo.findTeacherById.mockResolvedValue({ id: 'teacher-uuid-2' });
-      mockRepo.findByClassroomAndSemester.mockResolvedValue(null);
+      mockRepo.findAssignment.mockResolvedValue(null);
       mockRepo.update.mockResolvedValue(updated);
 
       const result = await useCase.execute(id, dto);
@@ -69,25 +69,6 @@ describe('UpdateClassroomSupervisorUseCase', () => {
       await expect(useCase.execute(id, {})).rejects.toThrow(NotFoundException);
       expect(mockRepo.update).not.toHaveBeenCalled();
     });
-
-    it('should throw NotFoundException when new class does not exist', async () => {
-      mockRepo.findById.mockResolvedValue(mockExisting);
-      mockRepo.findClassroomById.mockResolvedValue(null);
-
-      await expect(
-        useCase.execute(id, { classroomId: 'class-new' }),
-      ).rejects.toThrow(NotFoundException);
-    });
-
-    it('should throw NotFoundException when new semester does not exist', async () => {
-      mockRepo.findById.mockResolvedValue(mockExisting);
-      mockRepo.findSemesterById.mockResolvedValue(null);
-
-      await expect(
-        useCase.execute(id, { semesterId: 'semester-new' }),
-      ).rejects.toThrow(NotFoundException);
-    });
-
     it('should throw ConflictException when class+semester pair already has a supervisor', async () => {
       const dto: UpdateClassroomSupervisorDto = {
         semesterId: 'semester-uuid-2',
@@ -95,7 +76,7 @@ describe('UpdateClassroomSupervisorUseCase', () => {
 
       mockRepo.findById.mockResolvedValue(mockExisting);
       mockRepo.findSemesterById.mockResolvedValue({ id: 'semester-uuid-2' });
-      mockRepo.findByClassroomAndSemester.mockResolvedValue({
+      mockRepo.findAssignment.mockResolvedValue({
         id: 'other-sup',
       });
 

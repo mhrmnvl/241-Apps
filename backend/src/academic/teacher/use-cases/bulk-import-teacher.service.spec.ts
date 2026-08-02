@@ -1,7 +1,7 @@
 import { BadRequestException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import ExcelJS from 'exceljs';
-import { TeacherRepository } from '../repositories/teacher.repository.js';
+import { ITeacherRepository } from '../domain/interfaces/teacher-repository.interface.js';
 import { BulkImportTeachersUseCase } from './bulk-import-teacher.use-case.js';
 import { CreateTeacherUseCase } from './create-teacher.use-case.js';
 
@@ -60,7 +60,7 @@ describe('BulkImportTeachersUseCase', () => {
       providers: [
         BulkImportTeachersUseCase,
         { provide: ExcelTeacherParser, useClass: ConcreteExcelTeacherParser },
-        { provide: TeacherRepository, useValue: mockRepo },
+        { provide: ITeacherRepository, useValue: mockRepo },
         { provide: CreateTeacherUseCase, useValue: mockCreateTeacher },
       ],
     }).compile();

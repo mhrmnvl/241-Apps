@@ -1,12 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { AcademicYear, Prisma } from '@prisma/client';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
-import {
+import { IAcademicYearRepository } from '../../domain/interfaces/academic-year-repository.interface.js';
+import type {
+  AcademicYearQueryInput,
   CreateAcademicYearRepositoryInput,
-  IAcademicYearRepository,
+  UpdateAcademicYearRepositoryInput,
 } from '../../domain/interfaces/academic-year-repository.interface.js';
-import { AcademicYearQueryDto } from '../../dto/request/academic-year-query.dto.js';
 import { PaginatedResult } from '../../../../shared/domain/interfaces/repository.interface.js';
+import {
+  ACADEMIC_YEAR_WITH_DETAILS_INCLUDE,
+  AcademicYearWithDetails,
+} from './prisma-academic-year.includes.js';
 
 @Injectable()
 export class PrismaAcademicYearRepository extends IAcademicYearRepository {
@@ -15,19 +20,20 @@ export class PrismaAcademicYearRepository extends IAcademicYearRepository {
   }
 
   async findAll(
-    query: AcademicYearQueryDto,
-  ): Promise<PaginatedResult<AcademicYear>> {
+    query: AcademicYearQueryInput,
+  ): Promise<PaginatedResult<AcademicYearWithDetails>> {
     const { page = 1, limit = 10, search } = query;
     const skip = (page - 1) * limit;
 
     const where: Prisma.AcademicYearWhereInput = {
       deletedAt: null,
-      ...(search && { name: { contains: search, mode: 'insensitive' } }),
+      ...(search ? { name: { contains: search, mode: 'insensitive' } } : {}),
     };
 
     const [data, total] = await Promise.all([
       this.prisma.academicYear.findMany({
         where,
+        include: ACADEMIC_YEAR_WITH_DETAILS_INCLUDE,
         skip,
         take: limit,
         orderBy: { name: 'asc' },
@@ -38,9 +44,17 @@ export class PrismaAcademicYearRepository extends IAcademicYearRepository {
     return { data, total, page, limit };
   }
 
-  async findById(id: string): Promise<AcademicYear | null> {
+  async findById(id: string): Promise<AcademicYearWithDetails | null> {
     return this.prisma.academicYear.findFirst({
       where: { id, deletedAt: null },
+      include: ACADEMIC_YEAR_WITH_DETAILS_INCLUDE,
+    });
+  }
+
+  async findActive(): Promise<AcademicYearWithDetails | null> {
+    return this.prisma.academicYear.findFirst({
+      where: { isActive: true, deletedAt: null },
+      include: ACADEMIC_YEAR_WITH_DETAILS_INCLUDE,
     });
   }
 
@@ -57,30 +71,44 @@ export class PrismaAcademicYearRepository extends IAcademicYearRepository {
     });
   }
 
-  async create(data: CreateAcademicYearRepositoryInput): Promise<AcademicYear> {
+  async create(
+    data: CreateAcademicYearRepositoryInput,
+  ): Promise<AcademicYearWithDetails> {
     return this.prisma.academicYear.create({
       data: {
         name: data.name,
         isActive: data.isActive,
       },
+      include: ACADEMIC_YEAR_WITH_DETAILS_INCLUDE,
     });
   }
 
   async update(
     id: string,
-    data: Prisma.AcademicYearUpdateInput,
-  ): Promise<AcademicYear> {
-    return this.prisma.academicYear.update({ where: { id }, data });
+    data: UpdateAcademicYearRepositoryInput,
+  ): Promise<AcademicYearWithDetails> {
+    return this.prisma.academicYear.update({
+      where: { id },
+      data: data,
+      include: ACADEMIC_YEAR_WITH_DETAILS_INCLUDE,
+    });
   }
 
-  async deactivateAll(): Promise<Prisma.BatchPayload> {
+  async deactivateAllActive(excludeId?: string): Promise<{ count: number }> {
+    return this.deactivateAll(excludeId);
+  }
+
+  async deactivateAll(excludeId?: string): Promise<Prisma.BatchPayload> {
     return this.prisma.academicYear.updateMany({
-      where: { isActive: true },
+      where: {
+        isActive: true,
+        ...(excludeId ? { NOT: { id: excludeId } } : {}),
+      },
       data: { isActive: false },
     });
   }
 
-  async activateById(id: string): Promise<AcademicYear> {
+  async activateById(id: string): Promise<AcademicYearWithDetails> {
     return this.prisma.$transaction(async (tx) => {
       await tx.academicYear.updateMany({
         where: { isActive: true },
@@ -89,6 +117,7 @@ export class PrismaAcademicYearRepository extends IAcademicYearRepository {
       return tx.academicYear.update({
         where: { id },
         data: { isActive: true },
+        include: ACADEMIC_YEAR_WITH_DETAILS_INCLUDE,
       });
     });
   }
@@ -127,6 +156,10 @@ export class PrismaAcademicYearRepository extends IAcademicYearRepository {
       where: { academicYearId, isActive: true, deletedAt: null },
       data: { isActive: false },
     });
+  }
+
+  async remove(id: string): Promise<AcademicYear> {
+    return this.softDelete(id);
   }
 
   async softDelete(id: string): Promise<AcademicYear> {

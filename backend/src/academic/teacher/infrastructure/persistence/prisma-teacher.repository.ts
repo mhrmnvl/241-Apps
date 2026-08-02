@@ -2,18 +2,24 @@ import { Injectable } from '@nestjs/common';
 import { Prisma, Teacher, User, Profile } from '@prisma/client';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
 import { AccountProvisioningService } from '../../../../platform/user/index.js';
+import type {
+  ProfileEntity,
+  ProfileUpdateInput,
+} from '../../../../platform/profile/domain/entities/profile.entity.js';
 import { resolveAcademicYearId } from '../../../../shared/utils/active-academic-year.helper.js';
+import { ITeacherRepository } from '../../domain/interfaces/teacher-repository.interface.js';
 import {
-  ITeacherRepository,
   TEACHER_LIST_INCLUDE,
   TEACHER_DETAIL_INCLUDE,
   TeacherWithDetails,
   TeacherListWithDetails,
+} from './prisma-teacher.includes.js';
+import type {
+  TeacherQueryInput,
+  ExportTeacherQueryInput,
+  CreateTeacherRepositoryInput,
+  UpdateTeacherRepositoryInput,
 } from '../../domain/interfaces/teacher-repository.interface.js';
-import { TeacherQueryDto } from '../../dto/request/teacher-query.dto.js';
-import { ExportTeacherQueryDto } from '../../dto/request/export-teacher-query.dto.js';
-import { CreateTeacherDto } from '../../dto/request/create-teacher.dto.js';
-import { UpdateTeacherDto } from '../../dto/request/update-teacher.dto.js';
 import { PaginatedResult } from '../../../../shared/domain/interfaces/repository.interface.js';
 
 @Injectable()
@@ -33,7 +39,7 @@ export class PrismaTeacherRepository extends ITeacherRepository {
   }
 
   async findAll(
-    query: TeacherQueryDto,
+    query: TeacherQueryInput,
   ): Promise<PaginatedResult<TeacherListWithDetails>> {
     const {
       page = 1,
@@ -107,7 +113,7 @@ export class PrismaTeacherRepository extends ITeacherRepository {
   }
 
   async findAllForExport(
-    filters: ExportTeacherQueryDto,
+    filters: ExportTeacherQueryInput,
   ): Promise<TeacherListWithDetails[]> {
     const { search, employmentTypeId, isActive } = filters;
 
@@ -185,13 +191,13 @@ export class PrismaTeacherRepository extends ITeacherRepository {
 
   async updateProfile(
     userId: string,
-    data: Prisma.ProfileUpdateInput,
-  ): Promise<Profile> {
+    data: ProfileUpdateInput,
+  ): Promise<ProfileEntity> {
     return this.prisma.profile.update({ where: { userId }, data });
   }
 
   async create(
-    dto: CreateTeacherDto,
+    dto: CreateTeacherRepositoryInput,
     hashedPassword: string,
   ): Promise<TeacherWithDetails> {
     return this.prisma.$transaction(async (tx) => {
@@ -233,7 +239,10 @@ export class PrismaTeacherRepository extends ITeacherRepository {
     });
   }
 
-  async update(id: string, dto: UpdateTeacherDto): Promise<TeacherWithDetails> {
+  async update(
+    id: string,
+    dto: UpdateTeacherRepositoryInput,
+  ): Promise<TeacherWithDetails> {
     return this.prisma.teacher.update({
       where: { id },
       data: {

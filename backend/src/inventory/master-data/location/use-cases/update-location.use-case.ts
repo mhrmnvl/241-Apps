@@ -4,14 +4,14 @@ import { UpdateLocationDto } from '../dto/request/update-location.dto.js';
 
 @Injectable()
 export class UpdateLocationUseCase {
-  constructor(private readonly repository: ILocationRepository) {}
+  constructor(private readonly locationRepository: ILocationRepository) {}
 
   async execute(id: string, dto: UpdateLocationDto) {
-    const location = await this.repository.findById(id);
+    const location = await this.locationRepository.findById(id);
     if (!location) {
       throw new NotFoundException(`Location with ID ${id} not found`);
     }
-    return this.repository.update(id, {
+    return this.locationRepository.update(id, {
       code: dto.code,
       name: dto.name,
       building: dto.building ?? null,

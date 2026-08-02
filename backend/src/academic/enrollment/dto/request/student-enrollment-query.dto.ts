@@ -1,5 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { EnrollmentStatus } from '@prisma/client';
+import { EnrollmentStatus } from '../../../../shared/domain/enums/enrollment-status.enum.js';
 import { IsEnum, IsOptional, IsUUID } from 'class-validator';
 import { PaginationQueryDto } from '../../../../shared/dto/pagination.dto.js';
 

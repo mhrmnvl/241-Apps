@@ -1,13 +1,7 @@
-import { ProfileSocialMedia, Prisma } from '@prisma/client';
+import { ProfileSocialMediaEntity } from '../entities/profile-social-media.entity.js';
+import { ProfileSocialMediaWithDetails } from '../entities/profile-social-media.entity.js';
 
-export const PROFILE_SOCIAL_MEDIA_INCLUDE = {
-  socialMedia: true,
-} satisfies Prisma.ProfileSocialMediaInclude;
-
-export type ProfileSocialMediaWithDetails =
-  Prisma.ProfileSocialMediaGetPayload<{
-    include: typeof PROFILE_SOCIAL_MEDIA_INCLUDE;
-  }>;
+export type { ProfileSocialMediaWithDetails };
 
 export abstract class IProfileSocialMediaRepository {
   abstract findAllByProfileId(
@@ -17,12 +11,12 @@ export abstract class IProfileSocialMediaRepository {
   abstract findByIdAndProfile(
     id: string,
     profileId: string,
-  ): Promise<ProfileSocialMedia | null>;
+  ): Promise<ProfileSocialMediaEntity | null>;
 
   abstract findByPlatformAndProfile(
     socialMediaId: string,
     profileId: string,
-  ): Promise<ProfileSocialMedia | null>;
+  ): Promise<ProfileSocialMediaEntity | null>;
 
   abstract create(
     profileId: string,
@@ -31,9 +25,9 @@ export abstract class IProfileSocialMediaRepository {
 
   abstract update(
     id: string,
-    dto: Prisma.ProfileSocialMediaUpdateInput,
+    dto: { username?: string | null },
   ): Promise<ProfileSocialMediaWithDetails>;
 
-  abstract remove(id: string): Promise<ProfileSocialMedia>;
+  abstract remove(id: string): Promise<ProfileSocialMediaEntity>;
   abstract countByPlatformId(socialMediaId: string): Promise<number>;
 }

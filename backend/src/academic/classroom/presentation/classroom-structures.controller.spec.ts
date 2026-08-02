@@ -6,10 +6,10 @@ import { CreateClassroomStructureUseCase } from '../use-cases/create-classroom-s
 import { DeleteClassroomStructureUseCase } from '../use-cases/delete-classroom-structure.use-case.js';
 import { GetClassroomStructuresUseCase } from '../use-cases/get-classroom-structures.use-case.js';
 import { UpdateClassroomStructureUseCase } from '../use-cases/update-classroom-structure.use-case.js';
-import { ClassroomStructuresController } from './classroom-structures.controller.js';
+import { ClassroomStructureController } from './classroom-structure.controller.js';
 
-describe('ClassroomStructuresController', () => {
-  let controller: ClassroomStructuresController;
+describe('ClassroomStructureController', () => {
+  let controller: ClassroomStructureController;
 
   const mockGetAll = { execute: jest.fn() };
   const mockCreate = { execute: jest.fn() };
@@ -18,7 +18,7 @@ describe('ClassroomStructuresController', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [ClassroomStructuresController],
+      controllers: [ClassroomStructureController],
       providers: [
         { provide: GetClassroomStructuresUseCase, useValue: mockGetAll },
         { provide: CreateClassroomStructureUseCase, useValue: mockCreate },
@@ -27,8 +27,8 @@ describe('ClassroomStructuresController', () => {
       ],
     }).compile();
 
-    controller = module.get<ClassroomStructuresController>(
-      ClassroomStructuresController,
+    controller = module.get<ClassroomStructureController>(
+      ClassroomStructureController,
     );
     jest.clearAllMocks();
   });

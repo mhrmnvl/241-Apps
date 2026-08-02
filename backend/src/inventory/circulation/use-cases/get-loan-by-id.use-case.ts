@@ -3,10 +3,10 @@ import { ICirculationRepository } from '../domain/interfaces/circulation-reposit
 
 @Injectable()
 export class GetLoanByIdUseCase {
-  constructor(private readonly repository: ICirculationRepository) {}
+  constructor(private readonly circulationRepository: ICirculationRepository) {}
 
   async execute(id: string) {
-    const loan = await this.repository.findLoanById(id);
+    const loan = await this.circulationRepository.findLoanById(id);
     if (!loan) {
       throw new NotFoundException('Loan transaction not found.');
     }

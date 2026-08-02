@@ -1,0 +1,5 @@
+export enum AppKey {
+  ACADEMIC = 'ACADEMIC',
+  ADMISSION = 'ADMISSION',
+  INVENTORY = 'INVENTORY',
+}

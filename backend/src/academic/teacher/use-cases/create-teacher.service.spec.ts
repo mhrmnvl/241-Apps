@@ -1,8 +1,8 @@
 import { ConflictException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { UserGender } from '@prisma/client';
+import { UserGender } from '../../../shared/domain/enums/user-gender.enum.js';
 import { CreateTeacherDto } from '../dto/request/create-teacher.dto.js';
-import { TeacherRepository } from '../repositories/teacher.repository.js';
+import { ITeacherRepository } from '../domain/interfaces/teacher-repository.interface.js';
 import { CreateTeacherUseCase } from './create-teacher.use-case.js';
 import { hashPassword } from '../../../shared/utils/hash.helper.js';
 
@@ -25,7 +25,7 @@ describe('CreateTeacherUseCase', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         CreateTeacherUseCase,
-        { provide: TeacherRepository, useValue: mockRepository },
+        { provide: ITeacherRepository, useValue: mockRepository },
       ],
     }).compile();
 
@@ -74,8 +74,9 @@ describe('CreateTeacherUseCase', () => {
 
       expect(mockRepository.findByNip).not.toHaveBeenCalled();
       expect(mockRepository.findByNuptk).not.toHaveBeenCalled();
+      // The port takes a real Date; the use case converts the ISO string.
       expect(mockRepository.create).toHaveBeenCalledWith(
-        dto,
+        { ...dto, birthDate: new Date(dto.birthDate) },
         'hashed-password',
       );
       expect(result).toEqual(mockTeacher);

@@ -7,27 +7,27 @@ import {
 } from '@nestjs/common';
 import { CreateTeacherPositionDto } from '../dto/request/create-teacher-position.dto.js';
 import { UpdateTeacherPositionDto } from '../dto/request/update-teacher-position.dto.js';
-import { TeacherPositionRepository } from '../repositories/teacher-position.repository.js';
-import { TeacherRepository } from '../index.js';
+import { ITeacherPositionRepository } from '../domain/interfaces/teacher-position-repository.interface.js';
+import { ITeacherRepository } from '../domain/interfaces/teacher-repository.interface.js';
 
 @Injectable()
 export class TeacherPositionUseCase {
   private readonly logger = new Logger(TeacherPositionUseCase.name);
 
   constructor(
-    private readonly repository: TeacherRepository,
-    private readonly teacherPositionRepository: TeacherPositionRepository,
+    private readonly teacherRepository: ITeacherRepository,
+    private readonly teacherPositionRepository: ITeacherPositionRepository,
   ) {}
 
   async findAll(teacherId: string) {
     await this.ensureTeacherExists(teacherId);
-    return this.teacherPositionRepository.findAll(teacherId);
+    return this.teacherPositionRepository.findByTeacherId(teacherId);
   }
 
   async assign(teacherId: string, dto: CreateTeacherPositionDto) {
     await this.ensureTeacherExists(teacherId);
 
-    const position = await this.teacherPositionRepository.findPosition(
+    const position = await this.teacherPositionRepository.findPositionById(
       dto.positionId,
     );
     if (!position)
@@ -40,18 +40,21 @@ export class TeacherPositionUseCase {
       );
     }
 
-    const existing = await this.teacherPositionRepository.findAssignment(
-      teacherId,
-      dto.positionId,
-      new Date(dto.hireDate),
-    );
+    const existing =
+      await this.teacherPositionRepository.findByTeacherAndPosition(
+        teacherId,
+        dto.positionId,
+      );
     if (existing) {
       throw new ConflictException(
-        'This position is already assigned to the teacher on that date',
+        'This position is already assigned to the teacher',
       );
     }
 
-    const link = await this.teacherPositionRepository.assign(teacherId, dto);
+    const link = await this.teacherPositionRepository.create(teacherId, {
+      ...dto,
+      hireDate: new Date(dto.hireDate),
+    });
     this.logger.log(
       `Position ${dto.positionId} assigned to teacher ${teacherId}`,
     );
@@ -65,10 +68,14 @@ export class TeacherPositionUseCase {
   ) {
     await this.ensureTeacherExists(teacherId);
     await this.ensureLinkExists(teacherId, linkId);
+    const { hireDate, ...rest } = dto;
     const updated = await this.teacherPositionRepository.update(
       teacherId,
       linkId,
-      dto,
+      {
+        ...rest,
+        ...(hireDate !== undefined && { hireDate: new Date(hireDate) }),
+      },
     );
     this.logger.log(`Position link ${linkId} updated for teacher ${teacherId}`);
     return updated;
@@ -77,21 +84,21 @@ export class TeacherPositionUseCase {
   async remove(teacherId: string, linkId: string): Promise<void> {
     await this.ensureTeacherExists(teacherId);
     await this.ensureLinkExists(teacherId, linkId);
-    await this.teacherPositionRepository.remove(linkId);
+    await this.teacherPositionRepository.softDelete(teacherId, linkId);
     this.logger.log(
       `Position link ${linkId} removed from teacher ${teacherId}`,
     );
   }
 
   private async ensureTeacherExists(id: string) {
-    const teacher = await this.repository.findById(id);
+    const teacher = await this.teacherRepository.findById(id);
     if (!teacher)
       throw new NotFoundException(`Teacher with ID ${id} not found`);
     return teacher;
   }
 
   private async ensureLinkExists(teacherId: string, linkId: string) {
-    const link = await this.teacherPositionRepository.findLinkById(
+    const link = await this.teacherPositionRepository.findById(
       teacherId,
       linkId,
     );

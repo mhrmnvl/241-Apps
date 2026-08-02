@@ -1,12 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma, TeachingAssignment } from '@prisma/client';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
-import { TeachingAssignmentQueryDto } from '../../dto/request/teaching-assignment-query.dto.js';
+import type { TeachingAssignmentQueryInput } from '../../domain/interfaces/teaching-assignment-repository.interface.js';
 import { resolveSemesterId } from '../../../../shared/utils/active-academic-year.helper.js';
 import {
   ITeachingAssignmentRepository,
-  TEACHING_ASSIGNMENT_INCLUDE,
-  TeachingAssignmentWithDetails,
   ClassroomReference,
   SemesterReference,
   CreateTeachingAssignmentRepositoryInput,
@@ -14,6 +12,10 @@ import {
   RestoreTeachingAssignmentRepositoryInput,
 } from '../../domain/interfaces/teaching-assignment-repository.interface.js';
 import { PaginatedResult } from '../../../../shared/domain/interfaces/repository.interface.js';
+import {
+  TEACHING_ASSIGNMENT_WITH_DETAILS_INCLUDE,
+  TeachingAssignmentWithDetails,
+} from './prisma-teaching-assignment.includes.js';
 
 @Injectable()
 export class PrismaTeachingAssignmentRepository extends ITeachingAssignmentRepository {
@@ -22,7 +24,7 @@ export class PrismaTeachingAssignmentRepository extends ITeachingAssignmentRepos
   }
 
   async findAll(
-    query: TeachingAssignmentQueryDto,
+    query: TeachingAssignmentQueryInput,
   ): Promise<PaginatedResult<TeachingAssignmentWithDetails>> {
     const {
       page = 1,
@@ -47,7 +49,7 @@ export class PrismaTeachingAssignmentRepository extends ITeachingAssignmentRepos
     const [data, total] = await Promise.all([
       this.prisma.teachingAssignment.findMany({
         where,
-        include: TEACHING_ASSIGNMENT_INCLUDE,
+        include: TEACHING_ASSIGNMENT_WITH_DETAILS_INCLUDE,
         skip,
         take: limit,
         orderBy: { classroom: { name: 'asc' } },
@@ -63,7 +65,7 @@ export class PrismaTeachingAssignmentRepository extends ITeachingAssignmentRepos
         id,
         deletedAt: null,
       },
-      include: TEACHING_ASSIGNMENT_INCLUDE,
+      include: TEACHING_ASSIGNMENT_WITH_DETAILS_INCLUDE,
     });
   }
 
@@ -91,7 +93,7 @@ export class PrismaTeachingAssignmentRepository extends ITeachingAssignmentRepos
   ): Promise<TeachingAssignmentWithDetails> {
     return this.prisma.teachingAssignment.create({
       data,
-      include: TEACHING_ASSIGNMENT_INCLUDE,
+      include: TEACHING_ASSIGNMENT_WITH_DETAILS_INCLUDE,
     });
   }
 
@@ -102,7 +104,7 @@ export class PrismaTeachingAssignmentRepository extends ITeachingAssignmentRepos
     return this.prisma.teachingAssignment.update({
       where: { id },
       data,
-      include: TEACHING_ASSIGNMENT_INCLUDE,
+      include: TEACHING_ASSIGNMENT_WITH_DETAILS_INCLUDE,
     });
   }
 
@@ -130,7 +132,7 @@ export class PrismaTeachingAssignmentRepository extends ITeachingAssignmentRepos
     return this.prisma.teachingAssignment.update({
       where: { id },
       data: { ...data, deletedAt: null },
-      include: TEACHING_ASSIGNMENT_INCLUDE,
+      include: TEACHING_ASSIGNMENT_WITH_DETAILS_INCLUDE,
     });
   }
 
@@ -139,6 +141,10 @@ export class PrismaTeachingAssignmentRepository extends ITeachingAssignmentRepos
       where: { id },
       data: { deletedAt: new Date() },
     });
+  }
+
+  async remove(id: string): Promise<TeachingAssignment> {
+    return this.softDelete(id);
   }
 
   async findClassroomById(id: string): Promise<ClassroomReference | null> {

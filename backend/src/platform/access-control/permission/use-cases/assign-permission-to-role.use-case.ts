@@ -5,7 +5,7 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { IPermissionRepository } from '../interfaces/permission-repository.interface.js';
+import { IPermissionRepository } from '../domain/interfaces/permission-repository.interface.js';
 import { IRoleRepository } from '../../role/index.js';
 
 @Injectable()

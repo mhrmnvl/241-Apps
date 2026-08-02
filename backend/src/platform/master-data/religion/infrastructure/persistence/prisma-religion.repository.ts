@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Religion, Prisma } from '@prisma/client';
 import { PrismaService } from '../../../../../core/database/prisma.service.js';
-import { ReligionQueryDto } from '../../dto/request/religion-query.dto.js';
+import { ReligionQueryInput } from '../../domain/interfaces/religion-repository.interface.js';
 import { IReligionRepository } from '../../domain/interfaces/religion-repository.interface.js';
 import { PaginatedResult } from '../../../../../shared/domain/interfaces/repository.interface.js';
 
@@ -11,7 +11,7 @@ export class PrismaReligionRepository extends IReligionRepository {
     super();
   }
 
-  async findAll(query: ReligionQueryDto): Promise<PaginatedResult<Religion>> {
+  async findAll(query: ReligionQueryInput): Promise<PaginatedResult<Religion>> {
     const { page = 1, limit = 10, search, isActive } = query;
     const skip = (page - 1) * limit;
 

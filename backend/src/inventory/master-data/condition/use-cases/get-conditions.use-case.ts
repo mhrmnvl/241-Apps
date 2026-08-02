@@ -3,9 +3,9 @@ import { IConditionRepository } from '../domain/interfaces/condition-repository.
 
 @Injectable()
 export class GetConditionsUseCase {
-  constructor(private readonly repository: IConditionRepository) {}
+  constructor(private readonly conditionRepository: IConditionRepository) {}
 
   async execute(search?: string) {
-    return this.repository.findMany(search);
+    return this.conditionRepository.findMany(search);
   }
 }

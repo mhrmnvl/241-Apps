@@ -1,12 +1,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { AchievementRepository } from '../repositories/achievement.repository.js';
+import { IAchievementRepository } from '../domain/interfaces/achievement-repository.interface.js';
 
 @Injectable()
 export class GetAchievementByIdUseCase {
-  constructor(private readonly repository: AchievementRepository) {}
+  constructor(private readonly achievementRepository: IAchievementRepository) {}
 
   async execute(id: string) {
-    const achievement = await this.repository.findById(id);
+    const achievement = await this.achievementRepository.findById(id);
     if (!achievement) throw new NotFoundException('Achievement not found');
     return achievement;
   }

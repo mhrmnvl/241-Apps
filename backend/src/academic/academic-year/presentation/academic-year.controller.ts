@@ -20,7 +20,7 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { AcademicYear } from '@prisma/client';
+import { AcademicYearEntity as AcademicYear } from '../domain/entities/academic-year.entity.js';
 
 import { JwtAuthGuard } from '../../../platform/auth/index.js';
 import { CurrentUser } from '../../../core/decorators/current-user.decorator.js';

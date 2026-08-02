@@ -6,19 +6,21 @@ import { IAcademicYearRepository } from '../domain/interfaces/academic-year-repo
 export class CreateAcademicYearUseCase {
   private readonly logger = new Logger(CreateAcademicYearUseCase.name);
 
-  constructor(private readonly repository: IAcademicYearRepository) {}
+  constructor(
+    private readonly academicYearRepository: IAcademicYearRepository,
+  ) {}
 
   async execute(dto: CreateAcademicYearDto) {
-    const existing = await this.repository.findByName(dto.name);
+    const existing = await this.academicYearRepository.findByName(dto.name);
     if (existing) {
       throw new ConflictException(`Academic Year "${dto.name}" already exists`);
     }
 
     if (dto.isActive) {
-      await this.repository.deactivateAll();
+      await this.academicYearRepository.deactivateAll();
     }
 
-    const academicYear = await this.repository.create({
+    const academicYear = await this.academicYearRepository.create({
       name: dto.name,
       isActive: dto.isActive ?? false,
     });

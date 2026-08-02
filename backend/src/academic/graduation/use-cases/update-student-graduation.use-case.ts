@@ -4,12 +4,18 @@ import { IGraduationRepository } from '../domain/interfaces/graduation-repositor
 
 @Injectable()
 export class UpdateStudentGraduationUseCase {
-  constructor(private readonly repository: IGraduationRepository) {}
+  constructor(private readonly graduationRepository: IGraduationRepository) {}
   async execute(id: string, dto: UpdateStudentGraduationDto) {
-    const graduation = await this.repository.findById(id);
+    const graduation = await this.graduationRepository.findById(id);
     if (!graduation) {
       throw new NotFoundException(`StudentGraduation ${id} not found`);
     }
-    return this.repository.update(id, dto);
+    const { graduationDate, ...rest } = dto;
+    return this.graduationRepository.update(id, {
+      ...rest,
+      ...(graduationDate !== undefined && {
+        graduationDate: new Date(graduationDate),
+      }),
+    });
   }
 }

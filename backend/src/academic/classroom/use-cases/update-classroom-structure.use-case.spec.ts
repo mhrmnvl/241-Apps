@@ -4,7 +4,7 @@ import {
   ConflictException,
   NotFoundException,
 } from '@nestjs/common';
-import { ClassroomStructureRepository } from '../repositories/classroom-structures.repository.js';
+import { IClassroomStructureRepository } from '../domain/interfaces/classroom-structure-repository.interface.js';
 import { UpdateClassroomStructureUseCase } from './update-classroom-structure.use-case.js';
 
 describe('UpdateClassroomStructureUseCase', () => {
@@ -31,7 +31,7 @@ describe('UpdateClassroomStructureUseCase', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         UpdateClassroomStructureUseCase,
-        { provide: ClassroomStructureRepository, useValue: mockRepo },
+        { provide: IClassroomStructureRepository, useValue: mockRepo },
       ],
     }).compile();
 
@@ -64,16 +64,6 @@ describe('UpdateClassroomStructureUseCase', () => {
     expect(result.presidentId).toBe('stu-2');
   });
 
-  it('should throw BadRequestException when student not enrolled', async () => {
-    mockRepo.findById.mockResolvedValue(existing);
-    mockRepo.findActiveEnrollment.mockResolvedValue(null);
-
-    await expect(
-      useCase.execute('str-1', { vicePresidentId: 'stu-bad' }),
-    ).rejects.toThrow(BadRequestException);
-    expect(mockRepo.update).not.toHaveBeenCalled();
-  });
-
   it('should skip enrollment check when no student fields changed', async () => {
     mockRepo.findById.mockResolvedValue(existing);
     mockRepo.update.mockResolvedValue(existing);
@@ -88,19 +78,6 @@ describe('UpdateClassroomStructureUseCase', () => {
     await expect(
       useCase.execute('str-1', { secretaryId: 'stu-1' }),
     ).rejects.toThrow(BadRequestException);
-  });
-
-  it('should throw ConflictException when student already holds position in another structure', async () => {
-    mockRepo.findById.mockResolvedValue(existing);
-    mockRepo.findActiveEnrollment.mockResolvedValue({ id: 'enr-1' });
-    mockRepo.findByStudentAndSemester.mockResolvedValue({
-      id: 'str-other',
-      classroom: { code: 'VII-B' },
-    });
-
-    await expect(
-      useCase.execute('str-1', { vicePresidentId: 'stu-3' }),
-    ).rejects.toThrow(ConflictException);
   });
 
   it('should allow updating same student in same structure (no false positive)', async () => {

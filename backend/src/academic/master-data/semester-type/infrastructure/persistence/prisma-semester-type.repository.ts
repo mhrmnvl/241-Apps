@@ -2,7 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { Prisma, SemesterType } from '@prisma/client';
 import { PrismaService } from '../../../../../core/database/prisma.service.js';
 import { ISemesterTypeRepository } from '../../domain/interfaces/semester-type-repository.interface.js';
-import { SemesterTypeQueryDto } from '../../dto/request/semester-type-query.dto.js';
+import type {
+  SemesterTypeQueryInput,
+  CreateSemesterTypeRepositoryInput,
+  UpdateSemesterTypeRepositoryInput,
+} from '../../domain/interfaces/semester-type-repository.interface.js';
 
 @Injectable()
 export class PrismaSemesterTypeRepository extends ISemesterTypeRepository {
@@ -10,7 +14,7 @@ export class PrismaSemesterTypeRepository extends ISemesterTypeRepository {
     super();
   }
 
-  async findAll(query: SemesterTypeQueryDto): Promise<{
+  async findAll(query: SemesterTypeQueryInput): Promise<{
     data: SemesterType[];
     total: number;
     page: number;
@@ -52,9 +56,11 @@ export class PrismaSemesterTypeRepository extends ISemesterTypeRepository {
 
   async create(data: {
     name: string;
-    isActive: boolean;
+    isActive?: boolean;
   }): Promise<SemesterType> {
-    return this.prisma.semesterType.create({ data });
+    return this.prisma.semesterType.create({
+      data: { name: data.name, isActive: data.isActive ?? true },
+    });
   }
 
   async update(
@@ -67,11 +73,19 @@ export class PrismaSemesterTypeRepository extends ISemesterTypeRepository {
     });
   }
 
-  async delete(id: string): Promise<SemesterType> {
+  async softDelete(id: string): Promise<SemesterType> {
     return this.prisma.semesterType.update({
       where: { id },
       data: { deletedAt: new Date() },
     });
+  }
+
+  async remove(id: string): Promise<SemesterType> {
+    return this.softDelete(id);
+  }
+
+  async delete(id: string): Promise<SemesterType> {
+    return this.softDelete(id);
   }
 
   async hasRelatedData(id: string): Promise<boolean> {

@@ -1,6 +1,6 @@
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { IEducationRepository } from '../interfaces/education-repository.interface.js';
+import { IEducationRepository } from '../domain/interfaces/education-repository.interface.js';
 import { GetEducationByIdUseCase } from './get-education-by-id.use-case.js';
 
 describe('GetEducationByIdUseCase', () => {

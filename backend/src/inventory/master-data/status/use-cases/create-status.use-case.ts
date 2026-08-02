@@ -4,10 +4,10 @@ import { CreateStatusDto } from '../dto/request/create-status.dto.js';
 
 @Injectable()
 export class CreateStatusUseCase {
-  constructor(private readonly repository: IStatusRepository) {}
+  constructor(private readonly statusRepository: IStatusRepository) {}
 
   async execute(dto: CreateStatusDto) {
-    return this.repository.create({
+    return this.statusRepository.create({
       code: dto.code,
       name: dto.name,
       allowTransactions: dto.allowTransactions ?? true,

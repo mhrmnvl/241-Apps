@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { EventQueryDto } from '../dto/request/event-query.dto.js';
-import { IEventRepository } from '../domain/interfaces/events-repository.interface.js';
+import { IEventRepository } from '../domain/interfaces/event-repository.interface.js';
 
 @Injectable()
 export class GetEventsUseCase {

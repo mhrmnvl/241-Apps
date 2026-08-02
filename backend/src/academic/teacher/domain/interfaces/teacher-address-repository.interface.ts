@@ -1,20 +1,28 @@
-import { Address } from '@prisma/client';
 import {
-  CreateAddressDto,
-  UpdateAddressDto,
-} from '../../../../shared/dto/address.dto.js';
+  AddressEntity,
+  CreateAddressRepositoryInput,
+  UpdateAddressRepositoryInput,
+} from '../../../../shared/domain/entities/address.entity.js';
+
+export type { CreateAddressRepositoryInput, UpdateAddressRepositoryInput };
 
 export abstract class ITeacherAddressRepository {
-  abstract findAll(teacherId: string): Promise<Address[]>;
+  abstract findByTeacherId(teacherId: string): Promise<AddressEntity[]>;
   abstract findById(
     teacherId: string,
     addressId: string,
-  ): Promise<Address | null>;
-  abstract create(teacherId: string, dto: CreateAddressDto): Promise<Address>;
+  ): Promise<AddressEntity | null>;
+  abstract create(
+    teacherId: string,
+    input: CreateAddressRepositoryInput,
+  ): Promise<AddressEntity>;
   abstract update(
     teacherId: string,
     addressId: string,
-    dto: UpdateAddressDto,
-  ): Promise<Address>;
-  abstract remove(addressId: string): Promise<Address>;
+    input: UpdateAddressRepositoryInput,
+  ): Promise<AddressEntity>;
+  abstract softDelete(
+    teacherId: string,
+    addressId: string,
+  ): Promise<AddressEntity>;
 }

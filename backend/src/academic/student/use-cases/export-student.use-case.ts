@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import ExcelJS from 'exceljs';
 import { ExportStudentQueryDto } from '../dto/request/export-student-query.dto.js';
-import { StudentRepository } from '../repositories/student.repository.js';
+import { IStudentRepository } from '../domain/interfaces/student-repository.interface.js';
 
 import { mapStudentToExportRow } from '../constants/student-export-columns.js';
 
@@ -17,7 +17,7 @@ type ExcelRow = Record<string, ExcelJS.CellValue>;
 
 @Injectable()
 export class ExportStudentsUseCase {
-  constructor(private readonly studentRepository: StudentRepository) {}
+  constructor(private readonly studentRepository: IStudentRepository) {}
 
   async execute(filters: ExportStudentQueryDto): Promise<Buffer> {
     const students = await this.studentRepository.findAllForExport(filters);

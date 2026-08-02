@@ -4,14 +4,14 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { SchoolUnitTypeRepository } from '../repositories/school-unit-types.repository.js';
+import { ISchoolUnitTypeRepository } from '../domain/interfaces/school-unit-type-repository.interface.js';
 
 @Injectable()
 export class DeleteSchoolUnitTypeUseCase {
   private readonly logger = new Logger(DeleteSchoolUnitTypeUseCase.name);
 
   constructor(
-    private readonly schoolUnitTypeRepository: SchoolUnitTypeRepository,
+    private readonly schoolUnitTypeRepository: ISchoolUnitTypeRepository,
   ) {}
 
   async execute(id: string) {

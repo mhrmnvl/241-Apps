@@ -1,6 +1,6 @@
 import { ConflictException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { IOccupationRepository } from '../interfaces/occupation-repository.interface.js';
+import { IOccupationRepository } from '../domain/interfaces/occupation-repository.interface.js';
 import { DeleteOccupationUseCase } from './delete-occupation.use-case.js';
 
 describe('DeleteOccupationUseCase', () => {

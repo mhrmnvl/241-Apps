@@ -3,9 +3,9 @@ import { IApprovalRepository } from '../domain/interfaces/approval-repository.in
 
 @Injectable()
 export class GetWorkflowsUseCase {
-  constructor(private readonly repository: IApprovalRepository) {}
+  constructor(private readonly approvalRepository: IApprovalRepository) {}
 
   async execute() {
-    return this.repository.findAllWorkflows();
+    return this.approvalRepository.findAllWorkflows();
   }
 }

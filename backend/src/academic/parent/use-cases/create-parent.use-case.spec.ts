@@ -1,7 +1,7 @@
 ﻿import { ConflictException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { CreateParentDto } from '../dto/request/create-parent.dto.js';
-import { ParentRepository } from '../repositories/parent.repository.js';
+import { IParentRepository } from '../domain/interfaces/parent-repository.interface.js';
 import { CreateParentUseCase } from './create-parent.use-case.js';
 
 describe('CreateParentUseCase', () => {
@@ -17,7 +17,7 @@ describe('CreateParentUseCase', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         CreateParentUseCase,
-        { provide: ParentRepository, useValue: mockRepo },
+        { provide: IParentRepository, useValue: mockRepo },
       ],
     }).compile();
 
@@ -56,7 +56,10 @@ describe('CreateParentUseCase', () => {
       expect(mockRepo.findOccupationById).toHaveBeenCalledWith(
         dto.occupationId,
       );
-      expect(mockRepo.create).toHaveBeenCalledWith(dto);
+      expect(mockRepo.create).toHaveBeenCalledWith({
+        ...dto,
+        birthDate: new Date(dto.birthDate),
+      });
       expect(result).toEqual(mockParent);
     });
 

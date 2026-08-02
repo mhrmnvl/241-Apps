@@ -1,6 +1,6 @@
 ﻿import { Test, TestingModule } from '@nestjs/testing';
 import { StudentParentQueryDto } from '../dto/request/student-parent-query.dto.js';
-import { StudentParentRepository } from '../repositories/student-parent.repository.js';
+import { IStudentParentRepository } from '../domain/interfaces/student-parent-repository.interface.js';
 import { GetStudentParentsListUseCase } from './get-student-parents-list.use-case.js';
 
 describe('GetStudentParentsListUseCase', () => {
@@ -15,7 +15,7 @@ describe('GetStudentParentsListUseCase', () => {
       providers: [
         GetStudentParentsListUseCase,
         {
-          provide: StudentParentRepository,
+          provide: IStudentParentRepository,
           useValue: mockStudentParentsRepository,
         },
       ],
@@ -34,16 +34,14 @@ describe('GetStudentParentsListUseCase', () => {
   describe('execute', () => {
     it('should return paginated data with meta', async () => {
       const query: StudentParentQueryDto = { page: 1, limit: 10 };
-      mockStudentParentsRepository.findAll.mockResolvedValue({
-        data: [{ id: '1' }],
-        total: 15,
-        page: 1,
-        limit: 10,
-      });
+      // findAll returns the full list; the use case paginates in memory.
+      mockStudentParentsRepository.findAll.mockResolvedValue(
+        Array.from({ length: 15 }, (_, i) => ({ id: String(i + 1) })),
+      );
 
       const result = await useCase.execute(query);
 
-      expect(result.data).toHaveLength(1);
+      expect(result.data).toHaveLength(10);
       expect(result.meta).toEqual({
         page: 1,
         limit: 10,

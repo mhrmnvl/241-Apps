@@ -1,17 +1,20 @@
-import { AdmissionWave, Prisma } from '@prisma/client';
-import { AdmissionWaveQueryDto } from '../../dto/request/admission-wave-query.dto.js';
-import { PaginatedResult } from '../../../shared/domain/interfaces/repository.interface.js';
+import {
+  PaginatedResult,
+  PaginationQueryInput,
+} from '../../../shared/domain/interfaces/repository.interface.js';
+import {
+  AdmissionWaveEntity,
+  ActiveWaveRow,
+} from '../entities/admission.entity.js';
 
-export type AdmissionWaveWithRelations = Prisma.AdmissionWaveGetPayload<{
-  include: {
-    academicYear: true;
-    _count: { select: { applications: true } };
-  };
-}>;
+export type AdmissionWaveWithRelations = ActiveWaveRow;
+export type AdmissionWaveWithAcademicYear = ActiveWaveRow;
 
-export type AdmissionWaveWithAcademicYear = Prisma.AdmissionWaveGetPayload<{
-  include: { academicYear: true };
-}>;
+export interface AdmissionWaveQueryInput extends PaginationQueryInput {
+  search?: string;
+  academicYearId?: string;
+  isActive?: boolean;
+}
 
 export interface CreateAdmissionWaveRepositoryInput {
   name: string;
@@ -21,22 +24,36 @@ export interface CreateAdmissionWaveRepositoryInput {
   endDate: Date;
   quota: number;
   registrationFee: number;
-  description: string | null;
-  isActive: boolean;
+  description?: string | null;
+  isActive?: boolean;
+}
+
+export interface UpdateAdmissionWaveRepositoryInput {
+  name?: string;
+  code?: string;
+  academicYearId?: string;
+  startDate?: Date;
+  endDate?: Date;
+  quota?: number;
+  registrationFee?: number;
+  description?: string | null;
+  isActive?: boolean;
 }
 
 export abstract class IAdmissionWaveRepository {
   abstract findAll(
-    query: AdmissionWaveQueryDto,
-  ): Promise<PaginatedResult<AdmissionWaveWithRelations>>;
-  abstract findById(id: string): Promise<AdmissionWaveWithRelations | null>;
-  abstract findByCode(code: string): Promise<AdmissionWave | null>;
+    query: AdmissionWaveQueryInput,
+  ): Promise<PaginatedResult<ActiveWaveRow>>;
+  abstract findById(id: string): Promise<ActiveWaveRow | null>;
+  abstract findByCode(code: string): Promise<AdmissionWaveEntity | null>;
+  abstract findActiveWave(): Promise<AdmissionWaveEntity | null>;
   abstract create(
-    data: CreateAdmissionWaveRepositoryInput,
-  ): Promise<AdmissionWaveWithAcademicYear>;
+    input: CreateAdmissionWaveRepositoryInput,
+  ): Promise<ActiveWaveRow>;
   abstract update(
     id: string,
-    data: Prisma.AdmissionWaveUncheckedUpdateInput,
-  ): Promise<AdmissionWaveWithAcademicYear>;
-  abstract softDelete(id: string): Promise<AdmissionWave>;
+    input: UpdateAdmissionWaveRepositoryInput,
+  ): Promise<ActiveWaveRow>;
+  abstract remove(id: string): Promise<AdmissionWaveEntity>;
+  abstract softDelete(id: string): Promise<AdmissionWaveEntity>;
 }

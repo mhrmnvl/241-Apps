@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { TeacherRepository } from '../repositories/teacher.repository.js';
+import { ITeacherRepository } from '../domain/interfaces/teacher-repository.interface.js';
 import { ResolveBulkImportConflictsDto } from '../dto/request/resolve-bulk-import-conflicts.dto.js';
 import { ResolveBulkImportResponseDto } from '../dto/response/resolve-bulk-import-response.dto.js';
 import { UpdateTeacherUseCase } from './update-teacher.use-case.js';
@@ -14,7 +14,7 @@ export class ResolveBulkImportConflictsUseCase {
   private readonly logger = new Logger(ResolveBulkImportConflictsUseCase.name);
 
   constructor(
-    private readonly repository: TeacherRepository,
+    private readonly teacherRepository: ITeacherRepository,
     private readonly updateTeacher: UpdateTeacherUseCase,
     private readonly updateTeacherProfile: UpdateTeacherProfileUseCase,
     private readonly createTeacher: CreateTeacherUseCase,
@@ -25,7 +25,7 @@ export class ResolveBulkImportConflictsUseCase {
   ): Promise<ResolveBulkImportResponseDto> {
     const employmentTypeIdByCode = await resolveOnceByKey(
       dto.conflicts.map((item) => item.data.employmentTypeCode),
-      (code) => this.repository.resolveEmploymentTypeId(code),
+      (code) => this.teacherRepository.resolveEmploymentTypeId(code),
     );
 
     return processBulkImportConflicts(

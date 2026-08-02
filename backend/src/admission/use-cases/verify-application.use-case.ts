@@ -11,13 +11,15 @@ import { AdmissionNotificationService } from '../services/admission-notification
 @Injectable()
 export class VerifyApplicationUseCase {
   constructor(
-    private readonly repository: IAdmissionApplicationRepository,
+    private readonly admissionApplicationRepository: IAdmissionApplicationRepository,
     private readonly notifications: AdmissionNotificationService,
   ) {}
 
   async execute(applicationId: string, adminId: string) {
     const application =
-      await this.repository.findActiveWithDocsAndPayment(applicationId);
+      await this.admissionApplicationRepository.findActiveWithDocsAndPayment(
+        applicationId,
+      );
     if (!application) {
       throw new NotFoundException('Data pendaftaran tidak ditemukan');
     }
@@ -25,9 +27,9 @@ export class VerifyApplicationUseCase {
     assertTransition(application.status, 'VERIFIED');
 
     const requiredTypes =
-      await this.repository.findRequiredActiveDocumentTypes();
+      await this.admissionApplicationRepository.findRequiredActiveDocumentTypes();
     const unapproved = requiredTypes.filter((type) => {
-      const doc = application.documents.find(
+      const doc = (application.documents ?? []).find(
         (d) => d.documentTypeId === type.id,
       );
       return doc?.status !== 'APPROVED';
@@ -46,7 +48,10 @@ export class VerifyApplicationUseCase {
       );
     }
 
-    const updated = await this.repository.setVerified(application.id, adminId);
+    const updated = await this.admissionApplicationRepository.setVerified(
+      application.id,
+      adminId,
+    );
 
     await this.notifications.notify(
       application.id,

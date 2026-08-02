@@ -4,9 +4,11 @@ import { ITeachingAssignmentRepository } from '../domain/interfaces/teaching-ass
 
 @Injectable()
 export class GetTeachingAssignmentsUseCase {
-  constructor(private readonly repository: ITeachingAssignmentRepository) {}
+  constructor(
+    private readonly teachingAssignmentRepository: ITeachingAssignmentRepository,
+  ) {}
 
   async execute(query: TeachingAssignmentQueryDto) {
-    return this.repository.findAll(query);
+    return this.teachingAssignmentRepository.findAll(query);
   }
 }

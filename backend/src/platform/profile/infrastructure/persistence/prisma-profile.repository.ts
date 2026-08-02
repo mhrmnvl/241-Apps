@@ -1,15 +1,16 @@
 import { Injectable } from '@nestjs/common';
-import { Profile, Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
+import { IProfileRepository } from '../../domain/interfaces/profile-repository.interface.js';
+import { ProfileUpdateInput } from '../../domain/entities/profile.entity.js';
 import {
-  IProfileRepository,
   PROFILE_INCLUDE,
   ProfileWithDetails,
   UserDetail,
   ProfileWithSocialMedias,
   USER_DETAIL_SELECT,
   PROFILE_WITH_SOCIAL_MEDIAS_INCLUDE,
-} from '../../domain/interfaces/profile-repository.interface.js';
+} from './prisma-profile.includes.js';
 
 @Injectable()
 export class PrismaProfileRepository extends IProfileRepository {
@@ -31,19 +32,13 @@ export class PrismaProfileRepository extends IProfileRepository {
     });
   }
 
-  async findByNik(
-    nik: string,
-    excludeUserId?: string,
-  ): Promise<Profile | null> {
+  async findByNik(nik: string, excludeUserId?: string) {
     return this.prisma.profile.findFirst({
       where: { nik, ...(excludeUserId && { NOT: { userId: excludeUserId } }) },
     });
   }
 
-  async findByEmail(
-    email: string,
-    excludeUserId?: string,
-  ): Promise<Profile | null> {
+  async findByEmail(email: string, excludeUserId?: string) {
     return this.prisma.profile.findFirst({
       where: {
         email,
@@ -52,10 +47,7 @@ export class PrismaProfileRepository extends IProfileRepository {
     });
   }
 
-  async findByPhone(
-    phone: string,
-    excludeUserId?: string,
-  ): Promise<Profile | null> {
+  async findByPhone(phone: string, excludeUserId?: string) {
     return this.prisma.profile.findFirst({
       where: {
         phone,
@@ -128,13 +120,12 @@ export class PrismaProfileRepository extends IProfileRepository {
 
   async update(
     userId: string,
-    dto: Prisma.ProfileUpdateInput,
+    dto: ProfileUpdateInput,
   ): Promise<ProfileWithDetails> {
-    const { religionId, bloodTypeId, ...rest } =
-      dto as Prisma.ProfileUpdateInput & {
-        religionId?: string | null;
-        bloodTypeId?: string | null;
-      };
+    const { religionId, bloodTypeId, ...rest } = dto as ProfileUpdateInput & {
+      religionId?: string | null;
+      bloodTypeId?: string | null;
+    };
 
     const updateData: Prisma.ProfileUpdateInput = {
       ...rest,
@@ -153,7 +144,7 @@ export class PrismaProfileRepository extends IProfileRepository {
     }
 
     if (dto.birthDate) {
-      updateData.birthDate = new Date(dto.birthDate as string | Date);
+      updateData.birthDate = new Date(dto.birthDate);
     }
 
     return this.prisma.profile.update({

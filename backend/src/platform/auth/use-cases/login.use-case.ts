@@ -24,7 +24,7 @@ export class LoginUseCase {
 
     const isValid = await this.passwordManagerService.validatePassword(
       dto.password,
-      user.passwordHash,
+      user.passwordHash ?? '',
     );
     if (!isValid) {
       throw new UnauthorizedException('Invalid credentials');

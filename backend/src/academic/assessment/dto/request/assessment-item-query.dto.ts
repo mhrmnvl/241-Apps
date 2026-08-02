@@ -1,5 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { AssessmentType } from '@prisma/client';
+import { AssessmentType } from '../../../../shared/domain/enums/assessment-type.enum.js';
 import { IsEnum, IsOptional, IsUUID } from 'class-validator';
 import { PaginationQueryDto } from '../../../../shared/dto/pagination.dto.js';
 

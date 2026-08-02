@@ -3,9 +3,11 @@ import { IGradeAcademicYearRepository } from '../domain/interfaces/grade-academi
 
 @Injectable()
 export class GetGradeAcademicYearsUseCase {
-  constructor(private readonly repository: IGradeAcademicYearRepository) {}
+  constructor(
+    private readonly gradeAcademicYearRepository: IGradeAcademicYearRepository,
+  ) {}
 
   async execute(academicYearId?: string) {
-    return this.repository.findAll(academicYearId);
+    return this.gradeAcademicYearRepository.findAll(academicYearId);
   }
 }

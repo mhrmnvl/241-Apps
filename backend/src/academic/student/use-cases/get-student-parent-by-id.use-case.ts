@@ -1,11 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { StudentParentRepository } from '../repositories/student-parent.repository.js';
+import { IStudentParentRepository } from '../domain/interfaces/student-parent-repository.interface.js';
 import { StudentParentWithDetails } from '../domain/interfaces/student-parent-repository.interface.js';
 
 @Injectable()
 export class GetStudentParentByIdUseCase {
   constructor(
-    private readonly studentParentRepository: StudentParentRepository,
+    private readonly studentParentRepository: IStudentParentRepository,
   ) {}
 
   async execute(id: string): Promise<StudentParentWithDetails> {

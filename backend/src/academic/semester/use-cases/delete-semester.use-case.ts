@@ -10,10 +10,10 @@ import { ISemesterRepository } from '../domain/interfaces/semester-repository.in
 export class DeleteSemesterUseCase {
   private readonly logger = new Logger(DeleteSemesterUseCase.name);
 
-  constructor(private readonly repository: ISemesterRepository) {}
+  constructor(private readonly semesterRepository: ISemesterRepository) {}
 
   async execute(id: string): Promise<void> {
-    const semester = await this.repository.findById(id);
+    const semester = await this.semesterRepository.findById(id);
     if (!semester) {
       throw new NotFoundException(`Semester with ID ${id} not found`);
     }
@@ -24,14 +24,14 @@ export class DeleteSemesterUseCase {
       );
     }
 
-    const hasData = await this.repository.hasRelatedData(id);
+    const hasData = await this.semesterRepository.hasRelatedData(id);
     if (hasData) {
       throw new BadRequestException(
         'Cannot delete semester that has enrollment data',
       );
     }
 
-    await this.repository.softDelete(id);
+    await this.semesterRepository.softDelete(id);
     this.logger.log(`Semester soft-deleted: ${id}`);
   }
 }

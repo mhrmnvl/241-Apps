@@ -15,7 +15,7 @@ import { IPromotionRepository } from '../domain/interfaces/promotion-repository.
 export class PromoteStudentsUseCase {
   private readonly logger = new Logger(PromoteStudentsUseCase.name);
 
-  constructor(private readonly repository: IPromotionRepository) {}
+  constructor(private readonly promotionRepository: IPromotionRepository) {}
 
   async execute(dto: PromotionDto): Promise<PromotionResultDto> {
     const { sourceSemesterId, targetSemesterId, students } = dto;
@@ -27,8 +27,8 @@ export class PromoteStudentsUseCase {
     }
 
     const [sourceSemester, targetSemester] = await Promise.all([
-      this.repository.findSemesterWithAcademicYear(sourceSemesterId),
-      this.repository.findSemesterWithAcademicYear(targetSemesterId),
+      this.promotionRepository.findSemesterWithAcademicYear(sourceSemesterId),
+      this.promotionRepository.findSemesterWithAcademicYear(targetSemesterId),
     ]);
 
     if (!sourceSemester) {
@@ -49,7 +49,7 @@ export class PromoteStudentsUseCase {
     }
 
     for (const student of students) {
-      const sourceClassroom = await this.repository.findClassroomById(
+      const sourceClassroom = await this.promotionRepository.findClassroomById(
         student.sourceClassroomId,
       );
       if (!sourceClassroom) {
@@ -82,7 +82,7 @@ export class PromoteStudentsUseCase {
         throw new BadRequestException('REPEAT action requires a declineReason');
       }
 
-      const targetClassroom = await this.repository.findClassroomById(
+      const targetClassroom = await this.promotionRepository.findClassroomById(
         student.targetClassroomId,
       );
       if (!targetClassroom) {
@@ -116,7 +116,7 @@ export class PromoteStudentsUseCase {
       }
     }
 
-    const result = await this.repository.executePromotion(
+    const result = await this.promotionRepository.executePromotion(
       sourceSemesterId,
       targetSemesterId,
       students,

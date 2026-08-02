@@ -1,14 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
-import { AcademicCalendarQueryDto } from '../../dto/request/academic-calendar-query.dto.js';
-import { CreateAcademicCalendarDto } from '../../dto/request/create-academic-calendar.dto.js';
-import { UpdateAcademicCalendarDto } from '../../dto/request/update-academic-calendar.dto.js';
-import { resolveAcademicYearId } from '../../../../shared/utils/active-academic-year.helper.js';
-import {
-  IAcademicCalendarRepository,
-  ACADEMIC_CALENDAR_INCLUDE,
+import type {
+  AcademicCalendarQueryInput,
+  CreateAcademicCalendarRepositoryInput,
+  UpdateAcademicCalendarRepositoryInput,
 } from '../../domain/interfaces/academic-calendar-repository.interface.js';
+import { IAcademicCalendarRepository } from '../../domain/interfaces/academic-calendar-repository.interface.js';
+import { CALENDAR_WITH_DETAILS_INCLUDE as ACADEMIC_CALENDAR_INCLUDE } from './prisma-calendar.includes.js';
 
 @Injectable()
 export class PrismaAcademicCalendarRepository extends IAcademicCalendarRepository {
@@ -16,7 +15,7 @@ export class PrismaAcademicCalendarRepository extends IAcademicCalendarRepositor
     super();
   }
 
-  async findAll(query: AcademicCalendarQueryDto) {
+  async findAll(query: AcademicCalendarQueryInput) {
     const { page = 1, limit = 50, academicYearId, semesterId, typeId } = query;
     const skip = (page - 1) * limit;
 
@@ -50,34 +49,38 @@ export class PrismaAcademicCalendarRepository extends IAcademicCalendarRepositor
     });
   }
 
-  async create(dto: CreateAcademicCalendarDto) {
+  async create(dto: CreateAcademicCalendarRepositoryInput) {
     return this.prisma.academicCalendar.create({
       data: {
         academicYearId: dto.academicYearId,
         semesterId: dto.semesterId,
         title: dto.title,
         typeId: dto.typeId,
-        startDate: new Date(dto.startDate),
-        endDate: new Date(dto.endDate),
+        startDate: dto.startDate,
+        endDate: dto.endDate,
         description: dto.description,
       },
       include: ACADEMIC_CALENDAR_INCLUDE,
     });
   }
 
-  async update(id: string, dto: UpdateAcademicCalendarDto) {
+  async update(id: string, dto: UpdateAcademicCalendarRepositoryInput) {
     return this.prisma.academicCalendar.update({
       where: { id },
       data: {
         ...(dto.semesterId !== undefined && { semesterId: dto.semesterId }),
         ...(dto.title && { title: dto.title }),
         ...(dto.typeId && { typeId: dto.typeId }),
-        ...(dto.startDate && { startDate: new Date(dto.startDate) }),
-        ...(dto.endDate && { endDate: new Date(dto.endDate) }),
+        ...(dto.startDate && { startDate: dto.startDate }),
+        ...(dto.endDate && { endDate: dto.endDate }),
         ...(dto.description !== undefined && { description: dto.description }),
       },
       include: ACADEMIC_CALENDAR_INCLUDE,
     });
+  }
+
+  async remove(id: string) {
+    return this.softDelete(id);
   }
 
   async softDelete(id: string) {

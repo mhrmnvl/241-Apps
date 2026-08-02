@@ -1,7 +1,7 @@
 import { BadRequestException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { IEnrollmentRepository } from '../domain/interfaces/enrollment-repository.interface.js';
-import { SemesterRepository } from '../../semester/repositories/semester.repository.js';
+import { ISemesterRepository } from '../../semester/domain/interfaces/semester-repository.interface.js';
 import { CreateStudentEnrollmentUseCase } from './create-student-enrollment.use-case.js';
 import { TransferStudentUseCase } from './transfer-student.use-case.js';
 import { EnsureStudentEnrollmentUseCase } from './ensure-student-enrollment.use-case.js';
@@ -32,7 +32,7 @@ describe('EnsureStudentEnrollmentUseCase', () => {
       providers: [
         EnsureStudentEnrollmentUseCase,
         { provide: IEnrollmentRepository, useValue: mockEnrollmentRepository },
-        { provide: SemesterRepository, useValue: mockSemesterRepository },
+        { provide: ISemesterRepository, useValue: mockSemesterRepository },
         {
           provide: CreateStudentEnrollmentUseCase,
           useValue: mockCreateStudentEnrollment,

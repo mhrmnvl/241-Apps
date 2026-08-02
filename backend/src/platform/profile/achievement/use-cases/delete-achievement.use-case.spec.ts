@@ -1,6 +1,6 @@
 ﻿import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { AchievementRepository } from '../repositories/achievement.repository.js';
+import { IAchievementRepository } from '../domain/interfaces/achievement-repository.interface.js';
 import { DeleteAchievementUseCase } from './delete-achievement.use-case.js';
 
 describe('DeleteAchievementUseCase', () => {
@@ -12,7 +12,7 @@ describe('DeleteAchievementUseCase', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         DeleteAchievementUseCase,
-        { provide: AchievementRepository, useValue: mockRepo },
+        { provide: IAchievementRepository, useValue: mockRepo },
       ],
     }).compile();
 

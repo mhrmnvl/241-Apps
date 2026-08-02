@@ -8,10 +8,16 @@ import {
   Prisma,
 } from '@prisma/client';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
-import { LoanQueryDto } from '../../dto/request/loan-query.dto.js';
 import {
+  CreateInventoryHistoryInput,
+  CreateLoanRepositoryInput,
   ICirculationRepository,
+  InventoryHistoryQueryInput,
+  LoanQueryInput,
   LoanWithRelations,
+  ProcessCreateLoanInput,
+  ProcessReturnLoanInput,
+  UpdateLoanRepositoryInput,
 } from '../../domain/interfaces/circulation-repository.interface.js';
 import { PaginatedResult } from '../../../../shared/domain/interfaces/repository.interface.js';
 
@@ -22,7 +28,7 @@ export class PrismaCirculationRepository extends ICirculationRepository {
   }
 
   async findAllLoans(
-    query: LoanQueryDto,
+    query: LoanQueryInput,
   ): Promise<PaginatedResult<InventoryLoan>> {
     const { page = 1, limit = 10, keyword, statusId, requesterId } = query;
     const skip = (page - 1) * limit;
@@ -89,15 +95,13 @@ export class PrismaCirculationRepository extends ICirculationRepository {
     });
   }
 
-  async createLoan(
-    data: Prisma.InventoryLoanCreateInput,
-  ): Promise<InventoryLoan> {
+  async createLoan(data: CreateLoanRepositoryInput): Promise<InventoryLoan> {
     return this.prisma.inventoryLoan.create({ data });
   }
 
   async updateLoan(
     id: string,
-    data: Prisma.InventoryLoanUpdateInput,
+    data: UpdateLoanRepositoryInput,
   ): Promise<InventoryLoan> {
     return this.prisma.inventoryLoan.update({
       where: { id },
@@ -111,11 +115,9 @@ export class PrismaCirculationRepository extends ICirculationRepository {
     });
   }
 
-  async findAllHistories(query: {
-    page?: number;
-    limit?: number;
-    unitId?: string;
-  }): Promise<PaginatedResult<InventoryHistory>> {
+  async findAllHistories(
+    query: InventoryHistoryQueryInput,
+  ): Promise<PaginatedResult<InventoryHistory>> {
     const { page = 1, limit = 10, unitId } = query;
     const skip = (page - 1) * limit;
 
@@ -142,7 +144,7 @@ export class PrismaCirculationRepository extends ICirculationRepository {
   }
 
   async createHistory(
-    data: Prisma.InventoryHistoryCreateInput,
+    data: CreateInventoryHistoryInput,
   ): Promise<InventoryHistory> {
     return this.prisma.inventoryHistory.create({ data });
   }
@@ -187,15 +189,9 @@ export class PrismaCirculationRepository extends ICirculationRepository {
     });
   }
 
-  async processCreateLoanTransaction(params: {
-    loanNumber: string;
-    requesterId: string;
-    expectedReturnDate: Date;
-    purpose: string;
-    pendingStatusId: string;
-    unitIds: string[];
-    units: { id: string; statusId: string }[];
-  }): Promise<unknown> {
+  async processCreateLoanTransaction(
+    params: ProcessCreateLoanInput,
+  ): Promise<LoanWithRelations> {
     return this.prisma.$transaction(async (tx) => {
       const loan = await tx.inventoryLoan.create({
         data: {
@@ -287,15 +283,9 @@ export class PrismaCirculationRepository extends ICirculationRepository {
     });
   }
 
-  async processReturnLoanTransaction(params: {
-    loanId: string;
-    returnedStatusId: string;
-    availStatusId: string;
-    txTypeId: string;
-    changedById: string;
-    loanNumber: string;
-    items: { unitId: string; conditionId: string; note?: string }[];
-  }): Promise<unknown> {
+  async processReturnLoanTransaction(
+    params: ProcessReturnLoanInput,
+  ): Promise<LoanWithRelations> {
     return this.prisma.$transaction(async (tx) => {
       const updatedLoan = await tx.inventoryLoan.update({
         where: { id: params.loanId },

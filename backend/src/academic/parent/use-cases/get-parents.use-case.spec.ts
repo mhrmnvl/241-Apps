@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ParentQueryDto } from '../dto/request/parent-query.dto.js';
-import { ParentRepository } from '../repositories/parent.repository.js';
+import { IParentRepository } from '../domain/interfaces/parent-repository.interface.js';
 import { GetParentsUseCase } from './get-parents.use-case.js';
 
 describe('GetParentsUseCase', () => {
@@ -14,7 +14,7 @@ describe('GetParentsUseCase', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         GetParentsUseCase,
-        { provide: ParentRepository, useValue: mockRepo },
+        { provide: IParentRepository, useValue: mockRepo },
       ],
     }).compile();
 

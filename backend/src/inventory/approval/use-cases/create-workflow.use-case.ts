@@ -4,21 +4,19 @@ import { CreateWorkflowDto } from '../dto/request/create-workflow.dto.js';
 
 @Injectable()
 export class CreateWorkflowUseCase {
-  constructor(private readonly repository: IApprovalRepository) {}
+  constructor(private readonly approvalRepository: IApprovalRepository) {}
 
   async execute(dto: CreateWorkflowDto) {
-    return this.repository.createWorkflow({
+    return this.approvalRepository.createWorkflow({
       name: dto.name,
       targetEntity: dto.targetEntity,
       description: dto.description ?? null,
       isActive: true,
-      steps: {
-        create: dto.steps.map((step) => ({
-          stepSequence: step.stepSequence,
-          approverRoleId: step.approverRoleId,
-          isMandatory: step.isMandatory ?? true,
-        })),
-      },
+      steps: dto.steps.map((step) => ({
+        stepSequence: step.stepSequence,
+        approverRoleId: step.approverRoleId,
+        isMandatory: step.isMandatory ?? true,
+      })),
     });
   }
 }

@@ -11,16 +11,18 @@ import { IAcademicYearRepository } from '../domain/interfaces/academic-year-repo
 export class UpdateAcademicYearUseCase {
   private readonly logger = new Logger(UpdateAcademicYearUseCase.name);
 
-  constructor(private readonly repository: IAcademicYearRepository) {}
+  constructor(
+    private readonly academicYearRepository: IAcademicYearRepository,
+  ) {}
 
   async execute(id: string, dto: UpdateAcademicYearDto) {
-    const current = await this.repository.findById(id);
+    const current = await this.academicYearRepository.findById(id);
     if (!current) {
       throw new NotFoundException(`Academic Year with ID ${id} not found`);
     }
 
     if (dto.name && dto.name !== current.name) {
-      const existing = await this.repository.findByName(dto.name);
+      const existing = await this.academicYearRepository.findByName(dto.name);
       if (existing) {
         throw new ConflictException(
           `Academic Year "${dto.name}" already exists`,
@@ -28,7 +30,7 @@ export class UpdateAcademicYearUseCase {
       }
     }
 
-    const updated = await this.repository.update(id, dto);
+    const updated = await this.academicYearRepository.update(id, dto);
     this.logger.log(`Academic Year updated: ${id}`);
     return updated;
   }

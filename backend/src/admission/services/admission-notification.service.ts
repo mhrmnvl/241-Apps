@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { AdmissionNotificationType } from '@prisma/client';
+import { AdmissionNotificationType } from '../../shared/domain/enums/admission-notification-type.enum.js';
 import { IAdmissionApplicantRepository } from '../domain/interfaces/admission-applicant-repository.interface.js';
 
 /**
@@ -15,7 +15,7 @@ export class AdmissionNotificationService {
 
   async notify(
     applicationId: string,
-    type: AdmissionNotificationType,
+    type: `${AdmissionNotificationType}`,
     title: string,
     message: string,
   ): Promise<void> {

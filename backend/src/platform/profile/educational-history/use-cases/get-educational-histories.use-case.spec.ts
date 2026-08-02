@@ -1,7 +1,7 @@
 ﻿import { Test, TestingModule } from '@nestjs/testing';
-import { EducationStatus } from '@prisma/client';
+import { EducationStatus } from '../../../../shared/domain/enums/education-status.enum.js';
 import { EducationalHistoryQueryDto } from '../dto/request/educational-history-query.dto.js';
-import { EducationalHistoryRepository } from '../repositories/educational-history.repository.js';
+import { IEducationalHistoryRepository } from '../domain/interfaces/educational-history-repository.interface.js';
 import { GetEducationalHistoriesUseCase } from './get-educational-histories.use-case.js';
 
 describe('GetEducationalHistoriesUseCase', () => {
@@ -13,7 +13,7 @@ describe('GetEducationalHistoriesUseCase', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         GetEducationalHistoriesUseCase,
-        { provide: EducationalHistoryRepository, useValue: mockRepo },
+        { provide: IEducationalHistoryRepository, useValue: mockRepo },
       ],
     }).compile();
 

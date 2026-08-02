@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import {
   AppKey,
-  AppSettingRepository,
-} from '../repositories/app-setting.repository.js';
+  IAppSettingRepository,
+} from '../domain/interfaces/app-setting-repository.interface.js';
 import { StorageService } from '../../../core/storage/storage.service.js';
 import { DEFAULT_APP_SETTINGS } from '../constants/default-app-settings.constant.js';
 import { toAppSettingResponseDto } from '../mappers/app-setting.mapper.js';
@@ -10,14 +10,14 @@ import { toAppSettingResponseDto } from '../mappers/app-setting.mapper.js';
 @Injectable()
 export class GetAppSettingUseCase {
   constructor(
-    private readonly repository: AppSettingRepository,
+    private readonly appSettingRepository: IAppSettingRepository,
     private readonly storage: StorageService,
   ) {}
 
   async execute(appKey: AppKey) {
-    let entity = await this.repository.findByAppKey(appKey);
+    let entity = await this.appSettingRepository.findByAppKey(appKey);
 
-    entity ??= await this.repository.upsert(
+    entity ??= await this.appSettingRepository.upsert(
       appKey,
       DEFAULT_APP_SETTINGS[appKey],
     );

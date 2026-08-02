@@ -17,7 +17,7 @@ import {
 @Injectable()
 export class UploadPaymentProofUseCase {
   constructor(
-    private readonly repository: IAdmissionApplicantRepository,
+    private readonly admissionApplicantRepository: IAdmissionApplicantRepository,
     private readonly storage: StorageService,
     private readonly keyBuilder: StorageKeyBuilder,
   ) {}
@@ -30,7 +30,9 @@ export class UploadPaymentProofUseCase {
     assertValidAdmissionFile(file);
 
     const application =
-      await this.repository.findMyApplicationWithPayment(userId);
+      await this.admissionApplicantRepository.findMyApplicationWithPayment(
+        userId,
+      );
     if (!application?.payment) {
       throw new NotFoundException('Data pendaftaran tidak ditemukan');
     }
@@ -50,7 +52,7 @@ export class UploadPaymentProofUseCase {
       ['payments'],
     );
 
-    const payment = await this.repository.savePaymentProof({
+    const payment = await this.admissionApplicantRepository.savePaymentProof({
       paymentId: application.payment.id,
       file: {
         filename,

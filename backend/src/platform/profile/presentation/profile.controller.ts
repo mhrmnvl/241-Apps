@@ -15,7 +15,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { AppKey } from '../../file/repositories/file.repository.js';
+import { AppKey } from '../../settings/domain/entities/app-setting.entity.js';
 import {
   ApiBearerAuth,
   ApiBody,

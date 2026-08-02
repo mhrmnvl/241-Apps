@@ -4,10 +4,13 @@ import { IAcademicCalendarTypeRepository } from '../domain/interfaces/academic-c
 
 @Injectable()
 export class GetAcademicCalendarTypesUseCase {
-  constructor(private readonly repository: IAcademicCalendarTypeRepository) {}
+  constructor(
+    private readonly academicCalendarTypeRepository: IAcademicCalendarTypeRepository,
+  ) {}
 
   async execute(query: AcademicCalendarTypeQueryDto) {
-    const { data, total, page, limit } = await this.repository.findAll(query);
+    const { data, total, page, limit } =
+      await this.academicCalendarTypeRepository.findAll(query);
     return {
       data,
       meta: {

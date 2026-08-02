@@ -5,10 +5,10 @@ import { ISemesterRepository } from '../domain/interfaces/semester-repository.in
 export class DeactivateSemesterUseCase {
   private readonly logger = new Logger(DeactivateSemesterUseCase.name);
 
-  constructor(private readonly repository: ISemesterRepository) {}
+  constructor(private readonly semesterRepository: ISemesterRepository) {}
 
   async execute(id: string) {
-    const current = await this.repository.findById(id);
+    const current = await this.semesterRepository.findById(id);
     if (!current) {
       throw new NotFoundException(`Semester with ID ${id} not found`);
     }
@@ -17,7 +17,9 @@ export class DeactivateSemesterUseCase {
       return current;
     }
 
-    const deactivated = await this.repository.update(id, { isActive: false });
+    const deactivated = await this.semesterRepository.update(id, {
+      isActive: false,
+    });
     this.logger.log(`Semester deactivated: ${id}`);
     return deactivated;
   }

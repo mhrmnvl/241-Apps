@@ -1,6 +1,6 @@
 ﻿import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { StudentParentRepository } from '../repositories/student-parent.repository.js';
+import { IStudentParentRepository } from '../domain/interfaces/student-parent-repository.interface.js';
 import { DeleteStudentParentUseCase } from './delete-student-parent.use-case.js';
 
 describe('DeleteStudentParentUseCase', () => {
@@ -16,7 +16,7 @@ describe('DeleteStudentParentUseCase', () => {
       providers: [
         DeleteStudentParentUseCase,
         {
-          provide: StudentParentRepository,
+          provide: IStudentParentRepository,
           useValue: mockStudentParentsRepository,
         },
       ],

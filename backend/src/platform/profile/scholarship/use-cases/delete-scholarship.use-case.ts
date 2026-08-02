@@ -1,14 +1,14 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { ScholarshipRepository } from '../repositories/scholarship.repository.js';
+import { IScholarshipRepository } from '../domain/interfaces/scholarship-repository.interface.js';
 
 @Injectable()
 export class DeleteScholarshipUseCase {
-  constructor(private readonly repository: ScholarshipRepository) {}
+  constructor(private readonly scholarshipRepository: IScholarshipRepository) {}
 
   async execute(id: string) {
-    const existing = await this.repository.findById(id);
+    const existing = await this.scholarshipRepository.findById(id);
     if (!existing) throw new NotFoundException('Scholarship not found');
-    await this.repository.softDelete(id);
+    await this.scholarshipRepository.softDelete(id);
     return { message: 'Scholarship deleted successfully' };
   }
 }

@@ -8,11 +8,12 @@ import {
   User,
 } from '@prisma/client';
 import { PrismaService } from '../../../core/database/prisma.service.js';
+import { toNumericValue } from '../../../shared/domain/types/decimal.type.js';
 import { AccountProvisioningService } from '../../../platform/user/index.js';
 import {
   applicationDetailInclude,
   ApplicationDetail,
-} from '../../domain/admission.includes.js';
+} from './prisma-admission-application.includes.js';
 import {
   AdmissionDocumentWithTypeAndFile,
   AdmissionPaymentWithProof,
@@ -23,9 +24,11 @@ import {
   ApplicationWithPayment,
   IAdmissionApplicantRepository,
   RegisterApplicantInput,
-  UploadPaymentProofInput,
-  type AdmissionApplicationParentInput,
-  type CreateDocumentFileInput,
+  type CreateAdmissionNotificationInput,
+  type SaveAdmissionDocumentInput,
+  type SavePaymentProofInput,
+  type UpdateMyApplicationFields,
+  type UpdateMyApplicationInput,
 } from '../../domain/interfaces/admission-applicant-repository.interface.js';
 import type { Prisma } from '@prisma/client';
 
@@ -36,6 +39,43 @@ export class PrismaAdmissionApplicantRepository extends IAdmissionApplicantRepos
     private readonly accountProvisioning: AccountProvisioningService,
   ) {
     super();
+  }
+
+  async findAll(): Promise<ActiveWaveRow[]> {
+    return this.findActiveWaves();
+  }
+  async findById(id: string): Promise<AdmissionApplication | null> {
+    return this.prisma.admissionApplication.findFirst({
+      where: { id, deletedAt: null },
+    });
+  }
+  async findByUserId(userId: string): Promise<AdmissionApplication | null> {
+    return this.findMyApplication(userId);
+  }
+  async findByRegistrationNumber(
+    regNum: string,
+  ): Promise<AdmissionApplication | null> {
+    return this.prisma.admissionApplication.findFirst({
+      where: { registrationNumber: regNum, deletedAt: null },
+    });
+  }
+  async create(applicationId: string): Promise<ApplicationDetail> {
+    return this.submitApplication(applicationId);
+  }
+  async update(
+    id: string,
+    input: UpdateMyApplicationFields,
+  ): Promise<AdmissionApplication> {
+    return this.prisma.admissionApplication.update({
+      where: { id },
+      data: input,
+    });
+  }
+  async remove(id: string): Promise<AdmissionApplication> {
+    return this.prisma.admissionApplication.update({
+      where: { id },
+      data: { deletedAt: new Date() },
+    });
   }
 
   // ── Registration ──
@@ -99,7 +139,7 @@ export class PrismaAdmissionApplicantRepository extends IAdmissionApplicantRepos
       await tx.admissionPayment.create({
         data: {
           applicationId: app.id,
-          amount: input.wave.registrationFee,
+          amount: toNumericValue(input.wave.registrationFee),
           status: 'UNPAID',
         },
       });
@@ -212,11 +252,9 @@ export class PrismaAdmissionApplicantRepository extends IAdmissionApplicantRepos
     });
   }
 
-  async updateMyApplication(input: {
-    applicationId: string;
-    data: Prisma.AdmissionApplicationUpdateInput;
-    parents?: AdmissionApplicationParentInput[];
-  }): Promise<ApplicationDetail> {
+  async updateMyApplication(
+    input: UpdateMyApplicationInput,
+  ): Promise<ApplicationDetail> {
     return this.prisma.$transaction(async (tx) => {
       await tx.admissionApplication.update({
         where: { id: input.applicationId },
@@ -249,11 +287,9 @@ export class PrismaAdmissionApplicantRepository extends IAdmissionApplicantRepos
     });
   }
 
-  async saveDocument(input: {
-    applicationId: string;
-    documentTypeId: string;
-    file: CreateDocumentFileInput;
-  }): Promise<AdmissionDocumentWithTypeAndFile> {
+  async saveDocument(
+    input: SaveAdmissionDocumentInput,
+  ): Promise<AdmissionDocumentWithTypeAndFile> {
     return this.prisma.$transaction(async (tx) => {
       const fileRow = await tx.file.create({ data: input.file });
 
@@ -284,7 +320,7 @@ export class PrismaAdmissionApplicantRepository extends IAdmissionApplicantRepos
   }
 
   async savePaymentProof(
-    input: UploadPaymentProofInput,
+    input: SavePaymentProofInput,
   ): Promise<AdmissionPaymentWithProof> {
     return this.prisma.$transaction(async (tx) => {
       const fileRow = await tx.file.create({ data: input.file });
@@ -317,12 +353,9 @@ export class PrismaAdmissionApplicantRepository extends IAdmissionApplicantRepos
   }
 
   // ── Notifications ──
-  async createNotification(input: {
-    applicationId: string;
-    type: AdmissionNotificationType;
-    title: string;
-    message: string;
-  }): Promise<AdmissionNotification> {
+  async createNotification(
+    input: CreateAdmissionNotificationInput,
+  ): Promise<AdmissionNotification> {
     return this.prisma.admissionNotification.create({
       data: input,
     });

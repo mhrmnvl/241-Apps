@@ -1,1 +1,1 @@
-export { ParentRepository } from './repositories/parent.repository.js';
+export { IParentRepository } from './domain/interfaces/parent-repository.interface.js';

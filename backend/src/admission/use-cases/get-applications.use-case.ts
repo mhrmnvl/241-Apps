@@ -4,10 +4,13 @@ import { AdmissionApplicationQueryDto } from '../dto/request/admission-query.dto
 
 @Injectable()
 export class GetApplicationsUseCase {
-  constructor(private readonly repository: IAdmissionApplicationRepository) {}
+  constructor(
+    private readonly admissionApplicationRepository: IAdmissionApplicationRepository,
+  ) {}
 
   async execute(query: AdmissionApplicationQueryDto) {
-    const { data, total, page, limit } = await this.repository.findAll(query);
+    const { data, total, page, limit } =
+      await this.admissionApplicationRepository.findAll(query);
 
     return {
       data,

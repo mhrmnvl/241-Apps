@@ -6,56 +6,55 @@ import {
 } from '@nestjs/common';
 import { CreateSchoolUnitSocialMediaDto } from '../dto/request/create-school-unit-social-media.dto.js';
 import { UpdateSchoolUnitSocialMediaDto } from '../dto/request/update-school-unit-social-media.dto.js';
-import { SchoolUnitSocialMediaRepository } from '../repositories/school-unit-social-media.repository.js';
-import { SchoolUnitRepository } from '../repositories/school-unit.repository.js';
+import { ISchoolUnitRepository } from '../domain/interfaces/school-unit-repository.interface.js';
+import { ISchoolUnitSocialMediaRepository } from '../domain/interfaces/school-unit-social-media-repository.interface.js';
 
 @Injectable()
 export class SchoolUnitSocialMediaUseCase {
   private readonly logger = new Logger(SchoolUnitSocialMediaUseCase.name);
 
   constructor(
-    private readonly schoolUnitRepository: SchoolUnitRepository,
-    private readonly repository: SchoolUnitSocialMediaRepository,
+    private readonly schoolUnitRepository: ISchoolUnitRepository,
+    private readonly schoolUnitSocialMediaRepository: ISchoolUnitSocialMediaRepository,
   ) {}
 
   async findAll() {
-    await this.requireSchoolUnit();
-    return this.repository.findAll();
+    const schoolUnit = await this.requireSchoolUnit();
+    return this.schoolUnitSocialMediaRepository.findAllBySchoolUnitId(
+      schoolUnit.id,
+    );
   }
 
   async create(dto: CreateSchoolUnitSocialMediaDto) {
-    await this.requireSchoolUnit();
+    const schoolUnit = await this.requireSchoolUnit();
 
-    const existing = await this.repository.findByPlatform(dto.socialMediaId);
-    if (existing) {
-      throw new ConflictException(
-        `Platform ${dto.socialMediaId} is already linked to this school unit`,
-      );
-    }
-
-    const socialMedia = await this.repository.create(dto);
+    const socialMedia = await this.schoolUnitSocialMediaRepository.create({
+      schoolUnitId: schoolUnit.id,
+      socialMediaId: dto.socialMediaId,
+      username: dto.username,
+    });
     this.logger.log(`Social media added: platform ${dto.socialMediaId}`);
     return socialMedia;
   }
 
   async update(id: string, dto: UpdateSchoolUnitSocialMediaDto) {
     await this.requireSchoolUnit();
-    const socialMedia = await this.repository.findById(id);
+    const socialMedia = await this.schoolUnitSocialMediaRepository.findById(id);
     if (!socialMedia) {
       throw new NotFoundException(`Social media with ID ${id} not found`);
     }
 
-    return this.repository.update(id, dto);
+    return this.schoolUnitSocialMediaRepository.update(id, dto);
   }
 
   async remove(id: string): Promise<void> {
     await this.requireSchoolUnit();
-    const socialMedia = await this.repository.findById(id);
+    const socialMedia = await this.schoolUnitSocialMediaRepository.findById(id);
     if (!socialMedia) {
       throw new NotFoundException(`Social media with ID ${id} not found`);
     }
 
-    await this.repository.remove(id);
+    await this.schoolUnitSocialMediaRepository.remove(id);
     this.logger.log(`Social media ${id} removed`);
   }
 

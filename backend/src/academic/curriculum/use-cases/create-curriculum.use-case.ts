@@ -13,7 +13,7 @@ export class CreateCurriculaUseCase {
   private readonly logger = new Logger(CreateCurriculaUseCase.name);
 
   constructor(
-    private readonly repository: ICurriculumRepository,
+    private readonly curriculumRepository: ICurriculumRepository,
     private readonly academicYearRepository: IAcademicYearRepository,
   ) {}
 
@@ -27,7 +27,7 @@ export class CreateCurriculaUseCase {
       );
     }
 
-    const existing = await this.repository.findByNameAndAcademicYear(
+    const existing = await this.curriculumRepository.findByNameAndAcademicYear(
       dto.name,
       dto.academicYearId,
     );
@@ -37,7 +37,7 @@ export class CreateCurriculaUseCase {
       );
     }
 
-    const curricula = await this.repository.create({
+    const curricula = await this.curriculumRepository.create({
       academicYearId: dto.academicYearId,
       name: dto.name,
       isActive: dto.isActive,

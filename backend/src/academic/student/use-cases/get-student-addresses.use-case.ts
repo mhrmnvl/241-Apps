@@ -4,14 +4,14 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Address } from '../domain/interfaces/student-repository.interface.js';
-import { StudentAddressRepository } from '../repositories/student-address.repository.js';
-import { StudentRepository, RequestUser } from '../index.js';
+import { IStudentAddressRepository } from '../domain/interfaces/student-address-repository.interface.js';
+import { IStudentRepository, RequestUser } from '../index.js';
 
 @Injectable()
 export class GetStudentAddressesUseCase {
   constructor(
-    private readonly repository: StudentRepository,
-    private readonly addressRepository: StudentAddressRepository,
+    private readonly studentRepository: IStudentRepository,
+    private readonly addressRepository: IStudentAddressRepository,
   ) {}
 
   async execute(
@@ -19,9 +19,9 @@ export class GetStudentAddressesUseCase {
     requester?: RequestUser,
   ): Promise<Address[]> {
     if (requester) {
-      const isStudent = await this.repository.isStudent(requester.id);
+      const isStudent = await this.studentRepository.isStudent(requester.id);
       if (isStudent) {
-        const own = await this.repository.findByUserId(requester.id);
+        const own = await this.studentRepository.findByUserId(requester.id);
         if (!own)
           throw new ForbiddenException(
             'Student account is not linked to an active student record',
@@ -32,7 +32,7 @@ export class GetStudentAddressesUseCase {
           );
       }
     }
-    const student = await this.repository.findById(studentId);
+    const student = await this.studentRepository.findById(studentId);
     if (!student)
       throw new NotFoundException(`Student with ID ${studentId} not found`);
     return this.addressRepository.findAll(studentId);

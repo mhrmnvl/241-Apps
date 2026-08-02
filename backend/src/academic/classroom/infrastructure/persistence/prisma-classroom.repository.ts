@@ -4,11 +4,15 @@ import { PrismaService } from '../../../../core/database/prisma.service.js';
 import { resolveAcademicYearId } from '../../../../shared/utils/active-academic-year.helper.js';
 import {
   IClassroomRepository,
-  CLASS_INCLUDE,
   ClassroomWithDetails,
-  CreateClassroomRepositoryInput,
+  ClassroomEntity,
 } from '../../domain/interfaces/classroom-repository.interface.js';
-import { ClassroomQueryDto } from '../../dto/request/classroom-query.dto.js';
+import { CLASSROOM_WITH_DETAILS_INCLUDE as CLASS_INCLUDE } from './prisma-classroom.includes.js';
+import type {
+  ClassroomQueryInput,
+  CreateClassroomRepositoryInput,
+  UpdateClassroomRepositoryInput,
+} from '../../domain/interfaces/classroom-repository.interface.js';
 import { PaginatedResult } from '../../../../shared/domain/interfaces/repository.interface.js';
 
 @Injectable()
@@ -18,7 +22,7 @@ export class PrismaClassroomRepository extends IClassroomRepository {
   }
 
   async findAll(
-    query: ClassroomQueryDto,
+    query: ClassroomQueryInput,
   ): Promise<PaginatedResult<ClassroomWithDetails>> {
     const page = Number(query.page ?? 1);
     const limit = Number(query.limit ?? 10);
@@ -67,16 +71,14 @@ export class PrismaClassroomRepository extends IClassroomRepository {
   }
 
   async findDuplicate(
-    academicYearId: string,
-    gradeId: string,
     code: string,
+    academicYearId?: string,
     excludeId?: string,
-  ): Promise<Classroom | null> {
+  ): Promise<ClassroomEntity | null> {
     return this.prisma.classroom.findFirst({
       where: {
-        academicYearId,
-        gradeId,
         code,
+        ...(academicYearId && { academicYearId }),
         deletedAt: null,
         ...(excludeId && { NOT: { id: excludeId } }),
       },
@@ -91,7 +93,7 @@ export class PrismaClassroomRepository extends IClassroomRepository {
 
   async update(
     id: string,
-    data: Prisma.ClassroomUpdateInput,
+    data: UpdateClassroomRepositoryInput,
   ): Promise<ClassroomWithDetails> {
     return this.prisma.classroom.update({
       where: { id },
@@ -100,14 +102,31 @@ export class PrismaClassroomRepository extends IClassroomRepository {
     });
   }
 
-  async findByCode(code: string): Promise<ClassroomWithDetails | null> {
+  async findByCode(
+    code: string,
+    excludeId?: string,
+  ): Promise<ClassroomEntity | null> {
     return this.prisma.classroom.findFirst({
       where: {
         code: { equals: code, mode: 'insensitive' },
         deletedAt: null,
-        isActive: true,
+        ...(excludeId && { NOT: { id: excludeId } }),
       },
-      include: CLASS_INCLUDE,
+    });
+  }
+
+  async findByName(
+    name: string,
+    academicYearId: string,
+    excludeId?: string,
+  ): Promise<ClassroomEntity | null> {
+    return this.prisma.classroom.findFirst({
+      where: {
+        name: { equals: name, mode: 'insensitive' },
+        academicYearId,
+        deletedAt: null,
+        ...(excludeId && { NOT: { id: excludeId } }),
+      },
     });
   }
 
@@ -124,10 +143,26 @@ export class PrismaClassroomRepository extends IClassroomRepository {
     });
   }
 
+  async remove(id: string): Promise<Classroom> {
+    return this.softDelete(id);
+  }
+
   async softDelete(id: string): Promise<Classroom> {
     return this.prisma.classroom.update({
       where: { id },
       data: { deletedAt: new Date() },
+    });
+  }
+
+  async countEnrollments(id: string): Promise<number> {
+    return this.prisma.studentEnrollment.count({
+      where: { classroomId: id, deletedAt: null },
+    });
+  }
+
+  async countTeachingAssignments(id: string): Promise<number> {
+    return this.prisma.teachingAssignment.count({
+      where: { classroomId: id, deletedAt: null },
     });
   }
 }

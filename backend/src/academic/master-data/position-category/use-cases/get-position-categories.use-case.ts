@@ -1,12 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { PositionCategoryQueryDto } from '../dto/request/position-category-query.dto.js';
-import { IPositionCategoryRepository } from '../interfaces/position-category-repository.interface.js';
+import { IPositionCategoryRepository } from '../domain/interfaces/position-category-repository.interface.js';
 
 @Injectable()
 export class GetPositionCategoriesUseCase {
-  constructor(private readonly repository: IPositionCategoryRepository) {}
+  constructor(
+    private readonly positionCategoryRepository: IPositionCategoryRepository,
+  ) {}
 
   async execute(query: PositionCategoryQueryDto) {
-    return this.repository.findAll(query);
+    return this.positionCategoryRepository.findAll(query);
   }
 }

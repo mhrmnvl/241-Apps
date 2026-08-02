@@ -1,6 +1,6 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { UpdateStudentParentDto } from '../dto/request/update-student-parent.dto.js';
-import { StudentParentRepository } from '../repositories/student-parent.repository.js';
+import { IStudentParentRepository } from '../domain/interfaces/student-parent-repository.interface.js';
 import { StudentParentWithDetails } from '../domain/interfaces/student-parent-repository.interface.js';
 
 @Injectable()
@@ -8,7 +8,7 @@ export class UpdateStudentParentUseCase {
   private readonly logger = new Logger(UpdateStudentParentUseCase.name);
 
   constructor(
-    private readonly studentParentRepository: StudentParentRepository,
+    private readonly studentParentRepository: IStudentParentRepository,
   ) {}
 
   async execute(
@@ -23,8 +23,8 @@ export class UpdateStudentParentUseCase {
 
     const updated = await this.studentParentRepository.update(
       id,
-      current.studentId,
       dto,
+      current.studentId,
     );
     this.logger.log(`Student-parent link updated: ${id}`);
     return updated;

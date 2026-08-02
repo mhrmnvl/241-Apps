@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { IAssessmentItemRepository } from '../domain/interfaces/assessment-items-repository.interface.js';
+import { IAssessmentItemRepository } from '../domain/interfaces/assessment-item-repository.interface.js';
 import { IEnrollmentRepository } from '../../enrollment/domain/interfaces/enrollment-repository.interface.js';
-import { IStudentScoreRepository } from '../domain/interfaces/student-scores-repository.interface.js';
+import { IStudentScoreRepository } from '../domain/interfaces/student-score-repository.interface.js';
 import { BulkUpsertStudentScoreDto } from '../dto/request/bulk-upsert-student-score.dto.js';
 
 @Injectable()

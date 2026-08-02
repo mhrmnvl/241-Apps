@@ -4,16 +4,16 @@ import { IEnrollmentRepository } from '../domain/interfaces/enrollment-repositor
 
 @Injectable()
 export class UpdateStudentEnrollmentUseCase {
-  constructor(private readonly repository: IEnrollmentRepository) {}
+  constructor(private readonly enrollmentRepository: IEnrollmentRepository) {}
   async execute(id: string, dto: UpdateStudentEnrollmentDto) {
-    const enrollment = await this.repository.findById(id);
+    const enrollment = await this.enrollmentRepository.findById(id);
     if (!enrollment) {
       throw new NotFoundException(`StudentEnrollment ${id} not found`);
     }
     const { endedAt, ...rest } = dto;
-    return this.repository.update(id, {
+    return this.enrollmentRepository.update(id, {
       ...rest,
-      ...(endedAt && { endedAt: new Date(endedAt) }),
+      ...(endedAt !== undefined && { endedAt: new Date(endedAt) }),
     });
   }
 }

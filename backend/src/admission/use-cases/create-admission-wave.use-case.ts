@@ -5,15 +5,17 @@ import { CreateAdmissionWaveDto } from '../dto/request/create-admission-wave.dto
 
 @Injectable()
 export class CreateAdmissionWaveUseCase {
-  constructor(private readonly repository: IAdmissionWaveRepository) {}
+  constructor(
+    private readonly admissionWaveRepository: IAdmissionWaveRepository,
+  ) {}
 
   async execute(dto: CreateAdmissionWaveDto) {
-    const existing = await this.repository.findByCode(dto.code);
+    const existing = await this.admissionWaveRepository.findByCode(dto.code);
     if (existing) {
       throw new ConflictException(`Kode gelombang '${dto.code}' sudah dipakai`);
     }
 
-    const created = await this.repository.create({
+    const created = await this.admissionWaveRepository.create({
       name: dto.name,
       code: dto.code,
       academicYearId: dto.academicYearId,

@@ -1,6 +1,6 @@
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { IEventRepository } from '../domain/interfaces/events-repository.interface.js';
+import { IEventRepository } from '../domain/interfaces/event-repository.interface.js';
 import { GetEventByIdUseCase } from './get-event-by-id.use-case.js';
 
 describe('GetEventByIdUseCase', () => {

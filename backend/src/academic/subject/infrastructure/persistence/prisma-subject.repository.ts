@@ -1,15 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma, Subject } from '@prisma/client';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
-import { CreateSubjectDto } from '../../dto/request/create-subject.dto.js';
-import { SubjectQueryDto } from '../../dto/request/subject-query.dto.js';
-import { UpdateSubjectDto } from '../../dto/request/update-subject.dto.js';
-import {
-  ISubjectRepository,
-  SUBJECT_LIST_INCLUDE,
-  SubjectWithDetails,
+import type {
+  SubjectQueryInput,
+  CreateSubjectRepositoryInput,
+  UpdateSubjectRepositoryInput,
 } from '../../domain/interfaces/subject-repository.interface.js';
+import { ISubjectRepository } from '../../domain/interfaces/subject-repository.interface.js';
 import { PaginatedResult } from '../../../../shared/domain/interfaces/repository.interface.js';
+import {
+  SUBJECT_WITH_COUNT_INCLUDE,
+  SubjectWithCount,
+} from './prisma-subject.includes.js';
 
 @Injectable()
 export class PrismaSubjectRepository extends ISubjectRepository {
@@ -18,8 +20,8 @@ export class PrismaSubjectRepository extends ISubjectRepository {
   }
 
   async findAll(
-    query: SubjectQueryDto,
-  ): Promise<PaginatedResult<SubjectWithDetails>> {
+    query: SubjectQueryInput,
+  ): Promise<PaginatedResult<SubjectWithCount>> {
     const { page = 1, limit = 10, search } = query;
     const skip = (page - 1) * limit;
 
@@ -39,7 +41,7 @@ export class PrismaSubjectRepository extends ISubjectRepository {
         skip,
         take: limit,
         orderBy: { name: 'asc' },
-        include: SUBJECT_LIST_INCLUDE,
+        include: SUBJECT_WITH_COUNT_INCLUDE,
       }),
       this.prisma.subject.count({ where }),
     ]);
@@ -47,19 +49,40 @@ export class PrismaSubjectRepository extends ISubjectRepository {
     return { data, total, page, limit };
   }
 
-  async findById(id: string): Promise<Subject | null> {
+  async findById(id: string): Promise<SubjectWithCount | null> {
     return this.prisma.subject.findFirst({
       where: { id, deletedAt: null },
+      include: SUBJECT_WITH_COUNT_INCLUDE,
     });
   }
 
-  async findByName(name: string): Promise<Subject | null> {
+  async findByCode(code: string, excludeId?: string): Promise<Subject | null> {
     return this.prisma.subject.findFirst({
-      where: { name, deletedAt: null },
+      where: {
+        code,
+        deletedAt: null,
+        ...(excludeId && { NOT: { id: excludeId } }),
+      },
     });
   }
 
-  async create(dto: CreateSubjectDto): Promise<Subject> {
+  async findByName(name: string, excludeId?: string): Promise<Subject | null> {
+    return this.prisma.subject.findFirst({
+      where: {
+        name,
+        deletedAt: null,
+        ...(excludeId && { NOT: { id: excludeId } }),
+      },
+    });
+  }
+
+  async countActiveAssignments(id: string): Promise<number> {
+    return this.prisma.teachingAssignment.count({
+      where: { subjectId: id, deletedAt: null },
+    });
+  }
+
+  async create(dto: CreateSubjectRepositoryInput): Promise<Subject> {
     const subject = await this.prisma.subject.create({
       data: {
         code: dto.code,
@@ -74,7 +97,10 @@ export class PrismaSubjectRepository extends ISubjectRepository {
     return subject;
   }
 
-  async update(id: string, dto: UpdateSubjectDto): Promise<Subject> {
+  async update(
+    id: string,
+    dto: UpdateSubjectRepositoryInput,
+  ): Promise<Subject> {
     await this.prisma.subject.updateMany({
       where: { id },
       data: {
@@ -156,7 +182,7 @@ export class PrismaSubjectRepository extends ISubjectRepository {
       where: { id },
       data: { deletedAt: new Date() },
     });
-    const deleted = await this.findById(id);
+    const deleted = await this.prisma.subject.findFirst({ where: { id } });
     if (!deleted) {
       throw new Error(`Subject with ID ${id} not found after deletion`);
     }

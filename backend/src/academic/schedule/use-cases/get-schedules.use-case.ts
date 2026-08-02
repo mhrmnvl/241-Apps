@@ -4,8 +4,8 @@ import { IScheduleRepository } from '../domain/interfaces/schedule-repository.in
 
 @Injectable()
 export class GetSchedulesUseCase {
-  constructor(private readonly repository: IScheduleRepository) {}
+  constructor(private readonly scheduleRepository: IScheduleRepository) {}
   async execute(query: ScheduleQueryDto) {
-    return this.repository.findAll(query);
+    return this.scheduleRepository.findAll(query);
   }
 }

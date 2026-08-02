@@ -2,12 +2,12 @@ import { Module } from '@nestjs/common';
 import { TeachingAssignmentModule } from '../teaching-assignment/teaching-assignment.module.js';
 import { SemesterModule } from '../semester/semester.module.js';
 import { EnrollmentModule } from '../enrollment/enrollment.module.js';
-import { AssessmentItemsController } from './presentation/assessment-items.controller.js';
-import { StudentScoresController } from './presentation/student-scores.controller.js';
-import { PrismaAssessmentItemRepository } from './infrastructure/persistence/prisma-assessment-items.repository.js';
-import { PrismaStudentScoreRepository } from './infrastructure/persistence/prisma-student-scores.repository.js';
-import { IAssessmentItemRepository } from './domain/interfaces/assessment-items-repository.interface.js';
-import { IStudentScoreRepository } from './domain/interfaces/student-scores-repository.interface.js';
+import { AssessmentItemController } from './presentation/assessment-item.controller.js';
+import { StudentScoreController } from './presentation/student-score.controller.js';
+import { PrismaAssessmentItemRepository } from './infrastructure/persistence/prisma-assessment-item.repository.js';
+import { PrismaStudentScoreRepository } from './infrastructure/persistence/prisma-student-score.repository.js';
+import { IAssessmentItemRepository } from './domain/interfaces/assessment-item-repository.interface.js';
+import { IStudentScoreRepository } from './domain/interfaces/student-score-repository.interface.js';
 
 import { GetAssessmentItemsUseCase } from './use-cases/get-assessment-items.use-case.js';
 import { GetAssessmentItemByIdUseCase } from './use-cases/get-assessment-item-by-id.use-case.js';
@@ -25,7 +25,7 @@ import { BulkUpsertStudentScoresUseCase } from './use-cases/bulk-upsert-student-
 
 @Module({
   imports: [TeachingAssignmentModule, SemesterModule, EnrollmentModule],
-  controllers: [AssessmentItemsController, StudentScoresController],
+  controllers: [AssessmentItemController, StudentScoreController],
   providers: [
     {
       provide: IAssessmentItemRepository,

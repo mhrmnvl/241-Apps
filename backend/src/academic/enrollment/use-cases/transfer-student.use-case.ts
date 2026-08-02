@@ -14,10 +14,10 @@ import { TransferStudentDto } from '../dto/request/transfer-student.dto.js';
 export class TransferStudentUseCase {
   private readonly logger = new Logger(TransferStudentUseCase.name);
 
-  constructor(private readonly repository: IEnrollmentRepository) {}
+  constructor(private readonly enrollmentRepository: IEnrollmentRepository) {}
 
   async execute(enrollmentId: string, dto: TransferStudentDto) {
-    const enrollment = await this.repository.findById(enrollmentId);
+    const enrollment = await this.enrollmentRepository.findById(enrollmentId);
     if (!enrollment) {
       throw new NotFoundException(
         `StudentEnrollment ${enrollmentId} not found`,
@@ -30,7 +30,7 @@ export class TransferStudentUseCase {
       );
     }
 
-    const updated = await this.repository.update(enrollmentId, {
+    const updated = await this.enrollmentRepository.update(enrollmentId, {
       classroomId: dto.targetClassroomId,
       note: dto.note,
     });

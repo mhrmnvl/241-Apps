@@ -1,27 +1,34 @@
-import { AdmissionPayment, AdmissionWave, Prisma } from '@prisma/client';
+import {
+  DecimalValue,
+  toNumericValue,
+} from '../../shared/domain/types/decimal.type.js';
 
-// Prisma Decimal instances get mangled by the global ClassSerializerInterceptor
+// Decimal instances get mangled by the global ClassSerializerInterceptor
 // (instanceToPlain copies its internal {s,e,d} props), so convert money fields
 // to plain numbers before returning from use-cases.
 
-export function serializeWave<T extends AdmissionWave>(wave: T) {
+export function serializeWave<T extends { registrationFee: DecimalValue }>(
+  wave: T,
+) {
   return {
     ...wave,
-    registrationFee: Number(wave.registrationFee),
+    registrationFee: toNumericValue(wave.registrationFee),
   };
 }
 
-export function serializePayment<T extends AdmissionPayment>(payment: T) {
+export function serializePayment<T extends { amount: DecimalValue }>(
+  payment: T,
+) {
   return {
     ...payment,
-    amount: Number(payment.amount),
+    amount: toNumericValue(payment.amount),
   };
 }
 
 export function serializeApplicationDetail<
   T extends {
-    wave?: AdmissionWave & Record<string, unknown>;
-    payment?: (AdmissionPayment & Record<string, unknown>) | null;
+    wave?: { registrationFee: DecimalValue } | null;
+    payment?: { amount: DecimalValue } | null;
   },
 >(application: T) {
   return {
@@ -33,4 +40,4 @@ export function serializeApplicationDetail<
   };
 }
 
-export type SerializedDecimal = number | Prisma.Decimal;
+export type SerializedDecimal = DecimalValue;

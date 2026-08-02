@@ -6,17 +6,17 @@ import { IBloodTypeRepository } from '../domain/interfaces/blood-type-repository
 export class CreateBloodTypeUseCase {
   private readonly logger = new Logger(CreateBloodTypeUseCase.name);
 
-  constructor(private readonly repository: IBloodTypeRepository) {}
+  constructor(private readonly bloodTypeRepository: IBloodTypeRepository) {}
 
   async execute(dto: CreateBloodTypeDto) {
-    const existing = await this.repository.findByName(dto.name);
+    const existing = await this.bloodTypeRepository.findByName(dto.name);
     if (existing) {
       throw new ConflictException(
         'BloodType with name "' + dto.name + '" already exists',
       );
     }
 
-    const item = await this.repository.create({
+    const item = await this.bloodTypeRepository.create({
       name: dto.name,
       isActive: dto.isActive,
     });

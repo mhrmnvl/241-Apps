@@ -3,13 +3,15 @@ import { IFundingSourceRepository } from '../domain/interfaces/funding-source-re
 
 @Injectable()
 export class DeleteFundingSourceUseCase {
-  constructor(private readonly repository: IFundingSourceRepository) {}
+  constructor(
+    private readonly fundingSourceRepository: IFundingSourceRepository,
+  ) {}
 
   async execute(id: string) {
-    const fundingSource = await this.repository.findById(id);
+    const fundingSource = await this.fundingSourceRepository.findById(id);
     if (!fundingSource) {
       throw new NotFoundException(`Funding Source with ID ${id} not found`);
     }
-    return this.repository.delete(id);
+    return this.fundingSourceRepository.delete(id);
   }
 }

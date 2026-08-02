@@ -3,10 +3,10 @@ import { IAssetRepository } from '../domain/interfaces/asset-repository.interfac
 
 @Injectable()
 export class GetAssetByIdUseCase {
-  constructor(private readonly repository: IAssetRepository) {}
+  constructor(private readonly assetRepository: IAssetRepository) {}
 
   async execute(id: string) {
-    const asset = await this.repository.findById(id);
+    const asset = await this.assetRepository.findById(id);
     if (!asset) {
       throw new NotFoundException(`Asset with ID ${id} not found`);
     }

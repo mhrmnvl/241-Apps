@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { IEnrollmentRepository } from '../domain/interfaces/enrollment-repository.interface.js';
-import { SemesterRepository } from '../../semester/repositories/semester.repository.js';
+import { ISemesterRepository } from '../../semester/domain/interfaces/semester-repository.interface.js';
 import { CreateStudentEnrollmentUseCase } from './create-student-enrollment.use-case.js';
 import { TransferStudentUseCase } from './transfer-student.use-case.js';
 
@@ -18,7 +18,7 @@ export class EnsureStudentEnrollmentUseCase {
 
   constructor(
     private readonly enrollmentRepository: IEnrollmentRepository,
-    private readonly semesterRepository: SemesterRepository,
+    private readonly semesterRepository: ISemesterRepository,
     private readonly createStudentEnrollment: CreateStudentEnrollmentUseCase,
     private readonly transferStudent: TransferStudentUseCase,
   ) {}

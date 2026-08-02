@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserQueryDto } from '../dto/request/user-query.dto.js';
-import { IUserRepository } from '../interfaces/user-repository.interface.js';
+import { IUserRepository } from '../domain/interfaces/user-repository.interface.js';
 import { GetUsersUseCase } from './get-users.use-case.js';
 
 describe('GetUsersUseCase', () => {

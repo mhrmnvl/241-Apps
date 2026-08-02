@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { fileTypeFromBuffer } from 'file-type';
-import { AppKey, FileRepository } from '../repositories/file.repository.js';
+import { IFileRepository } from '../domain/interfaces/file-repository.interface.js';
+import { AppKey } from '../../settings/domain/entities/app-setting.entity.js';
 import { CreateFileDto } from '../dto/request/create-file.dto.js';
 import { ImageOptimizerService } from '../domain/interfaces/image-optimizer.interface.js';
 import { StorageService } from '../../../core/storage/storage.service.js';
@@ -16,7 +17,7 @@ const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024; // 10MB
 @Injectable()
 export class UploadFileUseCase {
   constructor(
-    private readonly repository: FileRepository,
+    private readonly fileRepository: IFileRepository,
     private readonly imageOptimizer: ImageOptimizerService,
     private readonly storage: StorageService,
     private readonly keyBuilder: StorageKeyBuilder,
@@ -61,7 +62,7 @@ export class UploadFileUseCase {
     }
 
     const category = categoryId
-      ? await this.repository.findCategoryById(categoryId)
+      ? await this.fileRepository.findCategoryById(categoryId)
       : null;
 
     const uniqueFilename = `${Date.now()}-${Math.round(Math.random() * 1e9)}${fileExt}`;
@@ -81,7 +82,7 @@ export class UploadFileUseCase {
       storageKey,
     };
 
-    const entity = await this.repository.create(dto, uploadedBy);
+    const entity = await this.fileRepository.create(dto, uploadedBy);
     return { ...entity, url: await this.storage.getSignedUrl(storageKey) };
   }
 }

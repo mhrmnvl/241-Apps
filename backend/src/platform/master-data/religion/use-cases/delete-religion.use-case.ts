@@ -5,15 +5,15 @@ import { IReligionRepository } from '../domain/interfaces/religion-repository.in
 export class DeleteReligionUseCase {
   private readonly logger = new Logger(DeleteReligionUseCase.name);
 
-  constructor(private readonly repository: IReligionRepository) {}
+  constructor(private readonly religionRepository: IReligionRepository) {}
 
   async execute(id: string) {
-    const item = await this.repository.findById(id);
+    const item = await this.religionRepository.findById(id);
     if (!item) {
       throw new NotFoundException('Religion with ID ${id} not found');
     }
 
-    await this.repository.softDelete(id);
+    await this.religionRepository.softDelete(id);
     this.logger.log(`Religion deleted: ${item.name}`);
   }
 }

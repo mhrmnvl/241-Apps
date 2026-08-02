@@ -1,53 +1,82 @@
-import { Attendance, AttendanceStatus, Prisma } from '@prisma/client';
-import type {
-  AttendanceQueryDto,
-  AttendanceRecapQueryDto,
-  AttendanceTrendQueryDto,
-  BulkAttendanceRecordDto,
-} from '../../dto/request/attendance.dto.js';
-import { PaginatedResult } from '../../../../shared/domain/interfaces/repository.interface.js';
+import {
+  PaginatedResult,
+  PaginationQueryInput,
+} from '../../../../shared/domain/interfaces/repository.interface.js';
+import { AttendanceStatus } from '../../../../shared/domain/enums/attendance-status.enum.js';
+import {
+  AttendanceEntity,
+  AttendanceWithDetails,
+} from '../entities/attendance.entity.js';
 
-export const ATTENDANCE_INCLUDE = {
-  enrollment: {
-    include: {
-      student: {
-        include: { user: { select: { profile: true } } },
-      },
-    },
-  },
-  schedule: { include: { timeSlot: true } },
-} satisfies Prisma.AttendanceInclude;
+export type { AttendanceWithDetails };
 
-export type AttendanceWithDetails = Prisma.AttendanceGetPayload<{
-  include: typeof ATTENDANCE_INCLUDE;
-}>;
+export interface AttendanceQueryInput extends PaginationQueryInput {
+  status?: AttendanceStatus;
+  enrollmentId?: string;
+  scheduleId?: string;
+  classroomId?: string;
+  semesterId?: string;
+  date?: string;
+}
 
-export interface AttendanceRecap {
+export interface CreateAttendanceRepositoryInput {
   enrollmentId: string;
-  studentName: string;
-  nis: string;
+  date: Date;
+  status: AttendanceStatus;
+  scheduleId?: string | null;
+  note?: string | null;
+}
+
+export interface UpdateAttendanceRepositoryInput {
+  status?: AttendanceStatus;
+  note?: string | null;
+}
+
+/** Restoring a soft-deleted row always re-asserts a status. */
+export interface RestoreAttendanceRepositoryInput {
+  status: AttendanceStatus;
+  note?: string | null;
+}
+
+/** One row of a bulk attendance submission for a single date. */
+export interface BulkAttendanceRecord {
+  enrollmentId: string;
+  status: AttendanceStatus;
+  note?: string | null;
+}
+
+export interface BulkAttendanceResult {
+  saved: number;
+}
+
+/** Whole-semester recap unless both month and year are supplied. */
+export interface AttendanceRecapQueryInput {
+  classroomId: string;
+  semesterId: string;
+  month?: number;
+  year?: number;
+}
+
+export interface AttendanceTrendQueryInput {
+  classroomId: string;
+  semesterId: string;
+}
+
+export interface AttendanceRecapRow {
+  enrollmentId: string;
+  studentName?: string;
   PRESENT: number;
   SICK: number;
   EXCUSED: number;
   ABSENT: number;
   LATE: number;
-  /** Sum of all five status counts. */
   total: number;
-  /** (PRESENT + LATE) / total * 100, rounded to 1 decimal. 0 when total is 0. */
   percentage: number;
-}
-
-export interface AttendanceStatusCounts {
-  sick: number;
-  excused: number;
-  absent: number;
 }
 
 export interface AttendanceMonthlyTrendPoint {
   year: number;
-  /** 1-12. */
   month: number;
-  /** e.g. "Jan 2026" — ready to display as an x-axis label. */
   monthLabel: string;
   PRESENT: number;
   SICK: number;
@@ -58,59 +87,59 @@ export interface AttendanceMonthlyTrendPoint {
   percentage: number;
 }
 
+export interface AttendanceStatusCounts {
+  sick: number;
+  excused: number;
+  absent: number;
+}
+
 export abstract class IAttendanceRepository {
   abstract findAll(
-    query: AttendanceQueryDto,
+    query: AttendanceQueryInput,
   ): Promise<PaginatedResult<AttendanceWithDetails>>;
-
   abstract findById(id: string): Promise<AttendanceWithDetails | null>;
-
-  abstract findDuplicate(
-    enrollmentId: string,
+  abstract findAttendance(
+    teachingAssignmentId: string,
+    studentEnrollmentId: string,
     date: Date,
-    scheduleId?: string,
     excludeId?: string,
-  ): Promise<Attendance | null>;
-
-  abstract create(data: {
-    enrollmentId: string;
-    date: Date;
-    status: AttendanceStatus;
-    scheduleId?: string;
-    note?: string;
-  }): Promise<Attendance>;
-
+  ): Promise<AttendanceEntity | null>;
+  abstract create(
+    input: CreateAttendanceRepositoryInput,
+  ): Promise<AttendanceWithDetails>;
   abstract update(
     id: string,
-    data: Prisma.AttendanceUpdateInput,
-  ): Promise<Attendance>;
-
-  abstract findSoftDeleted(
-    enrollmentId: string,
-    date: Date,
-    scheduleId?: string,
-  ): Promise<Attendance | null>;
-
+    input: UpdateAttendanceRepositoryInput,
+  ): Promise<AttendanceWithDetails>;
+  abstract remove(id: string): Promise<AttendanceEntity>;
+  abstract softDelete(id: string): Promise<AttendanceEntity>;
   abstract restore(
     id: string,
-    data: { status: AttendanceStatus; note?: string },
-  ): Promise<Attendance>;
-
-  abstract softDelete(id: string): Promise<Attendance>;
-
+    input: RestoreAttendanceRepositoryInput,
+  ): Promise<AttendanceEntity>;
+  abstract findDuplicate(
+    enrollmentId: string,
+    date: Date | string,
+    scheduleId?: string,
+    excludeId?: string,
+  ): Promise<AttendanceEntity | null>;
+  abstract findSoftDeleted(
+    enrollmentId: string,
+    date: Date | string,
+    scheduleId?: string,
+  ): Promise<AttendanceEntity | null>;
   abstract bulkUpsert(
     date: Date,
-    records: BulkAttendanceRecordDto[],
+    records: BulkAttendanceRecord[],
     scheduleId?: string,
-  ): Promise<{ saved: number }>;
-
-  abstract getRecap(query: AttendanceRecapQueryDto): Promise<AttendanceRecap[]>;
-
+  ): Promise<BulkAttendanceResult>;
   abstract getStatusCounts(
     enrollmentId: string,
   ): Promise<AttendanceStatusCounts>;
-
+  abstract getRecap(
+    query: AttendanceRecapQueryInput,
+  ): Promise<AttendanceRecapRow[]>;
   abstract getMonthlyTrend(
-    query: AttendanceTrendQueryDto,
+    query: AttendanceTrendQueryInput,
   ): Promise<AttendanceMonthlyTrendPoint[]>;
 }

@@ -13,7 +13,7 @@ import { IPromotionRepository } from '../domain/interfaces/promotion-repository.
 
 @Injectable()
 export class GeneratePromotionRecommendationUseCase {
-  constructor(private readonly repository: IPromotionRepository) {}
+  constructor(private readonly promotionRepository: IPromotionRepository) {}
 
   async execute(
     dto: GenerateRecommendationDto,
@@ -27,8 +27,8 @@ export class GeneratePromotionRecommendationUseCase {
     }
 
     const [sourceSemester, targetSemester] = await Promise.all([
-      this.repository.findSemesterWithAcademicYear(sourceSemesterId),
-      this.repository.findSemesterWithAcademicYear(targetSemesterId),
+      this.promotionRepository.findSemesterWithAcademicYear(sourceSemesterId),
+      this.promotionRepository.findSemesterWithAcademicYear(targetSemesterId),
     ]);
 
     if (!sourceSemester) {
@@ -49,8 +49,12 @@ export class GeneratePromotionRecommendationUseCase {
     }
 
     const [enrollments, targetClassrooms] = await Promise.all([
-      this.repository.findActiveEnrollmentsWithDetails(sourceSemesterId),
-      this.repository.findClassesByAcademicYear(targetSemester.academicYearId),
+      this.promotionRepository.findActiveEnrollmentsWithDetails(
+        sourceSemesterId,
+      ),
+      this.promotionRepository.findClassesByAcademicYear(
+        targetSemester.academicYearId,
+      ),
     ]);
 
     // Build a map of level (int) → next level's classrooms
@@ -93,7 +97,7 @@ export class GeneratePromotionRecommendationUseCase {
 
             if (bestMatch) {
               targetClassroomId = bestMatch.id;
-              targetClassroomName = bestMatch.code;
+              targetClassroomName = bestMatch.code ?? undefined;
               targetLevel = bestMatch.grade.name;
             }
           }

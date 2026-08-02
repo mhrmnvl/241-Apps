@@ -1,17 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { ProfileSocialMedia, Prisma } from '@prisma/client';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
+import { IProfileSocialMediaRepository } from '../../domain/interfaces/profile-social-media-repository.interface.js';
 import {
-  IProfileSocialMediaRepository,
-  ProfileSocialMediaWithDetails,
   PROFILE_SOCIAL_MEDIA_INCLUDE,
-} from '../../domain/interfaces/profile-social-media-repository.interface.js';
+  ProfileSocialMediaWithDetails,
+} from './prisma-profile-social-media.includes.js';
 
 @Injectable()
-export class PrismaProfileSocialMediaRepository extends IProfileSocialMediaRepository {
-  constructor(private readonly prisma: PrismaService) {
-    super();
-  }
+export class PrismaProfileSocialMediaRepository implements IProfileSocialMediaRepository {
+  constructor(private readonly prisma: PrismaService) {}
 
   async findAllByProfileId(
     profileId: string,

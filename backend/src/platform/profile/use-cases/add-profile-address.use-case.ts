@@ -1,15 +1,15 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { CreateAddressDto } from '../../../shared/dto/address.dto.js';
-import { ProfileRepository } from '../index.js';
-import { ProfileAddressRepository } from '../repositories/profile-address.repository.js';
+import { IProfileRepository } from '../index.js';
+import { IProfileAddressRepository } from '../domain/interfaces/profile-address-repository.interface.js';
 
 @Injectable()
 export class AddProfileAddressUseCase {
   private readonly logger = new Logger(AddProfileAddressUseCase.name);
 
   constructor(
-    private readonly profileRepository: ProfileRepository,
-    private readonly addressRepository: ProfileAddressRepository,
+    private readonly profileRepository: IProfileRepository,
+    private readonly addressRepository: IProfileAddressRepository,
   ) {}
 
   async execute(userId: string, dto: CreateAddressDto) {

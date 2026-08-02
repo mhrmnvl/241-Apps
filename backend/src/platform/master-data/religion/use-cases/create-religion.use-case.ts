@@ -6,17 +6,17 @@ import { IReligionRepository } from '../domain/interfaces/religion-repository.in
 export class CreateReligionUseCase {
   private readonly logger = new Logger(CreateReligionUseCase.name);
 
-  constructor(private readonly repository: IReligionRepository) {}
+  constructor(private readonly religionRepository: IReligionRepository) {}
 
   async execute(dto: CreateReligionDto) {
-    const existing = await this.repository.findByName(dto.name);
+    const existing = await this.religionRepository.findByName(dto.name);
     if (existing) {
       throw new ConflictException(
         'Religion with name "' + dto.name + '" already exists',
       );
     }
 
-    const item = await this.repository.create({
+    const item = await this.religionRepository.create({
       name: dto.name,
       isActive: dto.isActive,
     });

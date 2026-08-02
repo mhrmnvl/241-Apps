@@ -2,8 +2,8 @@ import { BadRequestException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import ExcelJS from 'exceljs';
 import { IGradeRepository } from '../../grade/domain/interfaces/grade-repository.interface.js';
-import { ClassroomRepository } from '../../classroom/index.js';
-import { StudentRepository } from '../repositories/student.repository.js';
+import { IClassroomRepository } from '../../classroom/index.js';
+import { IStudentRepository } from '../domain/interfaces/student-repository.interface.js';
 import { BulkImportStudentsUseCase } from './bulk-import-student.use-case.js';
 import { CreateStudentUseCase } from './create-student.use-case.js';
 import { ExcelStudentParser } from '../domain/interfaces/student-excel-parser.interface.js';
@@ -63,8 +63,8 @@ describe('BulkImportStudentsUseCase', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         BulkImportStudentsUseCase,
-        { provide: StudentRepository, useValue: mockStudentRepository },
-        { provide: ClassroomRepository, useValue: mockClassroomRepository },
+        { provide: IStudentRepository, useValue: mockStudentRepository },
+        { provide: IClassroomRepository, useValue: mockClassroomRepository },
         {
           provide: IGradeRepository,
           useValue: mockClassroomLevelRepository,

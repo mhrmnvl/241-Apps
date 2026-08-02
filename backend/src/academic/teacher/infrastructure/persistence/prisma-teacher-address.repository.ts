@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { Address } from '@prisma/client';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
-import { ITeacherAddressRepository } from '../../domain/interfaces/teacher-address-repository.interface.js';
 import {
-  CreateAddressDto,
-  UpdateAddressDto,
-} from '../../../../shared/dto/address.dto.js';
+  CreateAddressRepositoryInput,
+  ITeacherAddressRepository,
+  UpdateAddressRepositoryInput,
+} from '../../domain/interfaces/teacher-address-repository.interface.js';
 
 @Injectable()
 export class PrismaTeacherAddressRepository extends ITeacherAddressRepository {
@@ -13,11 +13,15 @@ export class PrismaTeacherAddressRepository extends ITeacherAddressRepository {
     super();
   }
 
-  async findAll(teacherId: string): Promise<Address[]> {
+  async findByTeacherId(teacherId: string): Promise<Address[]> {
     return this.prisma.address.findMany({
       where: { teacherId },
       orderBy: { isPrimary: 'desc' },
     });
+  }
+
+  async findAll(teacherId: string): Promise<Address[]> {
+    return this.findByTeacherId(teacherId);
   }
 
   async findById(
@@ -29,7 +33,10 @@ export class PrismaTeacherAddressRepository extends ITeacherAddressRepository {
     });
   }
 
-  async create(teacherId: string, dto: CreateAddressDto): Promise<Address> {
+  async create(
+    teacherId: string,
+    dto: CreateAddressRepositoryInput,
+  ): Promise<Address> {
     return this.prisma.$transaction(async (tx) => {
       if (dto.isPrimary) {
         await tx.address.updateMany({
@@ -46,7 +53,7 @@ export class PrismaTeacherAddressRepository extends ITeacherAddressRepository {
   async update(
     teacherId: string,
     addressId: string,
-    dto: UpdateAddressDto,
+    dto: UpdateAddressRepositoryInput,
   ): Promise<Address> {
     return this.prisma.$transaction(async (tx) => {
       if (dto.isPrimary) {
@@ -59,6 +66,13 @@ export class PrismaTeacherAddressRepository extends ITeacherAddressRepository {
         where: { id: addressId },
         data: dto,
       });
+    });
+  }
+
+  async softDelete(teacherId: string, addressId: string): Promise<Address> {
+    return this.prisma.address.update({
+      where: { id: addressId },
+      data: { deletedAt: new Date() },
     });
   }
 

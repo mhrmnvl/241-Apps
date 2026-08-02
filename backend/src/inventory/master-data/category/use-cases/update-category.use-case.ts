@@ -4,14 +4,14 @@ import { UpdateCategoryDto } from '../dto/request/update-category.dto.js';
 
 @Injectable()
 export class UpdateCategoryUseCase {
-  constructor(private readonly repository: ICategoryRepository) {}
+  constructor(private readonly categoryRepository: ICategoryRepository) {}
 
   async execute(id: string, dto: UpdateCategoryDto) {
-    const category = await this.repository.findById(id);
+    const category = await this.categoryRepository.findById(id);
     if (!category) {
       throw new NotFoundException(`Category with ID ${id} not found`);
     }
-    return this.repository.update(id, {
+    return this.categoryRepository.update(id, {
       code: dto.code,
       name: dto.name,
       depreciationRatePercent: dto.depreciationRatePercent,

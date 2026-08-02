@@ -1,28 +1,28 @@
-import { User, AuthSession, PasswordResetToken, Prisma } from '@prisma/client';
 import {
   CreateSessionData,
   UpdateSessionTokenData,
 } from '../../types/auth-session.types.js';
+import { UserEntity } from '../../../../shared/domain/entities/user.entity.js';
+import {
+  AuthSessionEntity,
+  PasswordResetTokenEntity,
+} from '../entities/auth-session.entity.js';
+import {
+  UserWithProfileAndRoles,
+  SessionWithUser,
+  PasswordResetTokenWithUser,
+} from '../entities/auth-session.entity.js';
 
-export type UserWithProfileAndRoles = Prisma.UserGetPayload<{
-  include: {
-    profile: true;
-    userRoles: { include: { role: true } };
-  };
-}>;
-
-export type SessionWithUser = Prisma.AuthSessionGetPayload<{
-  include: { user: true };
-}>;
-
-export type PasswordResetTokenWithUser = Prisma.PasswordResetTokenGetPayload<{
-  include: { user: true };
-}>;
+export type {
+  UserWithProfileAndRoles,
+  SessionWithUser,
+  PasswordResetTokenWithUser,
+};
 
 export abstract class IAuthRepository {
   abstract findUserByIdentifier(
     identifier: string,
-  ): Promise<(User & { userRoles: { role: { code: string } }[] }) | null>;
+  ): Promise<(UserEntity & { userRoles: { role: { code: string } }[] }) | null>;
 
   abstract findUserById(
     userId: string,
@@ -32,14 +32,14 @@ export abstract class IAuthRepository {
     sessionId: string,
   ): Promise<SessionWithUser | null>;
 
-  abstract createSession(data: CreateSessionData): Promise<AuthSession>;
+  abstract createSession(data: CreateSessionData): Promise<AuthSessionEntity>;
 
   abstract updateSessionToken(
     sessionId: string,
     data: UpdateSessionTokenData,
-  ): Promise<AuthSession>;
+  ): Promise<AuthSessionEntity>;
 
-  abstract revokeSession(sessionId: string): Promise<AuthSession>;
+  abstract revokeSession(sessionId: string): Promise<AuthSessionEntity>;
 
   abstract deleteExpiredSessions(
     now: Date,
@@ -49,18 +49,18 @@ export abstract class IAuthRepository {
   abstract updateUserPassword(
     userId: string,
     passwordHash: string,
-  ): Promise<User>;
+  ): Promise<UserEntity>;
 
   abstract revokeAllOtherUserSessions(
     userId: string,
     currentSessionId: string,
-  ): Promise<Prisma.BatchPayload>;
+  ): Promise<{ count: number }>;
 
   abstract createPasswordResetToken(
     userId: string,
     tokenHash: string,
     expiresAt: Date,
-  ): Promise<PasswordResetToken>;
+  ): Promise<PasswordResetTokenEntity>;
 
   abstract findActivePasswordResetToken(
     tokenHash: string,
@@ -68,9 +68,9 @@ export abstract class IAuthRepository {
 
   abstract markPasswordResetTokenAsUsed(
     tokenId: string,
-  ): Promise<PasswordResetToken>;
+  ): Promise<PasswordResetTokenEntity>;
 
-  abstract findUserSessions(userId: string): Promise<AuthSession[]>;
+  abstract findUserSessions(userId: string): Promise<AuthSessionEntity[]>;
 
-  abstract revokeAll(userId: string): Promise<Prisma.BatchPayload>;
+  abstract revokeAll(userId: string): Promise<{ count: number }>;
 }

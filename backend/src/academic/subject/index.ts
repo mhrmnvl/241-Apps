@@ -1,1 +1,1 @@
-export { SubjectRepository } from './repositories/subject.repository.js';
+export { ISubjectRepository } from './domain/interfaces/subject-repository.interface.js';

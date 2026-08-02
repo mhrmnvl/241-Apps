@@ -1,8 +1,8 @@
 ﻿import { ConflictException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { ParentRelation } from '@prisma/client';
+import { ParentRelation } from '../../../shared/domain/enums/parent-relation.enum.js';
 import { CreateStudentParentDto } from '../dto/request/create-student-parent.dto.js';
-import { StudentParentRepository } from '../repositories/student-parent.repository.js';
+import { IStudentParentRepository } from '../domain/interfaces/student-parent-repository.interface.js';
 import { CreateStudentParentUseCase } from './create-student-parent.use-case.js';
 
 describe('CreateStudentParentUseCase', () => {
@@ -19,7 +19,7 @@ describe('CreateStudentParentUseCase', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         CreateStudentParentUseCase,
-        { provide: StudentParentRepository, useValue: mockRepo },
+        { provide: IStudentParentRepository, useValue: mockRepo },
       ],
     }).compile();
 

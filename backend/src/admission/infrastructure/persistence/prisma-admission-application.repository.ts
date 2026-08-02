@@ -1,15 +1,11 @@
 import { ConflictException, Injectable, Logger } from '@nestjs/common';
 import {
   AdmissionApplication,
-  AdmissionDocumentStatus,
   AdmissionDocumentType,
   AdmissionPayment,
-  AdmissionPaymentStatus,
   Prisma,
 } from '@prisma/client';
 import { PrismaService } from '../../../core/database/prisma.service.js';
-import { AdmissionApplicationQueryDto } from '../../dto/request/admission-query.dto.js';
-import { EnrollApplicantDto } from '../../dto/request/admin-actions.dto.js';
 import {
   isEligibleAdmissionParent,
   hasCompleteAddress,
@@ -17,13 +13,13 @@ import {
 import { PaginatedResult } from '../../../shared/domain/interfaces/repository.interface.js';
 import {
   applicationAdminDetailInclude,
-  applicationDetailInclude,
   applicationListInclude,
   ApplicationAdminDetail,
-  ApplicationDetail,
   ApplicationListItem,
-} from '../../domain/admission.includes.js';
+} from './prisma-admission-application.includes.js';
 import {
+  AcceptAdmissionApplicationInput,
+  AdmissionApplicationQueryInput,
   AdmissionDocumentWithType,
   AdmissionDocumentWithTypeAndFile,
   AdmissionPaymentWithProof,
@@ -32,8 +28,14 @@ import {
   ApplicationWithDocsAndPayment,
   ApplicationWithParentsAndUser,
   ApplicationWithWave,
+  CreateAdmissionApplicationRepositoryInput,
+  EnrollApplicantRepositoryInput,
   EnrollResult,
   IAdmissionApplicationRepository,
+  RejectAdmissionApplicationInput,
+  UpdateAdmissionApplicationRepositoryInput,
+  UpdateAdmissionDocumentStatusInput,
+  UpdateAdmissionPaymentStatusInput,
 } from '../../domain/interfaces/admission-application-repository.interface.js';
 
 @Injectable()
@@ -46,10 +48,45 @@ export class PrismaAdmissionApplicationRepository extends IAdmissionApplicationR
     super();
   }
 
+  async findById(id: string): Promise<AdmissionApplication | null> {
+    return this.findActiveById(id);
+  }
+
+  async findByApplicantId(
+    applicantId: string,
+  ): Promise<AdmissionApplication | null> {
+    return this.prisma.admissionApplication.findFirst({
+      where: { userId: applicantId, deletedAt: null },
+    });
+  }
+
+  async create(
+    input: CreateAdmissionApplicationRepositoryInput,
+  ): Promise<AdmissionApplication> {
+    return this.prisma.admissionApplication.create({ data: input });
+  }
+
+  async update(
+    id: string,
+    input: UpdateAdmissionApplicationRepositoryInput,
+  ): Promise<AdmissionApplication> {
+    return this.prisma.admissionApplication.update({
+      where: { id },
+      data: input,
+    });
+  }
+
+  async remove(id: string): Promise<AdmissionApplication> {
+    return this.prisma.admissionApplication.update({
+      where: { id },
+      data: { deletedAt: new Date() },
+    });
+  }
+
   // ── Read model ──
 
   async findAll(
-    query: AdmissionApplicationQueryDto,
+    query: AdmissionApplicationQueryInput,
   ): Promise<PaginatedResult<ApplicationListItem>> {
     const { page = 1, limit = 10, search, status, waveId } = query;
     const skip = (page - 1) * limit;
@@ -227,11 +264,7 @@ export class PrismaAdmissionApplicationRepository extends IAdmissionApplicationR
 
   async updateDocumentStatus(
     documentId: string,
-    input: {
-      status: AdmissionDocumentStatus;
-      note: string | null;
-      adminId: string;
-    },
+    input: UpdateAdmissionDocumentStatusInput,
   ): Promise<AdmissionDocumentWithTypeAndFile> {
     return this.prisma.admissionDocument.update({
       where: { id: documentId },
@@ -247,11 +280,7 @@ export class PrismaAdmissionApplicationRepository extends IAdmissionApplicationR
 
   async updatePaymentStatus(
     paymentId: string,
-    input: {
-      status: AdmissionPaymentStatus;
-      note: string | null;
-      adminId: string;
-    },
+    input: UpdateAdmissionPaymentStatusInput,
   ): Promise<AdmissionPaymentWithProof> {
     return this.prisma.admissionPayment.update({
       where: { id: paymentId },
@@ -268,15 +297,18 @@ export class PrismaAdmissionApplicationRepository extends IAdmissionApplicationR
   async setRevisionNeeded(
     id: string,
     note: string,
-  ): Promise<ApplicationDetail> {
+  ): Promise<ApplicationAdminDetail> {
     return this.prisma.admissionApplication.update({
       where: { id },
       data: { status: 'REVISION_NEEDED', revisionNote: note },
-      include: applicationDetailInclude,
+      include: applicationAdminDetailInclude,
     });
   }
 
-  async setVerified(id: string, adminId: string): Promise<ApplicationDetail> {
+  async setVerified(
+    id: string,
+    adminId: string,
+  ): Promise<ApplicationAdminDetail> {
     return this.prisma.admissionApplication.update({
       where: { id },
       data: {
@@ -284,15 +316,13 @@ export class PrismaAdmissionApplicationRepository extends IAdmissionApplicationR
         verifiedById: adminId,
         verifiedAt: new Date(),
       },
-      include: applicationDetailInclude,
+      include: applicationAdminDetailInclude,
     });
   }
 
-  async setAccepted(input: {
-    id: string;
-    adminId: string;
-    note: string | null;
-  }): Promise<ApplicationDetail> {
+  async setAccepted(
+    input: AcceptAdmissionApplicationInput,
+  ): Promise<ApplicationAdminDetail> {
     return this.prisma.admissionApplication.update({
       where: { id: input.id },
       data: {
@@ -301,15 +331,13 @@ export class PrismaAdmissionApplicationRepository extends IAdmissionApplicationR
         decidedAt: new Date(),
         decisionNote: input.note,
       },
-      include: applicationDetailInclude,
+      include: applicationAdminDetailInclude,
     });
   }
 
-  async setRejected(input: {
-    id: string;
-    adminId: string;
-    reason: string;
-  }): Promise<ApplicationDetail> {
+  async setRejected(
+    input: RejectAdmissionApplicationInput,
+  ): Promise<ApplicationAdminDetail> {
     return this.prisma.admissionApplication.update({
       where: { id: input.id },
       data: {
@@ -318,13 +346,13 @@ export class PrismaAdmissionApplicationRepository extends IAdmissionApplicationR
         decidedAt: new Date(),
         decisionNote: input.reason,
       },
-      include: applicationDetailInclude,
+      include: applicationAdminDetailInclude,
     });
   }
 
   async enrollAsStudent(
     application: ApplicationWithParentsAndUser,
-    dto: EnrollApplicantDto,
+    dto: EnrollApplicantRepositoryInput,
     studentRoleId: string,
   ): Promise<EnrollResult> {
     return this.prisma.$transaction(async (tx) => {
@@ -332,7 +360,7 @@ export class PrismaAdmissionApplicationRepository extends IAdmissionApplicationR
       await tx.profile.create({
         data: {
           userId: application.userId,
-          name: application.fullName,
+          name: application.fullName ?? '',
           nik: application.nik!,
           gender: application.gender!,
           birthPlace: application.birthPlace!,
@@ -357,7 +385,7 @@ export class PrismaAdmissionApplicationRepository extends IAdmissionApplicationR
       // 3. Parents (reuse by NIK when possible) + student links. Admission
       //    parents missing required fields are skipped, not blocking.
       let parentsLinked = 0;
-      for (const ap of application.parents) {
+      for (const ap of application.parents ?? []) {
         if (!isEligibleAdmissionParent(ap)) {
           this.logger.warn(
             `Skipping incomplete admission parent ${ap.relation} for ${application.registrationNumber}`,

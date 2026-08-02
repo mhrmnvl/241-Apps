@@ -1,12 +1,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { ProfileRepository } from '../repositories/profile.repository.js';
+import { IProfileRepository } from '../domain/interfaces/profile-repository.interface.js';
 import { StorageService } from '../../../core/storage/storage.service.js';
 import { withAvatarUrl } from '../mappers/profile-avatar.mapper.js';
 
 @Injectable()
 export class DeleteProfilePhotoUseCase {
   constructor(
-    private readonly profileRepository: ProfileRepository,
+    private readonly profileRepository: IProfileRepository,
     private readonly storage: StorageService,
   ) {}
 
@@ -22,7 +22,7 @@ export class DeleteProfilePhotoUseCase {
     }
 
     const updated = await this.profileRepository.update(userId, {
-      avatarFile: { disconnect: true },
+      avatarFileId: null,
     });
 
     return withAvatarUrl(updated, this.storage);

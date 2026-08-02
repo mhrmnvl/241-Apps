@@ -1,17 +1,17 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { ParentRepository } from '../repositories/parent.repository.js';
+import { IParentRepository } from '../domain/interfaces/parent-repository.interface.js';
 
 @Injectable()
 export class DeleteParentUseCase {
   private readonly logger = new Logger(DeleteParentUseCase.name);
 
-  constructor(private readonly repository: ParentRepository) {}
+  constructor(private readonly parentRepository: IParentRepository) {}
 
   async execute(id: string): Promise<void> {
-    const parent = await this.repository.findById(id);
+    const parent = await this.parentRepository.findById(id);
     if (!parent) throw new NotFoundException(`Parent with ID ${id} not found`);
 
-    await this.repository.softDelete(id);
+    await this.parentRepository.softDelete(id);
     this.logger.log(`Parent soft-deleted: ${id}`);
   }
 }

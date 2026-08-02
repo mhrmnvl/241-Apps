@@ -4,10 +4,13 @@ import { IAchievementTypeRepository } from '../domain/interfaces/achievement-typ
 
 @Injectable()
 export class GetAchievementTypesUseCase {
-  constructor(private readonly repository: IAchievementTypeRepository) {}
+  constructor(
+    private readonly achievementTypeRepository: IAchievementTypeRepository,
+  ) {}
 
   async execute(query: AchievementTypeQueryDto) {
-    const { data, total, page, limit } = await this.repository.findAll(query);
+    const { data, total, page, limit } =
+      await this.achievementTypeRepository.findAll(query);
     return {
       data,
       meta: {

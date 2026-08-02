@@ -1,12 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { AdmissionAnnouncement, Prisma } from '@prisma/client';
 import { PrismaService } from '../../../core/database/prisma.service.js';
-import { AdmissionAnnouncementQueryDto } from '../../dto/request/admission-announcement-query.dto.js';
 import { PaginatedResult } from '../../../shared/domain/interfaces/repository.interface.js';
 import {
+  AdmissionAnnouncementQueryInput,
   AdmissionAnnouncementWithWave,
   CreateAdmissionAnnouncementRepositoryInput,
   IAdmissionAnnouncementRepository,
+  UpdateAdmissionAnnouncementRepositoryInput,
 } from '../../domain/interfaces/admission-announcement-repository.interface.js';
 
 const WAVE_SELECT = {
@@ -20,7 +21,7 @@ export class PrismaAdmissionAnnouncementRepository extends IAdmissionAnnouncemen
   }
 
   async findAll(
-    query: AdmissionAnnouncementQueryDto,
+    query: AdmissionAnnouncementQueryInput,
   ): Promise<PaginatedResult<AdmissionAnnouncementWithWave>> {
     const { page = 1, limit = 10, search, waveId, isPublished } = query;
     const skip = (page - 1) * limit;
@@ -51,6 +52,10 @@ export class PrismaAdmissionAnnouncementRepository extends IAdmissionAnnouncemen
     return { data, total, page, limit };
   }
 
+  async findById(id: string): Promise<AdmissionAnnouncement | null> {
+    return this.findActiveById(id);
+  }
+
   async findActiveById(id: string): Promise<AdmissionAnnouncement | null> {
     return this.prisma.admissionAnnouncement.findFirst({
       where: { id, deletedAt: null },
@@ -68,7 +73,7 @@ export class PrismaAdmissionAnnouncementRepository extends IAdmissionAnnouncemen
 
   async update(
     id: string,
-    data: Prisma.AdmissionAnnouncementUncheckedUpdateInput,
+    data: UpdateAdmissionAnnouncementRepositoryInput,
   ): Promise<AdmissionAnnouncementWithWave> {
     return this.prisma.admissionAnnouncement.update({
       where: { id },
@@ -83,6 +88,10 @@ export class PrismaAdmissionAnnouncementRepository extends IAdmissionAnnouncemen
       data: { isPublished: true, publishedAt: new Date() },
       include: WAVE_SELECT,
     });
+  }
+
+  async remove(id: string): Promise<AdmissionAnnouncement> {
+    return this.softDelete(id);
   }
 
   async softDelete(id: string): Promise<AdmissionAnnouncement> {

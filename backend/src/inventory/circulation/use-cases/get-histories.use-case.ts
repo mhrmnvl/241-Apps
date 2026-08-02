@@ -4,9 +4,9 @@ import { HistoryQueryDto } from '../dto/request/history-query.dto.js';
 
 @Injectable()
 export class GetHistoriesUseCase {
-  constructor(private readonly repository: ICirculationRepository) {}
+  constructor(private readonly circulationRepository: ICirculationRepository) {}
 
   async execute(query: HistoryQueryDto) {
-    return this.repository.findAllHistories(query);
+    return this.circulationRepository.findAllHistories(query);
   }
 }

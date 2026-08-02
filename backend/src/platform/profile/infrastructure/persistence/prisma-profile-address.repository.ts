@@ -1,22 +1,25 @@
 import { Injectable } from '@nestjs/common';
-import { Address, Student, Teacher, Prisma } from '@prisma/client';
+import { Address, Prisma } from '@prisma/client';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
 import {
+  CreateProfileAddressDto,
   IProfileAddressRepository,
-  AddressPublic,
-  ADDRESS_OMIT,
+  UpdateProfileAddressDto,
 } from '../../domain/interfaces/profile-address-repository.interface.js';
+import {
+  ADDRESS_OMIT,
+  AddressPublic,
+} from './prisma-profile-address.includes.js';
 
 @Injectable()
-export class PrismaProfileAddressRepository extends IProfileAddressRepository {
-  constructor(private readonly prisma: PrismaService) {
-    super();
-  }
+export class PrismaProfileAddressRepository implements IProfileAddressRepository {
+  constructor(private readonly prisma: PrismaService) {}
 
   async findAllByUserId(userId: string): Promise<AddressPublic[]> {
     return this.prisma.address.findMany({
       where: {
         OR: [{ student: { userId } }, { teacher: { userId } }],
+        deletedAt: null,
       },
       omit: ADDRESS_OMIT,
       orderBy: { isPrimary: 'desc' },
@@ -31,50 +34,47 @@ export class PrismaProfileAddressRepository extends IProfileAddressRepository {
       where: {
         id: addressId,
         OR: [{ student: { userId } }, { teacher: { userId } }],
+        deletedAt: null,
       },
     });
   }
 
-  async findStudentByUserId(userId: string): Promise<Student | null> {
-    return this.prisma.student.findUnique({ where: { userId } });
+  async findStudentByUserId(userId: string) {
+    return this.prisma.student.findUnique({
+      where: { userId },
+      select: { id: true },
+    });
   }
 
-  async findTeacherByUserId(userId: string): Promise<Teacher | null> {
-    return this.prisma.teacher.findUnique({ where: { userId } });
+  async findTeacherByUserId(userId: string) {
+    return this.prisma.teacher.findUnique({
+      where: { userId },
+      select: { id: true },
+    });
   }
 
-  async clearPrimaryForStudent(
-    studentId: string,
-  ): Promise<Prisma.BatchPayload> {
+  async clearPrimaryForStudent(studentId: string) {
     return this.prisma.address.updateMany({
       where: { studentId, isPrimary: true },
       data: { isPrimary: false },
     });
   }
 
-  async clearPrimaryForTeacher(
-    teacherId: string,
-  ): Promise<Prisma.BatchPayload> {
+  async clearPrimaryForTeacher(teacherId: string) {
     return this.prisma.address.updateMany({
       where: { teacherId, isPrimary: true },
       data: { isPrimary: false },
     });
   }
 
-  async clearPrimaryForStudentExclude(
-    studentId: string,
-    excludeId: string,
-  ): Promise<Prisma.BatchPayload> {
+  async clearPrimaryForStudentExclude(studentId: string, excludeId: string) {
     return this.prisma.address.updateMany({
       where: { studentId, isPrimary: true, NOT: { id: excludeId } },
       data: { isPrimary: false },
     });
   }
 
-  async clearPrimaryForTeacherExclude(
-    teacherId: string,
-    excludeId: string,
-  ): Promise<Prisma.BatchPayload> {
+  async clearPrimaryForTeacherExclude(teacherId: string, excludeId: string) {
     return this.prisma.address.updateMany({
       where: { teacherId, isPrimary: true, NOT: { id: excludeId } },
       data: { isPrimary: false },
@@ -82,21 +82,22 @@ export class PrismaProfileAddressRepository extends IProfileAddressRepository {
   }
 
   async create(
-    dto: Prisma.AddressCreateWithoutStudentInput &
-      Prisma.AddressCreateWithoutTeacherInput,
+    dto: CreateProfileAddressDto,
     ownerId: { studentId?: string; teacherId?: string },
   ): Promise<AddressPublic> {
     return this.prisma.address.create({
-      // Owner is provided as a scalar FK (studentId/teacherId), which is the
-      // "unchecked" create-input variant of Prisma's XOR union.
-      data: { ...dto, ...ownerId } as Prisma.AddressUncheckedCreateInput,
+      data: {
+        ...dto,
+        ...(ownerId.studentId && { studentId: ownerId.studentId }),
+        ...(ownerId.teacherId && { teacherId: ownerId.teacherId }),
+      },
       omit: ADDRESS_OMIT,
     });
   }
 
   async update(
     addressId: string,
-    dto: Prisma.AddressUpdateInput,
+    dto: UpdateProfileAddressDto,
   ): Promise<AddressPublic> {
     return this.prisma.address.update({
       where: { id: addressId },

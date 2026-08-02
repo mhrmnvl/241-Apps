@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { IGradeRepository } from '../../grade/domain/interfaces/grade-repository.interface.js';
-import { ClassroomRepository } from '../../classroom/index.js';
+import { IClassroomRepository } from '../../classroom/index.js';
 import { ResolveBulkImportConflictsDto } from '../dto/request/resolve-bulk-import-conflicts.dto.js';
 import { ResolveBulkImportResponseDto } from '../dto/response/resolve-bulk-import-response.dto.js';
 import { UpdateStudentUseCase } from './update-student.use-case.js';
@@ -16,7 +16,7 @@ export class ResolveBulkImportConflictsUseCase {
 
   constructor(
     private readonly gradeRepository: IGradeRepository,
-    private readonly classroomRepository: ClassroomRepository,
+    private readonly classroomRepository: IClassroomRepository,
     private readonly updateStudent: UpdateStudentUseCase,
     private readonly updateStudentProfile: UpdateStudentProfileUseCase,
     private readonly createStudent: CreateStudentUseCase,

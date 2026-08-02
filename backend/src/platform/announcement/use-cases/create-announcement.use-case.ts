@@ -1,15 +1,15 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { ClassroomRepository } from '../../../academic/classroom/index.js';
+import { IClassroomRepository } from '../../../academic/classroom/index.js';
 import { CreateAnnouncementDto } from '../dto/request/create-announcement.dto.js';
-import { AnnouncementRepository } from '../repositories/announcement.repository.js';
+import { IAnnouncementRepository } from '../domain/interfaces/announcement-repository.interface.js';
 
 @Injectable()
 export class CreateAnnouncementUseCase {
   private readonly logger = new Logger(CreateAnnouncementUseCase.name);
 
   constructor(
-    private readonly repository: AnnouncementRepository,
-    private readonly ClassroomRepository: ClassroomRepository,
+    private readonly announcementRepository: IAnnouncementRepository,
+    private readonly ClassroomRepository: IClassroomRepository,
   ) {}
 
   async execute(dto: CreateAnnouncementDto) {
@@ -24,7 +24,7 @@ export class CreateAnnouncementUseCase {
       }
     }
 
-    const announcement = await this.repository.create({
+    const announcement = await this.announcementRepository.create({
       title: dto.title,
       description: dto.description,
       date: new Date(dto.date),

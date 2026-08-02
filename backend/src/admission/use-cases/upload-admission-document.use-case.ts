@@ -4,7 +4,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { AppKey } from '../../platform/file/repositories/file.repository.js';
+import { AppKey } from '../../platform/settings/domain/entities/app-setting.entity.js';
 import * as path from 'path';
 import { isEditable } from '../domain/admission-status.transitions.js';
 import { IAdmissionApplicantRepository } from '../domain/interfaces/admission-applicant-repository.interface.js';
@@ -48,7 +48,7 @@ export async function saveAdmissionFile(
 @Injectable()
 export class UploadAdmissionDocumentUseCase {
   constructor(
-    private readonly repository: IAdmissionApplicantRepository,
+    private readonly admissionApplicantRepository: IAdmissionApplicantRepository,
     private readonly storage: StorageService,
     private readonly keyBuilder: StorageKeyBuilder,
   ) {}
@@ -60,7 +60,8 @@ export class UploadAdmissionDocumentUseCase {
   ) {
     assertValidAdmissionFile(file);
 
-    const application = await this.repository.findMyApplication(userId);
+    const application =
+      await this.admissionApplicantRepository.findMyApplication(userId);
     if (!application) {
       throw new NotFoundException('Data pendaftaran tidak ditemukan');
     }
@@ -71,23 +72,28 @@ export class UploadAdmissionDocumentUseCase {
     }
 
     const documentType =
-      await this.repository.findDocumentTypeByCode(documentTypeCode);
+      await this.admissionApplicantRepository.findDocumentTypeByCode(
+        documentTypeCode,
+      );
     if (!documentType) {
       throw new NotFoundException(
         `Jenis berkas '${documentTypeCode}' tidak dikenal`,
       );
     }
 
+    const docTypeName = String(documentType.name ?? '');
+    const docTypeId = String(documentType.id ?? '');
+
     const { filename, storageKey } = await saveAdmissionFile(
       this.storage,
       this.keyBuilder,
       file,
-      ['documents', documentType.name],
+      ['documents', docTypeName],
     );
 
-    return this.repository.saveDocument({
+    return this.admissionApplicantRepository.saveDocument({
       applicationId: application.id,
-      documentTypeId: documentType.id,
+      documentTypeId: docTypeId,
       file: {
         filename,
         originalName: file.originalname,

@@ -1,10 +1,8 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { fileTypeFromBuffer } from 'file-type';
-import { ProfileRepository } from '../repositories/profile.repository.js';
-import {
-  AppKey,
-  FileRepository,
-} from '../../file/repositories/file.repository.js';
+import { IProfileRepository } from '../domain/interfaces/profile-repository.interface.js';
+import { IFileRepository } from '../../file/domain/interfaces/file-repository.interface.js';
+import { AppKey } from '../../settings/domain/entities/app-setting.entity.js';
 import { ImageOptimizerService } from '../../file/index.js';
 import { ALLOWED_UPLOAD_MIME_TYPES } from '../../file/constants/file-upload.constants.js';
 import { StorageService } from '../../../core/storage/storage.service.js';
@@ -17,8 +15,8 @@ const AVATAR_MAX_DIMENSION = 512;
 @Injectable()
 export class UploadProfilePhotoUseCase {
   constructor(
-    private readonly profileRepository: ProfileRepository,
-    private readonly fileRepository: FileRepository,
+    private readonly profileRepository: IProfileRepository,
+    private readonly fileRepository: IFileRepository,
     private readonly imageOptimizer: ImageOptimizerService,
     private readonly storage: StorageService,
     private readonly keyBuilder: StorageKeyBuilder,
@@ -70,7 +68,7 @@ export class UploadProfilePhotoUseCase {
     );
 
     const updated = await this.profileRepository.update(userId, {
-      avatarFile: { connect: { id: newFile.id } },
+      avatarFileId: newFile.id,
     });
 
     return withAvatarUrl(updated, this.storage);

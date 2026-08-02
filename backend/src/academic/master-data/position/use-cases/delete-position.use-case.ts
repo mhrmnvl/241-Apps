@@ -4,18 +4,18 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { IPositionRepository } from '../interfaces/position-repository.interface.js';
+import { IPositionRepository } from '../domain/interfaces/position-repository.interface.js';
 
 @Injectable()
 export class DeletePositionUseCase {
   private readonly logger = new Logger(DeletePositionUseCase.name);
 
-  constructor(private readonly repository: IPositionRepository) {}
+  constructor(private readonly positionRepository: IPositionRepository) {}
 
   async execute(id: string): Promise<void> {
     const [position, inUse] = await Promise.all([
-      this.repository.findById(id),
-      this.repository.countActiveAssignments(id),
+      this.positionRepository.findById(id),
+      this.positionRepository.countActiveAssignments(id),
     ]);
 
     if (!position)
@@ -26,7 +26,7 @@ export class DeletePositionUseCase {
         `Position is still assigned to ${inUse} teacher(s) and cannot be deleted`,
       );
 
-    await this.repository.remove(id);
+    await this.positionRepository.remove(id);
     this.logger.log(`Position deleted: ${id}`);
   }
 }

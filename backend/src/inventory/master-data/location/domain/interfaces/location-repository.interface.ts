@@ -1,14 +1,26 @@
-import { InventoryLocation, Prisma } from '@prisma/client';
+import { InventoryLocationEntity } from '../entities/location.entity.js';
 
 export abstract class ILocationRepository {
-  abstract findMany(search?: string): Promise<InventoryLocation[]>;
-  abstract findById(id: string): Promise<InventoryLocation | null>;
-  abstract create(
-    data: Prisma.InventoryLocationCreateInput,
-  ): Promise<InventoryLocation>;
+  abstract findMany(search?: string): Promise<InventoryLocationEntity[]>;
+  abstract findById(id: string): Promise<InventoryLocationEntity | null>;
+  abstract create(data: {
+    code: string;
+    name: string;
+    building?: string | null;
+    room?: string | null;
+    rack?: string | null;
+    description?: string | null;
+  }): Promise<InventoryLocationEntity>;
   abstract update(
     id: string,
-    data: Prisma.InventoryLocationUpdateInput,
-  ): Promise<InventoryLocation>;
-  abstract delete(id: string): Promise<InventoryLocation>;
+    data: {
+      code?: string;
+      name?: string;
+      building?: string | null;
+      room?: string | null;
+      rack?: string | null;
+      description?: string | null;
+    },
+  ): Promise<InventoryLocationEntity>;
+  abstract delete(id: string): Promise<InventoryLocationEntity>;
 }

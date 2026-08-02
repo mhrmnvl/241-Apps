@@ -1,8 +1,8 @@
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { UpdateAddressDto } from '../../../shared/dto/address.dto.js';
-import { StudentAddressRepository } from '../repositories/student-address.repository.js';
-import { StudentRepository } from '../index.js';
+import { IStudentAddressRepository } from '../domain/interfaces/student-address-repository.interface.js';
+import { IStudentRepository } from '../index.js';
 import { UpdateStudentAddressUseCase } from './update-student-address.use-case.js';
 
 describe('UpdateStudentAddressUseCase', () => {
@@ -22,8 +22,8 @@ describe('UpdateStudentAddressUseCase', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         UpdateStudentAddressUseCase,
-        { provide: StudentRepository, useValue: mockRepo },
-        { provide: StudentAddressRepository, useValue: mockAddressRepository },
+        { provide: IStudentRepository, useValue: mockRepo },
+        { provide: IStudentAddressRepository, useValue: mockAddressRepository },
       ],
     }).compile();
 

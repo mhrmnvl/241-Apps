@@ -1,4 +1,4 @@
-export enum StudentStatus {
+export enum StudentStatusEnum {
   ACTIVE = 'ACTIVE',
   TRANSFERRED = 'TRANSFERRED',
   DROPPED = 'DROPPED',

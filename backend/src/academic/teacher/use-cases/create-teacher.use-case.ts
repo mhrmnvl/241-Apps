@@ -1,13 +1,13 @@
 import { ConflictException, Injectable, Logger } from '@nestjs/common';
 import { CreateTeacherDto } from '../dto/request/create-teacher.dto.js';
-import { TeacherRepository } from '../repositories/teacher.repository.js';
+import { ITeacherRepository } from '../domain/interfaces/teacher-repository.interface.js';
 import { hashPassword } from '../../../shared/utils/hash.helper.js';
 
 @Injectable()
 export class CreateTeacherUseCase {
   private readonly logger = new Logger(CreateTeacherUseCase.name);
 
-  constructor(private readonly repository: TeacherRepository) {}
+  constructor(private readonly teacherRepository: ITeacherRepository) {}
 
   async execute(dto: CreateTeacherDto) {
     const fallback = dto.nip ?? dto.nuptk ?? dto.nik;
@@ -16,10 +16,10 @@ export class CreateTeacherUseCase {
 
     const [existingUsername, existingNik, existingNip, existingNuptk] =
       await Promise.all([
-        this.repository.findUserByIdentifier(dto.identifier),
-        this.repository.findProfileByNik(dto.nik),
-        dto.nip ? this.repository.findByNip(dto.nip) : null,
-        dto.nuptk ? this.repository.findByNuptk(dto.nuptk) : null,
+        this.teacherRepository.findUserByIdentifier(dto.identifier),
+        this.teacherRepository.findProfileByNik(dto.nik),
+        dto.nip ? this.teacherRepository.findByNip(dto.nip) : null,
+        dto.nuptk ? this.teacherRepository.findByNuptk(dto.nuptk) : null,
       ]);
 
     if (existingUsername)
@@ -34,7 +34,10 @@ export class CreateTeacherUseCase {
       throw new ConflictException(`NUPTK "${dto.nuptk}" is already registered`);
 
     const hashedPassword = await hashPassword(dto.password);
-    const teacher = await this.repository.create(dto, hashedPassword);
+    const teacher = await this.teacherRepository.create(
+      { ...dto, birthDate: new Date(dto.birthDate) },
+      hashedPassword,
+    );
 
     this.logger.log(`Teacher created: ${dto.name}`);
     return teacher;

@@ -1,91 +1,81 @@
 import {
-  Prisma,
-  StudentEnrollment,
-  EnrollmentStatus,
-  StudentStatus,
-} from '@prisma/client';
-import type { StudentEnrollmentQueryDto } from '../../dto/request/student-enrollment-query.dto.js';
-import { PaginatedResult } from '../../../../shared/domain/interfaces/repository.interface.js';
+  PaginatedResult,
+  PaginationQueryInput,
+} from '../../../../shared/domain/interfaces/repository.interface.js';
+import { EnrollmentStatus as EnrollmentStatusEnum } from '../../../../shared/domain/enums/enrollment-status.enum.js';
+import {
+  StudentEnrollmentEntity as EnrollmentEntity,
+  EnrollmentWithDetails,
+} from '../entities/enrollment.entity.js';
 
-export { EnrollmentStatus, StudentStatus };
+export { EnrollmentStatus } from '../../../../shared/domain/enums/enrollment-status.enum.js';
+export { StudentStatusEnum as StudentStatus } from '../../../../shared/domain/enums/student-status.enum.js';
+export type { EnrollmentWithDetails };
 
-export const ENROLLMENT_INCLUDE = {
-  student: { include: { user: { select: { profile: true } } } },
-  classroom: true,
-  semester: { include: { academicYear: true, type: true } },
-  reportCard: true,
-} satisfies Prisma.StudentEnrollmentInclude;
+export interface StudentEnrollmentQueryInput extends PaginationQueryInput {
+  studentId?: string;
+  classroomId?: string;
+  semesterId?: string;
+  academicYearId?: string;
+  status?: EnrollmentStatusEnum;
+}
 
-export type EnrollmentWithDetails = Prisma.StudentEnrollmentGetPayload<{
-  include: typeof ENROLLMENT_INCLUDE;
-}>;
+export interface CreateEnrollmentRepositoryInput {
+  studentId: string;
+  classroomId: string;
+  semesterId: string;
+  status?: EnrollmentStatusEnum;
+}
+
+export interface UpdateEnrollmentRepositoryInput {
+  classroomId?: string;
+  semesterId?: string;
+  status?: EnrollmentStatusEnum;
+  /** Set when an enrollment is dropped or transferred out. */
+  endedAt?: Date | null;
+  note?: string | null;
+}
 
 export abstract class IEnrollmentRepository {
   abstract findAll(
-    query: StudentEnrollmentQueryDto,
+    query: StudentEnrollmentQueryInput,
   ): Promise<PaginatedResult<EnrollmentWithDetails>>;
   abstract findById(id: string): Promise<EnrollmentWithDetails | null>;
-  abstract findActiveByStudentId(
+  abstract findActiveEnrollment(
     studentId: string,
+    semesterId?: string,
+    excludeId?: string,
   ): Promise<EnrollmentWithDetails | null>;
-  abstract findActiveByClassroomAndSemester(
-    classroomId: string,
-    semesterId: string,
-  ): Promise<EnrollmentWithDetails[]>;
+  abstract create(
+    input: CreateEnrollmentRepositoryInput,
+  ): Promise<EnrollmentWithDetails>;
+  abstract update(
+    id: string,
+    input: UpdateEnrollmentRepositoryInput,
+  ): Promise<EnrollmentWithDetails>;
+  abstract remove(id: string): Promise<EnrollmentEntity>;
+  abstract softDelete(id: string): Promise<EnrollmentEntity>;
+  abstract restore(
+    id: string,
+    input: { classroomId: string },
+  ): Promise<EnrollmentWithDetails>;
+  abstract findDuplicate(
+    studentId: string,
+    classroomId?: string,
+    semesterId?: string,
+    excludeId?: string,
+  ): Promise<EnrollmentWithDetails | null>;
+  abstract findSoftDeleted(
+    studentId: string,
+    semesterId?: string,
+  ): Promise<EnrollmentWithDetails | null>;
   abstract countActiveByClassroomAndSemester(
     classroomId: string,
     semesterId: string,
   ): Promise<number>;
   abstract countActiveByIds(ids: string[]): Promise<number>;
   abstract findManyActiveByIds(ids: string[]): Promise<EnrollmentWithDetails[]>;
-  abstract findDuplicate(
-    studentId: string,
-    semesterId: string,
-    excludeId?: string,
-  ): Promise<StudentEnrollment | null>;
-  abstract create(data: {
-    studentId: string;
-    classroomId: string;
-    semesterId: string;
-    status?: EnrollmentStatus;
-  }): Promise<EnrollmentWithDetails>;
-  abstract update(
-    id: string,
-    data: Partial<{
-      classroomId: string;
-      semesterId: string;
-      status: EnrollmentStatus;
-      endedAt: Date;
-      note: string;
-    }>,
-  ): Promise<EnrollmentWithDetails>;
   abstract createMany(
-    data: {
-      studentId: string;
-      classroomId: string;
-      semesterId: string;
-      status?: EnrollmentStatus;
-    }[],
-  ): Promise<Prisma.BatchPayload>;
-  abstract bulkCreateForRollover(
-    data: {
-      studentId: string;
-      classroomId: string;
-      semesterId: string;
-    }[],
-  ): Promise<Prisma.BatchPayload>;
-  abstract bulkUpdateStatus(
-    ids: string[],
-    status: EnrollmentStatus,
-    endedAt?: Date,
-  ): Promise<Prisma.BatchPayload>;
-  abstract findSoftDeleted(
-    studentId: string,
-    semesterId: string,
-  ): Promise<StudentEnrollment | null>;
-  abstract restore(
-    id: string,
-    data: { classroomId: string },
-  ): Promise<EnrollmentWithDetails>;
-  abstract softDelete(id: string): Promise<StudentEnrollment>;
+    data: CreateEnrollmentRepositoryInput[],
+  ): Promise<{ count: number }>;
 }

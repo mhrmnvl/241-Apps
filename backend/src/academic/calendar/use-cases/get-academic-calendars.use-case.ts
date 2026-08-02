@@ -4,9 +4,11 @@ import { AcademicCalendarQueryDto } from '../dto/request/academic-calendar-query
 
 @Injectable()
 export class GetAcademicCalendarsUseCase {
-  constructor(private readonly repository: IAcademicCalendarRepository) {}
+  constructor(
+    private readonly academicCalendarRepository: IAcademicCalendarRepository,
+  ) {}
 
   async execute(query: AcademicCalendarQueryDto) {
-    return this.repository.findAll(query);
+    return this.academicCalendarRepository.findAll(query);
   }
 }

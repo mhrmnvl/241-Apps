@@ -10,10 +10,12 @@ import { IAcademicYearRepository } from '../domain/interfaces/academic-year-repo
 export class DeleteAcademicYearUseCase {
   private readonly logger = new Logger(DeleteAcademicYearUseCase.name);
 
-  constructor(private readonly repository: IAcademicYearRepository) {}
+  constructor(
+    private readonly academicYearRepository: IAcademicYearRepository,
+  ) {}
 
   async execute(id: string): Promise<void> {
-    const year = await this.repository.findById(id);
+    const year = await this.academicYearRepository.findById(id);
     if (!year) {
       throw new NotFoundException(`Academic Year with ID ${id} not found`);
     }
@@ -24,14 +26,14 @@ export class DeleteAcademicYearUseCase {
       );
     }
 
-    const hasData = await this.repository.hasRelatedData(id);
+    const hasData = await this.academicYearRepository.hasRelatedData(id);
     if (hasData) {
       throw new BadRequestException(
         'Cannot delete academic year that has enrollment data',
       );
     }
 
-    await this.repository.softDelete(id);
+    await this.academicYearRepository.softDelete(id);
     this.logger.log(`Academic Year soft-deleted: ${id}`);
   }
 }

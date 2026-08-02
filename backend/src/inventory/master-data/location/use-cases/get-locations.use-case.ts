@@ -3,9 +3,9 @@ import { ILocationRepository } from '../domain/interfaces/location-repository.in
 
 @Injectable()
 export class GetLocationsUseCase {
-  constructor(private readonly repository: ILocationRepository) {}
+  constructor(private readonly locationRepository: ILocationRepository) {}
 
   async execute(search?: string) {
-    return this.repository.findMany(search);
+    return this.locationRepository.findMany(search);
   }
 }

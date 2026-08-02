@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { SocialMediaQueryDto } from '../dto/request/social-media-query.dto.js';
-import { ISocialMediaRepository } from '../interfaces/social-media-repository.interface.js';
+import { ISocialMediaRepository } from '../domain/interfaces/social-media-repository.interface.js';
 import { GetSocialMediasUseCase } from './get-social-medias.use-case.js';
 
 describe('GetSocialMediasUseCase', () => {
@@ -41,7 +41,8 @@ describe('GetSocialMediasUseCase', () => {
 
       const result = await useCase.execute(query);
 
-      expect(mockRepo.findAll).toHaveBeenCalledWith({ skip: 0, take: 10 });
+      // The query contract is passed straight through; the repo does the paging.
+      expect(mockRepo.findAll).toHaveBeenCalledWith(query);
       expect(result).toEqual({
         data: mockData,
         meta: { page: 1, limit: 10, total: 2, totalPages: 1 },

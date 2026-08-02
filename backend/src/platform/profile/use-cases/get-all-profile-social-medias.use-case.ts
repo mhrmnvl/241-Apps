@@ -4,11 +4,11 @@ import {
   ProfileSocialMediaListDto,
   ProfileSocialMediaListResponseDto,
 } from '../dto/response/profile-social-media-response.dto.js';
-import { ProfileRepository } from '../index.js';
+import { IProfileRepository } from '../index.js';
 
 @Injectable()
 export class GetAllProfileSocialMediasUseCase {
-  constructor(private readonly profileRepository: ProfileRepository) {}
+  constructor(private readonly profileRepository: IProfileRepository) {}
 
   async execute(
     query: ProfileSocialMediaQueryDto,
@@ -34,9 +34,9 @@ export class GetAllProfileSocialMediasUseCase {
         profileRole: profile.user.userRoles[0]?.role.code,
         id: sm.id,
         socialMediaId: sm.socialMediaId,
-        username: sm.username,
+        username: sm.username ?? '',
         platformName: sm.socialMedia.name,
-        platformBaseUrl: sm.socialMedia.baseUrl,
+        platformBaseUrl: sm.socialMedia.baseUrl ?? '',
       })),
     );
 

@@ -1,7 +1,7 @@
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { StudentAddressRepository } from '../repositories/student-address.repository.js';
-import { StudentRepository } from '../index.js';
+import { IStudentAddressRepository } from '../domain/interfaces/student-address-repository.interface.js';
+import { IStudentRepository } from '../index.js';
 import { RemoveStudentAddressUseCase } from './remove-student-address.use-case.js';
 
 describe('RemoveStudentAddressUseCase', () => {
@@ -20,8 +20,8 @@ describe('RemoveStudentAddressUseCase', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         RemoveStudentAddressUseCase,
-        { provide: StudentRepository, useValue: mockRepo },
-        { provide: StudentAddressRepository, useValue: mockAddressRepository },
+        { provide: IStudentRepository, useValue: mockRepo },
+        { provide: IStudentAddressRepository, useValue: mockAddressRepository },
       ],
     }).compile();
 

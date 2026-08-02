@@ -7,19 +7,21 @@ import { IAdmissionWaveRepository } from '../domain/interfaces/admission-wave-re
 
 @Injectable()
 export class DeleteAdmissionWaveUseCase {
-  constructor(private readonly repository: IAdmissionWaveRepository) {}
+  constructor(
+    private readonly admissionWaveRepository: IAdmissionWaveRepository,
+  ) {}
 
   async execute(id: string) {
-    const wave = await this.repository.findById(id);
+    const wave = await this.admissionWaveRepository.findById(id);
     if (!wave) {
       throw new NotFoundException('Gelombang tidak ditemukan');
     }
-    if (wave._count.applications > 0) {
+    if ((wave._count?.applications ?? 0) > 0) {
       throw new ConflictException(
         'Gelombang dengan pendaftar tidak dapat dihapus. Nonaktifkan saja.',
       );
     }
 
-    return this.repository.softDelete(id);
+    return this.admissionWaveRepository.softDelete(id);
   }
 }

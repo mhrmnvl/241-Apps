@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { SchoolUnitStatus } from '@prisma/client';
+import { SchoolUnitStatus } from '../../../../shared/domain/enums/school-unit-status.enum.js';
 import { SchoolUnitSocialMediaResponseDto } from './school-unit-social-media-response.dto.js';
 
 export class SchoolUnitResponseDto {

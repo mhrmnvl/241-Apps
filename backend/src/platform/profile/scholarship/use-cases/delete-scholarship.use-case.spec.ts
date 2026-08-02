@@ -1,6 +1,6 @@
 ﻿import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { ScholarshipRepository } from '../repositories/scholarship.repository.js';
+import { IScholarshipRepository } from '../domain/interfaces/scholarship-repository.interface.js';
 import { DeleteScholarshipUseCase } from './delete-scholarship.use-case.js';
 
 describe('DeleteScholarshipUseCase', () => {
@@ -12,7 +12,7 @@ describe('DeleteScholarshipUseCase', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         DeleteScholarshipUseCase,
-        { provide: ScholarshipRepository, useValue: mockRepo },
+        { provide: IScholarshipRepository, useValue: mockRepo },
       ],
     }).compile();
 

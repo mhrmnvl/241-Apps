@@ -4,9 +4,9 @@ import { LoanQueryDto } from '../dto/request/loan-query.dto.js';
 
 @Injectable()
 export class GetLoansUseCase {
-  constructor(private readonly repository: ICirculationRepository) {}
+  constructor(private readonly circulationRepository: ICirculationRepository) {}
 
   async execute(query: LoanQueryDto) {
-    return this.repository.findAllLoans(query);
+    return this.circulationRepository.findAllLoans(query);
   }
 }

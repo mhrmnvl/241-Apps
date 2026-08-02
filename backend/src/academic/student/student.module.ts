@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { UserModule } from '../../platform/user/user.module.js';
 import { GradeModule } from '../grade/grade.module.js';
 import { ClassroomModule } from '../classroom/classroom.module.js';
@@ -8,14 +8,14 @@ import { StudentImportExportController } from './presentation/student-import-exp
 import { StudentAddressController } from './presentation/student-address.controller.js';
 import { StudentParentController } from './presentation/student-parent.controller.js';
 import { StudentProfileController } from './presentation/student-profile.controller.js';
-import { StudentRepository } from './repositories/student.repository.js';
-import { StudentAddressRepository } from './repositories/student-address.repository.js';
-import { StudentParentRepository } from './repositories/student-parent.repository.js';
 import { IStudentRepository } from './domain/interfaces/student-repository.interface.js';
+import { IStudentAddressRepository } from './domain/interfaces/student-address-repository.interface.js';
+import { IStudentParentRepository } from './domain/interfaces/student-parent-repository.interface.js';
 import { PrismaStudentRepository } from './infrastructure/persistence/prisma-student.repository.js';
 import { PrismaStudentAddressRepository } from './infrastructure/persistence/prisma-student-address.repository.js';
 import { PrismaStudentParentRepository } from './infrastructure/persistence/prisma-student-parent.repository.js';
-import { ExcelStudentParser } from './infrastructure/parsers/excel-student.parser.js';
+import { ExcelStudentParser as ExcelStudentParserConcrete } from './infrastructure/parsers/excel-student.parser.js';
+import { ExcelStudentParser } from './domain/interfaces/student-excel-parser.interface.js';
 import { CreateStudentUseCase } from './use-cases/create-student.use-case.js';
 import { CreateStudentWithRelationsUseCase } from './use-cases/create-student-with-relations.use-case.js';
 import { DeleteStudentUseCase } from './use-cases/delete-student.use-case.js';
@@ -38,7 +38,12 @@ import { DeleteStudentParentUseCase } from './use-cases/delete-student-parent.us
 import { UpdateStudentProfileUseCase } from './use-cases/update-student-profile.use-case.js';
 
 @Module({
-  imports: [UserModule, GradeModule, ClassroomModule, EnrollmentModule],
+  imports: [
+    UserModule,
+    GradeModule,
+    ClassroomModule,
+    forwardRef(() => EnrollmentModule),
+  ],
   controllers: [
     StudentImportExportController,
     StudentController,
@@ -48,16 +53,15 @@ import { UpdateStudentProfileUseCase } from './use-cases/update-student-profile.
   ],
   providers: [
     { provide: IStudentRepository, useClass: PrismaStudentRepository },
-    { provide: StudentRepository, useClass: PrismaStudentRepository },
     {
-      provide: StudentAddressRepository,
+      provide: IStudentAddressRepository,
       useClass: PrismaStudentAddressRepository,
     },
     {
-      provide: StudentParentRepository,
+      provide: IStudentParentRepository,
       useClass: PrismaStudentParentRepository,
     },
-    ExcelStudentParser,
+    { provide: ExcelStudentParser, useClass: ExcelStudentParserConcrete },
     CreateStudentUseCase,
     CreateStudentWithRelationsUseCase,
     DeleteStudentUseCase,
@@ -81,9 +85,8 @@ import { UpdateStudentProfileUseCase } from './use-cases/update-student-profile.
   ],
   exports: [
     IStudentRepository,
-    StudentRepository,
-    StudentAddressRepository,
-    StudentParentRepository,
+    IStudentAddressRepository,
+    IStudentParentRepository,
   ],
 })
 export class StudentModule {}

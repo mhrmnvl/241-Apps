@@ -8,21 +8,24 @@ import { UpdateCurriculumSubjectDto } from '../dto/request/update-curriculum-sub
 
 @Injectable()
 export class UpdateCurriculumSubjectUseCase {
-  constructor(private readonly repository: ICurriculumSubjectRepository) {}
+  constructor(
+    private readonly curriculumSubjectRepository: ICurriculumSubjectRepository,
+  ) {}
 
   async execute(id: string, dto: UpdateCurriculumSubjectDto) {
-    const current = await this.repository.findById(id);
+    const current = await this.curriculumSubjectRepository.findById(id);
     if (!current)
       throw new NotFoundException(`CurriculumSubject with ID ${id} not found`);
 
-    const curriculumId = dto.curriculumId ?? current.curriculumId;
+    const curriculumId =
+      dto.curriculumId ?? current.curriculumId ?? current.curriculaId ?? '';
     const subjectId = dto.subjectId ?? current.subjectId;
 
     if (
       curriculumId !== current.curriculumId ||
       subjectId !== current.subjectId
     ) {
-      const duplicate = await this.repository.findDuplicate(
+      const duplicate = await this.curriculumSubjectRepository.findDuplicate(
         curriculumId,
         subjectId,
         id,
@@ -33,6 +36,6 @@ export class UpdateCurriculumSubjectUseCase {
         );
     }
 
-    return this.repository.update(id, dto);
+    return this.curriculumSubjectRepository.update(id, dto);
   }
 }

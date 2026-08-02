@@ -3,12 +3,12 @@ import { IGraduationRepository } from '../domain/interfaces/graduation-repositor
 
 @Injectable()
 export class DeleteStudentGraduationUseCase {
-  constructor(private readonly repository: IGraduationRepository) {}
+  constructor(private readonly graduationRepository: IGraduationRepository) {}
   async execute(id: string) {
-    const graduation = await this.repository.findById(id);
+    const graduation = await this.graduationRepository.findById(id);
     if (!graduation) {
       throw new NotFoundException(`StudentGraduation ${id} not found`);
     }
-    return this.repository.softDelete(id);
+    return this.graduationRepository.softDelete(id);
   }
 }

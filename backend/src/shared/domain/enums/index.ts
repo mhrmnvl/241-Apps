@@ -16,3 +16,8 @@ export * from './admission-status.enum.js';
 export * from './admission-document-status.enum.js';
 export * from './admission-payment-status.enum.js';
 export * from './admission-notification-type.enum.js';
+export * from './app-key.enum.js';
+export * from './assessment-type.enum.js';
+export * from './attendance-status.enum.js';
+export * from './inventory-status-key.enum.js';
+export * from './day.enum.js';

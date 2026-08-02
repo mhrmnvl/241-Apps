@@ -1,3 +1,4 @@
+import type { UserEntity } from '../../../shared/domain/entities/user.entity.js';
 import { RequirePermissions } from '../../../platform/access-control/permission/decorators/require-permissions.decorator.js';
 import {
   Body,
@@ -21,7 +22,7 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import type { User, Profile } from '@prisma/client';
+import type { ProfileEntity } from '../../../platform/profile/domain/entities/profile.entity.js';
 
 import { JwtAuthGuard } from '../../../platform/auth/index.js';
 import { CurrentUser } from '../../../core/decorators/current-user.decorator.js';
@@ -153,7 +154,7 @@ export class TeacherController {
     @CurrentUser() _user: AuthenticatedUser,
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateProfileDto,
-  ): Promise<Profile> {
+  ): Promise<ProfileEntity> {
     return this.updateProfileUseCase.execute(id, dto);
   }
 
@@ -169,7 +170,7 @@ export class TeacherController {
     @CurrentUser() _user: AuthenticatedUser,
     @Param('id', ParseUUIDPipe) id: string,
     @Query('isActive', new ParseBoolPipe()) isActive: boolean,
-  ): Promise<User> {
+  ): Promise<UserEntity> {
     return this.toggleTeacherActiveUseCase.execute(id, isActive);
   }
 }

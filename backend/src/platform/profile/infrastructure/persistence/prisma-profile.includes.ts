@@ -1,0 +1,129 @@
+import { Prisma } from '@prisma/client';
+
+export const PROFILE_INCLUDE = {
+  socialMedias: {
+    where: { deletedAt: null },
+    include: { socialMedia: true },
+  },
+  achievements: {
+    where: { deletedAt: null },
+    include: { type: true },
+  },
+  scholarships: { where: { deletedAt: null } },
+  educationalHistories: { where: { deletedAt: null } },
+  religion: true,
+  bloodType: true,
+  avatarFile: true,
+} satisfies Prisma.ProfileInclude;
+
+export type ProfileWithDetails = Prisma.ProfileGetPayload<{
+  include: typeof PROFILE_INCLUDE;
+}>;
+
+export const USER_DETAIL_SELECT = {
+  id: true,
+  identifier: true,
+  userRoles: {
+    include: {
+      role: {
+        include: {
+          rolePermissions: {
+            include: { permission: true },
+          },
+        },
+      },
+    },
+  },
+  profile: { include: PROFILE_INCLUDE },
+  teacher: {
+    include: {
+      addresses: { where: { deletedAt: null } },
+      employmentType: true,
+      teacherPositions: {
+        where: { deletedAt: null },
+        include: {
+          position: {
+            include: {
+              category: true,
+            },
+          },
+        },
+        orderBy: [
+          { isPrimary: 'desc' as const },
+          { hireDate: 'desc' as const },
+        ],
+      },
+      teachingAssignments: {
+        where: { deletedAt: null },
+        include: { subject: true },
+      },
+    },
+  },
+  student: {
+    include: {
+      addresses: { where: { deletedAt: null } },
+      enrollments: {
+        where: { deletedAt: null },
+        include: {
+          classroom: {
+            include: {
+              grade: true,
+              classroomSupervisors: {
+                where: { deletedAt: null },
+                include: {
+                  teacher: {
+                    include: {
+                      user: {
+                        include: {
+                          profile: true,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          semester: { include: { academicYear: true } },
+        },
+        orderBy: { enrolledAt: 'desc' as const },
+      },
+      parents: {
+        where: { deletedAt: null },
+        include: {
+          parent: {
+            include: {
+              occupation: true,
+              education: true,
+              addresses: { where: { deletedAt: null } },
+            },
+          },
+        },
+      },
+    },
+  },
+} satisfies Prisma.UserSelect;
+
+export type UserDetail = Prisma.UserGetPayload<{
+  select: typeof USER_DETAIL_SELECT;
+}>;
+
+export const PROFILE_WITH_SOCIAL_MEDIAS_INCLUDE = {
+  user: {
+    include: {
+      userRoles: {
+        include: {
+          role: true,
+        },
+      },
+    },
+  },
+  socialMedias: {
+    where: { deletedAt: null },
+    include: { socialMedia: true },
+  },
+} satisfies Prisma.ProfileInclude;
+
+export type ProfileWithSocialMedias = Prisma.ProfileGetPayload<{
+  include: typeof PROFILE_WITH_SOCIAL_MEDIAS_INCLUDE;
+}>;

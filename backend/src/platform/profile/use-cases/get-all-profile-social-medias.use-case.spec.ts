@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ProfileSocialMediaQueryDto } from '../dto/request/profile-social-media-query.dto.js';
-import { ProfileRepository } from '../index.js';
+import { IProfileRepository } from '../index.js';
 import { GetAllProfileSocialMediasUseCase } from './get-all-profile-social-medias.use-case.js';
 
 describe('GetAllProfileSocialMediasUseCase', () => {
@@ -15,7 +15,7 @@ describe('GetAllProfileSocialMediasUseCase', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         GetAllProfileSocialMediasUseCase,
-        { provide: ProfileRepository, useValue: mockProfileRepository },
+        { provide: IProfileRepository, useValue: mockProfileRepository },
       ],
     }).compile();
 

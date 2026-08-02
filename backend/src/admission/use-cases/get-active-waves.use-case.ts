@@ -3,12 +3,14 @@ import { IAdmissionApplicantRepository } from '../domain/interfaces/admission-ap
 
 @Injectable()
 export class GetActiveWavesUseCase {
-  constructor(private readonly repository: IAdmissionApplicantRepository) {}
+  constructor(
+    private readonly admissionApplicantRepository: IAdmissionApplicantRepository,
+  ) {}
 
   async execute() {
     const [waves, documentTypes] = await Promise.all([
-      this.repository.findActiveWaves(),
-      this.repository.findActiveDocumentTypes(),
+      this.admissionApplicantRepository.findActiveWaves(),
+      this.admissionApplicantRepository.findActiveDocumentTypes(),
     ]);
 
     return {
@@ -20,7 +22,7 @@ export class GetActiveWavesUseCase {
         startDate: w.startDate,
         endDate: w.endDate,
         quota: w.quota,
-        remainingQuota: Math.max(w.quota - w._count.applications, 0),
+        remainingQuota: Math.max(w.quota - (w._count?.applications ?? 0), 0),
         registrationFee: Number(w.registrationFee),
         description: w.description,
       })),

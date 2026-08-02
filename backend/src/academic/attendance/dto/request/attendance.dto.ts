@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { AttendanceStatus } from '@prisma/client';
+import { AttendanceStatus } from '../../../../shared/domain/enums/attendance-status.enum.js';
 import { Type } from 'class-transformer';
 import {
   ArrayMinSize,

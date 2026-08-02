@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { IAssessmentItemRepository } from '../domain/interfaces/assessment-items-repository.interface.js';
+import { IAssessmentItemRepository } from '../domain/interfaces/assessment-item-repository.interface.js';
 import { AssessmentItemQueryDto } from '../dto/request/assessment-item-query.dto.js';
 
 @Injectable()

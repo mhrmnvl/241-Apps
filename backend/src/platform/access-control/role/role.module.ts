@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { RoleController } from './presentation/role.controller.js';
-import { RoleRepository } from './repositories/role.repository.js';
-import { IRoleRepository } from './interfaces/role-repository.interface.js';
+import { PrismaRoleRepository } from './infrastructure/persistence/prisma-role.repository.js';
+import { IRoleRepository } from './domain/interfaces/role-repository.interface.js';
 import { UserModule } from '../../user/user.module.js';
 import { CreateRoleUseCase } from './use-cases/create-role.use-case.js';
 import { GetRolesUseCase } from './use-cases/get-roles.use-case.js';
@@ -16,7 +16,7 @@ import { AuthModule } from '../../auth/auth.module.js';
   imports: [UserModule, AuthModule],
   controllers: [RoleController],
   providers: [
-    { provide: IRoleRepository, useClass: RoleRepository },
+    { provide: IRoleRepository, useClass: PrismaRoleRepository },
     CreateRoleUseCase,
     GetRolesUseCase,
     GetRoleByIdUseCase,

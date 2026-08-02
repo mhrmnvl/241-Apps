@@ -1,13 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { EnrollmentStatus, Prisma, StudentEnrollment } from '@prisma/client';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
-import { StudentEnrollmentQueryDto } from '../../dto/request/student-enrollment-query.dto.js';
-import { resolveSemesterId } from '../../../../shared/utils/active-academic-year.helper.js';
-import {
-  IEnrollmentRepository,
-  ENROLLMENT_INCLUDE,
-  EnrollmentWithDetails,
+import type {
+  StudentEnrollmentQueryInput,
+  CreateEnrollmentRepositoryInput,
+  UpdateEnrollmentRepositoryInput,
 } from '../../domain/interfaces/enrollment-repository.interface.js';
+import { resolveSemesterId } from '../../../../shared/utils/active-academic-year.helper.js';
+import { IEnrollmentRepository } from '../../domain/interfaces/enrollment-repository.interface.js';
+import {
+  ENROLLMENT_WITH_DETAILS_INCLUDE,
+  EnrollmentWithDetails,
+} from './prisma-enrollment.includes.js';
 import { PaginatedResult } from '../../../../shared/domain/interfaces/repository.interface.js';
 
 @Injectable()
@@ -17,7 +21,7 @@ export class PrismaEnrollmentRepository extends IEnrollmentRepository {
   }
 
   async findAll(
-    query: StudentEnrollmentQueryDto,
+    query: StudentEnrollmentQueryInput,
   ): Promise<PaginatedResult<EnrollmentWithDetails>> {
     const {
       page = 1,
@@ -51,7 +55,7 @@ export class PrismaEnrollmentRepository extends IEnrollmentRepository {
     const [data, total] = await Promise.all([
       this.prisma.studentEnrollment.findMany({
         where,
-        include: ENROLLMENT_INCLUDE,
+        include: ENROLLMENT_WITH_DETAILS_INCLUDE,
         skip,
         take: limit,
         orderBy: { enrolledAt: 'desc' },
@@ -68,7 +72,7 @@ export class PrismaEnrollmentRepository extends IEnrollmentRepository {
         id,
         deletedAt: null,
       },
-      include: ENROLLMENT_INCLUDE,
+      include: ENROLLMENT_WITH_DETAILS_INCLUDE,
     });
   }
 
@@ -81,7 +85,7 @@ export class PrismaEnrollmentRepository extends IEnrollmentRepository {
         status: EnrollmentStatus.ACTIVE,
         deletedAt: null,
       },
-      include: ENROLLMENT_INCLUDE,
+      include: ENROLLMENT_WITH_DETAILS_INCLUDE,
     });
   }
 
@@ -96,7 +100,7 @@ export class PrismaEnrollmentRepository extends IEnrollmentRepository {
         status: EnrollmentStatus.ACTIVE,
         deletedAt: null,
       },
-      include: ENROLLMENT_INCLUDE,
+      include: ENROLLMENT_WITH_DETAILS_INCLUDE,
     });
   }
 
@@ -131,19 +135,40 @@ export class PrismaEnrollmentRepository extends IEnrollmentRepository {
         status: EnrollmentStatus.ACTIVE,
         deletedAt: null,
       },
-      include: ENROLLMENT_INCLUDE,
+      include: ENROLLMENT_WITH_DETAILS_INCLUDE,
     });
+  }
+
+  async findActiveEnrollment(
+    studentId: string,
+    semesterId?: string,
+    excludeId?: string,
+  ): Promise<EnrollmentWithDetails | null> {
+    return this.prisma.studentEnrollment.findFirst({
+      where: {
+        studentId,
+        ...(semesterId && { semesterId }),
+        status: EnrollmentStatus.ACTIVE,
+        deletedAt: null,
+        ...(excludeId && { NOT: { id: excludeId } }),
+      },
+      include: ENROLLMENT_WITH_DETAILS_INCLUDE,
+    });
+  }
+
+  async remove(id: string): Promise<StudentEnrollment> {
+    return this.softDelete(id);
   }
 
   async findDuplicate(
     studentId: string,
-    semesterId: string,
+    semesterId?: string,
     excludeId?: string,
   ): Promise<StudentEnrollment | null> {
     return this.prisma.studentEnrollment.findFirst({
       where: {
         studentId,
-        semesterId,
+        ...(semesterId && { semesterId }),
         deletedAt: null,
         ...(excludeId && { NOT: { id: excludeId } }),
       },
@@ -163,27 +188,18 @@ export class PrismaEnrollmentRepository extends IEnrollmentRepository {
         semesterId: data.semesterId,
         status: data.status ?? undefined,
       },
-      include: ENROLLMENT_INCLUDE,
+      include: ENROLLMENT_WITH_DETAILS_INCLUDE,
     });
   }
 
   async update(
     id: string,
-    data: Partial<{
-      classroomId: string;
-      semesterId: string;
-      status: EnrollmentStatus;
-      endedAt: Date;
-      note: string;
-    }>,
+    data: UpdateEnrollmentRepositoryInput,
   ): Promise<EnrollmentWithDetails> {
     return this.prisma.studentEnrollment.update({
       where: { id },
-      data: {
-        ...data,
-        status: data.status ?? undefined,
-      },
-      include: ENROLLMENT_INCLUDE,
+      data,
+      include: ENROLLMENT_WITH_DETAILS_INCLUDE,
     });
   }
 
@@ -253,10 +269,9 @@ export class PrismaEnrollmentRepository extends IEnrollmentRepository {
     return this.prisma.studentEnrollment.update({
       where: { id },
       data: { ...data, deletedAt: null, status: EnrollmentStatus.ACTIVE },
-      include: ENROLLMENT_INCLUDE,
+      include: ENROLLMENT_WITH_DETAILS_INCLUDE,
     });
   }
-
   async softDelete(id: string): Promise<StudentEnrollment> {
     return this.prisma.studentEnrollment.update({
       where: { id },

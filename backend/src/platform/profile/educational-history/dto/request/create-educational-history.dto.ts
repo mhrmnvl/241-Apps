@@ -1,5 +1,5 @@
 ﻿import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { EducationStatus } from '@prisma/client';
+import { EducationStatus } from '../../../../../shared/domain/enums/education-status.enum.js';
 import {
   IsEnum,
   IsInt,

@@ -1,35 +1,45 @@
-import { Position, Prisma, TeacherPosition } from '@prisma/client';
-import { CreateTeacherPositionDto } from '../../dto/request/create-teacher-position.dto.js';
-import { UpdateTeacherPositionDto } from '../../dto/request/update-teacher-position.dto.js';
+import { TeacherPositionWithDetails } from '../entities/teacher.entity.js';
 
-export const TEACHER_POSITION_INCLUDE = {
-  position: { include: { category: true } },
-} satisfies Prisma.TeacherPositionInclude;
+export interface PositionRow {
+  id: string;
+  name: string;
+  categoryId?: string | null;
+  isActive?: boolean;
+}
 
-export type TeacherPositionWithDetails = Prisma.TeacherPositionGetPayload<{
-  include: typeof TEACHER_POSITION_INCLUDE;
-}>;
+export interface CreateTeacherPositionRepositoryInput {
+  positionId: string;
+  hireDate: Date;
+  isPrimary?: boolean;
+}
+
+export type UpdateTeacherPositionRepositoryInput =
+  Partial<CreateTeacherPositionRepositoryInput>;
 
 export abstract class ITeacherPositionRepository {
-  abstract findAll(teacherId: string): Promise<TeacherPositionWithDetails[]>;
-  abstract findLinkById(
+  abstract findByTeacherId(
     teacherId: string,
-    linkId: string,
-  ): Promise<TeacherPosition | null>;
-  abstract findPosition(positionId: string): Promise<Position | null>;
-  abstract findAssignment(
+  ): Promise<TeacherPositionWithDetails[]>;
+  abstract findById(
     teacherId: string,
     positionId: string,
-    hireDate: Date,
-  ): Promise<TeacherPosition | null>;
-  abstract assign(
+  ): Promise<TeacherPositionWithDetails | null>;
+  abstract findByTeacherAndPosition(
     teacherId: string,
-    dto: CreateTeacherPositionDto,
+    positionId: string,
+  ): Promise<TeacherPositionWithDetails | null>;
+  abstract findPositionById(positionId: string): Promise<PositionRow | null>;
+  abstract create(
+    teacherId: string,
+    input: CreateTeacherPositionRepositoryInput,
   ): Promise<TeacherPositionWithDetails>;
   abstract update(
     teacherId: string,
-    linkId: string,
-    dto: UpdateTeacherPositionDto,
+    positionId: string,
+    input: UpdateTeacherPositionRepositoryInput,
   ): Promise<TeacherPositionWithDetails>;
-  abstract remove(linkId: string): Promise<TeacherPosition>;
+  abstract softDelete(
+    teacherId: string,
+    positionId: string,
+  ): Promise<TeacherPositionWithDetails>;
 }

@@ -1,14 +1,13 @@
 import { Module } from '@nestjs/common';
 import { ClassroomController } from './presentation/classroom.controller.js';
-import { ClassroomStructuresController } from './presentation/classroom-structures.controller.js';
-import { ClassroomSupervisorsController } from './presentation/classroom-supervisors.controller.js';
-import { ClassroomRepository } from './repositories/classroom.repository.js';
-import { ClassroomStructureRepository } from './repositories/classroom-structures.repository.js';
-import { ClassroomSupervisorRepository } from './repositories/classroom-supervisors.repository.js';
+import { ClassroomStructureController } from './presentation/classroom-structure.controller.js';
+import { ClassroomSupervisorController } from './presentation/classroom-supervisor.controller.js';
 import { IClassroomRepository } from './domain/interfaces/classroom-repository.interface.js';
+import { IClassroomStructureRepository } from './domain/interfaces/classroom-structure-repository.interface.js';
+import { IClassroomSupervisorRepository } from './domain/interfaces/classroom-supervisor-repository.interface.js';
 import { PrismaClassroomRepository } from './infrastructure/persistence/prisma-classroom.repository.js';
-import { PrismaClassroomStructureRepository } from './infrastructure/persistence/prisma-classroom-structures.repository.js';
-import { PrismaClassroomSupervisorRepository } from './infrastructure/persistence/prisma-classroom-supervisors.repository.js';
+import { PrismaClassroomStructureRepository } from './infrastructure/persistence/prisma-classroom-structure.repository.js';
+import { PrismaClassroomSupervisorRepository } from './infrastructure/persistence/prisma-classroom-supervisor.repository.js';
 import { CreateClassroomUseCase } from './use-cases/create-classroom.use-case.js';
 import { DeleteClassroomUseCase } from './use-cases/delete-classroom.use-case.js';
 import { GetClassroomByIdUseCase } from './use-cases/get-classroom-by-id.use-case.js';
@@ -27,18 +26,17 @@ import { UpdateClassroomSupervisorUseCase } from './use-cases/update-classroom-s
 @Module({
   controllers: [
     ClassroomController,
-    ClassroomStructuresController,
-    ClassroomSupervisorsController,
+    ClassroomStructureController,
+    ClassroomSupervisorController,
   ],
   providers: [
     { provide: IClassroomRepository, useClass: PrismaClassroomRepository },
-    { provide: ClassroomRepository, useClass: PrismaClassroomRepository },
     {
-      provide: ClassroomStructureRepository,
+      provide: IClassroomStructureRepository,
       useClass: PrismaClassroomStructureRepository,
     },
     {
-      provide: ClassroomSupervisorRepository,
+      provide: IClassroomSupervisorRepository,
       useClass: PrismaClassroomSupervisorRepository,
     },
     CreateClassroomUseCase,
@@ -58,9 +56,8 @@ import { UpdateClassroomSupervisorUseCase } from './use-cases/update-classroom-s
   ],
   exports: [
     IClassroomRepository,
-    ClassroomRepository,
-    ClassroomStructureRepository,
-    ClassroomSupervisorRepository,
+    IClassroomStructureRepository,
+    IClassroomSupervisorRepository,
   ],
 })
 export class ClassroomModule {}

@@ -3,10 +3,10 @@ import { IReportCardRepository } from '../domain/interfaces/report-card-reposito
 
 @Injectable()
 export class GetReportCardByIdUseCase {
-  constructor(private readonly repository: IReportCardRepository) {}
+  constructor(private readonly reportCardRepository: IReportCardRepository) {}
 
   async execute(id: string) {
-    const reportCard = await this.repository.findById(id);
+    const reportCard = await this.reportCardRepository.findById(id);
     if (!reportCard)
       throw new NotFoundException(`ReportCard with ID ${id} not found`);
     return reportCard;

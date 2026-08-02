@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { AssessmentType } from '@prisma/client';
+import { AssessmentType } from '../../../shared/domain/enums/assessment-type.enum.js';
 import { CreateAssessmentItemDto } from '../dto/request/create-assessment-item.dto.js';
 import { UpdateAssessmentItemDto } from '../dto/request/update-assessment-item.dto.js';
 import { GetAssessmentItemsUseCase } from '../use-cases/get-assessment-items.use-case.js';
@@ -7,11 +7,11 @@ import { GetAssessmentItemByIdUseCase } from '../use-cases/get-assessment-item-b
 import { CreateAssessmentItemUseCase } from '../use-cases/create-assessment-item.use-case.js';
 import { UpdateAssessmentItemUseCase } from '../use-cases/update-assessment-item.use-case.js';
 import { DeleteAssessmentItemUseCase } from '../use-cases/delete-assessment-item.use-case.js';
-import { AssessmentItemsController } from './assessment-items.controller.js';
+import { AssessmentItemController } from './assessment-item.controller.js';
 import type { AuthenticatedUser } from '../../../core/types/authenticated-user.type.js';
 
-describe('AssessmentItemsController', () => {
-  let controller: AssessmentItemsController;
+describe('AssessmentItemController', () => {
+  let controller: AssessmentItemController;
 
   const mockGetAll = { execute: jest.fn() };
   const mockGetById = { execute: jest.fn() };
@@ -28,7 +28,7 @@ describe('AssessmentItemsController', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [AssessmentItemsController],
+      controllers: [AssessmentItemController],
       providers: [
         { provide: GetAssessmentItemsUseCase, useValue: mockGetAll },
         { provide: GetAssessmentItemByIdUseCase, useValue: mockGetById },
@@ -38,9 +38,7 @@ describe('AssessmentItemsController', () => {
       ],
     }).compile();
 
-    controller = module.get<AssessmentItemsController>(
-      AssessmentItemsController,
-    );
+    controller = module.get<AssessmentItemController>(AssessmentItemController);
     jest.clearAllMocks();
   });
 

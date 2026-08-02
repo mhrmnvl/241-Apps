@@ -40,12 +40,13 @@ const FIELD_LABELS: Record<string, string> = {
 @Injectable()
 export class SubmitApplicationUseCase {
   constructor(
-    private readonly repository: IAdmissionApplicantRepository,
+    private readonly admissionApplicantRepository: IAdmissionApplicantRepository,
     private readonly notifications: AdmissionNotificationService,
   ) {}
 
   async execute(userId: string) {
-    const application = await this.repository.findMyDetail(userId);
+    const application =
+      await this.admissionApplicantRepository.findMyDetail(userId);
     if (!application) {
       throw new NotFoundException('Data pendaftaran tidak ditemukan');
     }
@@ -53,21 +54,21 @@ export class SubmitApplicationUseCase {
     assertTransition(application.status, 'SUBMITTED');
 
     const today = new Date();
-    if (application.wave.endDate < today) {
+    if (!application.wave || application.wave.endDate < today) {
       throw new ConflictException('Gelombang pendaftaran sudah ditutup');
     }
 
     const missing = REQUIRED_FIELDS.filter((f) => !application[f]).map(
       (f) => FIELD_LABELS[f] ?? f,
     );
-    if (application.parents.length === 0) {
+    if ((application.parents ?? []).length === 0) {
       missing.push('Data orang tua/wali (minimal satu)');
     }
 
     const requiredTypes =
-      await this.repository.findRequiredActiveDocumentTypes();
+      await this.admissionApplicantRepository.findRequiredActiveDocumentTypes();
     for (const type of requiredTypes) {
-      const doc = application.documents.find(
+      const doc = (application.documents ?? []).find(
         (d) => d.documentTypeId === type.id,
       );
       if (!doc) {
@@ -93,7 +94,9 @@ export class SubmitApplicationUseCase {
       );
     }
 
-    const updated = await this.repository.submitApplication(application.id);
+    const updated = await this.admissionApplicantRepository.submitApplication(
+      application.id,
+    );
 
     await this.notifications.notify(
       application.id,

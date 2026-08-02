@@ -3,10 +3,10 @@ import { ICurriculumRepository } from '../domain/interfaces/curriculum-repositor
 
 @Injectable()
 export class GetCurriculaByIdUseCase {
-  constructor(private readonly repository: ICurriculumRepository) {}
+  constructor(private readonly curriculumRepository: ICurriculumRepository) {}
 
   async execute(id: string) {
-    const curricula = await this.repository.findById(id);
+    const curricula = await this.curriculumRepository.findById(id);
     if (!curricula) {
       throw new NotFoundException(`Curricula with ID ${id} not found`);
     }

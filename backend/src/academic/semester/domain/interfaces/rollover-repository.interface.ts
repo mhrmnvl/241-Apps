@@ -1,29 +1,49 @@
-import {
-  Classroom,
-  ClassroomSupervisor,
-  Schedule,
-  StudentEnrollment,
-  TeachingAssignment,
-  Prisma,
-} from '@prisma/client';
+import { DayEnum } from '../../../../shared/domain/enums/day.enum.js';
+import { SemesterWithAcademicYear } from '../entities/semester.entity.js';
 
-export const SEMESTER_WITH_ACADEMIC_YEAR_INCLUDE = {
-  academicYear: true,
-} satisfies Prisma.SemesterInclude;
+export type { SemesterWithAcademicYear };
 
-export type SemesterWithAcademicYear = Prisma.SemesterGetPayload<{
-  include: typeof SEMESTER_WITH_ACADEMIC_YEAR_INCLUDE;
-}>;
+export interface ClassroomRolloverEntity {
+  id: string;
+  gradeId: string;
+  code: string;
+  name: string | null;
+  capacity: number;
+  isActive: boolean;
+}
 
-export type TeachingAssignmentWithSchedules = TeachingAssignment & {
-  schedules: Schedule[];
-};
+export interface StudentEnrollmentRolloverEntity {
+  id: string;
+  studentId: string;
+  classroomId: string;
+}
+
+export interface ClassroomSupervisorRolloverEntity {
+  id: string;
+  classroomId: string;
+  teacherId: string;
+}
+
+export interface ScheduleRolloverEntity {
+  id: string;
+  day: `${DayEnum}`;
+  timeSlotId: string;
+  room?: string | null;
+}
+
+export interface TeachingAssignmentRolloverEntity {
+  id: string;
+  teacherId: string;
+  classroomId: string;
+  subjectId: string;
+  schedules: ScheduleRolloverEntity[];
+}
 
 export interface RolloverSourceData {
-  classrooms: Classroom[];
-  enrollments: StudentEnrollment[];
-  supervisors: ClassroomSupervisor[];
-  assignments: TeachingAssignmentWithSchedules[];
+  classrooms: ClassroomRolloverEntity[];
+  enrollments: StudentEnrollmentRolloverEntity[];
+  supervisors: ClassroomSupervisorRolloverEntity[];
+  assignments: TeachingAssignmentRolloverEntity[];
 }
 
 export interface RolloverResult {

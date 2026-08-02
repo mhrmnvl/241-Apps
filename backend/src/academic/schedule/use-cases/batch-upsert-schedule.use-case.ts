@@ -8,20 +8,24 @@ import { IScheduleRepository } from '../domain/interfaces/schedule-repository.in
 
 @Injectable()
 export class BatchUpsertScheduleUseCase {
-  constructor(private readonly repository: IScheduleRepository) {}
+  constructor(private readonly scheduleRepository: IScheduleRepository) {}
 
   async execute(classroomId: string, dto: BatchUpsertScheduleDto) {
-    const classroom = await this.repository.findValidClassroomById(classroomId);
+    const classroom =
+      await this.scheduleRepository.findValidClassroomById(classroomId);
     if (!classroom) {
       throw new NotFoundException('Classroom not found');
     }
 
-    const semester = await this.repository.findActiveSemester();
+    const semester = await this.scheduleRepository.findActiveSemester();
     if (!semester) {
       throw new BadRequestException('Tidak ada semester aktif');
     }
 
-    await this.repository.softDeleteByClassroomAndDay(classroomId, dto.day);
+    await this.scheduleRepository.softDeleteByClassroomAndDay(
+      classroomId,
+      dto.day,
+    );
 
     if (dto.lessons.length === 0) {
       return { created: 0, day: dto.day };
@@ -29,16 +33,18 @@ export class BatchUpsertScheduleUseCase {
 
     let created = 0;
     for (const row of dto.lessons) {
-      let ta = await this.repository.findTeachingAssignmentBySubjectAndSemester(
-        classroomId,
-        row.subjectId,
-        semester.id,
-      );
+      let ta =
+        await this.scheduleRepository.findTeachingAssignmentBySubjectAndSemester(
+          classroomId,
+          row.subjectId,
+          semester.id,
+        );
 
       if (!ta) {
-        const teacherId = await this.repository.findAnyTeacherIdForSubject(
-          row.subjectId,
-        );
+        const teacherId =
+          await this.scheduleRepository.findAnyTeacherIdForSubject(
+            row.subjectId,
+          );
 
         if (!teacherId) {
           throw new BadRequestException(
@@ -46,7 +52,7 @@ export class BatchUpsertScheduleUseCase {
           );
         }
 
-        ta = await this.repository.createTeachingAssignment({
+        ta = await this.scheduleRepository.createTeachingAssignment({
           classroomId,
           subjectId: row.subjectId,
           teacherId,
@@ -54,15 +60,15 @@ export class BatchUpsertScheduleUseCase {
         });
       }
 
-      const softDeleted = await this.repository.findSoftDeleted(
+      const softDeleted = await this.scheduleRepository.findSoftDeleted(
         ta.id,
         dto.day,
         row.timeSlotId,
       );
       if (softDeleted) {
-        await this.repository.restore(softDeleted.id, {});
+        await this.scheduleRepository.restore(softDeleted.id, {});
       } else {
-        await this.repository.create({
+        await this.scheduleRepository.create({
           teachingAssignmentId: ta.id,
           timeSlotId: row.timeSlotId,
           day: dto.day,

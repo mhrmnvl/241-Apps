@@ -3,35 +3,24 @@ import {
   ConflictException,
   Injectable,
   Logger,
-  NotFoundException,
 } from '@nestjs/common';
 import { CreateClassroomStructureDto } from '../dto/request/create-classroom-structure.dto.js';
-import { ClassroomStructureRepository } from '../repositories/classroom-structures.repository.js';
+import { IClassroomStructureRepository } from '../domain/interfaces/classroom-structure-repository.interface.js';
 
 @Injectable()
 export class CreateClassroomStructureUseCase {
   private readonly logger = new Logger(CreateClassroomStructureUseCase.name);
 
-  constructor(private readonly repository: ClassroomStructureRepository) {}
+  constructor(
+    private readonly classroomStructureRepository: IClassroomStructureRepository,
+  ) {}
 
   async execute(dto: CreateClassroomStructureDto) {
-    const [classroom, semester, existing] = await Promise.all([
-      this.repository.findClassroomById(dto.classroomId),
-      this.repository.findSemesterById(dto.semesterId),
-      this.repository.findByClassroomAndSemester(
-        dto.classroomId,
-        dto.semesterId,
-      ),
-    ]);
+    const existing = await this.classroomStructureRepository.findStructure(
+      dto.classroomId,
+      dto.semesterId,
+    );
 
-    if (!classroom)
-      throw new NotFoundException(
-        `Classroom with ID ${dto.classroomId} not found`,
-      );
-    if (!semester)
-      throw new NotFoundException(
-        `Semester with ID ${dto.semesterId} not found`,
-      );
     if (existing)
       throw new ConflictException(
         'Classroom structure already exists for this classroom/semester',
@@ -52,29 +41,7 @@ export class CreateClassroomStructureUseCase {
       );
     }
 
-    for (const { field, id } of positionEntries) {
-      const enrollment = await this.repository.findActiveEnrollment(
-        id,
-        dto.classroomId,
-        dto.semesterId,
-      );
-      if (!enrollment)
-        throw new BadRequestException(
-          `Siswa ${id} tidak terdaftar aktif di kelas ini pada semester yang dipilih`,
-        );
-
-      const existingPosition = await this.repository.findByStudentAndSemester(
-        id,
-        dto.semesterId,
-      );
-      if (existingPosition) {
-        throw new ConflictException(
-          `Siswa yang dipilih untuk ${field} sudah menjabat di kelas ${existingPosition.classroom.code} pada semester ini`,
-        );
-      }
-    }
-
-    const structure = await this.repository.create({
+    const structure = await this.classroomStructureRepository.create({
       classroomId: dto.classroomId,
       semesterId: dto.semesterId,
       presidentId: dto.presidentId,

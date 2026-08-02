@@ -4,15 +4,19 @@ import { IAdmissionApplicantRepository } from '../domain/interfaces/admission-ap
 
 @Injectable()
 export class GetMyApplicationUseCase {
-  constructor(private readonly repository: IAdmissionApplicantRepository) {}
+  constructor(
+    private readonly admissionApplicantRepository: IAdmissionApplicantRepository,
+  ) {}
 
   async execute(userId: string) {
-    const application = await this.repository.findMyDetail(userId);
+    const application =
+      await this.admissionApplicantRepository.findMyDetail(userId);
     if (!application) {
       throw new NotFoundException('Data pendaftaran tidak ditemukan');
     }
 
-    const documentTypes = await this.repository.findActiveDocumentTypes();
+    const documentTypes =
+      await this.admissionApplicantRepository.findActiveDocumentTypes();
 
     return { ...serializeApplicationDetail(application), documentTypes };
   }

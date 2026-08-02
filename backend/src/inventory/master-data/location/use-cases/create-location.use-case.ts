@@ -4,10 +4,10 @@ import { CreateLocationDto } from '../dto/request/create-location.dto.js';
 
 @Injectable()
 export class CreateLocationUseCase {
-  constructor(private readonly repository: ILocationRepository) {}
+  constructor(private readonly locationRepository: ILocationRepository) {}
 
   async execute(dto: CreateLocationDto) {
-    return this.repository.create({
+    return this.locationRepository.create({
       code: dto.code,
       name: dto.name,
       building: dto.building ?? null,

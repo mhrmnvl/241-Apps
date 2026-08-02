@@ -4,10 +4,11 @@ import { ICurriculumRepository } from '../domain/interfaces/curriculum-repositor
 
 @Injectable()
 export class GetCurriculaUseCase {
-  constructor(private readonly repository: ICurriculumRepository) {}
+  constructor(private readonly curriculumRepository: ICurriculumRepository) {}
 
   async execute(query: CurriculaQueryDto) {
-    const { data, total, page, limit } = await this.repository.findAll(query);
+    const { data, total, page, limit } =
+      await this.curriculumRepository.findAll(query);
     return {
       data,
       meta: {

@@ -1,12 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { Address, Prisma } from '@prisma/client';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
-import {
-  ISchoolUnitAddressRepository,
-  AddressPublic,
-  ADDRESS_OMIT,
-  SCHOOL_ADDRESS_WHERE,
-} from '../../domain/interfaces/school-unit-address-repository.interface.js';
+import { ISchoolUnitAddressRepository } from '../../domain/interfaces/school-unit-address-repository.interface.js';
+import { AddressEntity } from '../../../../shared/domain/entities/address.entity.js';
+import { ADDRESS_OMIT } from '../../../profile/infrastructure/persistence/prisma-profile-address.includes.js';
 
 @Injectable()
 export class PrismaSchoolUnitAddressRepository extends ISchoolUnitAddressRepository {
@@ -14,37 +10,46 @@ export class PrismaSchoolUnitAddressRepository extends ISchoolUnitAddressReposit
     super();
   }
 
-  async find(): Promise<Address | null> {
+  async findBySchoolUnitId(
+    schoolUnitId: string,
+  ): Promise<AddressEntity | null> {
     return this.prisma.address.findFirst({
-      where: SCHOOL_ADDRESS_WHERE,
+      where: { schoolUnitId, deletedAt: null },
+      omit: ADDRESS_OMIT,
     });
   }
 
   async create(
-    dto: Prisma.AddressUncheckedCreateInput,
     schoolUnitId: string,
-  ): Promise<AddressPublic> {
+    dto: Partial<AddressEntity>,
+  ): Promise<AddressEntity> {
+    const { id: _, ...data } = dto;
     return this.prisma.address.create({
-      data: { ...dto, isPrimary: true, schoolUnitId },
+      data: {
+        street: data.street ?? '',
+        rt: data.rt ?? '',
+        rw: data.rw ?? '',
+        village: data.village ?? '',
+        district: data.district ?? '',
+        city: data.city ?? '',
+        province: data.province ?? '',
+        postalCode: data.postalCode ?? '',
+        isPrimary: true,
+        schoolUnitId,
+      },
       omit: ADDRESS_OMIT,
     });
   }
 
   async update(
     id: string,
-    dto: Prisma.AddressUpdateInput,
-  ): Promise<AddressPublic> {
+    dto: Partial<AddressEntity>,
+  ): Promise<AddressEntity> {
+    const { id: _, ...data } = dto;
     return this.prisma.address.update({
       where: { id },
-      data: dto,
+      data,
       omit: ADDRESS_OMIT,
-    });
-  }
-
-  async remove(id: string): Promise<Address> {
-    return this.prisma.address.update({
-      where: { id },
-      data: { deletedAt: new Date() },
     });
   }
 }

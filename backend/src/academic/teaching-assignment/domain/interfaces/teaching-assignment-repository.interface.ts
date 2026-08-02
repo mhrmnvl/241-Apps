@@ -1,27 +1,28 @@
-import { Prisma, TeachingAssignment } from '@prisma/client';
-import { TeachingAssignmentQueryDto } from '../../dto/request/teaching-assignment-query.dto.js';
-import { PaginatedResult } from '../../../../shared/domain/interfaces/repository.interface.js';
+import {
+  PaginatedResult,
+  PaginationQueryInput,
+} from '../../../../shared/domain/interfaces/repository.interface.js';
+import {
+  TeachingAssignmentWithDetails,
+  TeachingAssignmentEntity,
+} from '../entities/teaching-assignment.entity.js';
 
-export const TEACHING_ASSIGNMENT_INCLUDE = {
-  teacher: { include: { user: { select: { profile: true } } } },
-  classroom: true,
-  subject: true,
-  semester: { include: { academicYear: true } },
-} satisfies Prisma.TeachingAssignmentInclude;
-
-export type TeachingAssignmentWithDetails =
-  Prisma.TeachingAssignmentGetPayload<{
-    include: typeof TEACHING_ASSIGNMENT_INCLUDE;
-  }>;
-
+export type { TeachingAssignmentWithDetails };
 export interface ClassroomReference {
   id: string;
   academicYearId: string;
 }
-
 export interface SemesterReference {
   id: string;
   academicYearId: string;
+}
+
+export interface TeachingAssignmentQueryInput extends PaginationQueryInput {
+  teacherId?: string;
+  classroomId?: string;
+  subjectId?: string;
+  semesterId?: string;
+  search?: string;
 }
 
 export interface CreateTeachingAssignmentRepositoryInput {
@@ -31,23 +32,15 @@ export interface CreateTeachingAssignmentRepositoryInput {
   semesterId: string;
 }
 
-export interface UpdateTeachingAssignmentRepositoryInput {
-  teacherId?: string;
-  classroomId?: string;
-  subjectId?: string;
-  semesterId?: string;
-}
+export type UpdateTeachingAssignmentRepositoryInput =
+  Partial<CreateTeachingAssignmentRepositoryInput>;
 
-export interface RestoreTeachingAssignmentRepositoryInput {
-  teacherId?: string;
-  classroomId?: string;
-  subjectId?: string;
-  semesterId?: string;
-}
+export type RestoreTeachingAssignmentRepositoryInput =
+  Partial<CreateTeachingAssignmentRepositoryInput>;
 
 export abstract class ITeachingAssignmentRepository {
   abstract findAll(
-    query: TeachingAssignmentQueryDto,
+    query: TeachingAssignmentQueryInput,
   ): Promise<PaginatedResult<TeachingAssignmentWithDetails>>;
   abstract findById(id: string): Promise<TeachingAssignmentWithDetails | null>;
   abstract findDuplicate(
@@ -56,25 +49,26 @@ export abstract class ITeachingAssignmentRepository {
     subjectId: string,
     semesterId: string,
     excludeId?: string,
-  ): Promise<TeachingAssignment | null>;
+  ): Promise<TeachingAssignmentEntity | null>;
   abstract create(
-    data: CreateTeachingAssignmentRepositoryInput,
+    input: CreateTeachingAssignmentRepositoryInput,
   ): Promise<TeachingAssignmentWithDetails>;
   abstract update(
     id: string,
-    data: UpdateTeachingAssignmentRepositoryInput,
+    input: UpdateTeachingAssignmentRepositoryInput,
   ): Promise<TeachingAssignmentWithDetails>;
   abstract findSoftDeleted(
     teacherId: string,
     classroomId: string,
     subjectId: string,
     semesterId: string,
-  ): Promise<TeachingAssignment | null>;
+  ): Promise<TeachingAssignmentEntity | null>;
   abstract restore(
     id: string,
-    data: RestoreTeachingAssignmentRepositoryInput,
+    input: RestoreTeachingAssignmentRepositoryInput,
   ): Promise<TeachingAssignmentWithDetails>;
-  abstract softDelete(id: string): Promise<TeachingAssignment>;
+  abstract softDelete(id: string): Promise<TeachingAssignmentEntity>;
+  abstract remove(id: string): Promise<TeachingAssignmentEntity>;
   abstract findClassroomById(id: string): Promise<ClassroomReference | null>;
   abstract findSemesterById(id: string): Promise<SemesterReference | null>;
 }

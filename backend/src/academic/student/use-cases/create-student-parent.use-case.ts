@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { CreateStudentParentDto } from '../dto/request/create-student-parent.dto.js';
-import { StudentParentRepository } from '../repositories/student-parent.repository.js';
+import { IStudentParentRepository } from '../domain/interfaces/student-parent-repository.interface.js';
 import { StudentParentWithDetails } from '../domain/interfaces/student-parent-repository.interface.js';
 
 @Injectable()
@@ -13,7 +13,7 @@ export class CreateStudentParentUseCase {
   private readonly logger = new Logger(CreateStudentParentUseCase.name);
 
   constructor(
-    private readonly studentParentRepository: StudentParentRepository,
+    private readonly studentParentRepository: IStudentParentRepository,
   ) {}
 
   async execute(

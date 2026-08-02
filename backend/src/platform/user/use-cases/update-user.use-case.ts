@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { UpdateUserDto } from '../dto/request/update-user.dto.js';
-import { IUserRepository } from '../interfaces/user-repository.interface.js';
+import { IUserRepository } from '../domain/interfaces/user-repository.interface.js';
 import { hashPassword } from '../../../shared/utils/hash.helper.js';
 
 @Injectable()

@@ -1,7 +1,7 @@
 import { ConflictException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { UpdateSocialMediaDto } from '../dto/request/update-social-media.dto.js';
-import { ISocialMediaRepository } from '../interfaces/social-media-repository.interface.js';
+import { ISocialMediaRepository } from '../domain/interfaces/social-media-repository.interface.js';
 import { UpdateSocialMediaUseCase } from './update-social-media.use-case.js';
 
 describe('UpdateSocialMediaUseCase', () => {

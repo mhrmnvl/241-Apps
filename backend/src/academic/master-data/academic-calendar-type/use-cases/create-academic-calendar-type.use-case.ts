@@ -6,17 +6,21 @@ import { IAcademicCalendarTypeRepository } from '../domain/interfaces/academic-c
 export class CreateAcademicCalendarTypeUseCase {
   private readonly logger = new Logger(CreateAcademicCalendarTypeUseCase.name);
 
-  constructor(private readonly repository: IAcademicCalendarTypeRepository) {}
+  constructor(
+    private readonly academicCalendarTypeRepository: IAcademicCalendarTypeRepository,
+  ) {}
 
   async execute(dto: CreateAcademicCalendarTypeDto) {
-    const existing = await this.repository.findByName(dto.name);
+    const existing = await this.academicCalendarTypeRepository.findByName(
+      dto.name,
+    );
     if (existing) {
       throw new ConflictException(
         'AcademicCalendarType with name "' + dto.name + '" already exists',
       );
     }
 
-    const item = await this.repository.create({
+    const item = await this.academicCalendarTypeRepository.create({
       name: dto.name,
       isActive: dto.isActive,
     });

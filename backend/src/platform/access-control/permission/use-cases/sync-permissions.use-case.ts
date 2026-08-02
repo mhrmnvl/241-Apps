@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { IPermissionRepository } from '../interfaces/permission-repository.interface.js';
+import { IPermissionRepository } from '../domain/interfaces/permission-repository.interface.js';
 import { SYSTEM_PERMISSIONS } from '../constants/permission-codes.constants.js';
 
 @Injectable()

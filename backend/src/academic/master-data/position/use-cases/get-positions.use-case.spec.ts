@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PositionQueryDto } from '../dto/request/position-query.dto.js';
-import { IPositionRepository } from '../interfaces/position-repository.interface.js';
+import { IPositionRepository } from '../domain/interfaces/position-repository.interface.js';
 import { GetPositionsUseCase } from './get-positions.use-case.js';
 
 describe('GetPositionsUseCase', () => {

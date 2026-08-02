@@ -1,12 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { DashboardRepository } from '../repositories/dashboard.repository.js';
+import { IDashboardRepository } from '../domain/interfaces/dashboard-repository.interface.js';
 import { GetDashboardSummaryUseCase } from './get-dashboard-summary.use-case.js';
 
 describe('GetDashboardSummaryUseCase', () => {
   let useCase: GetDashboardSummaryUseCase;
-  let repository: jest.Mocked<DashboardRepository>;
+  let repository: jest.Mocked<IDashboardRepository>;
 
-  const mockRepository: Partial<Record<keyof DashboardRepository, jest.Mock>> =
+  const mockRepository: Partial<Record<keyof IDashboardRepository, jest.Mock>> =
     {
       countActiveStudents: jest.fn(),
       countActiveTeachers: jest.fn(),
@@ -19,18 +19,20 @@ describe('GetDashboardSummaryUseCase', () => {
       getRecentAnnouncements: jest.fn(),
       getStudentDistributionByGrade: jest.fn(),
       getTeacherDistributionByPosition: jest.fn(),
+      countTodayAttendance: jest.fn(),
+      countPendingAdmissions: jest.fn(),
     };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         GetDashboardSummaryUseCase,
-        { provide: DashboardRepository, useValue: mockRepository },
+        { provide: IDashboardRepository, useValue: mockRepository },
       ],
     }).compile();
 
     useCase = module.get(GetDashboardSummaryUseCase);
-    repository = module.get(DashboardRepository);
+    repository = module.get(IDashboardRepository);
   });
 
   afterEach(() => jest.clearAllMocks());
@@ -59,7 +61,7 @@ describe('GetDashboardSummaryUseCase', () => {
           },
         },
       ],
-    });
+    } as any);
     repository.getInstitutionInfo.mockResolvedValue({
       id: 'inst-1',
       name: 'MTs Al-Hikmah',
@@ -84,7 +86,7 @@ describe('GetDashboardSummaryUseCase', () => {
         startDate: new Date('2026-01-01'),
         endDate: new Date('2026-01-01'),
       },
-    ]);
+    ] as any);
     repository.getRecentAnnouncements.mockResolvedValue([
       { id: 'ann-1', title: 'Pengumuman UTS', date: new Date('2025-10-01') },
     ]);

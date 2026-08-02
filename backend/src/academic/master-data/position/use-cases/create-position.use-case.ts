@@ -1,21 +1,21 @@
 import { ConflictException, Injectable, Logger } from '@nestjs/common';
 import { CreatePositionDto } from '../dto/request/create-position.dto.js';
-import { IPositionRepository } from '../interfaces/position-repository.interface.js';
+import { IPositionRepository } from '../domain/interfaces/position-repository.interface.js';
 
 @Injectable()
 export class CreatePositionUseCase {
   private readonly logger = new Logger(CreatePositionUseCase.name);
 
-  constructor(private readonly repository: IPositionRepository) {}
+  constructor(private readonly positionRepository: IPositionRepository) {}
 
   async execute(dto: CreatePositionDto) {
-    const existing = await this.repository.findByName(dto.name);
+    const existing = await this.positionRepository.findByName(dto.name);
     if (existing)
       throw new ConflictException(
         `Position name "${dto.name}" is already taken`,
       );
 
-    const position = await this.repository.create(dto);
+    const position = await this.positionRepository.create(dto);
     this.logger.log(`Position created: ${position.name}`);
     return position;
   }

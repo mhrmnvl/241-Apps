@@ -3,12 +3,12 @@ import { AcademicYearModule } from '../academic-year/academic-year.module.js';
 import { SemesterModule } from '../semester/semester.module.js';
 import { ClassroomModule } from '../classroom/classroom.module.js';
 import { AcademicCalendarController } from './presentation/academic-calendar.controller.js';
-import { EventsController } from './presentation/events.controller.js';
-import { AudienceGroupsController } from './presentation/audience-groups.controller.js';
+import { EventController } from './presentation/event.controller.js';
+import { AudienceGroupController } from './presentation/audience-group.controller.js';
 import { PrismaAcademicCalendarRepository } from './infrastructure/persistence/prisma-academic-calendar.repository.js';
-import { PrismaEventRepository } from './infrastructure/persistence/prisma-events.repository.js';
+import { PrismaEventRepository } from './infrastructure/persistence/prisma-event.repository.js';
 import { IAcademicCalendarRepository } from './domain/interfaces/academic-calendar-repository.interface.js';
-import { IEventRepository } from './domain/interfaces/events-repository.interface.js';
+import { IEventRepository } from './domain/interfaces/event-repository.interface.js';
 
 import { CreateAcademicCalendarUseCase } from './use-cases/create-academic-calendar.use-case.js';
 import { DeleteAcademicCalendarUseCase } from './use-cases/delete-academic-calendar.use-case.js';
@@ -27,8 +27,8 @@ import { GetAudienceGroupsUseCase } from './use-cases/get-audience-groups.use-ca
   imports: [AcademicYearModule, SemesterModule, ClassroomModule],
   controllers: [
     AcademicCalendarController,
-    EventsController,
-    AudienceGroupsController,
+    EventController,
+    AudienceGroupController,
   ],
   providers: [
     {

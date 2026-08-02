@@ -11,16 +11,16 @@ import { IReligionRepository } from '../domain/interfaces/religion-repository.in
 export class UpdateReligionUseCase {
   private readonly logger = new Logger(UpdateReligionUseCase.name);
 
-  constructor(private readonly repository: IReligionRepository) {}
+  constructor(private readonly religionRepository: IReligionRepository) {}
 
   async execute(id: string, dto: UpdateReligionDto) {
-    const item = await this.repository.findById(id);
+    const item = await this.religionRepository.findById(id);
     if (!item) {
       throw new NotFoundException('Religion with ID ${id} not found');
     }
 
     if (dto.name) {
-      const existing = await this.repository.findByName(dto.name, id);
+      const existing = await this.religionRepository.findByName(dto.name, id);
       if (existing) {
         throw new ConflictException(
           'Religion with name "' + dto.name + '" already exists',
@@ -28,7 +28,7 @@ export class UpdateReligionUseCase {
       }
     }
 
-    const updated = await this.repository.update(id, dto);
+    const updated = await this.religionRepository.update(id, dto);
     this.logger.log(`Religion updated: ${updated.name}`);
     return updated;
   }

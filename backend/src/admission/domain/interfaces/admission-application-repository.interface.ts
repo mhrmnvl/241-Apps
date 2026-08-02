@@ -1,152 +1,184 @@
 import {
-  AdmissionApplication,
-  AdmissionDocumentStatus,
-  AdmissionDocumentType,
-  AdmissionPayment,
-  AdmissionPaymentStatus,
-  AdmissionStatus,
-  Prisma,
-  Student,
-} from '@prisma/client';
-import { AdmissionApplicationQueryDto } from '../../dto/request/admission-query.dto.js';
-import { EnrollApplicantDto } from '../../dto/request/admin-actions.dto.js';
-import { PaginatedResult } from '../../../shared/domain/interfaces/repository.interface.js';
+  AdmissionDocumentWithType,
+  AdmissionDocumentWithTypeAndFile,
+  AdmissionPaymentWithProof,
+  AdmissionStatusCount,
+  AdmissionWaveAcceptedCount,
+  ApplicationWithDocsAndPayment,
+  ApplicationWithParentsAndUser,
+  ApplicationWithWave,
+  EnrollResult,
+  AdmissionApplicationEntity,
+  AdmissionApplicationListRow,
+} from '../entities/admission.entity.js';
 import {
-  ApplicationAdminDetail,
-  ApplicationDetail,
-  ApplicationListItem,
-} from '../admission.includes.js';
+  PaginatedResult,
+  PaginationQueryInput,
+} from '../../../shared/domain/interfaces/repository.interface.js';
+import { AdmissionStatus } from '../../../shared/domain/enums/admission-status.enum.js';
+import { AdmissionDocumentStatus } from '../../../shared/domain/enums/admission-document-status.enum.js';
+import { AdmissionPaymentStatus } from '../../../shared/domain/enums/admission-payment-status.enum.js';
 
-export interface AdmissionStatusCount {
-  status: AdmissionStatus;
-  count: number;
-}
+export type {
+  AdmissionDocumentWithType,
+  AdmissionDocumentWithTypeAndFile,
+  AdmissionPaymentWithProof,
+  AdmissionStatusCount,
+  AdmissionWaveAcceptedCount,
+  ApplicationWithDocsAndPayment,
+  ApplicationWithParentsAndUser,
+  ApplicationWithWave,
+  EnrollResult,
+};
 
-export interface AdmissionWaveAcceptedCount {
+/** Document-type master row as consumed by the application read models. */
+export interface AdmissionDocumentTypeRow {
   id: string;
-  name: string;
   code: string;
-  quota: number;
-  accepted: number;
+  name: string;
+  isRequired: boolean;
+  sortOrder: number;
+  isActive: boolean;
 }
 
-export type ApplicationWithWave = Prisma.AdmissionApplicationGetPayload<{
-  include: { wave: true };
-}>;
+export interface AdmissionApplicationQueryInput extends PaginationQueryInput {
+  search?: string;
+  status?: AdmissionStatus;
+  waveId?: string;
+}
 
-export type ApplicationWithDocsAndPayment =
-  Prisma.AdmissionApplicationGetPayload<{
-    include: { documents: true; payment: true };
-  }>;
+export interface CreateAdmissionApplicationRepositoryInput {
+  userId: string;
+  waveId: string;
+  registrationNumber: string;
+  fullName: string;
+  status?: AdmissionStatus;
+  nickname?: string | null;
+  birthPlace?: string | null;
+  birthDate?: Date | null;
+  nik?: string | null;
+  nisn?: string | null;
+  religionId?: string | null;
+  phone?: string | null;
+  email?: string | null;
+}
 
-export type ApplicationWithParentsAndUser =
-  Prisma.AdmissionApplicationGetPayload<{
-    include: { parents: true; user: true };
-  }>;
+export type UpdateAdmissionApplicationRepositoryInput =
+  Partial<CreateAdmissionApplicationRepositoryInput>;
 
-export type AdmissionDocumentWithType = Prisma.AdmissionDocumentGetPayload<{
-  include: { documentType: true };
-}>;
+/** Verification verdict recorded against a single uploaded document. */
+export interface UpdateAdmissionDocumentStatusInput {
+  status: AdmissionDocumentStatus;
+  note: string | null;
+  adminId: string;
+}
 
-export type AdmissionDocumentWithTypeAndFile =
-  Prisma.AdmissionDocumentGetPayload<{
-    include: { documentType: true; file: true };
-  }>;
+/** Verification verdict recorded against the registration payment. */
+export interface UpdateAdmissionPaymentStatusInput {
+  status: AdmissionPaymentStatus;
+  note: string | null;
+  adminId: string;
+}
 
-export type AdmissionPaymentWithProof = Prisma.AdmissionPaymentGetPayload<{
-  include: { proofFile: true };
-}>;
+export interface AcceptAdmissionApplicationInput {
+  id: string;
+  adminId: string;
+  note: string | null;
+}
 
-export interface EnrollResult {
-  application: AdmissionApplication;
-  student: Student;
-  parentsLinked: number;
-  enrollmentCreated: boolean;
+export interface RejectAdmissionApplicationInput {
+  id: string;
+  adminId: string;
+  reason: string;
 }
 
 /**
- * Persistence for the admission application aggregate (admin + workflow side).
- * Document and payment reads/writes are part of this aggregate. Business rules
- * (status transitions, required-doc checks) and notifications stay in the
- * use-cases; this interface only performs persistence.
+ * Student identity assigned at enrolment. Mirrors the admin action payload but
+ * is owned by the domain, so the port does not depend on the HTTP DTO.
  */
-export abstract class IAdmissionApplicationRepository {
-  // ── Read model ──
-  abstract findAll(
-    query: AdmissionApplicationQueryDto,
-  ): Promise<PaginatedResult<ApplicationListItem>>;
-  abstract findAdminDetailById(
-    id: string,
-  ): Promise<ApplicationAdminDetail | null>;
-  abstract countByNik(nik: string, excludeId: string): Promise<number>;
-  abstract findActiveDocumentTypes(): Promise<AdmissionDocumentType[]>;
-  abstract getStatusCounts(waveId?: string): Promise<AdmissionStatusCount[]>;
-  abstract getWavesWithAcceptedCount(
-    waveId?: string,
-  ): Promise<AdmissionWaveAcceptedCount[]>;
+export interface EnrollApplicantRepositoryInput {
+  nis: string;
+  nisn: string;
+  gradeId: string;
+  classroomId?: string;
+}
 
-  // ── Workflow reads ──
-  abstract findActiveById(id: string): Promise<AdmissionApplication | null>;
-  abstract findActiveWithWave(id: string): Promise<ApplicationWithWave | null>;
+export abstract class IAdmissionApplicationRepository {
+  abstract findAll(
+    query: AdmissionApplicationQueryInput,
+  ): Promise<PaginatedResult<AdmissionApplicationListRow>>;
+  abstract findById(id: string): Promise<ApplicationWithParentsAndUser | null>;
+  abstract findActiveById(
+    id: string,
+  ): Promise<ApplicationWithParentsAndUser | null>;
+  abstract findByApplicantId(
+    applicantId: string,
+  ): Promise<ApplicationWithParentsAndUser | null>;
+  abstract create(
+    input: CreateAdmissionApplicationRepositoryInput,
+  ): Promise<AdmissionApplicationEntity>;
+  abstract update(
+    id: string,
+    input: UpdateAdmissionApplicationRepositoryInput,
+  ): Promise<AdmissionApplicationEntity>;
+  abstract remove(id: string): Promise<AdmissionApplicationEntity>;
+
+  abstract setRevisionNeeded(
+    id: string,
+    note: string,
+  ): Promise<ApplicationWithDocsAndPayment>;
   abstract findActiveWithDocsAndPayment(
     id: string,
   ): Promise<ApplicationWithDocsAndPayment | null>;
-  abstract findActiveWithParentsAndUser(
+  abstract findRequiredActiveDocumentTypes(): Promise<
+    AdmissionDocumentTypeRow[]
+  >;
+  abstract setVerified(
     id: string,
-  ): Promise<ApplicationWithParentsAndUser | null>;
-  abstract countAcceptedInWave(waveId: string): Promise<number>;
-  abstract findRequiredActiveDocumentTypes(): Promise<AdmissionDocumentType[]>;
+    adminId: string,
+  ): Promise<ApplicationWithDocsAndPayment>;
   abstract findDocument(
     applicationId: string,
     documentId: string,
   ): Promise<AdmissionDocumentWithType | null>;
-  abstract findPayment(applicationId: string): Promise<AdmissionPayment | null>;
-  abstract findStudentRoleId(): Promise<string | null>;
+  abstract updateDocumentStatus(
+    documentId: string,
+    input: UpdateAdmissionDocumentStatusInput,
+  ): Promise<AdmissionDocumentWithTypeAndFile>;
+  abstract findPayment(
+    applicationId: string,
+  ): Promise<AdmissionPaymentWithProof | null>;
+  abstract updatePaymentStatus(
+    paymentId: string,
+    input: UpdateAdmissionPaymentStatusInput,
+  ): Promise<AdmissionPaymentWithProof>;
+  abstract findActiveWithWave(id: string): Promise<ApplicationWithWave | null>;
+  abstract countAcceptedInWave(waveId: string): Promise<number>;
+  abstract setAccepted(
+    input: AcceptAdmissionApplicationInput,
+  ): Promise<ApplicationWithDocsAndPayment>;
+  abstract findActiveWithParentsAndUser(
+    id: string,
+  ): Promise<ApplicationWithParentsAndUser | null>;
   abstract isNisTaken(nis: string): Promise<boolean>;
   abstract isNisnTaken(nisn: string): Promise<boolean>;
   abstract isNikTakenInProfiles(nik: string): Promise<boolean>;
-
-  // ── Workflow writes ──
-  abstract updateDocumentStatus(
-    documentId: string,
-    input: {
-      status: AdmissionDocumentStatus;
-      note: string | null;
-      adminId: string;
-    },
-  ): Promise<AdmissionDocumentWithTypeAndFile>;
-  abstract updatePaymentStatus(
-    paymentId: string,
-    input: {
-      status: AdmissionPaymentStatus;
-      note: string | null;
-      adminId: string;
-    },
-  ): Promise<AdmissionPaymentWithProof>;
-  abstract setRevisionNeeded(
-    id: string,
-    note: string,
-  ): Promise<ApplicationDetail>;
-  abstract setVerified(id: string, adminId: string): Promise<ApplicationDetail>;
-  abstract setAccepted(input: {
-    id: string;
-    adminId: string;
-    note: string | null;
-  }): Promise<ApplicationDetail>;
-  abstract setRejected(input: {
-    id: string;
-    adminId: string;
-    reason: string;
-  }): Promise<ApplicationDetail>;
-
-  /**
-   * Cross-context enrollment: copies verified admission data into the real
-   * student tables (profile, student, parents, address, role, optional
-   * classroom enrollment) and marks the application ENROLLED — all atomically.
-   */
+  abstract findStudentRoleId(): Promise<string | null>;
   abstract enrollAsStudent(
     application: ApplicationWithParentsAndUser,
-    dto: EnrollApplicantDto,
+    input: EnrollApplicantRepositoryInput,
     studentRoleId: string,
   ): Promise<EnrollResult>;
+  abstract getStatusCounts(waveId?: string): Promise<AdmissionStatusCount[]>;
+  abstract getWavesWithAcceptedCount(
+    waveId?: string,
+  ): Promise<AdmissionWaveAcceptedCount[]>;
+  abstract findAdminDetailById(
+    id: string,
+  ): Promise<ApplicationWithParentsAndUser | null>;
+  abstract countByNik(nik: string, excludeId: string): Promise<number>;
+  abstract findActiveDocumentTypes(): Promise<AdmissionDocumentTypeRow[]>;
+  abstract setRejected(
+    input: RejectAdmissionApplicationInput,
+  ): Promise<ApplicationWithDocsAndPayment>;
 }

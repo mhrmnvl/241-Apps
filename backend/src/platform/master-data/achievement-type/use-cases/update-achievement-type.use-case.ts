@@ -11,16 +11,21 @@ import { IAchievementTypeRepository } from '../domain/interfaces/achievement-typ
 export class UpdateAchievementTypeUseCase {
   private readonly logger = new Logger(UpdateAchievementTypeUseCase.name);
 
-  constructor(private readonly repository: IAchievementTypeRepository) {}
+  constructor(
+    private readonly achievementTypeRepository: IAchievementTypeRepository,
+  ) {}
 
   async execute(id: string, dto: UpdateAchievementTypeDto) {
-    const item = await this.repository.findById(id);
+    const item = await this.achievementTypeRepository.findById(id);
     if (!item) {
       throw new NotFoundException('AchievementType with ID ${id} not found');
     }
 
     if (dto.name) {
-      const existing = await this.repository.findByName(dto.name, id);
+      const existing = await this.achievementTypeRepository.findByName(
+        dto.name,
+        id,
+      );
       if (existing) {
         throw new ConflictException(
           'AchievementType with name "' + dto.name + '" already exists',
@@ -28,7 +33,7 @@ export class UpdateAchievementTypeUseCase {
       }
     }
 
-    const updated = await this.repository.update(id, dto);
+    const updated = await this.achievementTypeRepository.update(id, dto);
     this.logger.log(`AchievementType updated: ${updated.name}`);
     return updated;
   }

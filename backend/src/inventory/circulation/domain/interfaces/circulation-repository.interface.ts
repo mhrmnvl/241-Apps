@@ -1,95 +1,169 @@
 import {
-  InventoryLoan,
-  InventoryHistory,
-  InventoryStatus,
-  InventoryStatusKey,
-  InventoryTransactionType,
-  Prisma,
-} from '@prisma/client';
-import { LoanQueryDto } from '../../dto/request/loan-query.dto.js';
-import { PaginatedResult } from '../../../../shared/domain/interfaces/repository.interface.js';
+  PaginatedResult,
+  PaginationQueryInput,
+} from '../../../../shared/domain/interfaces/repository.interface.js';
 
-/**
- * A loan with its items and each item's asset (plus the asset's master-data
- * relations) eagerly loaded — the shape the return/detail use-cases rely on.
- */
-export type LoanWithRelations = Prisma.InventoryLoanGetPayload<{
-  include: {
-    items: {
-      include: {
-        unit: {
-          include: {
-            asset: true;
-            location: true;
-            status: true;
-            condition: true;
-          };
-        };
-      };
-    };
-  };
-}>;
+export interface InventoryStatusRow {
+  id: string;
+  code: string;
+  name: string;
+  systemKey?: string | null;
+  allowTransactions: boolean;
+}
+
+export interface InventoryTransactionTypeRow {
+  id: string;
+  code: string;
+  name: string;
+}
+
+export interface LoanItemRow {
+  id: string;
+  loanId: string;
+  unitId: string;
+  returnedConditionId?: string | null;
+  note?: string | null;
+}
+
+export interface LoanWithRelations {
+  id: string;
+  loanNumber: string;
+  requesterId: string;
+  expectedReturnDate: Date;
+  actualReturnDate?: Date | null;
+  purpose: string;
+  statusId: string;
+  workflowInstanceId?: string | null;
+  status?: InventoryStatusRow | null;
+  items?: LoanItemRow[];
+  requester?: { id: string; identifier: string } | null;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface InventoryHistoryRow {
+  id: string;
+  unitId: string;
+  transactionTypeId: string;
+  previousConditionId?: string | null;
+  newConditionId?: string | null;
+  previousStatusId?: string | null;
+  newStatusId?: string | null;
+  previousLocationId?: string | null;
+  newLocationId?: string | null;
+  previousCustodianId?: string | null;
+  newCustodianId?: string | null;
+  note?: string | null;
+  changedById: string;
+  changedAt: Date;
+}
+
+/** Asset unit as seen by the loan flow when checking availability. */
+export interface LoanableUnitRow {
+  id: string;
+  unitNumber: string;
+  statusId: string;
+  asset: { name: string };
+  status: { allowTransactions: boolean } | null;
+}
+
+export interface LoanQueryInput extends PaginationQueryInput {
+  keyword?: string;
+  statusId?: string;
+  requesterId?: string;
+}
+
+export interface InventoryHistoryQueryInput extends PaginationQueryInput {
+  unitId?: string;
+}
+
+export interface CreateLoanRepositoryInput {
+  loanNumber: string;
+  requesterId: string;
+  expectedReturnDate: Date;
+  purpose: string;
+  statusId: string;
+  workflowInstanceId?: string | null;
+}
+
+export interface UpdateLoanRepositoryInput {
+  expectedReturnDate?: Date;
+  actualReturnDate?: Date | null;
+  purpose?: string;
+  statusId?: string;
+  workflowInstanceId?: string | null;
+}
+
+export interface CreateInventoryHistoryInput {
+  unitId: string;
+  transactionTypeId: string;
+  previousConditionId?: string | null;
+  newConditionId?: string | null;
+  previousStatusId?: string | null;
+  newStatusId?: string | null;
+  previousLocationId?: string | null;
+  newLocationId?: string | null;
+  previousCustodianId?: string | null;
+  newCustodianId?: string | null;
+  note?: string | null;
+  changedById: string;
+}
+
+export interface ProcessCreateLoanInput {
+  loanNumber: string;
+  requesterId: string;
+  expectedReturnDate: Date;
+  purpose: string;
+  pendingStatusId: string;
+  unitIds: string[];
+  units: { id: string; statusId: string }[];
+}
+
+export interface ProcessReturnLoanInput {
+  loanId: string;
+  returnedStatusId: string;
+  availStatusId: string;
+  txTypeId: string;
+  changedById: string;
+  loanNumber: string;
+  items: { unitId: string; conditionId: string; note?: string }[];
+}
 
 export abstract class ICirculationRepository {
   abstract findAllLoans(
-    query: LoanQueryDto,
-  ): Promise<PaginatedResult<InventoryLoan>>;
+    query: LoanQueryInput,
+  ): Promise<PaginatedResult<LoanWithRelations>>;
   abstract findLoanById(id: string): Promise<LoanWithRelations | null>;
   abstract createLoan(
-    data: Prisma.InventoryLoanCreateInput,
-  ): Promise<InventoryLoan>;
+    input: CreateLoanRepositoryInput,
+  ): Promise<LoanWithRelations>;
   abstract updateLoan(
     id: string,
-    data: Prisma.InventoryLoanUpdateInput,
-  ): Promise<InventoryLoan>;
-  abstract findLatestLoan(): Promise<InventoryLoan | null>;
+    input: UpdateLoanRepositoryInput,
+  ): Promise<LoanWithRelations>;
+  abstract findLatestLoan(): Promise<LoanWithRelations | null>;
 
-  abstract findAllHistories(query: {
-    page?: number;
-    limit?: number;
-    unitId?: string;
-  }): Promise<PaginatedResult<InventoryHistory>>;
+  abstract findAllHistories(
+    query: InventoryHistoryQueryInput,
+  ): Promise<PaginatedResult<InventoryHistoryRow>>;
   abstract createHistory(
-    data: Prisma.InventoryHistoryCreateInput,
-  ): Promise<InventoryHistory>;
+    input: CreateInventoryHistoryInput,
+  ): Promise<InventoryHistoryRow>;
 
-  abstract findStatusByCode(code: string): Promise<InventoryStatus | null>;
-  /** Looks up a status by its protected role in the loan lifecycle, never by
-   * the admin-editable code/name (see InventoryStatusKey in inventory.prisma). */
+  abstract findStatusByCode(code: string): Promise<InventoryStatusRow | null>;
   abstract findStatusBySystemKey(
-    key: InventoryStatusKey,
-  ): Promise<InventoryStatus | null>;
+    systemKey: string,
+  ): Promise<InventoryStatusRow | null>;
   abstract findTransactionTypeByCode(
     code: string,
-  ): Promise<InventoryTransactionType | null>;
+  ): Promise<InventoryTransactionTypeRow | null>;
+  abstract findUnitsByIds(ids: string[]): Promise<LoanableUnitRow[]>;
 
-  abstract findUnitsByIds(ids: string[]): Promise<
-    {
-      id: string;
-      unitNumber: string;
-      statusId: string;
-      asset: { name: string };
-      status: { allowTransactions: boolean } | null;
-    }[]
-  >;
+  abstract processCreateLoanTransaction(
+    params: ProcessCreateLoanInput,
+  ): Promise<LoanWithRelations>;
 
-  abstract processCreateLoanTransaction(params: {
-    loanNumber: string;
-    requesterId: string;
-    expectedReturnDate: Date;
-    purpose: string;
-    pendingStatusId: string;
-    unitIds: string[];
-    units: { id: string; statusId: string }[];
-  }): Promise<unknown>;
-
-  abstract processReturnLoanTransaction(params: {
-    loanId: string;
-    returnedStatusId: string;
-    availStatusId: string;
-    txTypeId: string;
-    changedById: string;
-    loanNumber: string;
-    items: { unitId: string; conditionId: string; note?: string }[];
-  }): Promise<unknown>;
+  abstract processReturnLoanTransaction(
+    params: ProcessReturnLoanInput,
+  ): Promise<LoanWithRelations>;
 }

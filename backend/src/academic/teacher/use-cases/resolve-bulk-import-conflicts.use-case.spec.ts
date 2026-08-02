@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { TeacherRepository } from '../repositories/teacher.repository.js';
+import { ITeacherRepository } from '../domain/interfaces/teacher-repository.interface.js';
 import { UpdateTeacherUseCase } from './update-teacher.use-case.js';
 import { UpdateTeacherProfileUseCase } from './update-teacher-profile.use-case.js';
 import { CreateTeacherUseCase } from './create-teacher.use-case.js';
@@ -45,7 +45,7 @@ describe('ResolveBulkImportConflictsUseCase (teacher)', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ResolveBulkImportConflictsUseCase,
-        { provide: TeacherRepository, useValue: mockRepo },
+        { provide: ITeacherRepository, useValue: mockRepo },
         { provide: UpdateTeacherUseCase, useValue: mockUpdateTeacher },
         {
           provide: UpdateTeacherProfileUseCase,

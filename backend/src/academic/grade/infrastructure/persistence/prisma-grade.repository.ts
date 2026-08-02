@@ -1,10 +1,14 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { Grade, Prisma } from '@prisma/client';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
-import { GradeQueryDto } from '../../dto/request/grade-query.dto.js';
-import { CreateGradeDto } from '../../dto/request/create-grade.dto.js';
-import { UpdateGradeDto } from '../../dto/request/update-grade.dto.js';
+import type {
+  GradeQueryInput,
+  CreateGradeRepositoryInput,
+  UpdateGradeRepositoryInput,
+} from '../../domain/interfaces/grade-repository.interface.js';
 import { IGradeRepository } from '../../domain/interfaces/grade-repository.interface.js';
+import { PaginatedResult } from '../../../../shared/domain/interfaces/repository.interface.js';
+import { GradeEntity } from '../../domain/entities/grade.entity.js';
 
 @Injectable()
 export class PrismaGradeRepository extends IGradeRepository {
@@ -12,8 +16,11 @@ export class PrismaGradeRepository extends IGradeRepository {
     super();
   }
 
-  async findAll(query: GradeQueryDto) {
-    const { page = 1, limit = 10, search, isActive } = query;
+  async findAll(
+    query?: GradeQueryInput,
+  ): Promise<PaginatedResult<GradeEntity>> {
+    const q = query ?? {};
+    const { page = 1, limit = 10, search, isActive } = q;
     const skip = (page - 1) * limit;
 
     const where: Prisma.GradeWhereInput = {
@@ -37,25 +44,32 @@ export class PrismaGradeRepository extends IGradeRepository {
     return { data, total, page, limit };
   }
 
-  async findById(id: string) {
+  async findById(id: string): Promise<GradeEntity | null> {
     return this.prisma.grade.findFirst({
       where: { id, deletedAt: null },
     });
   }
 
-  async findByLevel(level: number) {
+  async findByLevel(level: number): Promise<GradeEntity | null> {
     return this.prisma.grade.findFirst({
       where: { level, deletedAt: null },
     });
   }
 
-  async findByName(name: string) {
+  async findByName(
+    name: string,
+    excludeId?: string,
+  ): Promise<GradeEntity | null> {
     return this.prisma.grade.findFirst({
-      where: { name, deletedAt: null },
+      where: {
+        name,
+        deletedAt: null,
+        ...(excludeId ? { NOT: { id: excludeId } } : {}),
+      },
     });
   }
 
-  async create(dto: CreateGradeDto) {
+  async create(dto: CreateGradeRepositoryInput): Promise<GradeEntity> {
     return this.prisma.grade.create({
       data: {
         level: dto.level,
@@ -65,7 +79,10 @@ export class PrismaGradeRepository extends IGradeRepository {
     });
   }
 
-  async update(id: string, dto: UpdateGradeDto) {
+  async update(
+    id: string,
+    dto: UpdateGradeRepositoryInput,
+  ): Promise<GradeEntity> {
     return this.prisma.grade.update({
       where: { id },
       data: {
@@ -76,7 +93,11 @@ export class PrismaGradeRepository extends IGradeRepository {
     });
   }
 
-  async softDelete(id: string) {
+  async remove(id: string): Promise<GradeEntity> {
+    return this.softDelete(id);
+  }
+
+  async softDelete(id: string): Promise<GradeEntity> {
     return this.prisma.grade.update({
       where: { id },
       data: { deletedAt: new Date() },

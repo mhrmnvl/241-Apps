@@ -5,15 +5,15 @@ import { IBloodTypeRepository } from '../domain/interfaces/blood-type-repository
 export class DeleteBloodTypeUseCase {
   private readonly logger = new Logger(DeleteBloodTypeUseCase.name);
 
-  constructor(private readonly repository: IBloodTypeRepository) {}
+  constructor(private readonly bloodTypeRepository: IBloodTypeRepository) {}
 
   async execute(id: string) {
-    const item = await this.repository.findById(id);
+    const item = await this.bloodTypeRepository.findById(id);
     if (!item) {
       throw new NotFoundException('BloodType with ID ${id} not found');
     }
 
-    await this.repository.softDelete(id);
+    await this.bloodTypeRepository.softDelete(id);
     this.logger.log(`BloodType deleted: ${item.name}`);
   }
 }

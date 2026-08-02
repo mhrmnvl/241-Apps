@@ -1,6 +1,6 @@
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { IUserRepository } from '../interfaces/user-repository.interface.js';
+import { IUserRepository } from '../domain/interfaces/user-repository.interface.js';
 import { DeleteUserUseCase } from './delete-user.use-case.js';
 
 describe('DeleteUserUseCase', () => {

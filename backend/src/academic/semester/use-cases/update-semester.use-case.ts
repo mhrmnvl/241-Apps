@@ -14,12 +14,12 @@ export class UpdateSemesterUseCase {
   private readonly logger = new Logger(UpdateSemesterUseCase.name);
 
   constructor(
-    private readonly repository: ISemesterRepository,
+    private readonly semesterRepository: ISemesterRepository,
     private readonly academicYearRepository: IAcademicYearRepository,
   ) {}
 
   async execute(id: string, dto: UpdateSemesterDto) {
-    const current = await this.repository.findById(id);
+    const current = await this.semesterRepository.findById(id);
     if (!current) {
       throw new NotFoundException(`Semester with ID ${id} not found`);
     }
@@ -36,7 +36,9 @@ export class UpdateSemesterUseCase {
     }
 
     if (dto.typeId) {
-      const semesterType = await this.repository.findTypeById(dto.typeId);
+      const semesterType = await this.semesterRepository.findTypeById(
+        dto.typeId,
+      );
       if (!semesterType) {
         throw new NotFoundException(
           `Semester Type with ID ${dto.typeId} not found`,
@@ -46,9 +48,9 @@ export class UpdateSemesterUseCase {
 
     if (dto.typeId || dto.academicYearId) {
       const checkAyId = dto.academicYearId ?? current.academicYearId;
-      const checkTypeId = dto.typeId ?? current.typeId;
+      const checkTypeId = dto.typeId ?? current.typeId ?? '';
 
-      const existing = await this.repository.findByAcademicYearAndType(
+      const existing = await this.semesterRepository.findByAcademicYearAndType(
         checkAyId,
         checkTypeId,
       );
@@ -68,17 +70,18 @@ export class UpdateSemesterUseCase {
       }
     }
 
+    const { startDate, endDate, ...rest } = dto;
     const updateData = {
-      ...dto,
-      ...(dto.startDate !== undefined && {
-        startDate: dto.startDate ? new Date(dto.startDate) : null,
+      ...rest,
+      ...(startDate !== undefined && {
+        startDate: startDate ? new Date(startDate) : null,
       }),
-      ...(dto.endDate !== undefined && {
-        endDate: dto.endDate ? new Date(dto.endDate) : null,
+      ...(endDate !== undefined && {
+        endDate: endDate ? new Date(endDate) : null,
       }),
     };
 
-    const updated = await this.repository.update(id, updateData);
+    const updated = await this.semesterRepository.update(id, updateData);
     this.logger.log(`Semester updated: ${id}`);
     return updated;
   }

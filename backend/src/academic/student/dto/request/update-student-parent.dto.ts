@@ -1,5 +1,5 @@
 ﻿import { ApiPropertyOptional } from '@nestjs/swagger';
-import { ParentRelation } from '@prisma/client';
+import { ParentRelation } from '../../../../shared/domain/enums/parent-relation.enum.js';
 import { IsBoolean, IsEnum, IsOptional } from 'class-validator';
 
 export class UpdateStudentParentDto {

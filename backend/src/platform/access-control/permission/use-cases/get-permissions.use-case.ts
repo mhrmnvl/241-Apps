@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { IPermissionRepository } from '../interfaces/permission-repository.interface.js';
+import { IPermissionRepository } from '../domain/interfaces/permission-repository.interface.js';
 
 @Injectable()
 export class GetPermissionsUseCase {

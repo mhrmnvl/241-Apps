@@ -1,4 +1,4 @@
-import { UserGender } from '@prisma/client';
+import { UserGender } from '../../../shared/domain/enums/user-gender.enum.js';
 export interface StudentProfile {
   name: string | null;
   nik: string | null;

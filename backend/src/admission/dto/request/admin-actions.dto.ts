@@ -1,8 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  AdmissionDocumentStatus,
-  AdmissionPaymentStatus,
-} from '@prisma/client';
+import { AdmissionDocumentStatus } from '../../../shared/domain/enums/admission-document-status.enum.js';
+import { AdmissionPaymentStatus } from '../../../shared/domain/enums/admission-payment-status.enum.js';
 import {
   IsEnum,
   IsIn,

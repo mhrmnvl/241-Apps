@@ -1,5 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { AssessmentType } from '@prisma/client';
+import { AssessmentType } from '../../../../shared/domain/enums/assessment-type.enum.js';
 import { Type } from 'class-transformer';
 import {
   IsEnum,

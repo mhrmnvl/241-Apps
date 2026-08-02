@@ -6,17 +6,19 @@ import { IAchievementTypeRepository } from '../domain/interfaces/achievement-typ
 export class CreateAchievementTypeUseCase {
   private readonly logger = new Logger(CreateAchievementTypeUseCase.name);
 
-  constructor(private readonly repository: IAchievementTypeRepository) {}
+  constructor(
+    private readonly achievementTypeRepository: IAchievementTypeRepository,
+  ) {}
 
   async execute(dto: CreateAchievementTypeDto) {
-    const existing = await this.repository.findByName(dto.name);
+    const existing = await this.achievementTypeRepository.findByName(dto.name);
     if (existing) {
       throw new ConflictException(
         'AchievementType with name "' + dto.name + '" already exists',
       );
     }
 
-    const item = await this.repository.create({
+    const item = await this.achievementTypeRepository.create({
       name: dto.name,
       isActive: dto.isActive,
     });

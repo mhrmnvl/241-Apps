@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { PermissionController } from './presentation/permission.controller.js';
-import { PermissionRepository } from './repositories/permission.repository.js';
-import { IPermissionRepository } from './interfaces/permission-repository.interface.js';
+import { PrismaPermissionRepository } from './infrastructure/persistence/prisma-permission.repository.js';
+import { IPermissionRepository } from './domain/interfaces/permission-repository.interface.js';
 import { GetPermissionsUseCase } from './use-cases/get-permissions.use-case.js';
 import { GetPermissionByIdUseCase } from './use-cases/get-permission-by-id.use-case.js';
 import { AssignPermissionToRoleUseCase } from './use-cases/assign-permission-to-role.use-case.js';
@@ -18,7 +18,7 @@ import { AuthModule } from '../../auth/auth.module.js';
   imports: [RoleModule, AuthModule],
   controllers: [PermissionController],
   providers: [
-    { provide: IPermissionRepository, useClass: PermissionRepository },
+    { provide: IPermissionRepository, useClass: PrismaPermissionRepository },
     GetPermissionsUseCase,
     GetPermissionByIdUseCase,
     AssignPermissionToRoleUseCase,

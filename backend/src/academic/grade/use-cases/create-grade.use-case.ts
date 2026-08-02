@@ -6,24 +6,24 @@ import { IGradeRepository } from '../domain/interfaces/grade-repository.interfac
 export class CreateGradeUseCase {
   private readonly logger = new Logger(CreateGradeUseCase.name);
 
-  constructor(private readonly repository: IGradeRepository) {}
+  constructor(private readonly gradeRepository: IGradeRepository) {}
 
   async execute(dto: CreateGradeDto) {
-    const existingLevel = await this.repository.findByLevel(dto.level);
+    const existingLevel = await this.gradeRepository.findByLevel(dto.level);
     if (existingLevel) {
       throw new ConflictException(
         `Classroom level ${dto.level} already exists`,
       );
     }
 
-    const existingName = await this.repository.findByName(dto.name);
+    const existingName = await this.gradeRepository.findByName(dto.name);
     if (existingName) {
       throw new ConflictException(
         `Classroom level name "${dto.name}" already exists`,
       );
     }
 
-    const created = await this.repository.create(dto);
+    const created = await this.gradeRepository.create(dto);
     this.logger.log(`Classroom level created: ${created.id} (${created.name})`);
     return created;
   }

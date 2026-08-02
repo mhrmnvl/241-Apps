@@ -4,20 +4,19 @@ import {
   IStudentRepository,
 } from '../domain/interfaces/student-repository.interface.js';
 import { CreateAddressDto } from '../../../shared/dto/address.dto.js';
-import { StudentAddressRepository } from '../repositories/student-address.repository.js';
-import { StudentRepository } from '../index.js';
+import { IStudentAddressRepository } from '../domain/interfaces/student-address-repository.interface.js';
 
 @Injectable()
 export class AddStudentAddressUseCase {
   private readonly logger = new Logger(AddStudentAddressUseCase.name);
 
   constructor(
-    private readonly repository: StudentRepository,
-    private readonly addressRepository: StudentAddressRepository,
+    private readonly studentRepository: IStudentRepository,
+    private readonly addressRepository: IStudentAddressRepository,
   ) {}
 
   async execute(studentId: string, dto: CreateAddressDto): Promise<Address> {
-    const student = await this.repository.findById(studentId);
+    const student = await this.studentRepository.findById(studentId);
     if (!student)
       throw new NotFoundException(`Student with ID ${studentId} not found`);
 

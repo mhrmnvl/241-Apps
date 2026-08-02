@@ -47,7 +47,11 @@ export const envSchema = z
       .string()
       .refine(
         (val) => {
-          const urls = val.split(',').map((u) => u.trim());
+          const urls = val
+            .split(',')
+            .map((u) => u.trim())
+            .filter((u) => u.length > 0);
+          if (urls.length === 0) return false;
           return urls.every((url) => {
             try {
               new URL(url);

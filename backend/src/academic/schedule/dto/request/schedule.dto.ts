@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Day } from '@prisma/client';
+import { DayEnum as Day } from '../../../../shared/domain/enums/day.enum.js';
 import { Type } from 'class-transformer';
 import {
   IsArray,

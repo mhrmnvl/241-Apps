@@ -5,14 +5,14 @@ import { IEnrollmentRepository } from '../domain/interfaces/enrollment-repositor
 
 @Injectable()
 export class BulkCreateStudentEnrollmentUseCase {
-  constructor(private readonly repository: IEnrollmentRepository) {}
+  constructor(private readonly enrollmentRepository: IEnrollmentRepository) {}
   async execute(dto: BulkCreateStudentEnrollmentDto) {
     const toCreate: CreateStudentEnrollmentDto[] = [];
     const skipped: string[] = [];
     const restored: string[] = [];
 
     for (const item of dto.enrollments) {
-      const dup = await this.repository.findDuplicate(
+      const dup = await this.enrollmentRepository.findDuplicate(
         item.studentId,
         item.semesterId,
       );
@@ -21,12 +21,12 @@ export class BulkCreateStudentEnrollmentUseCase {
         continue;
       }
 
-      const softDeleted = await this.repository.findSoftDeleted(
+      const softDeleted = await this.enrollmentRepository.findSoftDeleted(
         item.studentId,
         item.semesterId,
       );
       if (softDeleted) {
-        await this.repository.restore(softDeleted.id, {
+        await this.enrollmentRepository.restore(softDeleted.id, {
           classroomId: item.classroomId,
         });
         restored.push(item.studentId);
@@ -37,7 +37,7 @@ export class BulkCreateStudentEnrollmentUseCase {
 
     const created =
       toCreate.length > 0
-        ? await this.repository.createMany(toCreate)
+        ? await this.enrollmentRepository.createMany(toCreate)
         : { count: 0 };
 
     return {

@@ -1,50 +1,56 @@
-import { Address, Student, Teacher, Prisma } from '@prisma/client';
+import { AddressEntity } from '../../../../shared/domain/entities/address.entity.js';
+import { AddressPublic } from '../entities/profile-social-media.entity.js';
 
-export const ADDRESS_OMIT = {
-  studentId: true,
-  teacherId: true,
-  parentId: true,
-} satisfies Prisma.AddressOmit;
+export type { AddressPublic };
 
-export type AddressPublic = Prisma.AddressGetPayload<{
-  omit: typeof ADDRESS_OMIT;
-}>;
+export interface CreateProfileAddressDto {
+  street: string;
+  rt: string;
+  rw: string;
+  village: string;
+  district: string;
+  city: string;
+  province: string;
+  postalCode: string;
+  isPrimary?: boolean;
+}
+
+export type UpdateProfileAddressDto = Partial<CreateProfileAddressDto>;
 
 export abstract class IProfileAddressRepository {
   abstract findAllByUserId(userId: string): Promise<AddressPublic[]>;
   abstract findAddressForUser(
     addressId: string,
     userId: string,
-  ): Promise<Address | null>;
+  ): Promise<AddressEntity | null>;
 
-  abstract findStudentByUserId(userId: string): Promise<Student | null>;
-  abstract findTeacherByUserId(userId: string): Promise<Teacher | null>;
+  abstract findStudentByUserId(userId: string): Promise<{ id: string } | null>;
+  abstract findTeacherByUserId(userId: string): Promise<{ id: string } | null>;
   abstract clearPrimaryForStudent(
     studentId: string,
-  ): Promise<Prisma.BatchPayload>;
+  ): Promise<{ count: number }>;
   abstract clearPrimaryForTeacher(
     teacherId: string,
-  ): Promise<Prisma.BatchPayload>;
+  ): Promise<{ count: number }>;
   abstract clearPrimaryForStudentExclude(
     studentId: string,
     excludeId: string,
-  ): Promise<Prisma.BatchPayload>;
+  ): Promise<{ count: number }>;
 
   abstract clearPrimaryForTeacherExclude(
     teacherId: string,
     excludeId: string,
-  ): Promise<Prisma.BatchPayload>;
+  ): Promise<{ count: number }>;
 
   abstract create(
-    dto: Prisma.AddressCreateWithoutStudentInput &
-      Prisma.AddressCreateWithoutTeacherInput,
+    dto: CreateProfileAddressDto,
     ownerId: { studentId?: string; teacherId?: string },
   ): Promise<AddressPublic>;
 
   abstract update(
     addressId: string,
-    dto: Prisma.AddressUpdateInput,
+    dto: UpdateProfileAddressDto,
   ): Promise<AddressPublic>;
 
-  abstract remove(addressId: string): Promise<Address>;
+  abstract remove(addressId: string): Promise<AddressEntity>;
 }

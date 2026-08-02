@@ -4,9 +4,9 @@ import { IGradeRepository } from '../domain/interfaces/grade-repository.interfac
 
 @Injectable()
 export class GetGradesUseCase {
-  constructor(private readonly repository: IGradeRepository) {}
+  constructor(private readonly gradeRepository: IGradeRepository) {}
 
   async execute(query: GradeQueryDto) {
-    return this.repository.findAll(query);
+    return this.gradeRepository.findAll(query);
   }
 }

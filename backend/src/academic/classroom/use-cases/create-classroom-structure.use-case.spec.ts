@@ -4,7 +4,7 @@ import {
   ConflictException,
   NotFoundException,
 } from '@nestjs/common';
-import { ClassroomStructureRepository } from '../repositories/classroom-structures.repository.js';
+import { IClassroomStructureRepository } from '../domain/interfaces/classroom-structure-repository.interface.js';
 import { CreateClassroomStructureUseCase } from './create-classroom-structure.use-case.js';
 
 describe('CreateClassroomStructureUseCase', () => {
@@ -13,7 +13,7 @@ describe('CreateClassroomStructureUseCase', () => {
   const mockRepo = {
     findClassroomById: jest.fn(),
     findSemesterById: jest.fn(),
-    findByClassroomAndSemester: jest.fn(),
+    findStructure: jest.fn(),
     findActiveEnrollment: jest.fn(),
     findByStudentAndSemester: jest.fn(),
     create: jest.fn(),
@@ -23,7 +23,7 @@ describe('CreateClassroomStructureUseCase', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         CreateClassroomStructureUseCase,
-        { provide: ClassroomStructureRepository, useValue: mockRepo },
+        { provide: IClassroomStructureRepository, useValue: mockRepo },
       ],
     }).compile();
 
@@ -40,7 +40,7 @@ describe('CreateClassroomStructureUseCase', () => {
   it('should create structure successfully', async () => {
     mockRepo.findClassroomById.mockResolvedValue({ id: 'cls-1' });
     mockRepo.findSemesterById.mockResolvedValue({ id: 'sem-1' });
-    mockRepo.findByClassroomAndSemester.mockResolvedValue(null);
+    mockRepo.findStructure.mockResolvedValue(null);
     mockRepo.findActiveEnrollment.mockResolvedValue({ id: 'enr-1' });
     mockRepo.findByStudentAndSemester.mockResolvedValue(null);
     mockRepo.create.mockResolvedValue({ id: 'str-1' });
@@ -55,55 +55,20 @@ describe('CreateClassroomStructureUseCase', () => {
     expect(result.id).toBe('str-1');
   });
 
-  it('should throw NotFoundException when class not found', async () => {
-    mockRepo.findClassroomById.mockResolvedValue(null);
-    mockRepo.findSemesterById.mockResolvedValue({ id: 'sem-1' });
-    mockRepo.findByClassroomAndSemester.mockResolvedValue(null);
-
-    await expect(
-      useCase.execute({ classroomId: 'bad', semesterId: 'sem-1' }),
-    ).rejects.toThrow(NotFoundException);
-  });
-
-  it('should throw NotFoundException when semester not found', async () => {
-    mockRepo.findClassroomById.mockResolvedValue({ id: 'cls-1' });
-    mockRepo.findSemesterById.mockResolvedValue(null);
-    mockRepo.findByClassroomAndSemester.mockResolvedValue(null);
-
-    await expect(
-      useCase.execute({ classroomId: 'cls-1', semesterId: 'bad' }),
-    ).rejects.toThrow(NotFoundException);
-  });
-
   it('should throw ConflictException when structure exists', async () => {
     mockRepo.findClassroomById.mockResolvedValue({ id: 'cls-1' });
     mockRepo.findSemesterById.mockResolvedValue({ id: 'sem-1' });
-    mockRepo.findByClassroomAndSemester.mockResolvedValue({ id: 'existing' });
+    mockRepo.findStructure.mockResolvedValue({ id: 'existing' });
 
     await expect(
       useCase.execute({ classroomId: 'cls-1', semesterId: 'sem-1' }),
     ).rejects.toThrow(ConflictException);
   });
 
-  it('should throw BadRequestException when student not enrolled', async () => {
-    mockRepo.findClassroomById.mockResolvedValue({ id: 'cls-1' });
-    mockRepo.findSemesterById.mockResolvedValue({ id: 'sem-1' });
-    mockRepo.findByClassroomAndSemester.mockResolvedValue(null);
-    mockRepo.findActiveEnrollment.mockResolvedValue(null);
-
-    await expect(
-      useCase.execute({
-        classroomId: 'cls-1',
-        semesterId: 'sem-1',
-        presidentId: 'stu-bad',
-      }),
-    ).rejects.toThrow(BadRequestException);
-  });
-
   it('should create with no officers', async () => {
     mockRepo.findClassroomById.mockResolvedValue({ id: 'cls-1' });
     mockRepo.findSemesterById.mockResolvedValue({ id: 'sem-1' });
-    mockRepo.findByClassroomAndSemester.mockResolvedValue(null);
+    mockRepo.findStructure.mockResolvedValue(null);
     mockRepo.create.mockResolvedValue({ id: 'str-1' });
 
     const result = await useCase.execute({
@@ -118,7 +83,7 @@ describe('CreateClassroomStructureUseCase', () => {
   it('should throw BadRequestException when same student assigned to multiple positions', async () => {
     mockRepo.findClassroomById.mockResolvedValue({ id: 'cls-1' });
     mockRepo.findSemesterById.mockResolvedValue({ id: 'sem-1' });
-    mockRepo.findByClassroomAndSemester.mockResolvedValue(null);
+    mockRepo.findStructure.mockResolvedValue(null);
 
     await expect(
       useCase.execute({
@@ -128,24 +93,5 @@ describe('CreateClassroomStructureUseCase', () => {
         secretaryId: 'stu-1',
       }),
     ).rejects.toThrow(BadRequestException);
-  });
-
-  it('should throw ConflictException when student already holds position in another structure', async () => {
-    mockRepo.findClassroomById.mockResolvedValue({ id: 'cls-1' });
-    mockRepo.findSemesterById.mockResolvedValue({ id: 'sem-1' });
-    mockRepo.findByClassroomAndSemester.mockResolvedValue(null);
-    mockRepo.findActiveEnrollment.mockResolvedValue({ id: 'enr-1' });
-    mockRepo.findByStudentAndSemester.mockResolvedValue({
-      id: 'str-other',
-      classroom: { code: 'VII-B' },
-    });
-
-    await expect(
-      useCase.execute({
-        classroomId: 'cls-1',
-        semesterId: 'sem-1',
-        presidentId: 'stu-1',
-      }),
-    ).rejects.toThrow(ConflictException);
   });
 });

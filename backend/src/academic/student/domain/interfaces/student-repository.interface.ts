@@ -1,86 +1,129 @@
 import {
-  Prisma,
-  Student,
-  User,
-  Profile,
-  StudentStatus,
-  Address,
-} from '@prisma/client';
-import { StudentQueryDto } from '../../dto/request/student-query.dto.js';
-import { ExportStudentQueryDto } from '../../dto/request/export-student-query.dto.js';
+  PaginatedResult,
+  PaginationQueryInput,
+} from '../../../../shared/domain/interfaces/repository.interface.js';
+import { UserGender } from '../../../../shared/domain/enums/user-gender.enum.js';
+import { StudentStatusEnum } from '../../../../shared/domain/enums/student-status.enum.js';
+import { ParentRelation } from '../../../../shared/domain/enums/parent-relation.enum.js';
+import { IncomeRange } from '../../../../shared/domain/enums/income-range.enum.js';
+import { UserEntity } from '../../../../shared/domain/entities/user.entity.js';
+import {
+  ProfileEntity,
+  ProfileUpdateInput,
+} from '../../../../platform/profile/domain/entities/profile.entity.js';
+import { StudentEntity } from '../entities/student.entity.js';
+import { StudentWithDetails } from '../entities/student.entity.js';
+import {
+  AddressEntity,
+  CreateAddressRepositoryInput,
+} from '../../../../shared/domain/entities/address.entity.js';
 
-export type { Address, User, StudentStatus };
-import { CreateStudentDto } from '../../dto/request/create-student.dto.js';
-import { UpdateStudentDto } from '../../dto/request/update-student.dto.js';
-import { CreateStudentWithRelationsDto } from '../../dto/request/create-student-with-relations.dto.js';
-import { UpdateProfileDto } from '../../../../platform/profile/index.js';
-import { PaginatedResult } from '../../../../shared/domain/interfaces/repository.interface.js';
+export type { StudentWithDetails };
+export type User = UserEntity;
+export type Address = AddressEntity;
 
-export const STUDENT_INCLUDE = {
-  user: {
-    select: {
-      id: true,
-      identifier: true,
-      isActive: true,
-      createdAt: true,
-      updatedAt: true,
-      profile: true,
-    },
-  },
-  grade: true,
-  enrollments: {
-    where: { deletedAt: null },
-    include: {
-      classroom: true,
-      semester: { include: { academicYear: true } },
-    },
-    orderBy: { enrolledAt: 'desc' as const },
-  },
-} satisfies Prisma.StudentInclude;
-
-export type StudentWithDetails = Prisma.StudentGetPayload<{
-  include: typeof STUDENT_INCLUDE;
-}>;
-
-export interface CreateStudentResult extends User {
+export interface CreateStudentResult extends UserEntity {
   student: StudentWithDetails | null;
 }
 
+export interface StudentQueryInput extends PaginationQueryInput {
+  search?: string;
+  semesterId?: string;
+  classroomId?: string;
+  status?: StudentStatusEnum;
+  isActive?: boolean;
+}
+
+export interface ExportStudentQueryInput {
+  search?: string;
+  classroomId?: string;
+  isActive?: boolean;
+}
+
+export interface CreateStudentRepositoryInput {
+  /** Falls back to the NIS when the caller leaves it blank. */
+  identifier?: string;
+  name: string;
+  nik: string;
+  gender: UserGender;
+  birthPlace: string;
+  birthDate: Date;
+  email?: string;
+  phone?: string;
+  gradeId?: string;
+  /** When set, the student is auto-enrolled into the active semester. */
+  classroomId?: string;
+  nis?: string;
+  nisn?: string;
+}
+
+export interface UpdateStudentRepositoryInput {
+  nis?: string;
+  nisn?: string;
+  gradeId?: string;
+  status?: StudentStatusEnum;
+}
+
+/** Parent captured inline while creating a student. */
+export interface StudentParentSeedInput {
+  name: string;
+  nik: string;
+  birthPlace: string;
+  birthDate: Date;
+  email?: string;
+  phone?: string;
+  occupationId: string;
+  income?: IncomeRange;
+  relation: ParentRelation;
+  isPrimary?: boolean;
+}
+
+export interface CreateStudentWithRelationsRepositoryInput extends CreateStudentRepositoryInput {
+  address?: CreateAddressRepositoryInput;
+  parents?: StudentParentSeedInput[];
+}
+
 export abstract class IStudentRepository {
-  abstract toggleUserActive(userId: string, isActive: boolean): Promise<User>;
+  abstract toggleUserActive(
+    userId: string,
+    isActive: boolean,
+  ): Promise<UserEntity>;
   abstract findAll(
-    query: StudentQueryDto,
+    query: StudentQueryInput,
   ): Promise<PaginatedResult<StudentWithDetails>>;
   abstract findAllForExport(
-    filters: ExportStudentQueryDto,
+    filters: ExportStudentQueryInput,
   ): Promise<StudentWithDetails[]>;
   abstract findById(id: string): Promise<StudentWithDetails | null>;
   abstract findByUserId(userId: string): Promise<{ id: string } | null>;
-  abstract findByNis(nis: string): Promise<Student | null>;
-  abstract findByNisn(nisn: string): Promise<Student | null>;
+  abstract findByNis(nis: string): Promise<StudentEntity | null>;
+  abstract findByNisn(nisn: string): Promise<StudentEntity | null>;
   abstract isStudent(userId: string): Promise<boolean>;
   abstract create(
-    dto: CreateStudentDto,
+    input: CreateStudentRepositoryInput,
     passwordHash: string,
   ): Promise<CreateStudentResult>;
   abstract createWithRelations(
-    dto: CreateStudentWithRelationsDto,
+    input: CreateStudentWithRelationsRepositoryInput,
     passwordHash: string,
   ): Promise<StudentWithDetails>;
   abstract update(
     id: string,
-    dto: UpdateStudentDto,
+    input: UpdateStudentRepositoryInput,
   ): Promise<StudentWithDetails>;
   abstract updateStatus(
     id: string,
-    status: StudentStatus,
+    status: StudentStatusEnum,
   ): Promise<StudentWithDetails>;
   abstract remove(id: string): Promise<void>;
   abstract updateProfile(
     id: string,
-    dto: UpdateProfileDto,
-  ): Promise<Profile | null>;
-  abstract softDelete(id: string, userId: string): Promise<[Student, User]>;
+    data: ProfileUpdateInput,
+  ): Promise<{ id: string; name: string } | null>;
+  abstract softDelete(
+    id: string,
+    userId: string,
+  ): Promise<[StudentEntity, UserEntity]>;
   abstract getActiveGradeLevels(): Promise<number[]>;
   abstract getActiveClassroomCodes(): Promise<string[]>;
 }

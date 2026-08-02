@@ -1,7 +1,7 @@
 ﻿import { Test, TestingModule } from '@nestjs/testing';
-import { ScholarshipStatus } from '@prisma/client';
+import { ScholarshipStatus } from '../../../../shared/domain/enums/scholarship-status.enum.js';
 import { CreateScholarshipDto } from '../dto/request/create-scholarship.dto.js';
-import { ScholarshipRepository } from '../repositories/scholarship.repository.js';
+import { IScholarshipRepository } from '../domain/interfaces/scholarship-repository.interface.js';
 import { CreateScholarshipUseCase } from './create-scholarship.use-case.js';
 
 describe('CreateScholarshipUseCase', () => {
@@ -13,7 +13,7 @@ describe('CreateScholarshipUseCase', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         CreateScholarshipUseCase,
-        { provide: ScholarshipRepository, useValue: mockRepo },
+        { provide: IScholarshipRepository, useValue: mockRepo },
       ],
     }).compile();
 

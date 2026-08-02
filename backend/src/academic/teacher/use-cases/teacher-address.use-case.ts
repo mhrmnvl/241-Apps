@@ -3,21 +3,21 @@ import {
   CreateAddressDto,
   UpdateAddressDto,
 } from '../../../shared/dto/address.dto.js';
-import { TeacherAddressRepository } from '../repositories/teacher-address.repository.js';
-import { TeacherRepository } from '../index.js';
+import { ITeacherAddressRepository } from '../domain/interfaces/teacher-address-repository.interface.js';
+import { ITeacherRepository } from '../index.js';
 
 @Injectable()
 export class TeacherAddressUseCase {
   private readonly logger = new Logger(TeacherAddressUseCase.name);
 
   constructor(
-    private readonly repository: TeacherRepository,
-    private readonly addressRepository: TeacherAddressRepository,
+    private readonly teacherRepository: ITeacherRepository,
+    private readonly addressRepository: ITeacherAddressRepository,
   ) {}
 
   async findAll(teacherId: string) {
     await this.ensureExists(teacherId);
-    return this.addressRepository.findAll(teacherId);
+    return this.addressRepository.findByTeacherId(teacherId);
   }
 
   async add(teacherId: string, dto: CreateAddressDto) {
@@ -42,12 +42,12 @@ export class TeacherAddressUseCase {
   async remove(teacherId: string, addressId: string): Promise<void> {
     await this.ensureExists(teacherId);
     await this.ensureAddressExists(teacherId, addressId);
-    await this.addressRepository.remove(addressId);
+    await this.addressRepository.softDelete(teacherId, addressId);
     this.logger.log(`Address ${addressId} removed from teacher ${teacherId}`);
   }
 
   private async ensureExists(id: string) {
-    const teacher = await this.repository.findById(id);
+    const teacher = await this.teacherRepository.findById(id);
     if (!teacher)
       throw new NotFoundException(`Teacher with ID ${id} not found`);
     return teacher;

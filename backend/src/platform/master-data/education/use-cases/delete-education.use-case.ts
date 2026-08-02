@@ -4,18 +4,18 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { IEducationRepository } from '../interfaces/education-repository.interface.js';
+import { IEducationRepository } from '../domain/interfaces/education-repository.interface.js';
 
 @Injectable()
 export class DeleteEducationUseCase {
   private readonly logger = new Logger(DeleteEducationUseCase.name);
 
-  constructor(private readonly repository: IEducationRepository) {}
+  constructor(private readonly educationRepository: IEducationRepository) {}
 
   async execute(id: string): Promise<void> {
     const [education, usageCount] = await Promise.all([
-      this.repository.findById(id),
-      this.repository.countParentUsage(id),
+      this.educationRepository.findById(id),
+      this.educationRepository.countParentUsage(id),
     ]);
 
     if (!education)
@@ -27,7 +27,7 @@ export class DeleteEducationUseCase {
       );
     }
 
-    await this.repository.softDelete(id);
+    await this.educationRepository.softDelete(id);
     this.logger.log(`Education soft-deleted: ${id}`);
   }
 }

@@ -4,10 +4,11 @@ import { ISubjectRepository } from '../domain/interfaces/subject-repository.inte
 
 @Injectable()
 export class GetSubjectsUseCase {
-  constructor(private readonly repository: ISubjectRepository) {}
+  constructor(private readonly subjectRepository: ISubjectRepository) {}
 
   async execute(query: SubjectQueryDto) {
-    const { data, total, page, limit } = await this.repository.findAll(query);
+    const { data, total, page, limit } =
+      await this.subjectRepository.findAll(query);
     return {
       data,
       meta: { page, limit, total, totalPages: Math.ceil(total / limit) },

@@ -1,3 +1,4 @@
+import type { UserEntity } from '../../../shared/domain/entities/user.entity.js';
 import { RequirePermissions } from '../../../platform/access-control/permission/decorators/require-permissions.decorator.js';
 import {
   Body,
@@ -21,7 +22,6 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { User } from '@prisma/client';
 import { CurrentUser } from '../../../core/decorators/current-user.decorator.js';
 import type { AuthenticatedUser } from '../../../core/types/authenticated-user.type.js';
 import type { RequestUser } from '../types/student.types.js';
@@ -160,7 +160,7 @@ export class StudentController {
     @CurrentUser() _user: AuthenticatedUser,
     @Param('id', ParseUUIDPipe) id: string,
     @Query('isActive', new ParseBoolPipe()) isActive: boolean,
-  ): Promise<User> {
+  ): Promise<UserEntity> {
     return this.toggleStudentActiveService.execute(id, isActive);
   }
 }

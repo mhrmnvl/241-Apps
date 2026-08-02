@@ -14,7 +14,6 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import type { Profile } from '@prisma/client';
 
 import { JwtAuthGuard } from '../../../platform/auth/index.js';
 import { CurrentUser } from '../../../core/decorators/current-user.decorator.js';
@@ -45,7 +44,7 @@ export class StudentProfileController {
     @Param('studentId', ParseUUIDPipe) studentId: string,
     @Body() dto: UpdateProfileDto,
     @CurrentUser() user: AuthenticatedUser,
-  ): Promise<Profile | null> {
+  ): Promise<{ id: string; name: string } | null> {
     return this.updateStudentProfileService.execute(studentId, dto);
   }
 }

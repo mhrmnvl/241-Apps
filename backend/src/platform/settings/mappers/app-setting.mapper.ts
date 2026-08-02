@@ -1,11 +1,6 @@
-import type { AppSetting, File } from '@prisma/client';
+import type { AppSettingWithFiles } from '../domain/entities/app-setting.entity.js';
 import { StorageService } from '../../../core/storage/storage.service.js';
 import { AppSettingResponseDto } from '../dto/response/app-setting-response.dto.js';
-
-type AppSettingWithFiles = AppSetting & {
-  logoFile: File | null;
-  faviconFile: File | null;
-};
 
 export async function toAppSettingResponseDto(
   entity: AppSettingWithFiles,

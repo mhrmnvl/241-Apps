@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ClassroomQueryDto } from '../dto/request/classroom-query.dto.js';
-import { ClassroomRepository } from '../repositories/classroom.repository.js';
+import { IClassroomRepository } from '../domain/interfaces/classroom-repository.interface.js';
 import { GetClassroomsUseCase } from './get-classrooms.use-case.js';
 
 describe('GetClassroomsUseCase', () => {
@@ -14,7 +14,7 @@ describe('GetClassroomsUseCase', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         GetClassroomsUseCase,
-        { provide: ClassroomRepository, useValue: mockRepository },
+        { provide: IClassroomRepository, useValue: mockRepository },
       ],
     }).compile();
 

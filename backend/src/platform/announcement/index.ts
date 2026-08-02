@@ -1,1 +1,1 @@
-export { AnnouncementRepository } from './repositories/announcement.repository.js';
+export { IAnnouncementRepository } from './domain/interfaces/announcement-repository.interface.js';

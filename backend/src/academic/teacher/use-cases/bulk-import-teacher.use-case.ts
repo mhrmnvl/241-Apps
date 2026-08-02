@@ -7,7 +7,7 @@ import {
 } from '../dto/response/bulk-import-teacher-response.dto.js';
 import { BulkImportTeacherRowDto } from '../dto/request/bulk-import-teacher.dto.js';
 import { CreateTeacherDto } from '../dto/request/create-teacher.dto.js';
-import { TeacherRepository } from '../repositories/teacher.repository.js';
+import { ITeacherRepository } from '../domain/interfaces/teacher-repository.interface.js';
 import { CreateTeacherUseCase } from './create-teacher.use-case.js';
 import { ExcelTeacherParser } from '../domain/interfaces/teacher-excel-parser.interface.js';
 import { resolveOnceByKey } from '../../../shared/utils/resolve-once-by-key.helper.js';
@@ -15,7 +15,7 @@ import { resolveOnceByKey } from '../../../shared/utils/resolve-once-by-key.help
 @Injectable()
 export class BulkImportTeachersUseCase {
   constructor(
-    private readonly teacherRepository: TeacherRepository,
+    private readonly teacherRepository: ITeacherRepository,
     private readonly createTeacher: CreateTeacherUseCase,
     private readonly parser: ExcelTeacherParser,
   ) {}

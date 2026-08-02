@@ -3,13 +3,13 @@ import { ICategoryRepository } from '../domain/interfaces/category-repository.in
 
 @Injectable()
 export class DeleteCategoryUseCase {
-  constructor(private readonly repository: ICategoryRepository) {}
+  constructor(private readonly categoryRepository: ICategoryRepository) {}
 
   async execute(id: string) {
-    const category = await this.repository.findById(id);
+    const category = await this.categoryRepository.findById(id);
     if (!category) {
       throw new NotFoundException(`Category with ID ${id} not found`);
     }
-    return this.repository.delete(id);
+    return this.categoryRepository.delete(id);
   }
 }

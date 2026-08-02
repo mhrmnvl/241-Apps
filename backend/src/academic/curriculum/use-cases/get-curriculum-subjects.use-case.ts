@@ -4,9 +4,11 @@ import { ICurriculumSubjectRepository } from '../domain/interfaces/curriculum-su
 
 @Injectable()
 export class GetCurriculumSubjectsUseCase {
-  constructor(private readonly repository: ICurriculumSubjectRepository) {}
+  constructor(
+    private readonly curriculumSubjectRepository: ICurriculumSubjectRepository,
+  ) {}
 
   async execute(query: CurriculumSubjectQueryDto) {
-    return this.repository.findAll(query);
+    return this.curriculumSubjectRepository.findAll(query);
   }
 }

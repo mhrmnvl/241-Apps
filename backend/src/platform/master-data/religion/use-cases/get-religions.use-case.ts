@@ -4,10 +4,11 @@ import { IReligionRepository } from '../domain/interfaces/religion-repository.in
 
 @Injectable()
 export class GetReligionsUseCase {
-  constructor(private readonly repository: IReligionRepository) {}
+  constructor(private readonly religionRepository: IReligionRepository) {}
 
   async execute(query: ReligionQueryDto) {
-    const { data, total, page, limit } = await this.repository.findAll(query);
+    const { data, total, page, limit } =
+      await this.religionRepository.findAll(query);
     return {
       data,
       meta: {

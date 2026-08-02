@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { FileController } from './presentation/file.controller.js';
-import { FileRepository } from './repositories/file.repository.js';
+import { PrismaFileRepository } from './infrastructure/persistence/prisma-file.repository.js';
+import { IFileRepository } from './domain/interfaces/file-repository.interface.js';
 import { ImageOptimizerService } from './domain/interfaces/image-optimizer.interface.js';
 import { SharpImageOptimizerService } from './infrastructure/image-optimizer.service.js';
 
@@ -12,7 +13,10 @@ import { DeleteFileUseCase } from './use-cases/delete-file.use-case.js';
 @Module({
   controllers: [FileController],
   providers: [
-    FileRepository,
+    {
+      provide: IFileRepository,
+      useClass: PrismaFileRepository,
+    },
     {
       provide: ImageOptimizerService,
       useClass: SharpImageOptimizerService,
@@ -21,6 +25,6 @@ import { DeleteFileUseCase } from './use-cases/delete-file.use-case.js';
     GetFilesUseCase,
     DeleteFileUseCase,
   ],
-  exports: [FileRepository, ImageOptimizerService],
+  exports: [IFileRepository, ImageOptimizerService],
 })
 export class FileModule {}

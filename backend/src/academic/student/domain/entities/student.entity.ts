@@ -1,34 +1,39 @@
-import { BaseEntity } from '../../../../shared/domain/base/entity.base.js';
-import { StudentStatus } from '../../../../shared/domain/enums/student-status.enum.js';
+import { StudentStatusEnum } from '../../../../shared/domain/enums/student-status.enum.js';
 
-export class StudentEntity extends BaseEntity<string> {
-  private _status: StudentStatus;
+export interface StudentEntity {
+  id: string;
+  userId: string;
+  nis: string;
+  nisn: string;
+  status: `${StudentStatusEnum}`;
+  gradeId?: string | null;
+  deletedAt?: Date | null;
+}
 
-  constructor(
-    id: string,
-    public readonly userId: string,
-    public readonly nis: string,
-    public readonly nisn: string,
-    status: StudentStatus,
-    public readonly gradeId: string | null = null,
-  ) {
-    super(id);
-    this._status = status;
-  }
-
-  public get status(): StudentStatus {
-    return this._status;
-  }
-
-  public transitionTo(newStatus: StudentStatus): void {
-    if (this._status === newStatus) {
-      return;
-    }
-
-    if (this._status === StudentStatus.GRADUATED) {
-      throw new Error(`Cannot change status of a graduated student.`);
-    }
-
-    this._status = newStatus;
-  }
+export interface StudentWithDetails extends StudentEntity {
+  user: {
+    id: string;
+    identifier: string;
+    isActive: boolean;
+    profile?: {
+      name?: string | null;
+      nik?: string | null;
+      gender?: string | null;
+      birthPlace?: string | null;
+      birthDate?: Date | string | null;
+      email?: string | null;
+      phone?: string | null;
+    } | null;
+  };
+  grade?: {
+    id: string;
+    name: string;
+    level: number;
+  } | null;
+  enrollments?: {
+    classroom: {
+      code: string;
+    };
+  }[];
+  parents?: { parentId: string; isPrimary: boolean; relation: string }[];
 }

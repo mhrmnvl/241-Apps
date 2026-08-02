@@ -1,6 +1,6 @@
 import { ConflictException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { IEducationRepository } from '../interfaces/education-repository.interface.js';
+import { IEducationRepository } from '../domain/interfaces/education-repository.interface.js';
 import { DeleteEducationUseCase } from './delete-education.use-case.js';
 
 describe('DeleteEducationUseCase', () => {

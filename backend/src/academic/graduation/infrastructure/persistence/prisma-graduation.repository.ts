@@ -1,16 +1,18 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma, StudentGraduation, StudentStatus } from '@prisma/client';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
-import { CreateStudentGraduationDto } from '../../dto/request/create-student-graduation.dto.js';
-import { StudentGraduationQueryDto } from '../../dto/request/student-graduation-query.dto.js';
-import { UpdateStudentGraduationDto } from '../../dto/request/update-student-graduation.dto.js';
-import { resolveAcademicYearId } from '../../../../shared/utils/active-academic-year.helper.js';
-import {
-  IGraduationRepository,
-  GRADUATION_INCLUDE,
-  StudentGraduationWithDetails,
+import type {
+  StudentGraduationQueryInput,
+  CreateStudentGraduationRepositoryInput,
+  UpdateStudentGraduationRepositoryInput,
 } from '../../domain/interfaces/graduation-repository.interface.js';
+import { resolveAcademicYearId } from '../../../../shared/utils/active-academic-year.helper.js';
+import { IGraduationRepository } from '../../domain/interfaces/graduation-repository.interface.js';
 import { PaginatedResult } from '../../../../shared/domain/interfaces/repository.interface.js';
+import {
+  GRADUATION_WITH_DETAILS_INCLUDE,
+  GraduationWithDetails,
+} from './prisma-graduation.includes.js';
 
 @Injectable()
 export class PrismaGraduationRepository extends IGraduationRepository {
@@ -19,8 +21,8 @@ export class PrismaGraduationRepository extends IGraduationRepository {
   }
 
   async findAll(
-    query: StudentGraduationQueryDto,
-  ): Promise<PaginatedResult<StudentGraduationWithDetails>> {
+    query: StudentGraduationQueryInput,
+  ): Promise<PaginatedResult<GraduationWithDetails>> {
     const { page = 1, limit = 10, academicYearId, search } = query;
     const skip = (page - 1) * limit;
 
@@ -51,7 +53,7 @@ export class PrismaGraduationRepository extends IGraduationRepository {
     const [data, total] = await Promise.all([
       this.prisma.studentGraduation.findMany({
         where,
-        include: GRADUATION_INCLUDE,
+        include: GRADUATION_WITH_DETAILS_INCLUDE,
         skip,
         take: limit,
         orderBy: { createdAt: 'desc' },
@@ -62,13 +64,13 @@ export class PrismaGraduationRepository extends IGraduationRepository {
     return { data, total, page, limit };
   }
 
-  async findById(id: string): Promise<StudentGraduationWithDetails | null> {
+  async findById(id: string): Promise<GraduationWithDetails | null> {
     return this.prisma.studentGraduation.findFirst({
       where: {
         id,
         deletedAt: null,
       },
-      include: GRADUATION_INCLUDE,
+      include: GRADUATION_WITH_DETAILS_INCLUDE,
     });
   }
 
@@ -82,8 +84,8 @@ export class PrismaGraduationRepository extends IGraduationRepository {
   }
 
   async create(
-    dto: CreateStudentGraduationDto,
-  ): Promise<StudentGraduationWithDetails> {
+    dto: CreateStudentGraduationRepositoryInput,
+  ): Promise<GraduationWithDetails> {
     return this.prisma.$transaction(async (tx) => {
       const student = await tx.student.findFirst({
         where: {
@@ -105,7 +107,7 @@ export class PrismaGraduationRepository extends IGraduationRepository {
           ...(dto.certificateNo && { certificateNo: dto.certificateNo }),
           ...(dto.note && { note: dto.note }),
         },
-        include: GRADUATION_INCLUDE,
+        include: GRADUATION_WITH_DETAILS_INCLUDE,
       });
 
       await tx.student.update({
@@ -119,8 +121,8 @@ export class PrismaGraduationRepository extends IGraduationRepository {
 
   async update(
     id: string,
-    dto: UpdateStudentGraduationDto,
-  ): Promise<StudentGraduationWithDetails> {
+    dto: UpdateStudentGraduationRepositoryInput,
+  ): Promise<GraduationWithDetails> {
     const { studentId, academicYearId, graduationDate, ...rest } = dto;
     return this.prisma.studentGraduation.update({
       where: { id },
@@ -130,8 +132,12 @@ export class PrismaGraduationRepository extends IGraduationRepository {
         ...(academicYearId && { academicYearId }),
         ...(graduationDate && { graduationDate: new Date(graduationDate) }),
       },
-      include: GRADUATION_INCLUDE,
+      include: GRADUATION_WITH_DETAILS_INCLUDE,
     });
+  }
+
+  async remove(id: string): Promise<StudentGraduation> {
+    return this.softDelete(id);
   }
 
   async softDelete(id: string): Promise<StudentGraduation> {

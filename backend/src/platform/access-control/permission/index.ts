@@ -1,5 +1,5 @@
 export { PermissionModule } from './permission.module.js';
-export { IPermissionRepository } from './interfaces/permission-repository.interface.js';
+export { IPermissionRepository } from './domain/interfaces/permission-repository.interface.js';
 export { PermissionGuard } from './guards/permission.guard.js';
 export {
   RequirePermissions,

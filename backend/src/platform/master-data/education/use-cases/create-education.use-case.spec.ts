@@ -1,7 +1,7 @@
 import { ConflictException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { CreateEducationDto } from '../dto/request/create-education.dto.js';
-import { IEducationRepository } from '../interfaces/education-repository.interface.js';
+import { IEducationRepository } from '../domain/interfaces/education-repository.interface.js';
 import { CreateEducationUseCase } from './create-education.use-case.js';
 
 describe('CreateEducationUseCase', () => {

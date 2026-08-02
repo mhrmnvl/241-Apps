@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { IUserRepository } from '../interfaces/user-repository.interface.js';
+import { IUserRepository } from '../domain/interfaces/user-repository.interface.js';
 
 @Injectable()
 export class GetUserByIdUseCase {

@@ -1,12 +1,12 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { AppKey } from '@prisma/client';
+import { AppKey } from '../../../../shared/domain/enums/app-key.enum.js';
 
 export class AppSettingResponseDto {
   @ApiProperty({ format: 'uuid' })
   id!: string;
 
   @ApiProperty({ enum: AppKey })
-  appKey!: AppKey;
+  appKey!: `${AppKey}`;
 
   @ApiProperty({ example: 'SIAKAD 241' })
   appTitle!: string;

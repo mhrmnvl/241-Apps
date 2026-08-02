@@ -1,7 +1,7 @@
 import { ConflictException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { CreateClassroomDto } from '../dto/request/create-classroom.dto.js';
-import { ClassroomRepository } from '../repositories/classroom.repository.js';
+import { IClassroomRepository } from '../domain/interfaces/classroom-repository.interface.js';
 import { CreateClassroomUseCase } from './create-classroom.use-case.js';
 
 describe('CreateClassroomUseCase', () => {
@@ -16,7 +16,7 @@ describe('CreateClassroomUseCase', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         CreateClassroomUseCase,
-        { provide: ClassroomRepository, useValue: mockRepository },
+        { provide: IClassroomRepository, useValue: mockRepository },
       ],
     }).compile();
 
@@ -45,9 +45,8 @@ describe('CreateClassroomUseCase', () => {
       const result = await useCase.execute(dto);
 
       expect(mockRepository.findDuplicate).toHaveBeenCalledWith(
-        dto.academicYearId,
-        dto.gradeId,
         dto.code,
+        dto.academicYearId,
       );
       expect(mockRepository.create).toHaveBeenCalled();
       expect(result).toEqual({ ...created, displayName: dto.name });
@@ -66,7 +65,7 @@ describe('CreateClassroomUseCase', () => {
         academicYearId: dto.academicYearId,
         gradeId: dto.gradeId,
         code: dto.code,
-        name: null,
+        name: undefined,
         capacity: dto.capacity,
         isActive: dto.isActive,
       });

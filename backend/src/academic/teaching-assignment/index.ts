@@ -1,1 +1,1 @@
-export { TeachingAssignmentRepository } from './repositories/teaching-assignment.repository.js';
+export { ITeachingAssignmentRepository } from './domain/interfaces/teaching-assignment-repository.interface.js';

@@ -13,7 +13,7 @@ import { IPromotionRepository } from '../domain/interfaces/promotion-repository.
 
 @Injectable()
 export class PreviewPromotionUseCase {
-  constructor(private readonly repository: IPromotionRepository) {}
+  constructor(private readonly promotionRepository: IPromotionRepository) {}
 
   async execute(dto: PromotionDto): Promise<PromotionPreviewDto> {
     const { sourceSemesterId, targetSemesterId, students } = dto;
@@ -25,8 +25,8 @@ export class PreviewPromotionUseCase {
     }
 
     const [sourceSemester, targetSemester] = await Promise.all([
-      this.repository.findSemesterWithAcademicYear(sourceSemesterId),
-      this.repository.findSemesterWithAcademicYear(targetSemesterId),
+      this.promotionRepository.findSemesterWithAcademicYear(sourceSemesterId),
+      this.promotionRepository.findSemesterWithAcademicYear(targetSemesterId),
     ]);
 
     if (!sourceSemester) {

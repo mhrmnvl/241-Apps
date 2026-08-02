@@ -8,7 +8,7 @@ import { AdmissionNotificationService } from '../services/admission-notification
 @Injectable()
 export class RejectApplicationUseCase {
   constructor(
-    private readonly repository: IAdmissionApplicationRepository,
+    private readonly admissionApplicationRepository: IAdmissionApplicationRepository,
     private readonly notifications: AdmissionNotificationService,
   ) {}
 
@@ -17,14 +17,15 @@ export class RejectApplicationUseCase {
     dto: RejectApplicationDto,
     adminId: string,
   ) {
-    const application = await this.repository.findActiveById(applicationId);
+    const application =
+      await this.admissionApplicationRepository.findActiveById(applicationId);
     if (!application) {
       throw new NotFoundException('Data pendaftaran tidak ditemukan');
     }
 
     assertTransition(application.status, 'REJECTED');
 
-    const updated = await this.repository.setRejected({
+    const updated = await this.admissionApplicationRepository.setRejected({
       id: application.id,
       adminId,
       reason: dto.reason,

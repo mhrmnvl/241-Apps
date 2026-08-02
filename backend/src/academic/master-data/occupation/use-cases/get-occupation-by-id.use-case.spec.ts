@@ -1,6 +1,6 @@
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { IOccupationRepository } from '../interfaces/occupation-repository.interface.js';
+import { IOccupationRepository } from '../domain/interfaces/occupation-repository.interface.js';
 import { GetOccupationByIdUseCase } from './get-occupation-by-id.use-case.js';
 
 describe('GetOccupationByIdUseCase', () => {

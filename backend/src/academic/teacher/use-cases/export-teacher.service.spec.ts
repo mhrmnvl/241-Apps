@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { TeacherRepository } from '../repositories/teacher.repository.js';
+import { ITeacherRepository } from '../domain/interfaces/teacher-repository.interface.js';
 import { ExportTeachersUseCase } from './export-teacher.use-case.js';
 
 const mockTeacher = {
@@ -38,7 +38,7 @@ describe('ExportTeachersUseCase', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ExportTeachersUseCase,
-        { provide: TeacherRepository, useValue: mockRepo },
+        { provide: ITeacherRepository, useValue: mockRepo },
       ],
     }).compile();
 

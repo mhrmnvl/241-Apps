@@ -3,9 +3,9 @@ import { IStatusRepository } from '../domain/interfaces/status-repository.interf
 
 @Injectable()
 export class GetStatusesUseCase {
-  constructor(private readonly repository: IStatusRepository) {}
+  constructor(private readonly statusRepository: IStatusRepository) {}
 
   async execute(search?: string) {
-    return this.repository.findMany(search);
+    return this.statusRepository.findMany(search);
   }
 }

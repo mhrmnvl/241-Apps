@@ -1,7 +1,7 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { ClassroomRepository } from '../../classroom/index.js';
+import { IClassroomRepository } from '../../classroom/index.js';
 import { CreateEventDto } from '../dto/request/create-event.dto.js';
-import { IEventRepository } from '../domain/interfaces/events-repository.interface.js';
+import { IEventRepository } from '../domain/interfaces/event-repository.interface.js';
 
 @Injectable()
 export class CreateEventUseCase {
@@ -9,7 +9,7 @@ export class CreateEventUseCase {
 
   constructor(
     private readonly eventRepository: IEventRepository,
-    private readonly ClassroomRepository: ClassroomRepository,
+    private readonly ClassroomRepository: IClassroomRepository,
   ) {}
 
   async execute(dto: CreateEventDto) {
@@ -24,7 +24,11 @@ export class CreateEventUseCase {
       }
     }
 
-    const event = await this.eventRepository.create(dto);
+    const event = await this.eventRepository.create({
+      ...dto,
+      startTime: new Date(dto.startTime),
+      endTime: new Date(dto.endTime),
+    });
     this.logger.log(
       `Event created: "${dto.title}" - targets: ${
         dto.classroomIds?.length ? dto.classroomIds.join(', ') : 'school-wide'

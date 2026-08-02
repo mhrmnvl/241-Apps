@@ -1,4 +1,1 @@
-export {
-  GradeRepository,
-  IGradeRepository,
-} from './repositories/grade.repository.js';
+export { IGradeRepository } from './domain/interfaces/grade-repository.interface.js';

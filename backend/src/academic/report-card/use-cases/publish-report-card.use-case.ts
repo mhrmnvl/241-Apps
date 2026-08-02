@@ -10,10 +10,10 @@ import { IReportCardRepository } from '../domain/interfaces/report-card-reposito
 export class PublishReportCardUseCase {
   private readonly logger = new Logger(PublishReportCardUseCase.name);
 
-  constructor(private readonly repository: IReportCardRepository) {}
+  constructor(private readonly reportCardRepository: IReportCardRepository) {}
 
   async execute(id: string) {
-    const existing = await this.repository.findById(id);
+    const existing = await this.reportCardRepository.findById(id);
     if (!existing)
       throw new NotFoundException(`ReportCard with ID ${id} not found`);
 
@@ -26,7 +26,7 @@ export class PublishReportCardUseCase {
       );
     }
 
-    const updated = await this.repository.update(id, {
+    const updated = await this.reportCardRepository.update(id, {
       isPublished: !existing.isPublished,
     });
 

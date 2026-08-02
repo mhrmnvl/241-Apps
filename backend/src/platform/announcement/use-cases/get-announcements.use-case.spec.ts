@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AnnouncementQueryDto } from '../dto/request/announcement-query.dto.js';
-import { AnnouncementRepository } from '../repositories/announcement.repository.js';
+import { IAnnouncementRepository } from '../domain/interfaces/announcement-repository.interface.js';
 import { GetAnnouncementsUseCase } from './get-announcements.use-case.js';
 
 describe('GetAnnouncementsUseCase', () => {
@@ -14,7 +14,7 @@ describe('GetAnnouncementsUseCase', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         GetAnnouncementsUseCase,
-        { provide: AnnouncementRepository, useValue: mockRepository },
+        { provide: IAnnouncementRepository, useValue: mockRepository },
       ],
     }).compile();
 

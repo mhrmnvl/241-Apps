@@ -7,13 +7,13 @@ import { IEnrollmentRepository } from '../domain/interfaces/enrollment-repositor
 export class BulkTransferStudentUseCase {
   private readonly logger = new Logger(BulkTransferStudentUseCase.name);
 
-  constructor(private readonly repository: IEnrollmentRepository) {}
+  constructor(private readonly enrollmentRepository: IEnrollmentRepository) {}
 
   async execute(dto: BulkTransferStudentDto) {
     const results: { id: string; success: boolean; error?: string }[] = [];
 
     for (const enrollmentId of dto.enrollmentIds) {
-      const enrollment = await this.repository.findById(enrollmentId);
+      const enrollment = await this.enrollmentRepository.findById(enrollmentId);
       if (!enrollment) {
         results.push({
           id: enrollmentId,
@@ -32,7 +32,7 @@ export class BulkTransferStudentUseCase {
         continue;
       }
 
-      await this.repository.update(enrollmentId, {
+      await this.enrollmentRepository.update(enrollmentId, {
         classroomId: dto.targetClassroomId,
         note: dto.note,
       });

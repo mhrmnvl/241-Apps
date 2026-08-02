@@ -1,56 +1,67 @@
-import { Occupation, Parent, Prisma } from '@prisma/client';
-import { CreateParentDto } from '../../dto/request/create-parent.dto.js';
-import { ParentQueryDto } from '../../dto/request/parent-query.dto.js';
-import { UpdateParentDto } from '../../dto/request/update-parent.dto.js';
-import { PaginatedResult } from '../../../../shared/domain/interfaces/repository.interface.js';
+import {
+  PaginatedResult,
+  PaginationQueryInput,
+} from '../../../../shared/domain/interfaces/repository.interface.js';
+import { IncomeRange } from '../../../../shared/domain/enums/income-range.enum.js';
+import {
+  ProfileEntity,
+  ProfileUpdateInput,
+} from '../../../../platform/profile/domain/entities/profile.entity.js';
+import {
+  ParentEntity,
+  ParentWithDetails,
+  ParentListWithDetails,
+} from '../entities/parent.entity.js';
 
-export const ADDRESS_OMIT = {
-  studentId: true,
-  teacherId: true,
-  parentId: true,
-} satisfies Prisma.AddressOmit;
+export type { ParentWithDetails, ParentListWithDetails };
 
-export const PARENT_LIST_INCLUDE = {
-  occupation: true,
-  _count: { select: { addresses: true, studentParents: true } },
-} satisfies Prisma.ParentInclude;
+export interface OccupationRef {
+  id: string;
+  name: string;
+  isActive: boolean;
+}
 
-export const PARENT_DETAIL_INCLUDE = {
-  occupation: true,
-  addresses: { omit: ADDRESS_OMIT, orderBy: { isPrimary: 'desc' as const } },
-  studentParents: {
-    where: { student: { deletedAt: null } },
-    orderBy: { isPrimary: 'desc' as const },
-    include: {
-      student: {
-        select: {
-          id: true,
-          nis: true,
-          nisn: true,
-          status: true,
-          user: { select: { profile: { select: { name: true } } } },
-        },
-      },
-    },
-  },
-} satisfies Prisma.ParentInclude;
+export interface ParentQueryInput extends PaginationQueryInput {
+  search?: string;
+  occupationId?: string;
+}
 
-export type ParentWithDetails = Prisma.ParentGetPayload<{
-  include: typeof PARENT_DETAIL_INCLUDE;
-}>;
+export interface CreateParentRepositoryInput {
+  name: string;
+  nik: string;
+  birthPlace: string;
+  birthDate: Date;
+  email?: string;
+  phone?: string;
+  occupationId: string;
+  income?: IncomeRange;
+}
 
-export type ParentListWithDetails = Prisma.ParentGetPayload<{
-  include: typeof PARENT_LIST_INCLUDE;
-}>;
+export type UpdateParentRepositoryInput = Partial<CreateParentRepositoryInput>;
 
 export abstract class IParentRepository {
   abstract findAll(
-    query: ParentQueryDto,
+    query: ParentQueryInput,
   ): Promise<PaginatedResult<ParentListWithDetails>>;
   abstract findById(id: string): Promise<ParentWithDetails | null>;
-  abstract findByNik(nik: string, excludeId?: string): Promise<Parent | null>;
-  abstract findOccupationById(id: string): Promise<Occupation | null>;
-  abstract create(dto: CreateParentDto): Promise<ParentWithDetails>;
-  abstract update(id: string, dto: UpdateParentDto): Promise<ParentWithDetails>;
-  abstract softDelete(id: string): Promise<Parent>;
+  abstract findByUserId(userId: string): Promise<ParentWithDetails | null>;
+  abstract findByNik(
+    nik: string,
+    excludeId?: string,
+  ): Promise<ParentWithDetails | null>;
+  abstract findOccupationById(id: string): Promise<OccupationRef | null>;
+  abstract create(
+    input: CreateParentRepositoryInput,
+    hashedPassword?: string,
+  ): Promise<ParentWithDetails>;
+  abstract update(
+    id: string,
+    input: UpdateParentRepositoryInput,
+  ): Promise<ParentWithDetails>;
+  abstract updateProfile(
+    userId: string,
+    data: ProfileUpdateInput,
+  ): Promise<ProfileEntity>;
+  abstract softDelete(id: string, userId?: string): Promise<ParentEntity>;
+  abstract remove(id: string): Promise<ParentEntity>;
 }

@@ -1,5 +1,6 @@
 import { BadRequestException, ConflictException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
+import { AdmissionDocumentStatus } from '../../shared/domain/enums/admission-document-status.enum.js';
 import { IAdmissionApplicationRepository } from '../domain/interfaces/admission-application-repository.interface.js';
 import { AdmissionNotificationService } from '../services/admission-notification.service.js';
 import { AcceptApplicationUseCase } from './accept-application.use-case.js';
@@ -59,7 +60,12 @@ describe('Admission workflow use-cases', () => {
   describe('VerifyDocumentUseCase', () => {
     it('requires a note when rejecting a document', async () => {
       await expect(
-        verifyDoc.execute('app1', 'doc1', { status: 'REJECTED' }, 'admin1'),
+        verifyDoc.execute(
+          'app1',
+          'doc1',
+          { status: AdmissionDocumentStatus.REJECTED },
+          'admin1',
+        ),
       ).rejects.toThrow(BadRequestException);
     });
   });

@@ -4,10 +4,12 @@ import { CreateAdmissionAnnouncementDto } from '../dto/request/create-admission-
 
 @Injectable()
 export class CreateAdmissionAnnouncementUseCase {
-  constructor(private readonly repository: IAdmissionAnnouncementRepository) {}
+  constructor(
+    private readonly admissionAnnouncementRepository: IAdmissionAnnouncementRepository,
+  ) {}
 
   async execute(dto: CreateAdmissionAnnouncementDto, createdById: string) {
-    return this.repository.create({
+    return this.admissionAnnouncementRepository.create({
       title: dto.title,
       content: dto.content,
       waveId: dto.waveId ?? null,

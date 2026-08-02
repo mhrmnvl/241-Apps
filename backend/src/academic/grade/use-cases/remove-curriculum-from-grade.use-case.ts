@@ -3,13 +3,14 @@ import { IGradeAcademicYearRepository } from '../domain/interfaces/grade-academi
 
 @Injectable()
 export class RemoveCurriculumFromGradeUseCase {
-  constructor(private readonly repository: IGradeAcademicYearRepository) {}
+  constructor(
+    private readonly gradeAcademicYearRepository: IGradeAcademicYearRepository,
+  ) {}
 
   async execute(id: string) {
-    const existing = await this.repository.findAll();
-    const record = existing.find((r) => r.id === id);
+    const record = await this.gradeAcademicYearRepository.findById(id);
     if (!record)
       throw new NotFoundException(`GradeAcademicYear with ID ${id} not found`);
-    await this.repository.delete(id);
+    await this.gradeAcademicYearRepository.remove(id);
   }
 }

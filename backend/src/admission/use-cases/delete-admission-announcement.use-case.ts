@@ -3,14 +3,17 @@ import { IAdmissionAnnouncementRepository } from '../domain/interfaces/admission
 
 @Injectable()
 export class DeleteAdmissionAnnouncementUseCase {
-  constructor(private readonly repository: IAdmissionAnnouncementRepository) {}
+  constructor(
+    private readonly admissionAnnouncementRepository: IAdmissionAnnouncementRepository,
+  ) {}
 
   async execute(id: string) {
-    const announcement = await this.repository.findActiveById(id);
+    const announcement =
+      await this.admissionAnnouncementRepository.findActiveById(id);
     if (!announcement) {
       throw new NotFoundException('Pengumuman tidak ditemukan');
     }
 
-    return this.repository.softDelete(id);
+    return this.admissionAnnouncementRepository.softDelete(id);
   }
 }

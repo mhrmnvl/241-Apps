@@ -7,19 +7,19 @@ import { ITimeSlotRepository } from '../domain/interfaces/time-slot-repository.i
 
 @Injectable()
 export class DeleteTimeSlotTypeUseCase {
-  constructor(private readonly repository: ITimeSlotRepository) {}
+  constructor(private readonly timeSlotRepository: ITimeSlotRepository) {}
 
   async execute(id: string) {
-    const type = await this.repository.findTypeById(id);
+    const type = await this.timeSlotRepository.findTypeById(id);
     if (!type) {
       throw new NotFoundException('Tipe jam tidak ditemukan');
     }
-    const inUse = await this.repository.countSlotsUsingType(id);
+    const inUse = await this.timeSlotRepository.countSlotsUsingType(id);
     if (inUse > 0) {
       throw new ConflictException(
         'Tipe masih dipakai oleh jam pelajaran, tidak bisa dihapus',
       );
     }
-    return this.repository.removeType(id);
+    return this.timeSlotRepository.removeType(id);
   }
 }

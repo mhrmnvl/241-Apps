@@ -1,26 +1,33 @@
-import { AchievementType, Prisma } from '@prisma/client';
-import { AchievementTypeQueryDto } from '../../dto/request/achievement-type-query.dto.js';
-import { PaginatedResult } from '../../../../../shared/domain/interfaces/repository.interface.js';
+import {
+  PaginatedResult,
+  PaginationQueryInput,
+} from '../../../../../shared/domain/interfaces/repository.interface.js';
+import { AchievementTypeEntity } from '../entities/achievement-type.entity.js';
+
+export interface AchievementTypeQueryInput extends PaginationQueryInput {
+  search?: string;
+  isActive?: boolean;
+}
 
 export abstract class IAchievementTypeRepository {
   abstract findAll(
-    query: AchievementTypeQueryDto,
-  ): Promise<PaginatedResult<AchievementType>>;
+    query: AchievementTypeQueryInput,
+  ): Promise<PaginatedResult<AchievementTypeEntity>>;
 
-  abstract findById(id: string): Promise<AchievementType | null>;
+  abstract findById(id: string): Promise<AchievementTypeEntity | null>;
   abstract findByName(
     name: string,
     excludeId?: string,
-  ): Promise<AchievementType | null>;
+  ): Promise<AchievementTypeEntity | null>;
 
   abstract create(data: {
     name: string;
     isActive?: boolean;
-  }): Promise<AchievementType>;
+  }): Promise<AchievementTypeEntity>;
   abstract update(
     id: string,
-    data: Prisma.AchievementTypeUpdateInput,
-  ): Promise<AchievementType>;
+    data: { name?: string; isActive?: boolean },
+  ): Promise<AchievementTypeEntity>;
 
-  abstract softDelete(id: string): Promise<AchievementType>;
+  abstract softDelete(id: string): Promise<AchievementTypeEntity>;
 }

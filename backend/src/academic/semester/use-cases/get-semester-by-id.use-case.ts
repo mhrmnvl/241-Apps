@@ -3,10 +3,10 @@ import { ISemesterRepository } from '../domain/interfaces/semester-repository.in
 
 @Injectable()
 export class GetSemesterByIdUseCase {
-  constructor(private readonly repository: ISemesterRepository) {}
+  constructor(private readonly semesterRepository: ISemesterRepository) {}
 
   async execute(id: string) {
-    const semester = await this.repository.findById(id);
+    const semester = await this.semesterRepository.findById(id);
     if (!semester) {
       throw new NotFoundException(`Semester with ID ${id} not found`);
     }

@@ -6,17 +6,17 @@ import { ITimeSlotRepository } from '../domain/interfaces/time-slot-repository.i
 export class CreateTimeSlotUseCase {
   private readonly logger = new Logger(CreateTimeSlotUseCase.name);
 
-  constructor(private readonly repository: ITimeSlotRepository) {}
+  constructor(private readonly timeSlotRepository: ITimeSlotRepository) {}
 
   async execute(dto: CreateTimeSlotDto) {
-    const conflict = await this.repository.findByOrder(dto.order);
+    const conflict = await this.timeSlotRepository.findByOrder(dto.order);
     if (conflict) {
       throw new ConflictException(
         `Time slot with order ${dto.order} already exists`,
       );
     }
 
-    const ts = await this.repository.create(dto);
+    const ts = await this.timeSlotRepository.create(dto);
     this.logger.log(`TimeSlot created: ${ts.name}`);
     return ts;
   }

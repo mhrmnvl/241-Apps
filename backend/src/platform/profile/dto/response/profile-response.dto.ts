@@ -1,5 +1,5 @@
 ﻿import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { UserGender } from '@prisma/client';
+import { UserGender } from '../../../../shared/domain/enums/user-gender.enum.js';
 
 export class ProfileResponseDto {
   @ApiProperty({

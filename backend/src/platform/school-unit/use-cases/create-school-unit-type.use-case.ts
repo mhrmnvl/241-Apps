@@ -1,13 +1,13 @@
 import { ConflictException, Injectable, Logger } from '@nestjs/common';
 import { CreateSchoolUnitTypeDto } from '../dto/request/create-school-unit-type.dto.js';
-import { SchoolUnitTypeRepository } from '../repositories/school-unit-types.repository.js';
+import { ISchoolUnitTypeRepository } from '../domain/interfaces/school-unit-type-repository.interface.js';
 
 @Injectable()
 export class CreateSchoolUnitTypeUseCase {
   private readonly logger = new Logger(CreateSchoolUnitTypeUseCase.name);
 
   constructor(
-    private readonly schoolUnitTypeRepository: SchoolUnitTypeRepository,
+    private readonly schoolUnitTypeRepository: ISchoolUnitTypeRepository,
   ) {}
 
   async execute(dto: CreateSchoolUnitTypeDto) {

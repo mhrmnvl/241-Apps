@@ -3,10 +3,12 @@ import { IAcademicCalendarRepository } from '../domain/interfaces/academic-calen
 
 @Injectable()
 export class GetAcademicCalendarByIdUseCase {
-  constructor(private readonly repository: IAcademicCalendarRepository) {}
+  constructor(
+    private readonly academicCalendarRepository: IAcademicCalendarRepository,
+  ) {}
 
   async execute(id: string) {
-    const calendar = await this.repository.findById(id);
+    const calendar = await this.academicCalendarRepository.findById(id);
     if (!calendar) {
       throw new NotFoundException(`Academic calendar with id ${id} not found`);
     }

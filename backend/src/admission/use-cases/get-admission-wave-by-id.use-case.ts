@@ -4,10 +4,12 @@ import { IAdmissionWaveRepository } from '../domain/interfaces/admission-wave-re
 
 @Injectable()
 export class GetAdmissionWaveByIdUseCase {
-  constructor(private readonly repository: IAdmissionWaveRepository) {}
+  constructor(
+    private readonly admissionWaveRepository: IAdmissionWaveRepository,
+  ) {}
 
   async execute(id: string) {
-    const wave = await this.repository.findById(id);
+    const wave = await this.admissionWaveRepository.findById(id);
     if (!wave) {
       throw new NotFoundException('Gelombang tidak ditemukan');
     }

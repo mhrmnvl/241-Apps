@@ -3,10 +3,10 @@ import { IScheduleRepository } from '../domain/interfaces/schedule-repository.in
 
 @Injectable()
 export class DeleteScheduleUseCase {
-  constructor(private readonly repository: IScheduleRepository) {}
+  constructor(private readonly scheduleRepository: IScheduleRepository) {}
   async execute(id: string) {
-    const r = await this.repository.findById(id);
+    const r = await this.scheduleRepository.findById(id);
     if (!r) throw new NotFoundException(`Schedule ${id} not found`);
-    return this.repository.softDelete(id);
+    return this.scheduleRepository.softDelete(id);
   }
 }

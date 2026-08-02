@@ -1,40 +1,53 @@
-import { AdmissionAnnouncement, Prisma } from '@prisma/client';
-import { AdmissionAnnouncementQueryDto } from '../../dto/request/admission-announcement-query.dto.js';
-import { PaginatedResult } from '../../../shared/domain/interfaces/repository.interface.js';
+import {
+  PaginatedResult,
+  PaginationQueryInput,
+} from '../../../shared/domain/interfaces/repository.interface.js';
+import { AdmissionAnnouncementEntity } from '../entities/admission.entity.js';
 
-export type AdmissionAnnouncementWithWave =
-  Prisma.AdmissionAnnouncementGetPayload<{
-    include: { wave: { select: { id: true; name: true; code: true } } };
-  }>;
+export type AdmissionAnnouncementWithWave = AdmissionAnnouncementEntity;
+
+export interface AdmissionAnnouncementQueryInput extends PaginationQueryInput {
+  search?: string;
+  waveId?: string;
+  isPublished?: boolean;
+}
 
 export interface CreateAdmissionAnnouncementRepositoryInput {
   title: string;
   content: string;
-  waveId: string | null;
-  isPublished: boolean;
-  publishedAt: Date | null;
+  /** Target wave; `null` means the announcement targets every wave. */
+  waveId?: string | null;
+  isPublished?: boolean;
+  publishedAt?: Date | null;
   createdById: string;
+}
+
+export interface UpdateAdmissionAnnouncementRepositoryInput {
+  title?: string;
+  content?: string;
+  waveId?: string | null;
+  isPublished?: boolean;
+  publishedAt?: Date | null;
 }
 
 export abstract class IAdmissionAnnouncementRepository {
   abstract findAll(
-    query: AdmissionAnnouncementQueryDto,
-  ): Promise<PaginatedResult<AdmissionAnnouncementWithWave>>;
-  abstract findActiveById(id: string): Promise<AdmissionAnnouncement | null>;
+    query: AdmissionAnnouncementQueryInput,
+  ): Promise<PaginatedResult<AdmissionAnnouncementEntity>>;
+  abstract findById(id: string): Promise<AdmissionAnnouncementEntity | null>;
+  abstract findActiveById(
+    id: string,
+  ): Promise<AdmissionAnnouncementEntity | null>;
   abstract create(
-    data: CreateAdmissionAnnouncementRepositoryInput,
-  ): Promise<AdmissionAnnouncementWithWave>;
+    input: CreateAdmissionAnnouncementRepositoryInput,
+  ): Promise<AdmissionAnnouncementEntity>;
   abstract update(
     id: string,
-    data: Prisma.AdmissionAnnouncementUncheckedUpdateInput,
-  ): Promise<AdmissionAnnouncementWithWave>;
-  abstract publish(id: string): Promise<AdmissionAnnouncementWithWave>;
-  abstract softDelete(id: string): Promise<AdmissionAnnouncement>;
-
-  /**
-   * Fan out an in-app notification to every (non-deleted) application in the
-   * announcement's scope. `waveId = null` targets all applications.
-   */
+    input: UpdateAdmissionAnnouncementRepositoryInput,
+  ): Promise<AdmissionAnnouncementEntity>;
+  abstract publish(id: string): Promise<AdmissionAnnouncementEntity>;
+  abstract remove(id: string): Promise<AdmissionAnnouncementEntity>;
+  abstract softDelete(id: string): Promise<AdmissionAnnouncementEntity>;
   abstract notifyScope(
     waveId: string | null,
     title: string,

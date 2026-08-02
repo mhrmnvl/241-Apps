@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { Day } from '@prisma/client';
+import { DayEnum as Day } from '../../../shared/domain/enums/day.enum.js';
 import {
   CreateScheduleDto,
   UpdateScheduleDto,

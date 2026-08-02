@@ -14,7 +14,7 @@ export class CreateSemesterUseCase {
   private readonly logger = new Logger(CreateSemesterUseCase.name);
 
   constructor(
-    private readonly repository: ISemesterRepository,
+    private readonly semesterRepository: ISemesterRepository,
     private readonly academicYearRepository: IAcademicYearRepository,
   ) {}
 
@@ -28,14 +28,14 @@ export class CreateSemesterUseCase {
       );
     }
 
-    const semesterType = await this.repository.findTypeById(dto.typeId);
+    const semesterType = await this.semesterRepository.findTypeById(dto.typeId);
     if (!semesterType) {
       throw new NotFoundException(
         `Semester Type with ID ${dto.typeId} not found`,
       );
     }
 
-    const existing = await this.repository.findByAcademicYearAndType(
+    const existing = await this.semesterRepository.findByAcademicYearAndType(
       dto.academicYearId,
       dto.typeId,
     );
@@ -52,10 +52,10 @@ export class CreateSemesterUseCase {
     }
 
     if (dto.isActive) {
-      await this.repository.deactivateAll();
+      await this.semesterRepository.deactivateAll();
     }
 
-    const semester = await this.repository.create({
+    const semester = await this.semesterRepository.create({
       academicYearId: dto.academicYearId,
       typeId: dto.typeId,
       isActive: dto.isActive ?? false,

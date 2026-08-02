@@ -4,10 +4,12 @@ import { CreateFundingSourceDto } from '../dto/request/create-funding-source.dto
 
 @Injectable()
 export class CreateFundingSourceUseCase {
-  constructor(private readonly repository: IFundingSourceRepository) {}
+  constructor(
+    private readonly fundingSourceRepository: IFundingSourceRepository,
+  ) {}
 
   async execute(dto: CreateFundingSourceDto) {
-    return this.repository.create({
+    return this.fundingSourceRepository.create({
       code: dto.code,
       name: dto.name,
       description: dto.description ?? null,

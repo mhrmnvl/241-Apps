@@ -1,6 +1,6 @@
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { ClassroomSupervisorRepository } from '../repositories/classroom-supervisors.repository.js';
+import { IClassroomSupervisorRepository } from '../domain/interfaces/classroom-supervisor-repository.interface.js';
 import { DeleteClassroomSupervisorUseCase } from './delete-classroom-supervisor.use-case.js';
 
 describe('DeleteClassroomSupervisorUseCase', () => {
@@ -8,14 +8,14 @@ describe('DeleteClassroomSupervisorUseCase', () => {
 
   const mockRepo = {
     findById: jest.fn(),
-    softDelete: jest.fn(),
+    remove: jest.fn(),
   };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         DeleteClassroomSupervisorUseCase,
-        { provide: ClassroomSupervisorRepository, useValue: mockRepo },
+        { provide: IClassroomSupervisorRepository, useValue: mockRepo },
       ],
     }).compile();
 
@@ -32,12 +32,12 @@ describe('DeleteClassroomSupervisorUseCase', () => {
   describe('execute', () => {
     it('should soft-delete the supervisor successfully', async () => {
       mockRepo.findById.mockResolvedValue({ id: 'sup-uuid-1' });
-      mockRepo.softDelete.mockResolvedValue(undefined);
+      mockRepo.remove.mockResolvedValue(undefined);
 
       await useCase.execute('sup-uuid-1');
 
       expect(mockRepo.findById).toHaveBeenCalledWith('sup-uuid-1');
-      expect(mockRepo.softDelete).toHaveBeenCalledWith('sup-uuid-1');
+      expect(mockRepo.remove).toHaveBeenCalledWith('sup-uuid-1');
     });
 
     it('should throw NotFoundException when supervisor not found', async () => {
@@ -46,7 +46,7 @@ describe('DeleteClassroomSupervisorUseCase', () => {
       await expect(useCase.execute('non-existent-id')).rejects.toThrow(
         NotFoundException,
       );
-      expect(mockRepo.softDelete).not.toHaveBeenCalled();
+      expect(mockRepo.remove).not.toHaveBeenCalled();
     });
   });
 });

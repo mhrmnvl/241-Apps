@@ -1,18 +1,18 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
-import { ClassroomStructureRepository } from '../repositories/classroom-structures.repository.js';
+import { IClassroomStructureRepository } from '../domain/interfaces/classroom-structure-repository.interface.js';
 import { DeleteClassroomStructureUseCase } from './delete-classroom-structure.use-case.js';
 
 describe('DeleteClassroomStructureUseCase', () => {
   let useCase: DeleteClassroomStructureUseCase;
 
-  const mockRepo = { findById: jest.fn(), softDelete: jest.fn() };
+  const mockRepo = { findById: jest.fn(), remove: jest.fn() };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         DeleteClassroomStructureUseCase,
-        { provide: ClassroomStructureRepository, useValue: mockRepo },
+        { provide: IClassroomStructureRepository, useValue: mockRepo },
       ],
     }).compile();
 
@@ -25,7 +25,7 @@ describe('DeleteClassroomStructureUseCase', () => {
   it('should soft-delete successfully', async () => {
     mockRepo.findById.mockResolvedValue({ id: 'str-1' });
     await useCase.execute('str-1');
-    expect(mockRepo.softDelete).toHaveBeenCalledWith('str-1');
+    expect(mockRepo.remove).toHaveBeenCalledWith('str-1');
   });
 
   it('should throw NotFoundException', async () => {

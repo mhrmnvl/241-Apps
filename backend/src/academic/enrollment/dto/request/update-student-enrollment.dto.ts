@@ -1,5 +1,5 @@
 import { ApiPropertyOptional, PartialType } from '@nestjs/swagger';
-import { EnrollmentStatus } from '@prisma/client';
+import { EnrollmentStatus } from '../../../../shared/domain/enums/enrollment-status.enum.js';
 import { IsDateString, IsEnum, IsOptional, IsString } from 'class-validator';
 import { CreateStudentEnrollmentDto } from './create-student-enrollment.dto.js';
 

@@ -3,14 +3,17 @@ import { IAdmissionApplicantRepository } from '../domain/interfaces/admission-ap
 
 @Injectable()
 export class GetMyNotificationsUseCase {
-  constructor(private readonly repository: IAdmissionApplicantRepository) {}
+  constructor(
+    private readonly admissionApplicantRepository: IAdmissionApplicantRepository,
+  ) {}
 
   async execute(userId: string) {
-    const applicationId = await this.repository.findApplicationIdByUser(userId);
+    const applicationId =
+      await this.admissionApplicantRepository.findApplicationIdByUser(userId);
     if (!applicationId) {
       throw new NotFoundException('Data pendaftaran tidak ditemukan');
     }
 
-    return this.repository.findNotifications(applicationId);
+    return this.admissionApplicantRepository.findNotifications(applicationId);
   }
 }

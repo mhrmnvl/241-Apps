@@ -3,10 +3,10 @@ import { ISubjectRepository } from '../domain/interfaces/subject-repository.inte
 
 @Injectable()
 export class GetSubjectByIdUseCase {
-  constructor(private readonly repository: ISubjectRepository) {}
+  constructor(private readonly subjectRepository: ISubjectRepository) {}
 
   async execute(id: string) {
-    const subject = await this.repository.findById(id);
+    const subject = await this.subjectRepository.findById(id);
     if (!subject)
       throw new NotFoundException(`Subject with ID ${id} not found`);
     return subject;

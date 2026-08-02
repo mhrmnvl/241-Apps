@@ -8,16 +8,19 @@ import { serializeApplicationDetail } from '../domain/admission.serializers.js';
 import {
   AdmissionApplicationParentInput,
   IAdmissionApplicantRepository,
-  Prisma,
+  UpdateMyApplicationFields,
 } from '../domain/interfaces/admission-applicant-repository.interface.js';
 import { UpdateMyApplicationDto } from '../dto/request/update-my-application.dto.js';
 
 @Injectable()
 export class UpdateMyApplicationUseCase {
-  constructor(private readonly repository: IAdmissionApplicantRepository) {}
+  constructor(
+    private readonly admissionApplicantRepository: IAdmissionApplicantRepository,
+  ) {}
 
   async execute(userId: string, dto: UpdateMyApplicationDto) {
-    const application = await this.repository.findMyApplication(userId);
+    const application =
+      await this.admissionApplicantRepository.findMyApplication(userId);
     if (!application) {
       throw new NotFoundException('Data pendaftaran tidak ditemukan');
     }
@@ -29,7 +32,7 @@ export class UpdateMyApplicationUseCase {
 
     const { parents, birthDate, ...fields } = dto;
 
-    const data: Prisma.AdmissionApplicationUpdateInput = {
+    const data: UpdateMyApplicationFields = {
       ...fields,
       ...(birthDate !== undefined && { birthDate: new Date(birthDate) }),
     };
@@ -48,11 +51,13 @@ export class UpdateMyApplicationUseCase {
         isPrimary: p.isPrimary ?? false,
       }));
 
-    const updated = await this.repository.updateMyApplication({
-      applicationId: application.id,
-      data,
-      parents: parentInputs,
-    });
+    const updated = await this.admissionApplicantRepository.updateMyApplication(
+      {
+        applicationId: application.id,
+        data,
+        parents: parentInputs,
+      },
+    );
 
     return serializeApplicationDetail(updated);
   }

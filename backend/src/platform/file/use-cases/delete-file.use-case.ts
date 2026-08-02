@@ -1,5 +1,5 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { FileRepository } from '../repositories/file.repository.js';
+import { IFileRepository } from '../domain/interfaces/file-repository.interface.js';
 import { StorageService } from '../../../core/storage/storage.service.js';
 
 @Injectable()
@@ -7,18 +7,18 @@ export class DeleteFileUseCase {
   private readonly logger = new Logger(DeleteFileUseCase.name);
 
   constructor(
-    private readonly repository: FileRepository,
+    private readonly fileRepository: IFileRepository,
     private readonly storage: StorageService,
   ) {}
 
   async execute(id: string) {
-    const existing = await this.repository.findById(id);
+    const existing = await this.fileRepository.findById(id);
     if (!existing) {
       throw new NotFoundException(`File with ID ${id} not found`);
     }
 
     // Soft delete in the database
-    await this.repository.softDelete(id);
+    await this.fileRepository.softDelete(id);
 
     // Clean up the object in storage to save space
     try {

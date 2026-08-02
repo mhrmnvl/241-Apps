@@ -1,33 +1,19 @@
-import { SchoolUnitSocialMedia, Prisma } from '@prisma/client';
-
-export const SCHOOL_UNIT_SOCIAL_MEDIA_INCLUDE = {
-  socialMedia: true,
-} satisfies Prisma.SchoolUnitSocialMediaInclude;
-
-export type SchoolUnitSocialMediaWithDetails =
-  Prisma.SchoolUnitSocialMediaGetPayload<{
-    include: typeof SCHOOL_UNIT_SOCIAL_MEDIA_INCLUDE;
-  }>;
+import { SchoolUnitSocialMediaEntity } from '../entities/school-unit-social-media.entity.js';
 
 export abstract class ISchoolUnitSocialMediaRepository {
-  abstract findAll(): Promise<SchoolUnitSocialMediaWithDetails[]>;
-
-  abstract findByPlatform(
-    socialMediaId: string,
-  ): Promise<SchoolUnitSocialMedia | null>;
-
-  abstract findById(id: string): Promise<SchoolUnitSocialMedia | null>;
-
+  abstract findAllBySchoolUnitId(
+    schoolUnitId: string,
+  ): Promise<SchoolUnitSocialMediaEntity[]>;
+  abstract findById(id: string): Promise<SchoolUnitSocialMediaEntity | null>;
   abstract create(dto: {
+    schoolUnitId: string;
     socialMediaId: string;
     username?: string | null;
-  }): Promise<SchoolUnitSocialMediaWithDetails>;
-
+  }): Promise<SchoolUnitSocialMediaEntity>;
   abstract update(
     id: string,
-    dto: Prisma.SchoolUnitSocialMediaUpdateInput,
-  ): Promise<SchoolUnitSocialMediaWithDetails>;
-
-  abstract remove(id: string): Promise<SchoolUnitSocialMedia>;
+    dto: { username?: string | null },
+  ): Promise<SchoolUnitSocialMediaEntity>;
+  abstract remove(id: string): Promise<SchoolUnitSocialMediaEntity>;
   abstract countByPlatformId(socialMediaId: string): Promise<number>;
 }

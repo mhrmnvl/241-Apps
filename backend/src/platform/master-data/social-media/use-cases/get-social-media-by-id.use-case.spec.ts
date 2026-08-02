@@ -1,6 +1,6 @@
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { ISocialMediaRepository } from '../interfaces/social-media-repository.interface.js';
+import { ISocialMediaRepository } from '../domain/interfaces/social-media-repository.interface.js';
 import { GetSocialMediaByIdUseCase } from './get-social-media-by-id.use-case.js';
 
 describe('GetSocialMediaByIdUseCase', () => {

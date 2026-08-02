@@ -1,35 +1,55 @@
-import { AcademicYear, Prisma } from '@prisma/client';
-import { AcademicYearQueryDto } from '../../dto/request/academic-year-query.dto.js';
-import { PaginatedResult } from '../../../../shared/domain/interfaces/repository.interface.js';
+import {
+  PaginatedResult,
+  PaginationQueryInput,
+} from '../../../../shared/domain/interfaces/repository.interface.js';
+import { AcademicYearEntity } from '../entities/academic-year.entity.js';
+import { AcademicYearWithDetails } from '../entities/academic-year.entity.js';
+
+export type { AcademicYearWithDetails };
+
+export interface AcademicYearQueryInput extends PaginationQueryInput {
+  search?: string;
+}
 
 export interface CreateAcademicYearRepositoryInput {
   name: string;
-  isActive: boolean;
+  isActive?: boolean;
+}
+
+export type UpdateAcademicYearRepositoryInput =
+  Partial<CreateAcademicYearRepositoryInput>;
+
+/** Row count returned by bulk activation/deactivation writes. */
+export interface AffectedCount {
+  count: number;
 }
 
 export abstract class IAcademicYearRepository {
   abstract findAll(
-    query: AcademicYearQueryDto,
-  ): Promise<PaginatedResult<AcademicYear>>;
-  abstract findById(id: string): Promise<AcademicYear | null>;
-  abstract findByName(name: string): Promise<AcademicYear | null>;
-  abstract findLatestAcademicYear(): Promise<AcademicYear | null>;
-
+    query: AcademicYearQueryInput,
+  ): Promise<PaginatedResult<AcademicYearWithDetails>>;
+  abstract findById(id: string): Promise<AcademicYearWithDetails | null>;
+  abstract findActive(): Promise<AcademicYearWithDetails | null>;
+  abstract findByName(
+    name: string,
+    excludeId?: string,
+  ): Promise<AcademicYearEntity | null>;
   abstract create(
-    data: CreateAcademicYearRepositoryInput,
-  ): Promise<AcademicYear>;
-
+    input: CreateAcademicYearRepositoryInput,
+  ): Promise<AcademicYearWithDetails>;
   abstract update(
     id: string,
-    data: Prisma.AcademicYearUpdateInput,
-  ): Promise<AcademicYear>;
-  abstract deactivateAll(): Promise<Prisma.BatchPayload>;
-  abstract activateById(id: string): Promise<AcademicYear>;
-  abstract hasRelatedData(id: string): Promise<boolean>;
-  abstract countSemesters(academicYearId: string): Promise<number>;
+    input: UpdateAcademicYearRepositoryInput,
+  ): Promise<AcademicYearWithDetails>;
+  abstract remove(id: string): Promise<AcademicYearEntity>;
+  abstract softDelete(id: string): Promise<AcademicYearEntity>;
+  abstract deactivateAllActive(excludeId?: string): Promise<AffectedCount>;
+  abstract deactivateAll(excludeId?: string): Promise<AffectedCount>;
+  abstract activateById(id: string): Promise<AcademicYearEntity>;
   abstract countActive(): Promise<number>;
+  abstract countSemesters(academicYearId: string): Promise<number>;
   abstract deactivateSemestersByAcademicYearId(
-    academicYearId: string,
-  ): Promise<Prisma.BatchPayload>;
-  abstract softDelete(id: string): Promise<AcademicYear>;
+    id: string,
+  ): Promise<AffectedCount>;
+  abstract hasRelatedData(id: string): Promise<boolean>;
 }

@@ -1,6 +1,6 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { EnrollmentStatus } from '@prisma/client';
+import { EnrollmentStatus } from '../../../shared/domain/enums/enrollment-status.enum.js';
 import { IEnrollmentRepository } from '../domain/interfaces/enrollment-repository.interface.js';
 import { IStudentRepository } from '../../student/domain/interfaces/student-repository.interface.js';
 import { DropStudentUseCase } from './drop-student.use-case.js';

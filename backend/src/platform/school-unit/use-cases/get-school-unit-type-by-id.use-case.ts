@@ -1,10 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { SchoolUnitTypeRepository } from '../repositories/school-unit-types.repository.js';
+import { ISchoolUnitTypeRepository } from '../domain/interfaces/school-unit-type-repository.interface.js';
 
 @Injectable()
 export class GetSchoolUnitTypeByIdUseCase {
   constructor(
-    private readonly schoolUnitTypeRepository: SchoolUnitTypeRepository,
+    private readonly schoolUnitTypeRepository: ISchoolUnitTypeRepository,
   ) {}
 
   async execute(id: string) {

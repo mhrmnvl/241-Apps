@@ -7,11 +7,11 @@ import { DeleteEventUseCase } from '../use-cases/delete-event.use-case.js';
 import { GetEventByIdUseCase } from '../use-cases/get-event-by-id.use-case.js';
 import { GetEventsUseCase } from '../use-cases/get-events.use-case.js';
 import { UpdateEventUseCase } from '../use-cases/update-event.use-case.js';
-import { EventsController } from './events.controller.js';
+import { EventController } from './event.controller.js';
 import type { AuthenticatedUser } from '../../../core/types/authenticated-user.type.js';
 
-describe('EventsController', () => {
-  let controller: EventsController;
+describe('EventController', () => {
+  let controller: EventController;
 
   const mockGetEventsService = { execute: jest.fn() };
   const mockGetEventByIdService = { execute: jest.fn() };
@@ -28,7 +28,7 @@ describe('EventsController', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [EventsController],
+      controllers: [EventController],
       providers: [
         { provide: GetEventsUseCase, useValue: mockGetEventsService },
         { provide: GetEventByIdUseCase, useValue: mockGetEventByIdService },
@@ -38,7 +38,7 @@ describe('EventsController', () => {
       ],
     }).compile();
 
-    controller = module.get<EventsController>(EventsController);
+    controller = module.get<EventController>(EventController);
     jest.clearAllMocks();
   });
 

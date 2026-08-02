@@ -1,6 +1,6 @@
 ﻿import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { ProfileRepository } from '../repositories/profile.repository.js';
+import { IProfileRepository } from '../domain/interfaces/profile-repository.interface.js';
 import { StorageService } from '../../../core/storage/storage.service.js';
 import { GetProfileUseCase } from './get-profile.use-case.js';
 
@@ -18,7 +18,7 @@ describe('GetProfileUseCase', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         GetProfileUseCase,
-        { provide: ProfileRepository, useValue: mockRepo },
+        { provide: IProfileRepository, useValue: mockRepo },
         { provide: StorageService, useValue: mockStorage },
       ],
     }).compile();

@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { PositionCategoryController } from './presentation/position-category.controller.js';
-import { PositionCategoryRepository } from './repositories/position-category.repository.js';
-import { IPositionCategoryRepository } from './interfaces/position-category-repository.interface.js';
+import { PrismaPositionCategoryRepository } from './infrastructure/persistence/prisma-position-category.repository.js';
+import { IPositionCategoryRepository } from './domain/interfaces/position-category-repository.interface.js';
 import { CreatePositionCategoryUseCase } from './use-cases/create-position-category.use-case.js';
 import { GetPositionCategoriesUseCase } from './use-cases/get-position-categories.use-case.js';
 import { GetPositionCategoryByIdUseCase } from './use-cases/get-position-category-by-id.use-case.js';
@@ -13,7 +13,7 @@ import { DeletePositionCategoryUseCase } from './use-cases/delete-position-categ
   providers: [
     {
       provide: IPositionCategoryRepository,
-      useClass: PositionCategoryRepository,
+      useClass: PrismaPositionCategoryRepository,
     },
     CreatePositionCategoryUseCase,
     GetPositionCategoriesUseCase,

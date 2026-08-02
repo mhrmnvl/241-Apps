@@ -3,9 +3,9 @@ import { FileModule } from '../file/file.module.js';
 import { ProfileController } from './presentation/profile.controller.js';
 import { ProfileAddressController } from './presentation/profile-address.controller.js';
 import { ProfileSocialMediaController } from './presentation/profile-social-media.controller.js';
-import { ProfileRepository } from './repositories/profile.repository.js';
-import { ProfileAddressRepository } from './repositories/profile-address.repository.js';
-import { ProfileSocialMediaRepository } from './repositories/profile-social-media.repository.js';
+import { IProfileRepository } from './domain/interfaces/profile-repository.interface.js';
+import { IProfileAddressRepository } from './domain/interfaces/profile-address-repository.interface.js';
+import { IProfileSocialMediaRepository } from './domain/interfaces/profile-social-media-repository.interface.js';
 import { PrismaProfileRepository } from './infrastructure/persistence/prisma-profile.repository.js';
 import { PrismaProfileAddressRepository } from './infrastructure/persistence/prisma-profile-address.repository.js';
 import { PrismaProfileSocialMediaRepository } from './infrastructure/persistence/prisma-profile-social-media.repository.js';
@@ -31,13 +31,13 @@ import { RemoveProfileSocialMediaUseCase } from './use-cases/remove-profile-soci
     ProfileSocialMediaController,
   ],
   providers: [
-    { provide: ProfileRepository, useClass: PrismaProfileRepository },
+    { provide: IProfileRepository, useClass: PrismaProfileRepository },
     {
-      provide: ProfileAddressRepository,
+      provide: IProfileAddressRepository,
       useClass: PrismaProfileAddressRepository,
     },
     {
-      provide: ProfileSocialMediaRepository,
+      provide: IProfileSocialMediaRepository,
       useClass: PrismaProfileSocialMediaRepository,
     },
     GetProfileUseCase,
@@ -55,9 +55,9 @@ import { RemoveProfileSocialMediaUseCase } from './use-cases/remove-profile-soci
     RemoveProfileSocialMediaUseCase,
   ],
   exports: [
-    ProfileRepository,
-    ProfileAddressRepository,
-    ProfileSocialMediaRepository,
+    IProfileRepository,
+    IProfileAddressRepository,
+    IProfileSocialMediaRepository,
   ],
 })
 export class ProfileModule {}

@@ -4,10 +4,12 @@ import { CreateCurriculumSubjectDto } from '../dto/request/create-curriculum-sub
 
 @Injectable()
 export class CreateCurriculumSubjectUseCase {
-  constructor(private readonly repository: ICurriculumSubjectRepository) {}
+  constructor(
+    private readonly curriculumSubjectRepository: ICurriculumSubjectRepository,
+  ) {}
 
   async execute(dto: CreateCurriculumSubjectDto) {
-    const existing = await this.repository.findDuplicate(
+    const existing = await this.curriculumSubjectRepository.findDuplicate(
       dto.curriculumId,
       dto.subjectId,
     );
@@ -17,17 +19,17 @@ export class CreateCurriculumSubjectUseCase {
       );
     }
 
-    const softDeleted = await this.repository.findSoftDeleted(
+    const softDeleted = await this.curriculumSubjectRepository.findSoftDeleted(
       dto.curriculumId,
       dto.subjectId,
     );
     if (softDeleted) {
-      return this.repository.restore(softDeleted.id, {
+      return this.curriculumSubjectRepository.restore(softDeleted.id, {
         hoursPerWeek: dto.hoursPerWeek,
       });
     }
 
-    return this.repository.create({
+    return this.curriculumSubjectRepository.create({
       curriculumId: dto.curriculumId,
       subjectId: dto.subjectId,
       hoursPerWeek: dto.hoursPerWeek,

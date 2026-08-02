@@ -1,87 +1,100 @@
-import { Prisma, Teacher, User, Profile } from '@prisma/client';
-import { TeacherQueryDto } from '../../dto/request/teacher-query.dto.js';
-import { ExportTeacherQueryDto } from '../../dto/request/export-teacher-query.dto.js';
-import { CreateTeacherDto } from '../../dto/request/create-teacher.dto.js';
-import { UpdateTeacherDto } from '../../dto/request/update-teacher.dto.js';
-import { PaginatedResult } from '../../../../shared/domain/interfaces/repository.interface.js';
+import {
+  PaginatedResult,
+  PaginationQueryInput,
+} from '../../../../shared/domain/interfaces/repository.interface.js';
+import { UserGender } from '../../../../shared/domain/enums/user-gender.enum.js';
+import { UserEntity } from '../../../../shared/domain/entities/user.entity.js';
+import {
+  ProfileEntity,
+  ProfileUpdateInput,
+} from '../../../../platform/profile/domain/entities/profile.entity.js';
+import { TeacherEntity } from '../entities/teacher.entity.js';
+import {
+  TeacherWithDetails,
+  TeacherListWithDetails,
+} from '../entities/teacher.entity.js';
 
-export const USER_SELECT = {
-  id: true,
-  identifier: true,
-  isActive: true,
-  createdAt: true,
-  updatedAt: true,
-  profile: true,
-} as const;
+export type { TeacherWithDetails, TeacherListWithDetails };
 
-export const TEACHER_LIST_INCLUDE = {
-  user: { select: USER_SELECT },
-  employmentType: true,
-  teacherPositions: {
-    where: { isPrimary: true },
-    include: { position: { include: { category: true } } },
-  },
-} satisfies Prisma.TeacherInclude;
+export interface TeacherQueryInput extends PaginationQueryInput {
+  search?: string;
+  employmentTypeId?: string;
+  academicYearId?: string;
+  positionCategoryId?: string;
+  isActive?: boolean;
+}
 
-export const TEACHER_DETAIL_INCLUDE = {
-  user: { select: USER_SELECT },
-  employmentType: true,
-  addresses: {
-    omit: {
-      studentId: true,
-      teacherId: true,
-      parentId: true,
-    },
-    orderBy: { isPrimary: 'desc' as const },
-  },
-  teacherPositions: {
-    include: { position: { include: { category: true } } },
-    orderBy: [{ isPrimary: 'desc' as const }, { hireDate: 'desc' as const }],
-  },
-} satisfies Prisma.TeacherInclude;
+export interface ExportTeacherQueryInput {
+  search?: string;
+  employmentTypeId?: string;
+  isActive?: boolean;
+}
 
-export type TeacherWithDetails = Prisma.TeacherGetPayload<{
-  include: typeof TEACHER_DETAIL_INCLUDE;
-}>;
+export interface CreateTeacherRepositoryInput {
+  /** Falls back to NIP/NUPTK/NIK when the caller leaves it blank. */
+  identifier?: string;
+  name: string;
+  nik: string;
+  gender: UserGender;
+  birthPlace: string;
+  birthDate: Date;
+  email?: string;
+  phone?: string;
+  nip?: string;
+  nuptk?: string;
+  employmentTypeId: string;
+  positionId?: string;
+}
 
-export type TeacherListWithDetails = Prisma.TeacherGetPayload<{
-  include: typeof TEACHER_LIST_INCLUDE;
-}>;
+export interface UpdateTeacherRepositoryInput {
+  nip?: string;
+  nuptk?: string;
+  employmentTypeId?: string;
+}
 
 export abstract class ITeacherRepository {
-  abstract toggleUserActive(userId: string, isActive: boolean): Promise<User>;
+  abstract toggleUserActive(
+    userId: string,
+    isActive: boolean,
+  ): Promise<UserEntity>;
   abstract findAll(
-    query: TeacherQueryDto,
+    query: TeacherQueryInput,
   ): Promise<PaginatedResult<TeacherListWithDetails>>;
   abstract findAllForExport(
-    filters: ExportTeacherQueryDto,
+    filters: ExportTeacherQueryInput,
   ): Promise<TeacherListWithDetails[]>;
   abstract findById(id: string): Promise<TeacherWithDetails | null>;
-  abstract findUserByIdentifier(identifier: string): Promise<User | null>;
-  abstract findProfileByNik(nik: string): Promise<Profile | null>;
-  abstract findByUserId(userId: string): Promise<Teacher | null>;
-  abstract findByNip(nip: string, excludeId?: string): Promise<Teacher | null>;
+  abstract findUserByIdentifier(identifier: string): Promise<UserEntity | null>;
+  abstract findProfileByNik(nik: string): Promise<ProfileEntity | null>;
+  abstract findByUserId(userId: string): Promise<TeacherEntity | null>;
+  abstract findByNip(
+    nip: string,
+    excludeId?: string,
+  ): Promise<TeacherEntity | null>;
   abstract findByNuptk(
     nuptk: string,
     excludeId?: string,
-  ): Promise<Teacher | null>;
+  ): Promise<TeacherEntity | null>;
   abstract findProfileByUserId(
     userId: string,
     nik: string,
-  ): Promise<Profile | null>;
+  ): Promise<ProfileEntity | null>;
   abstract updateProfile(
     userId: string,
-    data: Prisma.ProfileUpdateInput,
-  ): Promise<Profile>;
+    data: ProfileUpdateInput,
+  ): Promise<ProfileEntity>;
   abstract create(
-    dto: CreateTeacherDto,
+    input: CreateTeacherRepositoryInput,
     hashedPassword: string,
   ): Promise<TeacherWithDetails>;
   abstract update(
     id: string,
-    dto: UpdateTeacherDto,
+    input: UpdateTeacherRepositoryInput,
   ): Promise<TeacherWithDetails>;
   abstract resolveEmploymentTypeId(code: string): Promise<string>;
-  abstract softDelete(id: string, userId: string): Promise<[Teacher, User]>;
+  abstract softDelete(
+    id: string,
+    userId: string,
+  ): Promise<[TeacherEntity, UserEntity]>;
   abstract getActiveEmploymentTypeCodes(): Promise<string[]>;
 }

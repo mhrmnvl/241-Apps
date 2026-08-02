@@ -1,5 +1,5 @@
 ﻿import { Test, TestingModule } from '@nestjs/testing';
-import { ParentRelation } from '@prisma/client';
+import { ParentRelation } from '../../../shared/domain/enums/parent-relation.enum.js';
 import { CreateStudentParentDto } from '../dto/request/create-student-parent.dto.js';
 import { StudentParentQueryDto } from '../dto/request/student-parent-query.dto.js';
 import { UpdateStudentParentDto } from '../dto/request/update-student-parent.dto.js';

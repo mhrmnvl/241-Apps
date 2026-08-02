@@ -1,1 +1,1 @@
-export { EnrollmentRepository } from './repositories/enrollment.repository.js';
+export { IEnrollmentRepository } from './domain/interfaces/enrollment-repository.interface.js';

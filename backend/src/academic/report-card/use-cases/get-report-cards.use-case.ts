@@ -4,9 +4,9 @@ import { IReportCardRepository } from '../domain/interfaces/report-card-reposito
 
 @Injectable()
 export class GetReportCardsUseCase {
-  constructor(private readonly repository: IReportCardRepository) {}
+  constructor(private readonly reportCardRepository: IReportCardRepository) {}
 
   async execute(query: ReportCardQueryDto) {
-    return this.repository.findAll(query);
+    return this.reportCardRepository.findAll(query);
   }
 }

@@ -1,10 +1,15 @@
-import type { AdmissionApplicationParent } from '@prisma/client';
 import type { ApplicationWithParentsAndUser } from './interfaces/admission-application-repository.interface.js';
 
-type ParentCompletenessFields = Pick<
-  AdmissionApplicationParent,
-  'nik' | 'birthPlace' | 'birthDate' | 'occupationId'
->;
+/**
+ * The parent fields the real `Parent` table requires. Declared here rather than
+ * `Pick`ed off a Prisma model so this business rule owns its own contract.
+ */
+interface ParentCompletenessFields {
+  nik: string | null;
+  birthPlace: string | null;
+  birthDate: Date | null;
+  occupationId: string | null;
+}
 
 /**
  * An admission parent can only be carried over into a real Parent record

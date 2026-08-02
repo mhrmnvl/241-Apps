@@ -42,7 +42,7 @@ describe('UpdateGradeUseCase', () => {
 
       expect(mockRepository.findByLevel).not.toHaveBeenCalled();
       expect(mockRepository.findByName).not.toHaveBeenCalled();
-      expect(result.isActive).toBe(false);
+      expect((result as any).isActive).toBe(false);
     });
 
     it('should check duplicate when level changes', async () => {

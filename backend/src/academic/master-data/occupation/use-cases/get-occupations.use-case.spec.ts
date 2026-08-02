@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { OccupationQueryDto } from '../dto/request/occupation-query.dto.js';
-import { IOccupationRepository } from '../interfaces/occupation-repository.interface.js';
+import { IOccupationRepository } from '../domain/interfaces/occupation-repository.interface.js';
 import { GetOccupationsUseCase } from './get-occupations.use-case.js';
 
 describe('GetOccupationsUseCase', () => {

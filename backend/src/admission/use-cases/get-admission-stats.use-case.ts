@@ -3,12 +3,14 @@ import { IAdmissionApplicationRepository } from '../domain/interfaces/admission-
 
 @Injectable()
 export class GetAdmissionStatsUseCase {
-  constructor(private readonly repository: IAdmissionApplicationRepository) {}
+  constructor(
+    private readonly admissionApplicationRepository: IAdmissionApplicationRepository,
+  ) {}
 
   async execute(waveId?: string) {
     const [statusCounts, waves] = await Promise.all([
-      this.repository.getStatusCounts(waveId),
-      this.repository.getWavesWithAcceptedCount(waveId),
+      this.admissionApplicationRepository.getStatusCounts(waveId),
+      this.admissionApplicationRepository.getWavesWithAcceptedCount(waveId),
     ]);
 
     const byStatus = Object.fromEntries(

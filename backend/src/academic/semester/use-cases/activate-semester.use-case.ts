@@ -12,12 +12,12 @@ export class ActivateSemesterUseCase {
   private readonly logger = new Logger(ActivateSemesterUseCase.name);
 
   constructor(
-    private readonly repository: ISemesterRepository,
+    private readonly semesterRepository: ISemesterRepository,
     private readonly academicYearRepository: IAcademicYearRepository,
   ) {}
 
   async execute(id: string) {
-    const current = await this.repository.findById(id);
+    const current = await this.semesterRepository.findById(id);
     if (!current) {
       throw new NotFoundException(`Semester with ID ${id} not found`);
     }
@@ -35,7 +35,7 @@ export class ActivateSemesterUseCase {
       );
     }
 
-    const activated = await this.repository.activateById(id);
+    const activated = await this.semesterRepository.activateById(id);
     this.logger.log(`Semester activated: ${id}`);
     return activated;
   }

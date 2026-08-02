@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { SchoolUnitStatus } from '@prisma/client';
+import { SchoolUnitStatus } from '../../../../shared/domain/enums/school-unit-status.enum.js';
 import {
   IsEmail,
   IsEnum,

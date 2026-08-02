@@ -1,12 +1,14 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { EducationalHistoryRepository } from '../repositories/educational-history.repository.js';
+import { IEducationalHistoryRepository } from '../domain/interfaces/educational-history-repository.interface.js';
 
 @Injectable()
 export class GetEducationalHistoryByIdUseCase {
-  constructor(private readonly repository: EducationalHistoryRepository) {}
+  constructor(
+    private readonly educationalHistoryRepository: IEducationalHistoryRepository,
+  ) {}
 
   async execute(id: string) {
-    const record = await this.repository.findById(id);
+    const record = await this.educationalHistoryRepository.findById(id);
     if (!record) throw new NotFoundException('Educational history not found');
     return record;
   }

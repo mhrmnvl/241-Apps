@@ -2,14 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 import { IGradeRepository } from '../../grade/domain/interfaces/grade-repository.interface.js';
-import { ClassroomRepository } from '../../classroom/index.js';
+import { IClassroomRepository } from '../../classroom/index.js';
 import {
   BulkImportRowResultDto,
   BulkImportStudentsResponseDto,
 } from '../dto/response/bulk-import-student-response.dto.js';
 import { BulkImportStudentRowDto } from '../dto/request/bulk-import-student.dto.js';
 import { CreateStudentDto } from '../dto/request/create-student.dto.js';
-import { StudentRepository } from '../repositories/student.repository.js';
+import { IStudentRepository } from '../domain/interfaces/student-repository.interface.js';
 import { ExcelStudentParser } from '../domain/interfaces/student-excel-parser.interface.js';
 import { CreateStudentUseCase } from './create-student.use-case.js';
 import { resolveOnceByKey } from '../../../shared/utils/resolve-once-by-key.helper.js';
@@ -17,8 +17,8 @@ import { resolveOnceByKey } from '../../../shared/utils/resolve-once-by-key.help
 @Injectable()
 export class BulkImportStudentsUseCase {
   constructor(
-    private readonly studentRepository: StudentRepository,
-    private readonly classroomRepository: ClassroomRepository,
+    private readonly studentRepository: IStudentRepository,
+    private readonly classroomRepository: IClassroomRepository,
     private readonly gradeRepository: IGradeRepository,
     private readonly excelParser: ExcelStudentParser,
     private readonly createStudent: CreateStudentUseCase,

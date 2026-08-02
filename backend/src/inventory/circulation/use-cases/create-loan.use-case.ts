@@ -8,11 +8,11 @@ import { CreateLoanDto } from '../dto/request/create-loan.dto.js';
 
 @Injectable()
 export class CreateLoanUseCase {
-  constructor(private readonly repository: ICirculationRepository) {}
+  constructor(private readonly circulationRepository: ICirculationRepository) {}
 
   async execute(dto: CreateLoanDto, requesterId: string) {
     const pendingStatus =
-      await this.repository.findStatusBySystemKey('LOAN_PENDING');
+      await this.circulationRepository.findStatusBySystemKey('LOAN_PENDING');
 
     if (!pendingStatus) {
       throw new NotFoundException(
@@ -21,7 +21,7 @@ export class CreateLoanUseCase {
     }
 
     // 1. Verify units exist and are available
-    const units = await this.repository.findUnitsByIds(dto.unitIds);
+    const units = await this.circulationRepository.findUnitsByIds(dto.unitIds);
 
     if (units.length !== dto.unitIds.length) {
       throw new BadRequestException('One or more units do not exist.');
@@ -36,7 +36,7 @@ export class CreateLoanUseCase {
     }
 
     // 2. Generate unique loan number
-    const latestLoan = await this.repository.findLatestLoan();
+    const latestLoan = await this.circulationRepository.findLatestLoan();
     const todayStr = new Date().toISOString().split('T')[0].replace(/-/g, '');
     let nextSeq = 1;
     if (latestLoan?.loanNumber.startsWith(`LN-${todayStr}`)) {
@@ -46,12 +46,12 @@ export class CreateLoanUseCase {
     const loanNumber = `LN-${todayStr}-${nextSeq.toString().padStart(4, '0')}`;
 
     // 3. Create Loan in a transaction via repository
-    return this.repository.processCreateLoanTransaction({
+    return this.circulationRepository.processCreateLoanTransaction({
       loanNumber,
       requesterId,
       expectedReturnDate: new Date(dto.expectedReturnDate),
       purpose: dto.purpose,
-      pendingStatusId: pendingStatus.id,
+      pendingStatusId: String(pendingStatus.id),
       unitIds: dto.unitIds,
       units,
     });

@@ -1,5 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { StudentStatus } from '@prisma/client';
+import { StudentStatusEnum as StudentStatus } from '../../../../shared/domain/enums/student-status.enum.js';
 import { Transform } from 'class-transformer';
 import {
   IsBoolean,

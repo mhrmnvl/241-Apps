@@ -1,8 +1,8 @@
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { UpdateProfileSocialMediaDto } from '../dto/request/update-profile-social-media.dto.js';
-import { ProfileSocialMediaRepository } from '../repositories/profile-social-media.repository.js';
-import { ProfileRepository } from '../index.js';
+import { IProfileSocialMediaRepository } from '../domain/interfaces/profile-social-media-repository.interface.js';
+import { IProfileRepository } from '../index.js';
 import { UpdateProfileSocialMediaUseCase } from './update-profile-social-media.use-case.js';
 
 describe('UpdateProfileSocialMediaUseCase', () => {
@@ -18,9 +18,9 @@ describe('UpdateProfileSocialMediaUseCase', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         UpdateProfileSocialMediaUseCase,
-        { provide: ProfileRepository, useValue: mockProfileRepository },
+        { provide: IProfileRepository, useValue: mockProfileRepository },
         {
-          provide: ProfileSocialMediaRepository,
+          provide: IProfileSocialMediaRepository,
           useValue: mockSocialRepository,
         },
       ],

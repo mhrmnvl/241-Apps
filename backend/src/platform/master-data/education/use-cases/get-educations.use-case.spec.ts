@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { EducationQueryDto } from '../dto/request/education-query.dto.js';
-import { IEducationRepository } from '../interfaces/education-repository.interface.js';
+import { IEducationRepository } from '../domain/interfaces/education-repository.interface.js';
 import { GetEducationsUseCase } from './get-educations.use-case.js';
 
 describe('GetEducationsUseCase', () => {

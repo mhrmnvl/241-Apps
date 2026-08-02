@@ -1,7 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InventoryStatus, Prisma } from '@prisma/client';
 import { PrismaService } from '../../../../../core/database/prisma.service.js';
-import { IStatusRepository } from '../../domain/interfaces/status-repository.interface.js';
+import {
+  CreateStatusRepositoryInput,
+  IStatusRepository,
+  UpdateStatusRepositoryInput,
+} from '../../domain/interfaces/status-repository.interface.js';
 
 @Injectable()
 export class StatusRepository extends IStatusRepository {
@@ -29,15 +33,13 @@ export class StatusRepository extends IStatusRepository {
     });
   }
 
-  async create(
-    data: Prisma.InventoryStatusCreateInput,
-  ): Promise<InventoryStatus> {
+  async create(data: CreateStatusRepositoryInput): Promise<InventoryStatus> {
     return this.prisma.inventoryStatus.create({ data });
   }
 
   async update(
     id: string,
-    data: Prisma.InventoryStatusUpdateInput,
+    data: UpdateStatusRepositoryInput,
   ): Promise<InventoryStatus> {
     return this.prisma.inventoryStatus.update({
       where: { id },

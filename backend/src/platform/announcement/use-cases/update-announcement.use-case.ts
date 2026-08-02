@@ -1,19 +1,19 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { ClassroomRepository } from '../../../academic/classroom/index.js';
+import { IClassroomRepository } from '../../../academic/classroom/index.js';
 import { UpdateAnnouncementDto } from '../dto/request/update-announcement.dto.js';
-import { AnnouncementRepository } from '../repositories/announcement.repository.js';
+import { IAnnouncementRepository } from '../domain/interfaces/announcement-repository.interface.js';
 
 @Injectable()
 export class UpdateAnnouncementUseCase {
   private readonly logger = new Logger(UpdateAnnouncementUseCase.name);
 
   constructor(
-    private readonly repository: AnnouncementRepository,
-    private readonly ClassroomRepository: ClassroomRepository,
+    private readonly announcementRepository: IAnnouncementRepository,
+    private readonly ClassroomRepository: IClassroomRepository,
   ) {}
 
   async execute(id: string, dto: UpdateAnnouncementDto) {
-    const existing = await this.repository.findById(id);
+    const existing = await this.announcementRepository.findById(id);
     if (!existing) {
       throw new NotFoundException(`Announcement with ID ${id} not found`);
     }
@@ -31,7 +31,7 @@ export class UpdateAnnouncementUseCase {
 
     const { classroomIds, date, ...rest } = dto;
 
-    const updated = await this.repository.update(
+    const updated = await this.announcementRepository.update(
       id,
       { ...rest, ...(date && { date: new Date(date) }) },
       classroomIds,

@@ -1,1 +1,1 @@
-export { ReportCardRepository } from './repositories/report-card.repository.js';
+export { IReportCardRepository } from './domain/interfaces/report-card-repository.interface.js';

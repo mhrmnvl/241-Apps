@@ -1,6 +1,6 @@
 import { ConflictException, Injectable, Logger } from '@nestjs/common';
 import { CreateStudentWithRelationsDto } from '../dto/request/create-student-with-relations.dto.js';
-import { StudentRepository } from '../repositories/student.repository.js';
+import { IStudentRepository } from '../domain/interfaces/student-repository.interface.js';
 import { StudentWithDetails } from '../domain/interfaces/student-repository.interface.js';
 import { hashPassword } from '../../../shared/utils/hash.helper.js';
 
@@ -8,7 +8,7 @@ import { hashPassword } from '../../../shared/utils/hash.helper.js';
 export class CreateStudentWithRelationsUseCase {
   private readonly logger = new Logger(CreateStudentWithRelationsUseCase.name);
 
-  constructor(private readonly repository: StudentRepository) {}
+  constructor(private readonly studentRepository: IStudentRepository) {}
 
   async execute(
     dto: CreateStudentWithRelationsDto,
@@ -22,8 +22,8 @@ export class CreateStudentWithRelationsUseCase {
     dto.password ??= nis ? nis : dto.identifier;
 
     const [dupNis, dupNisn] = await Promise.all([
-      nis ? this.repository.findByNis(nis) : null,
-      nisn ? this.repository.findByNisn(nisn) : null,
+      nis ? this.studentRepository.findByNis(nis) : null,
+      nisn ? this.studentRepository.findByNisn(nisn) : null,
     ]);
     if (dupNis)
       throw new ConflictException(`NIS "${nis}" is already registered`);
@@ -31,8 +31,15 @@ export class CreateStudentWithRelationsUseCase {
       throw new ConflictException(`NISN "${nisn}" is already registered`);
 
     const passwordHash = await hashPassword(dto.password);
-    const student = await this.repository.createWithRelations(
-      dto,
+    const student = await this.studentRepository.createWithRelations(
+      {
+        ...dto,
+        birthDate: new Date(dto.birthDate),
+        parents: dto.parents?.map((p) => ({
+          ...p,
+          birthDate: new Date(p.birthDate),
+        })),
+      },
       passwordHash,
     );
 

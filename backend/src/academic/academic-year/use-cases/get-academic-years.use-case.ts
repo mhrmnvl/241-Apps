@@ -4,10 +4,13 @@ import { IAcademicYearRepository } from '../domain/interfaces/academic-year-repo
 
 @Injectable()
 export class GetAcademicYearsUseCase {
-  constructor(private readonly repository: IAcademicYearRepository) {}
+  constructor(
+    private readonly academicYearRepository: IAcademicYearRepository,
+  ) {}
 
   async execute(query: AcademicYearQueryDto) {
-    const { data, total, page, limit } = await this.repository.findAll(query);
+    const { data, total, page, limit } =
+      await this.academicYearRepository.findAll(query);
     return {
       data,
       meta: {

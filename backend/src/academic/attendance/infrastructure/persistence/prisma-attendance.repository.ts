@@ -1,19 +1,21 @@
 import { Injectable } from '@nestjs/common';
 import { AttendanceStatus, Prisma } from '@prisma/client';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
-import {
-  AttendanceQueryDto,
-  AttendanceRecapQueryDto,
-  AttendanceTrendQueryDto,
-  BulkAttendanceRecordDto,
-} from '../../dto/request/attendance.dto.js';
 import { resolveSemesterId } from '../../../../shared/utils/active-academic-year.helper.js';
+import { AttendanceEntity } from '../../domain/entities/attendance.entity.js';
 import {
-  IAttendanceRepository,
-  ATTENDANCE_INCLUDE,
   AttendanceMonthlyTrendPoint,
+  AttendanceQueryInput,
+  AttendanceRecapQueryInput,
   AttendanceStatusCounts,
+  AttendanceTrendQueryInput,
+  BulkAttendanceRecord,
+  CreateAttendanceRepositoryInput,
+  IAttendanceRepository,
+  RestoreAttendanceRepositoryInput,
+  UpdateAttendanceRepositoryInput,
 } from '../../domain/interfaces/attendance-repository.interface.js';
+import { ATTENDANCE_WITH_DETAILS_INCLUDE as ATTENDANCE_INCLUDE } from './prisma-attendance.includes.js';
 
 const MONTH_LABELS = [
   'Jan',
@@ -48,7 +50,23 @@ export class PrismaAttendanceRepository extends IAttendanceRepository {
     super();
   }
 
-  async findAll(query: AttendanceQueryDto) {
+  async findAttendance(
+    teachingAssignmentId: string,
+    studentEnrollmentId: string,
+    date: Date,
+    excludeId?: string,
+  ): Promise<AttendanceEntity | null> {
+    return this.prisma.attendance.findFirst({
+      where: {
+        enrollmentId: studentEnrollmentId,
+        date,
+        deletedAt: null,
+        ...(excludeId && { NOT: { id: excludeId } }),
+      },
+    });
+  }
+
+  async findAll(query: AttendanceQueryInput) {
     const {
       page = 1,
       limit = 10,
@@ -131,13 +149,7 @@ export class PrismaAttendanceRepository extends IAttendanceRepository {
     });
   }
 
-  async create(data: {
-    enrollmentId: string;
-    date: Date;
-    status: AttendanceStatus;
-    scheduleId?: string;
-    note?: string;
-  }) {
+  async create(data: CreateAttendanceRepositoryInput) {
     return this.prisma.attendance.create({
       data: {
         enrollmentId: data.enrollmentId,
@@ -149,7 +161,7 @@ export class PrismaAttendanceRepository extends IAttendanceRepository {
     });
   }
 
-  async update(id: string, data: Prisma.AttendanceUpdateInput) {
+  async update(id: string, data: UpdateAttendanceRepositoryInput) {
     return this.prisma.attendance.update({ where: { id }, data });
   }
 
@@ -164,7 +176,7 @@ export class PrismaAttendanceRepository extends IAttendanceRepository {
     });
   }
 
-  async restore(id: string, data: { status: AttendanceStatus; note?: string }) {
+  async restore(id: string, data: RestoreAttendanceRepositoryInput) {
     return this.prisma.attendance.update({
       where: { id },
       data: {
@@ -184,7 +196,7 @@ export class PrismaAttendanceRepository extends IAttendanceRepository {
 
   async bulkUpsert(
     date: Date,
-    records: BulkAttendanceRecordDto[],
+    records: BulkAttendanceRecord[],
     scheduleId?: string,
   ) {
     const results = await this.prisma.$transaction(
@@ -215,7 +227,7 @@ export class PrismaAttendanceRepository extends IAttendanceRepository {
     return { saved: results.length };
   }
 
-  async getRecap(query: AttendanceRecapQueryDto) {
+  async getRecap(query: AttendanceRecapQueryInput) {
     const { classroomId, semesterId, month, year } = query;
 
     // month/year both present -> scope to that calendar month; otherwise the
@@ -312,7 +324,7 @@ export class PrismaAttendanceRepository extends IAttendanceRepository {
     return counts;
   }
 
-  async getMonthlyTrend(query: AttendanceTrendQueryDto) {
+  async getMonthlyTrend(query: AttendanceTrendQueryInput) {
     const { classroomId, semesterId } = query;
 
     // Whole-semester query (no date filter), then grouped in-memory by
@@ -361,9 +373,17 @@ export class PrismaAttendanceRepository extends IAttendanceRepository {
         return {
           ...entry,
           total,
-          percentage: calcPercentage({ ...entry, total }),
+          percentage: calcPercentage({
+            PRESENT: entry.PRESENT,
+            LATE: entry.LATE,
+            total,
+          }),
         };
       })
       .sort((a, b) => a.year - b.year || a.month - b.month);
+  }
+
+  async remove(id: string) {
+    return this.softDelete(id);
   }
 }

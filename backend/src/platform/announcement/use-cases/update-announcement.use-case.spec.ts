@@ -1,8 +1,8 @@
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { ClassroomRepository } from '../../../academic/classroom/index.js';
+import { IClassroomRepository } from '../../../academic/classroom/index.js';
 import { UpdateAnnouncementDto } from '../dto/request/update-announcement.dto.js';
-import { AnnouncementRepository } from '../repositories/announcement.repository.js';
+import { IAnnouncementRepository } from '../domain/interfaces/announcement-repository.interface.js';
 import { UpdateAnnouncementUseCase } from './update-announcement.use-case.js';
 
 describe('UpdateAnnouncementUseCase', () => {
@@ -30,8 +30,8 @@ describe('UpdateAnnouncementUseCase', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         UpdateAnnouncementUseCase,
-        { provide: AnnouncementRepository, useValue: mockRepository },
-        { provide: ClassroomRepository, useValue: mockClassroomRepository },
+        { provide: IAnnouncementRepository, useValue: mockRepository },
+        { provide: IClassroomRepository, useValue: mockClassroomRepository },
       ],
     }).compile();
 

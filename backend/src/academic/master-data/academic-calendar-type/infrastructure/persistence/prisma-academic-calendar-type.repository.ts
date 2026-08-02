@@ -1,7 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../../../../core/database/prisma.service.js';
-import { AcademicCalendarTypeQueryDto } from '../../dto/request/academic-calendar-type-query.dto.js';
+import type {
+  AcademicCalendarTypeQueryInput,
+  CreateAcademicCalendarTypeRepositoryInput,
+  UpdateAcademicCalendarTypeRepositoryInput,
+} from '../../domain/interfaces/academic-calendar-type-repository.interface.js';
 import { IAcademicCalendarTypeRepository } from '../../domain/interfaces/academic-calendar-type-repository.interface.js';
 
 @Injectable()
@@ -10,7 +14,7 @@ export class PrismaAcademicCalendarTypeRepository extends IAcademicCalendarTypeR
     super();
   }
 
-  async findAll(query: AcademicCalendarTypeQueryDto) {
+  async findAll(query: AcademicCalendarTypeQueryInput) {
     const { page = 1, limit = 10, search, isActive } = query;
     const skip = (page - 1) * limit;
 

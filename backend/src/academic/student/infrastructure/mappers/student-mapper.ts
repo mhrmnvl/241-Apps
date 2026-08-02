@@ -1,16 +1,17 @@
 import { Student } from '@prisma/client';
 import { StudentEntity } from '../../domain/entities/student.entity.js';
-import { StudentStatus } from '../../domain/enums/student-status.enum.js';
+import { StudentStatusEnum } from '../../../../shared/domain/enums/student-status.enum.js';
 
 export class StudentMapper {
   static toDomain(prismaStudent: Student): StudentEntity {
-    return new StudentEntity(
-      prismaStudent.id,
-      prismaStudent.userId,
-      prismaStudent.nis,
-      prismaStudent.nisn,
-      prismaStudent.status as StudentStatus,
-      prismaStudent.gradeId,
-    );
+    return {
+      id: prismaStudent.id,
+      userId: prismaStudent.userId,
+      nis: prismaStudent.nis,
+      nisn: prismaStudent.nisn,
+      status: prismaStudent.status,
+      gradeId: prismaStudent.gradeId,
+      deletedAt: prismaStudent.deletedAt,
+    };
   }
 }

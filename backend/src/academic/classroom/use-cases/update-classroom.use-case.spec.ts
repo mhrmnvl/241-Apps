@@ -1,7 +1,7 @@
 import { ConflictException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { UpdateClassroomDto } from '../dto/request/update-classroom.dto.js';
-import { ClassroomRepository } from '../repositories/classroom.repository.js';
+import { IClassroomRepository } from '../domain/interfaces/classroom-repository.interface.js';
 import { UpdateClassroomUseCase } from './update-classroom.use-case.js';
 
 describe('UpdateClassroomUseCase', () => {
@@ -27,7 +27,7 @@ describe('UpdateClassroomUseCase', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         UpdateClassroomUseCase,
-        { provide: ClassroomRepository, useValue: mockRepository },
+        { provide: IClassroomRepository, useValue: mockRepository },
       ],
     }).compile();
 

@@ -1,6 +1,6 @@
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { AnnouncementRepository } from '../repositories/announcement.repository.js';
+import { IAnnouncementRepository } from '../domain/interfaces/announcement-repository.interface.js';
 import { GetAnnouncementByIdUseCase } from './get-announcement-by-id.use-case.js';
 
 describe('GetAnnouncementByIdUseCase', () => {
@@ -14,7 +14,7 @@ describe('GetAnnouncementByIdUseCase', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         GetAnnouncementByIdUseCase,
-        { provide: AnnouncementRepository, useValue: mockRepository },
+        { provide: IAnnouncementRepository, useValue: mockRepository },
       ],
     }).compile();
 

@@ -1,13 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { AdmissionWave, Prisma } from '@prisma/client';
 import { PrismaService } from '../../../core/database/prisma.service.js';
-import { AdmissionWaveQueryDto } from '../../dto/request/admission-wave-query.dto.js';
 import { PaginatedResult } from '../../../shared/domain/interfaces/repository.interface.js';
 import {
+  AdmissionWaveQueryInput,
   AdmissionWaveWithAcademicYear,
   AdmissionWaveWithRelations,
   CreateAdmissionWaveRepositoryInput,
   IAdmissionWaveRepository,
+  UpdateAdmissionWaveRepositoryInput,
 } from '../../domain/interfaces/admission-wave-repository.interface.js';
 
 const WAVE_INCLUDE = {
@@ -22,7 +23,7 @@ export class PrismaAdmissionWaveRepository extends IAdmissionWaveRepository {
   }
 
   async findAll(
-    query: AdmissionWaveQueryDto,
+    query: AdmissionWaveQueryInput,
   ): Promise<PaginatedResult<AdmissionWaveWithRelations>> {
     const { page = 1, limit = 10, search, academicYearId, isActive } = query;
     const skip = (page - 1) * limit;
@@ -64,6 +65,18 @@ export class PrismaAdmissionWaveRepository extends IAdmissionWaveRepository {
     return this.prisma.admissionWave.findUnique({ where: { code } });
   }
 
+  async findActiveWave(): Promise<AdmissionWave | null> {
+    const today = new Date();
+    return this.prisma.admissionWave.findFirst({
+      where: {
+        isActive: true,
+        deletedAt: null,
+        startDate: { lte: today },
+        endDate: { gte: today },
+      },
+    });
+  }
+
   async create(
     data: CreateAdmissionWaveRepositoryInput,
   ): Promise<AdmissionWaveWithAcademicYear> {
@@ -75,13 +88,17 @@ export class PrismaAdmissionWaveRepository extends IAdmissionWaveRepository {
 
   async update(
     id: string,
-    data: Prisma.AdmissionWaveUncheckedUpdateInput,
+    data: UpdateAdmissionWaveRepositoryInput,
   ): Promise<AdmissionWaveWithAcademicYear> {
     return this.prisma.admissionWave.update({
       where: { id },
       data,
       include: { academicYear: true },
     });
+  }
+
+  async remove(id: string): Promise<AdmissionWave> {
+    return this.softDelete(id);
   }
 
   async softDelete(id: string): Promise<AdmissionWave> {

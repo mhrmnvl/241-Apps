@@ -1,31 +1,15 @@
-import { Address, Prisma } from '@prisma/client';
-
-export const ADDRESS_OMIT = {
-  studentId: true,
-  teacherId: true,
-  parentId: true,
-  schoolUnitId: true,
-} satisfies Prisma.AddressOmit;
-
-export type AddressPublic = Prisma.AddressGetPayload<{
-  omit: typeof ADDRESS_OMIT;
-}>;
-
-// The school-unit address is the one owned by a SchoolUnit (schoolUnitId set).
-export const SCHOOL_ADDRESS_WHERE: Prisma.AddressWhereInput = {
-  schoolUnitId: { not: null },
-  deletedAt: null,
-};
+import { AddressEntity } from '../../../../shared/domain/entities/address.entity.js';
 
 export abstract class ISchoolUnitAddressRepository {
-  abstract find(): Promise<Address | null>;
-  abstract create(
-    dto: Prisma.AddressUncheckedCreateInput,
+  abstract findBySchoolUnitId(
     schoolUnitId: string,
-  ): Promise<AddressPublic>;
+  ): Promise<AddressEntity | null>;
+  abstract create(
+    schoolUnitId: string,
+    dto: Partial<AddressEntity>,
+  ): Promise<AddressEntity>;
   abstract update(
     id: string,
-    dto: Prisma.AddressUpdateInput,
-  ): Promise<AddressPublic>;
-  abstract remove(id: string): Promise<Address>;
+    dto: Partial<AddressEntity>,
+  ): Promise<AddressEntity>;
 }

@@ -1,3 +1,4 @@
+import { PromotionAction } from '../../domain/enums/promotion-action.enum.js';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
@@ -11,11 +12,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 
-export enum PromotionAction {
-  PROMOTE = 'PROMOTE',
-  REPEAT = 'REPEAT',
-  GRADUATE = 'GRADUATE',
-}
+export { PromotionAction };
 
 export class PromotionStudentDto {
   @ApiProperty({ description: 'Student ID', format: 'uuid' })

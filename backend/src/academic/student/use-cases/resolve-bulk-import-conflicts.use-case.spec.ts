@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { IGradeRepository } from '../../grade/domain/interfaces/grade-repository.interface.js';
-import { ClassroomRepository } from '../../classroom/index.js';
+import { IClassroomRepository } from '../../classroom/index.js';
 import { UpdateStudentUseCase } from './update-student.use-case.js';
 import { UpdateStudentProfileUseCase } from './update-student-profile.use-case.js';
 import { CreateStudentUseCase } from './create-student.use-case.js';
@@ -55,7 +55,7 @@ describe('ResolveBulkImportConflictsUseCase', () => {
       providers: [
         ResolveBulkImportConflictsUseCase,
         { provide: IGradeRepository, useValue: mockGradeRepository },
-        { provide: ClassroomRepository, useValue: mockClassroomRepository },
+        { provide: IClassroomRepository, useValue: mockClassroomRepository },
         { provide: UpdateStudentUseCase, useValue: mockUpdateStudent },
         {
           provide: UpdateStudentProfileUseCase,

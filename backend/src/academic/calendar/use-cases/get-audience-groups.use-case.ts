@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { IEventRepository } from '../domain/interfaces/events-repository.interface.js';
+import { IEventRepository } from '../domain/interfaces/event-repository.interface.js';
 
 @Injectable()
 export class GetAudienceGroupsUseCase {

@@ -4,15 +4,15 @@ import { UpdateAssetDto } from '../dto/request/update-asset.dto.js';
 
 @Injectable()
 export class UpdateAssetUseCase {
-  constructor(private readonly repository: IAssetRepository) {}
+  constructor(private readonly assetRepository: IAssetRepository) {}
 
   async execute(id: string, dto: UpdateAssetDto) {
-    const asset = await this.repository.findById(id);
+    const asset = await this.assetRepository.findById(id);
     if (!asset) {
       throw new NotFoundException(`Asset with ID ${id} not found`);
     }
 
-    return this.repository.update(id, {
+    return this.assetRepository.update(id, {
       name: dto.name,
       brand: dto.brand ?? undefined,
       model: dto.model ?? undefined,
@@ -21,14 +21,8 @@ export class UpdateAssetUseCase {
       purchasePrice: dto.purchasePrice,
       usefulLifeMonths: dto.usefulLifeMonths ?? undefined,
       notes: dto.notes ?? undefined,
-      category: dto.categoryId
-        ? { connect: { id: dto.categoryId } }
-        : undefined,
-      fundingSource: dto.fundingSourceId
-        ? { connect: { id: dto.fundingSourceId } }
-        : dto.fundingSourceId === null
-          ? { disconnect: true }
-          : undefined,
+      categoryId: dto.categoryId,
+      fundingSourceId: dto.fundingSourceId,
     });
   }
 }

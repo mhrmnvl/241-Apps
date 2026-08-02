@@ -1,26 +1,33 @@
-import { BloodType, Prisma } from '@prisma/client';
-import { BloodTypeQueryDto } from '../../dto/request/blood-type-query.dto.js';
-import { PaginatedResult } from '../../../../../shared/domain/interfaces/repository.interface.js';
+import {
+  PaginatedResult,
+  PaginationQueryInput,
+} from '../../../../../shared/domain/interfaces/repository.interface.js';
+import { BloodTypeEntity } from '../entities/blood-type.entity.js';
+
+export interface BloodTypeQueryInput extends PaginationQueryInput {
+  search?: string;
+  isActive?: boolean;
+}
 
 export abstract class IBloodTypeRepository {
   abstract findAll(
-    query: BloodTypeQueryDto,
-  ): Promise<PaginatedResult<BloodType>>;
+    query: BloodTypeQueryInput,
+  ): Promise<PaginatedResult<BloodTypeEntity>>;
 
-  abstract findById(id: string): Promise<BloodType | null>;
+  abstract findById(id: string): Promise<BloodTypeEntity | null>;
   abstract findByName(
     name: string,
     excludeId?: string,
-  ): Promise<BloodType | null>;
+  ): Promise<BloodTypeEntity | null>;
 
   abstract create(data: {
     name: string;
     isActive?: boolean;
-  }): Promise<BloodType>;
+  }): Promise<BloodTypeEntity>;
   abstract update(
     id: string,
-    data: Prisma.BloodTypeUpdateInput,
-  ): Promise<BloodType>;
+    data: { name?: string; isActive?: boolean },
+  ): Promise<BloodTypeEntity>;
 
-  abstract softDelete(id: string): Promise<BloodType>;
+  abstract softDelete(id: string): Promise<BloodTypeEntity>;
 }

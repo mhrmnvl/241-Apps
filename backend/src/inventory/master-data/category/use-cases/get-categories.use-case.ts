@@ -3,9 +3,9 @@ import { ICategoryRepository } from '../domain/interfaces/category-repository.in
 
 @Injectable()
 export class GetCategoriesUseCase {
-  constructor(private readonly repository: ICategoryRepository) {}
+  constructor(private readonly categoryRepository: ICategoryRepository) {}
 
   async execute(search?: string) {
-    return this.repository.findMany(search);
+    return this.categoryRepository.findMany(search);
   }
 }

@@ -1,3 +1,4 @@
+import { AdmissionDocumentStatus } from '../../shared/domain/enums/admission-document-status.enum.js';
 import {
   BadRequestException,
   Injectable,
@@ -10,7 +11,7 @@ import { AdmissionNotificationService } from '../services/admission-notification
 @Injectable()
 export class VerifyDocumentUseCase {
   constructor(
-    private readonly repository: IAdmissionApplicationRepository,
+    private readonly admissionApplicationRepository: IAdmissionApplicationRepository,
     private readonly notifications: AdmissionNotificationService,
   ) {}
 
@@ -20,11 +21,11 @@ export class VerifyDocumentUseCase {
     dto: VerifyDocumentDto,
     adminId: string,
   ) {
-    if (dto.status === 'REJECTED' && !dto.note?.trim()) {
+    if (dto.status === AdmissionDocumentStatus.REJECTED && !dto.note?.trim()) {
       throw new BadRequestException('Alasan penolakan berkas wajib diisi');
     }
 
-    const document = await this.repository.findDocument(
+    const document = await this.admissionApplicationRepository.findDocument(
       applicationId,
       documentId,
     );
@@ -32,19 +33,23 @@ export class VerifyDocumentUseCase {
       throw new NotFoundException('Berkas tidak ditemukan');
     }
 
-    const updated = await this.repository.updateDocumentStatus(document.id, {
-      status: dto.status,
-      note: dto.note ?? null,
-      adminId,
-    });
+    const updated =
+      await this.admissionApplicationRepository.updateDocumentStatus(
+        document.id,
+        {
+          status: dto.status,
+          note: dto.note ?? null,
+          adminId,
+        },
+      );
 
     await this.notifications.notify(
       applicationId,
       'DOCUMENT',
-      dto.status === 'APPROVED'
+      dto.status === AdmissionDocumentStatus.APPROVED
         ? `Berkas ${document.documentType.name} disetujui`
         : `Berkas ${document.documentType.name} ditolak`,
-      dto.status === 'APPROVED'
+      dto.status === AdmissionDocumentStatus.APPROVED
         ? `Berkas ${document.documentType.name} Anda telah diverifikasi dan disetujui.`
         : `Berkas ${document.documentType.name} Anda ditolak. Catatan: ${dto.note}. Silakan unggah ulang.`,
     );

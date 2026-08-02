@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { TeacherQueryDto } from '../dto/request/teacher-query.dto.js';
-import { TeacherRepository } from '../repositories/teacher.repository.js';
+import { ITeacherRepository } from '../domain/interfaces/teacher-repository.interface.js';
 import { GetTeachersUseCase } from './get-teachers.use-case.js';
 
 describe('GetTeachersUseCase', () => {
@@ -14,7 +14,7 @@ describe('GetTeachersUseCase', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         GetTeachersUseCase,
-        { provide: TeacherRepository, useValue: mockRepository },
+        { provide: ITeacherRepository, useValue: mockRepository },
       ],
     }).compile();
 

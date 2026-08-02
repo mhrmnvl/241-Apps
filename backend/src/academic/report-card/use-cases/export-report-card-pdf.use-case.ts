@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { GetSchoolUnitUseCase } from '../../../platform/school-unit/index.js';
-import { IStudentScoreRepository } from '../../assessment/domain/interfaces/student-scores-repository.interface.js';
+import { IStudentScoreRepository } from '../../assessment/domain/interfaces/student-score-repository.interface.js';
 import { IAttendanceRepository } from '../../attendance/domain/interfaces/attendance-repository.interface.js';
 import { IReportCardRepository } from '../domain/interfaces/report-card-repository.interface.js';
 import { PdfService } from '../services/pdf.service.js';
@@ -20,7 +20,7 @@ import {
 @Injectable()
 export class ExportReportCardPdfUseCase {
   constructor(
-    private readonly repository: IReportCardRepository,
+    private readonly reportCardRepository: IReportCardRepository,
     private readonly studentScoreRepository: IStudentScoreRepository,
     private readonly attendanceRepository: IAttendanceRepository,
     private readonly pdfService: PdfService,
@@ -28,7 +28,7 @@ export class ExportReportCardPdfUseCase {
   ) {}
 
   async execute(id: string): Promise<Buffer> {
-    const reportCard = await this.repository.findById(id);
+    const reportCard = await this.reportCardRepository.findById(id);
     if (!reportCard) {
       throw new NotFoundException('Rapor tidak ditemukan');
     }
@@ -37,9 +37,12 @@ export class ExportReportCardPdfUseCase {
       throw new BadRequestException('Rapor belum dipublikasikan');
     }
 
+    const enrollmentId =
+      reportCard.enrollmentId ?? reportCard.studentEnrollmentId ?? '';
+
     const [scores, attendanceCounts] = await Promise.all([
-      this.studentScoreRepository.findAllForReportCard(reportCard.enrollmentId),
-      this.attendanceRepository.getStatusCounts(reportCard.enrollmentId),
+      this.studentScoreRepository.findAllForReportCard(enrollmentId),
+      this.attendanceRepository.getStatusCounts(enrollmentId),
     ]);
 
     // Fetch School Unit info
@@ -89,7 +92,7 @@ export class ExportReportCardPdfUseCase {
       sickCount: attendanceCounts.sick,
       excusedCount: attendanceCounts.excused,
       absentCount: attendanceCounts.absent,
-      teacherNote: reportCard.teacherNote,
+      teacherNote: reportCard.teacherNote ?? reportCard.teacherNotes ?? null,
       subjectsData,
     };
 

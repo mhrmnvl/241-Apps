@@ -1,5 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { MaritalStatus, UserGender } from '@prisma/client';
+import { MaritalStatus } from '../../../../shared/domain/enums/marital-status.enum.js';
+import { UserGender } from '../../../../shared/domain/enums/user-gender.enum.js';
 import {
   IsDateString,
   IsEmail,

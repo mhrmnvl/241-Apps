@@ -1,7 +1,7 @@
 ﻿import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
 import { UpdateScholarshipDto } from '../dto/request/update-scholarship.dto.js';
-import { ScholarshipRepository } from '../repositories/scholarship.repository.js';
+import { IScholarshipRepository } from '../domain/interfaces/scholarship-repository.interface.js';
 import { UpdateScholarshipUseCase } from './update-scholarship.use-case.js';
 
 describe('UpdateScholarshipUseCase', () => {
@@ -13,7 +13,7 @@ describe('UpdateScholarshipUseCase', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         UpdateScholarshipUseCase,
-        { provide: ScholarshipRepository, useValue: mockRepo },
+        { provide: IScholarshipRepository, useValue: mockRepo },
       ],
     }).compile();
 

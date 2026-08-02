@@ -1,21 +1,29 @@
-import { Address, Prisma } from '@prisma/client';
-import {
-  CreateAddressDto,
-  UpdateAddressDto,
-} from '../../../../shared/dto/address.dto.js';
+import { AddressEntity } from '../../../../shared/domain/entities/address.entity.js';
 
 export abstract class IStudentAddressRepository {
-  abstract findAll(studentId: string): Promise<Address[]>;
+  abstract findByStudentId(studentId: string): Promise<AddressEntity[]>;
+  abstract findAll(studentId: string): Promise<AddressEntity[]>;
+  abstract findById(id: string): Promise<AddressEntity | null>;
   abstract findOne(
     studentId: string,
     addressId: string,
-  ): Promise<Address | null>;
-  abstract clearPrimary(studentId: string): Promise<Prisma.BatchPayload>;
+  ): Promise<AddressEntity | null>;
+  abstract create(
+    studentId: string,
+    dto: Partial<AddressEntity>,
+  ): Promise<AddressEntity>;
+  abstract update(
+    id: string,
+    dto: Partial<AddressEntity>,
+  ): Promise<AddressEntity>;
+  abstract remove(id: string): Promise<AddressEntity>;
+  abstract clearPrimaryForStudent(
+    studentId: string,
+    excludeId?: string,
+  ): Promise<{ count: number }>;
   abstract clearPrimaryExclude(
     studentId: string,
-    excludeId: string,
-  ): Promise<Prisma.BatchPayload>;
-  abstract create(studentId: string, dto: CreateAddressDto): Promise<Address>;
-  abstract update(addressId: string, dto: UpdateAddressDto): Promise<Address>;
-  abstract remove(addressId: string): Promise<Address>;
+    excludeAddressId: string,
+  ): Promise<{ count: number }>;
+  abstract clearPrimary(studentId: string): Promise<{ count: number }>;
 }

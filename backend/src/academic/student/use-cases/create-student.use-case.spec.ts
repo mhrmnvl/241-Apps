@@ -1,8 +1,8 @@
 import { ConflictException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { UserGender } from '@prisma/client';
+import { UserGender } from '../../../shared/domain/enums/user-gender.enum.js';
 import { CreateStudentDto } from '../dto/request/create-student.dto.js';
-import { StudentRepository } from '../repositories/student.repository.js';
+import { IStudentRepository } from '../domain/interfaces/student-repository.interface.js';
 import { CreateStudentUseCase } from './create-student.use-case.js';
 import { EnsureStudentEnrollmentUseCase } from '../../enrollment/use-cases/ensure-student-enrollment.use-case.js';
 
@@ -23,7 +23,7 @@ describe('CreateStudentUseCase', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         CreateStudentUseCase,
-        { provide: StudentRepository, useValue: mockStudentRepository },
+        { provide: IStudentRepository, useValue: mockStudentRepository },
         {
           provide: EnsureStudentEnrollmentUseCase,
           useValue: mockEnsureStudentEnrollment,
@@ -72,8 +72,9 @@ describe('CreateStudentUseCase', () => {
 
       expect(mockStudentRepository.findByNis).toHaveBeenCalledWith(dto.nis);
       expect(mockStudentRepository.findByNisn).toHaveBeenCalledWith(dto.nisn);
+      // The port takes a real Date; the use case converts the ISO string.
       expect(mockStudentRepository.create).toHaveBeenCalledWith(
-        dto,
+        { ...dto, birthDate: new Date(dto.birthDate) },
         expect.any(String),
       );
       expect(mockEnsureStudentEnrollment.execute).toHaveBeenCalledWith(

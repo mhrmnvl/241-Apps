@@ -1,7 +1,7 @@
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { UpdateProfileDto } from '../../../platform/profile/index.js';
-import { StudentRepository } from '../index.js';
+import { IStudentRepository } from '../index.js';
 import { UpdateStudentProfileUseCase } from './update-student-profile.use-case.js';
 
 describe('UpdateStudentProfileUseCase', () => {
@@ -16,7 +16,7 @@ describe('UpdateStudentProfileUseCase', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         UpdateStudentProfileUseCase,
-        { provide: StudentRepository, useValue: mockRepo },
+        { provide: IStudentRepository, useValue: mockRepo },
       ],
     }).compile();
 

@@ -7,17 +7,19 @@ import { CreateSemesterTypeDto } from '../dto/request/create-semester-type.dto.j
 
 @Injectable()
 export class CreateSemesterTypeUseCase {
-  constructor(private readonly repository: ISemesterTypeRepository) {}
+  constructor(
+    private readonly semesterTypeRepository: ISemesterTypeRepository,
+  ) {}
 
   async execute(dto: CreateSemesterTypeDto): Promise<SemesterType> {
-    const existing = await this.repository.findByName(dto.name);
+    const existing = await this.semesterTypeRepository.findByName(dto.name);
     if (existing) {
       throw new ConflictException(
         `Semester Type with name "${dto.name}" already exists`,
       );
     }
 
-    return this.repository.create({
+    return this.semesterTypeRepository.create({
       name: dto.name,
       isActive: dto.isActive ?? true,
     });

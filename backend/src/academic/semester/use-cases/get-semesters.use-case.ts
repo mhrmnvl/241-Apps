@@ -4,10 +4,11 @@ import { ISemesterRepository } from '../domain/interfaces/semester-repository.in
 
 @Injectable()
 export class GetSemestersUseCase {
-  constructor(private readonly repository: ISemesterRepository) {}
+  constructor(private readonly semesterRepository: ISemesterRepository) {}
 
   async execute(query: SemesterQueryDto) {
-    const { data, total, page, limit } = await this.repository.findAll(query);
+    const { data, total, page, limit } =
+      await this.semesterRepository.findAll(query);
     return {
       data,
       meta: {

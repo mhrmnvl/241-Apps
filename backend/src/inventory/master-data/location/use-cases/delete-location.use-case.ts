@@ -3,13 +3,13 @@ import { ILocationRepository } from '../domain/interfaces/location-repository.in
 
 @Injectable()
 export class DeleteLocationUseCase {
-  constructor(private readonly repository: ILocationRepository) {}
+  constructor(private readonly locationRepository: ILocationRepository) {}
 
   async execute(id: string) {
-    const location = await this.repository.findById(id);
+    const location = await this.locationRepository.findById(id);
     if (!location) {
       throw new NotFoundException(`Location with ID ${id} not found`);
     }
-    return this.repository.delete(id);
+    return this.locationRepository.delete(id);
   }
 }

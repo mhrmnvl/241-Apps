@@ -1,3 +1,4 @@
+import { PaginatedResult } from '../../../../shared/domain/interfaces/repository.interface.js';
 import { RequirePermissions } from '../../../../platform/access-control/permission/decorators/require-permissions.decorator.js';
 import {
   Body,
@@ -20,7 +21,7 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { SemesterType } from '@prisma/client';
+import { SemesterTypeEntity as SemesterType } from '../domain/entities/semester-type.entity.js';
 import { JwtAuthGuard } from '../../../../platform/auth/index.js';
 import { CreateSemesterTypeDto } from '../dto/request/create-semester-type.dto.js';
 import { SemesterTypeQueryDto } from '../dto/request/semester-type-query.dto.js';
@@ -52,12 +53,9 @@ export class SemesterTypeController {
   @RequirePermissions('academic-calendar-types.read') // using existing permission or role-based
   @ApiOperation({ summary: 'List all semester types' })
   @ApiResponse({ status: 200, type: SemesterTypeListResponseDto })
-  async findAll(@Query() query: SemesterTypeQueryDto): Promise<{
-    data: SemesterType[];
-    total: number;
-    page: number;
-    limit: number;
-  }> {
+  async findAll(
+    @Query() query: SemesterTypeQueryDto,
+  ): Promise<PaginatedResult<SemesterType>> {
     return this.getSemesterTypesService.execute(query);
   }
 

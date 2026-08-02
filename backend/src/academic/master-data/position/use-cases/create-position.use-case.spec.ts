@@ -1,7 +1,7 @@
 import { ConflictException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { CreatePositionDto } from '../dto/request/create-position.dto.js';
-import { IPositionRepository } from '../interfaces/position-repository.interface.js';
+import { IPositionRepository } from '../domain/interfaces/position-repository.interface.js';
 import { CreatePositionUseCase } from './create-position.use-case.js';
 
 describe('CreatePositionUseCase', () => {

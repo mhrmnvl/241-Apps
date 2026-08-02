@@ -8,9 +8,15 @@ import {
 } from '@prisma/client';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
 import {
+  CreateApprovalLogInput,
+  CreateApprovalWorkflowInput,
   IApprovalRepository,
-  ApprovalInstanceWithRelations,
+  ProcessApprovalResult,
+  ProcessApprovalTransactionInput,
+  UpdateApprovalInstanceInput,
+  type ApprovalLoanDetailRow,
 } from '../../domain/interfaces/approval-repository.interface.js';
+import { ApprovalInstanceWithRelations } from './prisma-approval.includes.js';
 
 @Injectable()
 export class PrismaApprovalRepository extends IApprovalRepository {
@@ -41,8 +47,21 @@ export class PrismaApprovalRepository extends IApprovalRepository {
   }
 
   async createWorkflow(
-    data: Prisma.ApprovalWorkflowCreateInput,
+    input: CreateApprovalWorkflowInput,
   ): Promise<ApprovalWorkflow> {
+    const { steps, ...scalars } = input;
+
+    const data: Prisma.ApprovalWorkflowCreateInput = {
+      ...scalars,
+      steps: {
+        create: steps.map((step) => ({
+          stepSequence: step.stepSequence,
+          approverRoleId: step.approverRoleId,
+          isMandatory: step.isMandatory ?? true,
+        })),
+      },
+    };
+
     return this.prisma.approvalWorkflow.create({ data });
   }
 
@@ -66,7 +85,7 @@ export class PrismaApprovalRepository extends IApprovalRepository {
 
   async updateInstance(
     id: string,
-    data: Prisma.ApprovalInstanceUpdateInput,
+    data: UpdateApprovalInstanceInput,
   ): Promise<ApprovalInstance> {
     return this.prisma.approvalInstance.update({
       where: { id },
@@ -74,7 +93,7 @@ export class PrismaApprovalRepository extends IApprovalRepository {
     });
   }
 
-  async createLog(data: Prisma.ApprovalLogCreateInput): Promise<ApprovalLog> {
+  async createLog(data: CreateApprovalLogInput): Promise<ApprovalLog> {
     return this.prisma.approvalLog.create({ data });
   }
 
@@ -130,17 +149,9 @@ export class PrismaApprovalRepository extends IApprovalRepository {
     });
   }
 
-  async processApprovalTransaction(params: {
-    instanceId: string;
-    referenceId: string;
-    currentStepSequence: number;
-    action: 'APPROVE' | 'REJECT';
-    userId: string;
-    note?: string | null;
-    pendingStatusId: string;
-    hasNextStep: boolean;
-    nextStepSequence?: number;
-  }): Promise<unknown> {
+  async processApprovalTransaction(
+    params: ProcessApprovalTransactionInput,
+  ): Promise<ProcessApprovalResult> {
     const ACTION_APPROVE = '00000000-0000-0000-0000-000000000001';
     const ACTION_REJECT = '00000000-0000-0000-0000-000000000002';
 
@@ -274,7 +285,7 @@ export class PrismaApprovalRepository extends IApprovalRepository {
 
   async findLoanDetailsForInstance(
     referenceId: string,
-  ): Promise<Record<string, unknown> | null> {
+  ): Promise<ApprovalLoanDetailRow | null> {
     return this.prisma.inventoryLoan.findUnique({
       where: { id: referenceId },
       include: {

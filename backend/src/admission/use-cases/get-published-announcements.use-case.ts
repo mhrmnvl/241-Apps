@@ -3,9 +3,13 @@ import { IAdmissionApplicantRepository } from '../domain/interfaces/admission-ap
 
 @Injectable()
 export class GetPublishedAnnouncementsUseCase {
-  constructor(private readonly repository: IAdmissionApplicantRepository) {}
+  constructor(
+    private readonly admissionApplicantRepository: IAdmissionApplicantRepository,
+  ) {}
 
   async execute(userId: string) {
-    return this.repository.findPublishedAnnouncementsForUser(userId);
+    return this.admissionApplicantRepository.findPublishedAnnouncementsForUser(
+      userId,
+    );
   }
 }

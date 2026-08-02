@@ -1,6 +1,6 @@
 import { ConflictException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { IPositionRepository } from '../interfaces/position-repository.interface.js';
+import { IPositionRepository } from '../domain/interfaces/position-repository.interface.js';
 import { DeletePositionUseCase } from './delete-position.use-case.js';
 
 describe('DeletePositionUseCase', () => {

@@ -1,9 +1,7 @@
 import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import {
-  RequestUser,
-  StudentRepository,
-} from '../repositories/student.repository.js';
+import { IStudentRepository } from '../domain/interfaces/student-repository.interface.js';
+import type { RequestUser } from '../types/student.types.js';
 import { GetStudentByIdUseCase } from './get-student-by-id.use-case.js';
 
 describe('GetStudentByIdUseCase', () => {
@@ -19,7 +17,7 @@ describe('GetStudentByIdUseCase', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         GetStudentByIdUseCase,
-        { provide: StudentRepository, useValue: mockRepo },
+        { provide: IStudentRepository, useValue: mockRepo },
       ],
     }).compile();
 

@@ -1,8 +1,8 @@
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { ClassroomRepository } from '../../classroom/index.js';
+import { IClassroomRepository } from '../../classroom/index.js';
 import { CreateEventDto } from '../dto/request/create-event.dto.js';
-import { IEventRepository } from '../domain/interfaces/events-repository.interface.js';
+import { IEventRepository } from '../domain/interfaces/event-repository.interface.js';
 import { CreateEventUseCase } from './create-event.use-case.js';
 
 describe('CreateEventUseCase', () => {
@@ -21,7 +21,7 @@ describe('CreateEventUseCase', () => {
       providers: [
         CreateEventUseCase,
         { provide: IEventRepository, useValue: mockRepository },
-        { provide: ClassroomRepository, useValue: mockClassroomRepository },
+        { provide: IClassroomRepository, useValue: mockClassroomRepository },
       ],
     }).compile();
 
@@ -54,7 +54,11 @@ describe('CreateEventUseCase', () => {
       const result = await useCase.execute(dto);
 
       expect(mockClassroomRepository.findById).not.toHaveBeenCalled();
-      expect(mockRepository.create).toHaveBeenCalledWith(dto);
+      expect(mockRepository.create).toHaveBeenCalledWith({
+        ...dto,
+        startTime: new Date(dto.startTime),
+        endTime: new Date(dto.endTime),
+      });
       expect(result).toEqual(mockEvent);
     });
 
@@ -76,7 +80,11 @@ describe('CreateEventUseCase', () => {
 
       expect(mockClassroomRepository.findById).toHaveBeenCalledWith('cls-1');
       expect(mockClassroomRepository.findById).toHaveBeenCalledWith('cls-2');
-      expect(mockRepository.create).toHaveBeenCalledWith(dto);
+      expect(mockRepository.create).toHaveBeenCalledWith({
+        ...dto,
+        startTime: new Date(dto.startTime),
+        endTime: new Date(dto.endTime),
+      });
       expect(result).toBeDefined();
     });
 

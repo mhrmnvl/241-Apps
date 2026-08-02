@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ClassroomModule } from '../../academic/classroom/classroom.module.js';
 import { AnnouncementController } from './presentation/announcement.controller.js';
-import { AnnouncementRepository } from './repositories/announcement.repository.js';
+import { IAnnouncementRepository } from './domain/interfaces/announcement-repository.interface.js';
 import { PrismaAnnouncementRepository } from './infrastructure/persistence/prisma-announcement.repository.js';
 import { CreateAnnouncementUseCase } from './use-cases/create-announcement.use-case.js';
 import { DeleteAnnouncementUseCase } from './use-cases/delete-announcement.use-case.js';
@@ -14,7 +14,7 @@ import { UpdateAnnouncementUseCase } from './use-cases/update-announcement.use-c
   controllers: [AnnouncementController],
   providers: [
     {
-      provide: AnnouncementRepository,
+      provide: IAnnouncementRepository,
       useClass: PrismaAnnouncementRepository,
     },
 
@@ -24,6 +24,6 @@ import { UpdateAnnouncementUseCase } from './use-cases/update-announcement.use-c
     UpdateAnnouncementUseCase,
     DeleteAnnouncementUseCase,
   ],
-  exports: [AnnouncementRepository],
+  exports: [IAnnouncementRepository],
 })
 export class AnnouncementModule {}

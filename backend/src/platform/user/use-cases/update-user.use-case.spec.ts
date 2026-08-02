@@ -1,7 +1,7 @@
 import { ConflictException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { UpdateUserDto } from '../dto/request/update-user.dto.js';
-import { IUserRepository } from '../interfaces/user-repository.interface.js';
+import { IUserRepository } from '../domain/interfaces/user-repository.interface.js';
 import { UpdateUserUseCase } from './update-user.use-case.js';
 import { hashPassword } from '../../../shared/utils/hash.helper.js';
 

@@ -8,19 +8,19 @@ import { ITimeSlotRepository } from '../domain/interfaces/time-slot-repository.i
 
 @Injectable()
 export class UpdateTimeSlotTypeUseCase {
-  constructor(private readonly repository: ITimeSlotRepository) {}
+  constructor(private readonly timeSlotRepository: ITimeSlotRepository) {}
 
   async execute(id: string, dto: UpdateTimeSlotTypeDto) {
-    const type = await this.repository.findTypeById(id);
+    const type = await this.timeSlotRepository.findTypeById(id);
     if (!type) {
       throw new NotFoundException('Tipe jam tidak ditemukan');
     }
     if (dto.code) {
-      const dup = await this.repository.findTypeByCode(dto.code, id);
-      if (dup) {
+      const dup = await this.timeSlotRepository.findTypeByCode(dto.code);
+      if (dup && dup.id !== id) {
         throw new ConflictException(`Kode tipe "${dto.code}" sudah digunakan`);
       }
     }
-    return this.repository.updateType(id, dto);
+    return this.timeSlotRepository.updateType(id, dto);
   }
 }

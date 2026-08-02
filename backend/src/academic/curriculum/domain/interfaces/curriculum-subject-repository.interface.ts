@@ -1,49 +1,62 @@
-import { CurriculumSubject, Prisma } from '@prisma/client';
-import { CurriculumSubjectQueryDto } from '../../dto/request/curriculum-subject-query.dto.js';
-import { PaginatedResult } from '../../../../shared/domain/interfaces/repository.interface.js';
+import {
+  PaginatedResult,
+  PaginationQueryInput,
+} from '../../../../shared/domain/interfaces/repository.interface.js';
+import {
+  CurriculumSubjectEntity,
+  CurriculumSubjectWithDetails,
+} from '../entities/curriculum.entity.js';
 
-export const CURRICULUM_SUBJECT_INCLUDE = {
-  curricula: { include: { academicYear: true } },
-  subject: true,
-} satisfies Prisma.CurriculumSubjectInclude;
+export type { CurriculumSubjectWithDetails };
 
-export type CurriculumSubjectWithDetails = Prisma.CurriculumSubjectGetPayload<{
-  include: typeof CURRICULUM_SUBJECT_INCLUDE;
-}>;
+export interface CurriculumSubjectQueryInput extends PaginationQueryInput {
+  curriculumId?: string;
+  subjectId?: string;
+}
+
+export interface CreateCurriculumSubjectRepositoryInput {
+  curriculumId: string;
+  subjectId: string;
+  gradeId?: string | null;
+  hoursPerWeek?: number;
+}
+
+export type UpdateCurriculumSubjectRepositoryInput =
+  Partial<CreateCurriculumSubjectRepositoryInput>;
 
 export abstract class ICurriculumSubjectRepository {
   abstract findAll(
-    query: CurriculumSubjectQueryDto,
+    query: CurriculumSubjectQueryInput,
   ): Promise<PaginatedResult<CurriculumSubjectWithDetails>>;
-
   abstract findById(id: string): Promise<CurriculumSubjectWithDetails | null>;
-
-  abstract findDuplicate(
-    curriculumId: string,
+  abstract findAssignment(
+    curriculaId: string,
     subjectId: string,
+    gradeId?: string,
     excludeId?: string,
-  ): Promise<CurriculumSubject | null>;
-
-  abstract create(data: {
-    curriculumId: string;
-    subjectId: string;
-    hoursPerWeek?: number;
-  }): Promise<CurriculumSubjectWithDetails>;
-
+  ): Promise<CurriculumSubjectWithDetails | null>;
+  abstract create(
+    input: CreateCurriculumSubjectRepositoryInput,
+  ): Promise<CurriculumSubjectWithDetails>;
   abstract update(
     id: string,
-    data: Prisma.CurriculumSubjectUpdateInput,
+    input: UpdateCurriculumSubjectRepositoryInput,
   ): Promise<CurriculumSubjectWithDetails>;
-
-  abstract findSoftDeleted(
-    curriculumId: string,
-    subjectId: string,
-  ): Promise<CurriculumSubject | null>;
-
+  abstract remove(id: string): Promise<CurriculumSubjectEntity>;
+  abstract softDelete(id: string): Promise<CurriculumSubjectEntity>;
   abstract restore(
     id: string,
-    data: { hoursPerWeek?: number },
+    input?: UpdateCurriculumSubjectRepositoryInput,
   ): Promise<CurriculumSubjectWithDetails>;
-
-  abstract softDelete(id: string): Promise<CurriculumSubject>;
+  abstract findDuplicate(
+    curriculaId: string,
+    subjectId: string,
+    gradeId?: string,
+    excludeId?: string,
+  ): Promise<CurriculumSubjectWithDetails | null>;
+  abstract findSoftDeleted(
+    curriculaId: string,
+    subjectId: string,
+    gradeId?: string,
+  ): Promise<CurriculumSubjectWithDetails | null>;
 }

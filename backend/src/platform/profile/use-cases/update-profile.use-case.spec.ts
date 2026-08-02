@@ -1,8 +1,8 @@
 import { ConflictException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { UserGender } from '@prisma/client';
+import { UserGender } from '../../../shared/domain/enums/user-gender.enum.js';
 import { UpdateProfileDto } from '../dto/request/update-profile.dto.js';
-import { ProfileRepository } from '../repositories/profile.repository.js';
+import { IProfileRepository } from '../domain/interfaces/profile-repository.interface.js';
 import { StorageService } from '../../../core/storage/storage.service.js';
 import { UpdateProfileUseCase } from './update-profile.use-case.js';
 
@@ -24,7 +24,7 @@ describe('UpdateProfileUseCase', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         UpdateProfileUseCase,
-        { provide: ProfileRepository, useValue: mockRepo },
+        { provide: IProfileRepository, useValue: mockRepo },
         { provide: StorageService, useValue: mockStorage },
       ],
     }).compile();
@@ -58,7 +58,11 @@ describe('UpdateProfileUseCase', () => {
       expect(mockRepo.findByNik).not.toHaveBeenCalled();
       expect(mockRepo.findByEmail).not.toHaveBeenCalled();
       expect(mockRepo.findByPhone).not.toHaveBeenCalled();
-      expect(mockRepo.update).toHaveBeenCalledWith(userId, dto);
+      // The port takes a real Date; the use case converts the ISO string.
+      expect(mockRepo.update).toHaveBeenCalledWith(userId, {
+        ...dto,
+        birthDate: new Date(dto.birthDate!),
+      });
       expect(result).toEqual({ ...updated, avatar: null });
     });
 

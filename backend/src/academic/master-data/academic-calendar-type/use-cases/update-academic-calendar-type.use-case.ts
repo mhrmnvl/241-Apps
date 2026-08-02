@@ -11,10 +11,12 @@ import { IAcademicCalendarTypeRepository } from '../domain/interfaces/academic-c
 export class UpdateAcademicCalendarTypeUseCase {
   private readonly logger = new Logger(UpdateAcademicCalendarTypeUseCase.name);
 
-  constructor(private readonly repository: IAcademicCalendarTypeRepository) {}
+  constructor(
+    private readonly academicCalendarTypeRepository: IAcademicCalendarTypeRepository,
+  ) {}
 
   async execute(id: string, dto: UpdateAcademicCalendarTypeDto) {
-    const item = await this.repository.findById(id);
+    const item = await this.academicCalendarTypeRepository.findById(id);
     if (!item) {
       throw new NotFoundException(
         'AcademicCalendarType with ID ${id} not found',
@@ -22,7 +24,10 @@ export class UpdateAcademicCalendarTypeUseCase {
     }
 
     if (dto.name) {
-      const existing = await this.repository.findByName(dto.name, id);
+      const existing = await this.academicCalendarTypeRepository.findByName(
+        dto.name,
+        id,
+      );
       if (existing) {
         throw new ConflictException(
           'AcademicCalendarType with name "' + dto.name + '" already exists',
@@ -30,7 +35,7 @@ export class UpdateAcademicCalendarTypeUseCase {
       }
     }
 
-    const updated = await this.repository.update(id, dto);
+    const updated = await this.academicCalendarTypeRepository.update(id, dto);
     this.logger.log(`AcademicCalendarType updated: ${updated.name}`);
     return updated;
   }

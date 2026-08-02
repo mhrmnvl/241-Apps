@@ -21,13 +21,15 @@ export class EnrollApplicantUseCase {
   private readonly logger = new Logger(EnrollApplicantUseCase.name);
 
   constructor(
-    private readonly repository: IAdmissionApplicationRepository,
+    private readonly admissionApplicationRepository: IAdmissionApplicationRepository,
     private readonly notifications: AdmissionNotificationService,
   ) {}
 
   async execute(applicationId: string, dto: EnrollApplicantDto) {
     const application =
-      await this.repository.findActiveWithParentsAndUser(applicationId);
+      await this.admissionApplicationRepository.findActiveWithParentsAndUser(
+        applicationId,
+      );
     if (!application) {
       throw new NotFoundException('Data pendaftaran tidak ditemukan');
     }
@@ -50,9 +52,9 @@ export class EnrollApplicantUseCase {
     }
 
     const [nisTaken, nisnTaken, nikTaken] = await Promise.all([
-      this.repository.isNisTaken(dto.nis),
-      this.repository.isNisnTaken(dto.nisn),
-      this.repository.isNikTakenInProfiles(application.nik),
+      this.admissionApplicationRepository.isNisTaken(dto.nis),
+      this.admissionApplicationRepository.isNisnTaken(dto.nisn),
+      this.admissionApplicationRepository.isNikTakenInProfiles(application.nik),
     ]);
     if (nisTaken) {
       throw new ConflictException(`NIS ${dto.nis} sudah digunakan`);
@@ -66,12 +68,13 @@ export class EnrollApplicantUseCase {
       );
     }
 
-    const studentRoleId = await this.repository.findStudentRoleId();
+    const studentRoleId =
+      await this.admissionApplicationRepository.findStudentRoleId();
     if (!studentRoleId) {
       throw new ConflictException('Role STUDENT belum tersedia');
     }
 
-    const result = await this.repository.enrollAsStudent(
+    const result = await this.admissionApplicationRepository.enrollAsStudent(
       application,
       dto,
       studentRoleId,

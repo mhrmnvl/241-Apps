@@ -3,13 +3,13 @@ import { IConditionRepository } from '../domain/interfaces/condition-repository.
 
 @Injectable()
 export class DeleteConditionUseCase {
-  constructor(private readonly repository: IConditionRepository) {}
+  constructor(private readonly conditionRepository: IConditionRepository) {}
 
   async execute(id: string) {
-    const condition = await this.repository.findById(id);
+    const condition = await this.conditionRepository.findById(id);
     if (!condition) {
       throw new NotFoundException(`Condition with ID ${id} not found`);
     }
-    return this.repository.delete(id);
+    return this.conditionRepository.delete(id);
   }
 }

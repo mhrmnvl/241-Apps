@@ -3,24 +3,22 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import {
-  StudentRepository,
-  RequestUser,
-} from '../repositories/student.repository.js';
+import { IStudentRepository } from '../domain/interfaces/student-repository.interface.js';
+import type { RequestUser } from '../types/student.types.js';
 import { StudentWithDetails } from '../domain/interfaces/student-repository.interface.js';
 
 @Injectable()
 export class GetStudentByIdUseCase {
-  constructor(private readonly repository: StudentRepository) {}
+  constructor(private readonly studentRepository: IStudentRepository) {}
 
   async execute(
     id: string,
     requester?: RequestUser,
   ): Promise<StudentWithDetails> {
     if (requester) {
-      const isStudent = await this.repository.isStudent(requester.id);
+      const isStudent = await this.studentRepository.isStudent(requester.id);
       if (isStudent) {
-        const own = await this.repository.findByUserId(requester.id);
+        const own = await this.studentRepository.findByUserId(requester.id);
         if (!own)
           throw new ForbiddenException(
             'Student account is not linked to an active student record',
@@ -32,7 +30,7 @@ export class GetStudentByIdUseCase {
       }
     }
 
-    const student = await this.repository.findById(id);
+    const student = await this.studentRepository.findById(id);
     if (!student)
       throw new NotFoundException(`Student with ID ${id} not found`);
     return student;

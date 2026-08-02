@@ -13,12 +13,12 @@ export class UpdateCurriculaUseCase {
   private readonly logger = new Logger(UpdateCurriculaUseCase.name);
 
   constructor(
-    private readonly repository: ICurriculumRepository,
+    private readonly curriculumRepository: ICurriculumRepository,
     private readonly academicYearRepository: IAcademicYearRepository,
   ) {}
 
   async execute(id: string, dto: UpdateCurriculaDto) {
-    const current = await this.repository.findById(id);
+    const current = await this.curriculumRepository.findById(id);
     if (!current) {
       throw new NotFoundException(`Curricula with ID ${id} not found`);
     }
@@ -41,11 +41,12 @@ export class UpdateCurriculaUseCase {
       newAcademicYearId !== current.academicYearId ||
       newName !== current.name
     ) {
-      const duplicate = await this.repository.findByNameAndAcademicYear(
-        newName,
-        newAcademicYearId,
-        id,
-      );
+      const duplicate =
+        await this.curriculumRepository.findByNameAndAcademicYear(
+          newName,
+          newAcademicYearId,
+          id,
+        );
       if (duplicate) {
         throw new ConflictException(
           `Curricula with name "${newName}" already exists in this academic year`,
@@ -53,7 +54,7 @@ export class UpdateCurriculaUseCase {
       }
     }
 
-    const updated = await this.repository.update(id, dto);
+    const updated = await this.curriculumRepository.update(id, dto);
     this.logger.log(`Curricula updated: ${id}`);
     return updated;
   }

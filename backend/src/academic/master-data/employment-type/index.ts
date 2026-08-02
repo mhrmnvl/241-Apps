@@ -1,5 +1,5 @@
 export * from './employment-type.module.js';
-export { IEmploymentTypeRepository } from './interfaces/employment-type-repository.interface.js';
+export { IEmploymentTypeRepository } from './domain/interfaces/employment-type-repository.interface.js';
 export * from './use-cases/create-employment-type.use-case.js';
 export * from './use-cases/get-employment-types.use-case.js';
 export * from './use-cases/get-employment-type-by-id.use-case.js';

@@ -1,13 +1,8 @@
-import { Announcement, Prisma } from '@prisma/client';
 import { PaginatedResult } from '../../../../shared/domain/interfaces/repository.interface.js';
+import { AnnouncementEntity } from '../entities/announcement.entity.js';
+import { AnnouncementWithDetails } from '../entities/announcement.entity.js';
 
-export const ANNOUNCEMENT_INCLUDE = {
-  classrooms: { include: { classroom: true } },
-} satisfies Prisma.AnnouncementInclude;
-
-export type AnnouncementWithDetails = Prisma.AnnouncementGetPayload<{
-  include: typeof ANNOUNCEMENT_INCLUDE;
-}>;
+export type { AnnouncementWithDetails };
 
 export interface AnnouncementQueryInput {
   page?: number;
@@ -35,5 +30,5 @@ export abstract class IAnnouncementRepository {
     classroomIds?: string[],
   ): Promise<AnnouncementWithDetails>;
 
-  abstract softDelete(id: string): Promise<Announcement>;
+  abstract softDelete(id: string): Promise<AnnouncementEntity>;
 }

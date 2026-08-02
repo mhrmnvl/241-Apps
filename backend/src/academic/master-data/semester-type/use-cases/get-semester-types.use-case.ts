@@ -7,7 +7,9 @@ import { SemesterTypeQueryDto } from '../dto/request/semester-type-query.dto.js'
 
 @Injectable()
 export class GetSemesterTypesUseCase {
-  constructor(private readonly repository: ISemesterTypeRepository) {}
+  constructor(
+    private readonly semesterTypeRepository: ISemesterTypeRepository,
+  ) {}
 
   async execute(query: SemesterTypeQueryDto): Promise<{
     data: SemesterType[];
@@ -15,6 +17,6 @@ export class GetSemesterTypesUseCase {
     page: number;
     limit: number;
   }> {
-    return this.repository.findAll(query);
+    return this.semesterTypeRepository.findAll(query);
   }
 }

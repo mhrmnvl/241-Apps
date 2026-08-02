@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { EnrollmentModule } from '../enrollment/enrollment.module.js';
 import { AttendanceController } from './presentation/attendance.controller.js';
 import { PrismaAttendanceRepository } from './infrastructure/persistence/prisma-attendance.repository.js';
 import { GetAttendancesUseCase } from './use-cases/get-attendances.use-case.js';
@@ -12,6 +13,7 @@ import { GetAttendanceTrendUseCase } from './use-cases/get-attendance-trend.use-
 import { IAttendanceRepository } from './domain/interfaces/attendance-repository.interface.js';
 
 @Module({
+  imports: [EnrollmentModule],
   controllers: [AttendanceController],
   providers: [
     {

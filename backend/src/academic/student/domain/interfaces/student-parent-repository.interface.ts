@@ -1,50 +1,60 @@
-import { Prisma, StudentParent } from '@prisma/client';
-import { StudentParentQueryDto } from '../../dto/request/student-parent-query.dto.js';
-import { CreateStudentParentDto } from '../../dto/request/create-student-parent.dto.js';
-import { UpdateStudentParentDto } from '../../dto/request/update-student-parent.dto.js';
-import { PaginatedResult } from '../../../../shared/domain/interfaces/repository.interface.js';
+import {
+  StudentParentEntity,
+  StudentParentWithDetails,
+} from '../entities/student-parent.entity.js';
+import { ParentRelation } from '../../../../shared/domain/enums/parent-relation.enum.js';
 
-export const STUDENT_PARENT_INCLUDE = {
-  student: {
-    include: {
-      user: { include: { profile: { select: { name: true } } } },
-    },
-  },
-  parent: {
-    include: { occupation: true },
-  },
-} satisfies Prisma.StudentParentInclude;
+export type { StudentParentWithDetails };
 
-export type StudentParentWithDetails = Prisma.StudentParentGetPayload<{
-  include: typeof STUDENT_PARENT_INCLUDE;
-}>;
-
-export interface StudentReference {
+/** Existence probes used by the link flow — only the id is read. */
+export interface StudentRef {
   id: string;
 }
 
-export interface ParentReference {
+export interface ParentRef {
   id: string;
+}
+
+export interface CreateStudentParentRepositoryInput {
+  studentId: string;
+  parentId: string;
+  relation: ParentRelation;
+  isPrimary?: boolean;
+}
+
+export interface UpdateStudentParentRepositoryInput {
+  parentId?: string;
+  relation?: ParentRelation;
+  isPrimary?: boolean;
 }
 
 export abstract class IStudentParentRepository {
-  abstract findAll(
-    query: StudentParentQueryDto,
-  ): Promise<PaginatedResult<StudentParentWithDetails>>;
+  abstract findByStudentId(
+    studentId: string,
+  ): Promise<StudentParentWithDetails[]>;
+  abstract findAll(studentId: string): Promise<StudentParentWithDetails[]>;
   abstract findById(id: string): Promise<StudentParentWithDetails | null>;
+  abstract findStudent(studentId: string): Promise<StudentRef | null>;
+  abstract findParent(parentId: string): Promise<ParentRef | null>;
   abstract findPair(
     studentId: string,
     parentId: string,
-  ): Promise<StudentParent | null>;
-  abstract findStudent(id: string): Promise<StudentReference | null>;
-  abstract findParent(id: string): Promise<ParentReference | null>;
+  ): Promise<StudentParentWithDetails | null>;
+  abstract findByStudentAndParent(
+    studentId: string,
+    parentId: string,
+  ): Promise<StudentParentWithDetails | null>;
   abstract create(
-    dto: CreateStudentParentDto,
+    input: CreateStudentParentRepositoryInput,
   ): Promise<StudentParentWithDetails>;
   abstract update(
     id: string,
-    studentId: string,
-    dto: UpdateStudentParentDto,
+    input: UpdateStudentParentRepositoryInput,
+    studentId?: string,
   ): Promise<StudentParentWithDetails>;
-  abstract remove(id: string): Promise<StudentParent>;
+  abstract remove(id: string): Promise<StudentParentEntity>;
+  abstract clearPrimaryForStudent(
+    studentId: string,
+    excludeId?: string,
+  ): Promise<{ count: number }>;
 }

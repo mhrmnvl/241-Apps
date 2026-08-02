@@ -1,7 +1,7 @@
 import { ConflictException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { UpdatePositionDto } from '../dto/request/update-position.dto.js';
-import { IPositionRepository } from '../interfaces/position-repository.interface.js';
+import { IPositionRepository } from '../domain/interfaces/position-repository.interface.js';
 import { UpdatePositionUseCase } from './update-position.use-case.js';
 
 describe('UpdatePositionUseCase', () => {

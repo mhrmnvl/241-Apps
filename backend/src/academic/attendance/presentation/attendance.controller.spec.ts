@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { AttendanceStatus } from '@prisma/client';
+import { AttendanceStatus } from '../../../shared/domain/enums/attendance-status.enum.js';
 import {
   BulkUpsertAttendanceDto,
   CreateAttendanceDto,

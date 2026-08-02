@@ -1,14 +1,16 @@
-import { InventoryCategory, Prisma } from '@prisma/client';
+import { InventoryCategoryEntity } from '../entities/category.entity.js';
 
 export abstract class ICategoryRepository {
-  abstract findMany(search?: string): Promise<InventoryCategory[]>;
-  abstract findById(id: string): Promise<InventoryCategory | null>;
-  abstract create(
-    data: Prisma.InventoryCategoryCreateInput,
-  ): Promise<InventoryCategory>;
+  abstract findMany(search?: string): Promise<InventoryCategoryEntity[]>;
+  abstract findById(id: string): Promise<InventoryCategoryEntity | null>;
+  abstract create(data: {
+    code: string;
+    name: string;
+    depreciationRatePercent?: number;
+  }): Promise<InventoryCategoryEntity>;
   abstract update(
     id: string,
-    data: Prisma.InventoryCategoryUpdateInput,
-  ): Promise<InventoryCategory>;
-  abstract delete(id: string): Promise<InventoryCategory>;
+    data: { code?: string; name?: string; depreciationRatePercent?: number },
+  ): Promise<InventoryCategoryEntity>;
+  abstract delete(id: string): Promise<InventoryCategoryEntity>;
 }

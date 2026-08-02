@@ -3,12 +3,14 @@ import { ICurriculumSubjectRepository } from '../domain/interfaces/curriculum-su
 
 @Injectable()
 export class DeleteCurriculumSubjectUseCase {
-  constructor(private readonly repository: ICurriculumSubjectRepository) {}
+  constructor(
+    private readonly curriculumSubjectRepository: ICurriculumSubjectRepository,
+  ) {}
 
   async execute(id: string) {
-    const existing = await this.repository.findById(id);
+    const existing = await this.curriculumSubjectRepository.findById(id);
     if (!existing)
       throw new NotFoundException(`CurriculumSubject with ID ${id} not found`);
-    return this.repository.softDelete(id);
+    return this.curriculumSubjectRepository.softDelete(id);
   }
 }

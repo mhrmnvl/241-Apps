@@ -1,11 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
-import { UserQueryDto } from '../../dto/request/user-query.dto.js';
-import {
-  IUserRepository,
-  PUBLIC_USER_SELECT,
-} from '../../domain/interfaces/user-repository.interface.js';
+import { UserQueryInput } from '../../domain/interfaces/user-repository.interface.js';
+import { IUserRepository } from '../../domain/interfaces/user-repository.interface.js';
+import { PUBLIC_USER_SELECT } from './prisma-user.includes.js';
 
 @Injectable()
 export class PrismaUserRepository extends IUserRepository {
@@ -13,7 +11,7 @@ export class PrismaUserRepository extends IUserRepository {
     super();
   }
 
-  async findAll(query: UserQueryDto) {
+  async findAll(query: UserQueryInput) {
     const { page = 1, limit = 10, roleCode, search } = query;
     const skip = (page - 1) * limit;
 

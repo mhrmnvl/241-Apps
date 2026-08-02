@@ -8,19 +8,20 @@ import { AdmissionNotificationService } from '../services/admission-notification
 @Injectable()
 export class RequestRevisionUseCase {
   constructor(
-    private readonly repository: IAdmissionApplicationRepository,
+    private readonly admissionApplicationRepository: IAdmissionApplicationRepository,
     private readonly notifications: AdmissionNotificationService,
   ) {}
 
   async execute(applicationId: string, dto: RequestRevisionDto) {
-    const application = await this.repository.findActiveById(applicationId);
+    const application =
+      await this.admissionApplicationRepository.findActiveById(applicationId);
     if (!application) {
       throw new NotFoundException('Data pendaftaran tidak ditemukan');
     }
 
     assertTransition(application.status, 'REVISION_NEEDED');
 
-    const updated = await this.repository.setRevisionNeeded(
+    const updated = await this.admissionApplicationRepository.setRevisionNeeded(
       application.id,
       dto.note,
     );

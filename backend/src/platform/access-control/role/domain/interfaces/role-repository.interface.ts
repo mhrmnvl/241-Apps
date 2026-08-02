@@ -1,11 +1,13 @@
-import { Permission, Role, UserRole, Prisma } from '@prisma/client';
+import {
+  PermissionEntity,
+  RoleEntity,
+  RoleWithPermissionsEntity,
+  UserRoleEntity,
+  UserRoleWithRoleEntity,
+} from '../../../domain/entities/role-permission.entity.js';
 
-export type UserRoleWithRole = Prisma.UserRoleGetPayload<{
-  include: { role: true };
-}>;
-
-/** A role with its granted permissions flattened into a `permissions` array. */
-export type RoleWithPermissions = Role & { permissions: Permission[] };
+export type RoleWithPermissions = RoleWithPermissionsEntity;
+export type UserRoleWithRole = UserRoleWithRoleEntity;
 
 export abstract class IRoleRepository {
   abstract findAll(isSuperAdmin?: boolean): Promise<RoleWithPermissions[]>;
@@ -13,7 +15,7 @@ export abstract class IRoleRepository {
     id: string,
     isSuperAdmin?: boolean,
   ): Promise<RoleWithPermissions | null>;
-  abstract findByCode(code: string): Promise<Role | null>;
+  abstract findByCode(code: string): Promise<RoleEntity | null>;
   abstract create(data: {
     name: string;
     code: string;
@@ -24,15 +26,18 @@ export abstract class IRoleRepository {
     id: string,
     data: { name?: string; description?: string; permissionIds?: string[] },
   ): Promise<RoleWithPermissions>;
-  abstract delete(id: string): Promise<Role>;
-  abstract assignRoleToUser(userId: string, roleId: string): Promise<UserRole>;
+  abstract delete(id: string): Promise<RoleEntity>;
+  abstract assignRoleToUser(
+    userId: string,
+    roleId: string,
+  ): Promise<UserRoleEntity>;
   abstract removeRoleFromUser(
     userId: string,
     roleId: string,
-  ): Promise<UserRole>;
+  ): Promise<UserRoleEntity>;
   abstract findUserRole(
     userId: string,
     roleId: string,
-  ): Promise<UserRole | null>;
+  ): Promise<UserRoleEntity | null>;
   abstract findUserRoles(userId: string): Promise<UserRoleWithRole[]>;
 }

@@ -1,83 +1,130 @@
-import { Day, Prisma, Schedule } from '@prisma/client';
-import { ScheduleQueryDto } from '../../dto/request/schedule.dto.js';
-import { PaginatedResult } from '../../../../shared/domain/interfaces/repository.interface.js';
+import {
+  PaginatedResult,
+  PaginationQueryInput,
+} from '../../../../shared/domain/interfaces/repository.interface.js';
+import { DayEnum } from '../../../../shared/domain/enums/day.enum.js';
+import {
+  ScheduleWithDetails,
+  ScheduleEntity,
+} from '../entities/schedule.entity.js';
 
-export const SCHEDULE_INCLUDE = {
-  teachingAssignment: {
-    include: {
-      teacher: { include: { user: { select: { profile: true } } } },
-      classroom: true,
-      subject: true,
-    },
-  },
-  timeSlot: true,
-} satisfies Prisma.ScheduleInclude;
+export type { ScheduleWithDetails };
 
-export type ScheduleWithDetails = Prisma.ScheduleGetPayload<{
-  include: typeof SCHEDULE_INCLUDE;
-}>;
+export interface ScheduleQueryInput extends PaginationQueryInput {
+  teachingAssignmentId?: string;
+  timeSlotId?: string;
+  day?: DayEnum;
+}
 
 export interface CreateScheduleRepositoryInput {
   teachingAssignmentId: string;
   timeSlotId: string;
-  day: Day;
+  day?: DayEnum;
   room?: string;
 }
 
-export interface RestoreScheduleRepositoryInput {
-  room?: string;
+export interface UpdateScheduleRepositoryInput {
+  teachingAssignmentId?: string;
+  timeSlotId?: string;
+  day?: DayEnum | string;
+  room?: string | null;
+}
+
+export interface CreateTeachingAssignmentFromScheduleInput {
+  teacherId: string;
+  classroomId: string;
+  subjectId: string;
+  semesterId: string;
+}
+
+/**
+ * Identity-only rows: the scheduling flow resolves these purely to obtain (or
+ * confirm) an id before writing, so nothing else is selected.
+ */
+export interface ClassroomRef {
+  id: string;
+}
+
+export interface ActiveSemesterRef {
+  id: string;
+}
+
+export interface TeachingAssignmentRef {
+  id: string;
 }
 
 export abstract class IScheduleRepository {
   abstract findAll(
-    query: ScheduleQueryDto,
+    query: ScheduleQueryInput,
   ): Promise<PaginatedResult<ScheduleWithDetails>>;
   abstract findById(id: string): Promise<ScheduleWithDetails | null>;
-  abstract findDuplicate(
+  abstract findConflictingSchedule(
     teachingAssignmentId: string,
-    day: Day,
     timeSlotId: string,
+    day: DayEnum,
     excludeId?: string,
-  ): Promise<Schedule | null>;
+  ): Promise<ScheduleWithDetails | null>;
+  abstract findTeacherConflictingSchedule(
+    teacherId: string,
+    semesterId: string,
+    timeSlotId: string,
+    day: DayEnum,
+    excludeId?: string,
+  ): Promise<ScheduleWithDetails | null>;
+  abstract findClassroomConflictingSchedule(
+    classroomId: string,
+    semesterId: string,
+    timeSlotId: string,
+    day: DayEnum,
+    excludeId?: string,
+  ): Promise<ScheduleWithDetails | null>;
   abstract create(
-    data: CreateScheduleRepositoryInput,
+    input: CreateScheduleRepositoryInput,
   ): Promise<ScheduleWithDetails>;
   abstract update(
     id: string,
-    data: Prisma.ScheduleUpdateInput,
+    input: UpdateScheduleRepositoryInput,
   ): Promise<ScheduleWithDetails>;
-  abstract findSoftDeleted(
-    teachingAssignmentId: string,
-    day: Day,
-    timeSlotId: string,
-  ): Promise<Schedule | null>;
-  abstract restore(
-    id: string,
-    data: RestoreScheduleRepositoryInput,
-  ): Promise<ScheduleWithDetails>;
-  abstract softDelete(id: string): Promise<Schedule>;
-  abstract findByClassroom(classroomId: string): Promise<ScheduleWithDetails[]>;
+  abstract remove(id: string): Promise<ScheduleEntity>;
+  abstract softDelete(id: string): Promise<ScheduleEntity>;
+
+  abstract findValidClassroomById(id: string): Promise<ClassroomRef | null>;
+  abstract findActiveSemester(): Promise<ActiveSemesterRef | null>;
   abstract softDeleteByClassroomAndDay(
     classroomId: string,
-    day: Day,
-  ): Promise<Prisma.BatchPayload>;
-  abstract findTeachingAssignmentById(
-    id: string,
-  ): Promise<{ id: string } | null>;
-  abstract findValidClassroomById(id: string): Promise<{ id: string } | null>;
-  abstract findActiveSemester(): Promise<{ id: string } | null>;
+    day: DayEnum,
+  ): Promise<{ count: number }>;
   abstract findTeachingAssignmentBySubjectAndSemester(
     classroomId: string,
     subjectId: string,
     semesterId: string,
-  ): Promise<{ id: string } | null>;
+  ): Promise<TeachingAssignmentRef | null>;
   abstract findAnyTeacherIdForSubject(
     subjectId: string,
   ): Promise<string | null>;
-  abstract createTeachingAssignment(data: {
-    classroomId: string;
-    subjectId: string;
-    teacherId: string;
-    semesterId: string;
-  }): Promise<{ id: string }>;
+  abstract createTeachingAssignment(
+    input: CreateTeachingAssignmentFromScheduleInput,
+  ): Promise<TeachingAssignmentRef>;
+  abstract findSoftDeleted(
+    taId: string,
+    slotId: string,
+    day: string,
+  ): Promise<ScheduleEntity | null>;
+  abstract restore(
+    id: string,
+    input?: UpdateScheduleRepositoryInput,
+  ): Promise<ScheduleWithDetails>;
+  abstract findTeachingAssignmentById(
+    id: string,
+  ): Promise<TeachingAssignmentRef | null>;
+  abstract findDuplicate(
+    taId: string,
+    slotId: string,
+    day: string,
+    excludeId?: string,
+  ): Promise<ScheduleEntity | null>;
+  abstract findByClassroom(
+    classroomId: string,
+    semesterId?: string,
+  ): Promise<ScheduleWithDetails[]>;
 }

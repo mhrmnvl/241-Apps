@@ -3,12 +3,12 @@ import { IEnrollmentRepository } from '../domain/interfaces/enrollment-repositor
 
 @Injectable()
 export class DeleteStudentEnrollmentUseCase {
-  constructor(private readonly repository: IEnrollmentRepository) {}
+  constructor(private readonly enrollmentRepository: IEnrollmentRepository) {}
   async execute(id: string) {
-    const enrollment = await this.repository.findById(id);
+    const enrollment = await this.enrollmentRepository.findById(id);
     if (!enrollment) {
       throw new NotFoundException(`StudentEnrollment ${id} not found`);
     }
-    return this.repository.softDelete(id);
+    return this.enrollmentRepository.softDelete(id);
   }
 }

@@ -8,7 +8,7 @@ import { AdmissionNotificationService } from '../services/admission-notification
 @Injectable()
 export class AcceptApplicationUseCase {
   constructor(
-    private readonly repository: IAdmissionApplicationRepository,
+    private readonly admissionApplicationRepository: IAdmissionApplicationRepository,
     private readonly notifications: AdmissionNotificationService,
   ) {}
 
@@ -17,7 +17,10 @@ export class AcceptApplicationUseCase {
     dto: AcceptApplicationDto,
     adminId: string,
   ) {
-    const application = await this.repository.findActiveWithWave(applicationId);
+    const application =
+      await this.admissionApplicationRepository.findActiveWithWave(
+        applicationId,
+      );
     if (!application) {
       throw new NotFoundException('Data pendaftaran tidak ditemukan');
     }
@@ -25,15 +28,16 @@ export class AcceptApplicationUseCase {
     assertTransition(application.status, 'ACCEPTED');
 
     // Soft quota check: warn, don't block.
-    const acceptedCount = await this.repository.countAcceptedInWave(
-      application.waveId,
-    );
+    const acceptedCount =
+      await this.admissionApplicationRepository.countAcceptedInWave(
+        application.waveId,
+      );
     const quotaWarning =
       acceptedCount >= application.wave.quota
         ? `Kuota gelombang (${application.wave.quota}) sudah terpenuhi — penerimaan ini melebihi kuota.`
         : null;
 
-    const updated = await this.repository.setAccepted({
+    const updated = await this.admissionApplicationRepository.setAccepted({
       id: application.id,
       adminId,
       note: dto.note ?? null,

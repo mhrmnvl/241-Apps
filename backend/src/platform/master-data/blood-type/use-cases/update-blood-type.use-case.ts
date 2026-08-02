@@ -11,16 +11,16 @@ import { IBloodTypeRepository } from '../domain/interfaces/blood-type-repository
 export class UpdateBloodTypeUseCase {
   private readonly logger = new Logger(UpdateBloodTypeUseCase.name);
 
-  constructor(private readonly repository: IBloodTypeRepository) {}
+  constructor(private readonly bloodTypeRepository: IBloodTypeRepository) {}
 
   async execute(id: string, dto: UpdateBloodTypeDto) {
-    const item = await this.repository.findById(id);
+    const item = await this.bloodTypeRepository.findById(id);
     if (!item) {
       throw new NotFoundException('BloodType with ID ${id} not found');
     }
 
     if (dto.name) {
-      const existing = await this.repository.findByName(dto.name, id);
+      const existing = await this.bloodTypeRepository.findByName(dto.name, id);
       if (existing) {
         throw new ConflictException(
           'BloodType with name "' + dto.name + '" already exists',
@@ -28,7 +28,7 @@ export class UpdateBloodTypeUseCase {
       }
     }
 
-    const updated = await this.repository.update(id, dto);
+    const updated = await this.bloodTypeRepository.update(id, dto);
     this.logger.log(`BloodType updated: ${updated.name}`);
     return updated;
   }

@@ -5,10 +5,13 @@ import { AdmissionWaveQueryDto } from '../dto/request/admission-wave-query.dto.j
 
 @Injectable()
 export class GetAdmissionWavesUseCase {
-  constructor(private readonly repository: IAdmissionWaveRepository) {}
+  constructor(
+    private readonly admissionWaveRepository: IAdmissionWaveRepository,
+  ) {}
 
   async execute(query: AdmissionWaveQueryDto) {
-    const { data, total, page, limit } = await this.repository.findAll(query);
+    const { data, total, page, limit } =
+      await this.admissionWaveRepository.findAll(query);
 
     return {
       data: data.map(serializeWave),

@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { IAssessmentItemRepository } from '../domain/interfaces/assessment-items-repository.interface.js';
+import { IAssessmentItemRepository } from '../domain/interfaces/assessment-item-repository.interface.js';
 
 @Injectable()
 export class GetAssessmentItemByIdUseCase {

@@ -1,15 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { TimeSlot, TimeSlotType } from '@prisma/client';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
-import { CreateTimeSlotDto } from '../../dto/request/create-time-slot.dto.js';
-import { UpdateTimeSlotDto } from '../../dto/request/update-time-slot.dto.js';
-import { CreateTimeSlotTypeDto } from '../../dto/request/create-time-slot-type.dto.js';
-import { UpdateTimeSlotTypeDto } from '../../dto/request/update-time-slot-type.dto.js';
-import {
-  ITimeSlotRepository,
-  TIME_SLOT_INCLUDE,
-  TimeSlotWithDetails,
+import type {
+  TimeSlotQueryInput,
+  CreateTimeSlotRepositoryInput,
+  UpdateTimeSlotRepositoryInput,
+  CreateTimeSlotTypeRepositoryInput,
+  UpdateTimeSlotTypeRepositoryInput,
 } from '../../domain/interfaces/time-slot-repository.interface.js';
+import { ITimeSlotRepository } from '../../domain/interfaces/time-slot-repository.interface.js';
+import {
+  TIME_SLOT_WITH_TYPE_INCLUDE,
+  TimeSlotWithType,
+} from './prisma-time-slot.includes.js';
 
 @Injectable()
 export class PrismaTimeSlotRepository extends ITimeSlotRepository {
@@ -21,12 +24,13 @@ export class PrismaTimeSlotRepository extends ITimeSlotRepository {
     return new Date(`1970-01-01T${timeStr}:00.000Z`);
   }
 
-  async findAll(): Promise<TimeSlotWithDetails[]> {
-    return this.prisma.timeSlot.findMany({
+  async findAll(query?: TimeSlotQueryInput) {
+    const data = await this.prisma.timeSlot.findMany({
       where: { deletedAt: null },
-      include: TIME_SLOT_INCLUDE,
+      include: TIME_SLOT_WITH_TYPE_INCLUDE,
       orderBy: { order: 'asc' },
     });
+    return { data, total: data.length, page: 1, limit: data.length || 10 };
   }
 
   async findAllTypes(): Promise<TimeSlotType[]> {
@@ -55,7 +59,9 @@ export class PrismaTimeSlotRepository extends ITimeSlotRepository {
     });
   }
 
-  async createType(dto: CreateTimeSlotTypeDto): Promise<TimeSlotType> {
+  async createType(
+    dto: CreateTimeSlotTypeRepositoryInput,
+  ): Promise<TimeSlotType> {
     return this.prisma.timeSlotType.create({
       data: {
         code: dto.code,
@@ -68,7 +74,7 @@ export class PrismaTimeSlotRepository extends ITimeSlotRepository {
 
   async updateType(
     id: string,
-    dto: UpdateTimeSlotTypeDto,
+    dto: UpdateTimeSlotTypeRepositoryInput,
   ): Promise<TimeSlotType> {
     return this.prisma.timeSlotType.update({
       where: { id },
@@ -94,28 +100,44 @@ export class PrismaTimeSlotRepository extends ITimeSlotRepository {
     });
   }
 
-  async findById(id: string): Promise<TimeSlotWithDetails | null> {
+  async findById(id: string): Promise<TimeSlotWithType | null> {
     return this.prisma.timeSlot.findFirst({
       where: { id, deletedAt: null },
-      include: TIME_SLOT_INCLUDE,
+      include: TIME_SLOT_WITH_TYPE_INCLUDE,
     });
   }
 
   async findByOrder(
     order: number,
     excludeId?: string,
-  ): Promise<TimeSlotWithDetails | null> {
+  ): Promise<TimeSlotWithType | null> {
     return this.prisma.timeSlot.findFirst({
       where: {
         order,
         deletedAt: null,
         ...(excludeId && { id: { not: excludeId } }),
       },
-      include: TIME_SLOT_INCLUDE,
+      include: TIME_SLOT_WITH_TYPE_INCLUDE,
     });
   }
 
-  async create(dto: CreateTimeSlotDto): Promise<TimeSlotWithDetails> {
+  async findOverlappingSlot(
+    typeId: string,
+    startTime: string,
+    endTime: string,
+    excludeId?: string,
+  ): Promise<TimeSlotWithType | null> {
+    return this.prisma.timeSlot.findFirst({
+      where: {
+        typeId,
+        deletedAt: null,
+        ...(excludeId ? { NOT: { id: excludeId } } : {}),
+      },
+      include: TIME_SLOT_WITH_TYPE_INCLUDE,
+    });
+  }
+
+  async create(dto: CreateTimeSlotRepositoryInput): Promise<TimeSlotWithType> {
     return this.prisma.timeSlot.create({
       data: {
         name: dto.name,
@@ -124,14 +146,14 @@ export class PrismaTimeSlotRepository extends ITimeSlotRepository {
         order: dto.order,
         typeId: dto.typeId,
       },
-      include: TIME_SLOT_INCLUDE,
+      include: TIME_SLOT_WITH_TYPE_INCLUDE,
     });
   }
 
   async update(
     id: string,
-    dto: UpdateTimeSlotDto,
-  ): Promise<TimeSlotWithDetails> {
+    dto: UpdateTimeSlotRepositoryInput,
+  ): Promise<TimeSlotWithType> {
     return this.prisma.timeSlot.update({
       where: { id },
       data: {
@@ -141,7 +163,7 @@ export class PrismaTimeSlotRepository extends ITimeSlotRepository {
         ...(dto.order !== undefined && { order: dto.order }),
         ...(dto.typeId !== undefined && { typeId: dto.typeId }),
       },
-      include: TIME_SLOT_INCLUDE,
+      include: TIME_SLOT_WITH_TYPE_INCLUDE,
     });
   }
 
@@ -152,12 +174,16 @@ export class PrismaTimeSlotRepository extends ITimeSlotRepository {
     });
   }
 
-  async countSchedulesUsing(timeSlotId: string): Promise<number> {
+  async countSchedulesWithTimeSlot(timeSlotId: string): Promise<number> {
     return this.prisma.schedule.count({
       where: {
         timeSlotId,
         deletedAt: null,
       },
     });
+  }
+
+  async countSchedulesUsing(timeSlotId: string): Promise<number> {
+    return this.countSchedulesWithTimeSlot(timeSlotId);
   }
 }

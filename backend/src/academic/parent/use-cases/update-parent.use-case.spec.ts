@@ -1,7 +1,7 @@
 import { ConflictException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { UpdateParentDto } from '../dto/request/update-parent.dto.js';
-import { ParentRepository } from '../repositories/parent.repository.js';
+import { IParentRepository } from '../domain/interfaces/parent-repository.interface.js';
 import { UpdateParentUseCase } from './update-parent.use-case.js';
 
 describe('UpdateParentUseCase', () => {
@@ -18,7 +18,7 @@ describe('UpdateParentUseCase', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         UpdateParentUseCase,
-        { provide: ParentRepository, useValue: mockRepo },
+        { provide: IParentRepository, useValue: mockRepo },
       ],
     }).compile();
 

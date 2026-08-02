@@ -3,9 +3,11 @@ import { IFundingSourceRepository } from '../domain/interfaces/funding-source-re
 
 @Injectable()
 export class GetFundingSourcesUseCase {
-  constructor(private readonly repository: IFundingSourceRepository) {}
+  constructor(
+    private readonly fundingSourceRepository: IFundingSourceRepository,
+  ) {}
 
   async execute(search?: string) {
-    return this.repository.findMany(search);
+    return this.fundingSourceRepository.findMany(search);
   }
 }

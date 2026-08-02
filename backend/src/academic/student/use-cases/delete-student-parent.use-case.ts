@@ -1,12 +1,12 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { StudentParentRepository } from '../repositories/student-parent.repository.js';
+import { IStudentParentRepository } from '../domain/interfaces/student-parent-repository.interface.js';
 
 @Injectable()
 export class DeleteStudentParentUseCase {
   private readonly logger = new Logger(DeleteStudentParentUseCase.name);
 
   constructor(
-    private readonly studentParentRepository: StudentParentRepository,
+    private readonly studentParentRepository: IStudentParentRepository,
   ) {}
 
   async execute(id: string): Promise<void> {

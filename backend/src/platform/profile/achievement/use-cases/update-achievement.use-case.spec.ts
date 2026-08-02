@@ -1,7 +1,7 @@
 ﻿import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { UpdateAchievementDto } from '../dto/request/update-achievement.dto.js';
-import { AchievementRepository } from '../repositories/achievement.repository.js';
+import { IAchievementRepository } from '../domain/interfaces/achievement-repository.interface.js';
 import { UpdateAchievementUseCase } from './update-achievement.use-case.js';
 
 describe('UpdateAchievementUseCase', () => {
@@ -13,7 +13,7 @@ describe('UpdateAchievementUseCase', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         UpdateAchievementUseCase,
-        { provide: AchievementRepository, useValue: mockRepo },
+        { provide: IAchievementRepository, useValue: mockRepo },
       ],
     }).compile();
 

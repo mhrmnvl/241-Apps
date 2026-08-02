@@ -1,16 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma, ReportCard } from '@prisma/client';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
-import { ReportCardQueryDto } from '../../dto/request/report-card-query.dto.js';
-import { resolveSemesterId } from '../../../../shared/utils/active-academic-year.helper.js';
-import {
-  IReportCardRepository,
-  RAPOR_INCLUDE,
-  ReportCardWithDetails,
-  UpsertReportCardRepositoryInput,
+import type {
+  ReportCardQueryInput,
+  CreateReportCardRepositoryInput,
   UpdateReportCardRepositoryInput,
 } from '../../domain/interfaces/report-card-repository.interface.js';
+import { resolveSemesterId } from '../../../../shared/utils/active-academic-year.helper.js';
+import { IReportCardRepository } from '../../domain/interfaces/report-card-repository.interface.js';
 import { PaginatedResult } from '../../../../shared/domain/interfaces/repository.interface.js';
+import {
+  REPORT_CARD_WITH_DETAILS_INCLUDE,
+  ReportCardWithDetails,
+} from './prisma-report-card.includes.js';
 
 @Injectable()
 export class PrismaReportCardRepository extends IReportCardRepository {
@@ -19,7 +21,7 @@ export class PrismaReportCardRepository extends IReportCardRepository {
   }
 
   async findAll(
-    query: ReportCardQueryDto,
+    query: ReportCardQueryInput,
   ): Promise<PaginatedResult<ReportCardWithDetails>> {
     const {
       page = 1,
@@ -46,7 +48,7 @@ export class PrismaReportCardRepository extends IReportCardRepository {
     const [data, total] = await Promise.all([
       this.prisma.reportCard.findMany({
         where,
-        include: RAPOR_INCLUDE,
+        include: REPORT_CARD_WITH_DETAILS_INCLUDE,
         skip,
         take: limit,
         orderBy: { createdAt: 'desc' },
@@ -63,7 +65,7 @@ export class PrismaReportCardRepository extends IReportCardRepository {
         id,
         deletedAt: null,
       },
-      include: RAPOR_INCLUDE,
+      include: REPORT_CARD_WITH_DETAILS_INCLUDE,
     });
   }
 
@@ -75,20 +77,29 @@ export class PrismaReportCardRepository extends IReportCardRepository {
         enrollmentId,
         deletedAt: null,
       },
-      include: RAPOR_INCLUDE,
+      include: REPORT_CARD_WITH_DETAILS_INCLUDE,
+    });
+  }
+
+  async create(
+    dto: CreateReportCardRepositoryInput,
+  ): Promise<ReportCardWithDetails> {
+    return this.prisma.reportCard.create({
+      data: dto,
+      include: REPORT_CARD_WITH_DETAILS_INCLUDE,
     });
   }
 
   async upsert(
-    data: UpsertReportCardRepositoryInput,
+    input: CreateReportCardRepositoryInput,
   ): Promise<ReportCardWithDetails> {
-    const { enrollmentId, ...fields } = data;
+    const { enrollmentId, ...fields } = input;
 
     return this.prisma.reportCard.upsert({
       where: { enrollmentId },
       create: { enrollmentId, ...fields },
-      update: { ...fields },
-      include: RAPOR_INCLUDE,
+      update: fields,
+      include: REPORT_CARD_WITH_DETAILS_INCLUDE,
     });
   }
 
@@ -99,14 +110,14 @@ export class PrismaReportCardRepository extends IReportCardRepository {
     return this.prisma.reportCard.update({
       where: { id },
       data,
-      include: RAPOR_INCLUDE,
+      include: REPORT_CARD_WITH_DETAILS_INCLUDE,
     });
   }
 
   async calculateAndApplyClassroomRanks(
     classroomId: string,
     semesterId: string,
-    targetEnrollmentId: string,
+    targetEnrollmentId?: string,
   ): Promise<number | null> {
     const reportCardsInClass = await this.prisma.reportCard.findMany({
       where: {
@@ -135,6 +146,10 @@ export class PrismaReportCardRepository extends IReportCardRepository {
       }
     }
     return targetRank;
+  }
+
+  async remove(id: string): Promise<ReportCard> {
+    return this.softDelete(id);
   }
 
   async softDelete(id: string): Promise<ReportCard> {

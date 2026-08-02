@@ -1,13 +1,15 @@
 import { Injectable } from '@nestjs/common';
-import { Announcement, Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
 import {
   IAnnouncementRepository,
-  AnnouncementWithDetails,
   AnnouncementQueryInput,
-  ANNOUNCEMENT_INCLUDE,
 } from '../../domain/interfaces/announcement-repository.interface.js';
 import { PaginatedResult } from '../../../../shared/domain/interfaces/repository.interface.js';
+import {
+  ANNOUNCEMENT_INCLUDE,
+  AnnouncementWithDetails,
+} from './prisma-announcement.includes.js';
 
 @Injectable()
 export class PrismaAnnouncementRepository extends IAnnouncementRepository {
@@ -98,7 +100,7 @@ export class PrismaAnnouncementRepository extends IAnnouncementRepository {
     });
   }
 
-  async softDelete(id: string): Promise<Announcement> {
+  async softDelete(id: string) {
     return this.prisma.announcement.update({
       where: { id },
       data: { deletedAt: new Date() },

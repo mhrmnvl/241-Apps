@@ -1,6 +1,6 @@
 ﻿import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { StudentParentRepository } from '../repositories/student-parent.repository.js';
+import { IStudentParentRepository } from '../domain/interfaces/student-parent-repository.interface.js';
 import { GetStudentParentByIdUseCase } from './get-student-parent-by-id.use-case.js';
 
 describe('GetStudentParentByIdUseCase', () => {
@@ -15,7 +15,7 @@ describe('GetStudentParentByIdUseCase', () => {
       providers: [
         GetStudentParentByIdUseCase,
         {
-          provide: StudentParentRepository,
+          provide: IStudentParentRepository,
           useValue: mockStudentParentsRepository,
         },
       ],

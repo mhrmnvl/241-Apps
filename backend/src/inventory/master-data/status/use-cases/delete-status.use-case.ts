@@ -7,10 +7,10 @@ import { IStatusRepository } from '../domain/interfaces/status-repository.interf
 
 @Injectable()
 export class DeleteStatusUseCase {
-  constructor(private readonly repository: IStatusRepository) {}
+  constructor(private readonly statusRepository: IStatusRepository) {}
 
   async execute(id: string) {
-    const status = await this.repository.findById(id);
+    const status = await this.statusRepository.findById(id);
     if (!status) {
       throw new NotFoundException(`Status with ID ${id} not found`);
     }
@@ -19,6 +19,6 @@ export class DeleteStatusUseCase {
         `Status "${status.name}" berperan sebagai "${status.systemKey}" dalam alur pinjam-meminjam dan tidak dapat dihapus. Lepaskan peran sistemnya terlebih dahulu.`,
       );
     }
-    return this.repository.delete(id);
+    return this.statusRepository.delete(id);
   }
 }

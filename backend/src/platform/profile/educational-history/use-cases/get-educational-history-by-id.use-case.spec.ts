@@ -1,6 +1,6 @@
 ﻿import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
-import { EducationalHistoryRepository } from '../repositories/educational-history.repository.js';
+import { IEducationalHistoryRepository } from '../domain/interfaces/educational-history-repository.interface.js';
 import { GetEducationalHistoryByIdUseCase } from './get-educational-history-by-id.use-case.js';
 
 describe('GetEducationalHistoryByIdUseCase', () => {
@@ -12,7 +12,7 @@ describe('GetEducationalHistoryByIdUseCase', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         GetEducationalHistoryByIdUseCase,
-        { provide: EducationalHistoryRepository, useValue: mockRepo },
+        { provide: IEducationalHistoryRepository, useValue: mockRepo },
       ],
     }).compile();
 

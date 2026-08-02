@@ -1,5 +1,7 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IncomeRange, ParentRelation, UserGender } from '@prisma/client';
+import { IncomeRange } from '../../../shared/domain/enums/income-range.enum.js';
+import { ParentRelation } from '../../../shared/domain/enums/parent-relation.enum.js';
+import { UserGender } from '../../../shared/domain/enums/user-gender.enum.js';
 import { Type } from 'class-transformer';
 import {
   IsArray,

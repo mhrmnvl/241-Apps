@@ -14,7 +14,7 @@ export class RegisterApplicantUseCase {
   private readonly logger = new Logger(RegisterApplicantUseCase.name);
 
   constructor(
-    private readonly repository: IAdmissionApplicantRepository,
+    private readonly admissionApplicantRepository: IAdmissionApplicantRepository,
     private readonly passwordManager: PasswordManagerService,
   ) {}
 
@@ -23,7 +23,9 @@ export class RegisterApplicantUseCase {
       throw new BadRequestException('Konfirmasi kata sandi tidak cocok');
     }
 
-    const wave = await this.repository.findOpenWave(dto.waveId);
+    const wave = await this.admissionApplicantRepository.findOpenWave(
+      dto.waveId,
+    );
     if (!wave) {
       throw new BadRequestException(
         'Gelombang pendaftaran tidak ditemukan atau sudah ditutup',
@@ -32,12 +34,15 @@ export class RegisterApplicantUseCase {
 
     const identifier = dto.email.trim().toLowerCase();
     const existingUser =
-      await this.repository.findActiveUserByIdentifier(identifier);
+      await this.admissionApplicantRepository.findActiveUserByIdentifier(
+        identifier,
+      );
     if (existingUser) {
       throw new ConflictException('Email sudah terdaftar. Silakan login.');
     }
 
-    const applicantRoleId = await this.repository.findApplicantRoleId();
+    const applicantRoleId =
+      await this.admissionApplicantRepository.findApplicantRoleId();
     if (!applicantRoleId) {
       throw new InternalServerErrorException(
         'Role APPLICANT belum tersedia. Hubungi administrator.',
@@ -46,13 +51,14 @@ export class RegisterApplicantUseCase {
 
     const passwordHash = await this.passwordManager.hashPassword(dto.password);
 
-    const application = await this.repository.registerApplicant({
-      wave,
-      identifier,
-      passwordHash,
-      fullName: dto.fullName,
-      phone: dto.phone ?? null,
-    });
+    const application =
+      await this.admissionApplicantRepository.registerApplicant({
+        wave,
+        identifier,
+        passwordHash,
+        fullName: dto.fullName,
+        phone: dto.phone ?? null,
+      });
 
     this.logger.log(
       `Applicant registered: ${identifier} (${application.registrationNumber})`,

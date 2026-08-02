@@ -1,13 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { ParentQueryDto } from '../dto/request/parent-query.dto.js';
-import { ParentRepository } from '../repositories/parent.repository.js';
+import { IParentRepository } from '../domain/interfaces/parent-repository.interface.js';
 
 @Injectable()
 export class GetParentsUseCase {
-  constructor(private readonly repository: ParentRepository) {}
+  constructor(private readonly parentRepository: IParentRepository) {}
 
   async execute(query: ParentQueryDto) {
-    const { data, total, page, limit } = await this.repository.findAll(query);
+    const { data, total, page, limit } =
+      await this.parentRepository.findAll(query);
     return {
       data,
       meta: { page, limit, total, totalPages: Math.ceil(total / limit) },

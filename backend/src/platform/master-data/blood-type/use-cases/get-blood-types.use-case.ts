@@ -4,10 +4,11 @@ import { IBloodTypeRepository } from '../domain/interfaces/blood-type-repository
 
 @Injectable()
 export class GetBloodTypesUseCase {
-  constructor(private readonly repository: IBloodTypeRepository) {}
+  constructor(private readonly bloodTypeRepository: IBloodTypeRepository) {}
 
   async execute(query: BloodTypeQueryDto) {
-    const { data, total, page, limit } = await this.repository.findAll(query);
+    const { data, total, page, limit } =
+      await this.bloodTypeRepository.findAll(query);
     return {
       data,
       meta: {

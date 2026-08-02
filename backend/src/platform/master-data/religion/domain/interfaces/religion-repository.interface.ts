@@ -1,22 +1,31 @@
-import { Religion, Prisma } from '@prisma/client';
-import { ReligionQueryDto } from '../../dto/request/religion-query.dto.js';
-import { PaginatedResult } from '../../../../../shared/domain/interfaces/repository.interface.js';
+import {
+  PaginatedResult,
+  PaginationQueryInput,
+} from '../../../../../shared/domain/interfaces/repository.interface.js';
+import { ReligionEntity } from '../entities/religion.entity.js';
+
+export interface ReligionQueryInput extends PaginationQueryInput {
+  search?: string;
+  isActive?: boolean;
+}
 
 export abstract class IReligionRepository {
-  abstract findAll(query: ReligionQueryDto): Promise<PaginatedResult<Religion>>;
+  abstract findAll(
+    query: ReligionQueryInput,
+  ): Promise<PaginatedResult<ReligionEntity>>;
 
-  abstract findById(id: string): Promise<Religion | null>;
+  abstract findById(id: string): Promise<ReligionEntity | null>;
   abstract findByName(
     name: string,
     excludeId?: string,
-  ): Promise<Religion | null>;
+  ): Promise<ReligionEntity | null>;
   abstract create(data: {
     name: string;
     isActive?: boolean;
-  }): Promise<Religion>;
+  }): Promise<ReligionEntity>;
   abstract update(
     id: string,
-    data: Prisma.ReligionUpdateInput,
-  ): Promise<Religion>;
-  abstract softDelete(id: string): Promise<Religion>;
+    data: { name?: string; isActive?: boolean },
+  ): Promise<ReligionEntity>;
+  abstract softDelete(id: string): Promise<ReligionEntity>;
 }

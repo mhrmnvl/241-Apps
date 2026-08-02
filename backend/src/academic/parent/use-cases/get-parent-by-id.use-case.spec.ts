@@ -1,6 +1,6 @@
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { ParentRepository } from '../repositories/parent.repository.js';
+import { IParentRepository } from '../domain/interfaces/parent-repository.interface.js';
 import { GetParentByIdUseCase } from './get-parent-by-id.use-case.js';
 
 describe('GetParentByIdUseCase', () => {
@@ -14,7 +14,7 @@ describe('GetParentByIdUseCase', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         GetParentByIdUseCase,
-        { provide: ParentRepository, useValue: mockRepo },
+        { provide: IParentRepository, useValue: mockRepo },
       ],
     }).compile();
 

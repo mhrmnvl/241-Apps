@@ -1,18 +1,20 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { ClassroomSupervisorRepository } from '../repositories/classroom-supervisors.repository.js';
+import { IClassroomSupervisorRepository } from '../domain/interfaces/classroom-supervisor-repository.interface.js';
 
 @Injectable()
 export class DeleteClassroomSupervisorUseCase {
   private readonly logger = new Logger(DeleteClassroomSupervisorUseCase.name);
 
-  constructor(private readonly repository: ClassroomSupervisorRepository) {}
+  constructor(
+    private readonly classroomSupervisorRepository: IClassroomSupervisorRepository,
+  ) {}
 
   async execute(id: string) {
-    const existing = await this.repository.findById(id);
+    const existing = await this.classroomSupervisorRepository.findById(id);
     if (!existing)
       throw new NotFoundException(`ClassSupervisor with ID ${id} not found`);
 
-    await this.repository.softDelete(id);
+    await this.classroomSupervisorRepository.remove(id);
     this.logger.log(`ClassSupervisor deleted: ${id}`);
   }
 }

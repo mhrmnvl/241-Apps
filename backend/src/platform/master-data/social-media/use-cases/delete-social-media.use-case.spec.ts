@@ -1,8 +1,8 @@
 import { ConflictException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { SchoolUnitSocialMediaRepository } from '../../../school-unit/index.js';
-import { ProfileSocialMediaRepository } from '../../../profile/index.js';
-import { ISocialMediaRepository } from '../interfaces/social-media-repository.interface.js';
+import { ISchoolUnitSocialMediaRepository } from '../../../school-unit/index.js';
+import { IProfileSocialMediaRepository } from '../../../profile/index.js';
+import { ISocialMediaRepository } from '../domain/interfaces/social-media-repository.interface.js';
 import { DeleteSocialMediaUseCase } from './delete-social-media.use-case.js';
 
 describe('DeleteSocialMediaUseCase', () => {
@@ -27,11 +27,11 @@ describe('DeleteSocialMediaUseCase', () => {
         DeleteSocialMediaUseCase,
         { provide: ISocialMediaRepository, useValue: mockRepo },
         {
-          provide: SchoolUnitSocialMediaRepository,
+          provide: ISchoolUnitSocialMediaRepository,
           useValue: mockSchoolUnitSocialMediaRepository,
         },
         {
-          provide: ProfileSocialMediaRepository,
+          provide: IProfileSocialMediaRepository,
           useValue: mockProfileSocialMediaRepository,
         },
       ],

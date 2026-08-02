@@ -10,11 +10,11 @@ import { UpdateStudentScoreUseCase } from '../use-cases/update-student-score.use
 import { DeleteStudentScoreUseCase } from '../use-cases/delete-student-score.use-case.js';
 import { GetStudentScoreRosterUseCase } from '../use-cases/get-student-score-roster.use-case.js';
 import { BulkUpsertStudentScoresUseCase } from '../use-cases/bulk-upsert-student-scores.use-case.js';
-import { StudentScoresController } from './student-scores.controller.js';
+import { StudentScoreController } from './student-score.controller.js';
 import type { AuthenticatedUser } from '../../../core/types/authenticated-user.type.js';
 
-describe('StudentScoresController', () => {
-  let controller: StudentScoresController;
+describe('StudentScoreController', () => {
+  let controller: StudentScoreController;
   const mockGetAll = { execute: jest.fn() };
   const mockGetById = { execute: jest.fn() };
   const mockCreate = { execute: jest.fn() };
@@ -32,7 +32,7 @@ describe('StudentScoresController', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [StudentScoresController],
+      controllers: [StudentScoreController],
       providers: [
         { provide: GetStudentScoresUseCase, useValue: mockGetAll },
         { provide: GetStudentScoreByIdUseCase, useValue: mockGetById },
@@ -43,7 +43,7 @@ describe('StudentScoresController', () => {
         { provide: BulkUpsertStudentScoresUseCase, useValue: mockBulkUpsert },
       ],
     }).compile();
-    controller = module.get<StudentScoresController>(StudentScoresController);
+    controller = module.get<StudentScoreController>(StudentScoreController);
     jest.clearAllMocks();
   });
 

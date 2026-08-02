@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { IAssessmentItemRepository } from '../domain/interfaces/assessment-items-repository.interface.js';
-import { IStudentScoreRepository } from '../domain/interfaces/student-scores-repository.interface.js';
+import { IAssessmentItemRepository } from '../domain/interfaces/assessment-item-repository.interface.js';
+import { IStudentScoreRepository } from '../domain/interfaces/student-score-repository.interface.js';
 import { StudentScoreRosterQueryDto } from '../dto/request/student-score-roster-query.dto.js';
 
 @Injectable()
@@ -21,8 +21,8 @@ export class GetStudentScoreRosterUseCase {
 
     const items = await this.studentScoreRepository.getRoster(
       assessmentItem.id,
-      assessmentItem.teachingAssignment.classroomId,
-      assessmentItem.teachingAssignment.semesterId,
+      assessmentItem.teachingAssignment?.classroomId,
+      assessmentItem.teachingAssignment?.semesterId,
     );
 
     return {

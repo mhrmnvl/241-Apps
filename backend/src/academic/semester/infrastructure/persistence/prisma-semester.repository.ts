@@ -2,14 +2,17 @@ import { Injectable } from '@nestjs/common';
 import { Prisma, Semester, SemesterType } from '@prisma/client';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
 import { resolveAcademicYearId } from '../../../../shared/utils/active-academic-year.helper.js';
-import {
-  ISemesterRepository,
-  SEMESTER_INCLUDE,
-  SemesterWithDetails,
+import { ISemesterRepository } from '../../domain/interfaces/semester-repository.interface.js';
+import type {
+  SemesterQueryInput,
   CreateSemesterRepositoryInput,
+  UpdateSemesterRepositoryInput,
 } from '../../domain/interfaces/semester-repository.interface.js';
-import { SemesterQueryDto } from '../../dto/request/semester-query.dto.js';
 import { PaginatedResult } from '../../../../shared/domain/interfaces/repository.interface.js';
+import {
+  SEMESTER_WITH_DETAILS_INCLUDE,
+  SemesterWithDetails,
+} from './prisma-semester.includes.js';
 
 @Injectable()
 export class PrismaSemesterRepository extends ISemesterRepository {
@@ -18,7 +21,7 @@ export class PrismaSemesterRepository extends ISemesterRepository {
   }
 
   async findAll(
-    query: SemesterQueryDto,
+    query: SemesterQueryInput,
   ): Promise<PaginatedResult<SemesterWithDetails>> {
     const { page = 1, limit = 10, search, academicYearId, isActive } = query;
     const skip = (page - 1) * limit;
@@ -48,7 +51,7 @@ export class PrismaSemesterRepository extends ISemesterRepository {
           { academicYear: { name: 'desc' } },
           { type: { name: 'asc' } },
         ],
-        include: SEMESTER_INCLUDE,
+        include: SEMESTER_WITH_DETAILS_INCLUDE,
       }),
       this.prisma.semester.count({ where }),
     ]);
@@ -62,7 +65,7 @@ export class PrismaSemesterRepository extends ISemesterRepository {
         id,
         deletedAt: null,
       },
-      include: SEMESTER_INCLUDE,
+      include: SEMESTER_WITH_DETAILS_INCLUDE,
     });
   }
 
@@ -72,7 +75,7 @@ export class PrismaSemesterRepository extends ISemesterRepository {
         isActive: true,
         deletedAt: null,
       },
-      include: SEMESTER_INCLUDE,
+      include: SEMESTER_WITH_DETAILS_INCLUDE,
     });
   }
 
@@ -90,18 +93,18 @@ export class PrismaSemesterRepository extends ISemesterRepository {
   ): Promise<SemesterWithDetails> {
     return this.prisma.semester.create({
       data,
-      include: SEMESTER_INCLUDE,
+      include: SEMESTER_WITH_DETAILS_INCLUDE,
     });
   }
 
   async update(
     id: string,
-    data: Prisma.SemesterUpdateInput,
+    data: UpdateSemesterRepositoryInput,
   ): Promise<SemesterWithDetails> {
     return this.prisma.semester.update({
       where: { id },
       data,
-      include: SEMESTER_INCLUDE,
+      include: SEMESTER_WITH_DETAILS_INCLUDE,
     });
   }
 
@@ -109,6 +112,16 @@ export class PrismaSemesterRepository extends ISemesterRepository {
     return this.prisma.semester.updateMany({
       where: {
         isActive: true,
+      },
+      data: { isActive: false },
+    });
+  }
+
+  async deactivateAllActive(excludeId?: string): Promise<Prisma.BatchPayload> {
+    return this.prisma.semester.updateMany({
+      where: {
+        isActive: true,
+        ...(excludeId && { NOT: { id: excludeId } }),
       },
       data: { isActive: false },
     });
@@ -125,7 +138,7 @@ export class PrismaSemesterRepository extends ISemesterRepository {
       return tx.semester.update({
         where: { id },
         data: { isActive: true },
-        include: SEMESTER_INCLUDE,
+        include: SEMESTER_WITH_DETAILS_INCLUDE,
       });
     });
   }
@@ -142,6 +155,10 @@ export class PrismaSemesterRepository extends ISemesterRepository {
       take: 1,
     });
     return count > 0;
+  }
+
+  async remove(id: string): Promise<Semester> {
+    return this.softDelete(id);
   }
 
   async softDelete(id: string): Promise<Semester> {

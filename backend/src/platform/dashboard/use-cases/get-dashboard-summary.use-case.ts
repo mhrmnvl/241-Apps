@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { DashboardRepository } from '../repositories/dashboard.repository.js';
+import { IDashboardRepository } from '../domain/interfaces/dashboard-repository.interface.js';
 
 @Injectable()
 export class GetDashboardSummaryUseCase {
-  constructor(private readonly dashboardRepository: DashboardRepository) {}
+  constructor(private readonly dashboardRepository: IDashboardRepository) {}
 
   async execute() {
     const [
@@ -18,6 +18,8 @@ export class GetDashboardSummaryUseCase {
       recentAnnouncements,
       studentDistribution,
       teacherDistribution,
+      todayAttendance,
+      pendingAdmissions,
     ] = await Promise.all([
       this.dashboardRepository.countActiveStudents(),
       this.dashboardRepository.countActiveTeachers(),
@@ -30,6 +32,8 @@ export class GetDashboardSummaryUseCase {
       this.dashboardRepository.getRecentAnnouncements(5),
       this.dashboardRepository.getStudentDistributionByGrade(),
       this.dashboardRepository.getTeacherDistributionByPosition(),
+      this.dashboardRepository.countTodayAttendance(),
+      this.dashboardRepository.countPendingAdmissions(),
     ]);
 
     const activeSemester = activeAcademicYear?.semesters?.[0] ?? null;
@@ -50,10 +54,7 @@ export class GetDashboardSummaryUseCase {
         activeSemester: activeSemester
           ? {
               id: activeSemester.id,
-              type:
-                activeSemester.type && typeof activeSemester.type === 'object'
-                  ? activeSemester.type.name
-                  : null,
+              type: activeSemester.type?.name ?? null,
             }
           : null,
       },
@@ -70,6 +71,10 @@ export class GetDashboardSummaryUseCase {
         studentsByGrade: studentDistribution,
         teachersByPosition: teacherDistribution,
       },
+
+      todayAttendance,
+
+      pendingAdmissions,
 
       upcomingEvents,
 

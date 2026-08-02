@@ -1,4 +1,4 @@
-import { AppKey } from '@prisma/client';
+import { AppKey } from '../../../shared/domain/enums/app-key.enum.js';
 
 export interface DefaultAppSettingValues {
   appTitle: string;

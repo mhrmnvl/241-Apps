@@ -10,7 +10,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { AppKey } from '../repositories/app-setting.repository.js';
+import { AppKey } from '../domain/entities/app-setting.entity.js';
 import {
   ApiBearerAuth,
   ApiBody,

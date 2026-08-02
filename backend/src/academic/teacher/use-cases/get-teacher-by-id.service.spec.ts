@@ -1,6 +1,6 @@
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { TeacherRepository } from '../repositories/teacher.repository.js';
+import { ITeacherRepository } from '../domain/interfaces/teacher-repository.interface.js';
 import { GetTeacherByIdUseCase } from './get-teacher-by-id.use-case.js';
 
 describe('GetTeacherByIdUseCase', () => {
@@ -14,7 +14,7 @@ describe('GetTeacherByIdUseCase', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         GetTeacherByIdUseCase,
-        { provide: TeacherRepository, useValue: mockRepository },
+        { provide: ITeacherRepository, useValue: mockRepository },
       ],
     }).compile();
 

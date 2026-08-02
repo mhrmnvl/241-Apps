@@ -1,34 +1,44 @@
-import { AcademicCalendar, Prisma } from '@prisma/client';
-import type { AcademicCalendarQueryDto } from '../../dto/request/academic-calendar-query.dto.js';
-import type { CreateAcademicCalendarDto } from '../../dto/request/create-academic-calendar.dto.js';
-import type { UpdateAcademicCalendarDto } from '../../dto/request/update-academic-calendar.dto.js';
-import { PaginatedResult } from '../../../../shared/domain/interfaces/repository.interface.js';
+import {
+  PaginatedResult,
+  PaginationQueryInput,
+} from '../../../../shared/domain/interfaces/repository.interface.js';
+import { AcademicCalendarEntity } from '../entities/academic-calendar.entity.js';
+import { CalendarWithDetails } from '../entities/academic-calendar.entity.js';
 
-export const ACADEMIC_CALENDAR_INCLUDE = {
-  academicYear: { select: { id: true, name: true } },
-  semester: { select: { id: true, type: true, isActive: true } },
-  type: true,
-} satisfies Prisma.AcademicCalendarInclude;
+export type { CalendarWithDetails };
 
-export type AcademicCalendarWithDetails = Prisma.AcademicCalendarGetPayload<{
-  include: typeof ACADEMIC_CALENDAR_INCLUDE;
-}>;
+export interface AcademicCalendarQueryInput extends PaginationQueryInput {
+  academicYearId?: string;
+  semesterId?: string;
+  typeId?: string;
+}
+
+export interface CreateAcademicCalendarRepositoryInput {
+  academicYearId: string;
+  /** Omitted for cross-semester entries. */
+  semesterId?: string | null;
+  title: string;
+  typeId: string;
+  startDate: Date;
+  endDate: Date;
+  description?: string | null;
+}
+
+export type UpdateAcademicCalendarRepositoryInput =
+  Partial<CreateAcademicCalendarRepositoryInput>;
 
 export abstract class IAcademicCalendarRepository {
   abstract findAll(
-    query: AcademicCalendarQueryDto,
-  ): Promise<PaginatedResult<AcademicCalendarWithDetails>>;
-
-  abstract findById(id: string): Promise<AcademicCalendarWithDetails | null>;
-
+    query: AcademicCalendarQueryInput,
+  ): Promise<PaginatedResult<CalendarWithDetails>>;
+  abstract findById(id: string): Promise<CalendarWithDetails | null>;
   abstract create(
-    dto: CreateAcademicCalendarDto,
-  ): Promise<AcademicCalendarWithDetails>;
-
+    input: CreateAcademicCalendarRepositoryInput,
+  ): Promise<CalendarWithDetails>;
   abstract update(
     id: string,
-    dto: UpdateAcademicCalendarDto,
-  ): Promise<AcademicCalendarWithDetails>;
-
-  abstract softDelete(id: string): Promise<AcademicCalendar>;
+    input: UpdateAcademicCalendarRepositoryInput,
+  ): Promise<CalendarWithDetails>;
+  abstract remove(id: string): Promise<AcademicCalendarEntity>;
+  abstract softDelete(id: string): Promise<AcademicCalendarEntity>;
 }

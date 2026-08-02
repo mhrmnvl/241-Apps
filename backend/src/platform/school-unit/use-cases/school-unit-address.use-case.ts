@@ -8,56 +8,71 @@ import {
   CreateAddressDto,
   UpdateAddressDto,
 } from '../../../shared/dto/address.dto.js';
-import { SchoolUnitRepository } from '../repositories/school-unit.repository.js';
-import { SchoolUnitAddressRepository } from '../repositories/school-unit-address.repository.js';
+import { ISchoolUnitRepository } from '../domain/interfaces/school-unit-repository.interface.js';
+import { ISchoolUnitAddressRepository } from '../domain/interfaces/school-unit-address-repository.interface.js';
 
 @Injectable()
 export class SchoolUnitAddressUseCase {
   private readonly logger = new Logger(SchoolUnitAddressUseCase.name);
 
   constructor(
-    private readonly schoolUnitRepository: SchoolUnitRepository,
-    private readonly repository: SchoolUnitAddressRepository,
+    private readonly schoolUnitRepository: ISchoolUnitRepository,
+    private readonly schoolUnitAddressRepository: ISchoolUnitAddressRepository,
   ) {}
 
   async getAddress() {
-    return this.repository.find();
+    const schoolUnit = await this.requireSchoolUnit();
+    return this.schoolUnitAddressRepository.findBySchoolUnitId(schoolUnit.id);
   }
 
   async setAddress(dto: CreateAddressDto) {
     const schoolUnit = await this.requireSchoolUnit();
-    const existing = await this.repository.find();
+    const existing = await this.schoolUnitAddressRepository.findBySchoolUnitId(
+      schoolUnit.id,
+    );
     if (existing) {
       throw new ConflictException(
         'School unit address already exists. Use PATCH to update.',
       );
     }
 
-    const address = await this.repository.create(dto, schoolUnit.id);
+    const address = await this.schoolUnitAddressRepository.create(
+      schoolUnit.id,
+      dto,
+    );
     this.logger.log(`School unit address set`);
     return address;
   }
 
   async updateAddress(dto: UpdateAddressDto) {
-    await this.requireSchoolUnit();
-    const existing = await this.repository.find();
+    const schoolUnit = await this.requireSchoolUnit();
+    const existing = await this.schoolUnitAddressRepository.findBySchoolUnitId(
+      schoolUnit.id,
+    );
     if (!existing) {
       throw new NotFoundException('School unit address has not been set yet');
     }
 
-    const updated = await this.repository.update(existing.id, dto);
+    const updated = await this.schoolUnitAddressRepository.update(
+      existing.id,
+      dto,
+    );
     this.logger.log(`School unit address updated`);
     return updated;
   }
 
   async removeAddress(): Promise<void> {
-    await this.requireSchoolUnit();
-    const existing = await this.repository.find();
+    const schoolUnit = await this.requireSchoolUnit();
+    const existing = await this.schoolUnitAddressRepository.findBySchoolUnitId(
+      schoolUnit.id,
+    );
     if (!existing) {
       throw new NotFoundException('School unit address has not been set yet');
     }
 
-    await this.repository.remove(existing.id);
+    await this.schoolUnitAddressRepository.update(existing.id, {
+      deletedAt: new Date(),
+    });
     this.logger.log(`School unit address removed`);
   }
 

@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { IAssessmentItemRepository } from '../domain/interfaces/assessment-items-repository.interface.js';
+import { IAssessmentItemRepository } from '../domain/interfaces/assessment-item-repository.interface.js';
 import { ITeachingAssignmentRepository } from '../../teaching-assignment/domain/interfaces/teaching-assignment-repository.interface.js';
 import { CreateAssessmentItemDto } from '../dto/request/create-assessment-item.dto.js';
 

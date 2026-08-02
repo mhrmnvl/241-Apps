@@ -1,6 +1,6 @@
-export { ClassroomRepository } from './repositories/classroom.repository.js';
+export { IClassroomRepository } from './domain/interfaces/classroom-repository.interface.js';
 export { withDisplayName } from '../../shared/utils/classroom-display-name.helper.js';
 
-export { ClassroomStructureRepository } from './repositories/classroom-structures.repository.js';
+export { IClassroomStructureRepository } from './domain/interfaces/classroom-structure-repository.interface.js';
 
-export { ClassroomSupervisorRepository } from './repositories/classroom-supervisors.repository.js';
+export { IClassroomSupervisorRepository } from './domain/interfaces/classroom-supervisor-repository.interface.js';

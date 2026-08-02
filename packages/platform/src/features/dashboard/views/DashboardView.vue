@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { onMounted, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/card'
 import { Separator } from '@/ui/separator'
 import { Badge } from '@/ui/badge'
 import { Skeleton } from '@/ui/skeleton'
+import { Button } from '@/ui/button'
 import { useDashboard } from '../composables/useDashboard'
 import {
   Users,
@@ -17,9 +19,17 @@ import {
   BarChart3,
   CalendarCheck,
   ShieldCheck,
+  ClipboardCheck,
+  UserCheck,
+  UserX,
+  Clock,
+  FileText,
+  RefreshCw,
+  ChevronRight,
 } from 'lucide-vue-next'
 
 const breadcrumbs = [{ title: 'Dashboard' }]
+const router = useRouter()
 
 const { summary, loading, fetchSummary } = useDashboard()
 
@@ -29,6 +39,8 @@ const institution = computed(() => summary.value?.institution)
 const distributions = computed(() => summary.value?.distributions)
 const events = computed(() => summary.value?.upcomingEvents ?? [])
 const announcements = computed(() => summary.value?.recentAnnouncements ?? [])
+const todayAttendance = computed(() => summary.value?.todayAttendance)
+const pendingAdmissions = computed(() => summary.value?.pendingAdmissions ?? 0)
 
 const semesterLabel = computed(() => {
   const type = academic.value?.activeSemester?.type
@@ -43,9 +55,17 @@ const institutionStatusLabel = computed(() => {
   const map: Record<string, string> = {
     NEGERI: 'Negeri',
     SWASTA: 'Swasta',
-    ACTIVE: 'Negeri',
+    ACTIVE: 'Aktif',
   }
   return map[status] ?? status
+})
+
+const attendanceRate = computed(() => {
+  const a = todayAttendance.value
+  if (!a) return null
+  const total = a.present + a.absent + a.late + a.excused + a.sick
+  if (total === 0) return null
+  return Math.round((a.present / total) * 100)
 })
 
 function formatDate(dateStr: string) {
@@ -63,27 +83,29 @@ function formatGradeLevel(level: string | number) {
 }
 
 function formatEventType(type: string) {
-  const map: Record<string, string> = {
-    HOLIDAY: 'Libur',
-    EXAM: 'Ujian',
-    EVENT: 'Acara',
-    MEETING: 'Rapat',
-    OTHER: 'Lainnya',
-  }
-  return map[type] ?? type
+  return type
 }
 
 function eventTypeVariant(type: string) {
+  const lower = type.toLowerCase()
   const map: Record<
     string,
     'default' | 'secondary' | 'destructive' | 'outline'
   > = {
-    HOLIDAY: 'destructive',
-    EXAM: 'default',
-    EVENT: 'secondary',
-    MEETING: 'outline',
+    libur: 'destructive',
+    ujian: 'default',
+    acara: 'secondary',
+    rapat: 'outline',
+    holiday: 'destructive',
+    exam: 'default',
+    event: 'secondary',
+    meeting: 'outline',
   }
-  return map[type] ?? 'outline'
+  return map[lower] ?? 'outline'
+}
+
+function navigateTo(path: string) {
+  void router.push(path)
 }
 
 onMounted(() => {
@@ -108,9 +130,22 @@ onMounted(() => {
               Ringkasan data dan informasi akademik terkini.
             </p>
           </div>
+          <Button
+            variant="outline"
+            size="sm"
+            :disabled="loading"
+            @click="fetchSummary()"
+          >
+            <RefreshCw
+              class="size-3.5"
+              :class="{ 'animate-spin': loading }"
+            />
+            Refresh
+          </Button>
         </CardHeader>
 
         <div class="p-6 space-y-6">
+          <!-- Institution & Academic Context -->
           <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <Card class="shadow-none">
               <CardContent class="p-4">
@@ -130,11 +165,11 @@ onMounted(() => {
                   >
                     <Building2 class="size-4 text-primary" />
                   </div>
-                  <div class="min-w-0">
+                  <div class="flex-1 min-w-0">
                     <p class="text-xs font-medium text-muted-foreground">
                       Institusi
                     </p>
-                    <p class="truncate text-sm font-semibold">
+                    <p class="text-sm font-semibold break-words">
                       {{ institution?.name ?? 'Belum Dikonfigurasi' }}
                     </p>
                   </div>
@@ -235,8 +270,12 @@ onMounted(() => {
 
           <Separator />
 
+          <!-- Key Statistics -->
           <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-            <Card class="shadow-none">
+            <Card
+              class="shadow-none cursor-pointer transition-colors hover:bg-muted/30"
+              @click="navigateTo('/students')"
+            >
               <CardContent class="p-4">
                 <div
                   v-if="loading"
@@ -269,7 +308,10 @@ onMounted(() => {
               </CardContent>
             </Card>
 
-            <Card class="shadow-none">
+            <Card
+              class="shadow-none cursor-pointer transition-colors hover:bg-muted/30"
+              @click="navigateTo('/teachers')"
+            >
               <CardContent class="p-4">
                 <div
                   v-if="loading"
@@ -302,7 +344,10 @@ onMounted(() => {
               </CardContent>
             </Card>
 
-            <Card class="shadow-none">
+            <Card
+              class="shadow-none cursor-pointer transition-colors hover:bg-muted/30"
+              @click="navigateTo('/teachers')"
+            >
               <CardContent class="p-4">
                 <div
                   v-if="loading"
@@ -317,13 +362,13 @@ onMounted(() => {
                 >
                   <div>
                     <p class="text-xs font-medium text-muted-foreground">
-                      Total Pegawai
+                      Guru Mengajar
                     </p>
                     <p class="mt-1 text-2xl font-bold tabular-nums">
                       {{ stats?.totalInstructors ?? 0 }}
                     </p>
                     <p class="mt-0.5 text-[11px] text-muted-foreground">
-                      Guru & tenaga kependidikan
+                      Punya jadwal mengajar
                     </p>
                   </div>
                   <div
@@ -335,7 +380,10 @@ onMounted(() => {
               </CardContent>
             </Card>
 
-            <Card class="shadow-none">
+            <Card
+              class="shadow-none cursor-pointer transition-colors hover:bg-muted/30"
+              @click="navigateTo('/classrooms')"
+            >
               <CardContent class="p-4">
                 <div
                   v-if="loading"
@@ -368,7 +416,10 @@ onMounted(() => {
               </CardContent>
             </Card>
 
-            <Card class="shadow-none">
+            <Card
+              class="shadow-none cursor-pointer transition-colors hover:bg-muted/30"
+              @click="navigateTo('/subjects')"
+            >
               <CardContent class="p-4">
                 <div
                   v-if="loading"
@@ -404,6 +455,161 @@ onMounted(() => {
 
           <Separator />
 
+          <!-- Today Attendance + Pending Admissions -->
+          <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <!-- Today Attendance -->
+            <Card class="shadow-none lg:col-span-2">
+              <CardHeader class="border-b px-5 py-3.5">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <ClipboardCheck class="size-4 text-muted-foreground" />
+                    <CardTitle class="text-sm font-semibold">
+                      Kehadiran Hari Ini
+                    </CardTitle>
+                  </div>
+                  <span
+                    v-if="attendanceRate !== null"
+                    class="text-xs font-medium text-muted-foreground"
+                  >
+                    {{ attendanceRate }}% hadir
+                  </span>
+                </div>
+              </CardHeader>
+              <CardContent class="p-5">
+                <div
+                  v-if="loading"
+                  class="grid grid-cols-2 gap-3 sm:grid-cols-5"
+                >
+                  <Skeleton
+                    v-for="i in 5"
+                    :key="i"
+                    class="h-16 w-full rounded-lg"
+                  />
+                </div>
+                <div
+                  v-else-if="todayAttendance"
+                  class="grid grid-cols-2 gap-3 sm:grid-cols-5"
+                >
+                  <div
+                    class="flex flex-col items-center rounded-lg border bg-emerald-50 px-3 py-3 dark:bg-emerald-950/20"
+                  >
+                    <UserCheck class="mb-1 size-4 text-emerald-600" />
+                    <p
+                      class="text-xl font-bold tabular-nums text-emerald-700 dark:text-emerald-400"
+                    >
+                      {{ todayAttendance.present }}
+                    </p>
+                    <p class="text-[10px] font-medium text-muted-foreground">
+                      Hadir
+                    </p>
+                  </div>
+                  <div
+                    class="flex flex-col items-center rounded-lg border bg-red-50 px-3 py-3 dark:bg-red-950/20"
+                  >
+                    <UserX class="mb-1 size-4 text-red-600" />
+                    <p
+                      class="text-xl font-bold tabular-nums text-red-700 dark:text-red-400"
+                    >
+                      {{ todayAttendance.absent }}
+                    </p>
+                    <p class="text-[10px] font-medium text-muted-foreground">
+                      Alpha
+                    </p>
+                  </div>
+                  <div
+                    class="flex flex-col items-center rounded-lg border bg-amber-50 px-3 py-3 dark:bg-amber-950/20"
+                  >
+                    <Clock class="mb-1 size-4 text-amber-600" />
+                    <p
+                      class="text-xl font-bold tabular-nums text-amber-700 dark:text-amber-400"
+                    >
+                      {{ todayAttendance.late }}
+                    </p>
+                    <p class="text-[10px] font-medium text-muted-foreground">
+                      Terlambat
+                    </p>
+                  </div>
+                  <div
+                    class="flex flex-col items-center rounded-lg border px-3 py-3"
+                  >
+                    <FileText class="mb-1 size-4 text-blue-600" />
+                    <p
+                      class="text-xl font-bold tabular-nums text-blue-700 dark:text-blue-400"
+                    >
+                      {{ todayAttendance.excused }}
+                    </p>
+                    <p class="text-[10px] font-medium text-muted-foreground">
+                      Izin
+                    </p>
+                  </div>
+                  <div
+                    class="flex flex-col items-center rounded-lg border px-3 py-3"
+                  >
+                    <FileText class="mb-1 size-4 text-violet-600" />
+                    <p
+                      class="text-xl font-bold tabular-nums text-violet-700 dark:text-violet-400"
+                    >
+                      {{ todayAttendance.sick }}
+                    </p>
+                    <p class="text-[10px] font-medium text-muted-foreground">
+                      Sakit
+                    </p>
+                  </div>
+                </div>
+                <p
+                  v-else
+                  class="py-6 text-center text-sm text-muted-foreground"
+                >
+                  Belum ada data kehadiran hari ini.
+                </p>
+              </CardContent>
+            </Card>
+
+            <!-- Pending Admissions -->
+            <Card
+              class="shadow-none cursor-pointer transition-colors hover:bg-muted/30"
+              @click="navigateTo('/admissions')"
+            >
+              <CardHeader class="border-b px-5 py-3.5">
+                <div class="flex items-center gap-2">
+                  <FileText class="size-4 text-muted-foreground" />
+                  <CardTitle class="text-sm font-semibold">
+                    Penerimaan Siswa Baru
+                  </CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent class="p-5">
+                <div
+                  v-if="loading"
+                  class="space-y-2"
+                >
+                  <Skeleton class="h-10 w-20" />
+                  <Skeleton class="h-4 w-32" />
+                </div>
+                <div
+                  v-else
+                  class="flex items-end justify-between"
+                >
+                  <div>
+                    <p class="text-3xl font-bold tabular-nums">
+                      {{ pendingAdmissions }}
+                    </p>
+                    <p class="mt-1 text-xs text-muted-foreground">
+                      Pendaftar perlu ditinjau
+                    </p>
+                    <p class="text-[10px] text-muted-foreground">
+                      (Terkirim, revisi, & terverifikasi)
+                    </p>
+                  </div>
+                  <ChevronRight class="size-4 text-muted-foreground" />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <Separator />
+
+          <!-- Distributions & Events -->
           <div class="grid gap-6 lg:grid-cols-2">
             <Card class="shadow-none">
               <CardHeader class="border-b px-5 py-3.5">
@@ -511,8 +717,8 @@ onMounted(() => {
                         {{ new Date(event.startDate).getDate() }}
                       </span>
                     </div>
-                    <div class="min-w-0 flex-1">
-                      <p class="truncate text-sm font-medium">
+                    <div class="flex-1">
+                      <p class="text-sm font-medium break-words">
                         {{ event.title }}
                       </p>
                       <p class="text-xs text-muted-foreground">
@@ -570,7 +776,9 @@ onMounted(() => {
                     :key="item.category"
                     class="flex items-center justify-between rounded-lg border px-4 py-2.5"
                   >
-                    <span class="text-sm font-medium">{{ item.category }}</span>
+                    <span class="text-sm font-medium">{{
+                      item.category ?? 'Tidak Berkategori'
+                    }}</span>
                     <Badge
                       variant="secondary"
                       class="tabular-nums"
@@ -615,12 +823,12 @@ onMounted(() => {
                   <div
                     v-for="ann in announcements"
                     :key="ann.id"
-                    class="flex items-center justify-between rounded-lg border px-4 py-2.5"
+                    class="flex flex-col gap-0.5 rounded-lg border px-4 py-2.5"
                   >
-                    <p class="truncate text-sm font-medium">
+                    <p class="text-sm font-medium break-words">
                       {{ ann.title }}
                     </p>
-                    <span class="shrink-0 text-xs text-muted-foreground">{{
+                    <span class="text-xs text-muted-foreground">{{
                       formatDate(ann.date)
                     }}</span>
                   </div>

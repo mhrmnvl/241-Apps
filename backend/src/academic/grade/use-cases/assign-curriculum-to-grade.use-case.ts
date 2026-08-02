@@ -4,10 +4,12 @@ import { AssignCurriculumToGradeDto } from '../dto/request/assign-curriculum-to-
 
 @Injectable()
 export class AssignCurriculumToGradeUseCase {
-  constructor(private readonly repository: IGradeAcademicYearRepository) {}
+  constructor(
+    private readonly gradeAcademicYearRepository: IGradeAcademicYearRepository,
+  ) {}
 
   async execute(dto: AssignCurriculumToGradeDto) {
-    return this.repository.upsert({
+    return this.gradeAcademicYearRepository.upsert({
       gradeId: dto.gradeId,
       academicYearId: dto.academicYearId,
       curriculumId: dto.curriculumId,

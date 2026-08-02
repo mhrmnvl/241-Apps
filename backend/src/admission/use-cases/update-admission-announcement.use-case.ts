@@ -4,10 +4,13 @@ import { UpdateAdmissionAnnouncementDto } from '../dto/request/update-admission-
 
 @Injectable()
 export class UpdateAdmissionAnnouncementUseCase {
-  constructor(private readonly repository: IAdmissionAnnouncementRepository) {}
+  constructor(
+    private readonly admissionAnnouncementRepository: IAdmissionAnnouncementRepository,
+  ) {}
 
   async execute(id: string, dto: UpdateAdmissionAnnouncementDto) {
-    const announcement = await this.repository.findActiveById(id);
+    const announcement =
+      await this.admissionAnnouncementRepository.findActiveById(id);
     if (!announcement) {
       throw new NotFoundException('Pengumuman tidak ditemukan');
     }
@@ -15,7 +18,7 @@ export class UpdateAdmissionAnnouncementUseCase {
     const becomingPublished =
       dto.isPublished === true && !announcement.isPublished;
 
-    return this.repository.update(id, {
+    return this.admissionAnnouncementRepository.update(id, {
       ...dto,
       ...(becomingPublished && { publishedAt: new Date() }),
     });

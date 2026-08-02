@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { AchievementRepository } from '../repositories/achievement.repository.js';
+import { IAchievementRepository } from '../domain/interfaces/achievement-repository.interface.js';
 import { CreateAchievementDto } from '../dto/request/create-achievement.dto.js';
 
 @Injectable()
 export class CreateAchievementUseCase {
-  constructor(private readonly repository: AchievementRepository) {}
+  constructor(private readonly achievementRepository: IAchievementRepository) {}
 
   async execute(dto: CreateAchievementDto) {
-    return this.repository.create(dto);
+    return this.achievementRepository.create(dto);
   }
 }

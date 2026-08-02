@@ -1,1 +1,4 @@
-export { StudentStatus } from '../../../../shared/domain/enums/student-status.enum.js';
+export {
+  StudentStatusEnum,
+  StudentStatusEnum as StudentStatus,
+} from '../../../../shared/domain/enums/student-status.enum.js';

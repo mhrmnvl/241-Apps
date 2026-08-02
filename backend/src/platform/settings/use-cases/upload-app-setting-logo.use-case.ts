@@ -1,22 +1,22 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { fileTypeFromBuffer } from 'file-type';
-import { FileRepository } from '../../file/repositories/file.repository.js';
+import { IFileRepository } from '../../file/domain/interfaces/file-repository.interface.js';
 import { ImageOptimizerService } from '../../file/index.js';
 import { ALLOWED_UPLOAD_MIME_TYPES } from '../../file/constants/file-upload.constants.js';
 import { StorageService } from '../../../core/storage/storage.service.js';
 import { StorageKeyBuilder } from '../../../core/storage/storage-key-builder.service.js';
 import {
   AppKey,
-  AppSettingRepository,
-} from '../repositories/app-setting.repository.js';
+  IAppSettingRepository,
+} from '../domain/interfaces/app-setting-repository.interface.js';
 import { BRANDING_FILE_CATEGORY_CODE } from '../constants/branding-file-category.constant.js';
 import { toAppSettingResponseDto } from '../mappers/app-setting.mapper.js';
 
 @Injectable()
 export class UploadAppSettingLogoUseCase {
   constructor(
-    private readonly appSettingRepository: AppSettingRepository,
-    private readonly fileRepository: FileRepository,
+    private readonly appSettingRepository: IAppSettingRepository,
+    private readonly fileRepository: IFileRepository,
     private readonly imageOptimizer: ImageOptimizerService,
     private readonly storage: StorageService,
     private readonly keyBuilder: StorageKeyBuilder,

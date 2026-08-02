@@ -6,7 +6,7 @@ import { DeleteAcademicCalendarUseCase } from './delete-academic-calendar.use-ca
 describe('DeleteAcademicCalendarUseCase', () => {
   let useCase: DeleteAcademicCalendarUseCase;
 
-  const mockRepo = { findById: jest.fn(), softDelete: jest.fn() };
+  const mockRepo = { findById: jest.fn(), remove: jest.fn() };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -31,19 +31,19 @@ describe('DeleteAcademicCalendarUseCase', () => {
 
     it('should soft-delete calendar entry', async () => {
       mockRepo.findById.mockResolvedValue({ id });
-      mockRepo.softDelete.mockResolvedValue(undefined);
+      mockRepo.remove.mockResolvedValue(undefined);
 
       await useCase.execute(id);
 
       expect(mockRepo.findById).toHaveBeenCalledWith(id);
-      expect(mockRepo.softDelete).toHaveBeenCalledWith(id);
+      expect(mockRepo.remove).toHaveBeenCalledWith(id);
     });
 
     it('should throw NotFoundException and not call softDelete', async () => {
       mockRepo.findById.mockResolvedValue(null);
 
       await expect(useCase.execute(id)).rejects.toThrow(NotFoundException);
-      expect(mockRepo.softDelete).not.toHaveBeenCalled();
+      expect(mockRepo.remove).not.toHaveBeenCalled();
     });
   });
 });

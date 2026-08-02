@@ -1,7 +1,7 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { GetSchoolUnitUseCase } from '../../../platform/school-unit/index.js';
-import { IStudentScoreRepository } from '../../assessment/domain/interfaces/student-scores-repository.interface.js';
+import { IStudentScoreRepository } from '../../assessment/domain/interfaces/student-score-repository.interface.js';
 import { IAttendanceRepository } from '../../attendance/domain/interfaces/attendance-repository.interface.js';
 import { IReportCardRepository } from '../domain/interfaces/report-card-repository.interface.js';
 import { PdfService } from '../services/pdf.service.js';

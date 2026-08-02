@@ -1,6 +1,6 @@
 ﻿import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { AnnouncementRepository } from '../repositories/announcement.repository.js';
+import { IAnnouncementRepository } from '../domain/interfaces/announcement-repository.interface.js';
 import { DeleteAnnouncementUseCase } from './delete-announcement.use-case.js';
 
 describe('DeleteAnnouncementUseCase', () => {
@@ -15,7 +15,7 @@ describe('DeleteAnnouncementUseCase', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         DeleteAnnouncementUseCase,
-        { provide: AnnouncementRepository, useValue: mockRepository },
+        { provide: IAnnouncementRepository, useValue: mockRepository },
       ],
     }).compile();
 

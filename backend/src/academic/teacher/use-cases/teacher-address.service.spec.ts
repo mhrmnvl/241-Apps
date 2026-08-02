@@ -4,8 +4,8 @@ import {
   CreateAddressDto,
   UpdateAddressDto,
 } from '../../../shared/dto/address.dto.js';
-import { TeacherAddressRepository } from '../repositories/teacher-address.repository.js';
-import { TeacherRepository } from '../index.js';
+import { ITeacherAddressRepository } from '../domain/interfaces/teacher-address-repository.interface.js';
+import { ITeacherRepository } from '../index.js';
 import { TeacherAddressUseCase } from './teacher-address.use-case.js';
 
 describe('TeacherAddressUseCase', () => {
@@ -16,10 +16,10 @@ describe('TeacherAddressUseCase', () => {
   };
 
   const mockAddressRepository = {
-    findAll: jest.fn(),
+    findByTeacherId: jest.fn(),
     create: jest.fn(),
     update: jest.fn(),
-    remove: jest.fn(),
+    softDelete: jest.fn(),
     findById: jest.fn(),
   };
 
@@ -27,8 +27,8 @@ describe('TeacherAddressUseCase', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         TeacherAddressUseCase,
-        { provide: TeacherRepository, useValue: mockTeacherRepository },
-        { provide: TeacherAddressRepository, useValue: mockAddressRepository },
+        { provide: ITeacherRepository, useValue: mockTeacherRepository },
+        { provide: ITeacherAddressRepository, useValue: mockAddressRepository },
       ],
     }).compile();
 
@@ -50,12 +50,14 @@ describe('TeacherAddressUseCase', () => {
         { id: 'addr-1', street: 'Jl. Veteran No. 1', city: 'Malang' },
       ];
       mockTeacherRepository.findById.mockResolvedValue(mockTeacher);
-      mockAddressRepository.findAll.mockResolvedValue(mockAddresses);
+      mockAddressRepository.findByTeacherId.mockResolvedValue(mockAddresses);
 
       const result = await useCase.findAll(teacherId);
 
       expect(mockTeacherRepository.findById).toHaveBeenCalledWith(teacherId);
-      expect(mockAddressRepository.findAll).toHaveBeenCalledWith(teacherId);
+      expect(mockAddressRepository.findByTeacherId).toHaveBeenCalledWith(
+        teacherId,
+      );
       expect(result).toEqual(mockAddresses);
     });
 
@@ -65,7 +67,7 @@ describe('TeacherAddressUseCase', () => {
       await expect(useCase.findAll(teacherId)).rejects.toThrow(
         NotFoundException,
       );
-      expect(mockAddressRepository.findAll).not.toHaveBeenCalled();
+      expect(mockAddressRepository.findByTeacherId).not.toHaveBeenCalled();
     });
   });
 
@@ -149,11 +151,14 @@ describe('TeacherAddressUseCase', () => {
     it('should remove an address successfully', async () => {
       mockTeacherRepository.findById.mockResolvedValue(mockTeacher);
       mockAddressRepository.findById.mockResolvedValue({ id: 'addr-1' });
-      mockAddressRepository.remove.mockResolvedValue(undefined);
+      mockAddressRepository.softDelete.mockResolvedValue(undefined);
 
       await useCase.remove(teacherId, addressId);
 
-      expect(mockAddressRepository.remove).toHaveBeenCalledWith(addressId);
+      expect(mockAddressRepository.softDelete).toHaveBeenCalledWith(
+        teacherId,
+        addressId,
+      );
     });
 
     it('should throw NotFoundException when teacher is not found', async () => {
@@ -162,7 +167,7 @@ describe('TeacherAddressUseCase', () => {
       await expect(useCase.remove(teacherId, addressId)).rejects.toThrow(
         NotFoundException,
       );
-      expect(mockAddressRepository.remove).not.toHaveBeenCalled();
+      expect(mockAddressRepository.softDelete).not.toHaveBeenCalled();
     });
 
     it('should throw NotFoundException when address is not found', async () => {
@@ -172,7 +177,7 @@ describe('TeacherAddressUseCase', () => {
       await expect(useCase.remove(teacherId, addressId)).rejects.toThrow(
         NotFoundException,
       );
-      expect(mockAddressRepository.remove).not.toHaveBeenCalled();
+      expect(mockAddressRepository.softDelete).not.toHaveBeenCalled();
     });
   });
 });

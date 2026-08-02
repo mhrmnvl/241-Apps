@@ -1,6 +1,6 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { ProfileRepository } from '../index.js';
-import { ProfileSocialMediaRepository } from '../repositories/profile-social-media.repository.js';
+import { IProfileRepository } from '../index.js';
+import { IProfileSocialMediaRepository } from '../domain/interfaces/profile-social-media-repository.interface.js';
 import { UpdateProfileSocialMediaDto } from '../dto/request/update-profile-social-media.dto.js';
 
 @Injectable()
@@ -8,8 +8,8 @@ export class UpdateProfileSocialMediaUseCase {
   private readonly logger = new Logger(UpdateProfileSocialMediaUseCase.name);
 
   constructor(
-    private readonly profileRepository: ProfileRepository,
-    private readonly socialMediaRepository: ProfileSocialMediaRepository,
+    private readonly profileRepository: IProfileRepository,
+    private readonly socialMediaRepository: IProfileSocialMediaRepository,
   ) {}
 
   async execute(

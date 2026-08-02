@@ -4,13 +4,14 @@ import { TeacherController } from './presentation/teacher.controller.js';
 import { TeacherImportExportController } from './presentation/teacher-import-export.controller.js';
 import { TeacherAddressController } from './presentation/teacher-address.controller.js';
 import { TeacherPositionsController } from './presentation/teacher-position.controller.js';
-import { TeacherRepository } from './repositories/teacher.repository.js';
-import { TeacherAddressRepository } from './repositories/teacher-address.repository.js';
-import { TeacherPositionRepository } from './repositories/teacher-position.repository.js';
+import { ITeacherRepository } from './domain/interfaces/teacher-repository.interface.js';
+import { ITeacherAddressRepository } from './domain/interfaces/teacher-address-repository.interface.js';
+import { ITeacherPositionRepository } from './domain/interfaces/teacher-position-repository.interface.js';
 import { PrismaTeacherRepository } from './infrastructure/persistence/prisma-teacher.repository.js';
 import { PrismaTeacherAddressRepository } from './infrastructure/persistence/prisma-teacher-address.repository.js';
 import { PrismaTeacherPositionRepository } from './infrastructure/persistence/prisma-teacher-position.repository.js';
-import { ExcelTeacherParser } from './infrastructure/parsers/excel-teacher.parser.js';
+import { ExcelTeacherParser as ExcelTeacherParserConcrete } from './infrastructure/parsers/excel-teacher.parser.js';
+import { ExcelTeacherParser } from './domain/interfaces/teacher-excel-parser.interface.js';
 import { CreateTeacherUseCase } from './use-cases/create-teacher.use-case.js';
 import { DeleteTeacherUseCase } from './use-cases/delete-teacher.use-case.js';
 import { GetTeacherByIdUseCase } from './use-cases/get-teacher-by-id.use-case.js';
@@ -33,16 +34,16 @@ import { TeacherPositionUseCase } from './use-cases/teacher-position.use-case.js
     TeacherPositionsController,
   ],
   providers: [
-    { provide: TeacherRepository, useClass: PrismaTeacherRepository },
+    { provide: ITeacherRepository, useClass: PrismaTeacherRepository },
     {
-      provide: TeacherAddressRepository,
+      provide: ITeacherAddressRepository,
       useClass: PrismaTeacherAddressRepository,
     },
     {
-      provide: TeacherPositionRepository,
+      provide: ITeacherPositionRepository,
       useClass: PrismaTeacherPositionRepository,
     },
-    ExcelTeacherParser,
+    { provide: ExcelTeacherParser, useClass: ExcelTeacherParserConcrete },
     CreateTeacherUseCase,
     DeleteTeacherUseCase,
     GetTeacherByIdUseCase,
@@ -57,9 +58,9 @@ import { TeacherPositionUseCase } from './use-cases/teacher-position.use-case.js
     TeacherPositionUseCase,
   ],
   exports: [
-    TeacherRepository,
-    TeacherAddressRepository,
-    TeacherPositionRepository,
+    ITeacherRepository,
+    ITeacherAddressRepository,
+    ITeacherPositionRepository,
   ],
 })
 export class TeacherModule {}

@@ -1,13 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { Position, TeacherPosition } from '@prisma/client';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
+import { ITeacherPositionRepository } from '../../domain/interfaces/teacher-position-repository.interface.js';
+import type {
+  CreateTeacherPositionRepositoryInput,
+  UpdateTeacherPositionRepositoryInput,
+} from '../../domain/interfaces/teacher-position-repository.interface.js';
 import {
-  ITeacherPositionRepository,
   TEACHER_POSITION_INCLUDE,
   TeacherPositionWithDetails,
-} from '../../domain/interfaces/teacher-position-repository.interface.js';
-import { CreateTeacherPositionDto } from '../../dto/request/create-teacher-position.dto.js';
-import { UpdateTeacherPositionDto } from '../../dto/request/update-teacher-position.dto.js';
+} from './prisma-teacher.includes.js';
 
 @Injectable()
 export class PrismaTeacherPositionRepository extends ITeacherPositionRepository {
@@ -15,7 +17,9 @@ export class PrismaTeacherPositionRepository extends ITeacherPositionRepository 
     super();
   }
 
-  async findAll(teacherId: string): Promise<TeacherPositionWithDetails[]> {
+  async findByTeacherId(
+    teacherId: string,
+  ): Promise<TeacherPositionWithDetails[]> {
     return this.prisma.teacherPosition.findMany({
       where: { teacherId, position: { isActive: true } },
       include: TEACHER_POSITION_INCLUDE,
@@ -23,34 +27,33 @@ export class PrismaTeacherPositionRepository extends ITeacherPositionRepository 
     });
   }
 
-  async findLinkById(
+  async findById(
     teacherId: string,
-    linkId: string,
-  ): Promise<TeacherPosition | null> {
+    positionId: string,
+  ): Promise<TeacherPositionWithDetails | null> {
     return this.prisma.teacherPosition.findFirst({
-      where: { id: linkId, teacherId },
+      where: { id: positionId, teacherId },
+      include: TEACHER_POSITION_INCLUDE,
     });
   }
 
-  async findPosition(positionId: string): Promise<Position | null> {
+  async findByTeacherAndPosition(
+    teacherId: string,
+    positionId: string,
+  ): Promise<TeacherPositionWithDetails | null> {
+    return this.prisma.teacherPosition.findFirst({
+      where: { teacherId, positionId },
+      include: TEACHER_POSITION_INCLUDE,
+    });
+  }
+
+  async findPositionById(positionId: string): Promise<Position | null> {
     return this.prisma.position.findUnique({ where: { id: positionId } });
   }
 
-  async findAssignment(
+  async create(
     teacherId: string,
-    positionId: string,
-    hireDate: Date,
-  ): Promise<TeacherPosition | null> {
-    return this.prisma.teacherPosition.findUnique({
-      where: {
-        teacherId_positionId_hireDate: { teacherId, positionId, hireDate },
-      },
-    });
-  }
-
-  async assign(
-    teacherId: string,
-    dto: CreateTeacherPositionDto,
+    dto: CreateTeacherPositionRepositoryInput,
   ): Promise<TeacherPositionWithDetails> {
     return this.prisma.$transaction(async (tx) => {
       if (dto.isPrimary) {
@@ -63,7 +66,7 @@ export class PrismaTeacherPositionRepository extends ITeacherPositionRepository 
         data: {
           teacherId,
           positionId: dto.positionId,
-          hireDate: new Date(dto.hireDate),
+          hireDate: dto.hireDate,
           isPrimary: dto.isPrimary ?? false,
         },
         include: TEACHER_POSITION_INCLUDE,
@@ -73,20 +76,20 @@ export class PrismaTeacherPositionRepository extends ITeacherPositionRepository 
 
   async update(
     teacherId: string,
-    linkId: string,
-    dto: UpdateTeacherPositionDto,
+    positionId: string,
+    dto: UpdateTeacherPositionRepositoryInput,
   ): Promise<TeacherPositionWithDetails> {
     return this.prisma.$transaction(async (tx) => {
       if (dto.isPrimary) {
         await tx.teacherPosition.updateMany({
-          where: { teacherId, isPrimary: true, NOT: { id: linkId } },
+          where: { teacherId, isPrimary: true, NOT: { id: positionId } },
           data: { isPrimary: false },
         });
       }
       return tx.teacherPosition.update({
-        where: { id: linkId },
+        where: { id: positionId },
         data: {
-          ...(dto.hireDate && { hireDate: new Date(dto.hireDate) }),
+          ...(dto.hireDate && { hireDate: dto.hireDate }),
           ...(dto.isPrimary !== undefined && { isPrimary: dto.isPrimary }),
         },
         include: TEACHER_POSITION_INCLUDE,
@@ -94,9 +97,12 @@ export class PrismaTeacherPositionRepository extends ITeacherPositionRepository 
     });
   }
 
-  async remove(linkId: string): Promise<TeacherPosition> {
+  async softDelete(
+    teacherId: string,
+    positionId: string,
+  ): Promise<TeacherPosition> {
     return this.prisma.teacherPosition.update({
-      where: { id: linkId },
+      where: { id: positionId },
       data: { deletedAt: new Date() },
     });
   }

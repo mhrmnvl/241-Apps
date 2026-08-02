@@ -1,44 +1,64 @@
-import { Prisma, Semester, SemesterType } from '@prisma/client';
-import { SemesterQueryDto } from '../../dto/request/semester-query.dto.js';
-import { PaginatedResult } from '../../../../shared/domain/interfaces/repository.interface.js';
+import {
+  PaginatedResult,
+  PaginationQueryInput,
+} from '../../../../shared/domain/interfaces/repository.interface.js';
+import { SemesterEntity } from '../entities/semester.entity.js';
+import { SemesterWithDetails } from '../entities/semester.entity.js';
 
-export const SEMESTER_INCLUDE = {
-  academicYear: { select: { id: true, name: true } },
-  type: { select: { id: true, name: true } },
-} satisfies Prisma.SemesterInclude;
+export type { SemesterWithDetails };
 
-export type SemesterWithDetails = Prisma.SemesterGetPayload<{
-  include: typeof SEMESTER_INCLUDE;
-}>;
+export interface SemesterTypeRow {
+  id: string;
+  name: string;
+  isActive?: boolean;
+}
+
+export interface SemesterQueryInput extends PaginationQueryInput {
+  search?: string;
+  academicYearId?: string;
+  isActive?: boolean;
+}
 
 export interface CreateSemesterRepositoryInput {
   academicYearId: string;
   typeId: string;
-  isActive: boolean;
   startDate?: Date;
   endDate?: Date;
+  isActive?: boolean;
+}
+
+export interface UpdateSemesterRepositoryInput {
+  academicYearId?: string;
+  typeId?: string;
+  /** `null` clears the date; `undefined` leaves it untouched. */
+  startDate?: Date | null;
+  endDate?: Date | null;
+  isActive?: boolean;
 }
 
 export abstract class ISemesterRepository {
   abstract findAll(
-    query: SemesterQueryDto,
+    query: SemesterQueryInput,
   ): Promise<PaginatedResult<SemesterWithDetails>>;
   abstract findById(id: string): Promise<SemesterWithDetails | null>;
   abstract findActive(): Promise<SemesterWithDetails | null>;
+  abstract findTypeById(id: string): Promise<SemesterTypeRow | null>;
   abstract findByAcademicYearAndType(
     academicYearId: string,
     typeId: string,
-  ): Promise<Semester | null>;
+    excludeId?: string,
+  ): Promise<SemesterEntity | null>;
   abstract create(
-    data: CreateSemesterRepositoryInput,
+    input: CreateSemesterRepositoryInput,
   ): Promise<SemesterWithDetails>;
   abstract update(
     id: string,
-    data: Prisma.SemesterUpdateInput,
+    input: UpdateSemesterRepositoryInput,
   ): Promise<SemesterWithDetails>;
-  abstract deactivateAll(): Promise<Prisma.BatchPayload>;
+  abstract remove(id: string): Promise<SemesterEntity>;
+  abstract deactivateAllActive(excludeId?: string): Promise<{ count: number }>;
   abstract activateById(id: string): Promise<SemesterWithDetails>;
-  abstract findTypeById(id: string): Promise<SemesterType | null>;
+  abstract deactivateAll(): Promise<{ count: number }>;
   abstract hasRelatedData(id: string): Promise<boolean>;
-  abstract softDelete(id: string): Promise<Semester>;
+  abstract softDelete(id: string): Promise<SemesterEntity>;
 }

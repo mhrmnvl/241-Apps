@@ -1,11 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { SchoolUnitSocialMedia, Prisma } from '@prisma/client';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
-import {
-  ISchoolUnitSocialMediaRepository,
-  SchoolUnitSocialMediaWithDetails,
-  SCHOOL_UNIT_SOCIAL_MEDIA_INCLUDE,
-} from '../../domain/interfaces/school-unit-social-media-repository.interface.js';
+import { ISchoolUnitSocialMediaRepository } from '../../domain/interfaces/school-unit-social-media-repository.interface.js';
+import { SchoolUnitSocialMediaEntity } from '../../domain/entities/school-unit-social-media.entity.js';
 
 @Injectable()
 export class PrismaSchoolUnitSocialMediaRepository extends ISchoolUnitSocialMediaRepository {
@@ -13,58 +9,45 @@ export class PrismaSchoolUnitSocialMediaRepository extends ISchoolUnitSocialMedi
     super();
   }
 
-  async findAll(): Promise<SchoolUnitSocialMediaWithDetails[]> {
+  async findAllBySchoolUnitId(
+    schoolUnitId: string,
+  ): Promise<SchoolUnitSocialMediaEntity[]> {
     return this.prisma.schoolUnitSocialMedia.findMany({
-      where: { deletedAt: null },
-      include: SCHOOL_UNIT_SOCIAL_MEDIA_INCLUDE,
+      where: { schoolUnitId, deletedAt: null },
     });
   }
 
-  async findByPlatform(
-    socialMediaId: string,
-  ): Promise<SchoolUnitSocialMedia | null> {
-    return this.prisma.schoolUnitSocialMedia.findFirst({
-      where: { socialMediaId, deletedAt: null },
-    });
-  }
-
-  async findById(id: string): Promise<SchoolUnitSocialMedia | null> {
+  async findById(id: string): Promise<SchoolUnitSocialMediaEntity | null> {
     return this.prisma.schoolUnitSocialMedia.findFirst({
       where: { id, deletedAt: null },
     });
   }
 
   async create(dto: {
+    schoolUnitId: string;
     socialMediaId: string;
     username?: string | null;
-  }): Promise<SchoolUnitSocialMediaWithDetails> {
-    const schoolUnit = await this.prisma.schoolUnit.findFirst({
-      where: { isActive: true, deletedAt: null },
-      select: { id: true },
-    });
-    if (!schoolUnit) throw new Error('School unit not configured');
+  }): Promise<SchoolUnitSocialMediaEntity> {
     return this.prisma.schoolUnitSocialMedia.create({
       data: {
-        schoolUnitId: schoolUnit.id,
+        schoolUnitId: dto.schoolUnitId,
         socialMediaId: dto.socialMediaId,
         username: dto.username,
       },
-      include: SCHOOL_UNIT_SOCIAL_MEDIA_INCLUDE,
     });
   }
 
   async update(
     id: string,
-    dto: Prisma.SchoolUnitSocialMediaUpdateInput,
-  ): Promise<SchoolUnitSocialMediaWithDetails> {
+    dto: { username?: string | null },
+  ): Promise<SchoolUnitSocialMediaEntity> {
     return this.prisma.schoolUnitSocialMedia.update({
       where: { id },
       data: dto,
-      include: SCHOOL_UNIT_SOCIAL_MEDIA_INCLUDE,
     });
   }
 
-  async remove(id: string): Promise<SchoolUnitSocialMedia> {
+  async remove(id: string): Promise<SchoolUnitSocialMediaEntity> {
     return this.prisma.schoolUnitSocialMedia.update({
       where: { id },
       data: { deletedAt: new Date() },

@@ -1,71 +1,59 @@
-import { Prisma, ReportCard } from '@prisma/client';
-import { ReportCardQueryDto } from '../../dto/request/report-card-query.dto.js';
-import { PaginatedResult } from '../../../../shared/domain/interfaces/repository.interface.js';
+import {
+  PaginatedResult,
+  PaginationQueryInput,
+} from '../../../../shared/domain/interfaces/repository.interface.js';
+import {
+  ReportCardEntity,
+  ReportCardWithDetails,
+} from '../entities/report-card.entity.js';
 
-export const RAPOR_INCLUDE = {
-  enrollment: {
-    include: {
-      student: {
-        include: {
-          user: { include: { profile: { select: { name: true } } } },
-        },
-      },
-      classroom: {
-        select: {
-          id: true,
-          code: true,
-          name: true,
-          grade: { select: { name: true } },
-        },
-      },
-      semester: {
-        select: {
-          id: true,
-          type: true,
-          academicYear: { select: { id: true, name: true } },
-        },
-      },
-    },
-  },
-} satisfies Prisma.ReportCardInclude;
+export type { ReportCardWithDetails };
 
-export type ReportCardWithDetails = Prisma.ReportCardGetPayload<{
-  include: typeof RAPOR_INCLUDE;
-}>;
+export interface ReportCardQueryInput extends PaginationQueryInput {
+  studentId?: string;
+  classroomId?: string;
+  semesterId?: string;
+  isPublished?: boolean;
+}
 
-export interface UpsertReportCardRepositoryInput {
+export interface CreateReportCardRepositoryInput {
   enrollmentId: string;
-  totalAverage: number | null;
+  totalAverage?: number | null;
   rank?: number | null;
   teacherNote?: string | null;
   isPublished?: boolean;
 }
 
 export interface UpdateReportCardRepositoryInput {
-  teacherNote?: string | null;
+  totalAverage?: number | null;
   rank?: number | null;
+  teacherNote?: string | null;
   isPublished?: boolean;
 }
 
 export abstract class IReportCardRepository {
   abstract findAll(
-    query: ReportCardQueryDto,
+    query: ReportCardQueryInput,
   ): Promise<PaginatedResult<ReportCardWithDetails>>;
   abstract findById(id: string): Promise<ReportCardWithDetails | null>;
   abstract findByEnrollmentId(
     enrollmentId: string,
   ): Promise<ReportCardWithDetails | null>;
-  abstract upsert(
-    data: UpsertReportCardRepositoryInput,
+  abstract create(
+    input: CreateReportCardRepositoryInput,
   ): Promise<ReportCardWithDetails>;
   abstract update(
     id: string,
-    data: UpdateReportCardRepositoryInput,
+    input: UpdateReportCardRepositoryInput,
+  ): Promise<ReportCardWithDetails>;
+  abstract remove(id: string): Promise<ReportCardEntity>;
+  abstract softDelete(id: string): Promise<ReportCardEntity>;
+  abstract upsert(
+    input: CreateReportCardRepositoryInput,
   ): Promise<ReportCardWithDetails>;
   abstract calculateAndApplyClassroomRanks(
     classroomId: string,
     semesterId: string,
-    targetEnrollmentId: string,
+    targetEnrollmentId?: string,
   ): Promise<number | null>;
-  abstract softDelete(id: string): Promise<ReportCard>;
 }

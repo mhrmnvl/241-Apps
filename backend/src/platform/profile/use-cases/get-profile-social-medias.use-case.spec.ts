@@ -1,7 +1,7 @@
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { ProfileSocialMediaRepository } from '../repositories/profile-social-media.repository.js';
-import { ProfileRepository } from '../index.js';
+import { IProfileSocialMediaRepository } from '../domain/interfaces/profile-social-media-repository.interface.js';
+import { IProfileRepository } from '../index.js';
 import { GetProfileSocialMediasUseCase } from './get-profile-social-medias.use-case.js';
 
 describe('GetProfileSocialMediasUseCase', () => {
@@ -14,9 +14,9 @@ describe('GetProfileSocialMediasUseCase', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         GetProfileSocialMediasUseCase,
-        { provide: ProfileRepository, useValue: mockProfileRepository },
+        { provide: IProfileRepository, useValue: mockProfileRepository },
         {
-          provide: ProfileSocialMediaRepository,
+          provide: IProfileSocialMediaRepository,
           useValue: mockSocialRepository,
         },
       ],

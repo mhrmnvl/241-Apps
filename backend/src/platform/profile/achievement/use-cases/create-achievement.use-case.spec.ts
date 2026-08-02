@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CreateAchievementDto } from '../dto/request/create-achievement.dto.js';
-import { AchievementRepository } from '../repositories/achievement.repository.js';
+import { IAchievementRepository } from '../domain/interfaces/achievement-repository.interface.js';
 import { CreateAchievementUseCase } from './create-achievement.use-case.js';
 
 describe('CreateAchievementUseCase', () => {
@@ -12,7 +12,7 @@ describe('CreateAchievementUseCase', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         CreateAchievementUseCase,
-        { provide: AchievementRepository, useValue: mockRepo },
+        { provide: IAchievementRepository, useValue: mockRepo },
       ],
     }).compile();
 

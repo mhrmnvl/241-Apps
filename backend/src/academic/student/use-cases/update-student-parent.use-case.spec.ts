@@ -1,7 +1,7 @@
 ﻿import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { UpdateStudentParentDto } from '../dto/request/update-student-parent.dto.js';
-import { StudentParentRepository } from '../repositories/student-parent.repository.js';
+import { IStudentParentRepository } from '../domain/interfaces/student-parent-repository.interface.js';
 import { UpdateStudentParentUseCase } from './update-student-parent.use-case.js';
 
 describe('UpdateStudentParentUseCase', () => {
@@ -17,7 +17,7 @@ describe('UpdateStudentParentUseCase', () => {
       providers: [
         UpdateStudentParentUseCase,
         {
-          provide: StudentParentRepository,
+          provide: IStudentParentRepository,
           useValue: mockStudentParentsRepository,
         },
       ],

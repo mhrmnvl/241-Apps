@@ -2,18 +2,23 @@ import { Injectable } from '@nestjs/common';
 import { Prisma, Student, User, Profile, StudentStatus } from '@prisma/client';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
 import { AccountProvisioningService } from '../../../../platform/user/index.js';
-import { CreateStudentDto } from '../../dto/request/create-student.dto.js';
-import { CreateStudentWithRelationsDto } from '../../dto/request/create-student-with-relations.dto.js';
-import { ExportStudentQueryDto } from '../../dto/request/export-student-query.dto.js';
-import { StudentQueryDto } from '../../dto/request/student-query.dto.js';
-import { UpdateStudentDto } from '../../dto/request/update-student.dto.js';
+import type {
+  StudentQueryInput,
+  ExportStudentQueryInput,
+  CreateStudentRepositoryInput,
+  UpdateStudentRepositoryInput,
+  CreateStudentWithRelationsRepositoryInput,
+} from '../../domain/interfaces/student-repository.interface.js';
 import {
   IStudentRepository,
-  STUDENT_INCLUDE,
-  StudentWithDetails,
   CreateStudentResult,
 } from '../../domain/interfaces/student-repository.interface.js';
-import { UpdateProfileDto } from '../../../../platform/profile/index.js';
+import {
+  STUDENT_DETAIL_INCLUDE,
+  STUDENT_LIST_INCLUDE,
+  StudentWithDetails,
+} from './prisma-student.includes.js';
+import type { ProfileUpdateInput } from '../../../../platform/profile/domain/entities/profile.entity.js';
 import { PaginatedResult } from '../../../../shared/domain/interfaces/repository.interface.js';
 
 @Injectable()
@@ -33,7 +38,7 @@ export class PrismaStudentRepository extends IStudentRepository {
   }
 
   async findAll(
-    query: StudentQueryDto,
+    query: StudentQueryInput,
   ): Promise<PaginatedResult<StudentWithDetails>> {
     const {
       page = 1,
@@ -81,7 +86,7 @@ export class PrismaStudentRepository extends IStudentRepository {
     const [data, total] = await Promise.all([
       this.prisma.student.findMany({
         where,
-        include: STUDENT_INCLUDE,
+        include: STUDENT_LIST_INCLUDE,
         skip,
         take: limit,
         orderBy: [
@@ -96,7 +101,7 @@ export class PrismaStudentRepository extends IStudentRepository {
   }
 
   async findAllForExport(
-    filters: ExportStudentQueryDto,
+    filters: ExportStudentQueryInput,
   ): Promise<StudentWithDetails[]> {
     const { search, classroomId, isActive } = filters;
 
@@ -123,7 +128,7 @@ export class PrismaStudentRepository extends IStudentRepository {
 
     return this.prisma.student.findMany({
       where,
-      include: STUDENT_INCLUDE,
+      include: STUDENT_LIST_INCLUDE,
       orderBy: { user: { profile: { name: 'asc' } } },
     });
   }
@@ -134,7 +139,7 @@ export class PrismaStudentRepository extends IStudentRepository {
         id,
         deletedAt: null,
       },
-      include: STUDENT_INCLUDE,
+      include: STUDENT_DETAIL_INCLUDE,
     });
   }
 
@@ -174,7 +179,7 @@ export class PrismaStudentRepository extends IStudentRepository {
   }
 
   async create(
-    dto: CreateStudentDto,
+    dto: CreateStudentRepositoryInput,
     passwordHash: string,
   ): Promise<CreateStudentResult> {
     return this.prisma.$transaction(async (tx) => {
@@ -233,11 +238,14 @@ export class PrismaStudentRepository extends IStudentRepository {
     });
   }
 
-  async update(id: string, dto: UpdateStudentDto): Promise<StudentWithDetails> {
+  async update(
+    id: string,
+    dto: UpdateStudentRepositoryInput,
+  ): Promise<StudentWithDetails> {
     return this.prisma.student.update({
       where: { id },
       data: dto,
-      include: STUDENT_INCLUDE,
+      include: STUDENT_DETAIL_INCLUDE,
     });
   }
 
@@ -248,7 +256,7 @@ export class PrismaStudentRepository extends IStudentRepository {
     return this.prisma.student.update({
       where: { id },
       data: { status },
-      include: STUDENT_INCLUDE,
+      include: STUDENT_DETAIL_INCLUDE,
     });
   }
 
@@ -269,7 +277,7 @@ export class PrismaStudentRepository extends IStudentRepository {
 
   async updateProfile(
     id: string,
-    dto: UpdateProfileDto,
+    data: ProfileUpdateInput,
   ): Promise<Profile | null> {
     const student = await this.prisma.student.findFirst({
       where: { id, deletedAt: null },
@@ -278,10 +286,7 @@ export class PrismaStudentRepository extends IStudentRepository {
     if (!student) return null;
     return this.prisma.profile.update({
       where: { userId: student.userId },
-      data: {
-        ...dto,
-        ...(dto.birthDate && { birthDate: new Date(dto.birthDate) }),
-      },
+      data,
     });
   }
 
@@ -317,7 +322,7 @@ export class PrismaStudentRepository extends IStudentRepository {
   }
 
   async createWithRelations(
-    dto: CreateStudentWithRelationsDto,
+    dto: CreateStudentWithRelationsRepositoryInput,
     passwordHash: string,
   ): Promise<StudentWithDetails> {
     return this.prisma.$transaction(async (tx) => {
@@ -393,7 +398,7 @@ export class PrismaStudentRepository extends IStudentRepository {
       // 4. Return full student with details
       return tx.student.findUniqueOrThrow({
         where: { id: student.id },
-        include: STUDENT_INCLUDE,
+        include: STUDENT_DETAIL_INCLUDE,
       });
     });
   }

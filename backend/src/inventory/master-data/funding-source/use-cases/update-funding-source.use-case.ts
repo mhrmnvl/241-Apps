@@ -4,14 +4,16 @@ import { UpdateFundingSourceDto } from '../dto/request/update-funding-source.dto
 
 @Injectable()
 export class UpdateFundingSourceUseCase {
-  constructor(private readonly repository: IFundingSourceRepository) {}
+  constructor(
+    private readonly fundingSourceRepository: IFundingSourceRepository,
+  ) {}
 
   async execute(id: string, dto: UpdateFundingSourceDto) {
-    const fundingSource = await this.repository.findById(id);
+    const fundingSource = await this.fundingSourceRepository.findById(id);
     if (!fundingSource) {
       throw new NotFoundException(`Funding Source with ID ${id} not found`);
     }
-    return this.repository.update(id, {
+    return this.fundingSourceRepository.update(id, {
       code: dto.code,
       name: dto.name,
       description: dto.description ?? null,

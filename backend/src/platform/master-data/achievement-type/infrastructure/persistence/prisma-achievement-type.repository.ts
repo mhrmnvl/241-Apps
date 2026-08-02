@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { AchievementType, Prisma } from '@prisma/client';
 import { PrismaService } from '../../../../../core/database/prisma.service.js';
-import { AchievementTypeQueryDto } from '../../dto/request/achievement-type-query.dto.js';
+import { AchievementTypeQueryInput } from '../../domain/interfaces/achievement-type-repository.interface.js';
 import { IAchievementTypeRepository } from '../../domain/interfaces/achievement-type-repository.interface.js';
 import { PaginatedResult } from '../../../../../shared/domain/interfaces/repository.interface.js';
 
@@ -12,7 +12,7 @@ export class PrismaAchievementTypeRepository extends IAchievementTypeRepository 
   }
 
   async findAll(
-    query: AchievementTypeQueryDto,
+    query: AchievementTypeQueryInput,
   ): Promise<PaginatedResult<AchievementType>> {
     const { page = 1, limit = 10, search, isActive } = query;
     const skip = (page - 1) * limit;

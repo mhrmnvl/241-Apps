@@ -1,6 +1,6 @@
 import { ConflictException, Injectable, Logger } from '@nestjs/common';
 import { CreateUserDto } from '../dto/request/create-user.dto.js';
-import { IUserRepository } from '../interfaces/user-repository.interface.js';
+import { IUserRepository } from '../domain/interfaces/user-repository.interface.js';
 import { hashPassword } from '../../../shared/utils/hash.helper.js';
 
 @Injectable()

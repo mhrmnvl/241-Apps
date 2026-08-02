@@ -1,2 +1,2 @@
-export * from './repositories/schedule.repository.js';
-export * from './repositories/time-slot.repository.js';
+export * from './domain/interfaces/schedule-repository.interface.js';
+export * from './domain/interfaces/time-slot-repository.interface.js';

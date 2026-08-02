@@ -7,10 +7,10 @@ import { DeleteClassroomSupervisorUseCase } from '../use-cases/delete-classroom-
 import { GetClassroomSupervisorByIdUseCase } from '../use-cases/get-classroom-supervisor-by-id.use-case.js';
 import { GetClassroomSupervisorsUseCase } from '../use-cases/get-classroom-supervisors.use-case.js';
 import { UpdateClassroomSupervisorUseCase } from '../use-cases/update-classroom-supervisor.use-case.js';
-import { ClassroomSupervisorsController } from './classroom-supervisors.controller.js';
+import { ClassroomSupervisorController } from './classroom-supervisor.controller.js';
 
-describe('ClassroomSupervisorsController', () => {
-  let controller: ClassroomSupervisorsController;
+describe('ClassroomSupervisorController', () => {
+  let controller: ClassroomSupervisorController;
 
   const mockGetAll = { execute: jest.fn() };
   const mockGetById = { execute: jest.fn() };
@@ -20,7 +20,7 @@ describe('ClassroomSupervisorsController', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [ClassroomSupervisorsController],
+      controllers: [ClassroomSupervisorController],
       providers: [
         { provide: GetClassroomSupervisorsUseCase, useValue: mockGetAll },
         { provide: GetClassroomSupervisorByIdUseCase, useValue: mockGetById },
@@ -30,8 +30,8 @@ describe('ClassroomSupervisorsController', () => {
       ],
     }).compile();
 
-    controller = module.get<ClassroomSupervisorsController>(
-      ClassroomSupervisorsController,
+    controller = module.get<ClassroomSupervisorController>(
+      ClassroomSupervisorController,
     );
     jest.clearAllMocks();
   });

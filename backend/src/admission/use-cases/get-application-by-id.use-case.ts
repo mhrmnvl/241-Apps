@@ -4,20 +4,27 @@ import { serializeApplicationDetail } from '../domain/admission.serializers.js';
 
 @Injectable()
 export class GetApplicationByIdUseCase {
-  constructor(private readonly repository: IAdmissionApplicationRepository) {}
+  constructor(
+    private readonly admissionApplicationRepository: IAdmissionApplicationRepository,
+  ) {}
 
   async execute(id: string) {
-    const application = await this.repository.findAdminDetailById(id);
+    const application =
+      await this.admissionApplicationRepository.findAdminDetailById(id);
     if (!application) {
       throw new NotFoundException('Data pendaftaran tidak ditemukan');
     }
 
     // Duplicate-NIK warning for admins (NIK is intentionally not unique here).
     const duplicateNikCount = application.nik
-      ? await this.repository.countByNik(application.nik, application.id)
+      ? await this.admissionApplicationRepository.countByNik(
+          application.nik,
+          application.id,
+        )
       : 0;
 
-    const documentTypes = await this.repository.findActiveDocumentTypes();
+    const documentTypes =
+      await this.admissionApplicationRepository.findActiveDocumentTypes();
 
     return {
       ...serializeApplicationDetail(application),

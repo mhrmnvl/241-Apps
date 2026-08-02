@@ -3,10 +3,12 @@ import { IAcademicYearRepository } from '../domain/interfaces/academic-year-repo
 
 @Injectable()
 export class GetAcademicYearByIdUseCase {
-  constructor(private readonly repository: IAcademicYearRepository) {}
+  constructor(
+    private readonly academicYearRepository: IAcademicYearRepository,
+  ) {}
 
   async execute(id: string) {
-    const year = await this.repository.findById(id);
+    const year = await this.academicYearRepository.findById(id);
     if (!year) {
       throw new NotFoundException(`Academic Year with ID ${id} not found`);
     }

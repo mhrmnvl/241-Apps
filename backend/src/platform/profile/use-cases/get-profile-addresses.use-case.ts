@@ -1,12 +1,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { ProfileRepository } from '../index.js';
-import { ProfileAddressRepository } from '../repositories/profile-address.repository.js';
+import { IProfileRepository } from '../index.js';
+import { IProfileAddressRepository } from '../domain/interfaces/profile-address-repository.interface.js';
 
 @Injectable()
 export class GetProfileAddressesUseCase {
   constructor(
-    private readonly profileRepository: ProfileRepository,
-    private readonly addressRepository: ProfileAddressRepository,
+    private readonly profileRepository: IProfileRepository,
+    private readonly addressRepository: IProfileAddressRepository,
   ) {}
 
   async execute(userId: string) {

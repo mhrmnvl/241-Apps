@@ -1,14 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import { SchoolUnitTypeQueryInput } from '../domain/interfaces/school-unit-types-repository.interface.js';
-import { SchoolUnitTypeRepository } from '../repositories/school-unit-types.repository.js';
+import { ISchoolUnitTypeRepository } from '../domain/interfaces/school-unit-type-repository.interface.js';
 
 @Injectable()
 export class GetSchoolUnitTypesUseCase {
   constructor(
-    private readonly schoolUnitTypeRepository: SchoolUnitTypeRepository,
+    private readonly schoolUnitTypeRepository: ISchoolUnitTypeRepository,
   ) {}
 
-  async execute(query: SchoolUnitTypeQueryInput) {
-    return this.schoolUnitTypeRepository.findAll(query);
+  async execute() {
+    return this.schoolUnitTypeRepository.findAll();
   }
 }

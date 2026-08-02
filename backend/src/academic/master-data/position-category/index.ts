@@ -1,5 +1,5 @@
 export * from './position-category.module.js';
-export { IPositionCategoryRepository } from './interfaces/position-category-repository.interface.js';
+export { IPositionCategoryRepository } from './domain/interfaces/position-category-repository.interface.js';
 export * from './use-cases/create-position-category.use-case.js';
 export * from './use-cases/get-position-categories.use-case.js';
 export * from './use-cases/get-position-category-by-id.use-case.js';

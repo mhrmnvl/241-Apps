@@ -3,10 +3,10 @@ import { IBloodTypeRepository } from '../domain/interfaces/blood-type-repository
 
 @Injectable()
 export class GetBloodTypeByIdUseCase {
-  constructor(private readonly repository: IBloodTypeRepository) {}
+  constructor(private readonly bloodTypeRepository: IBloodTypeRepository) {}
 
   async execute(id: string) {
-    const item = await this.repository.findById(id);
+    const item = await this.bloodTypeRepository.findById(id);
     if (!item) {
       throw new NotFoundException('BloodType with ID ${id} not found');
     }

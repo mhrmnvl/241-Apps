@@ -1,7 +1,7 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { ClassroomRepository } from '../../classroom/index.js';
+import { IClassroomRepository } from '../../classroom/index.js';
 import { UpdateEventDto } from '../dto/request/update-event.dto.js';
-import { IEventRepository } from '../domain/interfaces/events-repository.interface.js';
+import { IEventRepository } from '../domain/interfaces/event-repository.interface.js';
 
 @Injectable()
 export class UpdateEventUseCase {
@@ -9,7 +9,7 @@ export class UpdateEventUseCase {
 
   constructor(
     private readonly eventRepository: IEventRepository,
-    private readonly ClassroomRepository: ClassroomRepository,
+    private readonly ClassroomRepository: IClassroomRepository,
   ) {}
 
   async execute(id: string, dto: UpdateEventDto) {
@@ -27,7 +27,12 @@ export class UpdateEventUseCase {
       }
     }
 
-    const updated = await this.eventRepository.update(id, dto);
+    const { startTime, endTime, ...rest } = dto;
+    const updated = await this.eventRepository.update(id, {
+      ...rest,
+      ...(startTime !== undefined && { startTime: new Date(startTime) }),
+      ...(endTime !== undefined && { endTime: new Date(endTime) }),
+    });
     this.logger.log(`Event updated: ${id}`);
     return updated;
   }

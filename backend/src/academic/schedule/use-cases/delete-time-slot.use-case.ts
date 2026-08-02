@@ -10,12 +10,12 @@ import { ITimeSlotRepository } from '../domain/interfaces/time-slot-repository.i
 export class DeleteTimeSlotUseCase {
   private readonly logger = new Logger(DeleteTimeSlotUseCase.name);
 
-  constructor(private readonly repository: ITimeSlotRepository) {}
+  constructor(private readonly timeSlotRepository: ITimeSlotRepository) {}
 
   async execute(id: string): Promise<void> {
     const [ts, inUse] = await Promise.all([
-      this.repository.findById(id),
-      this.repository.countSchedulesUsing(id),
+      this.timeSlotRepository.findById(id),
+      this.timeSlotRepository.countSchedulesUsing(id),
     ]);
 
     if (!ts) throw new NotFoundException(`TimeSlot with ID ${id} not found`);
@@ -25,7 +25,7 @@ export class DeleteTimeSlotUseCase {
         `TimeSlot is still used by ${inUse} active lesson(s) and cannot be deleted`,
       );
 
-    await this.repository.remove(id);
+    await this.timeSlotRepository.remove(id);
     this.logger.log(`TimeSlot deleted: ${id}`);
   }
 }

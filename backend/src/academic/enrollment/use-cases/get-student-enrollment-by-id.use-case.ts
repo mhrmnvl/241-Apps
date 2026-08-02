@@ -3,9 +3,9 @@ import { IEnrollmentRepository } from '../domain/interfaces/enrollment-repositor
 
 @Injectable()
 export class GetStudentEnrollmentByIdUseCase {
-  constructor(private readonly repository: IEnrollmentRepository) {}
+  constructor(private readonly enrollmentRepository: IEnrollmentRepository) {}
   async execute(id: string) {
-    const enrollment = await this.repository.findById(id);
+    const enrollment = await this.enrollmentRepository.findById(id);
     if (!enrollment) {
       throw new NotFoundException(`StudentEnrollment ${id} not found`);
     }

@@ -3,10 +3,10 @@ import { IGradeRepository } from '../domain/interfaces/grade-repository.interfac
 
 @Injectable()
 export class GetGradeByIdUseCase {
-  constructor(private readonly repository: IGradeRepository) {}
+  constructor(private readonly gradeRepository: IGradeRepository) {}
 
   async execute(id: string) {
-    const level = await this.repository.findById(id);
+    const level = await this.gradeRepository.findById(id);
     if (!level) {
       throw new NotFoundException(`Classroom level with ID ${id} not found`);
     }

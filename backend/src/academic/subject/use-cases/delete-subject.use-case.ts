@@ -5,14 +5,14 @@ import { ISubjectRepository } from '../domain/interfaces/subject-repository.inte
 export class DeleteSubjectUseCase {
   private readonly logger = new Logger(DeleteSubjectUseCase.name);
 
-  constructor(private readonly repository: ISubjectRepository) {}
+  constructor(private readonly subjectRepository: ISubjectRepository) {}
 
   async execute(id: string): Promise<void> {
-    const subject = await this.repository.findById(id);
+    const subject = await this.subjectRepository.findById(id);
     if (!subject)
       throw new NotFoundException(`Subject with ID ${id} not found`);
 
-    await this.repository.remove(id);
+    await this.subjectRepository.remove(id);
     this.logger.log(`Subject hard-deleted: ${id}`);
   }
 }
