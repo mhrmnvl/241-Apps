@@ -1,4 +1,5 @@
 import 'vue-router'
+import type { BreadcrumbItemType } from './breadcrumb.types'
 
 export type UserRole = string
 
@@ -17,5 +18,13 @@ declare module 'vue-router' {
      */
     requiredPermission?: string
     title?: string
+    /**
+     * Breadcrumb trail for this route, rendered by the app shell.
+     *
+     * Static trails belong here. A view whose trail depends on data it fetches
+     * cannot state it up front and should call `useBreadcrumbs()` instead, which
+     * overrides this for as long as the view is mounted.
+     */
+    breadcrumbs?: BreadcrumbItemType[]
   }
 }

@@ -2,7 +2,6 @@
 import { computed, h, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { watchDebounced } from '@vueuse/core'
-import AppLayout from '@/layouts/AppLayout.vue'
 import { DataTable } from '@/ui'
 import { Button } from '@/ui/button'
 import { Card, CardHeader, CardTitle } from '@/ui/card'
@@ -32,11 +31,6 @@ const statusFilter = ref<'ALL' | AdmissionStatus>('ALL')
 const waveFilter = ref<string>('ALL')
 const page = ref(1)
 const limit = 20
-
-const breadcrumbs = [
-  { title: 'Admin PSB', href: '/admin' },
-  { title: 'Daftar Pendaftar' },
-]
 
 const columns = computed<ColumnDef<AdmissionApplicationListItem>[]>(() => [
   {
@@ -131,97 +125,95 @@ function goToPage(target: number) {
 </script>
 
 <template>
-  <AppLayout :breadcrumbs="breadcrumbs">
-    <div class="p-4 sm:p-6">
-      <Card
-        class="overflow-hidden rounded-2xl shadow-sm shadow-black/5 ring-1 ring-black/4"
-      >
-        <CardHeader class="border-b px-6 py-5">
-          <div class="flex flex-wrap items-center justify-between gap-3">
-            <CardTitle class="text-xl font-bold tracking-tight"
-              >Daftar Pendaftar ({{ total }})</CardTitle
-            >
-            <div class="flex flex-wrap items-center gap-2">
-              <div class="relative">
-                <Search
-                  class="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground"
-                />
-                <Input
-                  v-model="searchQuery"
-                  placeholder="Cari nama / no. pendaftaran…"
-                  class="w-64 pl-8"
-                />
-              </div>
-              <Select
-                v-model="statusFilter"
-                @update:model-value="onFilterChange"
-              >
-                <SelectTrigger class="w-48">
-                  <SelectValue placeholder="Semua Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="ALL">Semua Status</SelectItem>
-                  <SelectItem
-                    v-for="(label, status) in STATUS_LABELS"
-                    :key="status"
-                    :value="status"
-                  >
-                    {{ label }}
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-              <Select
-                v-model="waveFilter"
-                @update:model-value="onFilterChange"
-              >
-                <SelectTrigger class="w-44">
-                  <SelectValue placeholder="Semua Gelombang" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="ALL">Semua Gelombang</SelectItem>
-                  <SelectItem
-                    v-for="wave in waves"
-                    :key="wave.id"
-                    :value="wave.id"
-                  >
-                    {{ wave.name }}
-                  </SelectItem>
-                </SelectContent>
-              </Select>
+  <div class="p-4 sm:p-6">
+    <Card
+      class="overflow-hidden rounded-2xl shadow-sm shadow-black/5 ring-1 ring-black/4"
+    >
+      <CardHeader class="border-b px-6 py-5">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <CardTitle class="text-xl font-bold tracking-tight"
+            >Daftar Pendaftar ({{ total }})</CardTitle
+          >
+          <div class="flex flex-wrap items-center gap-2">
+            <div class="relative">
+              <Search
+                class="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground"
+              />
+              <Input
+                v-model="searchQuery"
+                placeholder="Cari nama / no. pendaftaran…"
+                class="w-64 pl-8"
+              />
             </div>
-          </div>
-        </CardHeader>
-
-        <div class="p-6 space-y-4">
-          <DataTable
-            :columns="columns"
-            :data="applications"
-            :is-loading="loading"
-            hide-pagination
-            item-label="pendaftar"
-          />
-
-          <div class="flex items-center justify-end gap-2 text-sm">
-            <Button
-              variant="outline"
-              size="sm"
-              :disabled="page <= 1"
-              @click="goToPage(page - 1)"
+            <Select
+              v-model="statusFilter"
+              @update:model-value="onFilterChange"
             >
-              Sebelumnya
-            </Button>
-            <span>Hal. {{ page }} / {{ totalPages }}</span>
-            <Button
-              variant="outline"
-              size="sm"
-              :disabled="page >= totalPages"
-              @click="goToPage(page + 1)"
+              <SelectTrigger class="w-48">
+                <SelectValue placeholder="Semua Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL">Semua Status</SelectItem>
+                <SelectItem
+                  v-for="(label, status) in STATUS_LABELS"
+                  :key="status"
+                  :value="status"
+                >
+                  {{ label }}
+                </SelectItem>
+              </SelectContent>
+            </Select>
+            <Select
+              v-model="waveFilter"
+              @update:model-value="onFilterChange"
             >
-              Berikutnya
-            </Button>
+              <SelectTrigger class="w-44">
+                <SelectValue placeholder="Semua Gelombang" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL">Semua Gelombang</SelectItem>
+                <SelectItem
+                  v-for="wave in waves"
+                  :key="wave.id"
+                  :value="wave.id"
+                >
+                  {{ wave.name }}
+                </SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
-      </Card>
-    </div>
-  </AppLayout>
+      </CardHeader>
+
+      <div class="p-6 space-y-4">
+        <DataTable
+          :columns="columns"
+          :data="applications"
+          :is-loading="loading"
+          hide-pagination
+          item-label="pendaftar"
+        />
+
+        <div class="flex items-center justify-end gap-2 text-sm">
+          <Button
+            variant="outline"
+            size="sm"
+            :disabled="page <= 1"
+            @click="goToPage(page - 1)"
+          >
+            Sebelumnya
+          </Button>
+          <span>Hal. {{ page }} / {{ totalPages }}</span>
+          <Button
+            variant="outline"
+            size="sm"
+            :disabled="page >= totalPages"
+            @click="goToPage(page + 1)"
+          >
+            Berikutnya
+          </Button>
+        </div>
+      </div>
+    </Card>
+  </div>
 </template>

@@ -1,7 +1,7 @@
 // Public surface of the admission feature (mirrors the per-feature barrel
 // convention used across the academic app).
 
-export { admissionRoutes } from './routes'
+export { admissionPublicRoutes, admissionRoutes } from './routes'
 export { admissionApi } from './api/admissionApi'
 
 // Composables
