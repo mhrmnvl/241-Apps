@@ -9,6 +9,10 @@ export const inventoryRoutes: RouteRecordRaw[] = [
       requiresAuth: true,
       title: 'Daftar Aset',
       description: 'Kelola dan pantau seluruh data aset sekolah.',
+      breadcrumbs: [
+        { title: 'Inventaris', href: '#' },
+        { title: 'Daftar Aset' },
+      ],
     },
   },
   {
@@ -19,6 +23,11 @@ export const inventoryRoutes: RouteRecordRaw[] = [
       requiresAuth: true,
       title: 'Tambah Aset',
       description: 'Tambah data aset logistik sekolah baru.',
+      breadcrumbs: [
+        { title: 'Inventaris', href: '/inventory/assets' },
+        { title: 'Daftar Aset', href: '/inventory/assets' },
+        { title: 'Tambah Aset' },
+      ],
     },
   },
   {
@@ -29,6 +38,11 @@ export const inventoryRoutes: RouteRecordRaw[] = [
       requiresAuth: true,
       title: 'Ubah Detail Aset',
       description: 'Sesuaikan detail data aset logistik sekolah.',
+      breadcrumbs: [
+        { title: 'Inventaris', href: '/inventory/assets' },
+        { title: 'Daftar Aset', href: '/inventory/assets' },
+        { title: 'Ubah Detail Aset' },
+      ],
     },
   },
   {
@@ -39,6 +53,10 @@ export const inventoryRoutes: RouteRecordRaw[] = [
       requiresAuth: true,
       title: 'Cetak Label',
       description: 'Pilih aset dan cetak label unit untuk ditempel.',
+      breadcrumbs: [
+        { title: 'Inventaris', href: '#' },
+        { title: 'Cetak Label' },
+      ],
     },
   },
   {
@@ -49,6 +67,10 @@ export const inventoryRoutes: RouteRecordRaw[] = [
       requiresAuth: true,
       title: 'Kategori Aset',
       description: 'Klasifikasikan aset berdasarkan kategori.',
+      breadcrumbs: [
+        { title: 'Referensi', href: '#' },
+        { title: 'Kategori Aset', href: '/inventory/categories' },
+      ],
     },
   },
   {
@@ -59,6 +81,10 @@ export const inventoryRoutes: RouteRecordRaw[] = [
       requiresAuth: true,
       title: 'Sumber Dana',
       description: 'Kelola data asal-usul sumber dana pembelian aset.',
+      breadcrumbs: [
+        { title: 'Referensi', href: '#' },
+        { title: 'Sumber Dana', href: '/inventory/funding-sources' },
+      ],
     },
   },
   {
@@ -69,6 +95,10 @@ export const inventoryRoutes: RouteRecordRaw[] = [
       requiresAuth: true,
       title: 'Daftar Lokasi',
       description: 'Kelola lokasi dan ruangan penempatan aset.',
+      breadcrumbs: [
+        { title: 'Referensi', href: '#' },
+        { title: 'Daftar Lokasi', href: '/inventory/locations' },
+      ],
     },
   },
   {
@@ -79,6 +109,10 @@ export const inventoryRoutes: RouteRecordRaw[] = [
       requiresAuth: true,
       title: 'Kondisi Aset',
       description: 'Pantau status kelayakan dan kondisi fisik aset.',
+      breadcrumbs: [
+        { title: 'Referensi', href: '#' },
+        { title: 'Kondisi Aset', href: '/inventory/conditions' },
+      ],
     },
   },
   {
@@ -89,6 +123,10 @@ export const inventoryRoutes: RouteRecordRaw[] = [
       requiresAuth: true,
       title: 'Status Aset',
       description: 'Pantau status transaksi peminjaman aset.',
+      breadcrumbs: [
+        { title: 'Referensi', href: '#' },
+        { title: 'Status Aset', href: '/inventory/statuses' },
+      ],
     },
   },
   {
@@ -99,6 +137,10 @@ export const inventoryRoutes: RouteRecordRaw[] = [
       requiresAuth: true,
       title: 'Transaksi Pinjam',
       description: 'Kelola peminjaman dan pengembalian aset sekolah.',
+      breadcrumbs: [
+        { title: 'Inventaris', href: '#' },
+        { title: 'Transaksi Peminjaman' },
+      ],
     },
   },
   {
@@ -109,6 +151,11 @@ export const inventoryRoutes: RouteRecordRaw[] = [
       requiresAuth: true,
       title: 'Pinjam Aset',
       description: 'Ajukan permohonan peminjaman logistik sekolah baru.',
+      breadcrumbs: [
+        { title: 'Inventaris', href: '/inventory/loans' },
+        { title: 'Transaksi Peminjaman', href: '/inventory/loans' },
+        { title: 'Pinjam Aset' },
+      ],
     },
   },
   {
@@ -119,6 +166,10 @@ export const inventoryRoutes: RouteRecordRaw[] = [
       requiresAuth: true,
       title: 'Riwayat Sirkulasi',
       description: 'Pantau riwayat pergerakan dan sirkulasi aset.',
+      breadcrumbs: [
+        { title: 'Inventaris', href: '#' },
+        { title: 'Riwayat Sirkulasi' },
+      ],
     },
   },
   {
@@ -129,6 +180,10 @@ export const inventoryRoutes: RouteRecordRaw[] = [
       requiresAuth: true,
       title: 'Alur Kerja (Workflow)',
       description: 'Kelola alur persetujuan peminjaman aset.',
+      breadcrumbs: [
+        { title: 'Inventaris', href: '#' },
+        { title: 'Alur Kerja (Workflow)' },
+      ],
     },
   },
   {
@@ -139,6 +194,10 @@ export const inventoryRoutes: RouteRecordRaw[] = [
       requiresAuth: true,
       title: 'Daftar Persetujuan',
       description: 'Persetujuan pengajuan peminjaman aset sekolah.',
+      breadcrumbs: [
+        { title: 'Inventaris', href: '#' },
+        { title: 'Daftar Persetujuan' },
+      ],
     },
   },
 ]

@@ -41,7 +41,14 @@ const router = createRouter({
     ...religionRoutes,
     ...bloodTypeRoutes,
     ...achievementTypeRoutes,
-    ...inventoryRoutes,
+    {
+      path: '/',
+      component: () => import('@/layouts/AppLayout.vue'),
+      // Children keep their absolute paths — Vue Router treats a nested path
+      // starting with '/' as a root path, which is what lets the shell wrap
+      // these routes without changing a single URL.
+      children: [...inventoryRoutes],
+    },
     ...settingsRoutes,
     {
       path: '/pengaturan/umum',

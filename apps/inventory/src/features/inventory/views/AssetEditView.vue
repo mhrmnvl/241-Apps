@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, reactive, ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import AppLayout from '@/layouts/AppLayout.vue'
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/card'
 import { DataTable } from '@/ui'
 import { toast } from 'vue-sonner'
@@ -53,12 +52,6 @@ const metadata = ref<InventoryMetadata>({
   statuses: [],
   fundingSources: [],
 })
-
-const breadcrumbs = [
-  { title: 'Inventaris', href: '/inventory/assets' },
-  { title: 'Daftar Aset', href: '/inventory/assets' },
-  { title: 'Ubah Detail Aset' },
-]
 
 async function loadMetadataAndAsset() {
   try {
@@ -241,221 +234,219 @@ const unitColumns = computed(() =>
 </script>
 
 <template>
-  <AppLayout :breadcrumbs="breadcrumbs">
-    <div class="p-4 md:p-6 lg:p-8 w-full">
-      <!-- Main Form Card -->
-      <Card
-        class="overflow-hidden rounded-2xl shadow-sm shadow-black/5 ring-1 ring-black/4"
+  <div class="p-4 md:p-6 lg:p-8 w-full">
+    <!-- Main Form Card -->
+    <Card
+      class="overflow-hidden rounded-2xl shadow-sm shadow-black/5 ring-1 ring-black/4"
+    >
+      <CardHeader class="flex flex-row items-center gap-4 border-b px-6 py-5">
+        <Button
+          variant="outline"
+          size="icon"
+          @click="handleCancel"
+        >
+          <ChevronLeft class="h-4 w-4" />
+        </Button>
+        <div>
+          <CardTitle class="text-2xl font-bold tracking-tight"
+            >Ubah Detail Aset</CardTitle
+          >
+          <p class="text-sm text-muted-foreground mt-1">
+            Sesuaikan informasi detail aset logistik sekolah di bawah ini.
+          </p>
+        </div>
+      </CardHeader>
+      <CardContent class="p-6">
+        <div
+          v-if="isLoadingAsset"
+          class="flex items-center justify-center py-12"
+        >
+          <span class="text-muted-foreground">Memuat data aset...</span>
+        </div>
+        <AssetForm
+          v-else-if="asset"
+          :asset="asset"
+          :metadata="metadata"
+          :is-saving="isSaving"
+          @save="handleSave"
+          @cancel="handleCancel"
+        />
+      </CardContent>
+    </Card>
+
+    <!-- Units of this asset -->
+    <Card
+      v-if="asset"
+      class="mt-6 overflow-hidden rounded-2xl shadow-sm shadow-black/5 ring-1 ring-black/4"
+    >
+      <CardHeader
+        class="flex flex-row items-center justify-between border-b px-6 py-5"
       >
-        <CardHeader class="flex flex-row items-center gap-4 border-b px-6 py-5">
+        <div>
+          <CardTitle class="text-lg font-bold tracking-tight">
+            Unit ({{ asset.units?.length ?? 0 }})
+          </CardTitle>
+          <p class="text-sm text-muted-foreground mt-1">
+            Tiap unit punya nomornya sendiri untuk ditempel & dipinjam.
+          </p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <Select
+            :model-value="String(labelColumns)"
+            @update:model-value="labelColumns = Number($event)"
+          >
+            <SelectTrigger class="w-[120px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="2">2 / baris</SelectItem>
+              <SelectItem value="3">3 / baris</SelectItem>
+              <SelectItem value="4">4 / baris</SelectItem>
+            </SelectContent>
+          </Select>
+          <Button
+            v-if="selectedUnits.length > 0"
+            variant="outline"
+            @click="printSelectedUnits"
+          >
+            <Printer class="h-4 w-4 mr-2" /> Cetak Terpilih ({{
+              selectedUnits.length
+            }})
+          </Button>
           <Button
             variant="outline"
-            size="icon"
-            @click="handleCancel"
+            :disabled="!asset.units || asset.units.length === 0"
+            @click="printLabels(asset.units ?? [])"
           >
-            <ChevronLeft class="h-4 w-4" />
+            <Printer class="h-4 w-4 mr-2" /> Cetak Semua
           </Button>
-          <div>
-            <CardTitle class="text-2xl font-bold tracking-tight"
-              >Ubah Detail Aset</CardTitle
-            >
-            <p class="text-sm text-muted-foreground mt-1">
-              Sesuaikan informasi detail aset logistik sekolah di bawah ini.
-            </p>
-          </div>
-        </CardHeader>
-        <CardContent class="p-6">
-          <div
-            v-if="isLoadingAsset"
-            class="flex items-center justify-center py-12"
+          <Button
+            variant="outline"
+            :disabled="isUnitSaving"
+            @click="addOneUnit"
           >
-            <span class="text-muted-foreground">Memuat data aset...</span>
-          </div>
-          <AssetForm
-            v-else-if="asset"
-            :asset="asset"
-            :metadata="metadata"
-            :is-saving="isSaving"
-            @save="handleSave"
-            @cancel="handleCancel"
-          />
-        </CardContent>
-      </Card>
+            <Plus class="h-4 w-4 mr-2" /> Tambah Unit
+          </Button>
+        </div>
+      </CardHeader>
+      <CardContent class="p-6">
+        <DataTable
+          :columns="unitColumns"
+          :data="asset.units ?? []"
+          :is-loading="false"
+          item-label="unit"
+          @selection-change="handleUnitSelectionChange"
+        />
+      </CardContent>
+    </Card>
+  </div>
 
-      <!-- Units of this asset -->
-      <Card
-        v-if="asset"
-        class="mt-6 overflow-hidden rounded-2xl shadow-sm shadow-black/5 ring-1 ring-black/4"
-      >
-        <CardHeader
-          class="flex flex-row items-center justify-between border-b px-6 py-5"
-        >
-          <div>
-            <CardTitle class="text-lg font-bold tracking-tight">
-              Unit ({{ asset.units?.length ?? 0 }})
-            </CardTitle>
-            <p class="text-sm text-muted-foreground mt-1">
-              Tiap unit punya nomornya sendiri untuk ditempel & dipinjam.
-            </p>
-          </div>
-          <div class="flex flex-wrap items-center gap-2">
-            <Select
-              :model-value="String(labelColumns)"
-              @update:model-value="labelColumns = Number($event)"
-            >
-              <SelectTrigger class="w-[120px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="2">2 / baris</SelectItem>
-                <SelectItem value="3">3 / baris</SelectItem>
-                <SelectItem value="4">4 / baris</SelectItem>
-              </SelectContent>
-            </Select>
-            <Button
-              v-if="selectedUnits.length > 0"
-              variant="outline"
-              @click="printSelectedUnits"
-            >
-              <Printer class="h-4 w-4 mr-2" /> Cetak Terpilih ({{
-                selectedUnits.length
-              }})
-            </Button>
-            <Button
-              variant="outline"
-              :disabled="!asset.units || asset.units.length === 0"
-              @click="printLabels(asset.units ?? [])"
-            >
-              <Printer class="h-4 w-4 mr-2" /> Cetak Semua
-            </Button>
-            <Button
-              variant="outline"
-              :disabled="isUnitSaving"
-              @click="addOneUnit"
-            >
-              <Plus class="h-4 w-4 mr-2" /> Tambah Unit
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent class="p-6">
-          <DataTable
-            :columns="unitColumns"
-            :data="asset.units ?? []"
-            :is-loading="false"
-            item-label="unit"
-            @selection-change="handleUnitSelectionChange"
-          />
-        </CardContent>
-      </Card>
-    </div>
+  <!-- Edit unit dialog -->
+  <Dialog v-model:open="isUnitEditOpen">
+    <DialogContent class="sm:max-w-md">
+      <DialogHeader>
+        <DialogTitle>Edit Unit</DialogTitle>
+        <DialogDescription>
+          Perbarui kondisi, status, lokasi, dan detail unit ini.
+        </DialogDescription>
+      </DialogHeader>
 
-    <!-- Edit unit dialog -->
-    <Dialog v-model:open="isUnitEditOpen">
-      <DialogContent class="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Edit Unit</DialogTitle>
-          <DialogDescription>
-            Perbarui kondisi, status, lokasi, dan detail unit ini.
-          </DialogDescription>
-        </DialogHeader>
-
-        <div class="space-y-4 py-2">
-          <div class="space-y-1.5">
-            <Label>Kondisi</Label>
-            <Select v-model="unitForm.conditionId">
-              <SelectTrigger class="w-full">
-                <SelectValue placeholder="Pilih kondisi" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem
-                  v-for="c in metadata.conditions"
-                  :key="c.id"
-                  :value="c.id"
-                >
-                  {{ c.name }}
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div class="space-y-1.5">
-            <Label>Status</Label>
-            <Select v-model="unitForm.statusId">
-              <SelectTrigger class="w-full">
-                <SelectValue placeholder="Pilih status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem
-                  v-for="s in metadata.statuses"
-                  :key="s.id"
-                  :value="s.id"
-                >
-                  {{ s.name }}
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div class="space-y-1.5">
-            <Label>Lokasi</Label>
-            <Select v-model="unitForm.locationId">
-              <SelectTrigger class="w-full">
-                <SelectValue placeholder="Pilih lokasi" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem
-                  v-for="l in metadata.locations"
-                  :key="l.id"
-                  :value="l.id"
-                >
-                  {{ l.name }}
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div class="space-y-1.5">
-            <Label>Barcode</Label>
-            <Input
-              v-model="unitForm.barcode"
-              placeholder="Opsional"
-            />
-          </div>
-
-          <div class="space-y-1.5">
-            <Label>Catatan</Label>
-            <Textarea
-              v-model="unitForm.notes"
-              placeholder="Catatan unit (opsional)"
-            />
-          </div>
+      <div class="space-y-4 py-2">
+        <div class="space-y-1.5">
+          <Label>Kondisi</Label>
+          <Select v-model="unitForm.conditionId">
+            <SelectTrigger class="w-full">
+              <SelectValue placeholder="Pilih kondisi" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem
+                v-for="c in metadata.conditions"
+                :key="c.id"
+                :value="c.id"
+              >
+                {{ c.name }}
+              </SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
-        <DialogFooter class="gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            :disabled="isUnitSaving"
-            @click="isUnitEditOpen = false"
-          >
-            Batal
-          </Button>
-          <Button
-            type="button"
-            :disabled="isUnitSaving"
-            @click="saveUnit"
-          >
-            {{ isUnitSaving ? 'Menyimpan...' : 'Simpan' }}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        <div class="space-y-1.5">
+          <Label>Status</Label>
+          <Select v-model="unitForm.statusId">
+            <SelectTrigger class="w-full">
+              <SelectValue placeholder="Pilih status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem
+                v-for="s in metadata.statuses"
+                :key="s.id"
+                :value="s.id"
+              >
+                {{ s.name }}
+              </SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
 
-    <!-- Hidden print sheet (visible only when printing) -->
-    <UnitLabelSheet
-      ref="labelSheetRef"
-      :units="printUnits"
-      :columns="labelColumns"
-    />
-  </AppLayout>
+        <div class="space-y-1.5">
+          <Label>Lokasi</Label>
+          <Select v-model="unitForm.locationId">
+            <SelectTrigger class="w-full">
+              <SelectValue placeholder="Pilih lokasi" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem
+                v-for="l in metadata.locations"
+                :key="l.id"
+                :value="l.id"
+              >
+                {{ l.name }}
+              </SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div class="space-y-1.5">
+          <Label>Barcode</Label>
+          <Input
+            v-model="unitForm.barcode"
+            placeholder="Opsional"
+          />
+        </div>
+
+        <div class="space-y-1.5">
+          <Label>Catatan</Label>
+          <Textarea
+            v-model="unitForm.notes"
+            placeholder="Catatan unit (opsional)"
+          />
+        </div>
+      </div>
+
+      <DialogFooter class="gap-2">
+        <Button
+          type="button"
+          variant="outline"
+          :disabled="isUnitSaving"
+          @click="isUnitEditOpen = false"
+        >
+          Batal
+        </Button>
+        <Button
+          type="button"
+          :disabled="isUnitSaving"
+          @click="saveUnit"
+        >
+          {{ isUnitSaving ? 'Menyimpan...' : 'Simpan' }}
+        </Button>
+      </DialogFooter>
+    </DialogContent>
+  </Dialog>
+
+  <!-- Hidden print sheet (visible only when printing) -->
+  <UnitLabelSheet
+    ref="labelSheetRef"
+    :units="printUnits"
+    :columns="labelColumns"
+  />
 </template>

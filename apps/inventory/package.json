@@ -14,7 +14,9 @@
     "format:check": "prettier --check \"src/**/*.{ts,vue,json,css,scss,html,md}\"",
     "typecheck": "vue-tsc -b --noEmit",
     "check": "pnpm run format:check && pnpm run lint",
-    "validate": "pnpm run format:check && pnpm run lint && pnpm run typecheck && pnpm run lint:strict && pnpm run build"
+    "validate": "pnpm run format:check && pnpm run lint && pnpm run typecheck && pnpm run lint:strict && pnpm run build",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@241/platform": "workspace:*",
@@ -45,5 +47,9 @@
     "vue-router": "^5.1.0",
     "vue-sonner": "^2.0.9",
     "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "vitest": "^3.2.4",
+    "@vitejs/plugin-vue": "^6.0.7"
   }
 }
