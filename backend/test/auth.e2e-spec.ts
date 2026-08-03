@@ -22,7 +22,12 @@ interface ApiResponse<T = unknown> {
 
 interface AuthData {
   accessToken: string;
-  user: { id: string; username: string; role: string; isActive: boolean };
+  user: {
+    id: string;
+    identifier: string;
+    isActive: boolean;
+    roles?: string[];
+  };
 }
 
 interface LogoutData {
@@ -31,9 +36,10 @@ interface LogoutData {
 
 interface ProfileData {
   id: string;
-  username: string;
-  role: string;
+  identifier: string;
   isActive: boolean;
+  name: string | null;
+  roles: string[];
 }
 
 function getCookies(res: request.Response): string[] {
@@ -49,7 +55,9 @@ describe('Auth (e2e)', () => {
   let hashedPassword: string;
 
   const mockPrismaService = {
-    user: { findUnique: jest.fn() },
+    // `findUserByIdentifier` uses findFirst (it filters on deletedAt too);
+    // `findUserById` uses findUnique. Both need a stub or login never resolves.
+    user: { findUnique: jest.fn(), findFirst: jest.fn() },
     authSession: {
       findUnique: jest.fn(),
       create: jest.fn(),
@@ -63,16 +71,17 @@ describe('Auth (e2e)', () => {
   const TEST_USER_ID = 'b3d7f1a0-1234-4abc-9def-000000000001';
   const TEST_SESSION_ID = 'b3d7f1a0-1234-4abc-9def-000000000002';
 
+  /** Mirrors the User row plus the `userRoles` the auth queries include. */
   function buildMockUser(overrides: Record<string, unknown> = {}) {
     return {
       id: TEST_USER_ID,
-      username: 'admin',
-      password: hashedPassword,
-      role: 'ADMIN',
+      identifier: 'admin',
+      passwordHash: hashedPassword,
       isActive: true,
       deletedAt: null,
       createdAt: new Date(),
       updatedAt: new Date(),
+      userRoles: [{ role: { code: 'ADMIN' } }],
       ...overrides,
     };
   }
@@ -87,10 +96,10 @@ describe('Auth (e2e)', () => {
       tokenHash: 'any-hash',
       revokedAt: null,
       expiresAt: new Date(Date.now() + 86400000),
+      // `findSessionWithUser` includes the bare user row — no roles.
       user: {
         id: TEST_USER_ID,
-        username: 'admin',
-        role: 'ADMIN',
+        identifier: 'admin',
         isActive: true,
         deletedAt: null,
       },
@@ -103,8 +112,7 @@ describe('Auth (e2e)', () => {
       {
         sub: TEST_USER_ID,
         sessionId,
-        username: 'admin',
-        role: 'ADMIN',
+        identifier: 'admin',
         type: 'access',
       },
       { secret: TEST_JWT_SECRET, expiresIn: '15m' },
@@ -163,12 +171,12 @@ describe('Auth (e2e)', () => {
 
   describe('POST /auth/login', () => {
     it('should return 200 with accessToken and set refresh_token cookie', async () => {
-      mockPrismaService.user.findUnique.mockResolvedValue(buildMockUser());
+      mockPrismaService.user.findFirst.mockResolvedValue(buildMockUser());
       mockPrismaService.authSession.create.mockResolvedValue({});
 
       const res = await request(httpServer)
         .post('/auth/login')
-        .send({ username: 'admin', password: 'password123' })
+        .send({ identifier: 'admin', password: 'password123' })
         .expect(200);
 
       const body = res.body as ApiResponse<AuthData>;
@@ -176,9 +184,9 @@ describe('Auth (e2e)', () => {
       expect(body.data.user).toEqual(
         expect.objectContaining({
           id: TEST_USER_ID,
-          username: 'admin',
-          role: 'ADMIN',
+          identifier: 'admin',
           isActive: true,
+          roles: ['ADMIN'],
         }),
       );
 
@@ -188,42 +196,42 @@ describe('Auth (e2e)', () => {
     });
 
     it('should return 401 for wrong password', async () => {
-      mockPrismaService.user.findUnique.mockResolvedValue(buildMockUser());
+      mockPrismaService.user.findFirst.mockResolvedValue(buildMockUser());
 
       await request(httpServer)
         .post('/auth/login')
-        .send({ username: 'admin', password: 'wrongpassword' })
+        .send({ identifier: 'admin', password: 'wrongpassword' })
         .expect(401);
     });
 
     it('should return 401 for non-existent user', async () => {
-      mockPrismaService.user.findUnique.mockResolvedValue(null);
+      mockPrismaService.user.findFirst.mockResolvedValue(null);
 
       await request(httpServer)
         .post('/auth/login')
-        .send({ username: 'ghost', password: 'password123' })
+        .send({ identifier: 'ghost', password: 'password123' })
         .expect(401);
     });
 
     it('should return 401 for inactive user', async () => {
-      mockPrismaService.user.findUnique.mockResolvedValue(
+      mockPrismaService.user.findFirst.mockResolvedValue(
         buildMockUser({ isActive: false }),
       );
 
       await request(httpServer)
         .post('/auth/login')
-        .send({ username: 'admin', password: 'password123' })
+        .send({ identifier: 'admin', password: 'password123' })
         .expect(401);
     });
 
     it('should return 401 for soft-deleted user', async () => {
-      mockPrismaService.user.findUnique.mockResolvedValue(
+      mockPrismaService.user.findFirst.mockResolvedValue(
         buildMockUser({ deletedAt: new Date() }),
       );
 
       await request(httpServer)
         .post('/auth/login')
-        .send({ username: 'admin', password: 'password123' })
+        .send({ identifier: 'admin', password: 'password123' })
         .expect(401);
     });
 
@@ -231,7 +239,7 @@ describe('Auth (e2e)', () => {
       await request(httpServer).post('/auth/login').send({}).expect(400);
     });
 
-    it('should return 400 when username is missing', async () => {
+    it('should return 400 when identifier is missing', async () => {
       await request(httpServer)
         .post('/auth/login')
         .send({ password: 'password123' })
@@ -241,7 +249,7 @@ describe('Auth (e2e)', () => {
     it('should return 400 when password is missing', async () => {
       await request(httpServer)
         .post('/auth/login')
-        .send({ username: 'admin' })
+        .send({ identifier: 'admin' })
         .expect(400);
     });
   });
@@ -252,8 +260,7 @@ describe('Auth (e2e)', () => {
         {
           sub: TEST_USER_ID,
           sessionId: TEST_SESSION_ID,
-          username: 'admin',
-          role: 'ADMIN',
+          identifier: 'admin',
           type: 'refresh',
         },
         { secret: TEST_JWT_SECRET, expiresIn: '7d' },
@@ -331,7 +338,7 @@ describe('Auth (e2e)', () => {
         buildMockSession(TEST_SESSION_ID),
       );
       mockPrismaService.user.findUnique.mockResolvedValue(
-        buildMockUser({ profile: { fullName: 'Admin User' } }),
+        buildMockUser({ profile: { name: 'Admin User' } }),
       );
 
       const token = generateAccessToken(TEST_SESSION_ID);
@@ -345,9 +352,10 @@ describe('Auth (e2e)', () => {
       expect(body.data).toEqual(
         expect.objectContaining({
           id: TEST_USER_ID,
-          username: 'admin',
-          role: 'ADMIN',
+          identifier: 'admin',
           isActive: true,
+          name: 'Admin User',
+          roles: ['ADMIN'],
         }),
       );
     });
@@ -361,8 +369,7 @@ describe('Auth (e2e)', () => {
         {
           sub: TEST_USER_ID,
           sessionId: TEST_SESSION_ID,
-          username: 'admin',
-          role: 'ADMIN',
+          identifier: 'admin',
           type: 'access',
         },
         { secret: TEST_JWT_SECRET, expiresIn: '0s' },
