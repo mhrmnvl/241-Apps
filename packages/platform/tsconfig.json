@@ -13,7 +13,7 @@
       "@/master-data": ["../master-data/src/index.ts"],
       "@/master-data/*": ["../master-data/src/*"],
       "@/features/platform/*": ["./src/features/*"],
-      "@/layouts/*": ["../../apps/academic/src/layouts/*"]
+      "@/layouts/AppLayout.vue": ["./src/layouts.d.ts"]
     }
   },
   "include": ["src/**/*.ts", "src/**/*.vue"],

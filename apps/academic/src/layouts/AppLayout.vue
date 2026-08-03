@@ -34,6 +34,7 @@ import { useAuthSession } from '@/features/platform/auth'
 import { menuSections } from '@/config/menuConfig'
 import { LogOut, Search, Settings, UserRound } from 'lucide-vue-next'
 import { useRouter } from 'vue-router'
+import type { BreadcrumbItemType } from '@/shared/types/breadcrumb.types'
 import { computed, ref } from 'vue'
 
 const { user, logoutUser } = useAuthSession()
@@ -95,11 +96,6 @@ async function handleLogout() {
 
 function handleViewProfile() {
   void router.push({ name: 'profile-view' })
-}
-
-export interface BreadcrumbItemType {
-  title: string
-  href?: string
 }
 
 withDefaults(
