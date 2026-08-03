@@ -101,14 +101,5 @@ export default tseslint.config(
       'no-console': ['error', { allow: ['warn', 'error'] }],
     },
   },
-  {
-    // Specs define throwaway stub components next to the case that uses them —
-    // splitting those across files would hide what a test is exercising. The
-    // rule is about how production components are organised.
-    files: ['**/*.spec.ts'],
-    rules: {
-      'vue/one-component-per-file': 'off',
-    },
-  },
   prettier,
 )

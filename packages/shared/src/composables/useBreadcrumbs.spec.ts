@@ -1,3 +1,9 @@
+/* eslint-disable vue/one-component-per-file --
+ * These cases need several stub components — the ordering case needs two views
+ * mounted at once — and they belong beside the assertion that uses them.
+ * Splitting them across files would hide what each test is exercising. The rule
+ * is about how production components are laid out.
+ */
 import { describe, it, expect } from 'vitest'
 import { defineComponent, h, ref } from 'vue'
 import type { Ref } from 'vue'
