@@ -9,6 +9,10 @@ export const gradeRoutes: RouteRecordRaw[] = [
       requiresAuth: true,
       requiredPermission: 'academic-years.read',
       title: 'Tingkat Kelas',
+      breadcrumbs: [
+        { title: 'Akademik', href: '#' },
+        { title: 'Tingkat Kelas', href: '/academic/grade' },
+      ],
     },
   },
 ]

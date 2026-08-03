@@ -9,6 +9,10 @@ export const studentRoutes: RouteRecordRaw[] = [
       requiresAuth: true,
       requiredPermission: 'students.read',
       title: 'Daftar Siswa',
+      breadcrumbs: [
+        { title: 'Siswa', href: '/student' },
+        { title: 'Daftar Siswa' },
+      ],
     },
   },
 
@@ -20,6 +24,10 @@ export const studentRoutes: RouteRecordRaw[] = [
       requiresAuth: true,
       requiredPermission: 'students.read',
       title: 'Tambah Siswa',
+      breadcrumbs: [
+        { title: 'Siswa', href: '/student' },
+        { title: 'Tambah Siswa' },
+      ],
     },
   },
 
@@ -31,6 +39,10 @@ export const studentRoutes: RouteRecordRaw[] = [
       requiresAuth: true,
       requiredPermission: 'students.read',
       title: 'Akun Siswa',
+      breadcrumbs: [
+        { title: 'Siswa', href: '/student' },
+        { title: 'Akun Siswa' },
+      ],
     },
   },
 ]

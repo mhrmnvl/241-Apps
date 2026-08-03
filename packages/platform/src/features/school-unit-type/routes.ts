@@ -9,6 +9,10 @@ export const schoolUnitTypeRoutes: RouteRecordRaw[] = [
       title: 'Tipe Sekolah',
       requiresAuth: true,
       requiredPermission: 'school-units.read',
+      breadcrumbs: [
+        { title: 'Pengaturan', href: '#' },
+        { title: 'Tipe Sekolah', href: '/setting/school-unit-type' },
+      ],
     },
   },
 ]

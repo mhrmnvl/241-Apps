@@ -9,6 +9,10 @@ export const rolesRoutes: RouteRecordRaw[] = [
       title: 'Manajemen Role',
       requiresAuth: true,
       requiredPermission: 'roles.read',
+      breadcrumbs: [
+        { title: 'Pengaturan', href: '#' },
+        { title: 'Manajemen Role', href: '/setting/role' },
+      ],
     },
   },
   {
@@ -19,6 +23,11 @@ export const rolesRoutes: RouteRecordRaw[] = [
       title: 'Tambah Role',
       requiresAuth: true,
       requiredPermission: 'roles.read',
+      breadcrumbs: [
+        { title: 'Pengaturan', href: '#' },
+        { title: 'Manajemen Role', href: '/setting/role' },
+        { title: 'Tambah Role', href: '#' },
+      ],
     },
   },
   {
@@ -29,6 +38,11 @@ export const rolesRoutes: RouteRecordRaw[] = [
       title: 'Edit Role',
       requiresAuth: true,
       requiredPermission: 'roles.read',
+      breadcrumbs: [
+        { title: 'Pengaturan', href: '#' },
+        { title: 'Manajemen Role', href: '/setting/role' },
+        { title: 'Edit Role', href: '#' },
+      ],
     },
   },
 ]

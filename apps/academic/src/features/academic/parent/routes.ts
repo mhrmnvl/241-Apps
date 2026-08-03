@@ -9,6 +9,10 @@ export const parentRoutes: RouteRecordRaw[] = [
       requiresAuth: true,
       requiredPermission: 'parents.read',
       title: 'Data Orang Tua',
+      breadcrumbs: [
+        { title: 'Data Master', href: '#' },
+        { title: 'Data Orang Tua', href: '/data/parent' },
+      ],
     },
   },
 ]

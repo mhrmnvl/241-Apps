@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { toast } from 'vue-sonner'
-import AppLayout from '@/layouts/AppLayout.vue'
 import { DataTable } from '@/ui'
 import { Button } from '@/ui/button'
 import { Card, CardHeader, CardTitle } from '@/ui/card'
@@ -10,11 +9,6 @@ import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
 import { permissionsApi } from '../api/permissionsApi'
 import { getColumns } from '../components/permissionColumns'
 import type { Permission } from '../types'
-
-const breadcrumbs = [
-  { title: 'Pengaturan', href: '#' },
-  { title: 'Manajemen Permission', href: '/setting/permission' },
-]
 
 const permissions = ref<Permission[]>([])
 const isLoading = ref(false)
@@ -57,44 +51,42 @@ onMounted(() => {
 </script>
 
 <template>
-  <AppLayout :breadcrumbs="breadcrumbs">
-    <div class="p-4 md:p-6 lg:p-8">
-      <Card
-        class="overflow-hidden rounded-2xl shadow-sm shadow-black/5 ring-1 ring-black/4"
+  <div class="p-4 md:p-6 lg:p-8">
+    <Card
+      class="overflow-hidden rounded-2xl shadow-sm shadow-black/5 ring-1 ring-black/4"
+    >
+      <CardHeader
+        class="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b px-6 py-5 gap-4"
       >
-        <CardHeader
-          class="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b px-6 py-5 gap-4"
-        >
-          <div>
-            <CardTitle class="text-2xl font-bold tracking-tight">
-              Manajemen Permission
-            </CardTitle>
-          </div>
-          <div class="flex flex-col sm:flex-row w-full sm:w-auto gap-2">
-            <Button
-              variant="outline"
-              class="w-full sm:w-auto"
-              :disabled="isSyncing"
-              @click="handleSync"
-            >
-              <RefreshCw
-                class="mr-2 h-4 w-4"
-                :class="{ 'animate-spin': isSyncing }"
-              />
-              {{ isSyncing ? 'Menyinkronkan...' : 'Sinkronkan' }}
-            </Button>
-          </div>
-        </CardHeader>
-
-        <div class="p-6">
-          <DataTable
-            :columns="columns"
-            :data="permissions"
-            :is-loading="isLoading"
-            item-label="permission"
-          />
+        <div>
+          <CardTitle class="text-2xl font-bold tracking-tight">
+            Manajemen Permission
+          </CardTitle>
         </div>
-      </Card>
-    </div>
-  </AppLayout>
+        <div class="flex flex-col sm:flex-row w-full sm:w-auto gap-2">
+          <Button
+            variant="outline"
+            class="w-full sm:w-auto"
+            :disabled="isSyncing"
+            @click="handleSync"
+          >
+            <RefreshCw
+              class="mr-2 h-4 w-4"
+              :class="{ 'animate-spin': isSyncing }"
+            />
+            {{ isSyncing ? 'Menyinkronkan...' : 'Sinkronkan' }}
+          </Button>
+        </div>
+      </CardHeader>
+
+      <div class="p-6">
+        <DataTable
+          :columns="columns"
+          :data="permissions"
+          :is-loading="isLoading"
+          item-label="permission"
+        />
+      </div>
+    </Card>
+  </div>
 </template>

@@ -1,7 +1,7 @@
 import '@/shared/types/router'
 import { authRoutes } from '@/features/platform/auth'
 import { profileRoutes } from '@/features/platform/profile'
-import { admissionRoutes } from '@/features/admission'
+import { admissionPublicRoutes, admissionRoutes } from '@/features/admission'
 import { settingsRoutes, useSettingsStore } from '@/features/platform/settings'
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/features/platform/auth/stores/authStore'
@@ -20,21 +20,34 @@ export function resolveHomeRoute(roles: string[]) {
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
-    ...admissionRoutes,
+    // Shell-less pages first: the layout route below also answers to '/', and
+    // routes are matched in order, so the landing page has to be seen first.
+    ...admissionPublicRoutes,
     ...authRoutes,
-    ...profileRoutes,
-    ...settingsRoutes,
     {
-      path: '/setting/general',
-      name: 'setting-general',
-      component: () =>
-        import('@/features/platform/settings/views/AppSettingsView.vue'),
-      props: { appKey: 'ADMISSION', menuSections },
-      meta: {
-        requiresAuth: true,
-        requiredPermission: 'settings.update',
-        title: 'Pengaturan Umum',
-      },
+      path: '/',
+      component: () => import('@/layouts/AppLayout.vue'),
+      // Children keep their absolute paths — Vue Router treats a nested path
+      // starting with '/' as a root path, which is what lets the shell wrap
+      // these routes without changing a single URL.
+      children: [
+        ...admissionRoutes,
+        ...profileRoutes,
+        ...settingsRoutes,
+        {
+          path: '/setting/general',
+          name: 'setting-general',
+          component: () =>
+            import('@/features/platform/settings/views/AppSettingsView.vue'),
+          props: { appKey: 'ADMISSION', menuSections },
+          meta: {
+            requiresAuth: true,
+            requiredPermission: 'settings.update',
+            title: 'Pengaturan Umum',
+            breadcrumbs: [{ title: 'Pengaturan Umum' }],
+          },
+        },
+      ],
     },
     {
       // Platform login redirects to { name: 'dashboard' } after login;

@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import AppLayout from '@/layouts/AppLayout.vue'
 import { DataTable, Badge } from '@/ui'
 import { Card, CardHeader, CardTitle, CardContent } from '@/ui/card'
 import { toast } from 'vue-sonner'
@@ -14,11 +13,6 @@ import type {
   InventoryCondition,
 } from '../types'
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
-
-const breadcrumbs = [
-  { title: 'Inventaris', href: '#' },
-  { title: 'Riwayat Sirkulasi' },
-]
 
 // State
 const histories = ref<InventoryHistory[]>([])
@@ -133,28 +127,25 @@ onMounted(() => {
 </script>
 
 <template>
-  <AppLayout :breadcrumbs="breadcrumbs">
-    <div class="p-4 md:p-6 lg:p-8">
-      <Card
-        class="overflow-hidden rounded-2xl shadow-sm shadow-black/5 ring-1 ring-black/4"
-      >
-        <CardHeader class="border-b px-6 py-5">
-          <CardTitle class="text-2xl font-bold tracking-tight"
-            >Riwayat Sirkulasi Aset</CardTitle
-          >
-          <p class="text-sm text-muted-foreground mt-1">
-            Pantau seluruh mutasi, peminjaman, dan pengembalian logistik
-            sekolah.
-          </p>
-        </CardHeader>
-        <CardContent class="p-6">
-          <DataTable
-            :columns="columns"
-            :data="histories"
-            :loading="loading"
-          />
-        </CardContent>
-      </Card>
-    </div>
-  </AppLayout>
+  <div class="p-4 md:p-6 lg:p-8">
+    <Card
+      class="overflow-hidden rounded-2xl shadow-sm shadow-black/5 ring-1 ring-black/4"
+    >
+      <CardHeader class="border-b px-6 py-5">
+        <CardTitle class="text-2xl font-bold tracking-tight"
+          >Riwayat Sirkulasi Aset</CardTitle
+        >
+        <p class="text-sm text-muted-foreground mt-1">
+          Pantau seluruh mutasi, peminjaman, dan pengembalian logistik sekolah.
+        </p>
+      </CardHeader>
+      <CardContent class="p-6">
+        <DataTable
+          :columns="columns"
+          :data="histories"
+          :loading="loading"
+        />
+      </CardContent>
+    </Card>
+  </div>
 </template>

@@ -46,7 +46,9 @@ function triggerPhotoUpload() {
               :src="avatarUrl"
               :alt="fullName"
             />
-            <AvatarFallback class="bg-primary/10 text-xl font-bold text-primary">
+            <AvatarFallback
+              class="bg-primary/10 text-xl font-bold text-primary"
+            >
               {{ initials }}
             </AvatarFallback>
           </Avatar>

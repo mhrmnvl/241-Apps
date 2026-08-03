@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { watchDebounced } from '@vueuse/core'
-import AppLayout from '@/layouts/AppLayout.vue'
 import { DataTable, ActionCell } from '@/ui'
 import { Button } from '@/ui/button'
 import { Card, CardHeader, CardTitle } from '@/ui/card'
@@ -35,11 +34,6 @@ const isSaving = ref(false)
 const isFormOpen = ref(false)
 const selectedItem = ref<InventoryReferenceItem | null>(null)
 const searchQuery = ref('')
-
-const breadcrumbs = [
-  { title: 'Referensi', href: '#' },
-  { title: 'Status Aset', href: '/inventory/statuses' },
-]
 
 // Columns configuration
 const columns = computed<ColumnDef<InventoryReferenceItem>[]>(() => {
@@ -185,57 +179,55 @@ onMounted(() => {
 </script>
 
 <template>
-  <AppLayout :breadcrumbs="breadcrumbs">
-    <div class="p-6 space-y-6">
-      <Card class="border-slate-200 shadow-sm">
-        <CardHeader
-          class="flex flex-row items-center justify-between pb-4 border-b"
+  <div class="p-6 space-y-6">
+    <Card class="border-slate-200 shadow-sm">
+      <CardHeader
+        class="flex flex-row items-center justify-between pb-4 border-b"
+      >
+        <CardTitle class="text-xl font-bold text-slate-800"
+          >Status Aset</CardTitle
         >
-          <CardTitle class="text-xl font-bold text-slate-800"
-            >Status Aset</CardTitle
-          >
-          <Button
-            v-if="can('inventory.create')"
-            size="sm"
-            @click="handleOpenCreateForm"
-          >
-            <Plus class="w-4 h-4 mr-2" />
-            Tambah Status
-          </Button>
-        </CardHeader>
+        <Button
+          v-if="can('inventory.create')"
+          size="sm"
+          @click="handleOpenCreateForm"
+        >
+          <Plus class="w-4 h-4 mr-2" />
+          Tambah Status
+        </Button>
+      </CardHeader>
 
-        <div class="p-6 space-y-4">
-          <!-- Filter/Search Bar -->
-          <div class="flex items-center justify-between gap-4">
-            <div class="relative w-full max-w-sm">
-              <Search
-                class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground"
-              />
-              <Input
-                v-model="searchQuery"
-                placeholder="Cari kode atau nama status..."
-                class="pl-9"
-              />
-            </div>
+      <div class="p-6 space-y-4">
+        <!-- Filter/Search Bar -->
+        <div class="flex items-center justify-between gap-4">
+          <div class="relative w-full max-w-sm">
+            <Search
+              class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground"
+            />
+            <Input
+              v-model="searchQuery"
+              placeholder="Cari kode atau nama status..."
+              class="pl-9"
+            />
           </div>
-
-          <!-- Data Table -->
-          <DataTable
-            :columns="columns"
-            :data="dataItems"
-            :loading="loading"
-          />
         </div>
-      </Card>
 
-      <!-- Status Sheet Form -->
-      <StatusFormDialog
-        v-model:open="isFormOpen"
-        :item="selectedItem"
-        :is-saving="isSaving"
-        :existing-statuses="dataItems"
-        @save="handleSaveStatus"
-      />
-    </div>
-  </AppLayout>
+        <!-- Data Table -->
+        <DataTable
+          :columns="columns"
+          :data="dataItems"
+          :loading="loading"
+        />
+      </div>
+    </Card>
+
+    <!-- Status Sheet Form -->
+    <StatusFormDialog
+      v-model:open="isFormOpen"
+      :item="selectedItem"
+      :is-saving="isSaving"
+      :existing-statuses="dataItems"
+      @save="handleSaveStatus"
+    />
+  </div>
 </template>

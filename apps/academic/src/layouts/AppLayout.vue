@@ -33,8 +33,9 @@ import { TooltipProvider } from '@/ui/tooltip'
 import { useAuthSession } from '@/features/platform/auth'
 import { menuSections } from '@/config/menuConfig'
 import { LogOut, Search, Settings, UserRound } from 'lucide-vue-next'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import type { BreadcrumbItemType } from '@/shared/types/breadcrumb.types'
+import { provideBreadcrumbs } from '@/shared/composables/useBreadcrumbs'
 import { computed, ref } from 'vue'
 
 const { user, logoutUser } = useAuthSession()
@@ -98,13 +99,29 @@ function handleViewProfile() {
   void router.push({ name: 'profile-view' })
 }
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
+    /**
+     * For the one view that renders this layout itself rather than through the
+     * router: `NotFoundView` shows the shell only when the visitor is signed
+     * in, so it cannot be a child of the layout route. Every routed view states
+     * its trail in `meta.breadcrumbs`.
+     */
     breadcrumbs?: BreadcrumbItemType[]
   }>(),
   {
     breadcrumbs: () => [],
   },
+)
+
+const route = useRoute()
+const breadcrumbOverride = provideBreadcrumbs()
+
+/** Prop first (self-wrapping views), then a view's live override, then the route. */
+const resolvedBreadcrumbs = computed<BreadcrumbItemType[]>(() =>
+  props.breadcrumbs.length > 0
+    ? props.breadcrumbs
+    : (breadcrumbOverride.value ?? route.meta.breadcrumbs ?? []),
 )
 
 const searchGroups = computed(() => {
@@ -138,18 +155,19 @@ const searchGroups = computed(() => {
             <slot name="breadcrumb">
               <Breadcrumb>
                 <BreadcrumbList>
-                  <template v-if="breadcrumbs && breadcrumbs.length > 0">
+                  <template v-if="resolvedBreadcrumbs.length > 0">
                     <template
-                      v-for="(item, index) in breadcrumbs"
+                      v-for="(item, index) in resolvedBreadcrumbs"
                       :key="index"
                     >
                       <BreadcrumbItem
                         :class="{
-                          'hidden md:block': index < breadcrumbs.length - 1,
+                          'hidden md:block':
+                            index < resolvedBreadcrumbs.length - 1,
                         }"
                       >
                         <BreadcrumbPage
-                          v-if="index === breadcrumbs.length - 1"
+                          v-if="index === resolvedBreadcrumbs.length - 1"
                           class="text-primary font-medium"
                         >
                           {{ item.title }}
@@ -163,9 +181,10 @@ const searchGroups = computed(() => {
                         <span v-else>{{ item.title }}</span>
                       </BreadcrumbItem>
                       <BreadcrumbSeparator
-                        v-if="index < breadcrumbs.length - 1"
+                        v-if="index < resolvedBreadcrumbs.length - 1"
                         :class="{
-                          'hidden md:block': index < breadcrumbs.length - 1,
+                          'hidden md:block':
+                            index < resolvedBreadcrumbs.length - 1,
                         }"
                       />
                     </template>
@@ -264,7 +283,7 @@ const searchGroups = computed(() => {
           </div>
         </header>
         <div class="flex-1 overflow-auto min-w-0">
-          <slot />
+          <slot><RouterView /></slot>
         </div>
       </main>
     </TooltipProvider>

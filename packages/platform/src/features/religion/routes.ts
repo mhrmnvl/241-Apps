@@ -9,6 +9,10 @@ export const religionRoutes: RouteRecordRaw[] = [
       title: 'Agama',
       requiresAuth: true,
       requiredPermission: 'religions.read',
+      breadcrumbs: [
+        { title: 'Pengaturan', href: '#' },
+        { title: 'Agama', href: '/setting/religion' },
+      ],
     },
   },
 ]

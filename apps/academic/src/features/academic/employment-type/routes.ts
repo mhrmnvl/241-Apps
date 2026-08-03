@@ -9,6 +9,10 @@ export const employmentTypeRoutes: RouteRecordRaw[] = [
       title: 'Status Kepegawaian',
       requiresAuth: true,
       requiredPermission: 'teachers.read',
+      breadcrumbs: [
+        { title: 'Pengaturan', href: '#' },
+        { title: 'Status Kepegawaian', href: '/setting/employment-type' },
+      ],
     },
   },
 ]

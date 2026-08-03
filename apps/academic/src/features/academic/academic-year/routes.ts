@@ -9,6 +9,10 @@ export const academicYearRoutes: RouteRecordRaw[] = [
       requiresAuth: true,
       requiredPermission: 'academic-years.read',
       title: 'Tahun Ajaran',
+      breadcrumbs: [
+        { title: 'Akademik', href: '#' },
+        { title: 'Tahun Ajaran', href: '/academic/academic-year' },
+      ],
     },
   },
 ]

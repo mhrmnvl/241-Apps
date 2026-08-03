@@ -9,6 +9,10 @@ export const lessonRoutes: RouteRecordRaw[] = [
       requiresAuth: true,
       requiredPermission: 'schedules.read',
       title: 'Jadwal Pelajaran',
+      breadcrumbs: [
+        { title: 'Pembelajaran', href: '#' },
+        { title: 'Jadwal Pelajaran' },
+      ],
     },
   },
   {

@@ -2,7 +2,6 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { watchDebounced } from '@vueuse/core'
-import AppLayout from '@/layouts/AppLayout.vue'
 import { DataTable } from '@/ui'
 import { Button } from '@/ui/button'
 import { Card, CardHeader, CardTitle } from '@/ui/card'
@@ -36,11 +35,6 @@ import { createColumns } from '../components/columns'
 
 const { can } = useRoleGuard()
 const router = useRouter()
-
-const breadcrumbs = [
-  { title: 'Inventaris', href: '#' },
-  { title: 'Daftar Aset' },
-]
 
 // Component state
 const assets = ref<InventoryAsset[]>([])
@@ -192,199 +186,44 @@ onMounted(async () => {
 </script>
 
 <template>
-  <AppLayout :breadcrumbs="breadcrumbs">
-    <div class="p-4 md:p-6 lg:p-8">
-      <Card
-        class="overflow-hidden rounded-2xl shadow-sm shadow-black/5 ring-1 ring-black/4"
+  <div class="p-4 md:p-6 lg:p-8">
+    <Card
+      class="overflow-hidden rounded-2xl shadow-sm shadow-black/5 ring-1 ring-black/4"
+    >
+      <CardHeader
+        class="flex flex-row items-center justify-between border-b px-6 py-5 gap-4"
       >
-        <CardHeader
-          class="flex flex-row items-center justify-between border-b px-6 py-5 gap-4"
-        >
-          <div>
-            <CardTitle class="text-xl sm:text-2xl font-bold tracking-tight"
-              >Daftar Aset</CardTitle
-            >
-          </div>
-          <div class="flex items-center gap-2">
-            <Button
-              v-if="can('inventory.create')"
-              size="sm"
-              class="sm:h-10 sm:px-4 text-xs sm:text-sm"
-              @click="openAddForm"
-            >
-              <Plus class="size-4 mr-1 sm:mr-2" />
-              Tambah Aset
-            </Button>
-          </div>
-        </CardHeader>
-
-        <div class="p-6">
-          <!-- Filters Section matching Academic Layout -->
-          <div class="mb-6">
-            <!-- Desktop Layout: Inline selects -->
-            <div class="hidden lg:flex lg:flex-row lg:items-center gap-3">
-              <!-- Category -->
-              <Select
-                :model-value="filters.categoryId"
-                @update:model-value="handleFilterChange('categoryId', $event)"
-              >
-                <SelectTrigger
-                  class="w-full lg:w-fit lg:min-w-[150px] px-3! gap-2!"
-                >
-                  <SelectValue placeholder="Pilih kategori" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Semua Kategori</SelectItem>
-                  <SelectItem
-                    v-for="cat in metadata.categories"
-                    :key="cat.id"
-                    :value="cat.id"
-                  >
-                    {{ cat.name }}
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-
-              <!-- Location -->
-              <Select
-                :model-value="filters.locationId"
-                @update:model-value="handleFilterChange('locationId', $event)"
-              >
-                <SelectTrigger
-                  class="w-full lg:w-fit lg:min-w-[140px] px-3! gap-2!"
-                >
-                  <SelectValue placeholder="Pilih lokasi" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Semua Lokasi</SelectItem>
-                  <SelectItem
-                    v-for="loc in metadata.locations"
-                    :key="loc.id"
-                    :value="loc.id"
-                  >
-                    {{ loc.name }}
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-
-              <!-- Status -->
-              <Select
-                :model-value="filters.statusId"
-                @update:model-value="handleFilterChange('statusId', $event)"
-              >
-                <SelectTrigger
-                  class="w-full lg:w-fit lg:min-w-[130px] px-3! gap-2!"
-                >
-                  <SelectValue placeholder="Pilih status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Semua Status</SelectItem>
-                  <SelectItem
-                    v-for="status in metadata.statuses"
-                    :key="status.id"
-                    :value="status.id"
-                  >
-                    {{ status.name }}
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-
-              <!-- Condition -->
-              <Select
-                :model-value="filters.conditionId"
-                @update:model-value="handleFilterChange('conditionId', $event)"
-              >
-                <SelectTrigger
-                  class="w-full lg:w-fit lg:min-w-[135px] px-3! gap-2!"
-                >
-                  <SelectValue placeholder="Pilih kondisi" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Semua Kondisi</SelectItem>
-                  <SelectItem
-                    v-for="cond in metadata.conditions"
-                    :key="cond.id"
-                    :value="cond.id"
-                  >
-                    {{ cond.name }}
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-
-              <!-- Search Keyword Pushed to Right -->
-              <div class="relative lg:ml-auto lg:w-[240px]">
-                <Search
-                  class="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
-                />
-                <Input
-                  v-model="filters.keyword"
-                  placeholder="Cari aset..."
-                  class="pl-9"
-                />
-              </div>
-            </div>
-
-            <!-- Mobile Layout: Search + Filter Dialog Button -->
-            <div class="flex flex-col lg:hidden gap-3">
-              <div class="flex items-center gap-2">
-                <div class="relative flex-1">
-                  <Search
-                    class="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
-                  />
-                  <Input
-                    v-model="filters.keyword"
-                    placeholder="Cari aset..."
-                    class="pl-9"
-                  />
-                </div>
-                <Button
-                  variant="outline"
-                  class="relative shrink-0"
-                  @click="isFilterDialogOpen = true"
-                >
-                  <Filter class="size-4 mr-2" />
-                  Filter
-                  <span
-                    v-if="activeFiltersCount > 0"
-                    class="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-primary-foreground"
-                  >
-                    {{ activeFiltersCount }}
-                  </span>
-                </Button>
-              </div>
-            </div>
-          </div>
-
-          <DataTable
-            :columns="tableColumns"
-            :data="assets"
-            :is-loading="loading"
-            item-label="aset"
-          />
+        <div>
+          <CardTitle class="text-xl sm:text-2xl font-bold tracking-tight"
+            >Daftar Aset</CardTitle
+          >
         </div>
-      </Card>
-    </div>
+        <div class="flex items-center gap-2">
+          <Button
+            v-if="can('inventory.create')"
+            size="sm"
+            class="sm:h-10 sm:px-4 text-xs sm:text-sm"
+            @click="openAddForm"
+          >
+            <Plus class="size-4 mr-1 sm:mr-2" />
+            Tambah Aset
+          </Button>
+        </div>
+      </CardHeader>
 
-    <Dialog v-model:open="isFilterDialogOpen">
-      <DialogContent
-        class="sm:max-w-md flex flex-col gap-0 p-0 overflow-hidden"
-      >
-        <DialogHeader class="px-6 py-5 border-b shrink-0 bg-muted/20">
-          <DialogTitle>Filter Aset</DialogTitle>
-          <DialogDescription class="sr-only"> </DialogDescription>
-        </DialogHeader>
-
-        <div class="p-6 space-y-4">
-          <!-- Category -->
-          <div class="space-y-1.5">
-            <label class="text-xs font-semibold text-muted-foreground"
-              >Kategori</label
-            >
+      <div class="p-6">
+        <!-- Filters Section matching Academic Layout -->
+        <div class="mb-6">
+          <!-- Desktop Layout: Inline selects -->
+          <div class="hidden lg:flex lg:flex-row lg:items-center gap-3">
+            <!-- Category -->
             <Select
               :model-value="filters.categoryId"
               @update:model-value="handleFilterChange('categoryId', $event)"
             >
-              <SelectTrigger class="w-full">
+              <SelectTrigger
+                class="w-full lg:w-fit lg:min-w-[150px] px-3! gap-2!"
+              >
                 <SelectValue placeholder="Pilih kategori" />
               </SelectTrigger>
               <SelectContent>
@@ -398,18 +237,15 @@ onMounted(async () => {
                 </SelectItem>
               </SelectContent>
             </Select>
-          </div>
 
-          <!-- Location -->
-          <div class="space-y-1.5">
-            <label class="text-xs font-semibold text-muted-foreground"
-              >Lokasi</label
-            >
+            <!-- Location -->
             <Select
               :model-value="filters.locationId"
               @update:model-value="handleFilterChange('locationId', $event)"
             >
-              <SelectTrigger class="w-full">
+              <SelectTrigger
+                class="w-full lg:w-fit lg:min-w-[140px] px-3! gap-2!"
+              >
                 <SelectValue placeholder="Pilih lokasi" />
               </SelectTrigger>
               <SelectContent>
@@ -423,18 +259,15 @@ onMounted(async () => {
                 </SelectItem>
               </SelectContent>
             </Select>
-          </div>
 
-          <!-- Status -->
-          <div class="space-y-1.5">
-            <label class="text-xs font-semibold text-muted-foreground"
-              >Status</label
-            >
+            <!-- Status -->
             <Select
               :model-value="filters.statusId"
               @update:model-value="handleFilterChange('statusId', $event)"
             >
-              <SelectTrigger class="w-full">
+              <SelectTrigger
+                class="w-full lg:w-fit lg:min-w-[130px] px-3! gap-2!"
+              >
                 <SelectValue placeholder="Pilih status" />
               </SelectTrigger>
               <SelectContent>
@@ -448,18 +281,15 @@ onMounted(async () => {
                 </SelectItem>
               </SelectContent>
             </Select>
-          </div>
 
-          <!-- Condition -->
-          <div class="space-y-1.5">
-            <label class="text-xs font-semibold text-muted-foreground"
-              >Kondisi</label
-            >
+            <!-- Condition -->
             <Select
               :model-value="filters.conditionId"
               @update:model-value="handleFilterChange('conditionId', $event)"
             >
-              <SelectTrigger class="w-full">
+              <SelectTrigger
+                class="w-full lg:w-fit lg:min-w-[135px] px-3! gap-2!"
+              >
                 <SelectValue placeholder="Pilih kondisi" />
               </SelectTrigger>
               <SelectContent>
@@ -473,29 +303,189 @@ onMounted(async () => {
                 </SelectItem>
               </SelectContent>
             </Select>
+
+            <!-- Search Keyword Pushed to Right -->
+            <div class="relative lg:ml-auto lg:w-[240px]">
+              <Search
+                class="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+              />
+              <Input
+                v-model="filters.keyword"
+                placeholder="Cari aset..."
+                class="pl-9"
+              />
+            </div>
+          </div>
+
+          <!-- Mobile Layout: Search + Filter Dialog Button -->
+          <div class="flex flex-col lg:hidden gap-3">
+            <div class="flex items-center gap-2">
+              <div class="relative flex-1">
+                <Search
+                  class="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+                />
+                <Input
+                  v-model="filters.keyword"
+                  placeholder="Cari aset..."
+                  class="pl-9"
+                />
+              </div>
+              <Button
+                variant="outline"
+                class="relative shrink-0"
+                @click="isFilterDialogOpen = true"
+              >
+                <Filter class="size-4 mr-2" />
+                Filter
+                <span
+                  v-if="activeFiltersCount > 0"
+                  class="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-primary-foreground"
+                >
+                  {{ activeFiltersCount }}
+                </span>
+              </Button>
+            </div>
           </div>
         </div>
 
-        <DialogFooter
-          class="px-6 py-4 border-t bg-muted/20 flex flex-row items-center justify-end gap-2"
+        <DataTable
+          :columns="tableColumns"
+          :data="assets"
+          :is-loading="loading"
+          item-label="aset"
+        />
+      </div>
+    </Card>
+  </div>
+
+  <Dialog v-model:open="isFilterDialogOpen">
+    <DialogContent class="sm:max-w-md flex flex-col gap-0 p-0 overflow-hidden">
+      <DialogHeader class="px-6 py-5 border-b shrink-0 bg-muted/20">
+        <DialogTitle>Filter Aset</DialogTitle>
+        <DialogDescription class="sr-only"> </DialogDescription>
+      </DialogHeader>
+
+      <div class="p-6 space-y-4">
+        <!-- Category -->
+        <div class="space-y-1.5">
+          <label class="text-xs font-semibold text-muted-foreground"
+            >Kategori</label
+          >
+          <Select
+            :model-value="filters.categoryId"
+            @update:model-value="handleFilterChange('categoryId', $event)"
+          >
+            <SelectTrigger class="w-full">
+              <SelectValue placeholder="Pilih kategori" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Semua Kategori</SelectItem>
+              <SelectItem
+                v-for="cat in metadata.categories"
+                :key="cat.id"
+                :value="cat.id"
+              >
+                {{ cat.name }}
+              </SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <!-- Location -->
+        <div class="space-y-1.5">
+          <label class="text-xs font-semibold text-muted-foreground"
+            >Lokasi</label
+          >
+          <Select
+            :model-value="filters.locationId"
+            @update:model-value="handleFilterChange('locationId', $event)"
+          >
+            <SelectTrigger class="w-full">
+              <SelectValue placeholder="Pilih lokasi" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Semua Lokasi</SelectItem>
+              <SelectItem
+                v-for="loc in metadata.locations"
+                :key="loc.id"
+                :value="loc.id"
+              >
+                {{ loc.name }}
+              </SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <!-- Status -->
+        <div class="space-y-1.5">
+          <label class="text-xs font-semibold text-muted-foreground"
+            >Status</label
+          >
+          <Select
+            :model-value="filters.statusId"
+            @update:model-value="handleFilterChange('statusId', $event)"
+          >
+            <SelectTrigger class="w-full">
+              <SelectValue placeholder="Pilih status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Semua Status</SelectItem>
+              <SelectItem
+                v-for="status in metadata.statuses"
+                :key="status.id"
+                :value="status.id"
+              >
+                {{ status.name }}
+              </SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <!-- Condition -->
+        <div class="space-y-1.5">
+          <label class="text-xs font-semibold text-muted-foreground"
+            >Kondisi</label
+          >
+          <Select
+            :model-value="filters.conditionId"
+            @update:model-value="handleFilterChange('conditionId', $event)"
+          >
+            <SelectTrigger class="w-full">
+              <SelectValue placeholder="Pilih kondisi" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Semua Kondisi</SelectItem>
+              <SelectItem
+                v-for="cond in metadata.conditions"
+                :key="cond.id"
+                :value="cond.id"
+              >
+                {{ cond.name }}
+              </SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      <DialogFooter
+        class="px-6 py-4 border-t bg-muted/20 flex flex-row items-center justify-end gap-2"
+      >
+        <Button
+          variant="outline"
+          size="sm"
+          class="flex-1 sm:flex-none"
+          @click="resetAllFilters"
         >
-          <Button
-            variant="outline"
-            size="sm"
-            class="flex-1 sm:flex-none"
-            @click="resetAllFilters"
-          >
-            Atur Ulang
-          </Button>
-          <Button
-            size="sm"
-            class="flex-1 sm:flex-none"
-            @click="isFilterDialogOpen = false"
-          >
-            Tutup
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  </AppLayout>
+          Atur Ulang
+        </Button>
+        <Button
+          size="sm"
+          class="flex-1 sm:flex-none"
+          @click="isFilterDialogOpen = false"
+        >
+          Tutup
+        </Button>
+      </DialogFooter>
+    </DialogContent>
+  </Dialog>
 </template>

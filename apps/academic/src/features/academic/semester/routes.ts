@@ -9,6 +9,10 @@ export const semesterRoutes: RouteRecordRaw[] = [
       requiresAuth: true,
       requiredPermission: 'semesters.read',
       title: 'Semester',
+      breadcrumbs: [
+        { title: 'Akademik', href: '#' },
+        { title: 'Semester', href: '/academic/semester' },
+      ],
     },
   },
   {
@@ -19,6 +23,11 @@ export const semesterRoutes: RouteRecordRaw[] = [
       requiresAuth: true,
       requiredPermission: 'semesters.read',
       title: 'Kenaikan Kelas',
+      breadcrumbs: [
+        { title: 'Akademik', href: '#' },
+        { title: 'Semester', href: '/academic/semester' },
+        { title: 'Kenaikan Kelas', href: '/academic/semester/promotion' },
+      ],
     },
   },
 ]

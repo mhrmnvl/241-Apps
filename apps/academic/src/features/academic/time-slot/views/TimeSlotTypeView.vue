@@ -2,7 +2,6 @@
 import { onMounted, ref } from 'vue'
 import { toast } from 'vue-sonner'
 import { Plus } from 'lucide-vue-next'
-import AppLayout from '@/layouts/AppLayout.vue'
 import { DataTable } from '@/ui'
 import { Button } from '@/ui/button'
 import { Card, CardHeader, CardTitle } from '@/ui/card'
@@ -12,11 +11,6 @@ import { timeSlotApi } from '../api/timeSlotApi'
 import { createTimeSlotTypeColumns } from '../components/timeSlotTypeColumns'
 import TimeSlotTypeFormDialog from '../components/TimeSlotTypeFormDialog.vue'
 import type { TimeSlotType } from '../types'
-
-const breadcrumbs = [
-  { title: 'Referensi', href: '#' },
-  { title: 'Tipe Jam', href: '/setting/time-slot-type' },
-]
 
 const { can } = useRoleGuard()
 
@@ -72,51 +66,49 @@ onMounted(fetchTypes)
 </script>
 
 <template>
-  <AppLayout :breadcrumbs="breadcrumbs">
-    <div class="p-4 md:p-6 lg:p-8">
-      <Card
-        class="overflow-hidden rounded-2xl shadow-sm shadow-black/5 ring-1 ring-black/4"
+  <div class="p-4 md:p-6 lg:p-8">
+    <Card
+      class="overflow-hidden rounded-2xl shadow-sm shadow-black/5 ring-1 ring-black/4"
+    >
+      <CardHeader
+        class="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b px-6 py-5 gap-4"
       >
-        <CardHeader
-          class="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b px-6 py-5 gap-4"
+        <CardTitle class="text-2xl font-bold tracking-tight">
+          Tipe Jam
+        </CardTitle>
+        <Button
+          v-if="can('time-slots.create')"
+          class="w-full sm:w-auto"
+          @click="isAddOpen = true"
         >
-          <CardTitle class="text-2xl font-bold tracking-tight">
-            Tipe Jam
-          </CardTitle>
-          <Button
-            v-if="can('time-slots.create')"
-            class="w-full sm:w-auto"
-            @click="isAddOpen = true"
-          >
-            <Plus class="size-4 mr-2" />
-            Tambah Tipe
-          </Button>
-        </CardHeader>
+          <Plus class="size-4 mr-2" />
+          Tambah Tipe
+        </Button>
+      </CardHeader>
 
-        <div class="p-6">
-          <DataTable
-            :columns="columns"
-            :data="data"
-            :is-loading="isLoading"
-            item-label="tipe jam"
-            filter-column="name"
-            filter-placeholder="Cari tipe jam..."
-          />
-        </div>
-      </Card>
+      <div class="p-6">
+        <DataTable
+          :columns="columns"
+          :data="data"
+          :is-loading="isLoading"
+          item-label="tipe jam"
+          filter-column="name"
+          filter-placeholder="Cari tipe jam..."
+        />
+      </div>
+    </Card>
 
-      <TimeSlotTypeFormDialog
-        v-if="can('time-slots.create')"
-        v-model:open="isAddOpen"
-        @success="fetchTypes"
-      />
+    <TimeSlotTypeFormDialog
+      v-if="can('time-slots.create')"
+      v-model:open="isAddOpen"
+      @success="fetchTypes"
+    />
 
-      <TimeSlotTypeFormDialog
-        v-if="can('time-slots.update')"
-        v-model:open="isEditOpen"
-        :initial-data="selectedItem"
-        @success="fetchTypes"
-      />
-    </div>
-  </AppLayout>
+    <TimeSlotTypeFormDialog
+      v-if="can('time-slots.update')"
+      v-model:open="isEditOpen"
+      :initial-data="selectedItem"
+      @success="fetchTypes"
+    />
+  </div>
 </template>

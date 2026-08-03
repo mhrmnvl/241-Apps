@@ -9,6 +9,7 @@ export const schoolUnitRoutes: RouteRecordRaw[] = [
       requiresAuth: true,
       requiredPermission: 'school-units.read',
       title: 'Kelembagaan',
+      breadcrumbs: [{ title: 'Profil Sekolah', href: '/school-unit' }],
     },
   },
   {
@@ -19,6 +20,10 @@ export const schoolUnitRoutes: RouteRecordRaw[] = [
       requiresAuth: true,
       requiredPermission: 'school-units.read',
       title: 'Ubah Data Kelembagaan',
+      breadcrumbs: [
+        { title: 'Profil Sekolah', href: '/school-unit' },
+        { title: 'Ubah Profil', href: '/school-unit/edit' },
+      ],
     },
   },
 ]

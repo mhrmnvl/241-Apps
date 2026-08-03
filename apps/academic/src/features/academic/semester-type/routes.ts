@@ -8,6 +8,10 @@ export const semesterTypeRoutes: RouteRecordRaw[] = [
     meta: {
       title: 'Tipe Semester',
       requiresAuth: true,
+      breadcrumbs: [
+        { title: 'Pengaturan', href: '#' },
+        { title: 'Tipe Semester', href: '/setting/semester-type' },
+      ],
     },
   },
 ]

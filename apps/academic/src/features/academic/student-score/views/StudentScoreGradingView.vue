@@ -1,7 +1,7 @@
 ﻿<script setup lang="ts">
 import StudentScoreInputTable from '../components/StudentScoreInputTable.vue'
 import { useStudentScore } from '../composables/useStudentScore'
-import AppLayout from '@/layouts/AppLayout.vue'
+import { useBreadcrumbs } from '@/shared/composables/useBreadcrumbs'
 import { Alert, AlertDescription } from '@/ui/alert'
 import { Button } from '@/ui/button'
 import { Card, CardHeader, CardTitle, CardDescription } from '@/ui/card'
@@ -36,7 +36,7 @@ const {
   saveRoster,
 } = useStudentScore()
 
-const breadcrumbs = computed(() => [
+useBreadcrumbs(() => [
   { title: 'Penilaian', href: '#' },
   { title: 'Tugas & Nilai', href: '/academic/student-score' },
   { title: assessmentItem.value?.name ?? 'Nilai', href: route.path },
@@ -55,58 +55,56 @@ onMounted(() => {
 </script>
 
 <template>
-  <AppLayout :breadcrumbs="breadcrumbs">
-    <div class="p-4 md:p-6 lg:p-8">
-      <Card
-        class="overflow-hidden rounded-2xl shadow-sm shadow-black/5 ring-1 ring-black/4"
+  <div class="p-4 md:p-6 lg:p-8">
+    <Card
+      class="overflow-hidden rounded-2xl shadow-sm shadow-black/5 ring-1 ring-black/4"
+    >
+      <CardHeader
+        class="flex flex-col items-start justify-between gap-2 border-b px-6 py-5 sm:flex-row sm:items-center"
       >
-        <CardHeader
-          class="flex flex-col items-start justify-between gap-2 border-b px-6 py-5 sm:flex-row sm:items-center"
-        >
-          <div>
-            <div class="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                size="icon"
-                class="size-8"
-                @click="router.push('/academic/student-score')"
-              >
-                <ArrowLeft class="size-4" />
-              </Button>
-              <CardTitle class="text-2xl font-bold tracking-tight">
-                {{ assessmentItem?.name ?? 'Nilai Siswa' }}
-              </CardTitle>
-            </div>
-            <CardDescription
-              v-if="assessmentItem"
-              class="mt-1 ml-10"
+        <div>
+          <div class="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              class="size-8"
+              @click="router.push('/academic/student-score')"
             >
-              {{ TYPE_LABELS[assessmentItem.type] ?? assessmentItem.type }} ·
-              Bobot {{ assessmentItem.weight }}% · Skor Maks
-              {{ assessmentItem.maxScore }}
-            </CardDescription>
+              <ArrowLeft class="size-4" />
+            </Button>
+            <CardTitle class="text-2xl font-bold tracking-tight">
+              {{ assessmentItem?.name ?? 'Nilai Siswa' }}
+            </CardTitle>
           </div>
-        </CardHeader>
-
-        <div class="space-y-4 p-6">
-          <Alert
-            v-if="formError"
-            variant="destructive"
+          <CardDescription
+            v-if="assessmentItem"
+            class="mt-1 ml-10"
           >
-            <AlertCircle class="size-4" />
-            <AlertDescription>{{ formError }}</AlertDescription>
-          </Alert>
-
-          <StudentScoreInputTable
-            v-model:rows="roster"
-            :loading="loading"
-            :is-saving="isSaving"
-            :max-score="assessmentItem?.maxScore ?? 100"
-            :can-save="canManage"
-            @save="handleSave"
-          />
+            {{ TYPE_LABELS[assessmentItem.type] ?? assessmentItem.type }} ·
+            Bobot {{ assessmentItem.weight }}% · Skor Maks
+            {{ assessmentItem.maxScore }}
+          </CardDescription>
         </div>
-      </Card>
-    </div>
-  </AppLayout>
+      </CardHeader>
+
+      <div class="space-y-4 p-6">
+        <Alert
+          v-if="formError"
+          variant="destructive"
+        >
+          <AlertCircle class="size-4" />
+          <AlertDescription>{{ formError }}</AlertDescription>
+        </Alert>
+
+        <StudentScoreInputTable
+          v-model:rows="roster"
+          :loading="loading"
+          :is-saving="isSaving"
+          :max-score="assessmentItem?.maxScore ?? 100"
+          :can-save="canManage"
+          @save="handleSave"
+        />
+      </div>
+    </Card>
+  </div>
 </template>

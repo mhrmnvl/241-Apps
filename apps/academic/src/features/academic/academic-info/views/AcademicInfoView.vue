@@ -1,13 +1,10 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
-import AppLayout from '@/layouts/AppLayout.vue'
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/card'
 import { Badge } from '@/ui/badge'
 import { Skeleton } from '@/ui/skeleton'
 import { CalendarDays, BookOpen, Megaphone, Clock } from 'lucide-vue-next'
 import { useAcademicInfo } from '../composables/useAcademicInfo'
-
-const breadcrumbs = [{ title: 'Informasi Akademik' }]
 
 const {
   todayLabel,
@@ -40,203 +37,197 @@ onMounted(init)
 </script>
 
 <template>
-  <AppLayout :breadcrumbs="breadcrumbs">
-    <div class="p-4 md:p-6 lg:p-8 space-y-6">
-      <!-- Jadwal Hari Ini -->
+  <div class="p-4 md:p-6 lg:p-8 space-y-6">
+    <!-- Jadwal Hari Ini -->
+    <Card
+      class="overflow-hidden rounded-2xl shadow-sm shadow-black/5 ring-1 ring-black/4"
+    >
+      <CardHeader class="flex flex-row items-center gap-3 border-b px-6 py-5">
+        <BookOpen class="size-5 text-primary" />
+        <div>
+          <CardTitle class="text-xl font-bold tracking-tight">
+            Jadwal Hari Ini
+          </CardTitle>
+          <p class="text-sm text-muted-foreground mt-0.5">{{ todayLabel }}</p>
+        </div>
+      </CardHeader>
+      <CardContent class="p-6">
+        <div
+          v-if="isLoadingSchedule"
+          class="space-y-3"
+        >
+          <Skeleton
+            v-for="i in 4"
+            :key="i"
+            class="h-14 w-full rounded-xl"
+          />
+        </div>
+        <div
+          v-else-if="todayLessons.length === 0"
+          class="text-center text-sm text-muted-foreground py-10 border border-dashed rounded-xl"
+        >
+          Tidak ada pelajaran hari ini.
+        </div>
+        <div
+          v-else
+          class="space-y-3"
+        >
+          <div
+            v-for="row in todayLessons"
+            :key="row.timeSlot.id"
+            class="flex items-center gap-4 rounded-xl border bg-muted/30 px-4 py-3"
+          >
+            <div
+              class="flex flex-col items-center justify-center min-w-[56px] text-center"
+            >
+              <span class="text-xs font-semibold text-primary">{{
+                row.timeSlot.startTime
+              }}</span>
+              <span class="text-[10px] text-muted-foreground">{{
+                row.timeSlot.endTime
+              }}</span>
+            </div>
+            <div class="h-8 w-px bg-border" />
+            <div class="flex-1 min-w-0">
+              <p class="font-semibold text-sm truncate">
+                {{ row.lesson?.subject?.name ?? '-' }}
+              </p>
+              <p class="text-xs text-muted-foreground truncate">
+                {{
+                  row.lesson?.teacher?.user?.profile?.name ??
+                  'Guru belum diatur'
+                }}
+              </p>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+
+    <div class="grid gap-6 md:grid-cols-2">
+      <!-- Kegiatan Mendatang -->
       <Card
         class="overflow-hidden rounded-2xl shadow-sm shadow-black/5 ring-1 ring-black/4"
       >
         <CardHeader class="flex flex-row items-center gap-3 border-b px-6 py-5">
-          <BookOpen class="size-5 text-primary" />
-          <div>
-            <CardTitle class="text-xl font-bold tracking-tight">
-              Jadwal Hari Ini
-            </CardTitle>
-            <p class="text-sm text-muted-foreground mt-0.5">{{ todayLabel }}</p>
-          </div>
+          <CalendarDays class="size-5 text-primary" />
+          <CardTitle class="text-xl font-bold tracking-tight">
+            Kegiatan Mendatang
+          </CardTitle>
         </CardHeader>
         <CardContent class="p-6">
           <div
-            v-if="isLoadingSchedule"
+            v-if="isLoadingEvents"
             class="space-y-3"
           >
             <Skeleton
-              v-for="i in 4"
+              v-for="i in 3"
               :key="i"
               class="h-14 w-full rounded-xl"
             />
           </div>
           <div
-            v-else-if="todayLessons.length === 0"
+            v-else-if="upcomingEvents.length === 0"
             class="text-center text-sm text-muted-foreground py-10 border border-dashed rounded-xl"
           >
-            Tidak ada pelajaran hari ini.
+            Tidak ada kegiatan mendatang.
           </div>
           <div
             v-else
             class="space-y-3"
           >
             <div
-              v-for="row in todayLessons"
-              :key="row.timeSlot.id"
-              class="flex items-center gap-4 rounded-xl border bg-muted/30 px-4 py-3"
+              v-for="event in upcomingEvents"
+              :key="event.id"
+              class="rounded-xl border bg-muted/30 px-4 py-3"
             >
-              <div
-                class="flex flex-col items-center justify-center min-w-[56px] text-center"
-              >
-                <span class="text-xs font-semibold text-primary">{{
-                  row.timeSlot.startTime
-                }}</span>
-                <span class="text-[10px] text-muted-foreground">{{
-                  row.timeSlot.endTime
-                }}</span>
+              <div class="flex items-start justify-between gap-2">
+                <p class="font-semibold text-sm line-clamp-1">
+                  {{ event.title }}
+                </p>
+                <Badge
+                  variant="secondary"
+                  class="shrink-0 text-xs"
+                >
+                  {{ formatDate(event.startTime) }}
+                </Badge>
               </div>
-              <div class="h-8 w-px bg-border" />
-              <div class="flex-1 min-w-0">
-                <p class="font-semibold text-sm truncate">
-                  {{ row.lesson?.subject?.name ?? '-' }}
-                </p>
-                <p class="text-xs text-muted-foreground truncate">
-                  {{
-                    row.lesson?.teacher?.user?.profile?.name ??
-                    'Guru belum diatur'
-                  }}
-                </p>
+              <p
+                v-if="event.description"
+                class="text-xs text-muted-foreground mt-1 line-clamp-2"
+              >
+                {{ event.description }}
+              </p>
+              <div
+                class="flex items-center gap-1 mt-1.5 text-xs text-muted-foreground"
+              >
+                <Clock class="size-3" />
+                {{ formatTime(event.startTime) }} –
+                {{ formatTime(event.endTime) }}
               </div>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      <div class="grid gap-6 md:grid-cols-2">
-        <!-- Kegiatan Mendatang -->
-        <Card
-          class="overflow-hidden rounded-2xl shadow-sm shadow-black/5 ring-1 ring-black/4"
-        >
-          <CardHeader
-            class="flex flex-row items-center gap-3 border-b px-6 py-5"
+      <!-- Pengumuman Terbaru -->
+      <Card
+        class="overflow-hidden rounded-2xl shadow-sm shadow-black/5 ring-1 ring-black/4"
+      >
+        <CardHeader class="flex flex-row items-center gap-3 border-b px-6 py-5">
+          <Megaphone class="size-5 text-primary" />
+          <CardTitle class="text-xl font-bold tracking-tight">
+            Pengumuman Terbaru
+          </CardTitle>
+        </CardHeader>
+        <CardContent class="p-6">
+          <div
+            v-if="isLoadingAnnouncements"
+            class="space-y-3"
           >
-            <CalendarDays class="size-5 text-primary" />
-            <CardTitle class="text-xl font-bold tracking-tight">
-              Kegiatan Mendatang
-            </CardTitle>
-          </CardHeader>
-          <CardContent class="p-6">
-            <div
-              v-if="isLoadingEvents"
-              class="space-y-3"
-            >
-              <Skeleton
-                v-for="i in 3"
-                :key="i"
-                class="h-14 w-full rounded-xl"
-              />
-            </div>
-            <div
-              v-else-if="upcomingEvents.length === 0"
-              class="text-center text-sm text-muted-foreground py-10 border border-dashed rounded-xl"
-            >
-              Tidak ada kegiatan mendatang.
-            </div>
-            <div
-              v-else
-              class="space-y-3"
-            >
-              <div
-                v-for="event in upcomingEvents"
-                :key="event.id"
-                class="rounded-xl border bg-muted/30 px-4 py-3"
-              >
-                <div class="flex items-start justify-between gap-2">
-                  <p class="font-semibold text-sm line-clamp-1">
-                    {{ event.title }}
-                  </p>
-                  <Badge
-                    variant="secondary"
-                    class="shrink-0 text-xs"
-                  >
-                    {{ formatDate(event.startTime) }}
-                  </Badge>
-                </div>
-                <p
-                  v-if="event.description"
-                  class="text-xs text-muted-foreground mt-1 line-clamp-2"
-                >
-                  {{ event.description }}
-                </p>
-                <div
-                  class="flex items-center gap-1 mt-1.5 text-xs text-muted-foreground"
-                >
-                  <Clock class="size-3" />
-                  {{ formatTime(event.startTime) }} –
-                  {{ formatTime(event.endTime) }}
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <!-- Pengumuman Terbaru -->
-        <Card
-          class="overflow-hidden rounded-2xl shadow-sm shadow-black/5 ring-1 ring-black/4"
-        >
-          <CardHeader
-            class="flex flex-row items-center gap-3 border-b px-6 py-5"
+            <Skeleton
+              v-for="i in 3"
+              :key="i"
+              class="h-14 w-full rounded-xl"
+            />
+          </div>
+          <div
+            v-else-if="recentAnnouncements.length === 0"
+            class="text-center text-sm text-muted-foreground py-10 border border-dashed rounded-xl"
           >
-            <Megaphone class="size-5 text-primary" />
-            <CardTitle class="text-xl font-bold tracking-tight">
-              Pengumuman Terbaru
-            </CardTitle>
-          </CardHeader>
-          <CardContent class="p-6">
+            Tidak ada pengumuman terbaru.
+          </div>
+          <div
+            v-else
+            class="space-y-3"
+          >
             <div
-              v-if="isLoadingAnnouncements"
-              class="space-y-3"
+              v-for="item in recentAnnouncements"
+              :key="item.id"
+              class="rounded-xl border bg-muted/30 px-4 py-3"
             >
-              <Skeleton
-                v-for="i in 3"
-                :key="i"
-                class="h-14 w-full rounded-xl"
-              />
-            </div>
-            <div
-              v-else-if="recentAnnouncements.length === 0"
-              class="text-center text-sm text-muted-foreground py-10 border border-dashed rounded-xl"
-            >
-              Tidak ada pengumuman terbaru.
-            </div>
-            <div
-              v-else
-              class="space-y-3"
-            >
-              <div
-                v-for="item in recentAnnouncements"
-                :key="item.id"
-                class="rounded-xl border bg-muted/30 px-4 py-3"
-              >
-                <div class="flex items-start justify-between gap-2">
-                  <p class="font-semibold text-sm line-clamp-1">
-                    {{ item.title }}
-                  </p>
-                  <span
-                    class="shrink-0 text-xs text-muted-foreground whitespace-nowrap"
-                  >
-                    {{
-                      new Date(item.date).toLocaleDateString('id-ID', {
-                        day: 'numeric',
-                        month: 'short',
-                      })
-                    }}
-                  </span>
-                </div>
-                <p class="text-xs text-muted-foreground mt-1 line-clamp-2">
-                  {{ item.description }}
+              <div class="flex items-start justify-between gap-2">
+                <p class="font-semibold text-sm line-clamp-1">
+                  {{ item.title }}
                 </p>
+                <span
+                  class="shrink-0 text-xs text-muted-foreground whitespace-nowrap"
+                >
+                  {{
+                    new Date(item.date).toLocaleDateString('id-ID', {
+                      day: 'numeric',
+                      month: 'short',
+                    })
+                  }}
+                </span>
               </div>
+              <p class="text-xs text-muted-foreground mt-1 line-clamp-2">
+                {{ item.description }}
+              </p>
             </div>
-          </CardContent>
-        </Card>
-      </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
-  </AppLayout>
+  </div>
 </template>

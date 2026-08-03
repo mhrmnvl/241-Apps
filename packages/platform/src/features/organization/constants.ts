@@ -6,10 +6,3 @@ export const EMPTY_ORGANIZATION: Organization = {
   email: '',
   phoneNumber: '',
 }
-
-export const breadcrumbs = [{ title: 'Profil Yayasan', href: '/organization' }]
-
-export const editBreadcrumbs = [
-  { title: 'Profil Yayasan', href: '/organization' },
-  { title: 'Ubah Data', href: '/organization/edit' },
-]

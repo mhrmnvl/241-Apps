@@ -9,6 +9,10 @@ export const userRoleRoutes: RouteRecordRaw[] = [
       title: 'Kelola Pengguna',
       requiresAuth: true,
       requiredPermission: 'users.read',
+      breadcrumbs: [
+        { title: 'Pengaturan', href: '#' },
+        { title: 'Kelola Pengguna', href: '/setting/user' },
+      ],
     },
   },
   {
@@ -19,6 +23,11 @@ export const userRoleRoutes: RouteRecordRaw[] = [
       title: 'Ubah Akun Pengguna',
       requiresAuth: true,
       requiredPermission: 'users.update',
+      breadcrumbs: [
+        { title: 'Pengaturan', href: '#' },
+        { title: 'Kelola Pengguna', href: '/setting/user' },
+        { title: 'Ubah Akun' },
+      ],
     },
   },
 ]

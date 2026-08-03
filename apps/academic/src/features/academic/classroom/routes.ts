@@ -9,6 +9,10 @@ export const classroomRoutes: RouteRecordRaw[] = [
       requiresAuth: true,
       requiredPermission: 'classrooms.read',
       title: 'Kelas',
+      breadcrumbs: [
+        { title: 'Akademik', href: '#' },
+        { title: 'Kelas', href: '/academic/classroom' },
+      ],
     },
   },
   {

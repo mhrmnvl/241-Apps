@@ -9,6 +9,10 @@ export const auditLogsRoutes: RouteRecordRaw[] = [
       title: 'Log Aktivitas',
       requiresAuth: true,
       requiredPermission: 'audit-logs.read',
+      breadcrumbs: [
+        { title: 'Pengaturan', href: '#' },
+        { title: 'Log Aktivitas', href: '/setting/audit-log' },
+      ],
     },
   },
 ]

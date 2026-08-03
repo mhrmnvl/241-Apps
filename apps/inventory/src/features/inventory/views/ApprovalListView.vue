@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import AppLayout from '@/layouts/AppLayout.vue'
 import { DataTable } from '@/ui'
 import { Button } from '@/ui/button'
 import { Card, CardHeader, CardTitle, CardContent } from '@/ui/card'
@@ -25,11 +24,6 @@ import type {
   ApprovalStep,
   InventoryLoanItem,
 } from '../types'
-
-const breadcrumbs = [
-  { title: 'Inventaris', href: '#' },
-  { title: 'Daftar Persetujuan' },
-]
 
 // State
 const pendingApprovals = ref<ApprovalInstance[]>([])
@@ -159,129 +153,123 @@ onMounted(() => {
 </script>
 
 <template>
-  <AppLayout :breadcrumbs="breadcrumbs">
-    <div class="p-4 md:p-6 lg:p-8">
-      <Card
-        class="overflow-hidden rounded-2xl shadow-sm shadow-black/5 ring-1 ring-black/4"
-      >
-        <CardHeader class="border-b px-6 py-5">
-          <CardTitle class="text-2xl font-bold tracking-tight"
-            >Daftar Persetujuan</CardTitle
-          >
-          <p class="text-sm text-muted-foreground mt-1">
-            Periksa dan proses pengajuan peminjaman aset logistik sekolah sesuai
-            otorisasi Anda.
-          </p>
-        </CardHeader>
-        <CardContent class="p-6">
-          <DataTable
-            :columns="columns"
-            :data="pendingApprovals"
-            :loading="loading"
-          />
-        </CardContent>
-      </Card>
-    </div>
-
-    <!-- Process Action Dialog -->
-    <Dialog
-      :open="isActionOpen"
-      @update:open="isActionOpen = $event"
+  <div class="p-4 md:p-6 lg:p-8">
+    <Card
+      class="overflow-hidden rounded-2xl shadow-sm shadow-black/5 ring-1 ring-black/4"
     >
-      <DialogContent class="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle>Detail Pengajuan Peminjaman</DialogTitle>
-          <DialogDescription>
-            Tinjau pengajuan pinjam sebelum menyetujui atau menolak.
-          </DialogDescription>
-        </DialogHeader>
-
-        <div
-          v-if="selectedApproval"
-          class="space-y-4 py-2 text-sm"
+      <CardHeader class="border-b px-6 py-5">
+        <CardTitle class="text-2xl font-bold tracking-tight"
+          >Daftar Persetujuan</CardTitle
         >
-          <!-- Request Details -->
-          <div
-            class="grid grid-cols-3 gap-y-2 border p-3 rounded-lg bg-muted/40"
-          >
-            <span class="text-muted-foreground font-medium"
-              >No. Peminjaman</span
-            >
-            <span class="col-span-2 text-foreground font-semibold">{{
-              selectedApproval.details?.loanNumber
-            }}</span>
+        <p class="text-sm text-muted-foreground mt-1">
+          Periksa dan proses pengajuan peminjaman aset logistik sekolah sesuai
+          otorisasi Anda.
+        </p>
+      </CardHeader>
+      <CardContent class="p-6">
+        <DataTable
+          :columns="columns"
+          :data="pendingApprovals"
+          :loading="loading"
+        />
+      </CardContent>
+    </Card>
+  </div>
 
-            <span class="text-muted-foreground font-medium">Tujuan</span>
-            <span class="col-span-2 text-foreground">{{
-              selectedApproval.details?.purpose
-            }}</span>
+  <!-- Process Action Dialog -->
+  <Dialog
+    :open="isActionOpen"
+    @update:open="isActionOpen = $event"
+  >
+    <DialogContent class="sm:max-w-[500px]">
+      <DialogHeader>
+        <DialogTitle>Detail Pengajuan Peminjaman</DialogTitle>
+        <DialogDescription>
+          Tinjau pengajuan pinjam sebelum menyetujui atau menolak.
+        </DialogDescription>
+      </DialogHeader>
 
-            <span class="text-muted-foreground font-medium">Batas Kembali</span>
-            <span class="col-span-2 text-foreground">
-              {{
-                selectedApproval.details?.expectedReturnDate
-                  ? new Date(
-                      selectedApproval.details.expectedReturnDate,
-                    ).toLocaleDateString('id-ID')
-                  : '-'
-              }}
-            </span>
+      <div
+        v-if="selectedApproval"
+        class="space-y-4 py-2 text-sm"
+      >
+        <!-- Request Details -->
+        <div class="grid grid-cols-3 gap-y-2 border p-3 rounded-lg bg-muted/40">
+          <span class="text-muted-foreground font-medium">No. Peminjaman</span>
+          <span class="col-span-2 text-foreground font-semibold">{{
+            selectedApproval.details?.loanNumber
+          }}</span>
 
-            <span class="text-muted-foreground font-medium">Aset Diajukan</span>
-            <span class="col-span-2 text-foreground">
-              <ul class="list-disc pl-4 space-y-1">
-                <li
-                  v-for="item in selectedApproval.details?.items"
-                  :key="item.id"
-                >
-                  {{ item.unit?.asset?.name }} ({{ item.unit?.unitNumber }})
-                </li>
-              </ul>
-            </span>
-          </div>
+          <span class="text-muted-foreground font-medium">Tujuan</span>
+          <span class="col-span-2 text-foreground">{{
+            selectedApproval.details?.purpose
+          }}</span>
 
-          <!-- Note Input -->
-          <div class="space-y-1">
-            <Label for="note">Catatan Keputusan</Label>
-            <Input
-              id="note"
-              v-model="actionForm.note"
-              placeholder="Tulis catatan persetujuan atau alasan penolakan..."
-            />
-          </div>
+          <span class="text-muted-foreground font-medium">Batas Kembali</span>
+          <span class="col-span-2 text-foreground">
+            {{
+              selectedApproval.details?.expectedReturnDate
+                ? new Date(
+                    selectedApproval.details.expectedReturnDate,
+                  ).toLocaleDateString('id-ID')
+                : '-'
+            }}
+          </span>
 
-          <DialogFooter class="pt-4 flex sm:justify-between">
-            <Button
-              class="mr-auto sm:mr-0"
-              type="button"
-              variant="outline"
-              @click="isActionOpen = false"
-              >Batal</Button
-            >
-
-            <div class="flex space-x-2">
-              <Button
-                type="button"
-                variant="destructive"
-                :disabled="isSubmitting"
-                @click="processApproval('REJECT')"
+          <span class="text-muted-foreground font-medium">Aset Diajukan</span>
+          <span class="col-span-2 text-foreground">
+            <ul class="list-disc pl-4 space-y-1">
+              <li
+                v-for="item in selectedApproval.details?.items"
+                :key="item.id"
               >
-                <X class="size-4 mr-1.5" />
-                Tolak
-              </Button>
-              <Button
-                class="bg-emerald-600 hover:bg-emerald-700 text-white"
-                type="button"
-                :disabled="isSubmitting"
-                @click="processApproval('APPROVE')"
-              >
-                <Check class="size-4 mr-1.5" />
-                Setujui
-              </Button>
-            </div>
-          </DialogFooter>
+                {{ item.unit?.asset?.name }} ({{ item.unit?.unitNumber }})
+              </li>
+            </ul>
+          </span>
         </div>
-      </DialogContent>
-    </Dialog>
-  </AppLayout>
+
+        <!-- Note Input -->
+        <div class="space-y-1">
+          <Label for="note">Catatan Keputusan</Label>
+          <Input
+            id="note"
+            v-model="actionForm.note"
+            placeholder="Tulis catatan persetujuan atau alasan penolakan..."
+          />
+        </div>
+
+        <DialogFooter class="pt-4 flex sm:justify-between">
+          <Button
+            class="mr-auto sm:mr-0"
+            type="button"
+            variant="outline"
+            @click="isActionOpen = false"
+            >Batal</Button
+          >
+
+          <div class="flex space-x-2">
+            <Button
+              type="button"
+              variant="destructive"
+              :disabled="isSubmitting"
+              @click="processApproval('REJECT')"
+            >
+              <X class="size-4 mr-1.5" />
+              Tolak
+            </Button>
+            <Button
+              class="bg-emerald-600 hover:bg-emerald-700 text-white"
+              type="button"
+              :disabled="isSubmitting"
+              @click="processApproval('APPROVE')"
+            >
+              <Check class="size-4 mr-1.5" />
+              Setujui
+            </Button>
+          </div>
+        </DialogFooter>
+      </div>
+    </DialogContent>
+  </Dialog>
 </template>

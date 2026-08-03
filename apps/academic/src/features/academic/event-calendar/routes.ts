@@ -9,6 +9,10 @@ export const eventCalendarRoutes: RouteRecordRaw[] = [
       requiresAuth: true,
       requiredPermission: 'events.read',
       title: 'Kalender Kegiatan',
+      breadcrumbs: [
+        { title: 'Akademik', href: '#' },
+        { title: 'Kalender Kegiatan' },
+      ],
     },
   },
 ]

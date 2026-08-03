@@ -9,6 +9,10 @@ export const positionRoutes: RouteRecordRaw[] = [
       requiresAuth: true,
       requiredPermission: 'positions.read',
       title: 'Kelola Jabatan',
+      breadcrumbs: [
+        { title: 'Pengaturan', href: '#' },
+        { title: 'Jabatan', href: '/setting/position' },
+      ],
     },
   },
 ]

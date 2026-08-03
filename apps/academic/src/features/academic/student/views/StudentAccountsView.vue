@@ -1,7 +1,6 @@
 ﻿<script setup lang="ts">
 import { useStudent } from '../composables/useStudent'
 import { createAccountColumns } from '../components/columns'
-import AppLayout from '@/layouts/AppLayout.vue'
 import { DataTable } from '@/ui'
 import { Card, CardHeader, CardTitle } from '@/ui/card'
 import { Button } from '@/ui/button'
@@ -71,11 +70,6 @@ const tableColumns = computed(() =>
     grades.value,
   ),
 )
-
-const breadcrumbs = [
-  { title: 'Siswa', href: '/student' },
-  { title: 'Akun Siswa' },
-]
 
 const {
   students,
@@ -152,130 +146,27 @@ onMounted(async () => {
 </script>
 
 <template>
-  <AppLayout :breadcrumbs="breadcrumbs">
-    <div class="p-4 md:p-6 lg:p-8">
-      <Card
-        class="overflow-hidden rounded-2xl shadow-sm shadow-black/5 ring-1 ring-black/4"
-      >
-        <CardHeader class="border-b px-6 py-5">
-          <CardTitle class="text-2xl font-bold tracking-tight">
-            Akun Siswa
-          </CardTitle>
-        </CardHeader>
-        <div class="p-6">
-          <!-- Filters Section matching Academic Layout -->
-          <div class="mb-6">
-            <!-- Desktop Layout: Inline selects -->
-            <div class="hidden lg:flex lg:flex-row lg:items-center gap-3">
-              <Select
-                :model-value="filters.gradeId"
-                @update:model-value="handleFilterChange('gradeId', $event)"
-              >
-                <SelectTrigger
-                  class="w-full lg:w-fit lg:min-w-[145px] px-3! gap-2!"
-                >
-                  <SelectValue placeholder="Pilih tingkat" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all"> Semua Tingkat </SelectItem>
-                  <SelectItem
-                    v-for="lvl in grades"
-                    :key="lvl.id"
-                    :value="lvl.id"
-                  >
-                    {{ lvl.name }}
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Select
-                :model-value="filters.classroomId"
-                @update:model-value="handleFilterChange('classroomId', $event)"
-              >
-                <SelectTrigger
-                  class="w-full lg:w-fit lg:min-w-[140px] px-3! gap-2!"
-                >
-                  <SelectValue placeholder="Pilih kelas" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all"> Semua Kelas </SelectItem>
-                  <SelectItem
-                    v-for="cls in classrooms"
-                    :key="cls.id"
-                    :value="cls.id"
-                  >
-                    {{ cls.displayName }}
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <!-- Mobile Layout: Filter Dialog Button -->
-            <div class="flex flex-col lg:hidden gap-3">
-              <Button
-                variant="outline"
-                class="w-full relative justify-center"
-                @click="isFilterDialogOpen = true"
-              >
-                <Filter class="size-4 mr-2" />
-                Filter Siswa
-                <span
-                  v-if="activeFiltersCount > 0"
-                  class="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-primary-foreground"
-                >
-                  {{ activeFiltersCount }}
-                </span>
-              </Button>
-            </div>
-          </div>
-
-          <DataTable
-            :columns="tableColumns"
-            :data="filteredData"
-            :total-items="totalStudents"
-            :is-loading="loading"
-            item-label="akun siswa"
-          >
-            <template #header-right>
-              <div class="relative w-full sm:w-48 max-w-[200px]">
-                <Search
-                  class="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground"
-                />
-                <Input
-                  v-model="keyword"
-                  placeholder="Cari siswa..."
-                  class="h-8 pl-8 w-full text-xs"
-                />
-              </div>
-            </template>
-          </DataTable>
-        </div>
-      </Card>
-    </div>
-
-    <!-- Mobile Filter Dialog -->
-    <Dialog v-model:open="isFilterDialogOpen">
-      <DialogContent
-        class="sm:max-w-md flex flex-col gap-0 p-0 overflow-hidden"
-      >
-        <DialogHeader class="px-6 py-5 border-b shrink-0 bg-muted/20">
-          <DialogTitle>Filter Akun Siswa</DialogTitle>
-          <DialogDescription class="sr-only">
-            Saring daftar akun siswa berdasarkan tingkat dan kelas.
-          </DialogDescription>
-        </DialogHeader>
-
-        <div class="p-6 space-y-4">
-          <!-- Grade / Tingkat -->
-          <div class="space-y-1.5">
-            <label class="text-xs font-semibold text-muted-foreground"
-              >Tingkat</label
-            >
+  <div class="p-4 md:p-6 lg:p-8">
+    <Card
+      class="overflow-hidden rounded-2xl shadow-sm shadow-black/5 ring-1 ring-black/4"
+    >
+      <CardHeader class="border-b px-6 py-5">
+        <CardTitle class="text-2xl font-bold tracking-tight">
+          Akun Siswa
+        </CardTitle>
+      </CardHeader>
+      <div class="p-6">
+        <!-- Filters Section matching Academic Layout -->
+        <div class="mb-6">
+          <!-- Desktop Layout: Inline selects -->
+          <div class="hidden lg:flex lg:flex-row lg:items-center gap-3">
             <Select
               :model-value="filters.gradeId"
               @update:model-value="handleFilterChange('gradeId', $event)"
             >
-              <SelectTrigger class="w-full">
+              <SelectTrigger
+                class="w-full lg:w-fit lg:min-w-[145px] px-3! gap-2!"
+              >
                 <SelectValue placeholder="Pilih tingkat" />
               </SelectTrigger>
               <SelectContent>
@@ -289,18 +180,14 @@ onMounted(async () => {
                 </SelectItem>
               </SelectContent>
             </Select>
-          </div>
 
-          <!-- Classroom / Kelas -->
-          <div class="space-y-1.5">
-            <label class="text-xs font-semibold text-muted-foreground"
-              >Kelas</label
-            >
             <Select
               :model-value="filters.classroomId"
               @update:model-value="handleFilterChange('classroomId', $event)"
             >
-              <SelectTrigger class="w-full">
+              <SelectTrigger
+                class="w-full lg:w-fit lg:min-w-[140px] px-3! gap-2!"
+              >
                 <SelectValue placeholder="Pilih kelas" />
               </SelectTrigger>
               <SelectContent>
@@ -315,28 +202,131 @@ onMounted(async () => {
               </SelectContent>
             </Select>
           </div>
+
+          <!-- Mobile Layout: Filter Dialog Button -->
+          <div class="flex flex-col lg:hidden gap-3">
+            <Button
+              variant="outline"
+              class="w-full relative justify-center"
+              @click="isFilterDialogOpen = true"
+            >
+              <Filter class="size-4 mr-2" />
+              Filter Siswa
+              <span
+                v-if="activeFiltersCount > 0"
+                class="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-primary-foreground"
+              >
+                {{ activeFiltersCount }}
+              </span>
+            </Button>
+          </div>
         </div>
 
-        <DialogFooter
-          class="px-6 py-4 border-t bg-muted/20 flex flex-row items-center justify-end gap-2"
+        <DataTable
+          :columns="tableColumns"
+          :data="filteredData"
+          :total-items="totalStudents"
+          :is-loading="loading"
+          item-label="akun siswa"
         >
-          <Button
-            variant="outline"
-            size="sm"
-            class="flex-1 sm:flex-none"
-            @click="resetAllFilters"
+          <template #header-right>
+            <div class="relative w-full sm:w-48 max-w-[200px]">
+              <Search
+                class="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground"
+              />
+              <Input
+                v-model="keyword"
+                placeholder="Cari siswa..."
+                class="h-8 pl-8 w-full text-xs"
+              />
+            </div>
+          </template>
+        </DataTable>
+      </div>
+    </Card>
+  </div>
+
+  <!-- Mobile Filter Dialog -->
+  <Dialog v-model:open="isFilterDialogOpen">
+    <DialogContent class="sm:max-w-md flex flex-col gap-0 p-0 overflow-hidden">
+      <DialogHeader class="px-6 py-5 border-b shrink-0 bg-muted/20">
+        <DialogTitle>Filter Akun Siswa</DialogTitle>
+        <DialogDescription class="sr-only">
+          Saring daftar akun siswa berdasarkan tingkat dan kelas.
+        </DialogDescription>
+      </DialogHeader>
+
+      <div class="p-6 space-y-4">
+        <!-- Grade / Tingkat -->
+        <div class="space-y-1.5">
+          <label class="text-xs font-semibold text-muted-foreground"
+            >Tingkat</label
           >
-            Atur Ulang
-          </Button>
-          <Button
-            size="sm"
-            class="flex-1 sm:flex-none"
-            @click="isFilterDialogOpen = false"
+          <Select
+            :model-value="filters.gradeId"
+            @update:model-value="handleFilterChange('gradeId', $event)"
           >
-            Tutup
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  </AppLayout>
+            <SelectTrigger class="w-full">
+              <SelectValue placeholder="Pilih tingkat" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all"> Semua Tingkat </SelectItem>
+              <SelectItem
+                v-for="lvl in grades"
+                :key="lvl.id"
+                :value="lvl.id"
+              >
+                {{ lvl.name }}
+              </SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <!-- Classroom / Kelas -->
+        <div class="space-y-1.5">
+          <label class="text-xs font-semibold text-muted-foreground"
+            >Kelas</label
+          >
+          <Select
+            :model-value="filters.classroomId"
+            @update:model-value="handleFilterChange('classroomId', $event)"
+          >
+            <SelectTrigger class="w-full">
+              <SelectValue placeholder="Pilih kelas" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all"> Semua Kelas </SelectItem>
+              <SelectItem
+                v-for="cls in classrooms"
+                :key="cls.id"
+                :value="cls.id"
+              >
+                {{ cls.displayName }}
+              </SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      <DialogFooter
+        class="px-6 py-4 border-t bg-muted/20 flex flex-row items-center justify-end gap-2"
+      >
+        <Button
+          variant="outline"
+          size="sm"
+          class="flex-1 sm:flex-none"
+          @click="resetAllFilters"
+        >
+          Atur Ulang
+        </Button>
+        <Button
+          size="sm"
+          class="flex-1 sm:flex-none"
+          @click="isFilterDialogOpen = false"
+        >
+          Tutup
+        </Button>
+      </DialogFooter>
+    </DialogContent>
+  </Dialog>
 </template>

@@ -1,7 +1,10 @@
 import type { RouteRecordRaw } from 'vue-router'
 
-export const admissionRoutes: RouteRecordRaw[] = [
-  // ── Publik ──
+/**
+ * Public pages: they carry their own chrome and must stay outside the app
+ * shell, so the router registers these separately from {@link admissionRoutes}.
+ */
+export const admissionPublicRoutes: RouteRecordRaw[] = [
   {
     path: '/',
     name: 'landing',
@@ -21,7 +24,10 @@ export const admissionRoutes: RouteRecordRaw[] = [
       description: 'Buat akun pendaftaran santri baru.',
     },
   },
+]
 
+/** Routes rendered inside the app shell, as children of the layout route. */
+export const admissionRoutes: RouteRecordRaw[] = [
   // ── Pendaftar ──
   {
     path: '/pendaftaran',
@@ -32,6 +38,7 @@ export const admissionRoutes: RouteRecordRaw[] = [
       allowedRoles: ['APPLICANT'],
       title: 'Status Pendaftaran',
       description: 'Pantau status, notifikasi, dan pengumuman pendaftaran.',
+      breadcrumbs: [{ title: 'Status Pendaftaran' }],
     },
   },
   {
@@ -43,6 +50,10 @@ export const admissionRoutes: RouteRecordRaw[] = [
       allowedRoles: ['APPLICANT'],
       title: 'Formulir Pendaftaran',
       description: 'Lengkapi formulir pendaftaran santri baru.',
+      breadcrumbs: [
+        { title: 'Pendaftaran', href: '/pendaftaran' },
+        { title: 'Formulir' },
+      ],
     },
   },
 
@@ -56,6 +67,7 @@ export const admissionRoutes: RouteRecordRaw[] = [
       allowedRoles: ['ADMIN'],
       title: 'Dashboard PSB',
       description: 'Statistik penerimaan santri baru.',
+      breadcrumbs: [{ title: 'Dashboard PSB' }],
     },
   },
   {
@@ -67,6 +79,10 @@ export const admissionRoutes: RouteRecordRaw[] = [
       allowedRoles: ['ADMIN'],
       title: 'Daftar Pendaftar',
       description: 'Kelola dan verifikasi pendaftar santri baru.',
+      breadcrumbs: [
+        { title: 'Admin PSB', href: '/admin' },
+        { title: 'Daftar Pendaftar' },
+      ],
     },
   },
   {
@@ -78,6 +94,11 @@ export const admissionRoutes: RouteRecordRaw[] = [
       allowedRoles: ['ADMIN'],
       title: 'Detail Pendaftar',
       description: 'Verifikasi berkas dan keputusan penerimaan.',
+      breadcrumbs: [
+        { title: 'Admin PSB', href: '/admin' },
+        { title: 'Pendaftar', href: '/admin/pendaftar' },
+        { title: 'Detail' },
+      ],
     },
   },
   {
@@ -89,6 +110,10 @@ export const admissionRoutes: RouteRecordRaw[] = [
       allowedRoles: ['ADMIN'],
       title: 'Gelombang Pendaftaran',
       description: 'Kelola gelombang penerimaan santri baru.',
+      breadcrumbs: [
+        { title: 'Admin PSB', href: '/admin' },
+        { title: 'Gelombang' },
+      ],
     },
   },
   {
@@ -100,6 +125,10 @@ export const admissionRoutes: RouteRecordRaw[] = [
       allowedRoles: ['ADMIN'],
       title: 'Pengumuman PSB',
       description: 'Kelola pengumuman penerimaan santri baru.',
+      breadcrumbs: [
+        { title: 'Admin PSB', href: '/admin' },
+        { title: 'Pengumuman' },
+      ],
     },
   },
 ]

@@ -9,6 +9,7 @@ export const organizationRoutes: RouteRecordRaw[] = [
       requiresAuth: true,
       requiredPermission: 'school-units.read',
       title: 'Profil Yayasan',
+      breadcrumbs: [{ title: 'Profil Yayasan', href: '/organization' }],
     },
   },
   {
@@ -19,6 +20,10 @@ export const organizationRoutes: RouteRecordRaw[] = [
       requiresAuth: true,
       requiredPermission: 'school-units.update',
       title: 'Ubah Data Yayasan',
+      breadcrumbs: [
+        { title: 'Profil Yayasan', href: '/organization' },
+        { title: 'Ubah Data', href: '/organization/edit' },
+      ],
     },
   },
 ]

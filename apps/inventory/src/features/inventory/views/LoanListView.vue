@@ -2,7 +2,6 @@
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { Plus, RotateCcw } from 'lucide-vue-next'
-import AppLayout from '@/layouts/AppLayout.vue'
 import { DataTable, Badge } from '@/ui'
 import { Button } from '@/ui/button'
 import { Card, CardHeader, CardTitle, CardContent } from '@/ui/card'
@@ -27,11 +26,6 @@ import type {
   InventoryStatus,
   InventoryLoanItem,
 } from '../types'
-
-const breadcrumbs = [
-  { title: 'Inventaris', href: '#' },
-  { title: 'Transaksi Peminjaman' },
-]
 
 // State
 const loans = ref<InventoryLoan[]>([])
@@ -197,108 +191,106 @@ onMounted(() => {
 </script>
 
 <template>
-  <AppLayout :breadcrumbs="breadcrumbs">
-    <div class="p-4 md:p-6 lg:p-8">
-      <Card
-        class="overflow-hidden rounded-2xl shadow-sm shadow-black/5 ring-1 ring-black/4"
-      >
-        <CardHeader
-          class="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b px-6 py-5 gap-4"
-        >
-          <div>
-            <CardTitle class="text-2xl font-bold tracking-tight"
-              >Transaksi Peminjaman</CardTitle
-            >
-          </div>
-          <Button @click="router.push({ name: 'inventory-loans-create' })">
-            <Plus class="size-4 mr-2" />
-            Pinjam Aset
-          </Button>
-        </CardHeader>
-        <CardContent class="p-6">
-          <DataTable
-            :columns="columns"
-            :data="loans"
-            :loading="loading"
-          />
-        </CardContent>
-      </Card>
-    </div>
-
-    <!-- Return Loan Dialog -->
-    <Dialog
-      :open="isReturnOpen"
-      @update:open="isReturnOpen = $event"
+  <div class="p-4 md:p-6 lg:p-8">
+    <Card
+      class="overflow-hidden rounded-2xl shadow-sm shadow-black/5 ring-1 ring-black/4"
     >
-      <DialogContent class="sm:max-w-[550px]">
-        <DialogHeader>
-          <DialogTitle>Proses Pengembalian Aset</DialogTitle>
-          <DialogDescription>
-            Perbarui kondisi aset yang dikembalikan ke dalam inventaris sekolah.
-          </DialogDescription>
-        </DialogHeader>
+      <CardHeader
+        class="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b px-6 py-5 gap-4"
+      >
+        <div>
+          <CardTitle class="text-2xl font-bold tracking-tight"
+            >Transaksi Peminjaman</CardTitle
+          >
+        </div>
+        <Button @click="router.push({ name: 'inventory-loans-create' })">
+          <Plus class="size-4 mr-2" />
+          Pinjam Aset
+        </Button>
+      </CardHeader>
+      <CardContent class="p-6">
+        <DataTable
+          :columns="columns"
+          :data="loans"
+          :loading="loading"
+        />
+      </CardContent>
+    </Card>
+  </div>
 
-        <form
-          class="space-y-4 py-2"
-          @submit.prevent="handleReturnLoan"
-        >
-          <div class="space-y-3 max-h-[250px] overflow-y-auto pr-1">
-            <div
-              v-for="item in returnForm.items"
-              :key="item.unitId"
-              class="border p-3 rounded-lg bg-card space-y-2"
-            >
-              <div class="text-sm font-semibold text-foreground">
-                {{
-                  selectedLoanForReturn?.items.find(
-                    (i) => i.unitId === item.unitId,
-                  )?.unit?.unitNumber
-                }}
-              </div>
+  <!-- Return Loan Dialog -->
+  <Dialog
+    :open="isReturnOpen"
+    @update:open="isReturnOpen = $event"
+  >
+    <DialogContent class="sm:max-w-[550px]">
+      <DialogHeader>
+        <DialogTitle>Proses Pengembalian Aset</DialogTitle>
+        <DialogDescription>
+          Perbarui kondisi aset yang dikembalikan ke dalam inventaris sekolah.
+        </DialogDescription>
+      </DialogHeader>
 
-              <div class="grid grid-cols-2 gap-2">
-                <div class="space-y-1">
-                  <Label>Kondisi Saat Kembali</Label>
-                  <select
-                    v-model="item.returnedConditionId"
-                    class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+      <form
+        class="space-y-4 py-2"
+        @submit.prevent="handleReturnLoan"
+      >
+        <div class="space-y-3 max-h-[250px] overflow-y-auto pr-1">
+          <div
+            v-for="item in returnForm.items"
+            :key="item.unitId"
+            class="border p-3 rounded-lg bg-card space-y-2"
+          >
+            <div class="text-sm font-semibold text-foreground">
+              {{
+                selectedLoanForReturn?.items.find(
+                  (i) => i.unitId === item.unitId,
+                )?.unit?.unitNumber
+              }}
+            </div>
+
+            <div class="grid grid-cols-2 gap-2">
+              <div class="space-y-1">
+                <Label>Kondisi Saat Kembali</Label>
+                <select
+                  v-model="item.returnedConditionId"
+                  class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                >
+                  <option
+                    v-for="cond in metadata?.conditions"
+                    :key="cond.id"
+                    :value="cond.id"
                   >
-                    <option
-                      v-for="cond in metadata?.conditions"
-                      :key="cond.id"
-                      :value="cond.id"
-                    >
-                      {{ cond.name }}
-                    </option>
-                  </select>
-                </div>
-                <div class="space-y-1">
-                  <Label>Catatan Pengembalian</Label>
-                  <Input
-                    v-model="item.notes"
-                    placeholder="Catatan (opsional)"
-                  />
-                </div>
+                    {{ cond.name }}
+                  </option>
+                </select>
+              </div>
+              <div class="space-y-1">
+                <Label>Catatan Pengembalian</Label>
+                <Input
+                  v-model="item.notes"
+                  placeholder="Catatan (opsional)"
+                />
               </div>
             </div>
           </div>
+        </div>
 
-          <DialogFooter class="pt-4">
-            <Button
-              type="button"
-              variant="outline"
-              @click="isReturnOpen = false"
-              >Batal</Button
-            >
-            <Button
-              type="submit"
-              :disabled="isSubmitting"
-            >
-              {{ isSubmitting ? 'Memproses...' : 'Proses Kembali' }}
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
-  </AppLayout>
+        <DialogFooter class="pt-4">
+          <Button
+            type="button"
+            variant="outline"
+            @click="isReturnOpen = false"
+            >Batal</Button
+          >
+          <Button
+            type="submit"
+            :disabled="isSubmitting"
+          >
+            {{ isSubmitting ? 'Memproses...' : 'Proses Kembali' }}
+          </Button>
+        </DialogFooter>
+      </form>
+    </DialogContent>
+  </Dialog>
 </template>

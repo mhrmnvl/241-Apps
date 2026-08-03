@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { onMounted, ref, computed } from 'vue'
-import AppLayout from '@/layouts/AppLayout.vue'
 import { DataTable } from '@/ui'
 import { Card, CardHeader, CardTitle } from '@/ui/card'
 import { Input } from '@/ui/input'
@@ -46,11 +45,6 @@ watchDebounced(
   { debounce: 500 },
 )
 
-const breadcrumbs = [
-  { title: 'Pengaturan', href: '#' },
-  { title: 'Kelola Pengguna', href: '/setting/user' },
-]
-
 onMounted(async () => {
   void fetchTableData()
   try {
@@ -76,98 +70,96 @@ const handleRoleFilterChange = (val: string) => {
 </script>
 
 <template>
-  <AppLayout :breadcrumbs="breadcrumbs">
-    <div class="p-4 md:p-6 lg:p-8">
-      <Card
-        class="overflow-hidden rounded-2xl shadow-sm shadow-black/5 ring-1 ring-black/4"
+  <div class="p-4 md:p-6 lg:p-8">
+    <Card
+      class="overflow-hidden rounded-2xl shadow-sm shadow-black/5 ring-1 ring-black/4"
+    >
+      <CardHeader
+        class="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b px-6 py-5 gap-4"
       >
-        <CardHeader
-          class="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b px-6 py-5 gap-4"
-        >
-          <div>
-            <CardTitle class="text-2xl font-bold tracking-tight">
-              Kelola Pengguna
-            </CardTitle>
-          </div>
-        </CardHeader>
-
-        <div class="p-6 space-y-6">
-          <div class="flex flex-col gap-4">
-            <!-- Desktop Layout: Inline selects -->
-            <div class="hidden lg:flex lg:flex-row lg:items-center gap-3">
-              <Select
-                :model-value="currentFilters.roleCode ?? 'ALL'"
-                @update:model-value="
-                  (val) => handleRoleFilterChange(val as string)
-                "
-              >
-                <SelectTrigger
-                  class="w-full lg:w-fit lg:min-w-[150px] px-3! gap-2!"
-                >
-                  <SelectValue placeholder="Semua Role" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="ALL"> Semua Role </SelectItem>
-                  <SelectItem
-                    v-for="role in allRoles"
-                    :key="role.id"
-                    :value="role.code"
-                  >
-                    {{ role.name }}
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div class="flex flex-col lg:hidden gap-3">
-              <Select
-                :model-value="currentFilters.roleCode ?? 'ALL'"
-                @update:model-value="
-                  (val) => handleRoleFilterChange(val as string)
-                "
-              >
-                <SelectTrigger class="w-fit min-w-[150px] px-3! gap-2!">
-                  <SelectValue placeholder="Semua Role" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="ALL"> Semua Role </SelectItem>
-                  <SelectItem
-                    v-for="role in allRoles"
-                    :key="role.id"
-                    :value="role.code"
-                  >
-                    {{ role.name }}
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <DataTable
-            :columns="columns"
-            :data="users"
-            :is-loading="isLoading"
-            :total-items="paginationMeta.total"
-            :page="paginationMeta.page"
-            item-label="pengguna"
-            @update:page="handlePageChange"
-            @update:page-size="handlePageSizeChange"
-          >
-            <template #header-right>
-              <div class="relative w-full sm:w-48 max-w-[200px]">
-                <Search
-                  class="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground"
-                />
-                <Input
-                  v-model="searchKeyword"
-                  placeholder="Cari pengguna..."
-                  class="h-8 pl-8 w-full text-xs"
-                />
-              </div>
-            </template>
-          </DataTable>
+        <div>
+          <CardTitle class="text-2xl font-bold tracking-tight">
+            Kelola Pengguna
+          </CardTitle>
         </div>
-      </Card>
-    </div>
-  </AppLayout>
+      </CardHeader>
+
+      <div class="p-6 space-y-6">
+        <div class="flex flex-col gap-4">
+          <!-- Desktop Layout: Inline selects -->
+          <div class="hidden lg:flex lg:flex-row lg:items-center gap-3">
+            <Select
+              :model-value="currentFilters.roleCode ?? 'ALL'"
+              @update:model-value="
+                (val) => handleRoleFilterChange(val as string)
+              "
+            >
+              <SelectTrigger
+                class="w-full lg:w-fit lg:min-w-[150px] px-3! gap-2!"
+              >
+                <SelectValue placeholder="Semua Role" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL"> Semua Role </SelectItem>
+                <SelectItem
+                  v-for="role in allRoles"
+                  :key="role.id"
+                  :value="role.code"
+                >
+                  {{ role.name }}
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div class="flex flex-col lg:hidden gap-3">
+            <Select
+              :model-value="currentFilters.roleCode ?? 'ALL'"
+              @update:model-value="
+                (val) => handleRoleFilterChange(val as string)
+              "
+            >
+              <SelectTrigger class="w-fit min-w-[150px] px-3! gap-2!">
+                <SelectValue placeholder="Semua Role" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL"> Semua Role </SelectItem>
+                <SelectItem
+                  v-for="role in allRoles"
+                  :key="role.id"
+                  :value="role.code"
+                >
+                  {{ role.name }}
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        <DataTable
+          :columns="columns"
+          :data="users"
+          :is-loading="isLoading"
+          :total-items="paginationMeta.total"
+          :page="paginationMeta.page"
+          item-label="pengguna"
+          @update:page="handlePageChange"
+          @update:page-size="handlePageSizeChange"
+        >
+          <template #header-right>
+            <div class="relative w-full sm:w-48 max-w-[200px]">
+              <Search
+                class="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground"
+              />
+              <Input
+                v-model="searchKeyword"
+                placeholder="Cari pengguna..."
+                class="h-8 pl-8 w-full text-xs"
+              />
+            </div>
+          </template>
+        </DataTable>
+      </div>
+    </Card>
+  </div>
 </template>

@@ -2,7 +2,6 @@
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
-import AppLayout from '@/layouts/AppLayout.vue'
 import { DataTable } from '@/ui'
 import { Button } from '@/ui/button'
 import { Card, CardHeader, CardTitle } from '@/ui/card'
@@ -13,11 +12,6 @@ import { getColumns } from '../components/roleColumns'
 import type { Role } from '../types'
 
 const router = useRouter()
-
-const breadcrumbs = [
-  { title: 'Pengaturan', href: '#' },
-  { title: 'Manajemen Role', href: '/setting/role' },
-]
 
 const roles = ref<Role[]>([])
 const isLoading = ref(false)
@@ -70,38 +64,36 @@ onMounted(() => {
 </script>
 
 <template>
-  <AppLayout :breadcrumbs="breadcrumbs">
-    <div class="p-4 md:p-6 lg:p-8">
-      <Card
-        class="overflow-hidden rounded-2xl shadow-sm shadow-black/5 ring-1 ring-black/4"
+  <div class="p-4 md:p-6 lg:p-8">
+    <Card
+      class="overflow-hidden rounded-2xl shadow-sm shadow-black/5 ring-1 ring-black/4"
+    >
+      <CardHeader
+        class="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b px-6 py-5 gap-4"
       >
-        <CardHeader
-          class="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b px-6 py-5 gap-4"
-        >
-          <div>
-            <CardTitle class="text-2xl font-bold tracking-tight">
-              Manajemen Role & Hak Akses
-            </CardTitle>
-          </div>
-          <div class="flex flex-col sm:flex-row w-full sm:w-auto gap-2">
-            <Button
-              class="w-full sm:w-auto"
-              @click="handleAddClick"
-            >
-              <Plus class="mr-2 h-4 w-4" /> Tambah Role
-            </Button>
-          </div>
-        </CardHeader>
-
-        <div class="p-6">
-          <DataTable
-            :columns="columns"
-            :data="roles"
-            :is-loading="isLoading"
-            item-label="role"
-          />
+        <div>
+          <CardTitle class="text-2xl font-bold tracking-tight">
+            Manajemen Role & Hak Akses
+          </CardTitle>
         </div>
-      </Card>
-    </div>
-  </AppLayout>
+        <div class="flex flex-col sm:flex-row w-full sm:w-auto gap-2">
+          <Button
+            class="w-full sm:w-auto"
+            @click="handleAddClick"
+          >
+            <Plus class="mr-2 h-4 w-4" /> Tambah Role
+          </Button>
+        </div>
+      </CardHeader>
+
+      <div class="p-6">
+        <DataTable
+          :columns="columns"
+          :data="roles"
+          :is-loading="isLoading"
+          item-label="role"
+        />
+      </div>
+    </Card>
+  </div>
 </template>

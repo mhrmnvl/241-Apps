@@ -9,6 +9,10 @@ export const bloodTypeRoutes: RouteRecordRaw[] = [
       title: 'Golongan Darah',
       requiresAuth: true,
       requiredPermission: 'blood-types.read',
+      breadcrumbs: [
+        { title: 'Pengaturan', href: '#' },
+        { title: 'Golongan Darah', href: '/setting/blood-type' },
+      ],
     },
   },
 ]

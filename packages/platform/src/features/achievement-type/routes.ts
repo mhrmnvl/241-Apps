@@ -9,6 +9,10 @@ export const achievementTypeRoutes: RouteRecordRaw[] = [
       title: 'Tingkat Prestasi',
       requiresAuth: true,
       requiredPermission: 'achievement-types.read',
+      breadcrumbs: [
+        { title: 'Pengaturan', href: '#' },
+        { title: 'Tingkat Prestasi', href: '/setting/achievement-type' },
+      ],
     },
   },
 ]

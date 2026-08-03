@@ -9,6 +9,10 @@ export const positionCategoryRoutes: RouteRecordRaw[] = [
       title: 'Kategori Jabatan',
       requiresAuth: true,
       requiredPermission: 'positions.read',
+      breadcrumbs: [
+        { title: 'Pengaturan', href: '#' },
+        { title: 'Kategori Jabatan', href: '/setting/position-category' },
+      ],
     },
   },
 ]

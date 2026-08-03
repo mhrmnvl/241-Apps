@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed, h, onMounted, ref } from 'vue'
-import AppLayout from '@/layouts/AppLayout.vue'
 import { DataTable, ActionCell } from '@/ui'
 import { Button } from '@/ui/button'
 import { Card, CardHeader, CardTitle } from '@/ui/card'
@@ -25,11 +24,6 @@ const {
 
 const isFormOpen = ref(false)
 const selected = ref<AdmissionAnnouncement | null>(null)
-
-const breadcrumbs = [
-  { title: 'Admin PSB', href: '/admin' },
-  { title: 'Pengumuman' },
-]
 
 const columns = computed<ColumnDef<AdmissionAnnouncement>[]>(() => [
   {
@@ -132,40 +126,38 @@ async function handleDelete(id: string) {
 </script>
 
 <template>
-  <AppLayout :breadcrumbs="breadcrumbs">
-    <div class="p-4 sm:p-6">
-      <Card
-        class="overflow-hidden rounded-2xl shadow-sm shadow-black/5 ring-1 ring-black/4"
+  <div class="p-4 sm:p-6">
+    <Card
+      class="overflow-hidden rounded-2xl shadow-sm shadow-black/5 ring-1 ring-black/4"
+    >
+      <CardHeader
+        class="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b px-6 py-5 gap-4"
       >
-        <CardHeader
-          class="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b px-6 py-5 gap-4"
-        >
-          <CardTitle class="text-xl font-bold tracking-tight">
-            Pengumuman PSB
-          </CardTitle>
-          <Button @click="openCreateForm">
-            <Plus class="mr-2 h-4 w-4" />
-            Buat Pengumuman
-          </Button>
-        </CardHeader>
+        <CardTitle class="text-xl font-bold tracking-tight">
+          Pengumuman PSB
+        </CardTitle>
+        <Button @click="openCreateForm">
+          <Plus class="mr-2 h-4 w-4" />
+          Buat Pengumuman
+        </Button>
+      </CardHeader>
 
-        <div class="p-6">
-          <DataTable
-            :columns="columns"
-            :data="announcements"
-            :is-loading="loading"
-            item-label="pengumuman"
-          />
-        </div>
-      </Card>
+      <div class="p-6">
+        <DataTable
+          :columns="columns"
+          :data="announcements"
+          :is-loading="loading"
+          item-label="pengumuman"
+        />
+      </div>
+    </Card>
 
-      <AnnouncementFormSheet
-        v-model:open="isFormOpen"
-        :announcement="selected"
-        :is-saving="isSaving"
-        :waves="waves"
-        @save="handleSave"
-      />
-    </div>
-  </AppLayout>
+    <AnnouncementFormSheet
+      v-model:open="isFormOpen"
+      :announcement="selected"
+      :is-saving="isSaving"
+      :waves="waves"
+      @save="handleSave"
+    />
+  </div>
 </template>
