@@ -204,9 +204,11 @@ export function useTeacherCreateForm() {
     }
   })
 
+  // Callers address fields by a runtime string, while vee-validate types the path
+  // as a union of the known schema keys, which a plain string cannot satisfy.
   const setFieldValueWrapper = (field: string, value: unknown) => {
     setFieldValue(
-      field as unknown as Parameters<typeof setFieldValue>[0],
+      field as Parameters<typeof setFieldValue>[0],
       value as Parameters<typeof setFieldValue>[1],
     )
   }

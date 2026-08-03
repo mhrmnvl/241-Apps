@@ -3,15 +3,24 @@ import type {
   ApiSingleResponse,
 } from '@/shared/types/api'
 import api from '@/shared/utils/api'
-import type { LessonBatchRow, LessonQueryParams, Lesson } from '../types'
+import type {
+  LessonBatchRow,
+  LessonQueryParams,
+  Lesson,
+  ScheduleResponse,
+} from '../types'
 
 export const lessonApi = {
   getLessons: (params?: LessonQueryParams) => {
-    return api.get<ApiPaginatedResponse<Lesson>>('/schedules', { params })
+    return api.get<ApiPaginatedResponse<ScheduleResponse>>('/schedules', {
+      params,
+    })
   },
 
   getLessonsByClassroom: (classroomId: string) => {
-    return api.get<{ data: Lesson[] }>(`/schedules/classroom/${classroomId}`)
+    return api.get<{ data: ScheduleResponse[] }>(
+      `/schedules/classroom/${classroomId}`,
+    )
   },
 
   updateLessonBatch: (

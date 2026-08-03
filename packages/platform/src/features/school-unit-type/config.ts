@@ -7,7 +7,11 @@ import type {
   SchoolUnitTypeUpdatePayload,
 } from './types'
 
-export function useSchoolUnitTypeConfig(): MasterDataConfig<SchoolUnitType> {
+export function useSchoolUnitTypeConfig(): MasterDataConfig<
+  SchoolUnitType,
+  SchoolUnitTypeCreatePayload,
+  SchoolUnitTypeUpdatePayload
+> {
   const { can } = useRoleGuard()
 
   return {
@@ -19,15 +23,9 @@ export function useSchoolUnitTypeConfig(): MasterDataConfig<SchoolUnitType> {
     },
     service: {
       list: () => schoolUnitTypeService.getSchoolUnitTypes(),
-      create: (payload) =>
-        schoolUnitTypeService.createSchoolUnitType(
-          payload as unknown as SchoolUnitTypeCreatePayload,
-        ),
+      create: (payload) => schoolUnitTypeService.createSchoolUnitType(payload),
       update: (id, payload) =>
-        schoolUnitTypeService.updateSchoolUnitType(
-          id,
-          payload as unknown as SchoolUnitTypeUpdatePayload,
-        ),
+        schoolUnitTypeService.updateSchoolUnitType(id, payload),
       remove: (id, callbacks) =>
         schoolUnitTypeService.deleteSchoolUnitType(id, callbacks),
     },
