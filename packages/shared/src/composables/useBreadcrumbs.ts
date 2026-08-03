@@ -1,8 +1,8 @@
-import { inject, onScopeDispose, provide, ref, watchEffect } from 'vue'
-import type { InjectionKey, Ref } from 'vue'
+import { inject, onScopeDispose, provide, shallowRef, watchEffect } from 'vue'
+import type { InjectionKey, ShallowRef } from 'vue'
 import type { BreadcrumbItemType } from '../types/breadcrumb.types'
 
-type BreadcrumbOverride = Ref<BreadcrumbItemType[] | null>
+type BreadcrumbOverride = ShallowRef<BreadcrumbItemType[] | null>
 
 const breadcrumbOverrideKey: InjectionKey<BreadcrumbOverride> =
   Symbol('breadcrumbOverride')
@@ -17,7 +17,10 @@ const breadcrumbOverrideKey: InjectionKey<BreadcrumbOverride> =
  * cannot know up front.
  */
 export function provideBreadcrumbs(): BreadcrumbOverride {
-  const override: BreadcrumbOverride = ref(null)
+  // Shallow on purpose. A trail is replaced wholesale, never edited in place,
+  // so deep reactivity buys nothing — and it would hand back a proxy rather
+  // than the array that was stored, which the identity check below relies on.
+  const override: BreadcrumbOverride = shallowRef(null)
   provide(breadcrumbOverrideKey, override)
   return override
 }
