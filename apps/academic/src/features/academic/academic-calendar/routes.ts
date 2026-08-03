@@ -9,6 +9,10 @@ export const academicCalendarRoutes: RouteRecordRaw[] = [
       requiresAuth: true,
       requiredPermission: 'academic-calendars.read',
       title: 'Kalender Pendidikan',
+      breadcrumbs: [
+        { title: 'Akademik', href: '#' },
+        { title: 'Kalender Pendidikan' },
+      ],
     },
   },
 ]

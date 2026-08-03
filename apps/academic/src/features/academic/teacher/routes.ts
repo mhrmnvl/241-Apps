@@ -9,6 +9,7 @@ export const teacherRoutes: RouteRecordRaw[] = [
       requiresAuth: true,
       requiredPermission: 'teachers.read',
       title: 'Daftar Guru',
+      breadcrumbs: [{ title: 'Guru', href: '#' }, { title: 'Daftar Guru' }],
     },
   },
   {
@@ -19,6 +20,10 @@ export const teacherRoutes: RouteRecordRaw[] = [
       requiresAuth: true,
       requiredPermission: 'teachers.read',
       title: 'Tambah Guru',
+      breadcrumbs: [
+        { title: 'Guru', href: '/teacher' },
+        { title: 'Tambah Guru' },
+      ],
     },
   },
   {
@@ -29,6 +34,10 @@ export const teacherRoutes: RouteRecordRaw[] = [
       requiresAuth: true,
       requiredPermission: 'teachers.read',
       title: 'Akun Guru',
+      breadcrumbs: [
+        { title: 'Guru', href: '/teacher' },
+        { title: 'Akun Guru' },
+      ],
     },
   },
 ]

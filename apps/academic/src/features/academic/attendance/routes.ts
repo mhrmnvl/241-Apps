@@ -9,6 +9,10 @@ export const attendanceRoutes: RouteRecordRaw[] = [
       requiresAuth: true,
       requiredPermission: 'attendances.read',
       title: 'Kehadiran Siswa',
+      breadcrumbs: [
+        { title: 'Penilaian', href: '#' },
+        { title: 'Kehadiran Siswa', href: '/academic/attendance' },
+      ],
     },
   },
 ]

@@ -9,6 +9,10 @@ export const occupationRoutes: RouteRecordRaw[] = [
       title: 'Pekerjaan',
       requiresAuth: true,
       requiredPermission: 'occupations.read',
+      breadcrumbs: [
+        { title: 'Pengaturan', href: '#' },
+        { title: 'Pekerjaan', href: '/setting/occupation' },
+      ],
     },
   },
 ]

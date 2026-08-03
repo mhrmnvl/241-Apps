@@ -3,7 +3,6 @@ import type { AcademicYear } from '../types'
 import AcademicYearFormSheet from '../components/AcademicYearFormSheet.vue'
 import { createAcademicYearColumns } from '../components/columns'
 import { useAcademicYearList } from '../composables/useAcademicYearList'
-import AppLayout from '@/layouts/AppLayout.vue'
 import { DataTable } from '@/ui'
 import { Button } from '@/ui/button'
 import { Card, CardHeader, CardTitle } from '@/ui/card'
@@ -20,11 +19,6 @@ import {
 import { useRoleGuard } from '@/features/platform/auth'
 import { Plus } from 'lucide-vue-next'
 import { onMounted, ref, watch } from 'vue'
-
-const breadcrumbs = [
-  { title: 'Akademik', href: '#' },
-  { title: 'Tahun Ajaran', href: '/academic/academic-year' },
-]
 
 const {
   academicYears,
@@ -98,80 +92,78 @@ onMounted(() => {
 </script>
 
 <template>
-  <AppLayout :breadcrumbs="breadcrumbs">
-    <div class="p-4 md:p-6 lg:p-8">
-      <Card
-        class="overflow-hidden rounded-2xl shadow-sm shadow-black/5 ring-1 ring-black/4"
+  <div class="p-4 md:p-6 lg:p-8">
+    <Card
+      class="overflow-hidden rounded-2xl shadow-sm shadow-black/5 ring-1 ring-black/4"
+    >
+      <CardHeader
+        class="flex flex-row items-center justify-between border-b px-6 py-5"
       >
-        <CardHeader
-          class="flex flex-row items-center justify-between border-b px-6 py-5"
+        <CardTitle class="text-2xl font-bold tracking-tight">
+          Tahun Ajaran
+        </CardTitle>
+        <Button
+          v-if="can('academic-years.create')"
+          @click="isAddModalOpen = true"
         >
-          <CardTitle class="text-2xl font-bold tracking-tight">
-            Tahun Ajaran
-          </CardTitle>
-          <Button
-            v-if="can('academic-years.create')"
-            @click="isAddModalOpen = true"
-          >
-            <Plus class="size-4 mr-2" />
-            Tambah
-          </Button>
-        </CardHeader>
+          <Plus class="size-4 mr-2" />
+          Tambah
+        </Button>
+      </CardHeader>
 
-        <div class="p-6 space-y-4">
-          <DataTable
-            :columns="tableColumns"
-            :data="academicYears"
-            :total-items="totalItems"
-            :is-loading="loading"
-            item-label="tahun ajaran"
-            filter-column="name"
-            filter-placeholder="Cari tahun ajaran..."
-          />
+      <div class="p-6 space-y-4">
+        <DataTable
+          :columns="tableColumns"
+          :data="academicYears"
+          :total-items="totalItems"
+          :is-loading="loading"
+          item-label="tahun ajaran"
+          filter-column="name"
+          filter-placeholder="Cari tahun ajaran..."
+        />
 
-          <AcademicYearFormSheet
-            v-if="can('academic-years.create') && isAddModalOpen"
-            v-model:open="isAddModalOpen"
-            :edit-data="editingItem"
-            @save-success="fetchAcademicYears"
-          />
-        </div>
-      </Card>
-    </div>
+        <AcademicYearFormSheet
+          v-if="can('academic-years.create') && isAddModalOpen"
+          v-model:open="isAddModalOpen"
+          :edit-data="editingItem"
+          @save-success="fetchAcademicYears"
+        />
+      </div>
+    </Card>
+  </div>
 
-    <AlertDialog :open="!!confirmAction">
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>
-            {{
-              confirmAction?.type === 'activate'
-                ? 'Aktifkan Tahun Ajaran?'
-                : 'Nonaktifkan Tahun Ajaran?'
-            }}
-          </AlertDialogTitle>
-          <AlertDialogDescription>
-            {{
-              confirmAction?.type === 'activate'
-                ? 'Mengaktifkan tahun ajaran ini akan menonaktifkan semua tahun ajaran lainnya. Lanjutkan?'
-                : 'Apakah Anda yakin ingin menonaktifkan tahun ajaran ini?'
-            }}
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel
-            :disabled="isProcessing"
-            @click="confirmAction = null"
-          >
-            Batal
-          </AlertDialogCancel>
-          <AlertDialogAction
-            :disabled="isProcessing"
-            @click="handleConfirmAction"
-          >
-            {{ isProcessing ? 'Memproses...' : 'Ya, Lanjutkan' }}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
-  </AppLayout>
+  <AlertDialog :open="!!confirmAction">
+    <AlertDialogContent>
+      <AlertDialogHeader>
+        <AlertDialogTitle>
+          {{
+            confirmAction?.type === 'activate'
+              ? 'Aktifkan Tahun Ajaran?'
+              : 'Nonaktifkan Tahun Ajaran?'
+          }}
+        </AlertDialogTitle>
+        <AlertDialogDescription>
+          {{
+            confirmAction?.type === 'activate'
+              ? 'Mengaktifkan tahun ajaran ini akan menonaktifkan semua tahun ajaran lainnya. Lanjutkan?'
+              : 'Apakah Anda yakin ingin menonaktifkan tahun ajaran ini?'
+          }}
+        </AlertDialogDescription>
+      </AlertDialogHeader>
+      <AlertDialogFooter>
+        <AlertDialogCancel
+          :disabled="isProcessing"
+          @click="confirmAction = null"
+        >
+          Batal
+        </AlertDialogCancel>
+        <AlertDialogAction
+          :disabled="isProcessing"
+          @click="handleConfirmAction"
+        >
+          {{ isProcessing ? 'Memproses...' : 'Ya, Lanjutkan' }}
+        </AlertDialogAction>
+      </AlertDialogFooter>
+    </AlertDialogContent>
+  </AlertDialog>
 </template>

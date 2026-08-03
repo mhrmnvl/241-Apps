@@ -9,6 +9,10 @@ export const educationRoutes: RouteRecordRaw[] = [
       title: 'Tingkat Pendidikan',
       requiresAuth: true,
       requiredPermission: 'educations.read',
+      breadcrumbs: [
+        { title: 'Pengaturan', href: '#' },
+        { title: 'Tingkat Pendidikan', href: '/setting/education-level' },
+      ],
     },
   },
 ]

@@ -9,6 +9,10 @@ export const assessmentItemRoutes: RouteRecordRaw[] = [
       title: 'Tugas & Nilai',
       requiresAuth: true,
       requiredPermission: 'assessment-items.read',
+      breadcrumbs: [
+        { title: 'Penilaian', href: '#' },
+        { title: 'Tugas & Nilai', href: '/academic/student-score' },
+      ],
     },
   },
 ]

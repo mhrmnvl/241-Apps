@@ -3,7 +3,6 @@ import AttendanceFilterBar from '../components/AttendanceFilterBar.vue'
 import AttendanceInputTable from '../components/AttendanceInputTable.vue'
 import AttendanceRecapTab from '../components/AttendanceRecapTab.vue'
 import { useAttendance } from '../composables/useAttendance'
-import AppLayout from '@/layouts/AppLayout.vue'
 import { Card, CardHeader, CardTitle } from '@/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/tabs'
 import { onMounted, computed, watch } from 'vue'
@@ -31,11 +30,6 @@ const MONTH_OPTIONS: FilterOption[] = [
   'November',
   'Desember',
 ].map((label, i) => ({ value: String(i + 1), label }))
-
-const breadcrumbs = [
-  { title: 'Penilaian', href: '#' },
-  { title: 'Kehadiran Siswa', href: '/academic/attendance' },
-]
 
 const {
   loading,
@@ -135,74 +129,72 @@ onMounted(async () => {
 </script>
 
 <template>
-  <AppLayout :breadcrumbs="breadcrumbs">
-    <div class="p-4 md:p-6 lg:p-8">
-      <Card
-        class="overflow-hidden rounded-2xl shadow-sm shadow-black/5 ring-1 ring-black/4"
+  <div class="p-4 md:p-6 lg:p-8">
+    <Card
+      class="overflow-hidden rounded-2xl shadow-sm shadow-black/5 ring-1 ring-black/4"
+    >
+      <CardHeader
+        class="flex flex-row items-center justify-between border-b px-6 py-5"
       >
-        <CardHeader
-          class="flex flex-row items-center justify-between border-b px-6 py-5"
+        <CardTitle class="text-2xl font-bold tracking-tight">
+          Kehadiran Siswa
+        </CardTitle>
+      </CardHeader>
+
+      <div class="p-6 space-y-6">
+        <AttendanceFilterBar
+          v-model:selected-semester-id="selectedSemesterId"
+          v-model:selected-classroom-id="selectedClassroomId"
+          v-model:selected-date="selectedDate"
+          v-model:selected-month="selectedMonth"
+          v-model:selected-year="selectedYear"
+          :active-tab="activeTab"
+          :semester-filter-options="semesterFilterOptions"
+          :classroom-filter-options="classroomFilterOptions"
+          :month-options="MONTH_OPTIONS"
+          :year-filter-options="yearFilterOptions"
+        />
+
+        <Tabs
+          v-model="activeTab"
+          class="w-full"
         >
-          <CardTitle class="text-2xl font-bold tracking-tight">
-            Kehadiran Siswa
-          </CardTitle>
-        </CardHeader>
-
-        <div class="p-6 space-y-6">
-          <AttendanceFilterBar
-            v-model:selected-semester-id="selectedSemesterId"
-            v-model:selected-classroom-id="selectedClassroomId"
-            v-model:selected-date="selectedDate"
-            v-model:selected-month="selectedMonth"
-            v-model:selected-year="selectedYear"
-            :active-tab="activeTab"
-            :semester-filter-options="semesterFilterOptions"
-            :classroom-filter-options="classroomFilterOptions"
-            :month-options="MONTH_OPTIONS"
-            :year-filter-options="yearFilterOptions"
-          />
-
-          <Tabs
-            v-model="activeTab"
-            class="w-full"
-          >
-            <TabsList>
-              <TabsTrigger
-                v-if="canRecordAttendance"
-                value="input"
-              >
-                Input Kehadiran
-              </TabsTrigger>
-              <TabsTrigger value="recap">Rekapitulasi</TabsTrigger>
-            </TabsList>
-
-            <TabsContent
+          <TabsList>
+            <TabsTrigger
+              v-if="canRecordAttendance"
               value="input"
-              class="mt-4"
             >
-              <AttendanceInputTable
-                v-model:rows="inputRows"
-                :loading="loading"
-                :is-saving="isSaving"
-                @save="handleBulkSave"
-              />
-            </TabsContent>
+              Input Kehadiran
+            </TabsTrigger>
+            <TabsTrigger value="recap">Rekapitulasi</TabsTrigger>
+          </TabsList>
 
-            <TabsContent
-              value="recap"
-              class="mt-4"
-            >
-              <AttendanceRecapTab
-                :recap-items="recapItems"
-                :class-percentage="classPercentage"
-                :month-delta="monthDelta"
-                :recap-loading="recapLoading"
-                :trend-data="trendData"
-              />
-            </TabsContent>
-          </Tabs>
-        </div>
-      </Card>
-    </div>
-  </AppLayout>
+          <TabsContent
+            value="input"
+            class="mt-4"
+          >
+            <AttendanceInputTable
+              v-model:rows="inputRows"
+              :loading="loading"
+              :is-saving="isSaving"
+              @save="handleBulkSave"
+            />
+          </TabsContent>
+
+          <TabsContent
+            value="recap"
+            class="mt-4"
+          >
+            <AttendanceRecapTab
+              :recap-items="recapItems"
+              :class-percentage="classPercentage"
+              :month-delta="monthDelta"
+              :recap-loading="recapLoading"
+              :trend-data="trendData"
+            />
+          </TabsContent>
+        </Tabs>
+      </div>
+    </Card>
+  </div>
 </template>

@@ -9,6 +9,10 @@ export const academicCalendarTypeRoutes: RouteRecordRaw[] = [
       title: 'Tipe Kalender',
       requiresAuth: true,
       requiredPermission: 'academic-calendar-types.read',
+      breadcrumbs: [
+        { title: 'Pengaturan', href: '#' },
+        { title: 'Tipe Kalender', href: '/setting/academic-calendar-type' },
+      ],
     },
   },
 ]

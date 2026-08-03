@@ -9,6 +9,10 @@ export const announcementRoutes: RouteRecordRaw[] = [
       requiresAuth: true,
       requiredPermission: 'announcements.read',
       title: 'Pengumuman',
+      breadcrumbs: [
+        { title: 'Utama', href: '#' },
+        { title: 'Pengumuman', href: '/announcement' },
+      ],
     },
   },
 ]

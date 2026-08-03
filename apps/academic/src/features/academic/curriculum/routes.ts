@@ -9,6 +9,10 @@ export const curriculaRoutes: RouteRecordRaw[] = [
       requiresAuth: true,
       requiredPermission: 'curricula.read',
       title: 'Kurikulum',
+      breadcrumbs: [
+        { title: 'Akademik', href: '#' },
+        { title: 'Kurikulum', href: '/academic/curriculum' },
+      ],
     },
   },
 ]

@@ -4,7 +4,7 @@ import CurriculumSubjectFormDialog from '../components/CurriculumSubjectFormDial
 import AddCurriculumSubjectDialog from '../components/AddCurriculumSubjectDialog.vue'
 import { createCurriculumSubjectColumns } from '../components/columns'
 import { useCurriculumSubject } from '../composables/useCurriculumSubject'
-import AppLayout from '@/layouts/AppLayout.vue'
+import { useBreadcrumbs } from '@/shared/composables/useBreadcrumbs'
 import { DataTable } from '@/ui'
 import { Button } from '@/ui/button'
 import { Card, CardHeader, CardTitle, CardDescription } from '@/ui/card'
@@ -34,7 +34,7 @@ const {
   deleteCurriculumSubject,
 } = useCurriculumSubject()
 
-const breadcrumbs = computed(() => [
+useBreadcrumbs(() => [
   { title: 'Akademik', href: '#' },
   { title: 'Kurikulum', href: '/academic/curriculum' },
   { title: curriculumName.value || 'Detail', href: route.path },
@@ -107,72 +107,70 @@ onMounted(async () => {
 </script>
 
 <template>
-  <AppLayout :breadcrumbs="breadcrumbs">
-    <div class="p-4 md:p-6 lg:p-8">
-      <Card
-        class="overflow-hidden rounded-2xl shadow-sm shadow-black/5 ring-1 ring-black/4"
+  <div class="p-4 md:p-6 lg:p-8">
+    <Card
+      class="overflow-hidden rounded-2xl shadow-sm shadow-black/5 ring-1 ring-black/4"
+    >
+      <CardHeader
+        class="flex flex-row items-center justify-between border-b px-6 py-5"
       >
-        <CardHeader
-          class="flex flex-row items-center justify-between border-b px-6 py-5"
-        >
-          <div class="flex items-center gap-3">
-            <Button
-              variant="outline"
-              size="icon"
-              class="size-8"
-              @click="router.push('/academic/curriculum')"
-            >
-              <ArrowLeft class="size-4" />
-            </Button>
-            <div class="grid gap-0.5">
-              <CardTitle class="text-2xl font-bold tracking-tight">
-                Mata Pelajaran Kurikulum
-              </CardTitle>
-              <CardDescription v-if="curriculumName">
-                Kurikulum: {{ curriculumName }} ({{ curriculumAcademicYear }})
-              </CardDescription>
-            </div>
-          </div>
+        <div class="flex items-center gap-3">
           <Button
-            v-if="can('curriculum-subjects.create')"
-            @click="isAddDialogOpen = true"
+            variant="outline"
+            size="icon"
+            class="size-8"
+            @click="router.push('/academic/curriculum')"
           >
-            <Plus class="size-4 mr-2" />
-            Tambah
+            <ArrowLeft class="size-4" />
           </Button>
-        </CardHeader>
-
-        <div class="p-6 space-y-6">
-          <DataTable
-            :columns="tableColumns"
-            :data="items"
-            :total-items="totalItems"
-            :is-loading="loading"
-            item-label="mata pelajaran kurikulum"
-            filter-column="subject"
-            filter-placeholder="Cari mata pelajaran..."
-          />
-
-          <CurriculumSubjectFormDialog
-            v-if="can('curriculum-subjects.update') && isEditSheetOpen"
-            v-model:open="isEditSheetOpen"
-            :form-error="formError"
-            :is-saving="isSaving"
-            :curriculum-id="curriculumId"
-            :edit-data="editingItem"
-            @save="handleSaveCurriculumSubject"
-          />
-
-          <AddCurriculumSubjectDialog
-            v-if="can('curriculum-subjects.create') && isAddDialogOpen"
-            v-model:open="isAddDialogOpen"
-            :subjects="subjects"
-            :existing-subject-ids="existingSubjectIds"
-            :saving="isSaving"
-            @save="handleBulkSave"
-          />
+          <div class="grid gap-0.5">
+            <CardTitle class="text-2xl font-bold tracking-tight">
+              Mata Pelajaran Kurikulum
+            </CardTitle>
+            <CardDescription v-if="curriculumName">
+              Kurikulum: {{ curriculumName }} ({{ curriculumAcademicYear }})
+            </CardDescription>
+          </div>
         </div>
-      </Card>
-    </div>
-  </AppLayout>
+        <Button
+          v-if="can('curriculum-subjects.create')"
+          @click="isAddDialogOpen = true"
+        >
+          <Plus class="size-4 mr-2" />
+          Tambah
+        </Button>
+      </CardHeader>
+
+      <div class="p-6 space-y-6">
+        <DataTable
+          :columns="tableColumns"
+          :data="items"
+          :total-items="totalItems"
+          :is-loading="loading"
+          item-label="mata pelajaran kurikulum"
+          filter-column="subject"
+          filter-placeholder="Cari mata pelajaran..."
+        />
+
+        <CurriculumSubjectFormDialog
+          v-if="can('curriculum-subjects.update') && isEditSheetOpen"
+          v-model:open="isEditSheetOpen"
+          :form-error="formError"
+          :is-saving="isSaving"
+          :curriculum-id="curriculumId"
+          :edit-data="editingItem"
+          @save="handleSaveCurriculumSubject"
+        />
+
+        <AddCurriculumSubjectDialog
+          v-if="can('curriculum-subjects.create') && isAddDialogOpen"
+          v-model:open="isAddDialogOpen"
+          :subjects="subjects"
+          :existing-subject-ids="existingSubjectIds"
+          :saving="isSaving"
+          @save="handleBulkSave"
+        />
+      </div>
+    </Card>
+  </div>
 </template>

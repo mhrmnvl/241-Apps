@@ -9,6 +9,7 @@ export const academicInfoRoutes: RouteRecordRaw[] = [
       requiresAuth: true,
       requiredPermission: 'announcements.read',
       title: 'Informasi Akademik',
+      breadcrumbs: [{ title: 'Informasi Akademik' }],
     },
   },
 ]

@@ -5,7 +5,6 @@ import SemesterFormSheet from '../components/SemesterFormSheet.vue'
 import { createSemesterColumns } from '../components/columns'
 import { useSemesterList } from '../composables/useSemesterList'
 import { useSemesterRollover } from '../composables/useSemesterRollover'
-import AppLayout from '@/layouts/AppLayout.vue'
 import { DataTable } from '@/ui'
 import { Button } from '@/ui/button'
 import { Card, CardHeader, CardTitle } from '@/ui/card'
@@ -23,11 +22,6 @@ import { useRoleGuard } from '@/features/platform/auth'
 import { Copy, Plus } from 'lucide-vue-next'
 import { onMounted, ref, watch } from 'vue'
 import { toast } from 'vue-sonner'
-
-const breadcrumbs = [
-  { title: 'Akademik', href: '#' },
-  { title: 'Semester', href: '/academic/semester' },
-]
 
 const {
   semesters,
@@ -124,99 +118,97 @@ onMounted(() => {
 </script>
 
 <template>
-  <AppLayout :breadcrumbs="breadcrumbs">
-    <div class="p-4 md:p-6 lg:p-8">
-      <Card
-        class="overflow-hidden rounded-2xl shadow-sm shadow-black/5 ring-1 ring-black/4"
+  <div class="p-4 md:p-6 lg:p-8">
+    <Card
+      class="overflow-hidden rounded-2xl shadow-sm shadow-black/5 ring-1 ring-black/4"
+    >
+      <CardHeader
+        class="flex flex-col gap-3 border-b px-6 py-5 sm:flex-row sm:items-center sm:justify-between"
       >
-        <CardHeader
-          class="flex flex-col gap-3 border-b px-6 py-5 sm:flex-row sm:items-center sm:justify-between"
+        <CardTitle class="text-2xl font-bold tracking-tight">
+          Semester
+        </CardTitle>
+        <div
+          v-if="can('semesters.create')"
+          class="flex w-full items-center justify-end gap-2 sm:w-auto"
         >
-          <CardTitle class="text-2xl font-bold tracking-tight">
-            Semester
-          </CardTitle>
-          <div
-            v-if="can('semesters.create')"
-            class="flex w-full items-center justify-end gap-2 sm:w-auto"
+          <Button
+            variant="outline"
+            @click="isRolloverModalOpen = true"
           >
-            <Button
-              variant="outline"
-              @click="isRolloverModalOpen = true"
-            >
-              <Copy class="size-4 mr-2" />
-              Salin Data
-            </Button>
-            <Button @click="isAddModalOpen = true">
-              <Plus class="size-4 mr-2" />
-              Tambah
-            </Button>
-          </div>
-        </CardHeader>
-
-        <div class="p-6 space-y-4">
-          <DataTable
-            :columns="tableColumns"
-            :data="semesters"
-            :total-items="totalSemesters"
-            :is-loading="loading"
-            item-label="semester"
-            filter-column="type"
-            filter-placeholder="Cari semester (Ganjil/Genap)..."
-          />
-
-          <SemesterFormSheet
-            v-if="can('semesters.create') && isAddModalOpen"
-            v-model:open="isAddModalOpen"
-            :academic-years="academicYears"
-            :edit-data="editingItem"
-            @save-success="fetchSemesters"
-          />
-
-          <RolloverSemesterDialog
-            v-if="can('semesters.create')"
-            v-model:open="isRolloverModalOpen"
-            :semesters="semesters"
-            :is-rolling-over="isRollingOver"
-            :rollover-summary="rolloverSummary"
-            @rollover="handleRollover"
-          />
+            <Copy class="size-4 mr-2" />
+            Salin Data
+          </Button>
+          <Button @click="isAddModalOpen = true">
+            <Plus class="size-4 mr-2" />
+            Tambah
+          </Button>
         </div>
-      </Card>
-    </div>
+      </CardHeader>
 
-    <AlertDialog :open="!!confirmAction">
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>
-            {{
-              confirmAction?.type === 'activate'
-                ? 'Aktifkan Semester?'
-                : 'Nonaktifkan Semester?'
-            }}
-          </AlertDialogTitle>
-          <AlertDialogDescription>
-            {{
-              confirmAction?.type === 'activate'
-                ? 'Mengaktifkan semester ini akan menonaktifkan semua semester lainnya. Tahun ajaran terkait harus sudah aktif. Lanjutkan?'
-                : 'Apakah Anda yakin ingin menonaktifkan semester ini?'
-            }}
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel
-            :disabled="isProcessing"
-            @click="confirmAction = null"
-          >
-            Batal
-          </AlertDialogCancel>
-          <AlertDialogAction
-            :disabled="isProcessing"
-            @click="handleConfirmAction"
-          >
-            {{ isProcessing ? 'Memproses...' : 'Ya, Lanjutkan' }}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
-  </AppLayout>
+      <div class="p-6 space-y-4">
+        <DataTable
+          :columns="tableColumns"
+          :data="semesters"
+          :total-items="totalSemesters"
+          :is-loading="loading"
+          item-label="semester"
+          filter-column="type"
+          filter-placeholder="Cari semester (Ganjil/Genap)..."
+        />
+
+        <SemesterFormSheet
+          v-if="can('semesters.create') && isAddModalOpen"
+          v-model:open="isAddModalOpen"
+          :academic-years="academicYears"
+          :edit-data="editingItem"
+          @save-success="fetchSemesters"
+        />
+
+        <RolloverSemesterDialog
+          v-if="can('semesters.create')"
+          v-model:open="isRolloverModalOpen"
+          :semesters="semesters"
+          :is-rolling-over="isRollingOver"
+          :rollover-summary="rolloverSummary"
+          @rollover="handleRollover"
+        />
+      </div>
+    </Card>
+  </div>
+
+  <AlertDialog :open="!!confirmAction">
+    <AlertDialogContent>
+      <AlertDialogHeader>
+        <AlertDialogTitle>
+          {{
+            confirmAction?.type === 'activate'
+              ? 'Aktifkan Semester?'
+              : 'Nonaktifkan Semester?'
+          }}
+        </AlertDialogTitle>
+        <AlertDialogDescription>
+          {{
+            confirmAction?.type === 'activate'
+              ? 'Mengaktifkan semester ini akan menonaktifkan semua semester lainnya. Tahun ajaran terkait harus sudah aktif. Lanjutkan?'
+              : 'Apakah Anda yakin ingin menonaktifkan semester ini?'
+          }}
+        </AlertDialogDescription>
+      </AlertDialogHeader>
+      <AlertDialogFooter>
+        <AlertDialogCancel
+          :disabled="isProcessing"
+          @click="confirmAction = null"
+        >
+          Batal
+        </AlertDialogCancel>
+        <AlertDialogAction
+          :disabled="isProcessing"
+          @click="handleConfirmAction"
+        >
+          {{ isProcessing ? 'Memproses...' : 'Ya, Lanjutkan' }}
+        </AlertDialogAction>
+      </AlertDialogFooter>
+    </AlertDialogContent>
+  </AlertDialog>
 </template>

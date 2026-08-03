@@ -10,7 +10,7 @@ import { useClassroomList } from '../composables/useClassroomList'
 import { useClassroomSupervisor } from '../composables/useClassroomSupervisor'
 import { useClassroomEnrollment } from '../composables/useClassroomEnrollment'
 import { useClassroomStructure } from '../composables/useClassroomStructure'
-import AppLayout from '@/layouts/AppLayout.vue'
+import { useBreadcrumbs } from '@/shared/composables/useBreadcrumbs'
 import { Card, CardHeader, CardTitle } from '@/ui/card'
 import { Button } from '@/ui/button'
 import ClassroomInfoCard from '../components/ClassroomInfoCard.vue'
@@ -85,7 +85,7 @@ const remainingCapacity = computed(
   () =>
     (currentClassroom.value?.capacity ?? 0) - classroomEnrollments.value.length,
 )
-const breadcrumbs = computed(() => [
+useBreadcrumbs(() => [
   { title: 'Akademik', href: '#' },
   { title: 'Kelas', href: '/academic/classroom' },
   { title: currentClassroom.value?.displayName ?? 'Kelola' },
@@ -217,99 +217,97 @@ onMounted(async () => {
 </script>
 
 <template>
-  <AppLayout :breadcrumbs="breadcrumbs">
-    <div class="p-4 md:p-6 lg:p-8">
-      <Card
-        class="overflow-hidden rounded-2xl shadow-sm shadow-black/5 ring-1 ring-black/4"
+  <div class="p-4 md:p-6 lg:p-8">
+    <Card
+      class="overflow-hidden rounded-2xl shadow-sm shadow-black/5 ring-1 ring-black/4"
+    >
+      <CardHeader
+        class="flex flex-row items-center justify-between border-b px-6 py-5"
       >
-        <CardHeader
-          class="flex flex-row items-center justify-between border-b px-6 py-5"
-        >
-          <div class="flex items-center gap-3">
-            <Button
-              variant="outline"
-              size="icon"
-              class="h-8 w-8"
-              @click="router.push('/academic/classroom')"
-            >
-              <ArrowLeft class="h-4 w-4" />
-            </Button>
-            <div>
-              <CardTitle class="text-2xl font-bold tracking-tight">
-                Kelola Kelas {{ currentClassroom?.displayName ?? '' }}
-              </CardTitle>
-              <p class="text-sm text-muted-foreground mt-0.5">
-                Kelola wali kelas dan daftar siswa untuk semester aktif.
-              </p>
-            </div>
+        <div class="flex items-center gap-3">
+          <Button
+            variant="outline"
+            size="icon"
+            class="h-8 w-8"
+            @click="router.push('/academic/classroom')"
+          >
+            <ArrowLeft class="h-4 w-4" />
+          </Button>
+          <div>
+            <CardTitle class="text-2xl font-bold tracking-tight">
+              Kelola Kelas {{ currentClassroom?.displayName ?? '' }}
+            </CardTitle>
+            <p class="text-sm text-muted-foreground mt-0.5">
+              Kelola wali kelas dan daftar siswa untuk semester aktif.
+            </p>
           </div>
-        </CardHeader>
+        </div>
+      </CardHeader>
 
-        <div class="p-6 space-y-6">
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <ClassroomInfoCard
-              :current-classroom="currentClassroom"
-              :active-semester="activeSemester ?? null"
-              :is-admin="can('classrooms.update') || can('classrooms.delete')"
-              @manage="isEditInfoOpen = true"
-            />
+      <div class="p-6 space-y-6">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <ClassroomInfoCard
+            :current-classroom="currentClassroom"
+            :active-semester="activeSemester ?? null"
+            :is-admin="can('classrooms.update') || can('classrooms.delete')"
+            @manage="isEditInfoOpen = true"
+          />
 
-            <ClassroomStructureCard
-              :classroom-supervisor-label="classroomSupervisorLabel"
-              :classroom-structure="classroomStructure"
-              @manage="isStructureOpen = true"
-            />
-          </div>
-
-          <ClassroomStudentsCard
-            ref="studentsCardRef"
-            :classroom-enrollments="classroomEnrollments"
-            :capacity="currentClassroom?.capacity ?? 0"
-            :manage-loading="manageLoading"
-            @add-student="openAddStudentDialog"
-            @transfer-students="handleTransferStudents"
-            @unenroll-students="handleUnenrollStudents"
+          <ClassroomStructureCard
+            :classroom-supervisor-label="classroomSupervisorLabel"
+            :classroom-structure="classroomStructure"
+            @manage="isStructureOpen = true"
           />
         </div>
-      </Card>
 
-      <AddStudentDialog
-        v-model:open="isAddStudentOpen"
-        :class-name="currentClassroom?.displayName ?? ''"
-        :students="availableStudents"
-        :loading="manageLoading"
-        :enrolling="enrolling"
-        :remaining-capacity="remainingCapacity"
-        @enroll="handleEnroll"
-      />
+        <ClassroomStudentsCard
+          ref="studentsCardRef"
+          :classroom-enrollments="classroomEnrollments"
+          :capacity="currentClassroom?.capacity ?? 0"
+          :manage-loading="manageLoading"
+          @add-student="openAddStudentDialog"
+          @transfer-students="handleTransferStudents"
+          @unenroll-students="handleUnenrollStudents"
+        />
+      </div>
+    </Card>
 
-      <TransferStudentDialog
-        v-model:open="isTransferOpen"
-        :enrollments="transferEnrollments"
-        :current-classroom-id="classroomId"
-        :classrooms="classrooms"
-        :loading="transferring"
-        @transfer="handleTransfer"
-      />
+    <AddStudentDialog
+      v-model:open="isAddStudentOpen"
+      :class-name="currentClassroom?.displayName ?? ''"
+      :students="availableStudents"
+      :loading="manageLoading"
+      :enrolling="enrolling"
+      :remaining-capacity="remainingCapacity"
+      @enroll="handleEnroll"
+    />
 
-      <ClassroomStructureDialog
-        v-model:open="isStructureOpen"
-        :teachers="teachers"
-        :enrollments="classroomEnrollments"
-        :classroom-structure="classroomStructure"
-        :current-teacher-id="currentAssignment?.teacherId ?? null"
-        :is-saving="isSaving || isSupervisorSaving"
-        @save="handleSaveStructure"
-      />
+    <TransferStudentDialog
+      v-model:open="isTransferOpen"
+      :enrollments="transferEnrollments"
+      :current-classroom-id="classroomId"
+      :classrooms="classrooms"
+      :loading="transferring"
+      @transfer="handleTransfer"
+    />
 
-      <ClassroomFormDialog
-        v-if="can('classrooms.update') && isEditInfoOpen"
-        v-model:open="isEditInfoOpen"
-        :academic-years="academicYears"
-        :grades="grades"
-        :edit-data="currentClassroom"
-        @save-success="reloadData"
-      />
-    </div>
-  </AppLayout>
+    <ClassroomStructureDialog
+      v-model:open="isStructureOpen"
+      :teachers="teachers"
+      :enrollments="classroomEnrollments"
+      :classroom-structure="classroomStructure"
+      :current-teacher-id="currentAssignment?.teacherId ?? null"
+      :is-saving="isSaving || isSupervisorSaving"
+      @save="handleSaveStructure"
+    />
+
+    <ClassroomFormDialog
+      v-if="can('classrooms.update') && isEditInfoOpen"
+      v-model:open="isEditInfoOpen"
+      :academic-years="academicYears"
+      :grades="grades"
+      :edit-data="currentClassroom"
+      @save-success="reloadData"
+    />
+  </div>
 </template>

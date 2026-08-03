@@ -9,6 +9,10 @@ export const timeSlotRoutes: RouteRecordRaw[] = [
       requiresAuth: true,
       requiredPermission: 'time-slots.read',
       title: 'Jam Pelajaran',
+      breadcrumbs: [
+        { title: 'Pembelajaran', href: '#' },
+        { title: 'Jam Pelajaran', href: '/learning/time-slot' },
+      ],
     },
   },
   {
@@ -19,6 +23,10 @@ export const timeSlotRoutes: RouteRecordRaw[] = [
       requiresAuth: true,
       requiredPermission: 'time-slots.read',
       title: 'Tipe Jam',
+      breadcrumbs: [
+        { title: 'Referensi', href: '#' },
+        { title: 'Tipe Jam', href: '/setting/time-slot-type' },
+      ],
     },
   },
 ]

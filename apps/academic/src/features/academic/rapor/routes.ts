@@ -9,6 +9,10 @@ export const raporRoutes: RouteRecordRaw[] = [
       requiresAuth: true,
       requiredPermission: 'report-cards.read',
       title: 'Rapor Siswa',
+      breadcrumbs: [
+        { title: 'Manajemen Akademik', href: '#' },
+        { title: 'Rapor Siswa', href: '/academic/report-card' },
+      ],
     },
   },
 ]

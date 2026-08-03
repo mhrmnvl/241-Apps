@@ -9,6 +9,10 @@ export const subjectRoutes: RouteRecordRaw[] = [
       requiresAuth: true,
       requiredPermission: 'subjects.read',
       title: 'Mata Pelajaran',
+      breadcrumbs: [
+        { title: 'Pembelajaran', href: '#' },
+        { title: 'Mata Pelajaran', href: '/learning/subject' },
+      ],
     },
   },
 ]

@@ -9,6 +9,10 @@ export const studentParentRoutes: RouteRecordRaw[] = [
       requiresAuth: true,
       requiredPermission: 'students.read',
       title: 'Relasi Siswa — Orang Tua',
+      breadcrumbs: [
+        { title: 'Data Master', href: '#' },
+        { title: 'Relasi Orang Tua', href: '/data/parent-relation' },
+      ],
     },
   },
 ]

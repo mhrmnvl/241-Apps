@@ -3,7 +3,6 @@ import EventCalendarGridView from '../components/EventCalendarGridView.vue'
 import EventCalendarTableView from '../components/EventCalendarTableView.vue'
 import EventCalendarDialog from '../components/EventCalendarDialog.vue'
 import { useEventCalendar } from '../composables/useEventCalendar'
-import AppLayout from '@/layouts/AppLayout.vue'
 import { Button } from '@/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/card'
 
@@ -18,11 +17,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/tabs'
 import { Calendar as CalendarIcon, Clock, Plus } from 'lucide-vue-next'
 import { useRoleGuard } from '@/features/platform/auth'
 import { computed, ref, watch } from 'vue'
-
-const breadcrumbs = [
-  { title: 'Akademik', href: '#' },
-  { title: 'Kalender Kegiatan' },
-]
 
 const {
   events,
@@ -218,202 +212,200 @@ watch(activeTab, (val) => {
 </script>
 
 <template>
-  <AppLayout :breadcrumbs="breadcrumbs">
-    <div class="p-4 md:p-6 lg:p-8">
-      <Card
-        class="overflow-hidden rounded-2xl shadow-sm shadow-black/5 ring-1 ring-black/4"
+  <div class="p-4 md:p-6 lg:p-8">
+    <Card
+      class="overflow-hidden rounded-2xl shadow-sm shadow-black/5 ring-1 ring-black/4"
+    >
+      <CardHeader
+        class="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b px-6 py-5 gap-4"
       >
-        <CardHeader
-          class="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b px-6 py-5 gap-4"
-        >
-          <div>
-            <CardTitle class="text-2xl font-bold tracking-tight">
-              Kalender Kegiatan
-            </CardTitle>
-          </div>
-          <div class="flex flex-col sm:flex-row w-full sm:w-auto gap-2">
-            <Button
-              v-if="can('events.create')"
-              class="w-full sm:w-auto"
-              @click="openCreateDialog"
+        <div>
+          <CardTitle class="text-2xl font-bold tracking-tight">
+            Kalender Kegiatan
+          </CardTitle>
+        </div>
+        <div class="flex flex-col sm:flex-row w-full sm:w-auto gap-2">
+          <Button
+            v-if="can('events.create')"
+            class="w-full sm:w-auto"
+            @click="openCreateDialog"
+          >
+            <Plus class="size-4 mr-2" />
+            Tambah Agenda
+          </Button>
+        </div>
+      </CardHeader>
+
+      <Tabs
+        v-model="activeTab"
+        class="w-full"
+      >
+        <div class="px-6 pt-2 border-b bg-muted/10">
+          <TabsList class="h-auto rounded-none bg-transparent p-0">
+            <TabsTrigger
+              value="calendar"
+              class="rounded-b-none border border-transparent border-b-0 px-4 py-2 data-[state=active]:-mb-px data-[state=active]:z-10 data-[state=active]:border-border data-[state=active]:bg-background data-[state=active]:shadow-none"
             >
-              <Plus class="size-4 mr-2" />
-              Tambah Agenda
-            </Button>
-          </div>
-        </CardHeader>
+              Tampilan Kalender
+            </TabsTrigger>
+            <TabsTrigger
+              v-if="can('events.create')"
+              value="tabel"
+              class="rounded-b-none border border-transparent border-b-0 px-4 py-2 data-[state=active]:-mb-px data-[state=active]:z-10 data-[state=active]:border-border data-[state=active]:bg-background data-[state=active]:shadow-none"
+            >
+              Manajemen Data
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
-        <Tabs
-          v-model="activeTab"
-          class="w-full"
+        <TabsContent
+          value="calendar"
+          class="m-0 border-none outline-none focus-visible:ring-0 w-full"
         >
-          <div class="px-6 pt-2 border-b bg-muted/10">
-            <TabsList class="h-auto rounded-none bg-transparent p-0">
-              <TabsTrigger
-                value="calendar"
-                class="rounded-b-none border border-transparent border-b-0 px-4 py-2 data-[state=active]:-mb-px data-[state=active]:z-10 data-[state=active]:border-border data-[state=active]:bg-background data-[state=active]:shadow-none"
-              >
-                Tampilan Kalender
-              </TabsTrigger>
-              <TabsTrigger
-                v-if="can('events.create')"
-                value="tabel"
-                class="rounded-b-none border border-transparent border-b-0 px-4 py-2 data-[state=active]:-mb-px data-[state=active]:z-10 data-[state=active]:border-border data-[state=active]:bg-background data-[state=active]:shadow-none"
-              >
-                Manajemen Data
-              </TabsTrigger>
-            </TabsList>
-          </div>
-
-          <TabsContent
-            value="calendar"
-            class="m-0 border-none outline-none focus-visible:ring-0 w-full"
-          >
-            <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 p-6">
-              <div class="lg:col-span-1 space-y-6">
-                <Card class="border-none shadow-none bg-primary/5">
-                  <CardHeader class="pb-3 px-4">
-                    <CardTitle
-                      class="text-sm font-semibold text-primary flex items-center gap-2"
-                    >
-                      <Clock class="size-4" />
-                      Kegiatan Hari Ini
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent class="px-4 pb-4">
+          <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 p-6">
+            <div class="lg:col-span-1 space-y-6">
+              <Card class="border-none shadow-none bg-primary/5">
+                <CardHeader class="pb-3 px-4">
+                  <CardTitle
+                    class="text-sm font-semibold text-primary flex items-center gap-2"
+                  >
+                    <Clock class="size-4" />
+                    Kegiatan Hari Ini
+                  </CardTitle>
+                </CardHeader>
+                <CardContent class="px-4 pb-4">
+                  <div
+                    v-if="todayEvents.length > 0"
+                    class="space-y-3"
+                  >
                     <div
-                      v-if="todayEvents.length > 0"
-                      class="space-y-3"
+                      v-for="event in todayEvents"
+                      :key="event.id"
+                      class="bg-background rounded-xl p-3 shadow-sm border cursor-pointer hover:border-primary/50 transition-colors"
+                      @click="
+                        handleEventClick({
+                          event: {
+                            id: event.id,
+                            title: event.title,
+                            extendedProps: event,
+                          },
+                        })
+                      "
                     >
+                      <div class="font-medium text-sm mb-1 line-clamp-1">
+                        {{ event.title }}
+                      </div>
                       <div
-                        v-for="event in todayEvents"
-                        :key="event.id"
-                        class="bg-background rounded-xl p-3 shadow-sm border cursor-pointer hover:border-primary/50 transition-colors"
-                        @click="
-                          handleEventClick({
-                            event: {
-                              id: event.id,
-                              title: event.title,
-                              extendedProps: event,
-                            },
-                          })
-                        "
+                        class="text-xs text-muted-foreground flex items-center gap-1.5 mb-2"
                       >
-                        <div class="font-medium text-sm mb-1 line-clamp-1">
-                          {{ event.title }}
-                        </div>
-                        <div
-                          class="text-xs text-muted-foreground flex items-center gap-1.5 mb-2"
+                        <CalendarIcon class="size-3" />
+                        <span
+                          >{{ formatTime(event.startTime) }} -
+                          {{ formatTime(event.endTime) }}</span
                         >
-                          <CalendarIcon class="size-3" />
-                          <span
-                            >{{ formatTime(event.startTime) }} -
-                            {{ formatTime(event.endTime) }}</span
-                          >
-                        </div>
                       </div>
                     </div>
-                    <div
-                      v-else
-                      class="text-sm text-muted-foreground text-center py-6 bg-background/50 rounded-xl border border-dashed"
-                    >
-                      Tidak ada kegiatan hari ini
-                    </div>
-                  </CardContent>
-                </Card>
+                  </div>
+                  <div
+                    v-else
+                    class="text-sm text-muted-foreground text-center py-6 bg-background/50 rounded-xl border border-dashed"
+                  >
+                    Tidak ada kegiatan hari ini
+                  </div>
+                </CardContent>
+              </Card>
 
-                <Card class="border-none shadow-none bg-muted/30">
-                  <CardHeader class="pb-3 px-4">
-                    <CardTitle
-                      class="text-sm font-semibold flex items-center gap-2"
-                    >
-                      <CalendarIcon class="size-4" />
-                      Kegiatan Mendatang
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent class="px-4 pb-4">
+              <Card class="border-none shadow-none bg-muted/30">
+                <CardHeader class="pb-3 px-4">
+                  <CardTitle
+                    class="text-sm font-semibold flex items-center gap-2"
+                  >
+                    <CalendarIcon class="size-4" />
+                    Kegiatan Mendatang
+                  </CardTitle>
+                </CardHeader>
+                <CardContent class="px-4 pb-4">
+                  <div
+                    v-if="upcomingEvents.length > 0"
+                    class="space-y-3"
+                  >
                     <div
-                      v-if="upcomingEvents.length > 0"
-                      class="space-y-3"
+                      v-for="event in upcomingEvents"
+                      :key="event.id"
+                      class="bg-background rounded-xl p-3 shadow-sm border cursor-pointer hover:border-primary/50 transition-colors"
+                      @click="
+                        handleEventClick({
+                          event: {
+                            id: event.id,
+                            title: event.title,
+                            extendedProps: event,
+                          },
+                        })
+                      "
                     >
+                      <div class="font-medium text-sm mb-1 line-clamp-1">
+                        {{ event.title }}
+                      </div>
                       <div
-                        v-for="event in upcomingEvents"
-                        :key="event.id"
-                        class="bg-background rounded-xl p-3 shadow-sm border cursor-pointer hover:border-primary/50 transition-colors"
-                        @click="
-                          handleEventClick({
-                            event: {
-                              id: event.id,
-                              title: event.title,
-                              extendedProps: event,
-                            },
-                          })
-                        "
+                        class="text-xs text-muted-foreground flex items-center gap-1.5 mb-2"
                       >
-                        <div class="font-medium text-sm mb-1 line-clamp-1">
-                          {{ event.title }}
-                        </div>
-                        <div
-                          class="text-xs text-muted-foreground flex items-center gap-1.5 mb-2"
-                        >
-                          <CalendarIcon class="size-3" />
-                          <span>{{ formatDateStr(event.startTime) }}</span>
-                        </div>
+                        <CalendarIcon class="size-3" />
+                        <span>{{ formatDateStr(event.startTime) }}</span>
                       </div>
                     </div>
-                    <div
-                      v-else
-                      class="text-sm text-muted-foreground text-center py-6 bg-background/50 rounded-xl border border-dashed"
-                    >
-                      Tidak ada kegiatan mendatang
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-
-              <div
-                class="lg:col-span-3 bg-background rounded-2xl border shadow-sm p-4 md:p-6"
-              >
-                <EventCalendarGridView
-                  :events="events"
-                  :is-loading="isLoading"
-                  @date-click="handleDateClick"
-                  @event-click="handleEventClick"
-                  @fetch-events="fetchEvents"
-                />
-              </div>
+                  </div>
+                  <div
+                    v-else
+                    class="text-sm text-muted-foreground text-center py-6 bg-background/50 rounded-xl border border-dashed"
+                  >
+                    Tidak ada kegiatan mendatang
+                  </div>
+                </CardContent>
+              </Card>
             </div>
-          </TabsContent>
 
-          <TabsContent
-            value="tabel"
-            class="m-0 border-none outline-none focus-visible:ring-0 w-full bg-background rounded-b-2xl"
-          >
-            <EventCalendarTableView
-              ref="tableViewRef"
-              :table-events="tableEvents"
-              :is-loading="tableLoading"
-              :is-deleting-bulk="isDeletingBulk"
-              :show-actions="can('events.update') || can('events.delete')"
-              @update-filters="handleUpdateFilters"
-              @delete-bulk="handleDeleteBulk"
-              @edit="openEditSheet"
-              @deleted="handleSavedOrDeleted"
-            />
-          </TabsContent>
-        </Tabs>
-      </Card>
-    </div>
+            <div
+              class="lg:col-span-3 bg-background rounded-2xl border shadow-sm p-4 md:p-6"
+            >
+              <EventCalendarGridView
+                :events="events"
+                :is-loading="isLoading"
+                @date-click="handleDateClick"
+                @event-click="handleEventClick"
+                @fetch-events="fetchEvents"
+              />
+            </div>
+          </div>
+        </TabsContent>
 
-    <EventCalendarDialog
-      v-if="can('events.create')"
-      :open="sheetOpen"
-      :event-data="sheetEventData"
-      :selected-date="selectedDate"
-      :is-saving="isSavingEvent"
-      @update:open="sheetOpen = $event"
-      @saved="handleSaveEvent"
-      @deleted="handleDeleteEvent"
-    />
-  </AppLayout>
+        <TabsContent
+          value="tabel"
+          class="m-0 border-none outline-none focus-visible:ring-0 w-full bg-background rounded-b-2xl"
+        >
+          <EventCalendarTableView
+            ref="tableViewRef"
+            :table-events="tableEvents"
+            :is-loading="tableLoading"
+            :is-deleting-bulk="isDeletingBulk"
+            :show-actions="can('events.update') || can('events.delete')"
+            @update-filters="handleUpdateFilters"
+            @delete-bulk="handleDeleteBulk"
+            @edit="openEditSheet"
+            @deleted="handleSavedOrDeleted"
+          />
+        </TabsContent>
+      </Tabs>
+    </Card>
+  </div>
+
+  <EventCalendarDialog
+    v-if="can('events.create')"
+    :open="sheetOpen"
+    :event-data="sheetEventData"
+    :selected-date="selectedDate"
+    :is-saving="isSavingEvent"
+    @update:open="sheetOpen = $event"
+    @saved="handleSaveEvent"
+    @deleted="handleDeleteEvent"
+  />
 </template>

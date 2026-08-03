@@ -1,6 +1,5 @@
 ﻿<script setup lang="ts">
 import { onMounted, ref, watch } from 'vue'
-import AppLayout from '@/layouts/AppLayout.vue'
 import { DataTable } from '@/ui'
 import { Button } from '@/ui/button'
 import { Card, CardHeader, CardTitle } from '@/ui/card'
@@ -10,11 +9,6 @@ import { useRoleGuard } from '@/features/platform/auth'
 import { createStudentParentColumns } from '../components/columns'
 import StudentParentFormDialog from '../components/StudentParentFormDialog.vue'
 import type { StudentParent, StudentParentFormPayload } from '../types'
-
-const breadcrumbs = [
-  { title: 'Data Master', href: '#' },
-  { title: 'Relasi Orang Tua', href: '/data/parent-relation' },
-]
 
 const {
   items,
@@ -77,47 +71,45 @@ onMounted(async () => {
 </script>
 
 <template>
-  <AppLayout :breadcrumbs="breadcrumbs">
-    <div class="p-4 md:p-6 lg:p-8">
-      <Card
-        class="overflow-hidden rounded-2xl shadow-sm shadow-black/5 ring-1 ring-black/4"
+  <div class="p-4 md:p-6 lg:p-8">
+    <Card
+      class="overflow-hidden rounded-2xl shadow-sm shadow-black/5 ring-1 ring-black/4"
+    >
+      <CardHeader
+        class="flex flex-row items-center justify-between border-b px-6 py-5"
       >
-        <CardHeader
-          class="flex flex-row items-center justify-between border-b px-6 py-5"
+        <CardTitle class="text-2xl font-bold tracking-tight">
+          Relasi Siswa — Orang Tua
+        </CardTitle>
+        <Button
+          v-if="can('students.create')"
+          @click="isFormOpen = true"
         >
-          <CardTitle class="text-2xl font-bold tracking-tight">
-            Relasi Siswa — Orang Tua
-          </CardTitle>
-          <Button
-            v-if="can('students.create')"
-            @click="isFormOpen = true"
-          >
-            <Plus class="size-4 mr-2" />
-            Tambah
-          </Button>
-        </CardHeader>
+          <Plus class="size-4 mr-2" />
+          Tambah
+        </Button>
+      </CardHeader>
 
-        <div class="p-6">
-          <DataTable
-            :columns="columns"
-            :data="items"
-            :total-items="totalItems"
-            :is-loading="loading"
-            item-label="relasi"
-          />
+      <div class="p-6">
+        <DataTable
+          :columns="columns"
+          :data="items"
+          :total-items="totalItems"
+          :is-loading="loading"
+          item-label="relasi"
+        />
 
-          <StudentParentFormDialog
-            v-if="can('students.create') && isFormOpen"
-            v-model:open="isFormOpen"
-            :edit-data="editingItem"
-            :form-error="formError"
-            :is-saving="isSaving"
-            :students="students"
-            :parents="parents"
-            @save="handleSave"
-          />
-        </div>
-      </Card>
-    </div>
-  </AppLayout>
+        <StudentParentFormDialog
+          v-if="can('students.create') && isFormOpen"
+          v-model:open="isFormOpen"
+          :edit-data="editingItem"
+          :form-error="formError"
+          :is-saving="isSaving"
+          :students="students"
+          :parents="parents"
+          @save="handleSave"
+        />
+      </div>
+    </Card>
+  </div>
 </template>
