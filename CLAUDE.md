@@ -48,6 +48,7 @@ pnpm build            # production build, all frontend apps
 pnpm typecheck        # vue-tsc, all frontend apps
 pnpm lint             # ESLint, all frontend apps
 pnpm lint:strict      # type-aware ESLint, all frontend apps
+pnpm test             # vitest, all frontend apps + @241/* packages
 pnpm format:check     # Prettier check, all frontend apps
 ```
 
@@ -55,6 +56,11 @@ pnpm format:check     # Prettier check, all frontend apps
 > path filter is case-sensitive against cwd casing, so on Windows a path filter can
 > silently match nothing (green script that runs nothing) — always use the name
 > filter shown above.
+
+> `test` is the one root script that also covers `@241/*`, because two of the four
+> vitest suites live in `packages/master-data` and `packages/platform` rather than
+> in an app. It deliberately excludes `backend`, which runs jest through its own
+> filter. Packages with no `test` script are skipped.
 
 Per-app (substitute `academic-web` / `inventory-web` / `admission-web`):
 
