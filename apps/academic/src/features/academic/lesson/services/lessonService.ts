@@ -9,7 +9,6 @@ import type {
   LessonBatchRow,
   LessonQueryParams,
   LessonServiceResult,
-  ScheduleResponse,
 } from '../types'
 
 const DAY_LABELS: Record<string, string> = {
@@ -31,7 +30,7 @@ export const lessonService = {
       const response = await lessonApi.getLessons(params)
       return {
         success: true,
-        data: (response?.data?.data as unknown as ScheduleResponse[]) ?? [],
+        data: response?.data?.data ?? [],
       }
     } catch (err: unknown) {
       return { success: false, error: err }
@@ -49,7 +48,7 @@ export const lessonService = {
       const response = await lessonApi.getLessonsByClassroom(classroomId)
       return {
         success: true,
-        data: (response?.data?.data as unknown as ScheduleResponse[]) ?? [],
+        data: response?.data?.data ?? [],
       }
     } catch (err: unknown) {
       return { success: false, error: err }

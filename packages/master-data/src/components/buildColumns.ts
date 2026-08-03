@@ -2,13 +2,13 @@ import { ActionCell, Badge } from '@/ui'
 import type { ColumnDef } from '@tanstack/vue-table'
 import { h } from 'vue'
 import type {
-  MasterDataConfig,
   MasterDataDeleteCallbacks,
+  MasterDataDisplayConfig,
   MasterDataEntity,
 } from '../types/config'
 
 export function buildColumns<T extends MasterDataEntity>(
-  config: MasterDataConfig<T>,
+  config: MasterDataDisplayConfig<T>,
   onEdit: (item: T) => void,
   onDelete: (item: T, callbacks: MasterDataDeleteCallbacks) => void,
 ): ColumnDef<T>[] {

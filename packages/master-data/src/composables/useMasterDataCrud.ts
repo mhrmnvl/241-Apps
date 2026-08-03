@@ -1,9 +1,11 @@
 import { ref } from 'vue'
 import type { MasterDataConfig, MasterDataEntity } from '../types/config'
 
-export function useMasterDataCrud<T extends MasterDataEntity>(
-  config: MasterDataConfig<T>,
-) {
+export function useMasterDataCrud<
+  T extends MasterDataEntity,
+  TCreate = Record<string, unknown>,
+  TUpdate = TCreate,
+>(config: MasterDataConfig<T, TCreate, TUpdate>) {
   const data = ref<T[]>([])
   const isLoading = ref(false)
   const isSubmitting = ref(false)
@@ -17,7 +19,7 @@ export function useMasterDataCrud<T extends MasterDataEntity>(
     }
   }
 
-  async function create(payload: Record<string, unknown>) {
+  async function create(payload: TCreate) {
     isSubmitting.value = true
     try {
       const success = await config.service.create(payload)
@@ -28,7 +30,7 @@ export function useMasterDataCrud<T extends MasterDataEntity>(
     }
   }
 
-  async function update(id: string, payload: Record<string, unknown>) {
+  async function update(id: string, payload: TUpdate) {
     isSubmitting.value = true
     try {
       const success = await config.service.update(id, payload)

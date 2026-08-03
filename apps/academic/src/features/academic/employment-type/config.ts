@@ -7,7 +7,11 @@ import type {
   EmploymentTypeUpdatePayload,
 } from './types'
 
-export function useEmploymentTypeConfig(): MasterDataConfig<EmploymentType> {
+export function useEmploymentTypeConfig(): MasterDataConfig<
+  EmploymentType,
+  EmploymentTypeCreatePayload,
+  EmploymentTypeUpdatePayload
+> {
   const { can } = useRoleGuard()
 
   return {
@@ -22,15 +26,9 @@ export function useEmploymentTypeConfig(): MasterDataConfig<EmploymentType> {
     },
     service: {
       list: () => employmentTypeService.getEmploymentTypes(),
-      create: (payload) =>
-        employmentTypeService.createEmploymentType(
-          payload as unknown as EmploymentTypeCreatePayload,
-        ),
+      create: (payload) => employmentTypeService.createEmploymentType(payload),
       update: (id, payload) =>
-        employmentTypeService.updateEmploymentType(
-          id,
-          payload as unknown as EmploymentTypeUpdatePayload,
-        ),
+        employmentTypeService.updateEmploymentType(id, payload),
       remove: (id, callbacks) =>
         employmentTypeService.deleteEmploymentType(id, callbacks),
     },

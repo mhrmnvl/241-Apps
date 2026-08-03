@@ -4,9 +4,14 @@ import { academicCalendarTypeService } from './services/academicCalendarTypeServ
 import type {
   AcademicCalendarType,
   AcademicCalendarTypeCreatePayload,
+  AcademicCalendarTypeUpdatePayload,
 } from './types'
 
-export function useAcademicCalendarTypeConfig(): MasterDataConfig<AcademicCalendarType> {
+export function useAcademicCalendarTypeConfig(): MasterDataConfig<
+  AcademicCalendarType,
+  AcademicCalendarTypeCreatePayload,
+  AcademicCalendarTypeUpdatePayload
+> {
   const { can } = useRoleGuard()
 
   return {
@@ -19,9 +24,7 @@ export function useAcademicCalendarTypeConfig(): MasterDataConfig<AcademicCalend
     service: {
       list: () => academicCalendarTypeService.getAcademicCalendarTypes(),
       create: (payload) =>
-        academicCalendarTypeService.createAcademicCalendarType(
-          payload as unknown as AcademicCalendarTypeCreatePayload,
-        ),
+        academicCalendarTypeService.createAcademicCalendarType(payload),
       update: (id, payload) =>
         academicCalendarTypeService.updateAcademicCalendarType(id, payload),
       remove: (id, callbacks) =>

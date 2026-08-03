@@ -7,7 +7,11 @@ import type {
   BloodTypeUpdatePayload,
 } from './types'
 
-export function useBloodTypeConfig(): MasterDataConfig<BloodType> {
+export function useBloodTypeConfig(): MasterDataConfig<
+  BloodType,
+  BloodTypeCreatePayload,
+  BloodTypeUpdatePayload
+> {
   const { can } = useRoleGuard()
 
   return {
@@ -19,15 +23,8 @@ export function useBloodTypeConfig(): MasterDataConfig<BloodType> {
     },
     service: {
       list: () => bloodTypeService.getBloodTypes(),
-      create: (payload) =>
-        bloodTypeService.createBloodType(
-          payload as unknown as BloodTypeCreatePayload,
-        ),
-      update: (id, payload) =>
-        bloodTypeService.updateBloodType(
-          id,
-          payload as unknown as BloodTypeUpdatePayload,
-        ),
+      create: (payload) => bloodTypeService.createBloodType(payload),
+      update: (id, payload) => bloodTypeService.updateBloodType(id, payload),
       remove: (id, callbacks) =>
         bloodTypeService.deleteBloodType(id, callbacks),
     },

@@ -15,6 +15,7 @@
     "typecheck": "pnpm -r --filter \"*-web\" typecheck",
     "lint": "pnpm -r --filter \"*-web\" lint",
     "lint:strict": "pnpm -r --filter \"*-web\" lint:strict",
+    "test": "pnpm -r --filter \"*-web\" --filter \"@241/*\" test",
     "format:check": "pnpm -r --filter \"*-web\" format:check",
     "format": "pnpm -r --filter \"*-web\" format",
     "prepare": "husky"

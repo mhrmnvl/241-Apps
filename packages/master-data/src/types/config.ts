@@ -29,7 +29,17 @@ export interface MasterDataDeleteCallbacks {
   setLoading: (state: boolean) => void
 }
 
-export interface MasterDataConfig<T extends MasterDataEntity> {
+/**
+ * `TCreate` / `TUpdate` are the payload types the feature's own service takes.
+ * They default to the dynamic record the form produces, so a config that has no
+ * dedicated payload types can still be written as `MasterDataConfig<Thing>`.
+ * Declaring them is what lets a feature drop the cast on every service call.
+ */
+export interface MasterDataConfig<
+  T extends MasterDataEntity,
+  TCreate = Record<string, unknown>,
+  TUpdate = TCreate,
+> {
   entityLabel: {
     singular: string
     plural: string
@@ -41,8 +51,8 @@ export interface MasterDataConfig<T extends MasterDataEntity> {
   }
   service: {
     list: () => Promise<T[]>
-    create: (payload: Record<string, unknown>) => Promise<boolean>
-    update: (id: string, payload: Record<string, unknown>) => Promise<boolean>
+    create: (payload: TCreate) => Promise<boolean>
+    update: (id: string, payload: TUpdate) => Promise<boolean>
     remove: (
       id: string,
       callbacks: MasterDataDeleteCallbacks,
@@ -50,3 +60,9 @@ export interface MasterDataConfig<T extends MasterDataEntity> {
   }
   fields: MasterDataField[]
 }
+
+/** The parts of a config that describe the table, independent of payload types. */
+export type MasterDataDisplayConfig<T extends MasterDataEntity> = Pick<
+  MasterDataConfig<T>,
+  'entityLabel' | 'permissions' | 'fields'
+>

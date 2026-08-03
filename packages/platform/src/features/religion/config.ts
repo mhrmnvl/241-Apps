@@ -7,7 +7,11 @@ import type {
   ReligionUpdatePayload,
 } from './types'
 
-export function useReligionConfig(): MasterDataConfig<Religion> {
+export function useReligionConfig(): MasterDataConfig<
+  Religion,
+  ReligionCreatePayload,
+  ReligionUpdatePayload
+> {
   const { can } = useRoleGuard()
 
   return {
@@ -19,15 +23,8 @@ export function useReligionConfig(): MasterDataConfig<Religion> {
     },
     service: {
       list: () => religionService.getReligions(),
-      create: (payload) =>
-        religionService.createReligion(
-          payload as unknown as ReligionCreatePayload,
-        ),
-      update: (id, payload) =>
-        religionService.updateReligion(
-          id,
-          payload as unknown as ReligionUpdatePayload,
-        ),
+      create: (payload) => religionService.createReligion(payload),
+      update: (id, payload) => religionService.updateReligion(id, payload),
       remove: (id, callbacks) => religionService.deleteReligion(id, callbacks),
     },
     fields: [

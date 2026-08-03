@@ -7,7 +7,11 @@ import type {
   AchievementTypeUpdatePayload,
 } from './types'
 
-export function useAchievementTypeConfig(): MasterDataConfig<AchievementType> {
+export function useAchievementTypeConfig(): MasterDataConfig<
+  AchievementType,
+  AchievementTypeCreatePayload,
+  AchievementTypeUpdatePayload
+> {
   const { can } = useRoleGuard()
 
   return {
@@ -20,14 +24,9 @@ export function useAchievementTypeConfig(): MasterDataConfig<AchievementType> {
     service: {
       list: () => achievementTypeService.getAchievementTypes(),
       create: (payload) =>
-        achievementTypeService.createAchievementType(
-          payload as unknown as AchievementTypeCreatePayload,
-        ),
+        achievementTypeService.createAchievementType(payload),
       update: (id, payload) =>
-        achievementTypeService.updateAchievementType(
-          id,
-          payload as unknown as AchievementTypeUpdatePayload,
-        ),
+        achievementTypeService.updateAchievementType(id, payload),
       remove: (id, callbacks) =>
         achievementTypeService.deleteAchievementType(id, callbacks),
     },

@@ -108,7 +108,7 @@ watch(
 )
 
 const onSave = form.handleSubmit((values) => {
-  emit('update:draftSchoolUnit', values as unknown as SchoolUnitProfile)
+  emit('update:draftSchoolUnit', values)
   emit('save')
 })
 </script>

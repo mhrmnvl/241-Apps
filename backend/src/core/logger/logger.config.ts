@@ -16,9 +16,11 @@ export const pinoLoggerConfig: Params = {
 
     customProps: (req: IncomingMessage) => {
       const props: Record<string, unknown> = {};
-      const request = req as unknown as Express.Request;
-      if (request.user) {
-        props.userId = request.user.id;
+      // The auth guard attaches `user`; nothing else off the request is read
+      // here, so narrow to that instead of asserting the full Express type.
+      const { user } = req as IncomingMessage & { user?: { id: string } };
+      if (user) {
+        props.userId = user.id;
       }
       return props;
     },

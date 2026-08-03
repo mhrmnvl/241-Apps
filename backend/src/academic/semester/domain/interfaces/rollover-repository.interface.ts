@@ -1,43 +1,12 @@
-import { DayEnum } from '../../../../shared/domain/enums/day.enum.js';
+import {
+  ClassroomRolloverEntity,
+  ClassroomSupervisorRolloverEntity,
+  StudentEnrollmentRolloverEntity,
+  TeachingAssignmentRolloverEntity,
+} from '../entities/semester-rollover.entity.js';
 import { SemesterWithAcademicYear } from '../entities/semester.entity.js';
 
 export type { SemesterWithAcademicYear };
-
-export interface ClassroomRolloverEntity {
-  id: string;
-  gradeId: string;
-  code: string;
-  name: string | null;
-  capacity: number;
-  isActive: boolean;
-}
-
-export interface StudentEnrollmentRolloverEntity {
-  id: string;
-  studentId: string;
-  classroomId: string;
-}
-
-export interface ClassroomSupervisorRolloverEntity {
-  id: string;
-  classroomId: string;
-  teacherId: string;
-}
-
-export interface ScheduleRolloverEntity {
-  id: string;
-  day: `${DayEnum}`;
-  timeSlotId: string;
-  room?: string | null;
-}
-
-export interface TeachingAssignmentRolloverEntity {
-  id: string;
-  teacherId: string;
-  classroomId: string;
-  subjectId: string;
-  schedules: ScheduleRolloverEntity[];
-}
 
 export interface RolloverSourceData {
   classrooms: ClassroomRolloverEntity[];

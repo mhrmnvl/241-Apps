@@ -3,7 +3,7 @@ import { AddressPublic } from '../entities/profile-address.entity.js';
 
 export type { AddressPublic };
 
-export interface CreateProfileAddressDto {
+export interface CreateProfileAddressRepositoryInput {
   street: string;
   rt: string;
   rw: string;
@@ -15,7 +15,8 @@ export interface CreateProfileAddressDto {
   isPrimary?: boolean;
 }
 
-export type UpdateProfileAddressDto = Partial<CreateProfileAddressDto>;
+export type UpdateProfileAddressRepositoryInput =
+  Partial<CreateProfileAddressRepositoryInput>;
 
 export abstract class IProfileAddressRepository {
   abstract findAllByUserId(userId: string): Promise<AddressPublic[]>;
@@ -43,13 +44,13 @@ export abstract class IProfileAddressRepository {
   ): Promise<{ count: number }>;
 
   abstract create(
-    dto: CreateProfileAddressDto,
+    input: CreateProfileAddressRepositoryInput,
     ownerId: { studentId?: string; teacherId?: string },
   ): Promise<AddressPublic>;
 
   abstract update(
     addressId: string,
-    dto: UpdateProfileAddressDto,
+    input: UpdateProfileAddressRepositoryInput,
   ): Promise<AddressPublic>;
 
   abstract remove(addressId: string): Promise<AddressEntity>;

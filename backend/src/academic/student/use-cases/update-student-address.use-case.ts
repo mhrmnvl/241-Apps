@@ -1,5 +1,5 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { Address } from '../domain/interfaces/student-repository.interface.js';
+import { AddressEntity } from '../../../shared/domain/entities/address.entity.js';
 import { UpdateAddressDto } from '../../../shared/dto/address.dto.js';
 import { IStudentAddressRepository } from '../domain/interfaces/student-address-repository.interface.js';
 import { IStudentRepository } from '../index.js';
@@ -17,7 +17,7 @@ export class UpdateStudentAddressUseCase {
     studentId: string,
     addressId: string,
     dto: UpdateAddressDto,
-  ): Promise<Address> {
+  ): Promise<AddressEntity> {
     const student = await this.studentRepository.findById(studentId);
     if (!student)
       throw new NotFoundException(`Student with ID ${studentId} not found`);

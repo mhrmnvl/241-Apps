@@ -1,8 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { Address, Prisma } from '@prisma/client';
+
 import { PrismaService } from '../../../../core/database/prisma.service.js';
 import { IStudentAddressRepository } from '../../domain/interfaces/student-address-repository.interface.js';
-import { AddressEntity } from '../../../../shared/domain/entities/address.entity.js';
+import {
+  AddressEntity,
+  CreateAddressRepositoryInput,
+  UpdateAddressRepositoryInput,
+} from '../../../../shared/domain/entities/address.entity.js';
 
 @Injectable()
 export class PrismaStudentAddressRepository extends IStudentAddressRepository {
@@ -38,30 +42,27 @@ export class PrismaStudentAddressRepository extends IStudentAddressRepository {
 
   async create(
     studentId: string,
-    dto: Partial<AddressEntity>,
+    input: CreateAddressRepositoryInput,
   ): Promise<AddressEntity> {
     return this.prisma.$transaction(async (tx) => {
-      if (dto.isPrimary) {
+      if (input.isPrimary) {
         await tx.address.updateMany({
           where: { studentId, isPrimary: true },
           data: { isPrimary: false },
         });
       }
       return tx.address.create({
-        data: {
-          ...(dto as unknown as Prisma.AddressUncheckedCreateInput),
-          studentId,
-        },
+        data: { ...input, studentId },
       });
     });
   }
 
   async update(
     id: string,
-    dto: Partial<AddressEntity>,
+    input: UpdateAddressRepositoryInput,
   ): Promise<AddressEntity> {
     return this.prisma.$transaction(async (tx) => {
-      if (dto.isPrimary) {
+      if (input.isPrimary) {
         const current = await tx.address.findUnique({ where: { id } });
         if (current?.studentId) {
           await tx.address.updateMany({
@@ -76,7 +77,7 @@ export class PrismaStudentAddressRepository extends IStudentAddressRepository {
       }
       return tx.address.update({
         where: { id },
-        data: dto,
+        data: input,
       });
     });
   }

@@ -1,14 +1,13 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import ExcelJS from 'exceljs';
-import { BulkImportTeacherRowDto } from '../../dto/request/bulk-import-teacher.dto.js';
+import { TeacherImportRow } from '../../domain/entities/teacher-import-row.entity.js';
 import { ExcelTeacherParser as IExcelTeacherParser } from '../../domain/interfaces/teacher-excel-parser.interface.js';
 
 type ExcelRow = Record<string, ExcelJS.CellValue>;
-type MappedRow = Record<string, string | undefined>;
 
 @Injectable()
 export class ExcelTeacherParser implements IExcelTeacherParser {
-  async parse(buffer: Buffer): Promise<BulkImportTeacherRowDto[]> {
+  async parse(buffer: Buffer): Promise<TeacherImportRow[]> {
     const rows = await this.parseExcel(buffer);
 
     if (rows.length === 0) {
@@ -17,13 +16,10 @@ export class ExcelTeacherParser implements IExcelTeacherParser {
       );
     }
 
-    return rows.map((row) => {
-      const rawRow = this.mapColumns(row);
-      return rawRow as unknown as BulkImportTeacherRowDto;
-    });
+    return rows.map((row) => this.mapColumns(row));
   }
 
-  private mapColumns(row: ExcelRow): MappedRow {
+  private mapColumns(row: ExcelRow): TeacherImportRow {
     const pick = (...keys: string[]): ExcelJS.CellValue =>
       keys.reduce<ExcelJS.CellValue>((val, k) => val ?? row[k], undefined);
     const str = (...keys: string[]): string => {

@@ -41,15 +41,15 @@ export interface CreateTeachingAssignmentFromScheduleInput {
  * Identity-only rows: the scheduling flow resolves these purely to obtain (or
  * confirm) an id before writing, so nothing else is selected.
  */
-export interface ClassroomRef {
+export interface ClassroomIdRef {
   id: string;
 }
 
-export interface ActiveSemesterRef {
+export interface ActiveSemesterIdRef {
   id: string;
 }
 
-export interface TeachingAssignmentRef {
+export interface TeachingAssignmentIdRef {
   id: string;
 }
 
@@ -88,8 +88,8 @@ export abstract class IScheduleRepository {
   abstract remove(id: string): Promise<ScheduleEntity>;
   abstract softDelete(id: string): Promise<ScheduleEntity>;
 
-  abstract findValidClassroomById(id: string): Promise<ClassroomRef | null>;
-  abstract findActiveSemester(): Promise<ActiveSemesterRef | null>;
+  abstract findValidClassroomById(id: string): Promise<ClassroomIdRef | null>;
+  abstract findActiveSemester(): Promise<ActiveSemesterIdRef | null>;
   abstract softDeleteByClassroomAndDay(
     classroomId: string,
     day: DayEnum,
@@ -98,13 +98,13 @@ export abstract class IScheduleRepository {
     classroomId: string,
     subjectId: string,
     semesterId: string,
-  ): Promise<TeachingAssignmentRef | null>;
+  ): Promise<TeachingAssignmentIdRef | null>;
   abstract findAnyTeacherIdForSubject(
     subjectId: string,
   ): Promise<string | null>;
   abstract createTeachingAssignment(
     input: CreateTeachingAssignmentFromScheduleInput,
-  ): Promise<TeachingAssignmentRef>;
+  ): Promise<TeachingAssignmentIdRef>;
   abstract findSoftDeleted(
     taId: string,
     slotId: string,
@@ -116,7 +116,7 @@ export abstract class IScheduleRepository {
   ): Promise<ScheduleWithDetails>;
   abstract findTeachingAssignmentById(
     id: string,
-  ): Promise<TeachingAssignmentRef | null>;
+  ): Promise<TeachingAssignmentIdRef | null>;
   abstract findDuplicate(
     taId: string,
     slotId: string,

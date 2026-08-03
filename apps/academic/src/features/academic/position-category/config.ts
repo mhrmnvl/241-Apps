@@ -7,7 +7,11 @@ import type {
   PositionCategoryUpdatePayload,
 } from './types'
 
-export function usePositionCategoryConfig(): MasterDataConfig<PositionCategory> {
+export function usePositionCategoryConfig(): MasterDataConfig<
+  PositionCategory,
+  PositionCategoryCreatePayload,
+  PositionCategoryUpdatePayload
+> {
   const { can } = useRoleGuard()
 
   return {
@@ -20,14 +24,9 @@ export function usePositionCategoryConfig(): MasterDataConfig<PositionCategory> 
     service: {
       list: () => positionCategoryService.getPositionCategories(),
       create: (payload) =>
-        positionCategoryService.createPositionCategory(
-          payload as unknown as PositionCategoryCreatePayload,
-        ),
+        positionCategoryService.createPositionCategory(payload),
       update: (id, payload) =>
-        positionCategoryService.updatePositionCategory(
-          id,
-          payload as unknown as PositionCategoryUpdatePayload,
-        ),
+        positionCategoryService.updatePositionCategory(id, payload),
       remove: (id, callbacks) =>
         positionCategoryService.deletePositionCategory(id, callbacks),
     },

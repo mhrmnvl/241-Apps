@@ -1,3 +1,4 @@
+import { JsonObject } from '../../../../shared/domain/types/json.type.js';
 import {
   PaginatedResult,
   PaginationQueryInput,
@@ -16,7 +17,7 @@ export interface CreateAuditLogData {
   action: string;
   resource: string;
   resourceId?: string | null;
-  metadata?: unknown;
+  metadata?: JsonObject;
   ipAddress?: string | null;
   userAgent?: string | null;
 }

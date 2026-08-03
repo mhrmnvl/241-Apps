@@ -183,8 +183,12 @@ function confirmSave() {
                       v-bind="componentField"
                       :disabled="isEditing"
                       @input="
-                        (e: any) =>
-                          setValues({ code: e.target.value.toUpperCase() })
+                        (e: Event) =>
+                          setValues({
+                            code: (
+                              e.target as HTMLInputElement
+                            ).value.toUpperCase(),
+                          })
                       "
                     />
                   </FormControl>

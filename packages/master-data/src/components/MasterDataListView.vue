@@ -1,4 +1,12 @@
-<script setup lang="ts" generic="T extends MasterDataEntity">
+<script
+  setup
+  lang="ts"
+  generic="
+    T extends MasterDataEntity,
+    TCreate = Record<string, unknown>,
+    TUpdate = TCreate
+  "
+>
 import { onMounted, ref } from 'vue'
 import { Plus } from 'lucide-vue-next'
 import { DataTable } from '@/ui'
@@ -10,7 +18,7 @@ import MasterDataFormDialog from './MasterDataFormDialog.vue'
 import type { MasterDataConfig, MasterDataEntity } from '../types/config'
 
 const props = defineProps<{
-  config: MasterDataConfig<T>
+  config: MasterDataConfig<T, TCreate, TUpdate>
 }>()
 
 const { data, isLoading, isSubmitting, fetchAll, create, update, remove } =
@@ -25,14 +33,17 @@ function openEdit(item: T) {
   isEditOpen.value = true
 }
 
+// The dialog builds its record from `config.fields` at runtime, so the compiler
+// cannot see that it already matches the payload type the config declares. This
+// is the one place the two meet — every feature config used to repeat this cast.
 async function handleAddSave(payload: Record<string, unknown>) {
-  const success = await create(payload)
+  const success = await create(payload as TCreate)
   if (success) isAddOpen.value = false
 }
 
 async function handleEditSave(payload: Record<string, unknown>) {
   if (!selectedItem.value) return
-  const success = await update(selectedItem.value.id, payload)
+  const success = await update(selectedItem.value.id, payload as TUpdate)
   if (success) isEditOpen.value = false
 }
 
