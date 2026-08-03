@@ -2,10 +2,7 @@ import {
   PaginatedResult,
   PaginationQueryInput,
 } from '../../../../shared/domain/interfaces/repository.interface.js';
-import {
-  EventEntity,
-  EventWithDetails,
-} from '../entities/academic-calendar.entity.js';
+import { EventEntity, EventWithDetails } from '../entities/event.entity.js';
 
 export type { EventWithDetails };
 

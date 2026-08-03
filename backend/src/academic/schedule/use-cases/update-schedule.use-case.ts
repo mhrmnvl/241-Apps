@@ -3,7 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { UpdateScheduleDto } from '../dto/request/schedule.dto.js';
+import { UpdateScheduleDto } from '../dto/request/update-schedule.dto.js';
 import { IScheduleRepository } from '../domain/interfaces/schedule-repository.interface.js';
 
 @Injectable()

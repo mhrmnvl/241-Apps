@@ -2,7 +2,7 @@ import {
   PaginatedResult,
   PaginationQueryInput,
 } from '../../../shared/domain/interfaces/repository.interface.js';
-import { AdmissionAnnouncementEntity } from '../entities/admission.entity.js';
+import { AdmissionAnnouncementEntity } from '../entities/admission-announcement.entity.js';
 
 export type AdmissionAnnouncementWithWave = AdmissionAnnouncementEntity;
 

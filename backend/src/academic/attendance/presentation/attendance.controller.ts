@@ -24,14 +24,12 @@ import { JwtAuthGuard } from '../../../platform/auth/index.js';
 import { CurrentUser } from '../../../core/decorators/current-user.decorator.js';
 import type { AuthenticatedUser } from '../../../core/types/authenticated-user.type.js';
 
-import {
-  CreateAttendanceDto,
-  UpdateAttendanceDto,
-  AttendanceQueryDto,
-  BulkUpsertAttendanceDto,
-  AttendanceRecapQueryDto,
-  AttendanceTrendQueryDto,
-} from '../dto/request/attendance.dto.js';
+import { CreateAttendanceDto } from '../dto/request/create-attendance.dto.js';
+import { UpdateAttendanceDto } from '../dto/request/update-attendance.dto.js';
+import { AttendanceQueryDto } from '../dto/request/attendance-query.dto.js';
+import { BulkUpsertAttendanceDto } from '../dto/request/bulk-upsert-attendance.dto.js';
+import { AttendanceRecapQueryDto } from '../dto/request/attendance-recap-query.dto.js';
+import { AttendanceTrendQueryDto } from '../dto/request/attendance-trend-query.dto.js';
 import { GetAttendancesUseCase } from '../use-cases/get-attendances.use-case.js';
 import { GetAttendanceByIdUseCase } from '../use-cases/get-attendance-by-id.use-case.js';
 import { CreateAttendanceUseCase } from '../use-cases/create-attendance.use-case.js';

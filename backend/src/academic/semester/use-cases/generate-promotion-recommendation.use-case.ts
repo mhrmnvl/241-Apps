@@ -3,12 +3,12 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { GenerateRecommendationDto } from '../dto/request/generate-recommendation.dto.js';
 import {
-  GenerateRecommendationDto,
   PromotionRecommendationDto,
   PromotionRecommendationItemDto,
-} from '../dto/request/generate-recommendation.dto.js';
-import { PromotionAction } from '../dto/request/promotion.dto.js';
+} from '../dto/response/promotion-recommendation.dto.js';
+import { PromotionAction } from '../domain/enums/promotion-action.enum.js';
 import { IPromotionRepository } from '../domain/interfaces/promotion-repository.interface.js';
 
 @Injectable()

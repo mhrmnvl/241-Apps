@@ -4,10 +4,8 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import {
-  RolloverSemesterDto,
-  RolloverSummaryDto,
-} from '../dto/request/rollover-semester.dto.js';
+import { RolloverSemesterDto } from '../dto/request/rollover-semester.dto.js';
+import { RolloverSummaryDto } from '../dto/response/rollover-summary.dto.js';
 import { IRolloverRepository } from '../domain/interfaces/rollover-repository.interface.js';
 
 @Injectable()

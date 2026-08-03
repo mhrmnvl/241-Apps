@@ -2,11 +2,11 @@ import {
   PaginatedResult,
   PaginationQueryInput,
 } from '../../../../shared/domain/interfaces/repository.interface.js';
-import { StudentScoreEntity } from '../entities/assessment.entity.js';
+import { StudentScoreEntity } from '../entities/student-score.entity.js';
 import {
   StudentScoreWithDetails,
   StudentScoreWithDetails as StudentScoreWithReportCardDetails,
-} from '../entities/assessment.entity.js';
+} from '../entities/student-score.entity.js';
 
 /**
  * Score row joined all the way out to the subject, which is what the report

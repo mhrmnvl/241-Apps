@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CreateSemesterDto } from '../dto/request/create-semester.dto.js';
-import { PromotionAction } from '../dto/request/promotion.dto.js';
+import { PromotionAction } from '../domain/enums/promotion-action.enum.js';
 import { ActivateSemesterUseCase } from '../use-cases/activate-semester.use-case.js';
 import { CreateSemesterUseCase } from '../use-cases/create-semester.use-case.js';
 import { DeactivateSemesterUseCase } from '../use-cases/deactivate-semester.use-case.js';

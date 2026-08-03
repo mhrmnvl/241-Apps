@@ -1,4 +1,4 @@
-import { TeacherPositionWithDetails } from '../entities/teacher.entity.js';
+import { TeacherPositionWithDetails } from '../entities/teacher-position.entity.js';
 
 export interface PositionRow {
   id: string;

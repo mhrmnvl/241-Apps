@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { IStudentRepository } from '../domain/interfaces/student-repository.interface.js';
-import type { RequestUser } from '../types/student.types.js';
+import type { RequestUser } from '../../../core/types/request-user.type.js';
 import { StudentWithDetails } from '../domain/interfaces/student-repository.interface.js';
 
 @Injectable()

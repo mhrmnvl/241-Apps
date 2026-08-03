@@ -1,7 +1,8 @@
 import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { IStudentAddressRepository } from '../domain/interfaces/student-address-repository.interface.js';
-import { RequestUser, IStudentRepository } from '../index.js';
+import { IStudentRepository } from '../index.js';
+import type { RequestUser } from '../../../core/types/request-user.type.js';
 import { GetStudentAddressesUseCase } from './get-student-addresses.use-case.js';
 
 describe('GetStudentAddressesUseCase', () => {

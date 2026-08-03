@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { ScheduleQueryDto } from '../dto/request/schedule.dto.js';
+import { ScheduleQueryDto } from '../dto/request/schedule-query.dto.js';
 import { IScheduleRepository } from '../domain/interfaces/schedule-repository.interface.js';
 
 @Injectable()

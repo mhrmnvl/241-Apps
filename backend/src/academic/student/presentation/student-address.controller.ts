@@ -32,7 +32,7 @@ import {
   UpdateAddressDto,
 } from '../../../shared/dto/address.dto.js';
 import { StudentResponseDto } from '../index.js';
-import type { RequestUser } from '../types/student.types.js';
+import type { RequestUser } from '../../../core/types/request-user.type.js';
 import { AddStudentAddressUseCase } from '../use-cases/add-student-address.use-case.js';
 import { GetStudentAddressesUseCase } from '../use-cases/get-student-addresses.use-case.js';
 import { RemoveStudentAddressUseCase } from '../use-cases/remove-student-address.use-case.js';

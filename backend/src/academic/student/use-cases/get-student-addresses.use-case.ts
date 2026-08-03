@@ -5,7 +5,8 @@ import {
 } from '@nestjs/common';
 import { Address } from '../domain/interfaces/student-repository.interface.js';
 import { IStudentAddressRepository } from '../domain/interfaces/student-address-repository.interface.js';
-import { IStudentRepository, RequestUser } from '../index.js';
+import { IStudentRepository } from '../index.js';
+import type { RequestUser } from '../../../core/types/request-user.type.js';
 
 @Injectable()
 export class GetStudentAddressesUseCase {

@@ -1,9 +1,9 @@
 import { UserGender } from '../../../../shared/domain/enums/user-gender.enum.js';
 import { MaritalStatus } from '../../../../shared/domain/enums/marital-status.enum.js';
-import {
-  AddressEntity,
-  NamedRef,
-} from '../../../../shared/domain/entities/index.js';
+import type { NamedRef } from '../../../../shared/domain/entities/index.js';
+import type { AchievementEntity } from '../../achievement/domain/entities/achievement.entity.js';
+import type { EducationalHistoryEntity } from '../../educational-history/domain/entities/educational-history.entity.js';
+import type { ScholarshipEntity } from '../../scholarship/domain/entities/scholarship.entity.js';
 
 export interface ProfileEntity {
   id: string;
@@ -35,84 +35,6 @@ export interface ProfileFileRef {
   storageKey: string;
 }
 
-export interface AchievementRef {
-  id: string;
-  profileId: string;
-  name: string;
-  level: string;
-  typeId: string;
-  year: number;
-  description: string | null;
-  type?: NamedRef;
-}
-
-export interface ScholarshipRef {
-  id: string;
-  profileId: string;
-  name: string;
-  provider: string;
-  year: number;
-  status: string;
-}
-
-export interface EducationalHistoryRef {
-  id: string;
-  profileId: string;
-  level: string;
-  institution: string;
-  major: string | null;
-  startYear: number;
-  endYear: number | null;
-  status: string;
-}
-
-export interface ProfileWithDetails extends ProfileEntity {
-  socialMedias?: SocialMediaItem[];
-  achievements?: AchievementRef[];
-  scholarships?: ScholarshipRef[];
-  educationalHistories?: EducationalHistoryRef[];
-  religion?: NamedRef | null;
-  bloodType?: NamedRef | null;
-  avatarFile?: ProfileFileRef | null;
-}
-
-export interface UserRoleRef {
-  userId: string;
-  roleId: string;
-  role: {
-    id: string;
-    code: string;
-    name: string;
-  };
-}
-
-export interface TeacherSummaryRef {
-  id: string;
-  userId: string;
-  nip: string | null;
-  nuptk: string | null;
-  employmentTypeId: string | null;
-  addresses?: AddressEntity[];
-  employmentType?: NamedRef | null;
-}
-
-export interface StudentSummaryRef {
-  id: string;
-  userId: string;
-  nis: string;
-  nisn: string;
-  gradeId: string | null;
-}
-
-export interface UserDetail {
-  id: string;
-  identifier: string;
-  userRoles?: UserRoleRef[];
-  profile?: ProfileWithDetails | null;
-  teacher?: TeacherSummaryRef | null;
-  student?: StudentSummaryRef | null;
-}
-
 export interface SocialMediaItem {
   id: string;
   socialMediaId: string;
@@ -121,6 +43,16 @@ export interface SocialMediaItem {
     name: string;
     baseUrl?: string | null;
   };
+}
+
+export interface ProfileWithDetails extends ProfileEntity {
+  socialMedias?: SocialMediaItem[];
+  achievements?: AchievementEntity[];
+  scholarships?: ScholarshipEntity[];
+  educationalHistories?: EducationalHistoryEntity[];
+  religion?: NamedRef | null;
+  bloodType?: NamedRef | null;
+  avatarFile?: ProfileFileRef | null;
 }
 
 export interface ProfileWithSocialMedias extends ProfileEntity {

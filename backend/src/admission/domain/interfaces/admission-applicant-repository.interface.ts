@@ -1,13 +1,15 @@
+import { AdmissionApplicantEntity } from '../entities/admission-applicant.entity.js';
 import {
   ActiveWaveRow,
-  AdmissionApplicantEntity,
   AdmissionWaveEntity,
-  AdmissionDocumentWithTypeAndFile,
-  AdmissionPaymentWithProof,
+} from '../entities/admission-wave.entity.js';
+import { AdmissionDocumentWithTypeAndFile } from '../entities/admission-document.entity.js';
+import { AdmissionPaymentWithProof } from '../entities/admission-payment.entity.js';
+import {
   ApplicationWithDocsAndPayment,
   ApplicationWithParentsAndUser,
-} from '../entities/admission.entity.js';
-import { AdmissionAnnouncementEntity } from '../entities/admission.entity.js';
+} from '../entities/admission-application.entity.js';
+import { AdmissionAnnouncementEntity } from '../entities/admission-announcement.entity.js';
 import { AdmissionDocumentTypeRow } from './admission-application-repository.interface.js';
 import { DecimalValue } from '../../../shared/domain/types/decimal.type.js';
 import { AdmissionNotificationType } from '../../../shared/domain/enums/admission-notification-type.enum.js';

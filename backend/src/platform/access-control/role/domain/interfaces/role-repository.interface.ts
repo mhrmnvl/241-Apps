@@ -1,10 +1,10 @@
+import { PermissionEntity } from '../../../domain/entities/permission.entity.js';
 import {
-  PermissionEntity,
   RoleEntity,
   RoleWithPermissionsEntity,
   UserRoleEntity,
   UserRoleWithRoleEntity,
-} from '../../../domain/entities/role-permission.entity.js';
+} from '../../../domain/entities/role.entity.js';
 
 export type RoleWithPermissions = RoleWithPermissionsEntity;
 export type UserRoleWithRole = UserRoleWithRoleEntity;

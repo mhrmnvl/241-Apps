@@ -1,9 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { DayEnum as Day } from '../../../shared/domain/enums/day.enum.js';
-import {
-  CreateScheduleDto,
-  UpdateScheduleDto,
-} from '../dto/request/schedule.dto.js';
+import { CreateScheduleDto } from '../dto/request/create-schedule.dto.js';
+import { UpdateScheduleDto } from '../dto/request/update-schedule.dto.js';
 import { CreateScheduleUseCase } from '../use-cases/create-schedule.use-case.js';
 import { DeleteScheduleUseCase } from '../use-cases/delete-schedule.use-case.js';
 import { GetScheduleByIdUseCase } from '../use-cases/get-schedule-by-id.use-case.js';

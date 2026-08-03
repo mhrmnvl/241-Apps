@@ -1,8 +1,8 @@
 import {
   PermissionEntity,
   RolePermissionEntity,
-  UserRoleWithRoleEntity as UserRoleWithRole,
-} from '../../../domain/entities/role-permission.entity.js';
+} from '../../../domain/entities/permission.entity.js';
+import { UserRoleWithRoleEntity as UserRoleWithRole } from '../../../domain/entities/role.entity.js';
 
 export abstract class IPermissionRepository {
   abstract findAll(): Promise<PermissionEntity[]>;

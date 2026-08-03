@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { assertTransition } from '../domain/admission-status.transitions.js';
 import { serializeApplicationDetail } from '../domain/admission.serializers.js';
 import { IAdmissionApplicationRepository } from '../domain/interfaces/admission-application-repository.interface.js';
-import { RejectApplicationDto } from '../dto/request/admin-actions.dto.js';
+import { RejectApplicationDto } from '../dto/request/reject-application.dto.js';
 import { AdmissionNotificationService } from '../services/admission-notification.service.js';
 
 @Injectable()

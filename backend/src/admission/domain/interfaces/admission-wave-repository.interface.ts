@@ -5,7 +5,7 @@ import {
 import {
   AdmissionWaveEntity,
   ActiveWaveRow,
-} from '../entities/admission.entity.js';
+} from '../entities/admission-wave.entity.js';
 
 export type AdmissionWaveWithRelations = ActiveWaveRow;
 export type AdmissionWaveWithAcademicYear = ActiveWaveRow;

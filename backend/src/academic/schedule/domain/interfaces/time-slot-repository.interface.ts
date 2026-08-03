@@ -1,8 +1,6 @@
+import { TimeSlotTypeEntity } from '../entities/time-slot-type.entity.js';
 import {
   TimeSlotEntity,
-  TimeSlotTypeEntity,
-} from '../entities/time-slot.entity.js';
-import {
   TimeSlotWithType as TimeSlotWithDetails,
   TimeSlotWithType,
 } from '../entities/time-slot.entity.js';

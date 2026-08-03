@@ -25,12 +25,10 @@ import { JwtAuthGuard } from '../../../platform/auth/index.js';
 import { CurrentUser } from '../../../core/decorators/current-user.decorator.js';
 import type { AuthenticatedUser } from '../../../core/types/authenticated-user.type.js';
 
-import {
-  BatchUpsertScheduleDto,
-  CreateScheduleDto,
-  UpdateScheduleDto,
-  ScheduleQueryDto,
-} from '../dto/request/schedule.dto.js';
+import { BatchUpsertScheduleDto } from '../dto/request/batch-upsert-schedule.dto.js';
+import { CreateScheduleDto } from '../dto/request/create-schedule.dto.js';
+import { UpdateScheduleDto } from '../dto/request/update-schedule.dto.js';
+import { ScheduleQueryDto } from '../dto/request/schedule-query.dto.js';
 import { GetSchedulesUseCase } from '../use-cases/get-schedules.use-case.js';
 import { GetScheduleByIdUseCase } from '../use-cases/get-schedule-by-id.use-case.js';
 import { GetSchedulesByClassroomUseCase } from '../use-cases/get-schedules-by-classroom.use-case.js';
