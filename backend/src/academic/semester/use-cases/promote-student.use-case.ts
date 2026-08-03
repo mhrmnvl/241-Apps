@@ -4,11 +4,9 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import {
-  PromotionAction,
-  PromotionDto,
-  PromotionResultDto,
-} from '../dto/request/promotion.dto.js';
+import { PromotionAction } from '../domain/enums/promotion-action.enum.js';
+import { PromotionDto } from '../dto/request/promotion.dto.js';
+import { PromotionResultDto } from '../dto/response/promotion-result.dto.js';
 import { IPromotionRepository } from '../domain/interfaces/promotion-repository.interface.js';
 
 @Injectable()

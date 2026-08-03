@@ -1,9 +1,9 @@
 import { PromotionAction } from '../enums/promotion-action.enum.js';
+import { SemesterWithAcademicYear } from '../entities/semester.entity.js';
 import {
-  SemesterWithAcademicYear,
   ClassroomWithGrade,
   ActiveEnrollmentWithDetails,
-} from '../entities/semester.entity.js';
+} from '../entities/promotion.entity.js';
 
 export type {
   SemesterWithAcademicYear,

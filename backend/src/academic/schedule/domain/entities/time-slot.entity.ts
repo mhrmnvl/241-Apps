@@ -1,23 +1,4 @@
-import {
-  AcademicYearRef,
-  ClassroomRef,
-  CodedRef,
-  GradeRef,
-  NamedRef,
-  PersonRef,
-  SemesterRef,
-  SubjectRef,
-} from '../../../../shared/domain/entities/index.js';
-import { DayEnum } from '../../../../shared/domain/enums/day.enum.js';
-
-export interface TimeSlotTypeEntity {
-  id: string;
-  code: string;
-  name: string;
-  isLesson: boolean;
-  days: DayEnum[] | string[];
-  deletedAt?: Date | null;
-}
+import type { TimeSlotTypeEntity } from './time-slot-type.entity.js';
 
 export interface TimeSlotEntity {
   id: string;

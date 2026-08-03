@@ -5,7 +5,7 @@ import {
 import {
   ClassroomSupervisorEntity,
   SupervisorWithDetails,
-} from '../entities/classroom.entity.js';
+} from '../entities/classroom-supervisor.entity.js';
 
 export type {
   SupervisorWithDetails as ClassroomSupervisorWithDetails,

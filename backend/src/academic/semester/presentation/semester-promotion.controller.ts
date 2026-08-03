@@ -9,15 +9,11 @@ import { RequirePermissions } from '../../../platform/access-control/permission/
 import { JwtAuthGuard } from '../../../platform/auth/index.js';
 import { CurrentUser } from '../../../core/decorators/current-user.decorator.js';
 import type { AuthenticatedUser } from '../../../core/types/authenticated-user.type.js';
-import {
-  GenerateRecommendationDto,
-  PromotionRecommendationDto,
-} from '../dto/request/generate-recommendation.dto.js';
-import {
-  PromotionDto,
-  PromotionPreviewDto,
-  PromotionResultDto,
-} from '../dto/request/promotion.dto.js';
+import { GenerateRecommendationDto } from '../dto/request/generate-recommendation.dto.js';
+import { PromotionRecommendationDto } from '../dto/response/promotion-recommendation.dto.js';
+import { PromotionDto } from '../dto/request/promotion.dto.js';
+import { PromotionPreviewDto } from '../dto/response/promotion-preview.dto.js';
+import { PromotionResultDto } from '../dto/response/promotion-result.dto.js';
 import { GeneratePromotionRecommendationUseCase } from '../use-cases/generate-promotion-recommendation.use-case.js';
 import { PreviewPromotionUseCase } from '../use-cases/preview-promotion.use-case.js';
 import { PromoteStudentsUseCase } from '../use-cases/promote-student.use-case.js';

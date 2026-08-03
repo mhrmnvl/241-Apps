@@ -5,7 +5,7 @@ import {
 import {
   GradeAcademicYearEntity,
   GradeAcademicYearWithDetails,
-} from '../entities/grade.entity.js';
+} from '../entities/grade-academic-year.entity.js';
 
 export type { GradeAcademicYearWithDetails };
 

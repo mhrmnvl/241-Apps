@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ClassroomSupervisor, Prisma, Teacher } from '@prisma/client';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
 import { resolveSemesterId } from '../../../../shared/utils/active-academic-year.helper.js';
-import { ClassroomSupervisorEntity } from '../../domain/entities/classroom.entity.js';
+import { ClassroomSupervisorEntity } from '../../domain/entities/classroom-supervisor.entity.js';
 import {
   IClassroomSupervisorRepository,
   SupervisorWithDetails,

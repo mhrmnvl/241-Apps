@@ -1,7 +1,14 @@
 <script setup lang="ts">
+import { defineAsyncComponent } from 'vue'
 import AttendanceSummaryCards from './AttendanceSummaryCards.vue'
-import AttendanceTrendChart from './AttendanceTrendChart.vue'
 import { createRecapColumns } from './columns'
+
+// Split out: the chart pulls in the whole @unovis/ts runtime (~600 kB), which
+// otherwise lands in the Attendance route chunk even though the chart only
+// renders once the Recap tab is opened.
+const AttendanceTrendChart = defineAsyncComponent(
+  () => import('./AttendanceTrendChart.vue'),
+)
 import { DataTable } from '@/ui'
 import type { AttendanceRecapItem, AttendanceTrendPoint } from '../types'
 

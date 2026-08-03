@@ -1,8 +1,5 @@
-import {
-  AcademicYearRef,
-  GradeRef,
-  SubjectRef,
-} from '../../../../shared/domain/entities/index.js';
+import type { AcademicYearRef } from '../../../../shared/domain/entities/index.js';
+import type { CurriculumSubjectWithDetails } from './curriculum-subject.entity.js';
 
 export interface CurriculumEntity {
   id: string;
@@ -12,25 +9,8 @@ export interface CurriculumEntity {
   deletedAt?: Date | null;
 }
 
-export interface CurriculumSubjectEntity {
-  id: string;
-  curriculaId?: string;
-  curriculumId?: string;
-  subjectId: string;
-  gradeId?: string;
-  weeklyHours?: number;
-  hoursPerWeek?: number;
-  deletedAt?: Date | null;
-}
-
 export interface CurriculumWithDetails extends CurriculumEntity {
   academicYear?: AcademicYearRef;
   curriculumSubjects?: CurriculumSubjectWithDetails[];
   _count?: { gradeAcademicYears?: number };
-}
-
-export interface CurriculumSubjectWithDetails extends CurriculumSubjectEntity {
-  curriculum?: CurriculumEntity;
-  subject?: SubjectRef;
-  grade?: GradeRef | null;
 }

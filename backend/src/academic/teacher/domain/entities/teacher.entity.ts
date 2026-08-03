@@ -1,8 +1,9 @@
-import {
-  AddressEntity,
+import type {
   NamedRef,
   UserRef,
 } from '../../../../shared/domain/entities/index.js';
+import type { AddressEntity } from '../../../../shared/domain/entities/index.js';
+import type { TeacherPositionWithDetails } from './teacher-position.entity.js';
 
 export interface TeacherEntity {
   id: string;
@@ -12,15 +13,6 @@ export interface TeacherEntity {
   employmentTypeId?: string | null;
   joinDate?: Date | null;
   deletedAt?: Date | null;
-}
-
-export interface TeacherPositionWithDetails {
-  id: string;
-  teacherId: string;
-  positionId: string;
-  isPrimary: boolean;
-  hireDate?: Date | null;
-  position?: NamedRef | null;
 }
 
 export interface TeacherAssignmentRef {

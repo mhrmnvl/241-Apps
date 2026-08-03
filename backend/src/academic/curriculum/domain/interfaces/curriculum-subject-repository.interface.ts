@@ -5,7 +5,7 @@ import {
 import {
   CurriculumSubjectEntity,
   CurriculumSubjectWithDetails,
-} from '../entities/curriculum.entity.js';
+} from '../entities/curriculum-subject.entity.js';
 
 export type { CurriculumSubjectWithDetails };
 

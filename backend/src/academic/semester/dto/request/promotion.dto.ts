@@ -1,4 +1,3 @@
-import { PromotionAction } from '../../domain/enums/promotion-action.enum.js';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
@@ -11,9 +10,9 @@ import {
   IsUUID,
   ValidateNested,
 } from 'class-validator';
+import { PromotionAction } from '../../domain/enums/promotion-action.enum.js';
 
-export { PromotionAction };
-
+/** One student's decision — kept beside the payload that nests it. */
 export class PromotionStudentDto {
   @ApiProperty({ description: 'Student ID', format: 'uuid' })
   @IsUUID()
@@ -79,25 +78,4 @@ export class PromotionDto {
   @ValidateNested({ each: true })
   @Type(() => PromotionStudentDto)
   students: PromotionStudentDto[];
-}
-
-export class PromotionResultDto {
-  @ApiProperty() promoted: number;
-  @ApiProperty() repeated: number;
-  @ApiProperty() graduated: number;
-  @ApiProperty() skipped: number;
-}
-
-export class PromotionPreviewItemDto {
-  @ApiProperty() action: PromotionAction;
-  @ApiProperty() studentCount: number;
-}
-
-export class PromotionPreviewDto {
-  @ApiProperty({ type: [PromotionPreviewItemDto] })
-  items: PromotionPreviewItemDto[];
-  @ApiProperty() totalStudents: number;
-  @ApiProperty() promotedCount: number;
-  @ApiProperty() repeatedCount: number;
-  @ApiProperty() graduatedCount: number;
 }

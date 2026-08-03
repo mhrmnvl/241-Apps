@@ -4,9 +4,9 @@ import {
 } from '../entities/profile.entity.js';
 import {
   ProfileWithDetails,
-  UserDetail,
   ProfileWithSocialMedias,
 } from '../entities/profile.entity.js';
+import { UserDetail } from '../entities/user-detail.entity.js';
 
 export type { ProfileWithDetails, UserDetail, ProfileWithSocialMedias };
 

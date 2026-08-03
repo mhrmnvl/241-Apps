@@ -1,12 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AttendanceStatus } from '../../../shared/domain/enums/attendance-status.enum.js';
-import {
-  BulkUpsertAttendanceDto,
-  CreateAttendanceDto,
-  UpdateAttendanceDto,
-  AttendanceRecapQueryDto,
-  AttendanceTrendQueryDto,
-} from '../dto/request/attendance.dto.js';
+import { BulkUpsertAttendanceDto } from '../dto/request/bulk-upsert-attendance.dto.js';
+import { CreateAttendanceDto } from '../dto/request/create-attendance.dto.js';
+import { UpdateAttendanceDto } from '../dto/request/update-attendance.dto.js';
+import { AttendanceRecapQueryDto } from '../dto/request/attendance-recap-query.dto.js';
+import { AttendanceTrendQueryDto } from '../dto/request/attendance-trend-query.dto.js';
 import { GetAttendancesUseCase } from '../use-cases/get-attendances.use-case.js';
 import { GetAttendanceByIdUseCase } from '../use-cases/get-attendance-by-id.use-case.js';
 import { CreateAttendanceUseCase } from '../use-cases/create-attendance.use-case.js';

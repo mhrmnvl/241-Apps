@@ -3,7 +3,7 @@ import {
   ConflictException,
   Injectable,
 } from '@nestjs/common';
-import { CreateScheduleDto } from '../dto/request/schedule.dto.js';
+import { CreateScheduleDto } from '../dto/request/create-schedule.dto.js';
 import { IScheduleRepository } from '../domain/interfaces/schedule-repository.interface.js';
 
 @Injectable()

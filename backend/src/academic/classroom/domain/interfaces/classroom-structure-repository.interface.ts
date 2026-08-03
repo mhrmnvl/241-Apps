@@ -5,7 +5,7 @@ import {
 import {
   ClassroomStructureEntity,
   StructureWithDetails,
-} from '../entities/classroom.entity.js';
+} from '../entities/classroom-structure.entity.js';
 
 export type StudentSemesterStructureResult = StructureWithDetails;
 

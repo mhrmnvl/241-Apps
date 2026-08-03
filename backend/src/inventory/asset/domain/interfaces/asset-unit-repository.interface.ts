@@ -3,8 +3,8 @@ import {
   PaginatedResult,
   PaginationQueryInput,
 } from '../../../../shared/domain/interfaces/repository.interface.js';
-import { InventoryAssetUnitEntity } from '../entities/asset.entity.js';
-import { AssetUnitWithDetails } from '../entities/asset.entity.js';
+import { InventoryAssetUnitEntity } from '../entities/asset-unit.entity.js';
+import { AssetUnitWithDetails } from '../entities/asset-unit.entity.js';
 
 export type { AssetUnitWithDetails };
 

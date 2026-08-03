@@ -1,16 +1,18 @@
 import {
   AdmissionDocumentWithType,
   AdmissionDocumentWithTypeAndFile,
-  AdmissionPaymentWithProof,
+} from '../entities/admission-document.entity.js';
+import { AdmissionPaymentWithProof } from '../entities/admission-payment.entity.js';
+import { AdmissionWaveAcceptedCount } from '../entities/admission-wave.entity.js';
+import {
+  AdmissionApplicationEntity,
+  AdmissionApplicationListRow,
   AdmissionStatusCount,
-  AdmissionWaveAcceptedCount,
   ApplicationWithDocsAndPayment,
   ApplicationWithParentsAndUser,
   ApplicationWithWave,
   EnrollResult,
-  AdmissionApplicationEntity,
-  AdmissionApplicationListRow,
-} from '../entities/admission.entity.js';
+} from '../entities/admission-application.entity.js';
 import {
   PaginatedResult,
   PaginationQueryInput,

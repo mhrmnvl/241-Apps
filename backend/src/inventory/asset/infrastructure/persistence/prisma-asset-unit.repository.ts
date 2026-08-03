@@ -12,7 +12,7 @@ import { PaginatedResult } from '../../../../shared/domain/interfaces/repository
 import {
   AssetUnitWithDetails,
   InventoryAssetUnitEntity,
-} from '../../domain/entities/asset.entity.js';
+} from '../../domain/entities/asset-unit.entity.js';
 
 const UNIT_INCLUDE = {
   condition: true,

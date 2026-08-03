@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { IEnrollmentRepository } from '../../enrollment/domain/interfaces/enrollment-repository.interface.js';
 import { IAttendanceRepository } from '../domain/interfaces/attendance-repository.interface.js';
-import { BulkUpsertAttendanceDto } from '../dto/request/attendance.dto.js';
+import { BulkUpsertAttendanceDto } from '../dto/request/bulk-upsert-attendance.dto.js';
 
 @Injectable()
 export class BulkUpsertAttendanceUseCase {

@@ -1,5 +1,5 @@
 import { AddressEntity } from '../../../../shared/domain/entities/address.entity.js';
-import { AddressPublic } from '../entities/profile-social-media.entity.js';
+import { AddressPublic } from '../entities/profile-address.entity.js';
 
 export type { AddressPublic };
 

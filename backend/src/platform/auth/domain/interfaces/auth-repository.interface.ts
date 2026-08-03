@@ -5,13 +5,13 @@ import {
 import { UserEntity } from '../../../../shared/domain/entities/user.entity.js';
 import {
   AuthSessionEntity,
-  PasswordResetTokenEntity,
+  SessionWithUser,
 } from '../entities/auth-session.entity.js';
 import {
-  UserWithProfileAndRoles,
-  SessionWithUser,
+  PasswordResetTokenEntity,
   PasswordResetTokenWithUser,
-} from '../entities/auth-session.entity.js';
+} from '../entities/password-reset-token.entity.js';
+import { UserWithProfileAndRoles } from '../entities/authenticated-user.entity.js';
 
 export type {
   UserWithProfileAndRoles,

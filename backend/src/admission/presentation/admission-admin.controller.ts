@@ -20,14 +20,12 @@ import { CurrentUser } from '../../core/decorators/current-user.decorator.js';
 import type { AuthenticatedUser } from '../../core/types/authenticated-user.type.js';
 import { RequirePermissions } from '../../platform/access-control/permission/decorators/require-permissions.decorator.js';
 import { JwtAuthGuard } from '../../platform/auth/index.js';
-import {
-  AcceptApplicationDto,
-  EnrollApplicantDto,
-  RejectApplicationDto,
-  RequestRevisionDto,
-  VerifyDocumentDto,
-  VerifyPaymentDto,
-} from '../dto/request/admin-actions.dto.js';
+import { AcceptApplicationDto } from '../dto/request/accept-application.dto.js';
+import { EnrollApplicantDto } from '../dto/request/enroll-applicant.dto.js';
+import { RejectApplicationDto } from '../dto/request/reject-application.dto.js';
+import { RequestRevisionDto } from '../dto/request/request-revision.dto.js';
+import { VerifyDocumentDto } from '../dto/request/verify-document.dto.js';
+import { VerifyPaymentDto } from '../dto/request/verify-payment.dto.js';
 import { AdmissionApplicationQueryDto } from '../dto/request/admission-query.dto.js';
 import { AcceptApplicationUseCase } from '../use-cases/accept-application.use-case.js';
 import { EnrollApplicantUseCase } from '../use-cases/enroll-applicant.use-case.js';

@@ -9,10 +9,8 @@ import { RequirePermissions } from '../../../platform/access-control/permission/
 import { JwtAuthGuard } from '../../../platform/auth/index.js';
 import { CurrentUser } from '../../../core/decorators/current-user.decorator.js';
 import type { AuthenticatedUser } from '../../../core/types/authenticated-user.type.js';
-import {
-  RolloverSemesterDto,
-  RolloverSummaryDto,
-} from '../dto/request/rollover-semester.dto.js';
+import { RolloverSemesterDto } from '../dto/request/rollover-semester.dto.js';
+import { RolloverSummaryDto } from '../dto/response/rollover-summary.dto.js';
 import { RolloverSemesterUseCase } from '../use-cases/rollover-semester.use-case.js';
 
 @ApiTags('Semesters')

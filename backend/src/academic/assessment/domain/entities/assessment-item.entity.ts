@@ -1,6 +1,5 @@
 import {
   ClassroomRef,
-  NamedRef,
   PersonRef,
   SubjectRef,
 } from '../../../../shared/domain/entities/index.js';
@@ -17,17 +16,6 @@ export interface AssessmentItemEntity {
   weight?: number;
   maxScore?: number;
   date?: Date | null;
-  deletedAt?: Date | null;
-}
-
-export interface StudentScoreEntity {
-  id: string;
-  assessmentItemId?: string;
-  studentEnrollmentId?: string;
-  enrollmentId?: string;
-  score?: number | null;
-  note?: string | null;
-  feedback?: string | null;
   deletedAt?: Date | null;
 }
 
@@ -50,20 +38,3 @@ export interface AssessmentItemWithDetails extends AssessmentItemEntity {
     studentScores?: number;
   };
 }
-
-export interface ScoredEnrollmentRef {
-  id: string;
-  studentId: string;
-  classroomId: string;
-  semesterId: string;
-  student?: PersonRef;
-}
-
-export interface StudentScoreWithDetails extends StudentScoreEntity {
-  assessmentItem?: AssessmentItemEntity;
-  enrollment?: ScoredEnrollmentRef;
-}
-
-export type StudentScoreWithReportCardDetails = StudentScoreWithDetails;
-
-export type { NamedRef };

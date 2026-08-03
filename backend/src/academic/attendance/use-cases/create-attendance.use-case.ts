@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { IEnrollmentRepository } from '../../enrollment/domain/interfaces/enrollment-repository.interface.js';
 import { IAttendanceRepository } from '../domain/interfaces/attendance-repository.interface.js';
-import { CreateAttendanceDto } from '../dto/request/attendance.dto.js';
+import { CreateAttendanceDto } from '../dto/request/create-attendance.dto.js';
 
 @Injectable()
 export class CreateAttendanceUseCase {

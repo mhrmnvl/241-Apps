@@ -1,5 +1,6 @@
-import { CodedRef } from '../../../../shared/domain/entities/reference.entity.js';
-import { DecimalValue } from '../../../../shared/domain/types/decimal.type.js';
+import type { CodedRef } from '../../../../shared/domain/entities/index.js';
+import type { DecimalValue } from '../../../../shared/domain/types/decimal.type.js';
+import type { AssetUnitWithDetails } from './asset-unit.entity.js';
 
 export interface InventoryAssetEntity {
   id: string;
@@ -16,30 +17,9 @@ export interface InventoryAssetEntity {
   deletedAt?: Date | null;
 }
 
-export interface InventoryAssetUnitEntity {
-  id: string;
-  assetId: string;
-  unitNumber: string;
-  barcode?: string | null;
-  currentBookValue: DecimalValue;
-  conditionId: string;
-  statusId: string;
-  locationId: string;
-  custodianId?: string | null;
-  notes?: string | null;
-  deletedAt?: Date | null;
-}
-
 export interface AssetWithDetails extends InventoryAssetEntity {
   category?: CodedRef;
   fundingSource?: CodedRef | null;
   units?: AssetUnitWithDetails[];
   _count?: { units?: number };
-}
-
-export interface AssetUnitWithDetails extends InventoryAssetUnitEntity {
-  asset?: InventoryAssetEntity;
-  condition?: CodedRef;
-  status?: CodedRef;
-  location?: CodedRef;
 }

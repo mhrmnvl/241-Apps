@@ -1,4 +1,5 @@
-import { FileCategoryEntity, FileEntity } from '../entities/file.entity.js';
+import { FileCategoryEntity } from '../entities/file-category.entity.js';
+import { FileEntity } from '../entities/file.entity.js';
 
 export interface CreateFileRepositoryInput {
   categoryId?: string;

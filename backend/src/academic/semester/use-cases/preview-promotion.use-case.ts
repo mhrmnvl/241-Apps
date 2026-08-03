@@ -3,12 +3,12 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { PromotionAction } from '../domain/enums/promotion-action.enum.js';
+import { PromotionDto } from '../dto/request/promotion.dto.js';
 import {
-  PromotionAction,
-  PromotionDto,
   PromotionPreviewDto,
   PromotionPreviewItemDto,
-} from '../dto/request/promotion.dto.js';
+} from '../dto/response/promotion-preview.dto.js';
 import { IPromotionRepository } from '../domain/interfaces/promotion-repository.interface.js';
 
 @Injectable()

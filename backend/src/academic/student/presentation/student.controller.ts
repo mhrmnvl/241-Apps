@@ -24,7 +24,7 @@ import {
 } from '@nestjs/swagger';
 import { CurrentUser } from '../../../core/decorators/current-user.decorator.js';
 import type { AuthenticatedUser } from '../../../core/types/authenticated-user.type.js';
-import type { RequestUser } from '../types/student.types.js';
+import type { RequestUser } from '../../../core/types/request-user.type.js';
 
 import { JwtAuthGuard } from '../../../platform/auth/index.js';
 

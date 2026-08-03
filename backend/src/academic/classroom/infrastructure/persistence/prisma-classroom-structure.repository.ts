@@ -5,7 +5,7 @@ import { resolveSemesterId } from '../../../../shared/utils/active-academic-year
 import {
   ClassroomStructureEntity,
   StructureWithDetails,
-} from '../../domain/entities/classroom.entity.js';
+} from '../../domain/entities/classroom-structure.entity.js';
 import {
   IClassroomStructureRepository,
   ClassroomStructureWithDetails,

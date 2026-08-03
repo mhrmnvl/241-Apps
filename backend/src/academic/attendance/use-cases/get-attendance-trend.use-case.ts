@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { IAttendanceRepository } from '../domain/interfaces/attendance-repository.interface.js';
-import { AttendanceTrendQueryDto } from '../dto/request/attendance.dto.js';
+import { AttendanceTrendQueryDto } from '../dto/request/attendance-trend-query.dto.js';
 
 @Injectable()
 export class GetAttendanceTrendUseCase {
