@@ -58,7 +58,6 @@ const router = createRouter({
       path: '/',
       redirect: '/dashboard',
     },
-    ...dashboardRoutes,
     ...authRoutes,
     {
       path: '/',
@@ -67,6 +66,7 @@ const router = createRouter({
       // starting with '/' as a root path, which is what lets the shell wrap
       // these routes without changing a single URL.
       children: [
+        ...dashboardRoutes,
         ...studentRoutes,
         ...studentGraduationRoutes,
         ...teacherRoutes,
@@ -99,36 +99,35 @@ const router = createRouter({
         ...educationRoutes,
         ...academicCalendarTypeRoutes,
         ...semesterTypeRoutes,
+        ...schoolUnitRoutes,
+        ...organizationRoutes,
+        ...fileRoutes,
+        ...userRoleRoutes,
+        ...rolesRoutes,
+        ...permissionsRoutes,
+        ...auditLogsRoutes,
+        ...profileRoutes,
+        ...schoolUnitTypeRoutes,
+        ...religionRoutes,
+        ...bloodTypeRoutes,
+        ...achievementTypeRoutes,
+        ...settingsRoutes,
+        {
+          path: '/setting/general',
+          name: 'setting-general',
+          component: () =>
+            import('@/features/platform/settings').then((m) => ({
+              default: m.AppSettingsView,
+            })),
+          props: { appKey: 'ACADEMIC', menuSections },
+          meta: {
+            requiresAuth: true,
+            requiredPermission: 'settings.update',
+            title: 'Pengaturan Umum',
+            breadcrumbs: [{ title: 'Pengaturan Umum' }],
+          },
+        },
       ],
-    },
-    // Still flat: these render platform views, which wrap themselves in the
-    // shell today. They move under the layout route once every app has one.
-    ...schoolUnitRoutes,
-    ...organizationRoutes,
-    ...fileRoutes,
-    ...userRoleRoutes,
-    ...rolesRoutes,
-    ...permissionsRoutes,
-    ...auditLogsRoutes,
-    ...profileRoutes,
-    ...schoolUnitTypeRoutes,
-    ...religionRoutes,
-    ...bloodTypeRoutes,
-    ...achievementTypeRoutes,
-    ...settingsRoutes,
-    {
-      path: '/setting/general',
-      name: 'setting-general',
-      component: () =>
-        import('@/features/platform/settings').then((m) => ({
-          default: m.AppSettingsView,
-        })),
-      props: { appKey: 'ACADEMIC', menuSections },
-      meta: {
-        requiresAuth: true,
-        requiredPermission: 'settings.update',
-        title: 'Pengaturan Umum',
-      },
     },
     {
       path: '/:pathMatch(.*)*',

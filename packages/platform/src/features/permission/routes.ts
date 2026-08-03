@@ -9,6 +9,10 @@ export const permissionsRoutes: RouteRecordRaw[] = [
       title: 'Manajemen Permission',
       requiresAuth: true,
       requiredPermission: 'permissions.manage',
+      breadcrumbs: [
+        { title: 'Pengaturan', href: '#' },
+        { title: 'Manajemen Permission', href: '/setting/permission' },
+      ],
     },
   },
 ]

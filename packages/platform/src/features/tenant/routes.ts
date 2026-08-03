@@ -9,6 +9,7 @@ export const tenantRoutes: RouteRecordRaw[] = [
       requiresAuth: true,
       allowedRoles: ['SUPER_ADMIN'],
       title: 'Manajemen Tenant',
+      breadcrumbs: [{ title: 'Manajemen Tenant', href: '/tenants' }],
     },
   },
 ]

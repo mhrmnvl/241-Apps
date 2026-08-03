@@ -3,7 +3,6 @@ import { onMounted, reactive, ref } from 'vue'
 import { toast } from 'vue-sonner'
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/ui/card'
 import { Button } from '@/ui/button'
-import AppLayout from '@/layouts/AppLayout.vue'
 import { useSettingsStore } from '../stores/settingsStore'
 import type { AppKey } from '../types/app-setting.types'
 import type { MenuSection } from '@/shared/types/menu.types'
@@ -17,11 +16,6 @@ const props = defineProps<{
   appKey: AppKey
   menuSections: MenuSection[]
 }>()
-
-const breadcrumbs = [
-  { title: 'Pengaturan', href: '#' },
-  { title: 'Pengaturan Umum', href: '#' },
-]
 
 const settingsStore = useSettingsStore()
 
@@ -93,69 +87,67 @@ async function uploadFavicon(file: File) {
 </script>
 
 <template>
-  <AppLayout :breadcrumbs="breadcrumbs">
-    <div class="p-4 md:p-6 lg:p-8">
-      <div
-        v-if="settingsStore.isLoading && !settingsStore.isLoaded"
-        class="py-12 text-center text-sm text-muted-foreground"
-      >
-        Memuat pengaturan...
-      </div>
-
-      <template v-else>
-        <Card
-          class="overflow-hidden rounded-2xl shadow-sm shadow-black/5 ring-1 ring-black/4 flex flex-col gap-0"
-        >
-          <CardHeader class="border-b px-6 py-5 shrink-0">
-            <CardTitle class="text-2xl font-bold tracking-tight">
-              Pengaturan Umum
-            </CardTitle>
-          </CardHeader>
-
-          <CardContent class="p-6 md:p-8 lg:p-10 !pt-8 !md:pt-10 !lg:pt-12">
-            <div class="grid gap-6 md:gap-8 md:grid-cols-2">
-              <BrandingSection
-                v-model:app-title="form.appTitle"
-                v-model:app-subtitle="form.appSubtitle"
-                v-model:login-title="form.loginTitle"
-                v-model:meta-description="form.metaDescription"
-              />
-
-              <LogoFaviconSection
-                :logo-url="settingsStore.settings?.logoUrl"
-                :favicon-url="settingsStore.settings?.faviconUrl"
-                :upload-logo="uploadLogo"
-                :upload-favicon="uploadFavicon"
-              />
-
-              <ContactFooterSection
-                v-model:contact-email="form.contactEmail"
-                v-model:contact-phone="form.contactPhone"
-                v-model:footer-text="form.footerText"
-              />
-
-              <MaintenanceSection
-                v-model:maintenance-mode="form.maintenanceMode"
-                v-model:maintenance-message="form.maintenanceMessage"
-              />
-
-              <MenuVisibilityTree
-                v-model="form.hiddenMenuKeys"
-                :menu-sections="props.menuSections"
-              />
-            </div>
-          </CardContent>
-
-          <CardFooter class="border-t px-6 py-4 flex justify-end bg-muted/10">
-            <Button
-              :disabled="isSaving"
-              @click="handleSave"
-            >
-              {{ isSaving ? 'Menyimpan...' : 'Simpan Pengaturan' }}
-            </Button>
-          </CardFooter>
-        </Card>
-      </template>
+  <div class="p-4 md:p-6 lg:p-8">
+    <div
+      v-if="settingsStore.isLoading && !settingsStore.isLoaded"
+      class="py-12 text-center text-sm text-muted-foreground"
+    >
+      Memuat pengaturan...
     </div>
-  </AppLayout>
+
+    <template v-else>
+      <Card
+        class="overflow-hidden rounded-2xl shadow-sm shadow-black/5 ring-1 ring-black/4 flex flex-col gap-0"
+      >
+        <CardHeader class="border-b px-6 py-5 shrink-0">
+          <CardTitle class="text-2xl font-bold tracking-tight">
+            Pengaturan Umum
+          </CardTitle>
+        </CardHeader>
+
+        <CardContent class="p-6 md:p-8 lg:p-10 !pt-8 !md:pt-10 !lg:pt-12">
+          <div class="grid gap-6 md:gap-8 md:grid-cols-2">
+            <BrandingSection
+              v-model:app-title="form.appTitle"
+              v-model:app-subtitle="form.appSubtitle"
+              v-model:login-title="form.loginTitle"
+              v-model:meta-description="form.metaDescription"
+            />
+
+            <LogoFaviconSection
+              :logo-url="settingsStore.settings?.logoUrl"
+              :favicon-url="settingsStore.settings?.faviconUrl"
+              :upload-logo="uploadLogo"
+              :upload-favicon="uploadFavicon"
+            />
+
+            <ContactFooterSection
+              v-model:contact-email="form.contactEmail"
+              v-model:contact-phone="form.contactPhone"
+              v-model:footer-text="form.footerText"
+            />
+
+            <MaintenanceSection
+              v-model:maintenance-mode="form.maintenanceMode"
+              v-model:maintenance-message="form.maintenanceMessage"
+            />
+
+            <MenuVisibilityTree
+              v-model="form.hiddenMenuKeys"
+              :menu-sections="props.menuSections"
+            />
+          </div>
+        </CardContent>
+
+        <CardFooter class="border-t px-6 py-4 flex justify-end bg-muted/10">
+          <Button
+            :disabled="isSaving"
+            @click="handleSave"
+          >
+            {{ isSaving ? 'Menyimpan...' : 'Simpan Pengaturan' }}
+          </Button>
+        </CardFooter>
+      </Card>
+    </template>
+  </div>
 </template>

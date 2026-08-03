@@ -30,24 +30,24 @@ const router = createRouter({
       // Children keep their absolute paths — Vue Router treats a nested path
       // starting with '/' as a root path, which is what lets the shell wrap
       // these routes without changing a single URL.
-      children: [...admissionRoutes],
-    },
-    // Still flat: these render platform views, which wrap themselves in the
-    // shell today. They move under the layout route once all three apps have
-    // one (issue #25).
-    ...profileRoutes,
-    ...settingsRoutes,
-    {
-      path: '/setting/general',
-      name: 'setting-general',
-      component: () =>
-        import('@/features/platform/settings/views/AppSettingsView.vue'),
-      props: { appKey: 'ADMISSION', menuSections },
-      meta: {
-        requiresAuth: true,
-        requiredPermission: 'settings.update',
-        title: 'Pengaturan Umum',
-      },
+      children: [
+        ...admissionRoutes,
+        ...profileRoutes,
+        ...settingsRoutes,
+        {
+          path: '/setting/general',
+          name: 'setting-general',
+          component: () =>
+            import('@/features/platform/settings/views/AppSettingsView.vue'),
+          props: { appKey: 'ADMISSION', menuSections },
+          meta: {
+            requiresAuth: true,
+            requiredPermission: 'settings.update',
+            title: 'Pengaturan Umum',
+            breadcrumbs: [{ title: 'Pengaturan Umum' }],
+          },
+        },
+      ],
     },
     {
       // Platform login redirects to { name: 'dashboard' } after login;

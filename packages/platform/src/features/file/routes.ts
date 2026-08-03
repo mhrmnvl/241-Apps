@@ -9,6 +9,7 @@ export const fileRoutes: RouteRecordRaw[] = [
       requiresAuth: true,
       requiredPermission: 'files.read',
       title: 'Arsip Berkas',
+      breadcrumbs: [{ title: 'Berkas & Dokumen', href: '/files' }],
     },
   },
 ]

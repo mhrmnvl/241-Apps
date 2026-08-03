@@ -30,13 +30,6 @@ export const EMPTY_ADDRESS: SchoolUnitAddress = {
   postalCode: '',
 }
 
-export const breadcrumbs = [{ title: 'Profil Sekolah', href: '/school-unit' }]
-
-export const editBreadcrumbs = [
-  { title: 'Profil Sekolah', href: '/school-unit' },
-  { title: 'Ubah Profil', href: '/school-unit/edit' },
-]
-
 export const statusOptions: { value: SchoolUnitStatus; label: string }[] = [
   { value: 'PUBLIC', label: 'Negeri' },
   { value: 'PRIVATE', label: 'Swasta' },

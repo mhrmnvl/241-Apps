@@ -102,9 +102,10 @@ function handleViewProfile() {
 const props = withDefaults(
   defineProps<{
     /**
-     * Only for views that still wrap themselves in this layout. Routes nested
-     * under the layout route state their trail in `meta.breadcrumbs` instead,
-     * and this prop goes away once every view has moved (issue #25).
+     * For the one view that renders this layout itself rather than through the
+     * router: `NotFoundView` shows the shell only when the visitor is signed
+     * in, so it cannot be a child of the layout route. Every routed view states
+     * its trail in `meta.breadcrumbs`.
      */
     breadcrumbs?: BreadcrumbItemType[]
   }>(),
