@@ -57,7 +57,7 @@ export class PrismaAuditLogRepository implements IAuditLogRepository {
         action: data.action,
         resource: data.resource,
         resourceId: data.resourceId ?? null,
-        metadata: (data.metadata as Prisma.InputJsonValue) ?? Prisma.JsonNull,
+        metadata: data.metadata ?? Prisma.JsonNull,
         ipAddress: data.ipAddress ?? null,
         userAgent: data.userAgent ?? null,
       },

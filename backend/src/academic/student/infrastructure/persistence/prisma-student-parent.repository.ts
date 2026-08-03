@@ -101,18 +101,11 @@ export class PrismaStudentParentRepository extends IStudentParentRepository {
 
   async update(
     id: string,
-    dtoOrStudentId: UpdateStudentParentRepositoryInput | string,
-    studentIdArg?: string,
+    input: UpdateStudentParentRepositoryInput,
+    studentId?: string,
   ): Promise<StudentParentWithDetails> {
-    const dto =
-      typeof dtoOrStudentId === 'string'
-        ? (studentIdArg as unknown as UpdateStudentParentRepositoryInput)
-        : dtoOrStudentId;
-    const studentId =
-      typeof dtoOrStudentId === 'string' ? dtoOrStudentId : studentIdArg;
-
     return this.prisma.$transaction(async (tx) => {
-      if (dto?.isPrimary && studentId) {
+      if (input.isPrimary && studentId) {
         await tx.studentParent.updateMany({
           where: { studentId, isPrimary: true, NOT: { id } },
           data: { isPrimary: false },
@@ -120,7 +113,7 @@ export class PrismaStudentParentRepository extends IStudentParentRepository {
       }
       return tx.studentParent.update({
         where: { id },
-        data: dto,
+        data: input,
         include: STUDENT_PARENT_INCLUDE,
       });
     });

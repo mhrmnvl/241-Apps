@@ -2,9 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { Address, Prisma } from '@prisma/client';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
 import {
-  CreateProfileAddressDto,
+  CreateProfileAddressRepositoryInput,
   IProfileAddressRepository,
-  UpdateProfileAddressDto,
+  UpdateProfileAddressRepositoryInput,
 } from '../../domain/interfaces/profile-address-repository.interface.js';
 import {
   ADDRESS_OMIT,
@@ -82,12 +82,12 @@ export class PrismaProfileAddressRepository implements IProfileAddressRepository
   }
 
   async create(
-    dto: CreateProfileAddressDto,
+    input: CreateProfileAddressRepositoryInput,
     ownerId: { studentId?: string; teacherId?: string },
   ): Promise<AddressPublic> {
     return this.prisma.address.create({
       data: {
-        ...dto,
+        ...input,
         ...(ownerId.studentId && { studentId: ownerId.studentId }),
         ...(ownerId.teacherId && { teacherId: ownerId.teacherId }),
       },
@@ -97,11 +97,11 @@ export class PrismaProfileAddressRepository implements IProfileAddressRepository
 
   async update(
     addressId: string,
-    dto: UpdateProfileAddressDto,
+    input: UpdateProfileAddressRepositoryInput,
   ): Promise<AddressPublic> {
     return this.prisma.address.update({
       where: { id: addressId },
-      data: dto,
+      data: input,
       omit: ADDRESS_OMIT,
     });
   }

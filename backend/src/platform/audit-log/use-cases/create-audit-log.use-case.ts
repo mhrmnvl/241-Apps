@@ -1,3 +1,4 @@
+import { JsonObject } from '../../../shared/domain/types/json.type.js';
 import { Injectable, Logger } from '@nestjs/common';
 import { IAuditLogRepository } from '../domain/interfaces/audit-log-repository.interface.js';
 
@@ -12,7 +13,7 @@ export class CreateAuditLogUseCase {
     action: string;
     resource: string;
     resourceId?: string | null;
-    metadata?: unknown;
+    metadata?: JsonObject;
     ipAddress?: string | null;
     userAgent?: string | null;
   }) {

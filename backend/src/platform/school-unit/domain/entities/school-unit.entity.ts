@@ -26,10 +26,6 @@ export interface SchoolUnitEntity {
   deletedAt?: Date | null;
 }
 
-export type SchoolUnitInputDto = Partial<
-  Omit<SchoolUnitEntity, 'id' | 'deletedAt'>
->;
-
 export interface SchoolUnitWithDetails extends SchoolUnitEntity {
   type?: NamedRef | null;
   addresses?: AddressEntity[];

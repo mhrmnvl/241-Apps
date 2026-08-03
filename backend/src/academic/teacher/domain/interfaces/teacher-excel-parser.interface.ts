@@ -1,5 +1,5 @@
-import { BulkImportTeacherRowDto } from '../../dto/request/bulk-import-teacher.dto.js';
+import { TeacherImportRow } from '../entities/teacher-import-row.entity.js';
 
 export abstract class ExcelTeacherParser {
-  abstract parse(buffer: Buffer): Promise<BulkImportTeacherRowDto[]>;
+  abstract parse(buffer: Buffer): Promise<TeacherImportRow[]>;
 }

@@ -1,3 +1,4 @@
+import { JsonValue } from '../../../../shared/domain/types/json.type.js';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class AuditLogResponseDto {
@@ -34,7 +35,7 @@ export class AuditLogResponseDto {
     description: 'Metadata for the action (JSON)',
     required: false,
   })
-  metadata?: Record<string, unknown>;
+  metadata?: JsonValue | null;
 
   @ApiProperty({
     description: 'The client IP address',

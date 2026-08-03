@@ -1,6 +1,6 @@
-import { BulkImportStudentRowDto } from '../../dto/request/bulk-import-student.dto.js';
+import { StudentImportRow } from '../entities/student-import-row.entity.js';
 
 export abstract class ExcelStudentParser {
-  abstract parse(buffer: Buffer): Promise<BulkImportStudentRowDto[]>;
+  abstract parse(buffer: Buffer): Promise<StudentImportRow[]>;
   abstract buildImportTemplate(): Promise<Buffer>;
 }

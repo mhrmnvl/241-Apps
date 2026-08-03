@@ -1,39 +1,12 @@
-export interface ApprovalWorkflowStepEntity {
-  id: string;
-  workflowId: string;
-  stepSequence: number;
-  approverRoleId: string;
-  isMandatory: boolean;
-}
+import { ApprovalInstanceEntity } from '../entities/approval-instance.entity.js';
+import { ApprovalLogEntity } from '../entities/approval-log.entity.js';
+import { ApprovalWorkflowEntity } from '../entities/approval-workflow.entity.js';
 
-export interface ApprovalWorkflowEntity {
-  id: string;
-  name: string;
-  targetEntity: string;
-  description?: string | null;
-  isActive: boolean;
-  steps?: ApprovalWorkflowStepEntity[];
-}
-
-export interface ApprovalLogEntity {
-  id: string;
-  instanceId: string;
-  stepSequence: number;
-  approverId: string;
-  actionId: string;
-  note?: string | null;
-  createdAt: Date;
-}
-
-export interface ApprovalInstanceEntity {
-  id: string;
-  workflowId: string;
-  referenceId: string;
-  statusId?: string | null;
-  currentStepSequence: number;
-  workflow?: ApprovalWorkflowEntity | null;
-  logs?: ApprovalLogEntity[];
-}
+export type {
+  ApprovalInstanceEntity,
+  ApprovalLogEntity,
+  ApprovalWorkflowEntity,
+};
 
 /** Loan snapshot attached to a pending approval for display. */
 export interface ApprovalLoanDetailRow {

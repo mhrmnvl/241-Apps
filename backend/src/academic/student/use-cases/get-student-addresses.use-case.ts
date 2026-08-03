@@ -3,7 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Address } from '../domain/interfaces/student-repository.interface.js';
+import { AddressEntity } from '../../../shared/domain/entities/address.entity.js';
 import { IStudentAddressRepository } from '../domain/interfaces/student-address-repository.interface.js';
 import { IStudentRepository } from '../index.js';
 import type { RequestUser } from '../../../core/types/request-user.type.js';
@@ -18,7 +18,7 @@ export class GetStudentAddressesUseCase {
   async execute(
     studentId: string,
     requester?: RequestUser,
-  ): Promise<Address[]> {
+  ): Promise<AddressEntity[]> {
     if (requester) {
       const isStudent = await this.studentRepository.isStudent(requester.id);
       if (isStudent) {

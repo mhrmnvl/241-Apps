@@ -19,9 +19,6 @@ import {
 } from '../../../../shared/domain/entities/address.entity.js';
 
 export type { StudentWithDetails };
-export type User = UserEntity;
-export type Address = AddressEntity;
-
 export interface CreateStudentResult extends UserEntity {
   student: StudentWithDetails | null;
 }

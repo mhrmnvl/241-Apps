@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
 import { ISchoolUnitRepository } from '../../domain/interfaces/school-unit-repository.interface.js';
-import { SchoolUnitInputDto } from '../../domain/entities/school-unit.entity.js';
+import { SchoolUnitRepositoryInput } from '../../domain/interfaces/school-unit-repository.interface.js';
 import {
   SCHOOL_UNIT_INCLUDE,
   SchoolUnitWithDetails,
@@ -29,8 +29,10 @@ export class PrismaSchoolUnitRepository extends ISchoolUnitRepository {
     });
   }
 
-  async create(dto: SchoolUnitInputDto): Promise<SchoolUnitWithDetails> {
-    const { typeId, ...rest } = dto;
+  async create(
+    input: SchoolUnitRepositoryInput,
+  ): Promise<SchoolUnitWithDetails> {
+    const { typeId, ...rest } = input;
     return this.prisma.schoolUnit.create({
       data: {
         name: rest.name ?? '',
@@ -50,9 +52,9 @@ export class PrismaSchoolUnitRepository extends ISchoolUnitRepository {
 
   async update(
     id: string,
-    dto: SchoolUnitInputDto,
+    input: SchoolUnitRepositoryInput,
   ): Promise<SchoolUnitWithDetails> {
-    const { typeId, ...rest } = dto;
+    const { typeId, ...rest } = input;
     const updateData: Prisma.SchoolUnitUpdateInput = {
       ...(rest.name && { name: rest.name }),
       ...(rest.surname && { surname: rest.surname }),
