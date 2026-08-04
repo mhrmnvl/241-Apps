@@ -5,8 +5,10 @@ import { ClassroomModule } from '../classroom/classroom.module.js';
 import { ScheduleController } from './presentation/schedule.controller.js';
 import { TimeSlotController } from './presentation/time-slot.controller.js';
 import { PrismaScheduleRepository } from './infrastructure/persistence/prisma-schedule.repository.js';
+import { PrismaScheduleLookupRepository } from './infrastructure/persistence/prisma-schedule-lookup.repository.js';
 import { PrismaTimeSlotRepository } from './infrastructure/persistence/prisma-time-slot.repository.js';
 import { IScheduleRepository } from './domain/interfaces/schedule-repository.interface.js';
+import { IScheduleLookupRepository } from './domain/interfaces/schedule-lookup-repository.interface.js';
 import { ITimeSlotRepository } from './domain/interfaces/time-slot-repository.interface.js';
 
 import { GetSchedulesUseCase } from './use-cases/get-schedules.use-case.js';
@@ -36,6 +38,10 @@ import { DeleteTimeSlotTypeUseCase } from './use-cases/delete-time-slot-type.use
       useClass: PrismaScheduleRepository,
     },
     {
+      provide: IScheduleLookupRepository,
+      useClass: PrismaScheduleLookupRepository,
+    },
+    {
       provide: ITimeSlotRepository,
       useClass: PrismaTimeSlotRepository,
     },
@@ -58,6 +64,10 @@ import { DeleteTimeSlotTypeUseCase } from './use-cases/delete-time-slot-type.use
     UpdateTimeSlotTypeUseCase,
     DeleteTimeSlotTypeUseCase,
   ],
-  exports: [IScheduleRepository, ITimeSlotRepository],
+  exports: [
+    IScheduleRepository,
+    IScheduleLookupRepository,
+    ITimeSlotRepository,
+  ],
 })
 export class ScheduleModule {}

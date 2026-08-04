@@ -5,19 +5,23 @@ import {
 } from '@nestjs/common';
 import { BatchUpsertScheduleDto } from '../dto/request/batch-upsert-schedule.dto.js';
 import { IScheduleRepository } from '../domain/interfaces/schedule-repository.interface.js';
+import { IScheduleLookupRepository } from '../domain/interfaces/schedule-lookup-repository.interface.js';
 
 @Injectable()
 export class BatchUpsertScheduleUseCase {
-  constructor(private readonly scheduleRepository: IScheduleRepository) {}
+  constructor(
+    private readonly scheduleRepository: IScheduleRepository,
+    private readonly lookupRepository: IScheduleLookupRepository,
+  ) {}
 
   async execute(classroomId: string, dto: BatchUpsertScheduleDto) {
     const classroom =
-      await this.scheduleRepository.findValidClassroomById(classroomId);
+      await this.lookupRepository.findValidClassroomById(classroomId);
     if (!classroom) {
       throw new NotFoundException('Classroom not found');
     }
 
-    const semester = await this.scheduleRepository.findActiveSemester();
+    const semester = await this.lookupRepository.findActiveSemester();
     if (!semester) {
       throw new BadRequestException('Tidak ada semester aktif');
     }
@@ -34,7 +38,7 @@ export class BatchUpsertScheduleUseCase {
     let created = 0;
     for (const row of dto.lessons) {
       let ta =
-        await this.scheduleRepository.findTeachingAssignmentBySubjectAndSemester(
+        await this.lookupRepository.findTeachingAssignmentBySubjectAndSemester(
           classroomId,
           row.subjectId,
           semester.id,
@@ -42,9 +46,7 @@ export class BatchUpsertScheduleUseCase {
 
       if (!ta) {
         const teacherId =
-          await this.scheduleRepository.findAnyTeacherIdForSubject(
-            row.subjectId,
-          );
+          await this.lookupRepository.findAnyTeacherIdForSubject(row.subjectId);
 
         if (!teacherId) {
           throw new BadRequestException(
@@ -52,7 +54,7 @@ export class BatchUpsertScheduleUseCase {
           );
         }
 
-        ta = await this.scheduleRepository.createTeachingAssignment({
+        ta = await this.lookupRepository.createTeachingAssignment({
           classroomId,
           subjectId: row.subjectId,
           teacherId,
