@@ -4,16 +4,7 @@ import { ExportStudentQueryDto } from '../dto/request/export-student-query.dto.j
 import { IStudentRepository } from '../domain/interfaces/student-repository.interface.js';
 
 import { mapStudentToExportRow } from '../constants/student-export-columns.js';
-
-declare module 'exceljs' {
-  interface Worksheet {
-    dataValidations: {
-      add(range: string, validation: ExcelJS.DataValidation): void;
-    };
-  }
-}
-
-type ExcelRow = Record<string, ExcelJS.CellValue>;
+import type { ExcelRow } from '../../../shared/domain/types/exceljs.type.js';
 
 @Injectable()
 export class ExportStudentsUseCase {
