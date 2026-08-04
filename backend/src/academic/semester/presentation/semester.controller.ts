@@ -39,6 +39,7 @@ import { GetSemesterByIdUseCase } from '../use-cases/get-semester-by-id.use-case
 import { GetSemestersUseCase } from '../use-cases/get-semesters.use-case.js';
 import { UpdateSemesterUseCase } from '../use-cases/update-semester.use-case.js';
 import { SemesterWithDetails } from '../domain/interfaces/semester-repository.interface.js';
+import { PaginatedResponse } from '../../../shared/domain/interfaces/repository.interface.js';
 
 @ApiTags('Semesters')
 @ApiBearerAuth()
@@ -67,10 +68,7 @@ export class SemesterController {
   async findAll(
     @CurrentUser() _user: AuthenticatedUser,
     @Query() query: SemesterQueryDto,
-  ): Promise<{
-    data: SemesterWithDetails[];
-    meta: { page: number; limit: number; total: number; totalPages: number };
-  }> {
+  ): Promise<PaginatedResponse<SemesterWithDetails>> {
     return this.getSemestersService.execute(query);
   }
 

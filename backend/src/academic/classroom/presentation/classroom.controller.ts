@@ -37,6 +37,7 @@ import { DeleteClassroomUseCase } from '../use-cases/delete-classroom.use-case.j
 import { GetClassroomByIdUseCase } from '../use-cases/get-classroom-by-id.use-case.js';
 import { GetClassroomsUseCase } from '../use-cases/get-classrooms.use-case.js';
 import { UpdateClassroomUseCase } from '../use-cases/update-classroom.use-case.js';
+import { PaginatedResponse } from '../../../shared/domain/interfaces/repository.interface.js';
 
 @ApiTags('Classrooms')
 @ApiBearerAuth()
@@ -58,10 +59,7 @@ export class ClassroomController {
   async findAll(
     @CurrentUser() user: AuthenticatedUser,
     @Query() query: ClassroomQueryDto,
-  ): Promise<{
-    data: ClassroomWithDetails[];
-    meta: { page: number; limit: number; total: number; totalPages: number };
-  }> {
+  ): Promise<PaginatedResponse<ClassroomWithDetails>> {
     return this.getClassroomsService.execute(query);
   }
 

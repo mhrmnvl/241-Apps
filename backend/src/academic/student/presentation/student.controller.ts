@@ -44,6 +44,7 @@ import { ToggleStudentActiveUseCase } from '../use-cases/toggle-student-active.u
 import { UpdateStudentUseCase } from '../use-cases/update-student.use-case.js';
 import { StudentWithDetails } from '../domain/interfaces/student-repository.interface.js';
 import { CreateStudentWithRelationsDto } from '../dto/request/create-student-with-relations.dto.js';
+import { PaginatedResponse } from '../../../shared/domain/interfaces/repository.interface.js';
 
 @ApiTags('Students')
 @ApiBearerAuth()
@@ -67,10 +68,7 @@ export class StudentController {
   async findAll(
     @CurrentUser() _user: AuthenticatedUser,
     @Query() query: StudentQueryDto,
-  ): Promise<{
-    data: StudentWithDetails[];
-    meta: { page: number; limit: number; total: number; totalPages: number };
-  }> {
+  ): Promise<PaginatedResponse<StudentWithDetails>> {
     return this.getStudentsService.execute(query);
   }
 

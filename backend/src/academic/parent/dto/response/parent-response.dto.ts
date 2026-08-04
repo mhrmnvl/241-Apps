@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IncomeRange } from '../../../../shared/domain/enums/income-range.enum.js';
+import type { PaginationMeta } from '../../../../shared/domain/interfaces/repository.interface.js';
 
 export class ParentResponseDto {
   @ApiProperty({ format: 'uuid' })
@@ -49,5 +50,5 @@ export class ParentListResponseDto {
   data!: ParentResponseDto[];
 
   @ApiProperty({ example: { page: 1, limit: 10, total: 20, totalPages: 2 } })
-  meta!: { page: number; limit: number; total: number; totalPages: number };
+  meta!: PaginationMeta;
 }

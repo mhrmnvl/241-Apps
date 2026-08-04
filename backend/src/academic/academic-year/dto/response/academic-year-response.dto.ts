@@ -1,4 +1,5 @@
-﻿import { ApiProperty } from '@nestjs/swagger';
+import type { PaginationMeta } from '../../../../shared/domain/interfaces/repository.interface.js';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class AcademicYearResponseDto {
   @ApiProperty({ example: '550e8400-e29b-41d4-a716-446655440009' })
@@ -16,5 +17,5 @@ export class AcademicYearListResponseDto {
   data!: AcademicYearResponseDto[];
 
   @ApiProperty({ example: { page: 1, limit: 10, total: 5, totalPages: 1 } })
-  meta!: { page: number; limit: number; total: number; totalPages: number };
+  meta!: PaginationMeta;
 }

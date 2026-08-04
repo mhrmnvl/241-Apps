@@ -35,6 +35,7 @@ import { DeleteClassroomStructureUseCase } from '../use-cases/delete-classroom-s
 import { GetClassroomStructuresUseCase } from '../use-cases/get-classroom-structures.use-case.js';
 import { UpdateClassroomStructureUseCase } from '../use-cases/update-classroom-structure.use-case.js';
 import { ClassroomStructureWithDetails } from '../domain/interfaces/classroom-structure-repository.interface.js';
+import { PaginatedResponse } from '../../../shared/domain/interfaces/repository.interface.js';
 
 @ApiTags('Classroom Structures')
 @ApiBearerAuth()
@@ -54,10 +55,9 @@ export class ClassroomStructureController {
     summary: 'List class structures (officers per class/semester)',
   })
   @ApiResponse({ status: 200, type: ClassroomStructureListResponseDto })
-  async findAll(@Query() query: ClassroomStructureQueryDto): Promise<{
-    data: ClassroomStructureWithDetails[];
-    meta: { page: number; limit: number; total: number; totalPages: number };
-  }> {
+  async findAll(
+    @Query() query: ClassroomStructureQueryDto,
+  ): Promise<PaginatedResponse<ClassroomStructureWithDetails>> {
     return this.GetClassroomStructuresUseCase.execute(query);
   }
 
