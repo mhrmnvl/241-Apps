@@ -1,9 +1,14 @@
-import { ConflictException, Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { CreateStudentDto } from '../dto/request/create-student.dto.js';
 import { StudentResponseDto } from '../dto/response/student-response.dto.js';
 import { IStudentRepository } from '../domain/interfaces/student-repository.interface.js';
 import { EnsureStudentEnrollmentUseCase } from '../../enrollment/use-cases/ensure-student-enrollment.use-case.js';
 import { hashPassword } from '../../../shared/utils/hash.helper.js';
+import {
+  StudentCreationFailedException,
+  StudentNisAlreadyExistsException,
+  StudentNisnAlreadyExistsException,
+} from '../domain/exceptions/index.js';
 
 @Injectable()
 export class CreateStudentUseCase {
@@ -27,10 +32,8 @@ export class CreateStudentUseCase {
       nis ? this.studentRepository.findByNis(nis) : null,
       nisn ? this.studentRepository.findByNisn(nisn) : null,
     ]);
-    if (dupNis)
-      throw new ConflictException(`NIS "${nis}" is already registered`);
-    if (dupNisn)
-      throw new ConflictException(`NISN "${nisn}" is already registered`);
+    if (dupNis) throw new StudentNisAlreadyExistsException(nis);
+    if (dupNisn) throw new StudentNisnAlreadyExistsException(nisn);
 
     const passwordHash = await hashPassword(dto.password);
 
@@ -40,7 +43,7 @@ export class CreateStudentUseCase {
     );
     const student = userWithStudent.student;
     if (!student) {
-      throw new Error('Student creation failed');
+      throw new StudentCreationFailedException();
     }
 
     if (dto.classroomId) {

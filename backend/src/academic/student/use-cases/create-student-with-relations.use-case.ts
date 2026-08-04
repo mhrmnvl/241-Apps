@@ -1,8 +1,12 @@
-import { ConflictException, Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { CreateStudentWithRelationsDto } from '../dto/request/create-student-with-relations.dto.js';
 import { IStudentRepository } from '../domain/interfaces/student-repository.interface.js';
 import { StudentWithDetails } from '../domain/interfaces/student-repository.interface.js';
 import { hashPassword } from '../../../shared/utils/hash.helper.js';
+import {
+  StudentNisAlreadyExistsException,
+  StudentNisnAlreadyExistsException,
+} from '../domain/exceptions/index.js';
 
 @Injectable()
 export class CreateStudentWithRelationsUseCase {
@@ -25,10 +29,8 @@ export class CreateStudentWithRelationsUseCase {
       nis ? this.studentRepository.findByNis(nis) : null,
       nisn ? this.studentRepository.findByNisn(nisn) : null,
     ]);
-    if (dupNis)
-      throw new ConflictException(`NIS "${nis}" is already registered`);
-    if (dupNisn)
-      throw new ConflictException(`NISN "${nisn}" is already registered`);
+    if (dupNis) throw new StudentNisAlreadyExistsException(nis);
+    if (dupNisn) throw new StudentNisnAlreadyExistsException(nisn);
 
     const passwordHash = await hashPassword(dto.password);
     const student = await this.studentRepository.createWithRelations(

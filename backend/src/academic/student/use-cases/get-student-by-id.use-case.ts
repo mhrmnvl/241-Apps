@@ -1,11 +1,8 @@
-import {
-  ForbiddenException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { IStudentRepository } from '../domain/interfaces/student-repository.interface.js';
 import type { RequestUser } from '../../../core/types/request-user.type.js';
 import { StudentWithDetails } from '../domain/interfaces/student-repository.interface.js';
+import { StudentNotFoundException } from '../domain/exceptions/index.js';
 
 @Injectable()
 export class GetStudentByIdUseCase {
@@ -31,8 +28,7 @@ export class GetStudentByIdUseCase {
     }
 
     const student = await this.studentRepository.findById(id);
-    if (!student)
-      throw new NotFoundException(`Student with ID ${id} not found`);
+    if (!student) throw new StudentNotFoundException(id);
     return student;
   }
 }
