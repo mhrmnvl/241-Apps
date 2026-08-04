@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma, Subject } from '@prisma/client';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
 import type {
@@ -115,7 +115,9 @@ export class PrismaSubjectRepository extends ISubjectRepository {
 
     const updated = await this.findById(id);
     if (!updated) {
-      throw new Error(`Subject with ID ${id} not found after update`);
+      throw new NotFoundException(
+        `Subject with ID ${id} not found after update`,
+      );
     }
     return updated;
   }
@@ -184,7 +186,9 @@ export class PrismaSubjectRepository extends ISubjectRepository {
     });
     const deleted = await this.prisma.subject.findFirst({ where: { id } });
     if (!deleted) {
-      throw new Error(`Subject with ID ${id} not found after deletion`);
+      throw new NotFoundException(
+        `Subject with ID ${id} not found after deletion`,
+      );
     }
     return deleted;
   }
