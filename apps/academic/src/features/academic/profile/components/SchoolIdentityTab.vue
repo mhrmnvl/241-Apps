@@ -17,6 +17,7 @@ import type {
   SchoolProfileData,
   RawProfileData,
 } from '@/features/platform/profile'
+import type { EmploymentType } from '@/features/academic/employment-type'
 
 const props = defineProps<{
   data: SchoolProfileData
@@ -58,12 +59,6 @@ const form = reactive({
   nuptk: '',
   employmentTypeId: undefined as string | undefined,
 })
-
-interface EmploymentType {
-  id: string
-  code: string
-  name: string
-}
 
 const employmentTypes = ref<EmploymentType[]>([])
 

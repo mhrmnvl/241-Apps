@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { toast } from 'vue-sonner'
+import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
 import { ref, onMounted } from 'vue'
 import { useAchievementForm } from '../composables/useAchievementForm'
 import { Button } from '@/ui/button'
@@ -55,8 +57,8 @@ onMounted(async () => {
       isActive: true,
     })
     achievementTypes.value = res.data?.data ?? []
-  } catch (error) {
-    console.error('Gagal memuat tipe prestasi:', error)
+  } catch (error: unknown) {
+    toast.error(getIndonesianErrorMessage(error, 'Gagal memuat tipe prestasi.'))
   }
 })
 </script>

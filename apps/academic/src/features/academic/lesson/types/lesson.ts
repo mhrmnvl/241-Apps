@@ -45,6 +45,22 @@ export function isLessonSlot(slot: LessonEditorTimeSlot): boolean {
   return slot.isLesson ?? slot.type === 'LESSON'
 }
 
+/**
+ * Baris tabel editor jadwal. Slot non-pelajaran (istirahat, upacara) dikunci
+ * dan hanya ditampilkan; slot pelajaran dapat disunting per baris.
+ */
+export interface LockedScheduleRow {
+  kind: 'locked'
+  slot: LessonEditorTimeSlot
+}
+
+export interface EditableScheduleRow {
+  kind: 'editable'
+  rowIndex: number
+}
+
+export type ScheduleTableRow = LockedScheduleRow | EditableScheduleRow
+
 /** Shape dari response GET /schedules/classroom/:id */
 export interface ScheduleResponse {
   id: string

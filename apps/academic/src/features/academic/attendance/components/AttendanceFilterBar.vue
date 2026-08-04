@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { FilterOption } from '@/shared/types/filter.types'
 import { ref, computed } from 'vue'
 import { Filter } from 'lucide-vue-next'
 import { DatePicker } from '@/ui'
@@ -19,11 +20,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/ui/dialog'
-
-interface FilterOption {
-  value: string
-  label: string
-}
 
 const props = defineProps<{
   activeTab: 'input' | 'recap'

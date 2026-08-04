@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { FilterOption } from '@/shared/types/filter.types'
 import AssessmentItemFormDialog from '../components/AssessmentItemFormDialog.vue'
 import { createAssessmentItemColumns } from '../components/columns'
 import { useAssessmentItem } from '../composables/useAssessmentItem'
@@ -46,11 +47,6 @@ const {
   fetchItems,
   deleteItem,
 } = useAssessmentItem()
-
-interface FilterOption {
-  value: string
-  label: string
-}
 
 const semesterFilterOptions = computed<FilterOption[]>(() =>
   semesters.value.map((s) => ({
