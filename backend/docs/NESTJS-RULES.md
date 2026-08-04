@@ -2,7 +2,12 @@
 
 # BACKEND CODING RULES
 
-Version: 1.1
+Version: 1.2
+
+Reconciled against the code. Where this document and the source disagreed, the
+source won and the rule was rewritten to match — see EVENT RULES, SCOPING
+RULES, RESPONSE RULES, MAPPER RULES, and ERROR HANDLING. Architectural
+decisions are recorded in `docs/adr/`.
 
 Module system:
 NodeNext ESM (relative imports carry the `.js` extension)
@@ -32,7 +37,7 @@ RBAC + Permission Based Access Control
 
 3. One File = One Concern
 
-4. Business Logic Inside Service
+4. Business Logic Inside Use Cases
 
 5. Controllers Stay Thin
 
@@ -42,7 +47,7 @@ RBAC + Permission Based Access Control
 
 8. Permission First
 
-9. Tenant First
+9. Scope Every Query (soft delete + active period)
 
 10. Clean Code Over Clever Code
 
@@ -75,11 +80,17 @@ Each domain owns (actual layering):
 
 - presentation (controllers — thin, HTTP only)
 - use-cases (one class per business operation)
-- repositories (abstract repository interface — the port/token)
-- infrastructure (persistence: Prisma repo impl, mappers, parsers)
-- domain (entities, enums, events, interfaces)
+- domain (entities, enums, interfaces, exceptions)
+    interfaces/ holds the abstract repository = the port AND the DI token
+- infrastructure (persistence: Prisma impl + *.includes.ts; mappers; parsers)
 - dto (request/ and response/ — one DTO per file)
-- types
+- types, constants
+
+There is no top-level `repositories/` folder. The port lives in
+`domain/interfaces/`, its Prisma implementation in `infrastructure/persistence/`,
+and the module wires them together:
+
+providers: [{ provide: IStudentRepository, useClass: PrismaStudentRepository }]
 
 ---
 
@@ -92,11 +103,17 @@ academic/student
 student
 ├── presentation/       # controllers (thin, HTTP only)
 ├── use-cases/          # CreateStudentUseCase, UpdateStudentUseCase, ...
-├── repositories/       # abstract repository interface (port + injection token)
-├── infrastructure/     # persistence/ (PrismaStudentRepository), mappers, parsers
-├── domain/             # entities, enums, events, interfaces
+├── domain/
+│   ├── entities/
+│   ├── enums/
+│   ├── exceptions/     # StudentNotFoundException, ... + index.ts
+│   └── interfaces/     # IStudentRepository — port + injection token
+├── infrastructure/
+│   ├── persistence/    # PrismaStudentRepository + *.includes.ts / .where.ts / .writer.ts
+│   ├── mappers/
+│   └── parsers/
 ├── dto/                # request/ and response/ — one DTO per file
-├── types/
+├── constants/
 └── student.module.ts
 
 ---
@@ -127,7 +144,7 @@ Controller responsibility:
 
 - receive request
 - validate request
-- call service
+- call the use case
 - return response
 
 Nothing else.
@@ -148,13 +165,14 @@ Validation logic
 
 ---
 
-# SERVICE RULES
+# USE CASE RULES
 
-Service owns:
+The use-case owns the business logic. `academic/` names them `*UseCase`, not
+`*Service` — `services/` is reserved for the few stateless helpers that are not
+a business operation (e.g. `report-card/services/calculate-subject-grades.ts`,
+`pdf.service.ts`).
 
-Business Logic
-
-Examples:
+Examples of what belongs here:
 
 Student promotion
 
@@ -166,9 +184,7 @@ Assessment publication
 
 ---
 
-# SERVICE RULES
-
-One service
+One use case
 
 One business responsibility
 
@@ -186,17 +202,22 @@ handles everything
 
 Good
 
-CreateStudentService
+CreateStudentUseCase
 
-UpdateStudentService
+UpdateStudentUseCase
 
-PromoteStudentService
+PromoteStudentsUseCase
 
-GraduateStudentService
+GenerateReportCardUseCase
 
 ---
 
-# SERVICE SIZE
+A use-case may call another module's exported use-case directly (see EVENT
+RULES). It must never call a controller, and never touch Prisma.
+
+---
+
+# USE CASE SIZE
 
 Recommended
 
@@ -252,7 +273,7 @@ Forbidden
 
 Controller → Prisma
 
-Service → Prisma
+Use Case → Prisma
 
 ---
 
@@ -262,15 +283,20 @@ Controller
 
 ↓
 
-Service
+Use Case          (injected as IXxxRepository, never the Prisma class)
 
 ↓
 
-Repository
+Repository        (the port; Prisma impl bound in the module)
 
 ↓
 
 Prisma
+
+---
+
+The use-case depends on the ABSTRACTION. That inversion is what lets 1200+
+tests run without a database — swap `useClass` and nothing above it changes.
 
 ---
 
@@ -325,7 +351,7 @@ Forbidden
 
 if (!name)
 
-inside service
+inside a use case
 
 ---
 
@@ -335,15 +361,42 @@ Forbidden
 
 interface StudentData
 
-inside service
+inside a use-case or controller
 
 ---
 
 Use
 
-types/
+types/ · domain/entities/ · domain/interfaces/
 
-student.types.ts
+A repository's input and result shapes belong next to the port they serve, in
+`domain/interfaces/<x>-repository.interface.ts`.
+
+---
+
+Also forbidden: repeating an object literal in a signature.
+
+Bad — this exact shape was copy-pasted across 27 files
+
+async findAll(...): Promise<{
+  data: StudentWithDetails[];
+  meta: { page: number; limit: number; total: number; totalPages: number };
+}>
+
+Good
+
+async findAll(...): Promise<PaginatedResponse<StudentWithDetails>>
+
+---
+
+Narrow projections in a signature are FINE and should stay inline:
+
+Promise<{ id: string } | null>      an id-only lookup
+
+Promise<{ count: number }>          a Prisma BatchPayload
+
+Naming those adds a hop without adding meaning. The rule targets duplicated or
+domain-bearing shapes, not every brace.
 
 ---
 
@@ -355,7 +408,7 @@ status = "ACTIVE"
 
 role = "ADMIN"
 
-inside service
+inside a use case
 
 ---
 
@@ -369,34 +422,48 @@ role.constants.ts
 
 ---
 
-# TENANT RULES
+# SCOPING RULES
 
-Every business query must be tenant scoped.
+The deployment is single-school. There is no `organizationId`, and
+`schoolUnitId` exists only on `Address` and a couple of platform models — the
+academic domain does not filter by it anywhere. Do not add a tenant filter that
+the schema cannot honour.
 
-Required
+What every academic query MUST scope by instead:
 
-organizationId
+---
 
-schoolUnitId
+1. Soft delete
+
+deletedAt: null
+
+Non-negotiable. Nearly every academic table is soft-deleted, so a query without
+it silently returns removed students, classes, and scores.
+
+---
+
+2. Period, wherever the row belongs to one
+
+semesterId — enrolments, teaching assignments, supervisors
+
+academicYearId — classrooms, curricula, semesters
+
+When the caller gives neither, resolve the ACTIVE semester rather than reading
+across every year (see `shared/utils/active-academic-year.helper.ts`).
 
 ---
 
 Forbidden
 
-findMany()
+findMany() with no deletedAt filter
 
-without tenant filter
+An unbounded list read that ignores the active period
 
 ---
 
-Good
-
-findMany({
-where: {
-organizationId,
-schoolUnitId
-}
-})
+If the system ever becomes multi-school, this section is where the tenant
+column gets reintroduced — as an addition to the two rules above, not a
+replacement.
 
 ---
 
@@ -412,10 +479,14 @@ user.role === "ADMIN"
 
 Good
 
-permissionService.has(
-user,
-"student.create"
-)
+@RequirePermissions('students.create')
+
+Codes are `<module>.<action>`, and the module segment is PLURAL — `students`,
+`schedules`, `report-cards`. The full list lives in
+`platform/access-control/permission/constants/permission-codes.constants.ts`.
+
+There is no `permissionService.has(...)` helper; the guard below is the only
+enforcement point.
 
 ---
 
@@ -442,19 +513,30 @@ Permission strings, roles, and their design live in `IAM.md`.
 
 # MAPPER RULES
 
-Never return Prisma entities directly.
+Never let a raw Prisma row reach the client untyped.
 
-Use mapper.
+In practice the shape is pinned at the query, not by a mapper class: each
+repository declares its `include` once in a `*.includes.ts` file and derives the
+return type from it.
+
+Example (`prisma-student.includes.ts`)
+
+export const STUDENT_INCLUDE = { ... } satisfies Prisma.StudentInclude
+
+export type StudentWithDetails =
+  Prisma.StudentGetPayload<{ include: typeof STUDENT_INCLUDE }>
 
 ---
 
-Example
+Reach for a dedicated mapper under `infrastructure/mappers/` only when the
+outward shape genuinely differs from the row — renamed or computed fields,
+flattened relations. Today only `student` and `semester` need one.
 
-StudentEntity
+---
 
-↓
-
-StudentResponseDto
+The controller's declared return type is the real contract. Every list endpoint
+returns `PaginatedResponse<T>`; every detail endpoint returns an explicit
+entity or response DTO. Never `any`, never an inline object literal.
 
 ---
 
@@ -500,70 +582,138 @@ business logic
 
 # EVENT RULES
 
-Use domain events.
+This codebase does NOT use domain events. `@nestjs/event-emitter` is not a
+dependency, and nothing emits or listens.
 
-Examples
-
-StudentCreated
-
-AttendanceSubmitted
-
-AssessmentPublished
-
-ReportCardPublished
+Default: a direct, awaited call into the other module's exported use-case.
 
 ---
 
-Events must not contain business logic.
+Why (ADR-0002)
+
+`student.created` used to be emitted after creating a student with a classroom,
+with `EnrollmentModule` listening. `EventEmitter2.emit()` is never awaited, so a
+failed enrolment was only logged — the API had already answered "created". It
+was replaced by an awaited call to `EnsureStudentEnrollmentUseCase`, and the
+event + listener were deleted.
+
+---
+
+Rule of thumb
+
+ONE business rule → ONE must-succeed consequence
+  = direct awaited call, so the error reaches the caller
+
+ONE fact → MANY independent subscribers
+  = a genuine event; reintroduce the emitter when that case actually appears
+
+---
+
+Loose coupling is not the goal. Correct data is. A module boundary that hides
+failures is worse than a compile-time dependency.
+
+No `events/` folder and no `*.events.ts` file remains anywhere in `src/`. If one
+reappears, it should come with an emitter, a subscriber, and the dependency —
+not on its own.
 
 ---
 
 # RESPONSE RULES
 
-Use consistent response envelope.
+Controllers return plain payloads. The global `ResponseInterceptor`
+(`core/interceptors/response.interceptor.ts`) wraps every one of them — never
+build the envelope by hand.
 
-Example
+Actual shape
 
 {
-success: true,
-message: "...",
-data: {}
+statusCode: 200,
+message: "Success",
+data: {},
+meta?: {}
 }
+
+There is no `success` field. The status code carries that.
 
 ---
 
 Pagination
 
-{
-data: [],
-meta: {}
-}
+Repositories return the flat shape:
+
+{ data: [], total, page, limit }
+
+The interceptor detects it and folds it into `data` + `meta`. A use-case that
+computes `totalPages` returns `PaginatedResponse<T>` instead, and the
+interceptor passes it through untouched.
+
+---
+
+Use the shared types — do not re-declare the envelope inline:
+
+shared/domain/interfaces/repository.interface.ts
+
+  PaginatedResult<T>    repository side  { data, total, page, limit }
+
+  PaginatedResponse<T>  HTTP side        { data, meta }
+
+  PaginationMeta                         { page, limit, total, totalPages }
+
+Response DTOs must import `PaginationMeta` with `import type` — it sits under a
+Swagger decorator, and `isolatedModules` + `emitDecoratorMetadata` reject a
+value import there.
+
+---
+
+StreamableFile responses (Excel export, report-card PDF) bypass the envelope.
 
 ---
 
 # FILE SIZE RULES
 
-Controller
+The budget counts CODE. Import blocks and `@Api*` Swagger decorators do not
+count against it — they are documentation, and a well-documented controller
+routinely reaches ~190 physical lines while every handler body is one line.
 
-max 150 lines
+Use case / service     max 300 lines
 
----
+Repository class       max 200 lines
 
-Service
+Any other file         max 300 lines
 
-max 300 lines
-
----
-
-Repository
-
-max 200 lines
+Controller             max 150 lines of code
+                       (physical length is dominated by Swagger; judge the
+                        handler bodies, not `wc -l`)
 
 ---
 
-File
+# SPLITTING A REPOSITORY
 
-max 300 lines
+When a Prisma repository outgrows 200 lines, do NOT split the class or the
+interface it implements. Move the details out into sibling files and leave the
+class as a flat map of contract method → one call:
+
+*.includes.ts    Prisma include/select objects + the derived payload type
+
+*.where.ts       where-clause builders shared by list and export queries
+
+*.queries.ts     multi-step or grouped reads
+
+*.writer.ts      multi-table writes taking a `Prisma.TransactionClient`
+
+*.steps.ts       one function per stage of a long transaction
+                 (see prisma-rollover.steps.ts, prisma-promotion.steps.ts)
+
+---
+
+If it still does not fit, the contract itself is too fat — that is an Interface
+Segregation problem, not a formatting one.
+
+`IScheduleRepository` had 18 methods, six of which reached outside the Schedule
+aggregate (resolve a classroom, find the active semester, create a teaching
+assignment). Those moved to `IScheduleLookupRepository`, and both adapters came
+in comfortably under the limit. Splitting the port is the correct fix; padding
+the file is not.
 
 ---
 
@@ -619,15 +769,18 @@ For a genuine mutual module/provider dependency, use forwardRef() on both sides.
 
 # ERROR HANDLING
 
-Use custom exceptions.
+Throw NestJS HTTP exceptions from the use-case layer. They carry the right
+status code and are picked up by the global `HttpExceptionFilter`.
 
-Examples
+Default vocabulary
 
-StudentNotFoundException
+NotFoundException
 
-AcademicYearNotFoundException
+ConflictException
 
-AttendanceAlreadyExistsException
+BadRequestException
+
+ForbiddenException
 
 ---
 
@@ -635,47 +788,93 @@ Forbidden
 
 throw new Error()
 
+A bare `Error` becomes an opaque 500. If a failure really is an unexpected
+invariant violation, say so with `InternalServerErrorException` (or a custom
+exception extending it) so the intent is on the page.
+
+---
+
+Custom exceptions are OPTIONAL, and always extend a built-in.
+
+Add one when a rule is thrown from several call sites and deserves a domain
+name — not for every throw. `academic/student/domain/exceptions/` is the
+reference implementation:
+
+StudentNotFoundException            extends NotFoundException
+
+StudentNisAlreadyExistsException    extends ConflictException
+
+StudentCreationFailedException      extends InternalServerErrorException
+
+---
+
+Because they extend the built-ins, the HTTP contract does not change and tests
+asserting `rejects.toThrow(NotFoundException)` keep passing. That is the point:
+a custom exception adds a NAME, never new transport behaviour.
+
+One file per exception, under the owning module's `domain/exceptions/`, plus an
+`index.ts` barrel (exceptions only — no Module, no use-case).
+
 ---
 
 # TRANSACTION RULES
 
-Use Prisma transaction for:
+Use a Prisma transaction when several writes inside ONE module must land
+together:
 
-Student Promotion
+Student promotion / semester rollover  (classrooms → enrolments → schedules)
 
-Graduation
+Account provisioning  (User + Profile + Student/Teacher)
 
-Report Card Publish
+Bulk score import, bulk attendance
 
-Bulk Score Import
+Soft-deleting a student  (student row + its user account)
 
-Attendance Finalization
+---
+
+Do NOT wrap a sequence that crosses a module boundary (ADR-0003).
+
+Student → Enrollment writes are deliberately left untransacted:
+
+- Prisma's own guidance is to keep interactive transactions short and free of
+  branching; `EnsureStudentEnrollmentUseCase` alone is a find → decide →
+  create-or-transfer chain.
+- They are separate aggregates in separate modules. DDD asks for immediate
+  consistency inside an aggregate, eventual consistency between them.
+- Every step is idempotent, and the failure already surfaces in the bulk-import
+  row's `errors[]` rather than being swallowed.
+
+Reach for a transaction because the writes are same-module and NOT safe to
+retry — not because "multiple writes" pattern-matches a database habit.
 
 ---
 
 # AUDIT RULES
 
-Must log:
+STATUS: infrastructure only. NOT yet wired into `academic/`.
 
-Create
+What exists
 
-Update
+`AuditLog` model (`prisma/iam.prisma`) — actor, action, resource, resourceId,
+metadata, ipAddress, userAgent
 
-Delete
+`platform/audit-log/` — repository, `CreateAuditLogUseCase`, and a read
+endpoint behind `audit-logs.read`
 
-Publish
+What does not exist
 
-Approve
+Zero calls from `academic/`. No student create, grade change, or report-card
+publish currently writes an audit row.
 
 ---
 
-Examples
+Do not describe auditing as if it were enforced. When it is wired up, the
+target list is:
 
-Student Created
+Create · Update · Delete · Publish · Approve
 
-Assessment Published
-
-Report Card Published
+with report-card publish and grade changes first — those are the records a
+school is actually asked to account for.
 
 ---
 
@@ -706,15 +905,15 @@ Business logic in controller
 
 Prisma in controller
 
-Prisma in service
+Prisma in use case
 
 Role checking by string
 
 Cross-domain direct access
 
-Global god service
+Global god service/use case
 
-5000 line service
+5000 line use case
 
 Any type
 

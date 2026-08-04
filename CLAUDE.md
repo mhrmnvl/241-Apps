@@ -176,8 +176,10 @@ REFACTOR, API_DOCUMENTATION, audit_iam, custom_domain, logical-erd) have been mo
 `backend/docs/_archive/` — they are historical and may be outdated; treat the code and
 this file as the source of truth, not those.
 
-Top-level domains under `backend/src/`: `core/` (infra: config, database, guards,
-filters, interceptors, logger, storage, health, cache, events), `shared/` (helpers,
+Top-level domains under `backend/src/`: `core/` (infra: config, database,
+decorators, filters, interceptors, logger, storage, health, cache, types — the
+guards live with their feature, in `platform/auth/` and
+`platform/access-control/permission/`), `shared/` (helpers,
 types, dto, validators — no business logic), `platform/` (auth, user, role,
 permissions, session, audit-log, profile, school-unit, dashboard, notification,
 file, settings, master-data, ...), `academic/` (student, teacher, classroom,
@@ -191,29 +193,45 @@ Within a module (e.g. `academic/student/`), the established layering is:
 student/
 ├── presentation/       # controllers — thin, HTTP-only
 ├── use-cases/          # one class per business operation (CreateStudentUseCase, ...)
-├── repositories/        # Prisma access only
-├── infrastructure/      # mappers, parsers, persistence details
-├── domain/               # entities, enums, events, interfaces
-├── dto/                  # one DTO per file, class-validator/class-transformer
-├── types/
+├── domain/             # entities, enums, exceptions, interfaces
+│                       #   interfaces/ = the abstract repository (port + DI token)
+├── infrastructure/     # persistence/ (Prisma impl + *.includes/.where/.writer),
+│                       #   mappers, parsers
+├── dto/                # request/ and response/ — one DTO per file
+├── constants/
 └── student.module.ts
 ```
 
+There is no `repositories/` folder: the port lives in `domain/interfaces/` and its
+Prisma implementation in `infrastructure/persistence/`, wired in the module via
+`{ provide: IStudentRepository, useClass: PrismaStudentRepository }`.
+
 Core rules from `NESTJS-RULES.md` (enforced by convention, not by lint):
 
-- Controller → Use case/Service → Repository → Prisma. Controllers and services
+- Controller → Use case → Repository → Prisma. The use case is injected with the
+  abstract `IXxxRepository`, never the Prisma class; controllers and use cases
   never touch Prisma directly.
-- One use case/service = one business responsibility; prefer several small classes
+- One use case = one business responsibility; prefer several small classes
   (`CreateStudentUseCase`, `UpdateStudentUseCase`, ...) over one large `StudentService`.
-- Every query touching tenant data must be scoped by `organizationId` /
-  `schoolUnitId`.
-- Authorization checks permissions (`@RequirePermissions('students.create')`), never
-  role name strings (`user.role === 'ADMIN'`).
+  `services/` is only for stateless helpers that aren't a business operation.
+- The deployment is single-school — there is no `organizationId`, and nothing in
+  `academic/` filters by `schoolUnitId`. Scope every query by `deletedAt: null`
+  plus the relevant period (`semesterId` / `academicYearId`), falling back to the
+  active semester rather than reading across all years.
+- Authorization checks permissions (`@RequirePermissions('students.create')` — module
+  segment is plural), never role name strings (`user.role === 'ADMIN'`).
 - No business logic in DTOs/entities/shared; no inline types or magic
-  strings/constants inside services — put them in `types/` / `constants/`.
-- Use custom exceptions (e.g. `StudentNotFoundException`), never bare `throw new Error()`.
-- API responses use a consistent envelope: `{ success, message, data }`, paginated
-  as `{ data: [], meta: {} }` (see `core/interceptors/response.interceptor.ts`).
+  strings/constants inside use cases — put them in `types/` / `constants/`.
+  Narrow projections in a signature (`Promise<{ id: string } | null>`) are fine.
+- Throw NestJS HTTP exceptions (`NotFoundException`, `ConflictException`, ...);
+  never a bare `throw new Error()`. Custom exceptions are optional and always
+  extend a built-in — `academic/student/domain/exceptions/` is the reference.
+- Domain events are not used: `@nestjs/event-emitter` isn't installed. A 1:1
+  must-succeed consequence is a direct awaited call (ADR-0002).
+- API responses use a consistent envelope produced by the global interceptor:
+  `{ statusCode, message, data, meta? }` — there is no `success` field. Repositories
+  return `{ data, total, page, limit }` and the interceptor folds it into
+  `data` + `meta` (see `core/interceptors/response.interceptor.ts`).
 
 Import style: backend uses NodeNext ESM — relative imports include the `.js`
 extension (e.g. `from './app.module.js'`) even though the source is `.ts`. A
