@@ -11,6 +11,15 @@ export class UpdateEducationalHistoryUseCase {
   async execute(id: string, dto: UpdateEducationalHistoryDto) {
     const existing = await this.educationalHistoryRepository.findById(id);
     if (!existing) throw new NotFoundException('Educational history not found');
-    return this.educationalHistoryRepository.update(id, dto);
+    // `profileId` is absent from the update DTO on purpose: an entry cannot
+    // be moved to a different profile.
+    return this.educationalHistoryRepository.update(id, {
+      level: dto.level,
+      institution: dto.institution,
+      major: dto.major,
+      startYear: dto.startYear,
+      endYear: dto.endYear,
+      status: dto.status,
+    });
   }
 }

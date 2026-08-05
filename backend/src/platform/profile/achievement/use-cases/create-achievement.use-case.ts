@@ -7,6 +7,13 @@ export class CreateAchievementUseCase {
   constructor(private readonly achievementRepository: IAchievementRepository) {}
 
   async execute(dto: CreateAchievementDto) {
-    return this.achievementRepository.create(dto);
+    return this.achievementRepository.create({
+      profileId: dto.profileId,
+      name: dto.name,
+      level: dto.level,
+      typeId: dto.typeId,
+      year: dto.year,
+      description: dto.description,
+    });
   }
 }

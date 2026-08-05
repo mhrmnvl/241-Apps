@@ -42,6 +42,11 @@ export class CreateScheduleUseCase {
       });
     }
 
-    return this.scheduleRepository.create(dto);
+    return this.scheduleRepository.create({
+      teachingAssignmentId: dto.teachingAssignmentId,
+      timeSlotId: dto.timeSlotId,
+      day: dto.day,
+      room: dto.room,
+    });
   }
 }

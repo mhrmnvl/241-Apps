@@ -7,6 +7,12 @@ export class CreateScholarshipUseCase {
   constructor(private readonly scholarshipRepository: IScholarshipRepository) {}
 
   async execute(dto: CreateScholarshipDto) {
-    return this.scholarshipRepository.create(dto);
+    return this.scholarshipRepository.create({
+      profileId: dto.profileId,
+      name: dto.name,
+      provider: dto.provider,
+      year: dto.year,
+      status: dto.status,
+    });
   }
 }

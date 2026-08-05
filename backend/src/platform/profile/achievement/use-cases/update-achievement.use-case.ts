@@ -9,6 +9,14 @@ export class UpdateAchievementUseCase {
   async execute(id: string, dto: UpdateAchievementDto) {
     const existing = await this.achievementRepository.findById(id);
     if (!existing) throw new NotFoundException('Achievement not found');
-    return this.achievementRepository.update(id, dto);
+    // `profileId` is absent from the update DTO on purpose: an achievement
+    // cannot be moved to a different profile.
+    return this.achievementRepository.update(id, {
+      name: dto.name,
+      level: dto.level,
+      typeId: dto.typeId,
+      year: dto.year,
+      description: dto.description,
+    });
   }
 }

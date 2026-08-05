@@ -30,7 +30,9 @@ export class UpdateProfileSocialMediaUseCase {
         `Social media with ID ${socialMediaId} not found for this profile`,
       );
 
-    const updated = await this.socialMediaRepository.update(socialMediaId, dto);
+    const updated = await this.socialMediaRepository.update(socialMediaId, {
+      username: dto.username,
+    });
     this.logger.log(`Social media ${socialMediaId} updated for user ${userId}`);
     return updated;
   }

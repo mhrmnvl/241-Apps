@@ -21,6 +21,11 @@ export class UpdateTimeSlotTypeUseCase {
         throw new ConflictException(`Kode tipe "${dto.code}" sudah digunakan`);
       }
     }
-    return this.timeSlotRepository.updateType(id, dto);
+    return this.timeSlotRepository.updateType(id, {
+      code: dto.code,
+      name: dto.name,
+      isLesson: dto.isLesson,
+      days: dto.days,
+    });
   }
 }
