@@ -9,6 +9,14 @@ export class CreateEducationalHistoryUseCase {
   ) {}
 
   async execute(dto: CreateEducationalHistoryDto) {
-    return this.educationalHistoryRepository.create(dto);
+    return this.educationalHistoryRepository.create({
+      profileId: dto.profileId,
+      level: dto.level,
+      institution: dto.institution,
+      major: dto.major,
+      startYear: dto.startYear,
+      endYear: dto.endYear,
+      status: dto.status,
+    });
   }
 }

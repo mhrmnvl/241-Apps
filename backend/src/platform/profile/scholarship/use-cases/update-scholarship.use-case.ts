@@ -9,6 +9,13 @@ export class UpdateScholarshipUseCase {
   async execute(id: string, dto: UpdateScholarshipDto) {
     const existing = await this.scholarshipRepository.findById(id);
     if (!existing) throw new NotFoundException('Scholarship not found');
-    return this.scholarshipRepository.update(id, dto);
+    // `profileId` is absent from the update DTO on purpose: a scholarship
+    // cannot be moved to a different profile.
+    return this.scholarshipRepository.update(id, {
+      name: dto.name,
+      provider: dto.provider,
+      year: dto.year,
+      status: dto.status,
+    });
   }
 }

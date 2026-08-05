@@ -39,7 +39,17 @@ export class UpdateProfileAddressUseCase {
         );
     }
 
-    const updated = await this.addressRepository.update(addressId, dto);
+    const updated = await this.addressRepository.update(addressId, {
+      street: dto.street,
+      rt: dto.rt,
+      rw: dto.rw,
+      village: dto.village,
+      district: dto.district,
+      city: dto.city,
+      province: dto.province,
+      postalCode: dto.postalCode,
+      isPrimary: dto.isPrimary,
+    });
     this.logger.log(`Address ${addressId} updated for user ${userId}`);
     return updated;
   }

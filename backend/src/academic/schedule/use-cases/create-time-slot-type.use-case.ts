@@ -11,6 +11,11 @@ export class CreateTimeSlotTypeUseCase {
     if (existing) {
       throw new ConflictException(`Kode tipe "${dto.code}" sudah digunakan`);
     }
-    return this.timeSlotRepository.createType(dto);
+    return this.timeSlotRepository.createType({
+      code: dto.code,
+      name: dto.name,
+      isLesson: dto.isLesson,
+      days: dto.days,
+    });
   }
 }

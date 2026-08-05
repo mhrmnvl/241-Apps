@@ -16,7 +16,13 @@ export class CreateTimeSlotUseCase {
       );
     }
 
-    const ts = await this.timeSlotRepository.create(dto);
+    const ts = await this.timeSlotRepository.create({
+      name: dto.name,
+      startTime: dto.startTime,
+      endTime: dto.endTime,
+      order: dto.order,
+      typeId: dto.typeId,
+    });
     this.logger.log(`TimeSlot created: ${ts.name}`);
     return ts;
   }

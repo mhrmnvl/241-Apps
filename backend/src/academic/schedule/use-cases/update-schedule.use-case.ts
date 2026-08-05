@@ -28,6 +28,11 @@ export class UpdateScheduleUseCase {
       );
       if (dup) throw new ConflictException('Schedule already exists');
     }
-    return this.scheduleRepository.update(id, dto);
+    return this.scheduleRepository.update(id, {
+      teachingAssignmentId: dto.teachingAssignmentId,
+      timeSlotId: dto.timeSlotId,
+      day: dto.day,
+      room: dto.room,
+    });
   }
 }

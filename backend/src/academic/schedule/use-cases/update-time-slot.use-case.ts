@@ -27,7 +27,13 @@ export class UpdateTimeSlotUseCase {
       }
     }
 
-    const updated = await this.timeSlotRepository.update(id, dto);
+    const updated = await this.timeSlotRepository.update(id, {
+      name: dto.name,
+      startTime: dto.startTime,
+      endTime: dto.endTime,
+      order: dto.order,
+      typeId: dto.typeId,
+    });
     this.logger.log(`TimeSlot updated: ${id}`);
     return updated;
   }
