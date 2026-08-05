@@ -1,8 +1,12 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { AddressEntity } from '../../../shared/domain/entities/address.entity.js';
 import { UpdateAddressDto } from '../../../shared/dto/address.dto.js';
 import { IStudentAddressRepository } from '../domain/interfaces/student-address-repository.interface.js';
 import { IStudentRepository } from '../index.js';
+import {
+  StudentAddressNotFoundException,
+  StudentNotFoundException,
+} from '../domain/exceptions/index.js';
 
 @Injectable()
 export class UpdateStudentAddressUseCase {
@@ -19,14 +23,10 @@ export class UpdateStudentAddressUseCase {
     dto: UpdateAddressDto,
   ): Promise<AddressEntity> {
     const student = await this.studentRepository.findById(studentId);
-    if (!student)
-      throw new NotFoundException(`Student with ID ${studentId} not found`);
+    if (!student) throw new StudentNotFoundException(studentId);
 
     const address = await this.addressRepository.findOne(studentId, addressId);
-    if (!address)
-      throw new NotFoundException(
-        `Address with ID ${addressId} not found for this student`,
-      );
+    if (!address) throw new StudentAddressNotFoundException(addressId);
 
     if (dto.isPrimary)
       await this.addressRepository.clearPrimaryExclude(studentId, addressId);

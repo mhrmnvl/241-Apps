@@ -36,6 +36,7 @@ import { GetClassroomSupervisorByIdUseCase } from '../use-cases/get-classroom-su
 import { GetClassroomSupervisorsUseCase } from '../use-cases/get-classroom-supervisors.use-case.js';
 import { UpdateClassroomSupervisorUseCase } from '../use-cases/update-classroom-supervisor.use-case.js';
 import { ClassroomSupervisorWithDetails } from '../domain/interfaces/classroom-supervisor-repository.interface.js';
+import { PaginatedResponse } from '../../../shared/domain/interfaces/repository.interface.js';
 
 @ApiTags('Classroom Supervisors')
 @ApiBearerAuth()
@@ -56,10 +57,9 @@ export class ClassroomSupervisorController {
     summary: 'List all class supervisors (wali kelas) per semester',
   })
   @ApiResponse({ status: 200, type: ClassroomSupervisorListResponseDto })
-  async findAll(@Query() query: ClassroomSupervisorQueryDto): Promise<{
-    data: ClassroomSupervisorWithDetails[];
-    meta: { page: number; limit: number; total: number; totalPages: number };
-  }> {
+  async findAll(
+    @Query() query: ClassroomSupervisorQueryDto,
+  ): Promise<PaginatedResponse<ClassroomSupervisorWithDetails>> {
     return this.GetClassroomSupervisorsUseCase.execute(query);
   }
 

@@ -1,6 +1,7 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { UpdateProfileDto } from '../../../platform/profile/index.js';
 import { IStudentRepository } from '../index.js';
+import { StudentNotFoundException } from '../domain/exceptions/index.js';
 
 @Injectable()
 export class UpdateStudentProfileUseCase {
@@ -10,8 +11,7 @@ export class UpdateStudentProfileUseCase {
 
   async execute(id: string, dto: UpdateProfileDto) {
     const student = await this.studentRepository.findById(id);
-    if (!student)
-      throw new NotFoundException(`Student with ID ${id} not found`);
+    if (!student) throw new StudentNotFoundException(id);
 
     const { birthDate, ...rest } = dto;
     const updated = await this.studentRepository.updateProfile(id, {

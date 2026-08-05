@@ -16,3 +16,22 @@ export interface PaginationQueryInput {
   page?: number;
   limit?: number;
 }
+
+/**
+ * Pagination envelope returned to HTTP callers.
+ *
+ * Repositories return the flat `PaginatedResult<T>` shape; use-cases derive
+ * `totalPages` and hand this to the controller, which `ResponseInterceptor`
+ * passes through untouched (it already carries `data` + `meta`).
+ */
+export interface PaginationMeta {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
+export interface PaginatedResponse<T> {
+  data: T[];
+  meta: PaginationMeta;
+}

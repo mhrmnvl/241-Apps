@@ -36,6 +36,7 @@ import { GetStudentParentByIdUseCase } from '../use-cases/get-student-parent-by-
 import { GetStudentParentsListUseCase } from '../use-cases/get-student-parents-list.use-case.js';
 import { UpdateStudentParentUseCase } from '../use-cases/update-student-parent.use-case.js';
 import { StudentParentWithDetails } from '../domain/interfaces/student-parent-repository.interface.js';
+import { PaginatedResponse } from '../../../shared/domain/interfaces/repository.interface.js';
 
 @ApiTags('Student Parents')
 @ApiBearerAuth()
@@ -56,10 +57,9 @@ export class StudentParentController {
     summary: 'List all student-parent links (paginated, searchable)',
   })
   @ApiResponse({ status: 200, type: StudentParentListResponseDto })
-  async findAll(@Query() query: StudentParentQueryDto): Promise<{
-    data: StudentParentWithDetails[];
-    meta: { page: number; limit: number; total: number; totalPages: number };
-  }> {
+  async findAll(
+    @Query() query: StudentParentQueryDto,
+  ): Promise<PaginatedResponse<StudentParentWithDetails>> {
     return this.getStudentParentsListService.execute(query);
   }
 

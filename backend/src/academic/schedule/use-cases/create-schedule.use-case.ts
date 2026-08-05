@@ -5,12 +5,16 @@ import {
 } from '@nestjs/common';
 import { CreateScheduleDto } from '../dto/request/create-schedule.dto.js';
 import { IScheduleRepository } from '../domain/interfaces/schedule-repository.interface.js';
+import { IScheduleLookupRepository } from '../domain/interfaces/schedule-lookup-repository.interface.js';
 
 @Injectable()
 export class CreateScheduleUseCase {
-  constructor(private readonly scheduleRepository: IScheduleRepository) {}
+  constructor(
+    private readonly scheduleRepository: IScheduleRepository,
+    private readonly lookupRepository: IScheduleLookupRepository,
+  ) {}
   async execute(dto: CreateScheduleDto) {
-    const ta = await this.scheduleRepository.findTeachingAssignmentById(
+    const ta = await this.lookupRepository.findTeachingAssignmentById(
       dto.teachingAssignmentId,
     );
     if (!ta) {

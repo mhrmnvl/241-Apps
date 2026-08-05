@@ -5,6 +5,9 @@ export type {
   LessonEditorTimeSlot,
   LessonEditorSubject,
   ScheduleResponse,
+  LockedScheduleRow,
+  EditableScheduleRow,
+  ScheduleTableRow,
 } from './lesson'
 export { isLessonSlot } from './lesson'
 export type { LessonQueryParams, LessonServiceResult } from './lesson-payload'

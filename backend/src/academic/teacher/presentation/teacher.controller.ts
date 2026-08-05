@@ -47,6 +47,7 @@ import type {
   TeacherWithDetails,
   TeacherListWithDetails,
 } from '../domain/interfaces/teacher-repository.interface.js';
+import { PaginatedResponse } from '../../../shared/domain/interfaces/repository.interface.js';
 
 @ApiTags('Teachers')
 @ApiBearerAuth()
@@ -71,10 +72,7 @@ export class TeacherController {
   async findAll(
     @CurrentUser() _user: AuthenticatedUser,
     @Query() query: TeacherQueryDto,
-  ): Promise<{
-    data: TeacherListWithDetails[];
-    meta: { page: number; limit: number; total: number; totalPages: number };
-  }> {
+  ): Promise<PaginatedResponse<TeacherListWithDetails>> {
     return this.getTeachersUseCase.execute(query);
   }
 

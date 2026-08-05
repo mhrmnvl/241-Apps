@@ -1,12 +1,11 @@
-import {
-  ConflictException,
-  Injectable,
-  Logger,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { CreateStudentParentDto } from '../dto/request/create-student-parent.dto.js';
 import { IStudentParentRepository } from '../domain/interfaces/student-parent-repository.interface.js';
 import { StudentParentWithDetails } from '../domain/interfaces/student-parent-repository.interface.js';
+import {
+  StudentNotFoundException,
+  StudentParentAlreadyLinkedException,
+} from '../domain/exceptions/index.js';
 
 @Injectable()
 export class CreateStudentParentUseCase {
@@ -24,8 +23,7 @@ export class CreateStudentParentUseCase {
       this.studentParentRepository.findParent(dto.parentId),
     ]);
 
-    if (!student)
-      throw new NotFoundException(`Student with ID ${dto.studentId} not found`);
+    if (!student) throw new StudentNotFoundException(dto.studentId);
     if (!parent)
       throw new NotFoundException(`Parent with ID ${dto.parentId} not found`);
 
@@ -34,9 +32,7 @@ export class CreateStudentParentUseCase {
       dto.parentId,
     );
     if (existing) {
-      throw new ConflictException(
-        'This parent is already linked to the specified student',
-      );
+      throw new StudentParentAlreadyLinkedException();
     }
 
     const link = await this.studentParentRepository.create(dto);

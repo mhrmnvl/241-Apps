@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { FilterOption } from '@/shared/types/filter.types'
 import AttendanceFilterBar from '../components/AttendanceFilterBar.vue'
 import AttendanceInputTable from '../components/AttendanceInputTable.vue'
 import AttendanceRecapTab from '../components/AttendanceRecapTab.vue'
@@ -10,11 +11,6 @@ import { useRoleGuard } from '@/features/platform/auth'
 
 const { can } = useRoleGuard()
 const canRecordAttendance = computed(() => can('attendances.manage'))
-
-interface FilterOption {
-  value: string
-  label: string
-}
 
 const MONTH_OPTIONS: FilterOption[] = [
   'Januari',

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma, Teacher, User, Profile } from '@prisma/client';
+import { Teacher, User, Profile } from '@prisma/client';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
 import { AccountProvisioningService } from '../../../../platform/user/index.js';
 import type {
@@ -20,6 +20,11 @@ import type {
   CreateTeacherRepositoryInput,
   UpdateTeacherRepositoryInput,
 } from '../../domain/interfaces/teacher-repository.interface.js';
+import {
+  buildTeacherListWhere,
+  buildTeacherExportWhere,
+} from './prisma-teacher.where.js';
+import { createTeacherInTx } from './prisma-teacher.writer.js';
 import { PaginatedResult } from '../../../../shared/domain/interfaces/repository.interface.js';
 
 @Injectable()
@@ -41,68 +46,19 @@ export class PrismaTeacherRepository extends ITeacherRepository {
   async findAll(
     query: TeacherQueryInput,
   ): Promise<PaginatedResult<TeacherListWithDetails>> {
-    const {
-      page = 1,
-      limit = 10,
-      search,
-      employmentTypeId,
-      academicYearId,
-      positionCategoryId,
-      isActive,
-    } = query;
-    const skip = (page - 1) * limit;
+    const { page = 1, limit = 10, academicYearId } = query;
 
     const resolvedAcademicYearId = academicYearId
       ? await resolveAcademicYearId(this.prisma, academicYearId)
       : undefined;
 
-    const where: Prisma.TeacherWhereInput = {
-      deletedAt: null,
-      user: {
-        ...(isActive !== undefined && { isActive }),
-      },
-      ...(employmentTypeId && { employmentTypeId }),
-      ...(positionCategoryId && {
-        teacherPositions: {
-          some: {
-            isPrimary: true,
-            deletedAt: null,
-            position: { categoryId: positionCategoryId },
-          },
-        },
-      }),
-      ...(resolvedAcademicYearId && {
-        OR: [
-          {
-            classroomSupervisors: {
-              some: { semester: { academicYearId: resolvedAcademicYearId } },
-            },
-          },
-          {
-            teachingAssignments: {
-              some: { semester: { academicYearId: resolvedAcademicYearId } },
-            },
-          },
-        ],
-      }),
-      ...(search && {
-        OR: [
-          { nip: { contains: search, mode: 'insensitive' } },
-          { nuptk: { contains: search, mode: 'insensitive' } },
-          {
-            user: {
-              profile: { name: { contains: search, mode: 'insensitive' } },
-            },
-          },
-        ],
-      }),
-    };
+    const where = buildTeacherListWhere(query, resolvedAcademicYearId);
 
     const [data, total] = await Promise.all([
       this.prisma.teacher.findMany({
         where,
         include: TEACHER_LIST_INCLUDE,
-        skip,
+        skip: (page - 1) * limit,
         take: limit,
         orderBy: { user: { profile: { name: 'asc' } } },
       }),
@@ -115,29 +71,8 @@ export class PrismaTeacherRepository extends ITeacherRepository {
   async findAllForExport(
     filters: ExportTeacherQueryInput,
   ): Promise<TeacherListWithDetails[]> {
-    const { search, employmentTypeId, isActive } = filters;
-
-    const where: Prisma.TeacherWhereInput = {
-      deletedAt: null,
-      user: {
-        ...(isActive !== undefined && { isActive }),
-      },
-      ...(employmentTypeId && { employmentTypeId }),
-      ...(search && {
-        OR: [
-          { nip: { contains: search, mode: 'insensitive' } },
-          { nuptk: { contains: search, mode: 'insensitive' } },
-          {
-            user: {
-              profile: { name: { contains: search, mode: 'insensitive' } },
-            },
-          },
-        ],
-      }),
-    };
-
     return this.prisma.teacher.findMany({
-      where,
+      where: buildTeacherExportWhere(filters),
       include: TEACHER_LIST_INCLUDE,
       orderBy: { user: { profile: { name: 'asc' } } },
     });
@@ -200,43 +135,9 @@ export class PrismaTeacherRepository extends ITeacherRepository {
     dto: CreateTeacherRepositoryInput,
     hashedPassword: string,
   ): Promise<TeacherWithDetails> {
-    return this.prisma.$transaction(async (tx) => {
-      const user = await this.accountProvisioning.provision(tx, {
-        identifier: dto.identifier ?? dto.nip ?? dto.nuptk ?? dto.nik,
-        passwordHash: hashedPassword,
-        roleCode: 'TEACHER',
-        profile: {
-          name: dto.name,
-          nik: dto.nik,
-          gender: dto.gender,
-          birthPlace: dto.birthPlace,
-          birthDate: new Date(dto.birthDate),
-          email: dto.email,
-          phone: dto.phone,
-        },
-      });
-
-      return tx.teacher.create({
-        data: {
-          userId: user.id,
-          nip: dto.nip,
-          nuptk: dto.nuptk,
-          employmentTypeId: dto.employmentTypeId,
-          ...(dto.positionId
-            ? {
-                teacherPositions: {
-                  create: {
-                    positionId: dto.positionId,
-                    hireDate: new Date(),
-                    isPrimary: true,
-                  },
-                },
-              }
-            : {}),
-        },
-        include: TEACHER_DETAIL_INCLUDE,
-      });
-    });
+    return this.prisma.$transaction((tx) =>
+      createTeacherInTx(tx, this.accountProvisioning, dto, hashedPassword),
+    );
   }
 
   async update(

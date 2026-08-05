@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { toast } from 'vue-sonner'
+import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
 import { ref, onMounted } from 'vue'
 import type { CalendarEventData, CalendarSavePayload } from '../types'
 import { useCalendarDialogForm } from '../composables/useCalendarDialogForm'
@@ -78,8 +80,10 @@ onMounted(async () => {
       isActive: true,
     })
     calendarTypes.value = res.data?.data ?? []
-  } catch (error) {
-    console.error('Gagal memuat tipe kalender akademik:', error)
+  } catch (error: unknown) {
+    toast.error(
+      getIndonesianErrorMessage(error, 'Gagal memuat tipe kalender akademik.'),
+    )
   }
 })
 </script>

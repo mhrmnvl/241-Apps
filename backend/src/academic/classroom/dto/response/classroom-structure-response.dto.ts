@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import type { PaginationMeta } from '../../../../shared/domain/interfaces/repository.interface.js';
 
 export class ClassroomStructureResponseDto {
   @ApiProperty({ format: 'uuid' })
@@ -28,5 +29,5 @@ export class ClassroomStructureListResponseDto {
   data!: ClassroomStructureResponseDto[];
 
   @ApiProperty({ example: { page: 1, limit: 10, total: 20, totalPages: 2 } })
-  meta!: { page: number; limit: number; total: number; totalPages: number };
+  meta!: PaginationMeta;
 }

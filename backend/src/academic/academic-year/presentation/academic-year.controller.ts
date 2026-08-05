@@ -40,6 +40,7 @@ import { DeleteAcademicYearUseCase } from '../use-cases/delete-academic-year.use
 import { GetAcademicYearByIdUseCase } from '../use-cases/get-academic-year-by-id.use-case.js';
 import { GetAcademicYearsUseCase } from '../use-cases/get-academic-years.use-case.js';
 import { UpdateAcademicYearUseCase } from '../use-cases/update-academic-year.use-case.js';
+import { PaginatedResponse } from '../../../shared/domain/interfaces/repository.interface.js';
 
 @ApiTags('Academic Years')
 @ApiBearerAuth()
@@ -68,10 +69,7 @@ export class AcademicYearController {
   async findAll(
     @CurrentUser() user: AuthenticatedUser,
     @Query() query: AcademicYearQueryDto,
-  ): Promise<{
-    data: AcademicYear[];
-    meta: { page: number; limit: number; total: number; totalPages: number };
-  }> {
+  ): Promise<PaginatedResponse<AcademicYear>> {
     return this.getAcademicYearsService.execute(query);
   }
 

@@ -4,16 +4,7 @@ import { ExportTeacherQueryDto } from '../dto/request/export-teacher-query.dto.j
 import { ITeacherRepository } from '../domain/interfaces/teacher-repository.interface.js';
 
 import { mapTeacherToExportRow } from '../constants/teacher-export-columns.js';
-
-declare module 'exceljs' {
-  interface Worksheet {
-    dataValidations: {
-      add(range: string, validation: ExcelJS.DataValidation): void;
-    };
-  }
-}
-
-type ExcelRow = Record<string, ExcelJS.CellValue>;
+import type { ExcelRow } from '../../../shared/domain/types/exceljs.type.js';
 
 @Injectable()
 export class ExportTeachersUseCase {

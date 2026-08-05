@@ -7,6 +7,16 @@ import {
   RolloverResult,
   SemesterWithAcademicYear,
 } from '../../domain/interfaces/rollover-repository.interface.js';
+import {
+  copyClassrooms,
+  copyEnrollments,
+  copySupervisors,
+  emptyRolloverResult,
+} from './prisma-rollover.steps.js';
+import { copyAssignmentsWithSchedules } from './prisma-rollover.assignment-step.js';
+
+/** A rollover touches five tables; give it room beyond the default timeout. */
+const ROLLOVER_TX_OPTIONS = { maxWait: 10000, timeout: 30000 };
 
 @Injectable()
 export class PrismaRolloverRepository extends IRolloverRepository {
@@ -51,169 +61,51 @@ export class PrismaRolloverRepository extends IRolloverRepository {
     return { classrooms, enrollments, supervisors, assignments };
   }
 
+  /**
+   * Copies one semester's structure onto the next, in dependency order:
+   * classrooms first (everything else re-points at them), then enrolments,
+   * homeroom teachers, and finally teaching assignments with their schedules.
+   */
   async executeRollover(
     sourceData: RolloverSourceData,
     targetSemesterId: string,
     targetAcademicYearId: string,
   ): Promise<RolloverResult> {
-    return this.prisma.$transaction(
-      async (tx) => {
-        const result = {
-          classrooms: { created: 0, skipped: 0 },
-          enrollments: { created: 0, skipped: 0 },
-          supervisors: { created: 0, skipped: 0 },
-          teachingAssignments: { created: 0, skipped: 0 },
-          schedules: { created: 0, skipped: 0 },
-        };
+    return this.prisma.$transaction(async (tx) => {
+      const result = emptyRolloverResult();
 
-        const classroomIdMap = new Map<string, string>();
+      const classroomIdMap = await copyClassrooms(
+        tx,
+        sourceData.classrooms,
+        targetAcademicYearId,
+        result,
+      );
 
-        for (const classroom of sourceData.classrooms) {
-          const existing = await tx.classroom.findFirst({
-            where: {
-              academicYearId: targetAcademicYearId,
-              gradeId: classroom.gradeId,
-              code: classroom.code,
-              deletedAt: null,
-            },
-          });
+      await copyEnrollments(
+        tx,
+        sourceData.enrollments,
+        classroomIdMap,
+        targetSemesterId,
+        result,
+      );
 
-          if (existing) {
-            classroomIdMap.set(classroom.id, existing.id);
-            result.classrooms.skipped++;
-          } else {
-            const created = await tx.classroom.create({
-              data: {
-                academicYearId: targetAcademicYearId,
-                gradeId: classroom.gradeId,
-                code: classroom.code,
-                name: classroom.name,
-                capacity: classroom.capacity,
-                isActive: classroom.isActive,
-              },
-            });
-            classroomIdMap.set(classroom.id, created.id);
-            result.classrooms.created++;
-          }
-        }
+      await copySupervisors(
+        tx,
+        sourceData.supervisors,
+        classroomIdMap,
+        targetSemesterId,
+        result,
+      );
 
-        for (const enrollment of sourceData.enrollments) {
-          const newClassroomId = classroomIdMap.get(enrollment.classroomId);
-          if (!newClassroomId) continue;
+      await copyAssignmentsWithSchedules(
+        tx,
+        sourceData.assignments,
+        classroomIdMap,
+        targetSemesterId,
+        result,
+      );
 
-          const existing = await tx.studentEnrollment.findFirst({
-            where: {
-              studentId: enrollment.studentId,
-              semesterId: targetSemesterId,
-              deletedAt: null,
-            },
-          });
-
-          if (existing) {
-            result.enrollments.skipped++;
-          } else {
-            await tx.studentEnrollment.create({
-              data: {
-                studentId: enrollment.studentId,
-                classroomId: newClassroomId,
-                semesterId: targetSemesterId,
-                status: EnrollmentStatus.ACTIVE,
-              },
-            });
-            result.enrollments.created++;
-          }
-        }
-
-        for (const supervisor of sourceData.supervisors) {
-          const newClassroomId = classroomIdMap.get(supervisor.classroomId);
-          if (!newClassroomId) continue;
-
-          const existing = await tx.classroomSupervisor.findFirst({
-            where: {
-              classroomId: newClassroomId,
-              semesterId: targetSemesterId,
-              deletedAt: null,
-            },
-          });
-
-          if (existing) {
-            result.supervisors.skipped++;
-          } else {
-            await tx.classroomSupervisor.create({
-              data: {
-                classroomId: newClassroomId,
-                teacherId: supervisor.teacherId,
-                semesterId: targetSemesterId,
-              },
-            });
-            result.supervisors.created++;
-          }
-        }
-
-        const assignmentIdMap = new Map<string, string>();
-
-        for (const assignment of sourceData.assignments) {
-          const newClassroomId = classroomIdMap.get(assignment.classroomId);
-          if (!newClassroomId) continue;
-
-          const existing = await tx.teachingAssignment.findFirst({
-            where: {
-              teacherId: assignment.teacherId,
-              classroomId: newClassroomId,
-              subjectId: assignment.subjectId,
-              semesterId: targetSemesterId,
-              deletedAt: null,
-            },
-          });
-
-          if (existing) {
-            assignmentIdMap.set(assignment.id, existing.id);
-            result.teachingAssignments.skipped++;
-          } else {
-            const created = await tx.teachingAssignment.create({
-              data: {
-                teacherId: assignment.teacherId,
-                classroomId: newClassroomId,
-                subjectId: assignment.subjectId,
-                semesterId: targetSemesterId,
-              },
-            });
-            assignmentIdMap.set(assignment.id, created.id);
-            result.teachingAssignments.created++;
-          }
-
-          for (const schedule of assignment.schedules) {
-            const newAssignmentId = assignmentIdMap.get(assignment.id);
-            if (!newAssignmentId) continue;
-
-            const existingSchedule = await tx.schedule.findFirst({
-              where: {
-                teachingAssignmentId: newAssignmentId,
-                day: schedule.day,
-                timeSlotId: schedule.timeSlotId,
-                deletedAt: null,
-              },
-            });
-
-            if (existingSchedule) {
-              result.schedules.skipped++;
-            } else {
-              await tx.schedule.create({
-                data: {
-                  teachingAssignmentId: newAssignmentId,
-                  timeSlotId: schedule.timeSlotId,
-                  day: schedule.day,
-                  room: schedule.room,
-                },
-              });
-              result.schedules.created++;
-            }
-          }
-        }
-
-        return result;
-      },
-      { maxWait: 10000, timeout: 30000 },
-    );
+      return result;
+    }, ROLLOVER_TX_OPTIONS);
   }
 }

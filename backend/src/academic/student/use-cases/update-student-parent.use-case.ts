@@ -1,7 +1,8 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { UpdateStudentParentDto } from '../dto/request/update-student-parent.dto.js';
 import { IStudentParentRepository } from '../domain/interfaces/student-parent-repository.interface.js';
 import { StudentParentWithDetails } from '../domain/interfaces/student-parent-repository.interface.js';
+import { StudentParentLinkNotFoundException } from '../domain/exceptions/index.js';
 
 @Injectable()
 export class UpdateStudentParentUseCase {
@@ -16,10 +17,7 @@ export class UpdateStudentParentUseCase {
     dto: UpdateStudentParentDto,
   ): Promise<StudentParentWithDetails> {
     const current = await this.studentParentRepository.findById(id);
-    if (!current)
-      throw new NotFoundException(
-        `Student-parent link with ID ${id} not found`,
-      );
+    if (!current) throw new StudentParentLinkNotFoundException(id);
 
     const updated = await this.studentParentRepository.update(
       id,

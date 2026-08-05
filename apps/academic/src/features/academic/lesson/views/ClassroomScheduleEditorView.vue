@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useLessonEditor } from '../composables/useLessonEditor'
+import type { ScheduleTableRow } from '../types'
 import { useBreadcrumbs } from '@/shared/composables/useBreadcrumbs'
 import { Button } from '@/ui/button'
 import { Card, CardHeader, CardTitle } from '@/ui/card'
@@ -106,21 +107,11 @@ function slotTypeBadgeVariant(
   }
 }
 
-interface LockedRow {
-  kind: 'locked'
-  slot: (typeof allOrderedSlots.value)[0]
-}
-interface EditableRow {
-  kind: 'editable'
-  rowIndex: number
-}
-type TableRowItem = LockedRow | EditableRow
-
-function buildTableRows(day: string): TableRowItem[] {
+function buildTableRows(day: string): ScheduleTableRow[] {
   const lockedSlots = allOrderedSlots.value.filter((s) => !isLessonSlot(s))
   const lessonRows = schedule.value[day] ?? []
 
-  const rows: TableRowItem[] = []
+  const rows: ScheduleTableRow[] = []
 
   for (const slot of lockedSlots) {
     if (slot.type === 'CEREMONY' && day !== 'MONDAY') continue
