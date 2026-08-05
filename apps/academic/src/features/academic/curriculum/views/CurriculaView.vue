@@ -10,6 +10,13 @@ import { useRoleGuard } from '@/features/platform/auth'
 import { Plus } from 'lucide-vue-next'
 import { useRouter } from 'vue-router'
 import { onMounted, ref, watch } from 'vue'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/ui/select'
 
 const router = useRouter()
 const {
@@ -41,7 +48,7 @@ const tableColumns = createCurriculaColumns({
     setLoading(true)
     const result = await deleteCurriculum(item.id)
     if (result.success) {
-      await fetchCurricula()
+      refetchCurrentYear()
       closeAlert()
     }
     setLoading(false)
@@ -54,9 +61,27 @@ watch(isAddModalOpen, (isOpen) => {
   }
 })
 
-onMounted(() => {
-  void fetchCurricula()
-  void fetchAcademicYears()
+/**
+ * A curriculum belongs to one academic year, so an earlier year's curricula
+ * are only reachable by selecting that year.
+ */
+const selectedAcademicYearId = ref('')
+
+function onAcademicYearChange(value: unknown) {
+  const academicYearId = typeof value === 'string' ? value : ''
+  selectedAcademicYearId.value = academicYearId
+  void fetchCurricula(academicYearId || undefined)
+}
+
+/** Refetch after a save without losing the year the user is looking at. */
+function refetchCurrentYear() {
+  void fetchCurricula(selectedAcademicYearId.value || undefined)
+}
+
+onMounted(async () => {
+  await Promise.all([fetchCurricula(), fetchAcademicYears()])
+  selectedAcademicYearId.value =
+    academicYears.value.find((y) => y.isActive)?.id ?? ''
 })
 </script>
 
@@ -89,14 +114,34 @@ onMounted(() => {
           item-label="kurikulum"
           filter-column="name"
           filter-placeholder="Cari kurikulum..."
-        />
+        >
+          <template #header-right>
+            <Select
+              :model-value="selectedAcademicYearId"
+              @update:model-value="onAcademicYearChange"
+            >
+              <SelectTrigger class="h-8 w-[150px] text-xs">
+                <SelectValue placeholder="Tahun Ajaran" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem
+                  v-for="year in academicYears"
+                  :key="year.id"
+                  :value="year.id"
+                >
+                  {{ year.name }}
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </template>
+        </DataTable>
 
         <CurriculaFormSheet
           v-if="isAddModalOpen"
           v-model:open="isAddModalOpen"
           :academic-years="academicYears"
           :edit-data="editingItem"
-          @save-success="fetchCurricula"
+          @save-success="refetchCurrentYear"
         />
       </div>
     </Card>

@@ -18,6 +18,10 @@ export const classroomService = {
         page: params?.page ?? store.currentFilters.page,
         limit: params?.limit ?? store.currentFilters.limit,
         search: params?.search ?? store.currentFilters.search,
+        // Omitted means "the active year" on the backend, so an unset filter
+        // still scopes the list instead of spanning every academic year.
+        academicYearId:
+          params?.academicYearId ?? store.currentFilters.academicYearId,
       }
       store.currentFilters = mergedParams
 

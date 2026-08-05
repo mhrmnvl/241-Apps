@@ -5,7 +5,9 @@ export { useTeachingAssignment } from './composables/useTeachingAssignment'
 export { teachingAssignmentRoutes } from './routes'
 export type {
   TeachingAssignment,
-  TeachingAssignmentSavePayload,
+  TeachingAssignmentCreatePayload,
+  TeachingAssignmentCreateResult,
+  TeachingAssignmentUpdatePayload,
   TeachingAssignmentQueryParams,
   TeachingAssignmentColumnActions,
 } from './types'

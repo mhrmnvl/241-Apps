@@ -5,8 +5,10 @@ import type {
 import api from '@/shared/utils/api'
 import type {
   TeachingAssignment,
+  TeachingAssignmentCreatePayload,
+  TeachingAssignmentCreateResult,
   TeachingAssignmentQueryParams,
-  TeachingAssignmentSavePayload,
+  TeachingAssignmentUpdatePayload,
 } from '../types'
 
 export const teachingAssignmentApi = {
@@ -17,8 +19,8 @@ export const teachingAssignmentApi = {
     )
   },
 
-  createTeachingAssignment: (payload: TeachingAssignmentSavePayload) => {
-    return api.post<ApiSingleResponse<TeachingAssignment>>(
+  createTeachingAssignment: (payload: TeachingAssignmentCreatePayload) => {
+    return api.post<ApiSingleResponse<TeachingAssignmentCreateResult>>(
       '/teaching-assignments',
       payload,
     )
@@ -26,7 +28,7 @@ export const teachingAssignmentApi = {
 
   updateTeachingAssignment: (
     id: string,
-    payload: Partial<TeachingAssignmentSavePayload>,
+    payload: Partial<TeachingAssignmentUpdatePayload>,
   ) => {
     return api.patch<ApiSingleResponse<TeachingAssignment>>(
       `/teaching-assignments/${id}`,

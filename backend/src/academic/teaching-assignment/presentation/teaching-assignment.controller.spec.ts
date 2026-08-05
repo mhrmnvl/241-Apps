@@ -70,7 +70,7 @@ describe('TeachingAssignmentController', () => {
     it('should delegate', async () => {
       const dto: CreateTeachingAssignmentDto = {
         teacherId: 'emp-1',
-        classroomId: 'cls-1',
+        classroomIds: ['cls-1'],
         subjectId: 'sub-1',
         semesterId: 'sem-1',
       };

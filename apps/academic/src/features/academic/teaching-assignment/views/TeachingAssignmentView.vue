@@ -1,7 +1,8 @@
 ﻿<script setup lang="ts">
 import type {
   TeachingAssignment,
-  TeachingAssignmentSavePayload,
+  TeachingAssignmentCreatePayload,
+  TeachingAssignmentUpdatePayload,
 } from '../types'
 import TeachingAssignmentFormDialog from '../components/TeachingAssignmentFormDialog.vue'
 import { createTeachingAssignmentColumns } from '../components/columns'
@@ -73,7 +74,7 @@ const tableColumns = createTeachingAssignmentColumns({
 })
 
 async function handleSaveTeachingAssignment(
-  payload: TeachingAssignmentSavePayload,
+  payload: TeachingAssignmentCreatePayload | TeachingAssignmentUpdatePayload,
 ) {
   const result = await saveTeachingAssignment(
     editingItem.value?.id ?? null,

@@ -46,11 +46,34 @@ export interface TeachingAssignment {
   semester?: TeachingAssignmentSemester
 }
 
-export interface TeachingAssignmentSavePayload {
+/**
+ * Creating covers several classes in one go — one assignment row per class —
+ * because a teacher normally takes the same subject across a whole grade.
+ */
+export interface TeachingAssignmentCreatePayload {
+  teacherId: string
+  classroomIds: string[]
+  subjectId: string
+  semesterId: string
+}
+
+/** Editing touches exactly one existing row, so the class is singular. */
+export interface TeachingAssignmentUpdatePayload {
   teacherId: string
   classroomId: string
   subjectId: string
   semesterId: string
+}
+
+/** A classroom that already had this assignment and was left untouched. */
+export interface SkippedClassroom {
+  classroomId: string
+  reason: string
+}
+
+export interface TeachingAssignmentCreateResult {
+  created: TeachingAssignment[]
+  skipped: SkippedClassroom[]
 }
 
 export interface TeachingAssignmentQueryParams {

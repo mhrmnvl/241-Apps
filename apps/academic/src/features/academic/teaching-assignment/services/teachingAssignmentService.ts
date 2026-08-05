@@ -7,7 +7,8 @@ import { subjectApi } from '@/features/academic/subject'
 import { semesterApi } from '@/features/academic/semester'
 import { teacherApi } from '@/features/academic/teacher'
 import type {
-  TeachingAssignmentSavePayload,
+  TeachingAssignmentCreatePayload,
+  TeachingAssignmentUpdatePayload,
   TeachingAssignmentQueryParams,
 } from '../types'
 
@@ -64,18 +65,41 @@ export const teachingAssignmentService = {
 
   saveTeachingAssignment: async (
     id: string | null,
-    payload: TeachingAssignmentSavePayload,
+    payload: TeachingAssignmentCreatePayload | TeachingAssignmentUpdatePayload,
   ) => {
     const store = useTeachingAssignmentStore()
     store.isSaving = true
     store.formError = null
     try {
+      const { teacherId, subjectId, semesterId } = payload
+
       if (id) {
-        await teachingAssignmentApi.updateTeachingAssignment(id, payload)
+        // Narrowed rather than asserted, so a create-shaped payload can never
+        // leak `classroomIds` into an update request.
+        await teachingAssignmentApi.updateTeachingAssignment(id, {
+          teacherId,
+          subjectId,
+          semesterId,
+          ...('classroomId' in payload
+            ? { classroomId: payload.classroomId }
+            : {}),
+        })
         toast.success('Berhasil memperbarui penugasan mengajar')
       } else {
-        await teachingAssignmentApi.createTeachingAssignment(payload)
-        toast.success('Berhasil menambah penugasan mengajar')
+        const res = await teachingAssignmentApi.createTeachingAssignment({
+          teacherId,
+          subjectId,
+          semesterId,
+          classroomIds: 'classroomIds' in payload ? payload.classroomIds : [],
+        })
+        const { created = [], skipped = [] } = res.data?.data ?? {}
+        // Partial success is expected when some classes were already covered,
+        // so say what actually happened instead of a flat "berhasil".
+        toast.success(
+          skipped.length > 0
+            ? `${created.length} kelas ditambahkan, ${skipped.length} dilewati (sudah ada).`
+            : `Berhasil menambah penugasan untuk ${created.length} kelas`,
+        )
       }
       await teachingAssignmentService.fetchTeachingAssignments()
       return { success: true }
