@@ -8,7 +8,12 @@ export class GetOccupationsUseCase {
 
   async execute(query: OccupationQueryDto) {
     const { data, total, page, limit } =
-      await this.occupationRepository.findAll(query);
+      await this.occupationRepository.findAll({
+        page: query.page,
+        limit: query.limit,
+        search: query.search,
+        isActive: query.isActive,
+      });
     return {
       data,
       meta: { page, limit, total, totalPages: Math.ceil(total / limit) },

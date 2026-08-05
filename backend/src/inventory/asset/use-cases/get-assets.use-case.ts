@@ -7,6 +7,15 @@ export class GetAssetsUseCase {
   constructor(private readonly assetRepository: IAssetRepository) {}
 
   async execute(query: AssetQueryDto) {
-    return this.assetRepository.findAll(query);
+    return this.assetRepository.findAll({
+      page: query.page,
+      limit: query.limit,
+      keyword: query.keyword,
+      categoryId: query.categoryId,
+      locationId: query.locationId,
+      statusId: query.statusId,
+      conditionId: query.conditionId,
+      fundingSourceId: query.fundingSourceId,
+    });
   }
 }

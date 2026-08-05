@@ -8,6 +8,11 @@ export class GetStudentScoresUseCase {
     private readonly studentScoreRepository: IStudentScoreRepository,
   ) {}
   async execute(query: StudentScoreQueryDto) {
-    return this.studentScoreRepository.findAll(query);
+    return this.studentScoreRepository.findAll({
+      page: query.page,
+      limit: query.limit,
+      assessmentItemId: query.assessmentItemId,
+      enrollmentId: query.enrollmentId,
+    });
   }
 }

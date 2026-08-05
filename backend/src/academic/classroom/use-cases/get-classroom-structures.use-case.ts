@@ -10,7 +10,12 @@ export class GetClassroomStructuresUseCase {
 
   async execute(query: ClassroomStructureQueryDto) {
     const { data, total, page, limit } =
-      await this.classroomStructureRepository.findAll(query);
+      await this.classroomStructureRepository.findAll({
+        page: query.page,
+        limit: query.limit,
+        classroomId: query.classroomId,
+        semesterId: query.semesterId,
+      });
     const totalPages = Math.ceil(total / limit);
     return { data, meta: { page, limit, total, totalPages } };
   }

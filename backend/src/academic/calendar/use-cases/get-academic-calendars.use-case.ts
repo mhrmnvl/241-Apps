@@ -9,6 +9,12 @@ export class GetAcademicCalendarsUseCase {
   ) {}
 
   async execute(query: AcademicCalendarQueryDto) {
-    return this.academicCalendarRepository.findAll(query);
+    return this.academicCalendarRepository.findAll({
+      page: query.page,
+      limit: query.limit,
+      academicYearId: query.academicYearId,
+      semesterId: query.semesterId,
+      typeId: query.typeId,
+    });
   }
 }

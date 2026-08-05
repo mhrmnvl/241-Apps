@@ -7,6 +7,11 @@ export class GetScholarshipsUseCase {
   constructor(private readonly scholarshipRepository: IScholarshipRepository) {}
 
   async execute(query: ScholarshipQueryDto) {
-    return this.scholarshipRepository.findAll(query);
+    return this.scholarshipRepository.findAll({
+      page: query.page,
+      limit: query.limit,
+      profileId: query.profileId,
+      status: query.status,
+    });
   }
 }

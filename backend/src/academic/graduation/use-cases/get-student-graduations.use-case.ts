@@ -6,6 +6,11 @@ import { IGraduationRepository } from '../domain/interfaces/graduation-repositor
 export class GetStudentGraduationsUseCase {
   constructor(private readonly graduationRepository: IGraduationRepository) {}
   async execute(query: StudentGraduationQueryDto) {
-    return this.graduationRepository.findAll(query);
+    return this.graduationRepository.findAll({
+      page: query.page,
+      limit: query.limit,
+      academicYearId: query.academicYearId,
+      search: query.search,
+    });
   }
 }

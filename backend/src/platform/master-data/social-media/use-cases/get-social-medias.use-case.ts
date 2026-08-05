@@ -8,7 +8,11 @@ export class GetSocialMediasUseCase {
 
   async execute(query: SocialMediaQueryDto) {
     const { page = 1, limit = 10 } = query;
-    const { data, total } = await this.socialMediaRepository.findAll(query);
+    const { data, total } = await this.socialMediaRepository.findAll({
+      page: query.page,
+      limit: query.limit,
+      search: query.search,
+    });
 
     return {
       data,

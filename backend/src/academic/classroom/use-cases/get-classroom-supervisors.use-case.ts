@@ -10,7 +10,13 @@ export class GetClassroomSupervisorsUseCase {
 
   async execute(query: ClassroomSupervisorQueryDto) {
     const { data, total, page, limit } =
-      await this.classroomSupervisorRepository.findAll(query);
+      await this.classroomSupervisorRepository.findAll({
+        page: query.page,
+        limit: query.limit,
+        classroomId: query.classroomId,
+        teacherId: query.teacherId,
+        semesterId: query.semesterId,
+      });
     const totalPages = Math.ceil(total / limit);
     return { data, meta: { page, limit, total, totalPages } };
   }

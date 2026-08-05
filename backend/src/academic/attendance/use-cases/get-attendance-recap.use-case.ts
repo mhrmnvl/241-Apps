@@ -6,6 +6,11 @@ import { AttendanceRecapQueryDto } from '../dto/request/attendance-recap-query.d
 export class GetAttendanceRecapUseCase {
   constructor(private readonly attendanceRepository: IAttendanceRepository) {}
   async execute(query: AttendanceRecapQueryDto) {
-    return this.attendanceRepository.getRecap(query);
+    return this.attendanceRepository.getRecap({
+      classroomId: query.classroomId,
+      semesterId: query.semesterId,
+      month: query.month,
+      year: query.year,
+    });
   }
 }

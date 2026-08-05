@@ -10,7 +10,12 @@ export class GetAcademicCalendarTypesUseCase {
 
   async execute(query: AcademicCalendarTypeQueryDto) {
     const { data, total, page, limit } =
-      await this.academicCalendarTypeRepository.findAll(query);
+      await this.academicCalendarTypeRepository.findAll({
+        page: query.page,
+        limit: query.limit,
+        search: query.search,
+        isActive: query.isActive,
+      });
     return {
       data,
       meta: {

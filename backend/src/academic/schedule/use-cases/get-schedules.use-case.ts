@@ -6,6 +6,12 @@ import { IScheduleRepository } from '../domain/interfaces/schedule-repository.in
 export class GetSchedulesUseCase {
   constructor(private readonly scheduleRepository: IScheduleRepository) {}
   async execute(query: ScheduleQueryDto) {
-    return this.scheduleRepository.findAll(query);
+    return this.scheduleRepository.findAll({
+      page: query.page,
+      limit: query.limit,
+      teachingAssignmentId: query.teachingAssignmentId,
+      timeSlotId: query.timeSlotId,
+      day: query.day,
+    });
   }
 }

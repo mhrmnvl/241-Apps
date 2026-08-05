@@ -7,8 +7,14 @@ export class GetEducationsUseCase {
   constructor(private readonly educationRepository: IEducationRepository) {}
 
   async execute(query: EducationQueryDto) {
-    const { data, total, page, limit } =
-      await this.educationRepository.findAll(query);
+    const { data, total, page, limit } = await this.educationRepository.findAll(
+      {
+        page: query.page,
+        limit: query.limit,
+        search: query.search,
+        isActive: query.isActive,
+      },
+    );
     return {
       data,
       meta: { page, limit, total, totalPages: Math.ceil(total / limit) },

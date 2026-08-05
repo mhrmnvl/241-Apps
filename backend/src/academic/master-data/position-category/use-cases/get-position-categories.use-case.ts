@@ -9,6 +9,10 @@ export class GetPositionCategoriesUseCase {
   ) {}
 
   async execute(query: PositionCategoryQueryDto) {
-    return this.positionCategoryRepository.findAll(query);
+    return this.positionCategoryRepository.findAll({
+      page: query.page,
+      limit: query.limit,
+      search: query.search,
+    });
   }
 }

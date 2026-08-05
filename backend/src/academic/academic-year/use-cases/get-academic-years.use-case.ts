@@ -10,7 +10,11 @@ export class GetAcademicYearsUseCase {
 
   async execute(query: AcademicYearQueryDto) {
     const { data, total, page, limit } =
-      await this.academicYearRepository.findAll(query);
+      await this.academicYearRepository.findAll({
+        page: query.page,
+        limit: query.limit,
+        search: query.search,
+      });
     return {
       data,
       meta: {

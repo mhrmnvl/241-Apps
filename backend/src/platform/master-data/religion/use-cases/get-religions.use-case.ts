@@ -7,8 +7,12 @@ export class GetReligionsUseCase {
   constructor(private readonly religionRepository: IReligionRepository) {}
 
   async execute(query: ReligionQueryDto) {
-    const { data, total, page, limit } =
-      await this.religionRepository.findAll(query);
+    const { data, total, page, limit } = await this.religionRepository.findAll({
+      page: query.page,
+      limit: query.limit,
+      search: query.search,
+      isActive: query.isActive,
+    });
     return {
       data,
       meta: {

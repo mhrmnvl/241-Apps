@@ -11,7 +11,13 @@ export class GetAdmissionWavesUseCase {
 
   async execute(query: AdmissionWaveQueryDto) {
     const { data, total, page, limit } =
-      await this.admissionWaveRepository.findAll(query);
+      await this.admissionWaveRepository.findAll({
+        page: query.page,
+        limit: query.limit,
+        search: query.search,
+        academicYearId: query.academicYearId,
+        isActive: query.isActive,
+      });
 
     return {
       data: data.map(serializeWave),

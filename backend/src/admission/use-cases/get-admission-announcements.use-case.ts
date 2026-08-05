@@ -10,7 +10,13 @@ export class GetAdmissionAnnouncementsUseCase {
 
   async execute(query: AdmissionAnnouncementQueryDto) {
     const { data, total, page, limit } =
-      await this.admissionAnnouncementRepository.findAll(query);
+      await this.admissionAnnouncementRepository.findAll({
+        page: query.page,
+        limit: query.limit,
+        search: query.search,
+        waveId: query.waveId,
+        isPublished: query.isPublished,
+      });
 
     return {
       data,

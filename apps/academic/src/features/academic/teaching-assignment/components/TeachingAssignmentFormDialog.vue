@@ -77,8 +77,20 @@ const teacherOptions = computed<ComboboxOption[]>(() =>
 const subjectOptions = computed<ComboboxOption[]>(() =>
   subjects.value.map((s) => ({
     value: s.id,
-    label: `${s.name} (${s.code})`,
+    // A curriculum subject may carry no code, which would read as "(null)".
+    label: s.code ? `${s.name} (${s.code})` : s.name,
   })),
+)
+
+/**
+ * The list is scoped to the active curriculum, so "empty" usually means that
+ * curriculum has no subjects yet — not that the search missed. Say which,
+ * otherwise the dropdown looks broken.
+ */
+const subjectEmptyText = computed(() =>
+  subjects.value.length === 0
+    ? 'Belum ada mata pelajaran di kurikulum aktif. Tambahkan lewat Kurikulum › Mata Pelajaran.'
+    : 'Mata pelajaran tidak ditemukan.',
 )
 
 const classroomOptions = computed<ComboboxOption[]>(() =>
@@ -246,7 +258,7 @@ function confirmSave() {
                   :options="subjectOptions"
                   placeholder="Pilih Mata Pelajaran"
                   search-placeholder="Cari mata pelajaran..."
-                  empty-text="Mata pelajaran tidak ditemukan."
+                  :empty-text="subjectEmptyText"
                   @update:model-value="(val) => handleChange(val)"
                 />
               </FormControl>

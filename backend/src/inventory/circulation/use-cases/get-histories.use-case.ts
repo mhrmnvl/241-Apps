@@ -7,6 +7,10 @@ export class GetHistoriesUseCase {
   constructor(private readonly circulationRepository: ICirculationRepository) {}
 
   async execute(query: HistoryQueryDto) {
-    return this.circulationRepository.findAllHistories(query);
+    return this.circulationRepository.findAllHistories({
+      page: query.page,
+      limit: query.limit,
+      unitId: query.unitId,
+    });
   }
 }
