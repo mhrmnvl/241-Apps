@@ -134,7 +134,7 @@ onMounted(async () => {
         />
 
         <StudentGraduationFormDialog
-          v-if="can('graduations.create') && isAddModalOpen"
+          v-if="isAddModalOpen"
           v-model:open="isAddModalOpen"
           :edit-data="editingItem"
           :form-error="formError"

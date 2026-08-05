@@ -159,7 +159,7 @@ onMounted(async () => {
         />
 
         <TeachingAssignmentFormDialog
-          v-if="can('teaching-assignments.create') && isAddModalOpen"
+          v-if="isAddModalOpen"
           v-model:open="isAddModalOpen"
           :form-error="formError"
           :is-saving="isSaving"

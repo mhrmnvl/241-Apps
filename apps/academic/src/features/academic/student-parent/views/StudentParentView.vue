@@ -100,7 +100,7 @@ onMounted(async () => {
         />
 
         <StudentParentFormDialog
-          v-if="can('students.create') && isFormOpen"
+          v-if="isFormOpen"
           v-model:open="isFormOpen"
           :edit-data="editingItem"
           :form-error="formError"

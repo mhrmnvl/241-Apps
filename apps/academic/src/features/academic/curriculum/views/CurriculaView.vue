@@ -92,7 +92,7 @@ onMounted(() => {
         />
 
         <CurriculaFormSheet
-          v-if="can('curricula.create') && isAddModalOpen"
+          v-if="isAddModalOpen"
           v-model:open="isAddModalOpen"
           :academic-years="academicYears"
           :edit-data="editingItem"

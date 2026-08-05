@@ -163,7 +163,7 @@ onMounted(async () => {
         />
 
         <AddCurriculumSubjectDialog
-          v-if="can('curriculum-subjects.create') && isAddDialogOpen"
+          v-if="isAddDialogOpen"
           v-model:open="isAddDialogOpen"
           :subjects="subjects"
           :existing-subject-ids="existingSubjectIds"
