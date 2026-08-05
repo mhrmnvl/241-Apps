@@ -24,7 +24,12 @@ export class UpdateSubjectUseCase {
         throw new ConflictException(`Subject "${dto.name}" already exists`);
     }
 
-    const updated = await this.subjectRepository.update(id, dto);
+    // Explicit mapping — see CreateSubjectUseCase for why the DTO is not
+    // forwarded wholesale.
+    const updated = await this.subjectRepository.update(id, {
+      code: dto.code,
+      name: dto.name,
+    });
     this.logger.log(`Subject updated: ${id}`);
     return updated;
   }

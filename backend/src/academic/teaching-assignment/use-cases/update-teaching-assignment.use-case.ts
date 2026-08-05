@@ -57,6 +57,13 @@ export class UpdateTeachingAssignmentUseCase {
         throw new ConflictException('Teaching assignment already exists');
     }
 
-    return this.teachingAssignmentRepository.update(id, dto);
+    // Explicit mapping — see CreateSubjectUseCase for why the DTO is not
+    // forwarded wholesale.
+    return this.teachingAssignmentRepository.update(id, {
+      teacherId: dto.teacherId,
+      classroomId: dto.classroomId,
+      subjectId: dto.subjectId,
+      semesterId: dto.semesterId,
+    });
   }
 }
