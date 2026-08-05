@@ -35,7 +35,14 @@ export class UpdateClassroomStructureUseCase {
       );
     }
 
-    const updated = await this.classroomStructureRepository.update(id, dto);
+    const updated = await this.classroomStructureRepository.update(id, {
+      classroomId: dto.classroomId,
+      semesterId: dto.semesterId,
+      presidentId: dto.presidentId,
+      vicePresidentId: dto.vicePresidentId,
+      secretaryId: dto.secretaryId,
+      treasurerId: dto.treasurerId,
+    });
     this.logger.log(`ClassStructure updated: ${id}`);
     return updated;
   }

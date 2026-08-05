@@ -51,6 +51,12 @@ export class CreateStudentEnrollmentUseCase {
       });
     }
 
-    return this.enrollmentRepository.create(dto);
+    // `status` is not part of the create DTO — a new enrolment always starts
+    // ACTIVE, and the repository applies that default.
+    return this.enrollmentRepository.create({
+      studentId: dto.studentId,
+      classroomId: dto.classroomId,
+      semesterId: dto.semesterId,
+    });
   }
 }

@@ -31,7 +31,18 @@ export class UpdateStudentAddressUseCase {
     if (dto.isPrimary)
       await this.addressRepository.clearPrimaryExclude(studentId, addressId);
 
-    const updated = await this.addressRepository.update(addressId, dto);
+    const updated = await this.addressRepository.update(addressId, {
+      street: dto.street,
+      rt: dto.rt,
+      rw: dto.rw,
+      village: dto.village,
+      district: dto.district,
+      city: dto.city,
+      province: dto.province,
+      country: dto.country,
+      postalCode: dto.postalCode,
+      isPrimary: dto.isPrimary,
+    });
     this.logger.log(`Address ${addressId} updated for student ${studentId}`);
     return updated;
   }

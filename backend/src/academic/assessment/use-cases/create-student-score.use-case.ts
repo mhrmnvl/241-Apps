@@ -58,6 +58,11 @@ export class CreateStudentScoreUseCase {
       });
     }
 
-    return this.studentScoreRepository.create(dto);
+    return this.studentScoreRepository.create({
+      enrollmentId: dto.enrollmentId,
+      assessmentItemId: dto.assessmentItemId,
+      score: dto.score,
+      note: dto.note,
+    });
   }
 }

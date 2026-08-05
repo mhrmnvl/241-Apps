@@ -9,6 +9,11 @@ export class CreateRoleUseCase {
   async execute(dto: CreateRoleDto) {
     const existing = await this.roleRepository.findByCode(dto.code);
     if (existing) throw new ConflictException('Role code already exists');
-    return this.roleRepository.create(dto);
+    return this.roleRepository.create({
+      name: dto.name,
+      code: dto.code,
+      description: dto.description,
+      permissionIds: dto.permissionIds,
+    });
   }
 }

@@ -39,7 +39,14 @@ export class UpdateClassroomUseCase {
       }
     }
 
-    const updated = await this.classroomRepository.update(id, dto);
+    const updated = await this.classroomRepository.update(id, {
+      academicYearId: dto.academicYearId,
+      gradeId: dto.gradeId,
+      code: dto.code,
+      name: dto.name,
+      capacity: dto.capacity,
+      isActive: dto.isActive,
+    });
     this.logger.log(`Class updated: ${id}`);
     return withDisplayName(updated);
   }

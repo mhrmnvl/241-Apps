@@ -16,7 +16,10 @@ export class CreateSchoolUnitTypeUseCase {
       throw new ConflictException('Kode tipe sekolah sudah terdaftar');
     }
 
-    const schoolUnitType = await this.schoolUnitTypeRepository.create(dto);
+    const schoolUnitType = await this.schoolUnitTypeRepository.create({
+      code: dto.code,
+      name: dto.name,
+    });
     this.logger.log(`School unit type created: ${schoolUnitType.code}`);
     return schoolUnitType;
   }

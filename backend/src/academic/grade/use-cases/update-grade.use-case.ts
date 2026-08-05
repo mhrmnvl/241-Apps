@@ -37,7 +37,11 @@ export class UpdateGradeUseCase {
       }
     }
 
-    const updated = await this.gradeRepository.update(id, dto);
+    const updated = await this.gradeRepository.update(id, {
+      level: dto.level,
+      name: dto.name,
+      isActive: dto.isActive,
+    });
     this.logger.log(`Classroom level updated: ${id}`);
     return updated;
   }

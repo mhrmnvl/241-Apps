@@ -23,7 +23,11 @@ export class CreateGradeUseCase {
       );
     }
 
-    const created = await this.gradeRepository.create(dto);
+    const created = await this.gradeRepository.create({
+      level: dto.level,
+      name: dto.name,
+      isActive: dto.isActive,
+    });
     this.logger.log(`Classroom level created: ${created.id} (${created.name})`);
     return created;
   }

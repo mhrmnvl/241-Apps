@@ -54,7 +54,11 @@ export class UpdateCurriculaUseCase {
       }
     }
 
-    const updated = await this.curriculumRepository.update(id, dto);
+    const updated = await this.curriculumRepository.update(id, {
+      academicYearId: dto.academicYearId,
+      name: dto.name,
+      isActive: dto.isActive,
+    });
     this.logger.log(`Curricula updated: ${id}`);
     return updated;
   }

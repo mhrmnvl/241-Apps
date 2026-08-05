@@ -22,7 +22,18 @@ export class TeacherAddressUseCase {
 
   async add(teacherId: string, dto: CreateAddressDto) {
     await this.ensureExists(teacherId);
-    const address = await this.addressRepository.create(teacherId, dto);
+    const address = await this.addressRepository.create(teacherId, {
+      street: dto.street,
+      rt: dto.rt,
+      rw: dto.rw,
+      village: dto.village,
+      district: dto.district,
+      city: dto.city,
+      province: dto.province,
+      country: dto.country,
+      postalCode: dto.postalCode,
+      isPrimary: dto.isPrimary,
+    });
     this.logger.log(`Address added to teacher ${teacherId}`);
     return address;
   }

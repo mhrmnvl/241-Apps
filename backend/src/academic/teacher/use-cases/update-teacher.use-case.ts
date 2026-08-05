@@ -32,7 +32,13 @@ export class UpdateTeacherUseCase {
         );
     }
 
-    const updated = await this.teacherRepository.update(id, dto);
+    // The teacher row itself holds only these; profile fields carried by the
+    // DTO are persisted through the profile path, not here.
+    const updated = await this.teacherRepository.update(id, {
+      nip: dto.nip,
+      nuptk: dto.nuptk,
+      employmentTypeId: dto.employmentTypeId,
+    });
     this.logger.log(`Teacher updated: ${id}`);
     return updated;
   }

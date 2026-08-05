@@ -44,7 +44,9 @@ export class SchoolUnitSocialMediaUseCase {
       throw new NotFoundException(`Social media with ID ${id} not found`);
     }
 
-    return this.schoolUnitSocialMediaRepository.update(id, dto);
+    return this.schoolUnitSocialMediaRepository.update(id, {
+      username: dto.username,
+    });
   }
 
   async remove(id: string): Promise<void> {

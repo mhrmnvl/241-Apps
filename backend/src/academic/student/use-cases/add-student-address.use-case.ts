@@ -23,7 +23,18 @@ export class AddStudentAddressUseCase {
 
     if (dto.isPrimary) await this.addressRepository.clearPrimary(studentId);
 
-    const address = await this.addressRepository.create(studentId, dto);
+    const address = await this.addressRepository.create(studentId, {
+      street: dto.street,
+      rt: dto.rt,
+      rw: dto.rw,
+      village: dto.village,
+      district: dto.district,
+      city: dto.city,
+      province: dto.province,
+      country: dto.country,
+      postalCode: dto.postalCode,
+      isPrimary: dto.isPrimary,
+    });
     this.logger.log(`Address added to student ${studentId}`);
     return address;
   }

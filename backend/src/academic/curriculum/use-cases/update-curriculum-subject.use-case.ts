@@ -36,6 +36,12 @@ export class UpdateCurriculumSubjectUseCase {
         );
     }
 
-    return this.curriculumSubjectRepository.update(id, dto);
+    // `gradeId` is absent from the update DTO on purpose: the grade a subject
+    // sits in is decided when it is added to the curriculum.
+    return this.curriculumSubjectRepository.update(id, {
+      curriculumId: dto.curriculumId,
+      subjectId: dto.subjectId,
+      hoursPerWeek: dto.hoursPerWeek,
+    });
   }
 }
