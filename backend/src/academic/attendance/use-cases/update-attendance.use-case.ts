@@ -8,6 +8,10 @@ export class UpdateAttendanceUseCase {
   async execute(id: string, dto: UpdateAttendanceDto) {
     const r = await this.attendanceRepository.findById(id);
     if (!r) throw new NotFoundException(`Attendance ${id} not found`);
-    return this.attendanceRepository.update(id, dto);
+    // The enrolment, date and schedule identify the row and cannot be edited.
+    return this.attendanceRepository.update(id, {
+      status: dto.status,
+      note: dto.note,
+    });
   }
 }

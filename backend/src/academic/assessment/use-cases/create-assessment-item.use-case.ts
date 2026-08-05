@@ -16,6 +16,12 @@ export class CreateAssessmentItemUseCase {
     if (!ta) {
       throw new BadRequestException('Teaching assignment not found');
     }
-    return this.assessmentItemRepository.create(dto);
+    return this.assessmentItemRepository.create({
+      teachingAssignmentId: dto.teachingAssignmentId,
+      name: dto.name,
+      type: dto.type,
+      weight: dto.weight,
+      maxScore: dto.maxScore,
+    });
   }
 }

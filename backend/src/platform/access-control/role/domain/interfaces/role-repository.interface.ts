@@ -9,6 +9,20 @@ import {
 export type RoleWithPermissions = RoleWithPermissionsEntity;
 export type UserRoleWithRole = UserRoleWithRoleEntity;
 
+export interface CreateRoleRepositoryInput {
+  name: string;
+  code: string;
+  description?: string;
+  permissionIds?: string[];
+}
+
+/** The code identifies the role and is fixed once created. */
+export interface UpdateRoleRepositoryInput {
+  name?: string;
+  description?: string;
+  permissionIds?: string[];
+}
+
 export abstract class IRoleRepository {
   abstract findAll(isSuperAdmin?: boolean): Promise<RoleWithPermissions[]>;
   abstract findById(
@@ -16,15 +30,12 @@ export abstract class IRoleRepository {
     isSuperAdmin?: boolean,
   ): Promise<RoleWithPermissions | null>;
   abstract findByCode(code: string): Promise<RoleEntity | null>;
-  abstract create(data: {
-    name: string;
-    code: string;
-    description?: string;
-    permissionIds?: string[];
-  }): Promise<RoleWithPermissions>;
+  abstract create(
+    data: CreateRoleRepositoryInput,
+  ): Promise<RoleWithPermissions>;
   abstract update(
     id: string,
-    data: { name?: string; description?: string; permissionIds?: string[] },
+    data: UpdateRoleRepositoryInput,
   ): Promise<RoleWithPermissions>;
   abstract delete(id: string): Promise<RoleEntity>;
   abstract assignRoleToUser(

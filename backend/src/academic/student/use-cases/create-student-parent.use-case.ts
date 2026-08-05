@@ -35,7 +35,12 @@ export class CreateStudentParentUseCase {
       throw new StudentParentAlreadyLinkedException();
     }
 
-    const link = await this.studentParentRepository.create(dto);
+    const link = await this.studentParentRepository.create({
+      studentId: dto.studentId,
+      parentId: dto.parentId,
+      relation: dto.relation,
+      isPrimary: dto.isPrimary,
+    });
     this.logger.log(
       `Student-parent link created (student: ${dto.studentId}, parent: ${dto.parentId})`,
     );

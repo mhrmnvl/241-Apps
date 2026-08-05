@@ -56,7 +56,7 @@ export const menuSections: MenuSection[] = [
     items: [
       {
         key: 'academic-calendar-semester',
-        title: 'Kalender & Semester',
+        title: 'Periode Akademik',
         url: '#',
         icon: CalendarDays,
         items: [
@@ -106,7 +106,7 @@ export const menuSections: MenuSection[] = [
     items: [
       {
         key: 'learning-material-schedule',
-        title: 'Materi & Jadwal',
+        title: 'Pengajaran',
         url: '#',
         icon: BookOpen,
         items: [
@@ -158,52 +158,50 @@ export const menuSections: MenuSection[] = [
     ],
   },
 
-  // ──────────────────── DATA MASTER ────────────────────
+  // ──────────────────── SISWA ────────────────────
   {
-    key: 'master-data',
-    label: 'Data Master',
+    key: 'student',
+    label: 'Siswa',
     requiredPermission: 'students.read',
     items: [
       {
-        key: 'master-data-student',
-        title: 'Siswa',
-        url: '#',
+        title: 'Daftar Siswa',
+        url: '/student',
         icon: Users,
-        items: [
-          {
-            title: 'Daftar Siswa',
-            url: '/student',
-            requiredPermission: 'students.read',
-          },
-          {
-            title: 'Akun Siswa',
-            url: '/student/account',
-            requiredPermission: 'students.read',
-          },
-          {
-            title: 'Daftar Alumni',
-            url: '/student/alumni',
-            requiredPermission: 'graduations.read',
-          },
-        ],
+        requiredPermission: 'students.read',
       },
       {
-        key: 'master-data-teacher',
-        title: 'Guru',
-        url: '#',
+        title: 'Akun Siswa',
+        url: '/student/account',
+        icon: UserRound,
+        requiredPermission: 'students.read',
+      },
+      {
+        title: 'Daftar Alumni',
+        url: '/student/alumni',
+        icon: GraduationCap,
+        requiredPermission: 'graduations.read',
+      },
+    ],
+  },
+
+  // ──────────────────── GURU ────────────────────
+  {
+    key: 'teacher',
+    label: 'Guru',
+    requiredPermission: 'teachers.read',
+    items: [
+      {
+        title: 'Daftar Guru',
+        url: '/teacher',
         icon: UserCheck,
-        items: [
-          {
-            title: 'Daftar Guru',
-            url: '/teacher',
-            requiredPermission: 'teachers.read',
-          },
-          {
-            title: 'Akun Guru',
-            url: '/teacher/account',
-            requiredPermission: 'teachers.read',
-          },
-        ],
+        requiredPermission: 'teachers.read',
+      },
+      {
+        title: 'Akun Guru',
+        url: '/teacher/account',
+        icon: UserRound,
+        requiredPermission: 'teachers.read',
       },
     ],
   },
@@ -216,7 +214,7 @@ export const menuSections: MenuSection[] = [
     items: [
       {
         key: 'settings-employment-ref',
-        title: 'Ref. Kepegawaian',
+        title: 'Data Kepegawaian',
         url: '#',
         icon: Briefcase,
         items: [
@@ -249,7 +247,7 @@ export const menuSections: MenuSection[] = [
       },
       {
         key: 'settings-academic-ref',
-        title: 'Ref. Akademik',
+        title: 'Data Akademik',
         url: '#',
         icon: ListChecks,
         items: [
@@ -282,7 +280,7 @@ export const menuSections: MenuSection[] = [
       },
       {
         key: 'settings-profile-ref',
-        title: 'Ref. Profil',
+        title: 'Data Profil',
         url: '#',
         icon: Globe,
         items: [

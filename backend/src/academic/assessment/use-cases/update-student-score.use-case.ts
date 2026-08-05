@@ -10,6 +10,11 @@ export class UpdateStudentScoreUseCase {
   async execute(id: string, dto: UpdateStudentScoreDto) {
     const r = await this.studentScoreRepository.findById(id);
     if (!r) throw new NotFoundException(`StudentScore ${id} not found`);
-    return this.studentScoreRepository.update(id, dto);
+    // Only the score and note are editable; the enrolment and assessment item
+    // a score belongs to are fixed once created.
+    return this.studentScoreRepository.update(id, {
+      score: dto.score,
+      note: dto.note,
+    });
   }
 }

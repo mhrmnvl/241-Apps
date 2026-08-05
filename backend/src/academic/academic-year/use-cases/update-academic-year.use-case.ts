@@ -30,7 +30,11 @@ export class UpdateAcademicYearUseCase {
       }
     }
 
-    const updated = await this.academicYearRepository.update(id, dto);
+    // `isActive` is not editable here: activating a year deactivates every
+    // other one, so it goes through the dedicated activate/deactivate paths.
+    const updated = await this.academicYearRepository.update(id, {
+      name: dto.name,
+    });
     this.logger.log(`Academic Year updated: ${id}`);
     return updated;
   }

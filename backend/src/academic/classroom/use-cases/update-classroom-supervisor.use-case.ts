@@ -50,7 +50,11 @@ export class UpdateClassroomSupervisorUseCase {
         );
     }
 
-    const updated = await this.classroomSupervisorRepository.update(id, dto);
+    const updated = await this.classroomSupervisorRepository.update(id, {
+      classroomId: dto.classroomId,
+      teacherId: dto.teacherId,
+      semesterId: dto.semesterId,
+    });
     this.logger.log(`ClassroomSupervisor updated: ${id}`);
     return updated;
   }

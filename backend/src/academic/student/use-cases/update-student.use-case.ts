@@ -32,7 +32,14 @@ export class UpdateStudentUseCase {
         throw new StudentNisnAlreadyExistsException(dto.nisn);
     }
 
-    const updated = await this.studentRepository.update(id, dto);
+    // The student row itself holds only these; profile fields carried by the
+    // DTO are persisted through the profile path, not here.
+    const updated = await this.studentRepository.update(id, {
+      nis: dto.nis,
+      nisn: dto.nisn,
+      gradeId: dto.gradeId,
+      status: dto.status,
+    });
     this.logger.log(`Student updated: ${id}`);
     return updated;
   }

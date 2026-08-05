@@ -27,7 +27,10 @@ export class UpdateSchoolUnitTypeUseCase {
       }
     }
 
-    const updated = await this.schoolUnitTypeRepository.update(id, dto);
+    const updated = await this.schoolUnitTypeRepository.update(id, {
+      code: dto.code,
+      name: dto.name,
+    });
     this.logger.log(`School unit type updated: ${updated.code}`);
     return updated;
   }

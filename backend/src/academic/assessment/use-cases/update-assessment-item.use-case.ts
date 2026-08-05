@@ -12,6 +12,13 @@ export class UpdateAssessmentItemUseCase {
     if (!item) {
       throw new NotFoundException('Assessment item not found');
     }
-    return this.assessmentItemRepository.update(id, dto);
+    // The teaching assignment is fixed: an item cannot be moved to another
+    // class or teacher once scores hang off it.
+    return this.assessmentItemRepository.update(id, {
+      name: dto.name,
+      type: dto.type,
+      weight: dto.weight,
+      maxScore: dto.maxScore,
+    });
   }
 }

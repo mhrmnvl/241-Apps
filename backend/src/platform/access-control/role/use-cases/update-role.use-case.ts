@@ -20,6 +20,10 @@ export class UpdateRoleUseCase {
     if (role.code === 'SUPER_ADMIN') {
       throw new ForbiddenException('The SUPER_ADMIN role cannot be modified');
     }
-    return this.roleRepository.update(id, dto);
+    return this.roleRepository.update(id, {
+      name: dto.name,
+      description: dto.description,
+      permissionIds: dto.permissionIds,
+    });
   }
 }
