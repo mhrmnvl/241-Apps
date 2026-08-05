@@ -77,7 +77,8 @@ const teacherOptions = computed<ComboboxOption[]>(() =>
 const subjectOptions = computed<ComboboxOption[]>(() =>
   subjects.value.map((s) => ({
     value: s.id,
-    label: `${s.name} (${s.code})`,
+    // A curriculum subject may carry no code, which would read as "(null)".
+    label: s.code ? `${s.name} (${s.code})` : s.name,
   })),
 )
 

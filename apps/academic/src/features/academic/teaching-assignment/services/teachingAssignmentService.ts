@@ -6,25 +6,64 @@ import { classroomApi } from '@/features/academic/classroom'
 import { subjectApi } from '@/features/academic/subject'
 import { semesterApi } from '@/features/academic/semester'
 import { teacherApi } from '@/features/academic/teacher'
+import { curriculaApi } from '@/features/academic/curriculum'
+import { curriculumSubjectApi } from '@/features/academic/curriculum-subject'
 import type {
   TeachingAssignmentCreatePayload,
   TeachingAssignmentUpdatePayload,
   TeachingAssignmentQueryParams,
+  TeachingAssignmentSubjectOption,
 } from '../types'
+
+/**
+ * Subjects a teacher may be assigned to teach.
+ *
+ * Only what the active curriculum lists counts: assigning a subject outside it
+ * would record teaching that the curriculum does not contain. When no
+ * curriculum is active there is nothing to narrow by, so the full subject list
+ * is used rather than showing an empty dropdown the user cannot act on.
+ */
+async function fetchAssignableSubjects(): Promise<
+  TeachingAssignmentSubjectOption[]
+> {
+  const curriculaRes = await curriculaApi.getCurricula({ isActive: true })
+  const activeCurriculum = (curriculaRes.data?.data ?? []).find(
+    (c) => c.isActive,
+  )
+
+  if (!activeCurriculum) {
+    const subjectRes = await subjectApi.getSubjects({ limit: 100 })
+    return subjectRes.data?.data ?? []
+  }
+
+  const curriculumSubjectRes = await curriculumSubjectApi.getCurriculumSubjects(
+    {
+      curriculumId: activeCurriculum.id,
+      limit: 100,
+    },
+  )
+
+  return (curriculumSubjectRes.data?.data ?? [])
+    .map((cs) => cs.subject)
+    .filter((s): s is NonNullable<typeof s> => s != null)
+    .sort((a, b) => a.name.localeCompare(b.name))
+}
 
 export const teachingAssignmentService = {
   fetchFilterOptions: async () => {
     const store = useTeachingAssignmentStore()
     try {
-      const [classroomRes, subjectRes, semesterRes, teacherRes] =
+      // Subjects need a second round trip to resolve the active curriculum,
+      // so they run alongside the three flat lists rather than after them.
+      const [classroomRes, semesterRes, teacherRes, subjects] =
         await Promise.all([
           classroomApi.getClassrooms({ limit: 100 }),
-          subjectApi.getSubjects({ limit: 100 }),
           semesterApi.getSemesters({ limit: 100 }),
           teacherApi.getTeachers({ limit: 100 }),
+          fetchAssignableSubjects(),
         ])
       store.classrooms = classroomRes.data?.data ?? []
-      store.subjects = subjectRes.data?.data ?? []
+      store.subjects = subjects
       store.semesters = semesterRes.data?.data ?? []
       store.teachers = teacherRes.data?.data ?? []
     } catch (error: unknown) {

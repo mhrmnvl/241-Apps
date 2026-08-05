@@ -1,8 +1,10 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import type { TeachingAssignment } from '../types'
+import type {
+  TeachingAssignment,
+  TeachingAssignmentSubjectOption,
+} from '../types'
 import type { Classroom } from '@/features/academic/classroom'
-import type { Subject } from '@/features/academic/subject'
 import type { Semester } from '@/features/academic/semester'
 import type { Teacher } from '@/features/academic/teacher'
 
@@ -16,7 +18,7 @@ export const useTeachingAssignmentStore = defineStore(
     const formError = ref<string | null>(null)
 
     const classrooms = ref<Classroom[]>([])
-    const subjects = ref<Subject[]>([])
+    const subjects = ref<TeachingAssignmentSubjectOption[]>([])
     const semesters = ref<Semester[]>([])
     const teachers = ref<Teacher[]>([])
 

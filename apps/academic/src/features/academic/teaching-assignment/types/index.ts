@@ -18,6 +18,19 @@ export interface TeachingAssignmentSubject {
   code: string
 }
 
+/**
+ * What the subject dropdown needs, and no more.
+ *
+ * Deliberately narrower than `Subject`: the options come from the active
+ * curriculum (`CurriculumSubject.subject`, whose `code` is nullable) as well
+ * as from the plain subject list, so the shared shape has to admit both.
+ */
+export interface TeachingAssignmentSubjectOption {
+  id: string
+  name: string
+  code?: string | null
+}
+
 export interface TeachingAssignmentClassroom {
   id: string
   name: string
