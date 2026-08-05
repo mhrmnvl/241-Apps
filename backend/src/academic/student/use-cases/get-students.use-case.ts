@@ -11,8 +11,15 @@ export class GetStudentsUseCase {
   async execute(
     query: StudentQueryDto,
   ): Promise<PaginatedResponse<StudentWithDetails>> {
-    const { data, total, page, limit } =
-      await this.studentRepository.findAll(query);
+    const { data, total, page, limit } = await this.studentRepository.findAll({
+      page: query.page,
+      limit: query.limit,
+      search: query.search,
+      semesterId: query.semesterId,
+      classroomId: query.classroomId,
+      status: query.status,
+      isActive: query.isActive,
+    });
     return {
       data,
       meta: { page, limit, total, totalPages: Math.ceil(total / limit) },

@@ -8,7 +8,13 @@ export class GetCurriculaUseCase {
 
   async execute(query: CurriculaQueryDto) {
     const { data, total, page, limit } =
-      await this.curriculumRepository.findAll(query);
+      await this.curriculumRepository.findAll({
+        page: query.page,
+        limit: query.limit,
+        search: query.search,
+        academicYearId: query.academicYearId,
+        isActive: query.isActive,
+      });
     return {
       data,
       meta: {

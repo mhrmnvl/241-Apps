@@ -7,8 +7,14 @@ export class GetBloodTypesUseCase {
   constructor(private readonly bloodTypeRepository: IBloodTypeRepository) {}
 
   async execute(query: BloodTypeQueryDto) {
-    const { data, total, page, limit } =
-      await this.bloodTypeRepository.findAll(query);
+    const { data, total, page, limit } = await this.bloodTypeRepository.findAll(
+      {
+        page: query.page,
+        limit: query.limit,
+        search: query.search,
+        isActive: query.isActive,
+      },
+    );
     return {
       data,
       meta: {

@@ -7,5 +7,12 @@ export class ScheduleQueryDto extends PaginationQueryDto {
   @ApiPropertyOptional() @IsOptional() @IsUUID() teachingAssignmentId?: string;
   @ApiPropertyOptional({ enum: Day }) @IsOptional() @IsEnum(Day) day?: Day;
   @ApiPropertyOptional() @IsOptional() @IsUUID() timeSlotId?: string;
-  @ApiPropertyOptional() @IsOptional() @IsUUID() classroomId?: string;
 }
+
+/*
+ * `classroomId` used to be declared here and advertised in Swagger, but
+ * `findSchedulePage` never read it — the filter silently did nothing. Removing
+ * it changes no behaviour and stops the contract promising a filter it does not
+ * apply. Fetching a classroom's schedule goes through `findByClassroom`
+ * (GET /schedules/classroom/:id), which is what the frontend already uses.
+ */

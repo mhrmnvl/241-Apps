@@ -6,6 +6,9 @@ import { AttendanceTrendQueryDto } from '../dto/request/attendance-trend-query.d
 export class GetAttendanceTrendUseCase {
   constructor(private readonly attendanceRepository: IAttendanceRepository) {}
   async execute(query: AttendanceTrendQueryDto) {
-    return this.attendanceRepository.getMonthlyTrend(query);
+    return this.attendanceRepository.getMonthlyTrend({
+      classroomId: query.classroomId,
+      semesterId: query.semesterId,
+    });
   }
 }

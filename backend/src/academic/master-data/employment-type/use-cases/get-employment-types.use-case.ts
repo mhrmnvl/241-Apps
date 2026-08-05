@@ -9,6 +9,10 @@ export class GetEmploymentTypesUseCase {
   ) {}
 
   async execute(query: EmploymentTypeQueryDto) {
-    return this.employmentTypeRepository.findAll(query);
+    return this.employmentTypeRepository.findAll({
+      page: query.page,
+      limit: query.limit,
+      search: query.search,
+    });
   }
 }

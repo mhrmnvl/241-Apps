@@ -7,6 +7,13 @@ export class GetLoansUseCase {
   constructor(private readonly circulationRepository: ICirculationRepository) {}
 
   async execute(query: LoanQueryDto) {
-    return this.circulationRepository.findAllLoans(query);
+    return this.circulationRepository.findAllLoans({
+      page: query.page,
+      limit: query.limit,
+      keyword: query.keyword,
+      statusId: query.statusId,
+      requesterId: query.requesterId,
+      // The port also accepts `unitId`, but the DTO never exposed it.
+    });
   }
 }

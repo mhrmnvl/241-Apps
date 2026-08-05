@@ -10,7 +10,12 @@ export class GetAnnouncementsUseCase {
 
   async execute(query: AnnouncementQueryDto) {
     const { data, total, page, limit } =
-      await this.announcementRepository.findAll(query);
+      await this.announcementRepository.findAll({
+        page: query.page,
+        limit: query.limit,
+        classroomId: query.classroomId,
+        search: query.search,
+      });
     return {
       data,
       meta: { page, limit, total, totalPages: Math.ceil(total / limit) },

@@ -17,6 +17,11 @@ export class GetSemesterTypesUseCase {
     page: number;
     limit: number;
   }> {
-    return this.semesterTypeRepository.findAll(query);
+    return this.semesterTypeRepository.findAll({
+      page: query.page,
+      limit: query.limit,
+      search: query.search,
+      isActive: query.isActive,
+    });
   }
 }

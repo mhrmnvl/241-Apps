@@ -7,6 +7,13 @@ export class GetReportCardsUseCase {
   constructor(private readonly reportCardRepository: IReportCardRepository) {}
 
   async execute(query: ReportCardQueryDto) {
-    return this.reportCardRepository.findAll(query);
+    return this.reportCardRepository.findAll({
+      page: query.page,
+      limit: query.limit,
+      studentId: query.studentId,
+      classroomId: query.classroomId,
+      semesterId: query.semesterId,
+      isPublished: query.isPublished,
+    });
   }
 }

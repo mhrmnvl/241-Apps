@@ -7,8 +7,13 @@ export class GetEventsUseCase {
   constructor(private readonly eventRepository: IEventRepository) {}
 
   async execute(query: EventQueryDto) {
-    const { data, total, page, limit } =
-      await this.eventRepository.findAll(query);
+    const { data, total, page, limit } = await this.eventRepository.findAll({
+      page: query.page,
+      limit: query.limit,
+      classroomId: query.classroomId,
+      audienceGroupId: query.audienceGroupId,
+      search: query.search,
+    });
     return {
       data,
       meta: { page, limit, total, totalPages: Math.ceil(total / limit) },

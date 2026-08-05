@@ -7,8 +7,13 @@ export class GetSemestersUseCase {
   constructor(private readonly semesterRepository: ISemesterRepository) {}
 
   async execute(query: SemesterQueryDto) {
-    const { data, total, page, limit } =
-      await this.semesterRepository.findAll(query);
+    const { data, total, page, limit } = await this.semesterRepository.findAll({
+      page: query.page,
+      limit: query.limit,
+      search: query.search,
+      academicYearId: query.academicYearId,
+      isActive: query.isActive,
+    });
     return {
       data,
       meta: {

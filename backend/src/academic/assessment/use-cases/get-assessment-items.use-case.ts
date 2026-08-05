@@ -8,6 +8,12 @@ export class GetAssessmentItemsUseCase {
     private readonly assessmentItemRepository: IAssessmentItemRepository,
   ) {}
   async execute(query: AssessmentItemQueryDto) {
-    return this.assessmentItemRepository.findAll(query);
+    return this.assessmentItemRepository.findAll({
+      page: query.page,
+      limit: query.limit,
+      type: query.type,
+      teachingAssignmentId: query.teachingAssignmentId,
+      // The port also accepts `search`, but the DTO never exposed it.
+    });
   }
 }

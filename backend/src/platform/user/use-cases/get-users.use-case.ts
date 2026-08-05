@@ -7,8 +7,12 @@ export class GetUsersUseCase {
   constructor(private readonly userRepository: IUserRepository) {}
 
   async execute(query: UserQueryDto) {
-    const { data, total, page, limit } =
-      await this.userRepository.findAll(query);
+    const { data, total, page, limit } = await this.userRepository.findAll({
+      page: query.page,
+      limit: query.limit,
+      roleCode: query.roleCode,
+      search: query.search,
+    });
 
     return {
       data,

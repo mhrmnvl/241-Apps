@@ -7,6 +7,13 @@ export class GetAuditLogsUseCase {
   constructor(private readonly auditLogRepository: IAuditLogRepository) {}
 
   async execute(query: AuditLogQueryDto) {
-    return this.auditLogRepository.findAll(query);
+    return this.auditLogRepository.findAll({
+      page: query.page,
+      limit: query.limit,
+      search: query.search,
+      userId: query.userId,
+      action: query.action,
+      resource: query.resource,
+    });
   }
 }

@@ -10,7 +10,12 @@ export class GetAchievementTypesUseCase {
 
   async execute(query: AchievementTypeQueryDto) {
     const { data, total, page, limit } =
-      await this.achievementTypeRepository.findAll(query);
+      await this.achievementTypeRepository.findAll({
+        page: query.page,
+        limit: query.limit,
+        search: query.search,
+        isActive: query.isActive,
+      });
     return {
       data,
       meta: {

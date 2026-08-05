@@ -7,6 +7,11 @@ export class GetGradesUseCase {
   constructor(private readonly gradeRepository: IGradeRepository) {}
 
   async execute(query: GradeQueryDto) {
-    return this.gradeRepository.findAll(query);
+    return this.gradeRepository.findAll({
+      page: query.page,
+      limit: query.limit,
+      search: query.search,
+      isActive: query.isActive,
+    });
   }
 }

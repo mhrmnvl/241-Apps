@@ -9,6 +9,12 @@ export class GetEducationalHistoriesUseCase {
   ) {}
 
   async execute(query: EducationalHistoryQueryDto) {
-    return this.educationalHistoryRepository.findAll(query);
+    return this.educationalHistoryRepository.findAll({
+      page: query.page,
+      limit: query.limit,
+      profileId: query.profileId,
+      level: query.level,
+      status: query.status,
+    });
   }
 }

@@ -6,6 +6,15 @@ import { AttendanceQueryDto } from '../dto/request/attendance-query.dto.js';
 export class GetAttendancesUseCase {
   constructor(private readonly attendanceRepository: IAttendanceRepository) {}
   async execute(query: AttendanceQueryDto) {
-    return this.attendanceRepository.findAll(query);
+    return this.attendanceRepository.findAll({
+      page: query.page,
+      limit: query.limit,
+      status: query.status,
+      enrollmentId: query.enrollmentId,
+      scheduleId: query.scheduleId,
+      classroomId: query.classroomId,
+      semesterId: query.semesterId,
+      date: query.date,
+    });
   }
 }

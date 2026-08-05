@@ -8,8 +8,16 @@ export class GetClassroomsUseCase {
   constructor(private readonly classroomRepository: IClassroomRepository) {}
 
   async execute(query: ClassroomQueryDto) {
-    const { data, total, page, limit } =
-      await this.classroomRepository.findAll(query);
+    const { data, total, page, limit } = await this.classroomRepository.findAll(
+      {
+        page: query.page,
+        limit: query.limit,
+        academicYearId: query.academicYearId,
+        gradeId: query.gradeId,
+        search: query.search,
+        isActive: query.isActive,
+      },
+    );
     return {
       data: data.map(withDisplayName),
       meta: { page, limit, total, totalPages: Math.ceil(total / limit) },

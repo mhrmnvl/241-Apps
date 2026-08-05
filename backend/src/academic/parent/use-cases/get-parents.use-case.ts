@@ -7,8 +7,12 @@ export class GetParentsUseCase {
   constructor(private readonly parentRepository: IParentRepository) {}
 
   async execute(query: ParentQueryDto) {
-    const { data, total, page, limit } =
-      await this.parentRepository.findAll(query);
+    const { data, total, page, limit } = await this.parentRepository.findAll({
+      page: query.page,
+      limit: query.limit,
+      search: query.search,
+      occupationId: query.occupationId,
+    });
     return {
       data,
       meta: { page, limit, total, totalPages: Math.ceil(total / limit) },

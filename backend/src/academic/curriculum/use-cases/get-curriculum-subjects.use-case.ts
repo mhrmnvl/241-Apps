@@ -9,6 +9,11 @@ export class GetCurriculumSubjectsUseCase {
   ) {}
 
   async execute(query: CurriculumSubjectQueryDto) {
-    return this.curriculumSubjectRepository.findAll(query);
+    return this.curriculumSubjectRepository.findAll({
+      page: query.page,
+      limit: query.limit,
+      curriculumId: query.curriculumId,
+      subjectId: query.subjectId,
+    });
   }
 }
