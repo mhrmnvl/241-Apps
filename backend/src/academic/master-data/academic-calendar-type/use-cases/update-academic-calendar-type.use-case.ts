@@ -35,7 +35,10 @@ export class UpdateAcademicCalendarTypeUseCase {
       }
     }
 
-    const updated = await this.academicCalendarTypeRepository.update(id, dto);
+    const updated = await this.academicCalendarTypeRepository.update(id, {
+      name: dto.name,
+      isActive: dto.isActive,
+    });
     this.logger.log(`AcademicCalendarType updated: ${updated.name}`);
     return updated;
   }

@@ -36,7 +36,7 @@ export abstract class IAcademicCalendarTypeRepository {
   }): Promise<AcademicCalendarTypeEntity>;
   abstract update(
     id: string,
-    data: { name?: string; isActive?: boolean },
+    data: UpdateAcademicCalendarTypeRepositoryInput,
   ): Promise<AcademicCalendarTypeEntity>;
 
   abstract softDelete(id: string): Promise<AcademicCalendarTypeEntity>;

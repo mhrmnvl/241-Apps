@@ -9,6 +9,14 @@ export interface AchievementTypeQueryInput extends PaginationQueryInput {
   isActive?: boolean;
 }
 
+export interface CreateAchievementTypeRepositoryInput {
+  name: string;
+  isActive?: boolean;
+}
+
+export type UpdateAchievementTypeRepositoryInput =
+  Partial<CreateAchievementTypeRepositoryInput>;
+
 export abstract class IAchievementTypeRepository {
   abstract findAll(
     query: AchievementTypeQueryInput,
@@ -20,13 +28,12 @@ export abstract class IAchievementTypeRepository {
     excludeId?: string,
   ): Promise<AchievementTypeEntity | null>;
 
-  abstract create(data: {
-    name: string;
-    isActive?: boolean;
-  }): Promise<AchievementTypeEntity>;
+  abstract create(
+    data: CreateAchievementTypeRepositoryInput,
+  ): Promise<AchievementTypeEntity>;
   abstract update(
     id: string,
-    data: { name?: string; isActive?: boolean },
+    data: UpdateAchievementTypeRepositoryInput,
   ): Promise<AchievementTypeEntity>;
 
   abstract softDelete(id: string): Promise<AchievementTypeEntity>;

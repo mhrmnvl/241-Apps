@@ -15,7 +15,11 @@ export class CreatePositionUseCase {
         `Position name "${dto.name}" is already taken`,
       );
 
-    const position = await this.positionRepository.create(dto);
+    const position = await this.positionRepository.create({
+      name: dto.name,
+      categoryId: dto.categoryId,
+      isActive: dto.isActive,
+    });
     this.logger.log(`Position created: ${position.name}`);
     return position;
   }

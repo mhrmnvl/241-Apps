@@ -9,6 +9,14 @@ export interface ReligionQueryInput extends PaginationQueryInput {
   isActive?: boolean;
 }
 
+export interface CreateReligionRepositoryInput {
+  name: string;
+  isActive?: boolean;
+}
+
+export type UpdateReligionRepositoryInput =
+  Partial<CreateReligionRepositoryInput>;
+
 export abstract class IReligionRepository {
   abstract findAll(
     query: ReligionQueryInput,
@@ -19,13 +27,10 @@ export abstract class IReligionRepository {
     name: string,
     excludeId?: string,
   ): Promise<ReligionEntity | null>;
-  abstract create(data: {
-    name: string;
-    isActive?: boolean;
-  }): Promise<ReligionEntity>;
+  abstract create(data: CreateReligionRepositoryInput): Promise<ReligionEntity>;
   abstract update(
     id: string,
-    data: { name?: string; isActive?: boolean },
+    data: UpdateReligionRepositoryInput,
   ): Promise<ReligionEntity>;
   abstract softDelete(id: string): Promise<ReligionEntity>;
 }

@@ -9,6 +9,14 @@ export interface BloodTypeQueryInput extends PaginationQueryInput {
   isActive?: boolean;
 }
 
+export interface CreateBloodTypeRepositoryInput {
+  name: string;
+  isActive?: boolean;
+}
+
+export type UpdateBloodTypeRepositoryInput =
+  Partial<CreateBloodTypeRepositoryInput>;
+
 export abstract class IBloodTypeRepository {
   abstract findAll(
     query: BloodTypeQueryInput,
@@ -20,13 +28,12 @@ export abstract class IBloodTypeRepository {
     excludeId?: string,
   ): Promise<BloodTypeEntity | null>;
 
-  abstract create(data: {
-    name: string;
-    isActive?: boolean;
-  }): Promise<BloodTypeEntity>;
+  abstract create(
+    data: CreateBloodTypeRepositoryInput,
+  ): Promise<BloodTypeEntity>;
   abstract update(
     id: string,
-    data: { name?: string; isActive?: boolean },
+    data: UpdateBloodTypeRepositoryInput,
   ): Promise<BloodTypeEntity>;
 
   abstract softDelete(id: string): Promise<BloodTypeEntity>;

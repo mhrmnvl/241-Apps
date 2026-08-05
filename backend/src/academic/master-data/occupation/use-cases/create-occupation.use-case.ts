@@ -15,7 +15,10 @@ export class CreateOccupationUseCase {
         `Occupation name "${dto.name}" is already taken`,
       );
 
-    const occupation = await this.occupationRepository.create(dto);
+    const occupation = await this.occupationRepository.create({
+      name: dto.name,
+      isActive: dto.isActive,
+    });
     this.logger.log(`Occupation created: ${occupation.name}`);
     return occupation;
   }

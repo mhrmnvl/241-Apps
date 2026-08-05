@@ -31,6 +31,9 @@ export class UpdateSemesterTypeUseCase {
       }
     }
 
-    return this.semesterTypeRepository.update(id, dto);
+    return this.semesterTypeRepository.update(id, {
+      name: dto.name,
+      isActive: dto.isActive,
+    });
   }
 }

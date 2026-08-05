@@ -26,7 +26,11 @@ export class UpdatePositionUseCase {
         );
     }
 
-    const position = await this.positionRepository.update(id, dto);
+    const position = await this.positionRepository.update(id, {
+      name: dto.name,
+      categoryId: dto.categoryId,
+      isActive: dto.isActive,
+    });
     this.logger.log(`Position updated: ${id}`);
     return position;
   }

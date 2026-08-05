@@ -16,7 +16,9 @@ export class UpdatePositionCategoryUseCase {
       throw new NotFoundException(`Position category with ID ${id} not found`);
     }
 
-    const category = await this.positionCategoryRepository.update(id, dto);
+    const category = await this.positionCategoryRepository.update(id, {
+      name: dto.name,
+    });
     this.logger.log(`Position category updated: ${id}`);
     return category;
   }
