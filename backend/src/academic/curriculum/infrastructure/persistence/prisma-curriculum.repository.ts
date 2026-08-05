@@ -20,9 +20,13 @@ export class PrismaCurriculumRepository extends ICurriculumRepository {
     const { page = 1, limit = 10, search, academicYearId, isActive } = query;
     const skip = (page - 1) * limit;
 
-    const resolvedAcademicYearId = academicYearId
-      ? await resolveAcademicYearId(this.prisma, academicYearId)
-      : undefined;
+    // Always resolve: with no explicit year the helper falls back to the
+    // active one. Calling it only when a year was supplied would leave the
+    // list unscoped and mix curricula from every academic year together.
+    const resolvedAcademicYearId = await resolveAcademicYearId(
+      this.prisma,
+      academicYearId,
+    );
 
     const where: Prisma.CurriculaWhereInput = {
       deletedAt: null,

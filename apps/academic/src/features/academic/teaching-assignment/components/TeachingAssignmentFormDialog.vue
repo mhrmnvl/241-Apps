@@ -32,10 +32,12 @@ import {
 } from '@/ui/form'
 import { AppCombobox } from '@/ui'
 import type { ComboboxOption } from '@/ui'
+import { Checkbox } from '@/ui/checkbox'
 import { AlertCircle } from 'lucide-vue-next'
 import type {
   TeachingAssignment,
-  TeachingAssignmentSavePayload,
+  TeachingAssignmentCreatePayload,
+  TeachingAssignmentUpdatePayload,
 } from '../types'
 
 const props = defineProps<{
@@ -47,7 +49,9 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   'update:open': [value: boolean]
-  save: [data: TeachingAssignmentSavePayload]
+  save: [
+    data: TeachingAssignmentCreatePayload | TeachingAssignmentUpdatePayload,
+  ]
 }>()
 
 const open = computed({
@@ -92,11 +96,15 @@ const semesterOptions = computed<ComboboxOption[]>(() =>
   })),
 )
 
+/**
+ * Creating accepts many classes at once; editing targets the one row that was
+ * opened, so `classroomIds` always holds exactly one entry in that mode.
+ */
 const formSchema = toTypedSchema(
   z.object({
     teacherId: z.string().min(1, 'Guru wajib dipilih.'),
     subjectId: z.string().min(1, 'Mata pelajaran wajib dipilih.'),
-    classroomId: z.string().min(1, 'Kelas wajib dipilih.'),
+    classroomIds: z.array(z.string()).min(1, 'Pilih minimal satu kelas.'),
     semesterId: z.string().min(1, 'Semester wajib dipilih.'),
   }),
 )
@@ -106,10 +114,21 @@ const { handleSubmit, resetForm, setValues } = useForm({
   initialValues: {
     teacherId: '',
     subjectId: '',
-    classroomId: '',
+    classroomIds: [] as string[],
     semesterId: '',
   },
 })
+
+function toggleClassroom(
+  current: string[],
+  classroomId: string,
+  checked: boolean,
+): string[] {
+  if (checked) {
+    return current.includes(classroomId) ? current : [...current, classroomId]
+  }
+  return current.filter((id) => id !== classroomId)
+}
 
 watch(
   () => [props.open, editData?.value] as const,
@@ -120,7 +139,7 @@ watch(
         setValues({
           teacherId: data.teacherId || '',
           subjectId: data.subjectId || '',
-          classroomId: data.classroomId || '',
+          classroomIds: data.classroomId ? [data.classroomId] : [],
           semesterId: data.semesterId || '',
         })
       } else {
@@ -136,15 +155,17 @@ const showConfirmAlert = ref(false)
 function buildPayload(values: {
   teacherId: string
   subjectId: string
-  classroomId: string
+  classroomIds: string[]
   semesterId: string
-}): TeachingAssignmentSavePayload {
-  return {
+}): TeachingAssignmentCreatePayload | TeachingAssignmentUpdatePayload {
+  const base = {
     teacherId: values.teacherId,
     subjectId: values.subjectId,
-    classroomId: values.classroomId,
     semesterId: values.semesterId,
   }
+  return isEditing.value
+    ? { ...base, classroomId: values.classroomIds[0] ?? '' }
+    : { ...base, classroomIds: values.classroomIds }
 }
 
 const onSubmit = handleSubmit((values) => {
@@ -235,23 +256,65 @@ function confirmSave() {
 
           <FormField
             v-slot="{ value, handleChange }"
-            name="classroomId"
+            name="classroomIds"
           >
             <FormItem>
               <FormLabel>
                 Kelas
                 <span class="text-destructive">*</span>
               </FormLabel>
-              <FormControl>
+
+              <!-- Editing targets one existing row, so the class stays single. -->
+              <FormControl v-if="isEditing">
                 <AppCombobox
-                  :model-value="value"
+                  :model-value="(value as string[])[0] ?? ''"
                   :options="classroomOptions"
                   placeholder="Pilih Kelas"
                   search-placeholder="Cari kelas..."
                   empty-text="Kelas tidak ditemukan."
-                  @update:model-value="(val) => handleChange(val)"
+                  @update:model-value="(val) => handleChange(val ? [val] : [])"
                 />
               </FormControl>
+
+              <template v-else>
+                <FormControl>
+                  <div
+                    class="grid grid-cols-2 gap-1.5 rounded-md border p-3 max-h-52 overflow-y-auto"
+                  >
+                    <label
+                      v-for="opt in classroomOptions"
+                      :key="opt.value"
+                      class="flex items-center gap-2 rounded px-1.5 py-1 text-sm hover:bg-muted/60 cursor-pointer"
+                    >
+                      <Checkbox
+                        :model-value="(value as string[]).includes(opt.value)"
+                        @update:model-value="
+                          (checked) =>
+                            handleChange(
+                              toggleClassroom(
+                                value as string[],
+                                opt.value,
+                                checked === true,
+                              ),
+                            )
+                        "
+                      />
+                      <span>{{ opt.label }}</span>
+                    </label>
+                    <p
+                      v-if="classroomOptions.length === 0"
+                      class="col-span-2 text-xs text-muted-foreground"
+                    >
+                      Belum ada kelas pada tahun ajaran aktif.
+                    </p>
+                  </div>
+                </FormControl>
+                <p class="text-xs text-muted-foreground mt-1">
+                  Pilih beberapa kelas sekaligus — satu penugasan dibuat per
+                  kelas, dan kelas yang sudah ada akan dilewati.
+                </p>
+              </template>
+
               <FormMessage />
             </FormItem>
           </FormField>

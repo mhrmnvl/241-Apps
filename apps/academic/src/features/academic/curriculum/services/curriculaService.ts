@@ -6,11 +6,18 @@ import { toast } from 'vue-sonner'
 import type { CurriculaSavePayload } from '../types'
 
 export const curriculaService = {
-  fetchCurricula: async () => {
+  /**
+   * Omitting `academicYearId` means "the active year" on the backend, so the
+   * list stays scoped to one year instead of spanning all of them.
+   */
+  fetchCurricula: async (academicYearId?: string) => {
     const store = useCurriculaStore()
     store.loading = true
     try {
-      const res = await curriculaApi.getCurricula({ limit: 100 })
+      const res = await curriculaApi.getCurricula({
+        limit: 100,
+        academicYearId,
+      })
       store.curricula = res.data.data ?? []
       store.totalCurricula = res.data.meta?.total ?? store.curricula.length
     } catch (error: unknown) {

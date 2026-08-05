@@ -9,6 +9,14 @@ export class GetTeachingAssignmentsUseCase {
   ) {}
 
   async execute(query: TeachingAssignmentQueryDto) {
-    return this.teachingAssignmentRepository.findAll(query);
+    // Explicit mapping keeps HTTP-only query fields from reaching the port.
+    return this.teachingAssignmentRepository.findAll({
+      page: query.page,
+      limit: query.limit,
+      teacherId: query.teacherId,
+      classroomId: query.classroomId,
+      subjectId: query.subjectId,
+      semesterId: query.semesterId,
+    });
   }
 }

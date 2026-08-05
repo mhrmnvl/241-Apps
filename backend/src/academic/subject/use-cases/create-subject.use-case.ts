@@ -13,7 +13,14 @@ export class CreateSubjectUseCase {
     if (existing)
       throw new ConflictException(`Subject "${dto.name}" already exists`);
 
-    const subject = await this.subjectRepository.create(dto);
+    // Mapped field by field rather than forwarding the DTO. The two shapes are
+    // structurally compatible, so a new DTO field would otherwise reach the
+    // repository unnoticed — which is how `teacherIds` once slipped through and
+    // started assigning teachers to every classroom.
+    const subject = await this.subjectRepository.create({
+      code: dto.code,
+      name: dto.name,
+    });
     this.logger.log(`Subject created: ${dto.name}`);
     return subject;
   }

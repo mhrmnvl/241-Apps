@@ -2,33 +2,38 @@ import {
   PaginatedResult,
   PaginationQueryInput,
 } from '../../../../shared/domain/interfaces/repository.interface.js';
-import { SubjectEntity, SubjectWithCount } from '../entities/subject.entity.js';
+import {
+  SubjectEntity,
+  SubjectWithTeachers,
+} from '../entities/subject.entity.js';
 
-export type { SubjectWithCount };
+export type { SubjectWithTeachers };
 
 export interface SubjectQueryInput extends PaginationQueryInput {
   search?: string;
 }
 
+/**
+ * Teachers are deliberately absent from both write inputs: a teacher is bound
+ * to a (classroom, semester) pair, so assigning one belongs to the
+ * teaching-assignment module, not to editing the subject itself.
+ */
 export interface CreateSubjectRepositoryInput {
   code?: string;
   name: string;
-  /** Teachers attached to the subject on creation. */
-  teacherIds?: string[];
 }
 
 export interface UpdateSubjectRepositoryInput {
   code?: string;
   name?: string;
-  teacherIds?: string[];
 }
 
 export abstract class ISubjectRepository {
   abstract findAll(
     query: SubjectQueryInput,
-  ): Promise<PaginatedResult<SubjectWithCount>>;
+  ): Promise<PaginatedResult<SubjectWithTeachers>>;
 
-  abstract findById(id: string): Promise<SubjectWithCount | null>;
+  abstract findById(id: string): Promise<SubjectWithTeachers | null>;
 
   abstract findByCode(
     code: string,

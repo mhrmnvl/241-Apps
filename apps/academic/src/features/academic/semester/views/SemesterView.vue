@@ -158,7 +158,7 @@ onMounted(() => {
         />
 
         <SemesterFormSheet
-          v-if="can('semesters.create') && isAddModalOpen"
+          v-if="isAddModalOpen"
           v-model:open="isAddModalOpen"
           :academic-years="academicYears"
           :edit-data="editingItem"

@@ -12,6 +12,13 @@ import { useRoleGuard } from '@/features/platform/auth'
 import { useClassroomList } from '../composables/useClassroomList'
 import { watchDebounced } from '@vueuse/core'
 import { Input } from '@/ui/input'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/ui/select'
 
 const router = useRouter()
 
@@ -41,6 +48,21 @@ watchDebounced(
   { debounce: 500 },
 )
 
+/**
+ * Classrooms belong to one academic year, so browsing an earlier year is the
+ * only way to reach its classes once a new year has been rolled over.
+ *
+ * Driven by an explicit handler rather than a watcher: seeding the control on
+ * mount would otherwise fire a second, identical request.
+ */
+const selectedAcademicYearId = ref('')
+
+function onAcademicYearChange(value: unknown) {
+  const academicYearId = typeof value === 'string' ? value : ''
+  selectedAcademicYearId.value = academicYearId
+  void fetchClassrooms({ academicYearId: academicYearId || undefined, page: 1 })
+}
+
 const isAddModalOpen = ref(false)
 const { can } = useRoleGuard()
 
@@ -65,6 +87,11 @@ const tableColumns = createClassroomColumns({
 onMounted(async () => {
   await fetchSemesters()
   await Promise.all([fetchClassrooms(), fetchAcademicYears(), fetchGrades()])
+  // Reflect the year the backend defaulted to, so the control is never blank.
+  selectedAcademicYearId.value =
+    currentFilters.value.academicYearId ??
+    academicYears.value.find((y) => y.isActive)?.id ??
+    ''
 })
 </script>
 
@@ -98,15 +125,35 @@ onMounted(async () => {
           @update:page-size="(limit) => fetchClassrooms({ limit, page: 1 })"
         >
           <template #header-right>
-            <div class="relative w-full sm:w-48 max-w-[200px]">
-              <Search
-                class="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground"
-              />
-              <Input
-                v-model="searchKeyword"
-                placeholder="Cari kelas..."
-                class="h-8 pl-8 w-full text-xs"
-              />
+            <div class="flex items-center gap-2">
+              <Select
+                :model-value="selectedAcademicYearId"
+                @update:model-value="onAcademicYearChange"
+              >
+                <SelectTrigger class="h-8 w-[150px] text-xs">
+                  <SelectValue placeholder="Tahun Ajaran" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem
+                    v-for="year in academicYears"
+                    :key="year.id"
+                    :value="year.id"
+                  >
+                    {{ year.name }}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+
+              <div class="relative w-full sm:w-48 max-w-[200px]">
+                <Search
+                  class="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground"
+                />
+                <Input
+                  v-model="searchKeyword"
+                  placeholder="Cari kelas..."
+                  class="h-8 pl-8 w-full text-xs"
+                />
+              </div>
             </div>
           </template>
         </DataTable>

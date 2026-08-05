@@ -118,7 +118,7 @@ onMounted(() => {
         </DataTable>
 
         <SubjectFormDialog
-          v-if="can('subjects.create') && isAddModalOpen"
+          v-if="isAddModalOpen"
           v-model:open="isAddModalOpen"
           :form-error="formError"
           :is-saving="isSaving"

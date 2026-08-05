@@ -7,8 +7,12 @@ export class GetSubjectsUseCase {
   constructor(private readonly subjectRepository: ISubjectRepository) {}
 
   async execute(query: SubjectQueryDto) {
-    const { data, total, page, limit } =
-      await this.subjectRepository.findAll(query);
+    // Explicit mapping keeps HTTP-only query fields from reaching the port.
+    const { data, total, page, limit } = await this.subjectRepository.findAll({
+      page: query.page,
+      limit: query.limit,
+      search: query.search,
+    });
     return {
       data,
       meta: { page, limit, total, totalPages: Math.ceil(total / limit) },

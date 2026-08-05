@@ -169,8 +169,10 @@ Lucide · Axios · FullCalendar.
 
 NestJS modular monolith, Prisma ORM, PostgreSQL, RBAC + permission-based
 authorization. Authoritative backend docs: `backend/docs/NESTJS-RULES.md` (coding
-rules — kept in sync with the code) and `backend/docs/IAM.md` (auth/roles/permissions
-design) — read these before making non-trivial backend changes. Earlier planning
+rules — kept in sync with the code), `backend/docs/IAM.md` (auth/roles/permissions
+design), and `backend/docs/cleanup-teaching-assignment-fanout.md` (one-off
+remediation runbook for teaching assignments written by the old subject-page
+fan-out) — read these before making non-trivial backend changes. Earlier planning
 artifacts (PROJECT_STRUCTURE, Backend-Structure, DATABASE_ARCHITECTURE, prismaSchemaV2,
 REFACTOR, API_DOCUMENTATION, audit_iam, custom_domain, logical-erd) have been moved to
 `backend/docs/_archive/` — they are historical and may be outdated; treat the code and
@@ -223,6 +225,13 @@ Core rules from `NESTJS-RULES.md` (enforced by convention, not by lint):
 - No business logic in DTOs/entities/shared; no inline types or magic
   strings/constants inside use cases — put them in `types/` / `constants/`.
   Narrow projections in a signature (`Promise<{ id: string } | null>`) are fine.
+- `*Dto` and `*Input` are two boundaries, not two styles: a DTO is the HTTP
+  shape (class-validator + Swagger, under `dto/`), an Input is the repository
+  port shape (plain interface, under `domain/interfaces/`). Never let a DTO
+  reach a repository, and map DTO → Input field by field in the use case
+  rather than forwarding the whole object — structural typing makes the
+  pass-through compile, which is how an unwanted field silently reaches
+  persistence.
 - Throw NestJS HTTP exceptions (`NotFoundException`, `ConflictException`, ...);
   never a bare `throw new Error()`. Custom exceptions are optional and always
   extend a built-in — `academic/student/domain/exceptions/` is the reference.

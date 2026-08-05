@@ -123,7 +123,7 @@ onMounted(() => {
         />
 
         <AcademicYearFormSheet
-          v-if="can('academic-years.create') && isAddModalOpen"
+          v-if="isAddModalOpen"
           v-model:open="isAddModalOpen"
           :edit-data="editingItem"
           @save-success="fetchAcademicYears"

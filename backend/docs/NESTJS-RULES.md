@@ -333,6 +333,68 @@ A response DTO living under dto/request/ (or vice versa)
 
 ---
 
+## `*Dto` vs `*Input` — two boundaries, not two styles
+
+Both exist on purpose. They are not interchangeable and neither replaces
+the other.
+
+| | `*Dto` | `*Input` |
+|---|---|---|
+| Boundary | HTTP (presentation) | domain port (repository) |
+| Form | class + class-validator + Swagger | plain interface, no decorators |
+| Lives in | `dto/request/`, `dto/response/` | `domain/interfaces/<x>-repository.interface.ts` |
+| Answers | what the wire accepts | what persistence needs |
+
+The flow is layered:
+
+```
+HTTP body
+  -> CreateSubjectDto              dto/request/        (validated here)
+  -> use case                      use-cases/
+  -> CreateSubjectRepositoryInput  domain/interfaces/  (framework-free)
+  -> Prisma
+```
+
+If a repository took the DTO, class-validator and Swagger — both HTTP
+concerns — would sit behind a port that must stay transport-agnostic, and
+the repository could no longer be driven from a CLI, a scheduled job, or
+a test without dragging the HTTP layer in. `shared/domain/interfaces/
+repository.interface.ts` states the same reason for `PaginationQueryInput`.
+
+Naming: `*QueryInput` for reads, `*RepositoryInput` for writes,
+`<Operation>Input` for a specific operation.
+
+---
+
+## Map the DTO to the Input explicitly
+
+Forbidden — forwarding the whole DTO:
+
+```ts
+await this.subjectRepository.create(dto);
+```
+
+TypeScript is structural, so this compiles whenever the shapes happen to
+line up. The cost is that a field added to the DTO later reaches
+persistence with nobody deciding it should. That is precisely how
+`teacherIds` entered the subject write path and began assigning one
+teacher to every classroom.
+
+Required — field by field:
+
+```ts
+await this.subjectRepository.create({
+  code: dto.code,
+  name: dto.name,
+});
+```
+
+Note this is a review-time rule, not a test-enforced one: an existing spec
+asserting `toHaveBeenCalledWith(dto)` stays green either way, because the
+mapped object is structurally equal to the DTO.
+
+---
+
 # VALIDATION RULES
 
 Use:

@@ -1,12 +1,10 @@
 ﻿import { ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  IsArray,
-  IsOptional,
-  IsString,
-  IsUUID,
-  MaxLength,
-} from 'class-validator';
+import { IsOptional, IsString, MaxLength } from 'class-validator';
 
+/**
+ * Teachers are not editable here. An assignment is per (classroom, semester),
+ * so it is managed through the teaching-assignment endpoints instead.
+ */
 export class UpdateSubjectDto {
   @ApiPropertyOptional({
     description: 'Subject Code (unique, e.g. MTK, IPA)',
@@ -22,16 +20,4 @@ export class UpdateSubjectDto {
   @IsString()
   @MaxLength(100)
   name?: string;
-
-  @ApiPropertyOptional({
-    description:
-      'Replaces ALL assigned teacher IDs. Send empty array [] to remove all teachers. Omit this field to leave teachers unchanged.',
-    type: [String],
-    format: 'uuid',
-    example: ['uuid-teacher-1', 'uuid-teacher-2'],
-  })
-  @IsOptional()
-  @IsArray()
-  @IsUUID('4', { each: true })
-  teacherIds?: string[];
 }
