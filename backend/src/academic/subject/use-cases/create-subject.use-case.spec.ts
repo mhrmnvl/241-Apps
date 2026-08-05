@@ -43,19 +43,21 @@ describe('CreateSubjectUseCase', () => {
       expect(result).toEqual(created);
     });
 
-    it('should create a subject with teacherIds', async () => {
-      const dtoWithTeachers: CreateSubjectDto = {
-        name: 'Physics',
-        teacherIds: ['emp-1', 'emp-2'],
-      };
+    // Teachers are bound to a (classroom, semester) pair, so creating a
+    // subject must never assign one. Guards the old behaviour, which fanned a
+    // single teacher out across every classroom.
+    it('should not forward any teacher field to the repository', async () => {
+      const dto: CreateSubjectDto = { name: 'Physics', code: 'FIS' };
       const created = { id: 'sub-2', name: 'Physics' };
       mockRepo.findByName.mockResolvedValue(null);
       mockRepo.create.mockResolvedValue(created);
 
-      const result = await useCase.execute(dtoWithTeachers);
+      await useCase.execute(dto);
 
-      expect(mockRepo.create).toHaveBeenCalledWith(dtoWithTeachers);
-      expect(result).toEqual(created);
+      expect(mockRepo.create).toHaveBeenCalledWith(dto);
+      expect(mockRepo.create).toHaveBeenCalledWith(
+        expect.not.objectContaining({ teacherIds: expect.anything() }),
+      );
     });
 
     it('should throw ConflictException when subject name already exists', async () => {

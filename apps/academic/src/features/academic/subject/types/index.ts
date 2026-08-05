@@ -1,6 +1,7 @@
 export type {
   Subject,
-  SubjectTeacher,
+  SubjectClassroom,
+  SubjectTeachingAssignment,
   SubjectTeacherUser,
   SubjectTeacherProfile,
 } from './subject'

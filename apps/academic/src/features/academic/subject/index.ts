@@ -8,7 +8,8 @@ export { subjectRoutes } from './routes'
 export type {
   SubjectTeacherProfile,
   SubjectTeacherUser,
-  SubjectTeacher,
+  SubjectClassroom,
+  SubjectTeachingAssignment,
   Subject,
   SubjectSavePayload,
   SubjectQueryParams,

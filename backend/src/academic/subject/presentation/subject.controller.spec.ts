@@ -79,7 +79,7 @@ describe('SubjectController', () => {
     it('should delegate to CreateSubjectUseCase with dto', async () => {
       const dto: CreateSubjectDto = {
         name: 'Chemistry',
-        teacherIds: ['emp-1'],
+        code: 'KIM',
       };
       const expected = { id: 'sub-new', name: 'Chemistry' };
       mockCreateSubjectService.execute.mockResolvedValue(expected);

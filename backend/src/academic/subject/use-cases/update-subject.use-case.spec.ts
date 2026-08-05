@@ -34,8 +34,8 @@ describe('UpdateSubjectUseCase', () => {
     const currentSubject = { id: 'sub-1', name: 'Mathematics' };
 
     it('should update a subject successfully (no name change)', async () => {
-      const dto: UpdateSubjectDto = { teacherIds: ['emp-1'] };
-      const updated = { ...currentSubject, teachers: [{ id: 'emp-1' }] };
+      const dto: UpdateSubjectDto = { code: 'MTK' };
+      const updated = { ...currentSubject, code: 'MTK' };
       mockRepo.findById.mockResolvedValue(currentSubject);
       mockRepo.update.mockResolvedValue(updated);
 
@@ -96,7 +96,7 @@ describe('UpdateSubjectUseCase', () => {
     });
 
     it('should NOT call findByName when name is absent from dto', async () => {
-      const dto: UpdateSubjectDto = { teacherIds: ['emp-2'] };
+      const dto: UpdateSubjectDto = { code: 'IPA' };
       mockRepo.findById.mockResolvedValue(currentSubject);
       mockRepo.update.mockResolvedValue(currentSubject);
 

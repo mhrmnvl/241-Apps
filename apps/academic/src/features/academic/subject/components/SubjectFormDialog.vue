@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, toRefs, watch } from 'vue'
+import { computed, ref, toRefs, watch } from 'vue'
 import { toTypedSchema } from '@vee-validate/zod'
 import { useForm } from 'vee-validate'
 import * as z from 'zod'
-import { useSubjectForm } from '../composables/useSubjectForm'
 import { Alert, AlertDescription, AlertTitle } from '@/ui/alert'
 import {
   AlertDialog,
@@ -31,9 +30,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/ui/form'
-import { AppCombobox } from '@/ui'
-import type { ComboboxOption } from '@/ui'
-import { AlertCircle } from 'lucide-vue-next'
+import { AlertCircle, Info } from 'lucide-vue-next'
 import type { Subject, SubjectSavePayload } from '../types'
 
 const props = defineProps<{
@@ -59,24 +56,10 @@ const open = computed({
 const { editData } = toRefs(props)
 const isEditing = computed(() => !!editData?.value)
 
-const { teachers, fetchTeachers } = useSubjectForm()
-
-const teacherOptions = computed<ComboboxOption[]>(() =>
-  teachers.value.map((g) => ({
-    value: g.id,
-    label: (g.user?.profile?.name || g.nip) ?? 'Tanpa Nama',
-  })),
-)
-
-onMounted(() => {
-  void fetchTeachers()
-})
-
 const formSchema = toTypedSchema(
   z.object({
     name: z.string().min(1, 'Nama Mata Pelajaran wajib diisi.'),
     code: z.string().min(1, 'Kode Mata Pelajaran wajib diisi.'),
-    teacherId: z.string().optional().default(''),
   }),
 )
 
@@ -85,7 +68,6 @@ const { handleSubmit, resetForm, setValues } = useForm({
   initialValues: {
     name: '',
     code: '',
-    teacherId: '',
   },
 })
 
@@ -98,7 +80,6 @@ watch(
         setValues({
           name: data.name || '',
           code: data.code || '',
-          teacherId: data.teachingAssignments?.[0]?.teacherId ?? '',
         })
       } else {
         resetForm()
@@ -113,12 +94,10 @@ const showConfirmAlert = ref(false)
 function buildPayload(values: {
   name: string
   code: string
-  teacherId?: string
 }): SubjectSavePayload {
   return {
     name: values.name,
     code: values.code,
-    teacherIds: values.teacherId ? [values.teacherId] : [],
   }
 }
 
@@ -192,27 +171,18 @@ function confirmSave() {
             </FormItem>
           </FormField>
 
-          <FormField
-            v-slot="{ value, handleChange }"
-            name="teacherId"
+          <div
+            class="flex gap-2.5 rounded-md border bg-muted/40 px-3 py-2.5 text-xs text-muted-foreground"
           >
-            <FormItem>
-              <FormLabel>Guru Pengampu</FormLabel>
-              <FormControl>
-                <AppCombobox
-                  :model-value="value"
-                  :options="teacherOptions"
-                  placeholder="Pilih Guru Pengampu"
-                  search-placeholder="Cari guru..."
-                  empty-text="Guru tidak ditemukan."
-                  @update:model-value="handleChange"
-                />
-              </FormControl>
-              <p class="text-xs text-muted-foreground mt-1">
-                Pilih guru utama untuk mata pelajaran ini.
-              </p>
-            </FormItem>
-          </FormField>
+            <Info class="size-4 shrink-0 mt-px" />
+            <p>
+              Guru pengampu diatur per kelas dan per semester melalui menu
+              <span class="font-medium text-foreground"
+                >Pembelajaran &rsaquo; Penugasan Mengajar</span
+              >, karena satu mata pelajaran dapat diampu guru berbeda di tiap
+              kelas.
+            </p>
+          </div>
 
           <Alert
             v-if="formError"

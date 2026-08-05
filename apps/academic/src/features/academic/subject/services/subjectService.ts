@@ -1,7 +1,6 @@
 import { subjectApi } from '../api/subjectApi'
 import { useSubjectStore } from '../stores/subjectStore'
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
-import { teacherApi } from '@/features/academic/teacher'
 import { toast } from 'vue-sonner'
 import type { SubjectSavePayload, SubjectQueryParams } from '../types'
 
@@ -68,10 +67,5 @@ export const subjectService = {
       toast.error(errorMessage)
       return { success: false, error: errorMessage }
     }
-  },
-
-  fetchTeachers: async () => {
-    const res = await teacherApi.getTeachers({ limit: 100 })
-    return res.data?.data ?? []
   },
 }

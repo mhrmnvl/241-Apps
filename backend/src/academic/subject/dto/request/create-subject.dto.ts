@@ -1,13 +1,10 @@
 ﻿import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  IsArray,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-  IsUUID,
-  MaxLength,
-} from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
 
+/**
+ * Teachers are not set here. An assignment is per (classroom, semester), so it
+ * is created through the teaching-assignment endpoints instead.
+ */
 export class CreateSubjectDto {
   @ApiPropertyOptional({
     description: 'Subject Code (unique, e.g. MTK, IPA)',
@@ -23,15 +20,4 @@ export class CreateSubjectDto {
   @IsNotEmpty()
   @MaxLength(100)
   name: string;
-
-  @ApiPropertyOptional({
-    description: 'List of Teacher IDs (UUIDs) to attach as teachers',
-    type: [String],
-    format: 'uuid',
-    example: ['uuid-teacher-1'],
-  })
-  @IsOptional()
-  @IsArray()
-  @IsUUID('4', { each: true })
-  teacherIds?: string[];
 }
