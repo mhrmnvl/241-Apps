@@ -16,7 +16,9 @@ export class UpdateEmploymentTypeUseCase {
       throw new NotFoundException(`Employment type with ID ${id} not found`);
     }
 
-    const type = await this.employmentTypeRepository.update(id, dto);
+    const type = await this.employmentTypeRepository.update(id, {
+      name: dto.name,
+    });
     this.logger.log(`Employment type updated: ${id}`);
     return type;
   }

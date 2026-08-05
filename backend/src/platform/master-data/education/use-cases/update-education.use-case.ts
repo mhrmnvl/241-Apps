@@ -27,7 +27,10 @@ export class UpdateEducationUseCase {
       }
     }
 
-    const updated = await this.educationRepository.update(id, dto);
+    const updated = await this.educationRepository.update(id, {
+      name: dto.name,
+      isActive: dto.isActive,
+    });
     this.logger.log(`Education updated: ${id}`);
     return updated;
   }

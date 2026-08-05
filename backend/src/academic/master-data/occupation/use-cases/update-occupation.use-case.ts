@@ -29,7 +29,10 @@ export class UpdateOccupationUseCase {
         );
     }
 
-    const occupation = await this.occupationRepository.update(id, dto);
+    const occupation = await this.occupationRepository.update(id, {
+      name: dto.name,
+      isActive: dto.isActive,
+    });
     this.logger.log(`Occupation updated: ${id}`);
     return occupation;
   }

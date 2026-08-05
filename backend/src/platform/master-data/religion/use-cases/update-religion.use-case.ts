@@ -28,7 +28,10 @@ export class UpdateReligionUseCase {
       }
     }
 
-    const updated = await this.religionRepository.update(id, dto);
+    const updated = await this.religionRepository.update(id, {
+      name: dto.name,
+      isActive: dto.isActive,
+    });
     this.logger.log(`Religion updated: ${updated.name}`);
     return updated;
   }

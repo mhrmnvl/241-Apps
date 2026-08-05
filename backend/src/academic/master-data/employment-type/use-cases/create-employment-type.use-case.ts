@@ -18,7 +18,10 @@ export class CreateEmploymentTypeUseCase {
       );
     }
 
-    const type = await this.employmentTypeRepository.create(dto);
+    const type = await this.employmentTypeRepository.create({
+      code: dto.code,
+      name: dto.name,
+    });
     this.logger.log(`Employment type created: ${type.code}`);
     return type;
   }

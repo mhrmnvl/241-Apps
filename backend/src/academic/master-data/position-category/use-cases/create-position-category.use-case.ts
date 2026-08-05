@@ -18,7 +18,10 @@ export class CreatePositionCategoryUseCase {
       );
     }
 
-    const category = await this.positionCategoryRepository.create(dto);
+    const category = await this.positionCategoryRepository.create({
+      code: dto.code,
+      name: dto.name,
+    });
     this.logger.log(`Position category created: ${category.code}`);
     return category;
   }

@@ -28,7 +28,10 @@ export class UpdateBloodTypeUseCase {
       }
     }
 
-    const updated = await this.bloodTypeRepository.update(id, dto);
+    const updated = await this.bloodTypeRepository.update(id, {
+      name: dto.name,
+      isActive: dto.isActive,
+    });
     this.logger.log(`BloodType updated: ${updated.name}`);
     return updated;
   }

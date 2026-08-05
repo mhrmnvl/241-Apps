@@ -13,7 +13,10 @@ export class CreateSocialMediaUseCase {
     if (existing)
       throw new ConflictException(`Platform "${dto.name}" already exists`);
 
-    const platform = await this.socialMediaRepository.create(dto);
+    const platform = await this.socialMediaRepository.create({
+      name: dto.name,
+      baseUrl: dto.baseUrl,
+    });
     this.logger.log(`Platform created: ${platform.name}`);
     return platform;
   }

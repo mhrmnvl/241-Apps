@@ -27,7 +27,10 @@ export class UpdateSocialMediaUseCase {
         throw new ConflictException(`Platform "${dto.name}" already exists`);
     }
 
-    const platform = await this.socialMediaRepository.update(id, dto);
+    const platform = await this.socialMediaRepository.update(id, {
+      name: dto.name,
+      baseUrl: dto.baseUrl,
+    });
     this.logger.log(`Platform updated: ${platform.name}`);
     return platform;
   }

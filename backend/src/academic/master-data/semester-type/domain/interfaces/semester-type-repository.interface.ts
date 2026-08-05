@@ -38,7 +38,7 @@ export abstract class ISemesterTypeRepository {
   }): Promise<SemesterTypeEntity>;
   abstract update(
     id: string,
-    data: { name?: string; isActive?: boolean },
+    data: UpdateSemesterTypeRepositoryInput,
   ): Promise<SemesterTypeEntity>;
 
   abstract softDelete(id: string): Promise<SemesterTypeEntity>;

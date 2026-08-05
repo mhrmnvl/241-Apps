@@ -33,7 +33,10 @@ export class UpdateAchievementTypeUseCase {
       }
     }
 
-    const updated = await this.achievementTypeRepository.update(id, dto);
+    const updated = await this.achievementTypeRepository.update(id, {
+      name: dto.name,
+      isActive: dto.isActive,
+    });
     this.logger.log(`AchievementType updated: ${updated.name}`);
     return updated;
   }
