@@ -16,12 +16,13 @@ export class PrismaPositionRepository extends IPositionRepository {
   }
 
   async findAll(query: PositionQueryInput) {
-    const { page = 1, limit = 10, search, categoryId } = query;
+    const { page = 1, limit = 10, search, categoryId, isActive } = query;
     const skip = (page - 1) * limit;
 
     const where: Prisma.PositionWhereInput = {
       deletedAt: null,
       ...(categoryId && { categoryId }),
+      ...(isActive !== undefined && { isActive }),
       ...(search && {
         name: { contains: search, mode: 'insensitive' },
       }),

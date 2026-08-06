@@ -16,11 +16,12 @@ export class PrismaOccupationRepository extends IOccupationRepository {
   }
 
   async findAll(query: OccupationQueryInput) {
-    const { page = 1, limit = 10, search } = query;
+    const { page = 1, limit = 10, search, isActive } = query;
     const skip = (page - 1) * limit;
 
     const where: Prisma.OccupationWhereInput = {
       deletedAt: null,
+      ...(isActive !== undefined && { isActive }),
       ...(search && {
         name: { contains: search, mode: 'insensitive' },
       }),

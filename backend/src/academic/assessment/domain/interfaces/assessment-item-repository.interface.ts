@@ -11,7 +11,6 @@ export type { AssessmentItemWithDetails };
 export interface AssessmentItemQueryInput extends PaginationQueryInput {
   type?: AssessmentType;
   teachingAssignmentId?: string;
-  search?: string;
 }
 
 export interface CreateAssessmentItemRepositoryInput {
