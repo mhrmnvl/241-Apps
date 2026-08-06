@@ -4,8 +4,7 @@ import { profileRoutes } from '@/features/platform/profile'
 import { admissionPublicRoutes, admissionRoutes } from '@/features/admission'
 import { settingsRoutes, useSettingsStore } from '@/features/platform/settings'
 import { createRouter, createWebHistory } from 'vue-router'
-import { useAuthStore } from '@/features/platform/auth/stores/authStore'
-import { authSessionService } from '@/features/platform/auth/services/authSessionService'
+import { authSessionService, useAuthStore } from '@/features/platform/auth'
 import { menuSections } from '@/config/menuConfig'
 
 function isAdminUser(roles: string[]) {
