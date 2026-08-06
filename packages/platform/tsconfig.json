@@ -12,8 +12,7 @@
       "@/ui/utils": ["../ui/src/utils/index.ts"],
       "@/master-data": ["../master-data/src/index.ts"],
       "@/master-data/*": ["../master-data/src/*"],
-      "@/features/platform/*": ["./src/features/*"],
-      "@/layouts/AppLayout.vue": ["./src/layouts.d.ts"]
+      "@/features/platform/*": ["./src/features/*"]
     }
   },
   "include": ["src/**/*.ts", "src/**/*.vue"],
