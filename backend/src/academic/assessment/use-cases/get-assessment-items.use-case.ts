@@ -13,7 +13,6 @@ export class GetAssessmentItemsUseCase {
       limit: query.limit,
       type: query.type,
       teachingAssignmentId: query.teachingAssignmentId,
-      // The port also accepts `search`, but the DTO never exposed it.
     });
   }
 }

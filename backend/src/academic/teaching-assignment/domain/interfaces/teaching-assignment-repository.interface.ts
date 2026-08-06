@@ -22,7 +22,6 @@ export interface TeachingAssignmentQueryInput extends PaginationQueryInput {
   classroomId?: string;
   subjectId?: string;
   semesterId?: string;
-  search?: string;
 }
 
 export interface CreateTeachingAssignmentRepositoryInput {

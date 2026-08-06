@@ -13,11 +13,12 @@ export class PrismaEducationRepository implements IEducationRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async findAll(query: EducationQueryInput) {
-    const { page = 1, limit = 10, search } = query;
+    const { page = 1, limit = 10, search, isActive } = query;
     const skip = (page - 1) * limit;
 
     const where: Prisma.EducationWhereInput = {
       deletedAt: null,
+      ...(isActive !== undefined && { isActive }),
       ...(search && {
         name: { contains: search, mode: 'insensitive' },
       }),
