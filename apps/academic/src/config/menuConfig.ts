@@ -70,11 +70,6 @@ export const menuSections: MenuSection[] = [
             url: '/academic/semester',
             requiredPermission: 'semesters.read',
           },
-          {
-            title: 'Kurikulum',
-            url: '/academic/curriculum',
-            requiredPermission: 'curricula.read',
-          },
         ],
       },
       {
@@ -110,6 +105,11 @@ export const menuSections: MenuSection[] = [
         url: '#',
         icon: BookOpen,
         items: [
+          {
+            title: 'Kurikulum',
+            url: '/academic/curriculum',
+            requiredPermission: 'curricula.read',
+          },
           {
             title: 'Mata Pelajaran',
             url: '/learning/subject',

@@ -47,8 +47,7 @@ import { academicCalendarTypeRoutes } from '@/features/academic/academic-calenda
 import { semesterTypeRoutes } from '@/features/academic/semester-type'
 import { settingsRoutes, useSettingsStore } from '@/features/platform/settings'
 import { createRouter, createWebHistory } from 'vue-router'
-import { useAuthStore } from '@/features/platform/auth/stores/authStore'
-import { authSessionService } from '@/features/platform/auth/services/authSessionService'
+import { authSessionService, useAuthStore } from '@/features/platform/auth'
 import { menuSections } from '@/config/menuConfig'
 
 const router = createRouter({

@@ -15,6 +15,7 @@ in a single workspace/git repo.
 | `apps/admission` | `admission-web` | Admission app |
 | `packages/ui` | `@241/ui` | shadcn-vue components + `cn()` util, shared by all apps |
 | `packages/shared` | `@241/shared` | Composables, utils, types, config — cross-app |
+| `packages/master-data` | `@241/master-data` | Reference-data CRUD engine (list view, form dialog, schema/column generation) driven by a per-entity `config.ts` — see ADR-0001 |
 | `packages/platform` | `@241/platform` | Shared platform features (auth, profile, dashboard, role, etc.) |
 | `backend` | `backend` | NestJS + Prisma REST API |
 
@@ -57,10 +58,11 @@ pnpm format:check     # Prettier check, all frontend apps
 > silently match nothing (green script that runs nothing) — always use the name
 > filter shown above.
 
-> `test` is the one root script that also covers `@241/*`, because two of the four
-> vitest suites live in `packages/master-data` and `packages/platform` rather than
-> in an app. It deliberately excludes `backend`, which runs jest through its own
-> filter. Packages with no `test` script are skipped.
+> `test` is the one root script that also covers `@241/*`, because three of the six
+> vitest suites live in `packages/master-data`, `packages/platform`, and
+> `packages/shared` rather than in an app. It deliberately excludes `backend`, which
+> runs jest through its own filter. Packages with no `test` script are skipped
+> (`@241/ui` has none).
 
 Per-app (substitute `academic-web` / `inventory-web` / `admission-web`):
 
@@ -131,16 +133,23 @@ feature-name/
 Boundary rules:
 
 - Apps may only import a package through its public alias — `@/ui`, `@/shared`,
-  `@/features/platform/<feature>`. Never reach into a package's internal paths.
+  `@/master-data`, `@/features/platform/<feature>`. Subpath imports under `@/ui/*`,
+  `@/shared/*`, and `@/master-data/*` are part of that public surface. A platform
+  **feature barrel** is not: import from `@/features/platform/auth`, never from
+  `@/features/platform/auth/stores/authStore`.
 - Code used by two or more apps → promote to `packages/*`. Code specific to one app
   (e.g. `menuConfig`, `AppSidebar`) stays in that app.
-- `@241/platform` may depend on `@241/ui` and `@241/shared`, never the reverse.
+- `@241/platform` may depend on `@241/ui`, `@241/shared`, and `@241/master-data`,
+  never the reverse. `@241/master-data` depends on `@241/ui` + `@241/shared` only —
+  it must never import `@241/platform` (ADR-0001: that cycle is why it is its own
+  package).
 
 Path aliases (see `apps/*/vite.config.ts` and `tsconfig.app.json`):
 
 - `@/*` → app's own `src/*`
 - `@/ui`, `@/ui/*`, `@/ui/utils` → `packages/ui/src`
 - `@/shared/*` → `packages/shared/src`
+- `@/master-data`, `@/master-data/*` → `packages/master-data/src`
 - `@/features/platform/*` → `packages/platform/src/features`
 
 ### Per-app branding
@@ -169,14 +178,11 @@ Lucide · Axios · FullCalendar.
 
 NestJS modular monolith, Prisma ORM, PostgreSQL, RBAC + permission-based
 authorization. Authoritative backend docs: `backend/docs/NESTJS-RULES.md` (coding
-rules — kept in sync with the code), `backend/docs/IAM.md` (auth/roles/permissions
-design), and `backend/docs/cleanup-teaching-assignment-fanout.md` (one-off
-remediation runbook for teaching assignments written by the old subject-page
-fan-out) — read these before making non-trivial backend changes. Earlier planning
-artifacts (PROJECT_STRUCTURE, Backend-Structure, DATABASE_ARCHITECTURE, prismaSchemaV2,
-REFACTOR, API_DOCUMENTATION, audit_iam, custom_domain, logical-erd) have been moved to
-`backend/docs/_archive/` — they are historical and may be outdated; treat the code and
-this file as the source of truth, not those.
+rules — kept in sync with the code) and `backend/docs/IAM.md` (auth/roles/permissions
+design) — read these before making non-trivial backend changes. Earlier planning
+artifacts and completed one-off runbooks have been deleted rather than archived: a
+stale doc that contradicts the code is worse than no doc. Recover one from git history
+if you ever need it; treat the code, this file, and `docs/adr/` as the source of truth.
 
 Top-level domains under `backend/src/`: `core/` (infra: config, database,
 decorators, filters, interceptors, logger, storage, health, cache, types — the
@@ -186,8 +192,16 @@ types, dto, validators — no business logic), `platform/` (auth, user, role,
 permissions, session, audit-log, profile, school-unit, dashboard, notification,
 file, settings, master-data, ...), `academic/` (student, teacher, classroom,
 curriculum, subject, schedule, assessment, attendance, report-card, enrollment,
-graduation, ...), `inventory/`, `admission/`. New modules are registered in
-`src/app.module.ts`.
+graduation, ...), `inventory/` (asset, circulation, approval, master-data),
+`admission/`. `src/types/` holds ambient declarations only (`express.d.ts`) — it is
+not a domain. New modules are registered in `src/app.module.ts`.
+
+`platform/`, `academic/`, and `inventory/` are **domains containing sibling modules**;
+each module owns the layered layout below. `admission/` is the exception — it is
+currently one flat module holding four repository interfaces (wave, announcement,
+applicant, application), five controllers, and 31 use cases. That is technical debt,
+not a second valid layout: prefer splitting along its existing repository seams over
+adding to the flat structure.
 
 Within a module (e.g. `academic/student/`), the established layering is:
 
@@ -302,3 +316,10 @@ Default mattpocock labels in use: `needs-triage`, `needs-info`, `ready-for-agent
 ### Domain docs
 
 Single-context layout: one `CONTEXT.md` at the repo root + `docs/adr/` for architectural decisions. See `docs/agents/domain.md`.
+
+### Project constitution
+
+`.specify/memory/constitution.md` (Spec Kit) states the five non-negotiable invariants
+behind the rules in this file and in `NESTJS-RULES.md`, plus a **Compliance Baseline**
+listing where the codebase currently deviates. When a rule here changes, check whether
+the constitution needs the same amendment — the two are kept in sync by contract.

@@ -1,0 +1,1 @@
+export { setupProfileFeature } from './setup'

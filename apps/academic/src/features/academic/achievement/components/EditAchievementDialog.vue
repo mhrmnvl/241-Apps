@@ -30,7 +30,7 @@ import {
   SelectValue,
 } from '@/ui/select'
 import type { AchievementEditData } from '../types'
-import { achievementTypeApi } from '@/features/platform/achievement-type/api/achievementTypeApi'
+import { achievementTypeApi } from '@/features/platform/achievement-type'
 
 const props = defineProps<{
   open: boolean

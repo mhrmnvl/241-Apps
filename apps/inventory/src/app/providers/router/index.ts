@@ -16,8 +16,7 @@ import { achievementTypeRoutes } from '@/features/platform/achievement-type'
 import { inventoryRoutes } from '@/features/inventory/routes'
 import { settingsRoutes, useSettingsStore } from '@/features/platform/settings'
 import { createRouter, createWebHistory } from 'vue-router'
-import { useAuthStore } from '@/features/platform/auth/stores/authStore'
-import { authSessionService } from '@/features/platform/auth/services/authSessionService'
+import { authSessionService, useAuthStore } from '@/features/platform/auth'
 import { menuSections } from '@/config/menuConfig'
 
 const router = createRouter({
