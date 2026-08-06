@@ -1,7 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
 import { ISchoolUnitAddressRepository } from '../../domain/interfaces/school-unit-address-repository.interface.js';
-import { AddressEntity } from '../../../../shared/domain/entities/address.entity.js';
+import {
+  AddressEntity,
+  CreateAddressRepositoryInput,
+  UpdateAddressRepositoryInput,
+} from '../../../../shared/domain/entities/address.entity.js';
 import { ADDRESS_OMIT } from '../../../profile/infrastructure/persistence/prisma-profile-address.includes.js';
 
 @Injectable()
@@ -21,19 +25,21 @@ export class PrismaSchoolUnitAddressRepository extends ISchoolUnitAddressReposit
 
   async create(
     schoolUnitId: string,
-    dto: Partial<AddressEntity>,
+    input: CreateAddressRepositoryInput,
   ): Promise<AddressEntity> {
-    const { id: _, ...data } = dto;
     return this.prisma.address.create({
       data: {
-        street: data.street ?? '',
-        rt: data.rt ?? '',
-        rw: data.rw ?? '',
-        village: data.village ?? '',
-        district: data.district ?? '',
-        city: data.city ?? '',
-        province: data.province ?? '',
-        postalCode: data.postalCode ?? '',
+        street: input.street,
+        rt: input.rt,
+        rw: input.rw,
+        village: input.village,
+        district: input.district,
+        city: input.city,
+        province: input.province,
+        postalCode: input.postalCode,
+        // Undefined leaves the column default in place.
+        country: input.country,
+        // A school unit has exactly one address, so it is always the primary.
         isPrimary: true,
         schoolUnitId,
       },
@@ -43,12 +49,31 @@ export class PrismaSchoolUnitAddressRepository extends ISchoolUnitAddressReposit
 
   async update(
     id: string,
-    dto: Partial<AddressEntity>,
+    input: UpdateAddressRepositoryInput,
   ): Promise<AddressEntity> {
-    const { id: _, ...data } = dto;
     return this.prisma.address.update({
       where: { id },
-      data,
+      // `isPrimary` is deliberately absent: a school unit has exactly one
+      // address, so it is always primary and must not be demoted.
+      data: {
+        street: input.street,
+        rt: input.rt,
+        rw: input.rw,
+        village: input.village,
+        district: input.district,
+        city: input.city,
+        province: input.province,
+        postalCode: input.postalCode,
+        country: input.country,
+      },
+      omit: ADDRESS_OMIT,
+    });
+  }
+
+  async softDelete(id: string): Promise<AddressEntity> {
+    return this.prisma.address.update({
+      where: { id },
+      data: { deletedAt: new Date() },
       omit: ADDRESS_OMIT,
     });
   }
