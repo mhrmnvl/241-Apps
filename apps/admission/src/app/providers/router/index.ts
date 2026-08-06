@@ -60,10 +60,11 @@ const router = createRouter({
       },
     },
     {
+      // Outside the layout route on purpose: the shell applies only when the
+      // visitor is signed in, and NotFoundPage owns that decision.
       path: '/:pathMatch(.*)*',
       name: 'not-found',
-      component: () =>
-        import('@/features/platform/auth/views/NotFoundView.vue'),
+      component: () => import('@/layouts/NotFoundPage.vue'),
       meta: { title: 'Halaman Tidak Ditemukan' },
     },
   ],
