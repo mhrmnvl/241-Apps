@@ -6,7 +6,6 @@ import type {
   CreateStudentGraduationRepositoryInput,
   UpdateStudentGraduationRepositoryInput,
 } from '../../domain/interfaces/graduation-repository.interface.js';
-import { resolveAcademicYearId } from '../../../../shared/utils/active-academic-year.helper.js';
 import { IGraduationRepository } from '../../domain/interfaces/graduation-repository.interface.js';
 import { PaginatedResult } from '../../../../shared/domain/interfaces/repository.interface.js';
 import {
@@ -26,13 +25,12 @@ export class PrismaGraduationRepository extends IGraduationRepository {
     const { page = 1, limit = 10, academicYearId, search } = query;
     const skip = (page - 1) * limit;
 
-    const resolvedAcademicYearId = academicYearId
-      ? await resolveAcademicYearId(this.prisma, academicYearId)
-      : undefined;
-
+    // No active-year fallback on purpose, unlike classroom and curriculum: the
+    // alumni list accumulates across years, and the UI offers an explicit
+    // "Semua Tahun Ajaran" option that a default would quietly override.
     const where: Prisma.StudentGraduationWhereInput = {
       deletedAt: null,
-      ...(resolvedAcademicYearId && { academicYearId: resolvedAcademicYearId }),
+      ...(academicYearId && { academicYearId }),
       ...(search && {
         student: {
           OR: [

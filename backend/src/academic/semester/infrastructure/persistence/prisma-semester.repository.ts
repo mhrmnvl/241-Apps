@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma, Semester, SemesterType } from '@prisma/client';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
-import { resolveAcademicYearId } from '../../../../shared/utils/active-academic-year.helper.js';
 import { ISemesterRepository } from '../../domain/interfaces/semester-repository.interface.js';
 import type {
   SemesterQueryInput,
@@ -26,20 +25,22 @@ export class PrismaSemesterRepository extends ISemesterRepository {
     const { page = 1, limit = 10, search, academicYearId, isActive } = query;
     const skip = (page - 1) * limit;
 
-    const resolvedAcademicYearId = academicYearId
-      ? await resolveAcademicYearId(this.prisma, academicYearId)
-      : undefined;
-
+    // No active-year fallback on purpose, unlike classroom and curriculum.
+    // Promotion moves students into the NEXT academic year and picks its target
+    // semester from this list, so defaulting to the active year would make that
+    // target unreachable and break the year-end promotion flow.
+    // Both conditions live under one `academicYear` key: spreading a second
+    // one would replace the first, and the search branch used to drop the
+    // soft-delete guard that way — searching surfaced semesters belonging to
+    // deleted academic years.
     const where: Prisma.SemesterWhereInput = {
       deletedAt: null,
       academicYear: {
         deletedAt: null,
+        ...(search && { name: { contains: search, mode: 'insensitive' } }),
       },
-      ...(resolvedAcademicYearId && { academicYearId: resolvedAcademicYearId }),
+      ...(academicYearId && { academicYearId }),
       ...(isActive !== undefined && { isActive }),
-      ...(search && {
-        academicYear: { name: { contains: search, mode: 'insensitive' } },
-      }),
     };
 
     const [data, total] = await Promise.all([

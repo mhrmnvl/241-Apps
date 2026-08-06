@@ -6,7 +6,6 @@ import type {
   ProfileEntity,
   ProfileUpdateInput,
 } from '../../../../platform/profile/domain/entities/profile.entity.js';
-import { resolveAcademicYearId } from '../../../../shared/utils/active-academic-year.helper.js';
 import { ITeacherRepository } from '../../domain/interfaces/teacher-repository.interface.js';
 import {
   TEACHER_LIST_INCLUDE,
@@ -48,11 +47,11 @@ export class PrismaTeacherRepository extends ITeacherRepository {
   ): Promise<PaginatedResult<TeacherListWithDetails>> {
     const { page = 1, limit = 10, academicYearId } = query;
 
-    const resolvedAcademicYearId = academicYearId
-      ? await resolveAcademicYearId(this.prisma, academicYearId)
-      : undefined;
-
-    const where = buildTeacherListWhere(query, resolvedAcademicYearId);
+    // No active-year fallback on purpose, unlike classroom and curriculum: a
+    // teacher is not bound to an academic year. The filter narrows to teachers
+    // holding an assignment in the given year, so defaulting it would hide
+    // every teacher who happens to have none from the staff list.
+    const where = buildTeacherListWhere(query, academicYearId);
 
     const [data, total] = await Promise.all([
       this.prisma.teacher.findMany({
