@@ -70,9 +70,7 @@ export class SchoolUnitAddressUseCase {
       throw new NotFoundException('School unit address has not been set yet');
     }
 
-    await this.schoolUnitAddressRepository.update(existing.id, {
-      deletedAt: new Date(),
-    });
+    await this.schoolUnitAddressRepository.softDelete(existing.id);
     this.logger.log(`School unit address removed`);
   }
 
