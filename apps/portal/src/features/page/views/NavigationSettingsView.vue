@@ -1,8 +1,16 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { Button } from '@/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/ui/card'
 import { Input } from '@/ui/input'
 import { Label } from '@/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/ui/select'
 import { Switch } from '@/ui/switch'
 import {
   ChevronDown,
@@ -54,8 +62,6 @@ const canAdd = computed(() => {
 
 function draftPayload(): CreateNavItemPayload {
   const base = { label: draft.value.label.trim() }
-  // Exactly one destination — the API refuses anything else, and sending only
-  // the chosen one is what makes that check pass rather than a merge problem.
   if (draft.value.destination === 'page') {
     return { ...base, pageId: draft.value.pageId }
   }
@@ -74,14 +80,6 @@ async function add() {
   }
 }
 
-/**
- * Reordering with buttons rather than pointer dragging.
- *
- * A menu is five to eight items edited a few times a year, and arrow buttons
- * are keyboard-operable and work on a phone without a drag library. The service
- * still sends the full order, so switching to dragging later changes only this
- * component.
- */
 async function move(index: number, delta: number) {
   const next = index + delta
   if (next < 0 || next >= store.navItems.length) return
@@ -112,163 +110,182 @@ function describe(item: NavItem): string {
 </script>
 
 <template>
-  <div class="mx-auto max-w-3xl space-y-6 p-6">
-    <header>
-      <h1 class="text-2xl font-semibold tracking-tight">Menu Portal</h1>
-      <p class="text-sm text-muted-foreground">
-        Urutan di sini adalah urutan di situs. Menu yang menaut ke halaman belum
-        terbit otomatis disembunyikan dari pengunjung.
-      </p>
-    </header>
-
-    <section class="space-y-3 rounded-md border p-4">
-      <h2 class="text-sm font-medium">Tambah menu</h2>
-
-      <div class="grid gap-3 sm:grid-cols-2">
-        <div class="space-y-1.5">
-          <Label for="nav-label">Label</Label>
-          <Input
-            id="nav-label"
-            v-model="draft.label"
-            placeholder="mis. Profil"
-          />
+  <div class="p-4 md:p-6 lg:p-8">
+    <Card
+      class="overflow-hidden rounded-2xl shadow-sm shadow-black/5 ring-1 ring-black/4 w-full"
+    >
+      <CardHeader
+        class="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b px-6 py-5 gap-4"
+      >
+        <div>
+          <CardTitle class="text-2xl font-bold tracking-tight"
+            >Menu Portal</CardTitle
+          >
         </div>
+      </CardHeader>
 
-        <div class="space-y-1.5">
-          <Label for="nav-destination">Tujuan</Label>
-          <select
-            id="nav-destination"
-            v-model="draft.destination"
-            class="h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs"
+      <CardContent class="p-6 space-y-6">
+        <section class="space-y-3 rounded-md border p-4">
+          <h2 class="text-sm font-medium">Tambah menu</h2>
+
+          <div class="grid gap-3 sm:grid-cols-2">
+            <div class="space-y-1.5">
+              <Label for="nav-label">Label</Label>
+              <Input
+                id="nav-label"
+                v-model="draft.label"
+                placeholder="mis. Profil"
+              />
+            </div>
+
+            <div class="space-y-1.5">
+              <Label for="nav-destination">Tujuan</Label>
+              <Select v-model="draft.destination">
+                <SelectTrigger
+                  id="nav-destination"
+                  class="w-full"
+                >
+                  <SelectValue placeholder="Pilih tujuan…" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="route">Daftar bawaan</SelectItem>
+                  <SelectItem value="page">Halaman portal</SelectItem>
+                  <SelectItem value="external">Alamat luar</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div
+            v-if="draft.destination === 'route'"
+            class="space-y-1.5"
           >
-            <option value="route">Daftar bawaan</option>
-            <option value="page">Halaman portal</option>
-            <option value="external">Alamat luar</option>
-          </select>
-        </div>
-      </div>
+            <Label for="nav-route">Daftar</Label>
+            <Select v-model="draft.routeKey">
+              <SelectTrigger
+                id="nav-route"
+                class="w-full"
+              >
+                <SelectValue placeholder="Pilih daftar…" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem
+                  v-for="option in NAV_ROUTE_KEYS"
+                  :key="option.value"
+                  :value="option.value"
+                >
+                  {{ option.label }}
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
-      <div
-        v-if="draft.destination === 'route'"
-        class="space-y-1.5"
-      >
-        <Label for="nav-route">Daftar</Label>
-        <select
-          id="nav-route"
-          v-model="draft.routeKey"
-          class="h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs"
-        >
-          <option
-            v-for="option in NAV_ROUTE_KEYS"
-            :key="option.value"
-            :value="option.value"
+          <div
+            v-else-if="draft.destination === 'page'"
+            class="space-y-1.5"
           >
-            {{ option.label }}
-          </option>
-        </select>
-      </div>
+            <Label for="nav-page">Halaman</Label>
+            <Select v-model="draft.pageId">
+              <SelectTrigger
+                id="nav-page"
+                class="w-full"
+              >
+                <SelectValue placeholder="Pilih halaman…" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem
+                  v-for="page in publishedPages"
+                  :key="page.id"
+                  :value="page.id"
+                >
+                  {{ page.title }}
+                </SelectItem>
+              </SelectContent>
+            </Select>
+            <p class="text-xs text-muted-foreground">
+              Hanya halaman yang sudah terbit yang dapat dipilih.
+            </p>
+          </div>
 
-      <div
-        v-else-if="draft.destination === 'page'"
-        class="space-y-1.5"
-      >
-        <Label for="nav-page">Halaman</Label>
-        <select
-          id="nav-page"
-          v-model="draft.pageId"
-          class="h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs"
-        >
-          <option value="">Pilih halaman…</option>
-          <option
-            v-for="page in publishedPages"
-            :key="page.id"
-            :value="page.id"
+          <div
+            v-else
+            class="space-y-1.5"
           >
-            {{ page.title }}
-          </option>
-        </select>
-        <p class="text-xs text-muted-foreground">
-          Hanya halaman yang sudah terbit yang dapat dipilih.
-        </p>
-      </div>
+            <Label for="nav-external">Alamat</Label>
+            <Input
+              id="nav-external"
+              v-model="draft.externalUrl"
+              placeholder="https://ppdb.example.sch.id"
+            />
+          </div>
 
-      <div
-        v-else
-        class="space-y-1.5"
-      >
-        <Label for="nav-external">Alamat</Label>
-        <Input
-          id="nav-external"
-          v-model="draft.externalUrl"
-          placeholder="https://ppdb.example.sch.id"
-        />
-      </div>
+          <Button
+            :disabled="!canAdd"
+            @click="add"
+          >
+            <Plus class="mr-2 size-4" />
+            Tambah
+          </Button>
+        </section>
 
-      <Button
-        :disabled="!canAdd"
-        @click="add"
-      >
-        <Plus class="mr-2 size-4" />
-        Tambah
-      </Button>
-    </section>
-
-    <section class="space-y-2">
-      <p
-        v-if="store.navItems.length === 0"
-        class="rounded-md border border-dashed p-8 text-center text-sm text-muted-foreground"
-      >
-        Belum ada menu. Portal menampilkan menu bawaan sampai ada yang
-        ditambahkan di sini.
-      </p>
-
-      <div
-        v-for="(item, index) in store.navItems"
-        :key="item.id"
-        class="flex items-center gap-3 rounded-md border p-3"
-      >
-        <GripVertical class="size-4 shrink-0 text-muted-foreground" />
-
-        <div class="min-w-0 flex-1">
-          <p class="truncate font-medium">{{ item.label }}</p>
-          <p class="truncate text-xs text-muted-foreground">
-            {{ describe(item) }}
+        <section class="space-y-2">
+          <p
+            v-if="store.navItems.length === 0"
+            class="rounded-md border border-dashed p-8 text-center text-sm text-muted-foreground"
+          >
+            Belum ada menu. Portal menampilkan menu bawaan sampai ada yang
+            ditambahkan di sini.
           </p>
-        </div>
 
-        <Switch
-          :model-value="item.isActive"
-          :aria-label="`Tampilkan ${item.label}`"
-          @update:model-value="toggleActive(item)"
-        />
+          <div
+            v-for="(item, index) in store.navItems"
+            :key="item.id"
+            class="flex items-center gap-3 rounded-md border p-3"
+          >
+            <GripVertical class="size-4 shrink-0 text-muted-foreground" />
 
-        <Button
-          variant="ghost"
-          size="icon"
-          title="Naikkan"
-          :disabled="index === 0"
-          @click="move(index, -1)"
-        >
-          <ChevronUp class="size-4" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          title="Turunkan"
-          :disabled="index === store.navItems.length - 1"
-          @click="move(index, 1)"
-        >
-          <ChevronDown class="size-4" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          title="Hapus"
-          @click="remove(item)"
-        >
-          <Trash2 class="size-4" />
-        </Button>
-      </div>
-    </section>
+            <div class="min-w-0 flex-1">
+              <p class="truncate font-medium">{{ item.label }}</p>
+              <p class="truncate text-xs text-muted-foreground">
+                {{ describe(item) }}
+              </p>
+            </div>
+
+            <Switch
+              :model-value="item.isActive"
+              :aria-label="`Tampilkan ${item.label}`"
+              @update:model-value="toggleActive(item)"
+            />
+
+            <Button
+              variant="ghost"
+              size="icon"
+              title="Naikkan"
+              :disabled="index === 0"
+              @click="move(index, -1)"
+            >
+              <ChevronUp class="size-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              title="Turunkan"
+              :disabled="index === store.navItems.length - 1"
+              @click="move(index, 1)"
+            >
+              <ChevronDown class="size-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              title="Hapus"
+              @click="remove(item)"
+            >
+              <Trash2 class="size-4" />
+            </Button>
+          </div>
+        </section>
+      </CardContent>
+    </Card>
   </div>
 </template>

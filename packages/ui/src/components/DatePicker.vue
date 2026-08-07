@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, type HTMLAttributes } from 'vue'
 import {
   parseDate,
   getLocalTimeZone,
@@ -21,6 +21,7 @@ const props = withDefaults(
     disabled?: boolean
     minDate?: string
     maxDate?: string
+    class?: HTMLAttributes['class']
   }>(),
   {
     allowFutureDates: false,
@@ -96,6 +97,7 @@ function onSelect(date: CalendarDate | undefined) {
             'w-full justify-start text-left font-normal h-9',
             !modelValue && 'text-muted-foreground',
             hasError && 'border-destructive',
+            props.class,
           )
         "
       >

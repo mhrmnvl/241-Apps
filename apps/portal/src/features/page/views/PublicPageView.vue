@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
+import { Loader2 } from 'lucide-vue-next'
 import { NotFoundView } from '@/features/platform/auth'
+import { Skeleton } from '@/ui/skeleton'
+import { Separator } from '@/ui/separator'
 import { pageService } from '../services/pageService'
 import { usePageStore } from '../stores/pageStore'
 
@@ -20,12 +23,22 @@ watch(
 </script>
 
 <template>
-  <p
+  <div
     v-if="store.loading"
-    class="text-center text-sm text-muted-foreground"
+    class="space-y-6"
   >
-    Memuat…
-  </p>
+    <div class="flex items-center gap-2 text-sm text-muted-foreground">
+      <Loader2 class="size-4 animate-spin" />
+      Memuat…
+    </div>
+    <Skeleton class="h-9 w-2/3" />
+    <Skeleton class="h-px w-full" />
+    <div class="space-y-2">
+      <Skeleton class="h-4 w-full" />
+      <Skeleton class="h-4 w-full" />
+      <Skeleton class="h-4 w-3/4" />
+    </div>
+  </div>
 
   <!--
     This view sits behind the catch-all route, so it is where every address the
@@ -48,6 +61,8 @@ watch(
     <h1 class="text-3xl font-bold leading-tight tracking-tight">
       {{ store.publicPage.title }}
     </h1>
+
+    <Separator />
 
     <!-- Stored already sanitized; see PublicPostDetailView for the full note. -->
     <!-- eslint-disable vue/no-v-html -->

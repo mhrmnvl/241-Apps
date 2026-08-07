@@ -1,17 +1,11 @@
 <script setup lang="ts">
-import { computed, onMounted, watch } from 'vue'
+import { computed, h, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import type { ColumnDef } from '@tanstack/vue-table'
+import { DataTable } from '@/ui'
 import { Button } from '@/ui/button'
-import { Input } from '@/ui/input'
+import { Card, CardHeader, CardTitle } from '@/ui/card'
 import { Badge } from '@/ui/badge'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/ui/table'
 import {
   Archive,
   EyeOff,
@@ -19,7 +13,6 @@ import {
   PinOff,
   Plus,
   RotateCcw,
-  Search,
   Trash2,
 } from 'lucide-vue-next'
 import { postService } from '../services/postService'
@@ -60,8 +53,6 @@ watch(postType, () => {
   load()
 })
 
-// The bin is a filter over the same endpoint, not a second screen: an editor
-// looking for something they deleted is still looking for their content.
 watch(
   () => store.showDeleted,
   () => {
@@ -78,8 +69,6 @@ async function transition(
 }
 
 async function remove(post: PostAdminSummary) {
-  // Recoverable for 30 days, and the confirmation says so — an editor who knows
-  // the delete is undoable hesitates less over the ones that should be deleted.
   const confirmed = window.confirm(
     `Hapus "${post.title}"? Konten dapat dipulihkan dalam 30 hari.`,
   )
@@ -111,219 +100,227 @@ function formatDate(value: string | null) {
     timeZone: 'Asia/Jakarta',
   }).format(new Date(value))
 }
+
+const columns = computed<ColumnDef<PostAdminSummary>[]>(() => [
+  {
+    accessorKey: 'title',
+    header: 'Judul',
+    cell: ({ row }) => {
+      const post = row.original
+      return h(
+        'button',
+        {
+          class:
+            'font-medium text-left hover:underline cursor-pointer flex items-center gap-2',
+          onClick: () => openEdit(post.id),
+        },
+        [
+          post.pinnedAt
+            ? h(Pin, { class: 'size-3.5 text-primary shrink-0' })
+            : null,
+          post.title,
+        ],
+      )
+    },
+  },
+  {
+    accessorKey: 'status',
+    header: 'Status',
+    cell: ({ row }) => {
+      const post = row.original
+      return h(
+        Badge,
+        { variant: STATUS_VARIANTS[post.status] },
+        () => CONTENT_STATUS_LABELS[post.status],
+      )
+    },
+  },
+  {
+    accessorKey: 'categoryName',
+    header: 'Kategori',
+    cell: ({ row }) =>
+      h(
+        'span',
+        { class: 'text-muted-foreground' },
+        row.original.category?.name ?? '—',
+      ),
+  },
+  {
+    accessorKey: 'publishedAt',
+    header: 'Terbit',
+    cell: ({ row }) =>
+      h(
+        'span',
+        { class: 'text-muted-foreground' },
+        formatDate(row.original.publishedAt),
+      ),
+  },
+  {
+    accessorKey: 'authorName',
+    header: 'Penulis',
+    cell: ({ row }) =>
+      h('span', { class: 'text-muted-foreground' }, row.original.authorName),
+  },
+  {
+    id: 'actions',
+    header: () => h('div', { class: 'text-right' }, 'Tindakan'),
+    cell: ({ row }) => {
+      const post = row.original
+      if (store.showDeleted) {
+        return h('div', { class: 'flex justify-end gap-1' }, [
+          h(
+            Button,
+            {
+              variant: 'ghost',
+              size: 'icon',
+              title: 'Pulihkan',
+              disabled: store.isSaving,
+              onClick: (e: Event) => {
+                e.stopPropagation()
+                void restore(post)
+              },
+            },
+            () => h(RotateCcw, { class: 'size-4' }),
+          ),
+        ])
+      }
+
+      const actions = []
+
+      actions.push(
+        h(
+          Button,
+          {
+            variant: 'ghost',
+            size: 'icon',
+            title: post.pinnedAt ? 'Lepas sematan' : 'Sematkan',
+            disabled: store.isSaving,
+            onClick: (e: Event) => {
+              e.stopPropagation()
+              void transition(post, post.pinnedAt ? 'unpin' : 'pin')
+            },
+          },
+          () => h(post.pinnedAt ? PinOff : Pin, { class: 'size-4' }),
+        ),
+      )
+
+      if (post.status === 'PUBLISHED' || post.status === 'SCHEDULED') {
+        actions.push(
+          h(
+            Button,
+            {
+              variant: 'ghost',
+              size: 'icon',
+              title: 'Tarik dari publikasi',
+              disabled: store.isSaving,
+              onClick: (e: Event) => {
+                e.stopPropagation()
+                void transition(post, 'unpublish')
+              },
+            },
+            () => h(EyeOff, { class: 'size-4' }),
+          ),
+        )
+      }
+
+      if (post.status !== 'ARCHIVED') {
+        actions.push(
+          h(
+            Button,
+            {
+              variant: 'ghost',
+              size: 'icon',
+              title: 'Arsipkan',
+              disabled: store.isSaving,
+              onClick: (e: Event) => {
+                e.stopPropagation()
+                void transition(post, 'archive')
+              },
+            },
+            () => h(Archive, { class: 'size-4' }),
+          ),
+        )
+      }
+
+      actions.push(
+        h(
+          Button,
+          {
+            variant: 'ghost',
+            size: 'icon',
+            title: 'Hapus',
+            disabled: store.isSaving,
+            onClick: (e: Event) => {
+              e.stopPropagation()
+              void remove(post)
+            },
+          },
+          () => h(Trash2, { class: 'size-4' }),
+        ),
+      )
+
+      return h('div', { class: 'flex justify-end gap-1' }, actions)
+    },
+  },
+])
 </script>
 
 <template>
-  <div class="space-y-6 p-6">
-    <header class="flex flex-wrap items-center justify-between gap-4">
-      <h1 class="text-2xl font-semibold tracking-tight">
-        {{ POST_TYPE_LABELS[postType] }}
-      </h1>
-      <Button @click="openNew">
-        <Plus class="mr-2 size-4" />
-        Tulis {{ POST_TYPE_LABELS[postType] }}
-      </Button>
-    </header>
-
-    <div class="flex items-center gap-2">
-      <div class="relative max-w-sm flex-1">
-        <Search
-          class="absolute left-2.5 top-2.5 size-4 text-muted-foreground"
-        />
-        <Input
-          v-model="store.search"
-          placeholder="Cari judul atau ringkasan…"
-          class="pl-8"
-          @keyup.enter="load"
-        />
-      </div>
-      <Button
-        variant="outline"
-        @click="load"
-      >
-        Cari
-      </Button>
-      <Button
-        :variant="store.showDeleted ? 'default' : 'outline'"
-        @click="store.showDeleted = !store.showDeleted"
-      >
-        <Trash2 class="mr-2 size-4" />
-        Tempat sampah
-      </Button>
-    </div>
-
-    <!--
-      A blocking notice rather than a toast: a toast is dismissible, and losing
-      this warning means the editor retries and overwrites the other person's
-      work — which is the outcome the version check exists to prevent (FR-013).
-    -->
-    <div
-      v-if="store.conflict"
-      class="rounded-md border border-destructive/50 bg-destructive/10 p-4 text-sm"
+  <div class="p-4 md:p-6 lg:p-8">
+    <Card
+      class="overflow-hidden rounded-2xl shadow-sm shadow-black/5 ring-1 ring-black/4"
     >
-      {{ store.conflict }}
-      <Button
-        variant="link"
-        size="sm"
-        class="px-1"
-        @click="load"
+      <CardHeader
+        class="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b px-6 py-5 gap-4"
       >
-        Muat ulang
-      </Button>
-    </div>
+        <CardTitle class="text-2xl font-bold tracking-tight">
+          {{ POST_TYPE_LABELS[postType] }}
+        </CardTitle>
+        <Button
+          class="w-full sm:w-auto"
+          @click="openNew"
+        >
+          <Plus class="mr-2 h-4 w-4" />
+          Tulis {{ POST_TYPE_LABELS[postType] }}
+        </Button>
+      </CardHeader>
 
-    <div class="rounded-md border">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Judul</TableHead>
-            <TableHead class="w-32">Status</TableHead>
-            <TableHead class="w-40">Kategori</TableHead>
-            <TableHead class="w-48">Terbit</TableHead>
-            <TableHead class="w-40">Penulis</TableHead>
-            <TableHead class="w-44 text-right">Tindakan</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          <TableRow v-if="store.loading">
-            <TableCell
-              colspan="6"
-              class="py-10 text-center text-muted-foreground"
-            >
-              Memuat…
-            </TableCell>
-          </TableRow>
-
-          <TableRow v-else-if="store.posts.length === 0">
-            <TableCell
-              colspan="6"
-              class="py-10 text-center text-muted-foreground"
-            >
-              <template v-if="store.showDeleted">
-                Tempat sampah kosong.
-              </template>
-              <template v-else>
-                Belum ada {{ POST_TYPE_LABELS[postType].toLowerCase() }}. Klik
-                “Tulis” untuk membuat yang pertama.
-              </template>
-            </TableCell>
-          </TableRow>
-
-          <TableRow
-            v-for="post in store.posts"
-            v-else
-            :key="post.id"
-            class="cursor-pointer"
-            @click="openEdit(post.id)"
+      <div class="p-6 space-y-4">
+        <div
+          v-if="store.conflict"
+          class="rounded-md border border-destructive/50 bg-destructive/10 p-4 text-sm"
+        >
+          {{ store.conflict }}
+          <Button
+            variant="link"
+            size="sm"
+            class="px-1"
+            @click="load"
           >
-            <TableCell class="font-medium">
-              <div class="flex items-center gap-2">
-                <Pin
-                  v-if="post.pinnedAt"
-                  class="size-3.5 text-primary"
-                />
-                {{ post.title }}
-              </div>
-            </TableCell>
-            <TableCell>
-              <Badge :variant="STATUS_VARIANTS[post.status]">
-                {{ CONTENT_STATUS_LABELS[post.status] }}
-              </Badge>
-            </TableCell>
-            <TableCell class="text-muted-foreground">
-              {{ post.category?.name ?? '—' }}
-            </TableCell>
-            <TableCell class="text-muted-foreground">
-              {{ formatDate(post.publishedAt) }}
-            </TableCell>
-            <TableCell class="text-muted-foreground">
-              {{ post.authorName }}
-            </TableCell>
+            Muat ulang
+          </Button>
+        </div>
 
-            <!-- @click.stop throughout: the row itself opens the editor, and an
-                 action button that also navigated would take the editor away
-                 from the list they are working through. -->
-            <TableCell
-              class="text-right"
-              @click.stop
+        <DataTable
+          :columns="columns"
+          :data="store.posts"
+          :is-loading="store.loading"
+          :item-label="POST_TYPE_LABELS[postType].toLowerCase()"
+          filter-column="title"
+          filter-placeholder="Cari judul atau ringkasan..."
+        >
+          <template #header-right>
+            <Button
+              size="sm"
+              :variant="store.showDeleted ? 'default' : 'outline'"
+              @click="store.showDeleted = !store.showDeleted"
             >
-              <div class="flex justify-end gap-1">
-                <template v-if="store.showDeleted">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    title="Pulihkan"
-                    :disabled="store.isSaving"
-                    @click="restore(post)"
-                  >
-                    <RotateCcw class="size-4" />
-                  </Button>
-                </template>
-
-                <template v-else>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    :title="post.pinnedAt ? 'Lepas sematan' : 'Sematkan'"
-                    :disabled="store.isSaving"
-                    @click="transition(post, post.pinnedAt ? 'unpin' : 'pin')"
-                  >
-                    <PinOff
-                      v-if="post.pinnedAt"
-                      class="size-4"
-                    />
-                    <Pin
-                      v-else
-                      class="size-4"
-                    />
-                  </Button>
-
-                  <Button
-                    v-if="
-                      post.status === 'PUBLISHED' || post.status === 'SCHEDULED'
-                    "
-                    variant="ghost"
-                    size="icon"
-                    title="Tarik dari publikasi"
-                    :disabled="store.isSaving"
-                    @click="transition(post, 'unpublish')"
-                  >
-                    <EyeOff class="size-4" />
-                  </Button>
-
-                  <Button
-                    v-if="post.status !== 'ARCHIVED'"
-                    variant="ghost"
-                    size="icon"
-                    title="Arsipkan"
-                    :disabled="store.isSaving"
-                    @click="transition(post, 'archive')"
-                  >
-                    <Archive class="size-4" />
-                  </Button>
-
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    title="Hapus"
-                    :disabled="store.isSaving"
-                    @click="remove(post)"
-                  >
-                    <Trash2 class="size-4" />
-                  </Button>
-                </template>
-              </div>
-            </TableCell>
-          </TableRow>
-        </TableBody>
-      </Table>
-    </div>
-
-    <p
-      v-if="store.total > 0"
-      class="text-sm text-muted-foreground"
-    >
-      {{ store.total }} konten
-    </p>
+              <Trash2 class="mr-2 size-4" />
+              Tempat sampah
+            </Button>
+          </template>
+        </DataTable>
+      </div>
+    </Card>
   </div>
 </template>
