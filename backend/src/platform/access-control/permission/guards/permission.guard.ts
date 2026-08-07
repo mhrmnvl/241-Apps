@@ -8,6 +8,31 @@ import { Reflector } from '@nestjs/core';
 import { PERMISSIONS_KEY } from '../decorators/require-permissions.decorator.js';
 import { IPermissionRepository } from '../domain/interfaces/permission-repository.interface.js';
 
+/**
+ * Codes the ADMIN blanket bypass does not cover.
+ *
+ * Holding an administrative role in SIAKAD must not by itself confer the right
+ * to publish to the school's public website — its operators may be different
+ * people, and a boundary the top delegated role walks straight through is not a
+ * boundary (FR-062, ADR-0006).
+ *
+ * SUPER_ADMIN keeps the full bypass on purpose: it is the break-glass path that
+ * keeps the portal recoverable if every portal operator is locked out.
+ *
+ * This is data, not new branching. Blast radius is zero for everything outside
+ * the prefix.
+ */
+const ROLE_BYPASS_EXEMPT_PREFIXES = ['portal-'] as const;
+
+const SUPER_ADMIN_ROLE = 'SUPER_ADMIN';
+const ADMIN_ROLE = 'ADMIN';
+
+function isExemptFromRoleBypass(permission: string): boolean {
+  return ROLE_BYPASS_EXEMPT_PREFIXES.some((prefix) =>
+    permission.startsWith(prefix),
+  );
+}
+
 @Injectable()
 export class PermissionGuard implements CanActivate {
   constructor(
@@ -34,12 +59,21 @@ export class PermissionGuard implements CanActivate {
       throw new ForbiddenException('Access denied. User not authenticated.');
     }
 
-    // Admin and Super Admin bypass all permission checks
     const userRoles = await this.permissionRepository.findUserRoles(user.id);
-    const isAdmin = userRoles.some(
-      (ur) => ur.role.code === 'SUPER_ADMIN' || ur.role.code === 'ADMIN',
-    );
-    if (isAdmin) {
+    const roleCodes = userRoles.map((ur) => ur.role.code);
+
+    // Super Admin bypasses everything — the one break-glass account type.
+    if (roleCodes.includes(SUPER_ADMIN_ROLE)) {
+      return true;
+    }
+
+    // Admin bypasses everything except the exempt prefixes. An Admin asking for
+    // a portal code falls through to the ordinary permission check below and is
+    // granted only if the role actually holds it.
+    if (
+      roleCodes.includes(ADMIN_ROLE) &&
+      !requiredPermissions.some(isExemptFromRoleBypass)
+    ) {
       return true;
     }
 

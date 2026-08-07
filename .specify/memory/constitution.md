@@ -1,6 +1,38 @@
 <!--
 Sync Impact Report
 ==================
+Version change: 1.0.0 → 1.1.0 (2026-08-07)
+Bump rationale: MINOR — Principle III's sanctioned exception is materially expanded,
+and two structural facts are corrected. Amendment (a)-(e) per the procedure below:
+
+  (a) Edits: Principle III, Technology (workspace shape, domain vs module),
+      Compliance Baseline item 3, this report.
+  (b) Version and rationale: stated here.
+  (c) Docs affected: none further. CLAUDE.md already records four apps, seven portal
+      modules, and the portal domain; no divergence was introduced.
+  (d) Migration plan: none needed — this describes code that already shipped.
+  (e) Compliance Baseline: re-surveyed 2026-08-07 (below), unchanged by this bump.
+
+What 1.1.0 fixes, all three found by `/speckit-analyze` re-run after feature
+001-content-management-system shipped:
+
+  - III: the principle said the sanctioned exception was "the `SUPER_ADMIN`/`ADMIN`
+    bypass" flatly, while `PermissionGuard` had already narrowed it — ADMIN does not
+    bypass `portal-*` (ADR-0006). The correction existed ONLY as a footnote in
+    Baseline item 3, which called itself "an amendment to Principle III". A
+    NON-NEGOTIABLE principle whose text the code contradicts is exactly the fiction
+    Governance forbids, and the failure mode is specific: an agent reading III alone
+    concludes ADMIN can publish to the school's public website. Now stated in the
+    principle, with the exemption list named so adding a prefix is visibly an
+    amendment rather than a config tweak.
+  - Technology: "three apps" contradicted the Compliance Baseline 100 lines later,
+    which recorded the fourth. Now four.
+  - Technology: `portal/` added to the domains-holding-sibling-modules list; it is
+    the newest and cleanest example of the target shape.
+
+Version 1.0.0's report follows, retained because it records how the principles were
+derived and which four the code overturned.
+
 Version change: (unfilled template) → 1.0.0
 Bump rationale: initial ratification. Every placeholder token replaced with concrete
 governance. No prior version was ever committed, so this is a single first release
@@ -160,8 +192,14 @@ Every query is scoped and every action is permission-controlled.
 - Authorization MUST use permissions (`@RequirePermissions('students.create')`, module
   segment plural). Role-name and role-code string comparisons are forbidden in
   controllers, use cases, and repositories. The single sanctioned exception is the
-  `SUPER_ADMIN`/`ADMIN` bypass inside `PermissionGuard` itself — the guard is where
-  role-to-permission resolution belongs, and that check MUST NOT be copied elsewhere.
+  role bypass inside `PermissionGuard` itself — the guard is where role-to-permission
+  resolution belongs, and that check MUST NOT be copied elsewhere. The bypass is not
+  uniform: `SUPER_ADMIN` passes every permission as break-glass, while `ADMIN` passes
+  every permission **except** those whose module segment is listed in
+  `ROLE_BYPASS_EXEMPT_PREFIXES` (currently `portal-`). An exempt prefix means a
+  boundary the top operational role does not walk through by virtue of its role
+  (ADR-0006); adding one is an amendment to this principle, not a configuration
+  change.
 
 Rationale: wrong data in a school record looks exactly like correct data to the user
 reading it. Scoping and permission failures are silent by nature, so they must be
@@ -290,8 +328,9 @@ and reviewed.
   them in `dependencies` gives the package its own copy and reintroduces the duplicate
   runtime instance (Pinia's "reading `_s` of undefined") that the TypeScript pin exists
   to prevent. pnpm's strict `node_modules` will not cover an undeclared import.
-- **Workspace shape**: three apps (`academic`, `inventory`, `admission`), four packages
-  (`@241/ui`, `@241/shared`, `@241/platform`, `@241/master-data`), one `backend`.
+- **Workspace shape**: four apps (`academic`, `inventory`, `admission`, `portal`), four
+  packages (`@241/ui`, `@241/shared`, `@241/platform`, `@241/master-data`), one
+  `backend`.
 - **Frontend stack**: Vue 3 (Composition API, `<script setup>`), TypeScript, Vite,
   Tailwind CSS v4, shadcn-vue + Reka UI, Pinia, Vue Router, vee-validate + Zod,
   TanStack Vue Table, Lucide, Axios, FullCalendar. Adding a cross-cutting dependency
@@ -309,8 +348,8 @@ and reviewed.
   exceptions, interfaces), `infrastructure/` (persistence, mappers, parsers), `dto/`
   (`request/`, `response/`), `constants/`, `<name>.module.ts`, `index.ts`. There is no
   `repositories/` folder. New modules are registered in `src/app.module.ts`.
-- **Domain vs module**: `platform/`, `academic/`, and `inventory/` are domains holding
-  sibling modules, and that is the target shape for every domain. `admission/` is a
+- **Domain vs module**: `platform/`, `academic/`, `inventory/`, and `portal/` are domains
+  holding sibling modules, and that is the target shape for every domain. `admission/` is a
   single flat module at domain level that has already outgrown it — see the Compliance
   Baseline. New admission work MUST NOT extend the flat layout.
 - **Prisma schema** is split per domain under `backend/prisma/*.prisma`. A new model
@@ -385,12 +424,31 @@ is an architectural decision and REQUIRES an ADR.
   `NESTJS-RULES.md`, the doc MUST be updated in the same change. Those files are kept
   in sync with the code by contract, and agents rely on them as current.
 
-## Compliance Baseline (2026-08-06)
+## Compliance Baseline (re-surveyed 2026-08-07)
 
 The codebase largely holds these principles: no `repositories/` folders, no `any` in
 backend `src/`, no cross-app imports, no package→app reverse dependency, every
 controller and use case within budget, and the `*.includes.ts` / `*.where.ts` split
 pattern adopted across 43 files.
+
+**Re-surveyed after feature `001-content-management-system`**, which added a fourth
+app (`apps/portal`, package `portal-web`) and a seventh backend domain
+(`backend/src/portal/`, seven sibling modules). Findings:
+
+- The new domain adds **no items to this list**. All seven of its Prisma repositories
+  are under 200 lines, every module exposes an `index.ts`, no DTO imports a barrel,
+  and `portal/` reaches `academic/`, `inventory/`, and `admission/` not at all —
+  asserted by `src/portal/portal-siakad-disjointness.spec.ts` rather than by review.
+- Two deliberate deviations were introduced and are recorded as ADRs rather than as
+  debt, because both are decisions rather than shortcuts: **ADR-0005** (a fourth app)
+  and **ADR-0006** (narrowing the `ADMIN` permission bypass at `portal-*`, which
+  amends the single sanctioned exception named in Principle III).
+- One new sanctioned global: `PortalSharedModule` and `PortalFileUsageModule` are
+  `@Global()`. Both are justified in their own docblocks — the first carries the
+  public response cache that every portal module reaches for, the second registers
+  the portal's implementation of a `platform/file` port so file deletion can be vetoed
+  without `platform/` learning anything about the portal (dependency inversion, not a
+  boundary violation).
 
 The deviations below were found by survey and are recorded as debt. They are NOT
 precedent: new code MUST NOT extend them, and a change touching one of these files
@@ -406,7 +464,14 @@ SHOULD fix it in passing.
    domain into `asset`, `circulation`, and `approval` modules. 14 view/component files
    call `api/` directly as a result. Splitting it to match the backend is the target
    shape; `apps/academic` (37 features, 33 with `services/`) is the reference.
-3. **Admission provisions accounts by writing other domains' tables
+3. **The `ADMIN` permission bypass is now narrowed (Principle III)** — the guard's
+   blanket bypass no longer covers permissions whose module segment begins `portal-`;
+   `SUPER_ADMIN` retains it as break-glass. `iam.seed.ts` matches, granting `ADMIN`
+   every permission *except* the portal's — a bypass removed and then handed back as
+   an explicit grant would be no boundary at all. Recorded in full as ADR-0006, and
+   now stated directly in Principle III — this entry is history, not a correction
+   living outside the principle it corrects.
+4. **Admission provisions accounts by writing other domains' tables
    (Principle VI)** — `enrollAsStudent` in `prisma-admission-application.repository.ts`
    opens one `$transaction` and writes `tx.student`, `tx.studentEnrollment`,
    `tx.studentParent`, `tx.parent`, and `tx.semester` (owned by `academic/`) plus
@@ -414,20 +479,21 @@ SHOULD fix it in passing.
    Two reads, `isNisTaken` / `isNisnTaken`, hit `prisma.student` the same way even
    though `IStudentRepository` already exposes `findByNis` / `findByNisn`.
 
-   This is the sharpest open tension in the codebase and MUST NOT be fixed by reflex:
+   This remains the sharpest open tension in the codebase and MUST NOT be fixed by
+   reflex:
    routing the writes through the owning modules removes the shared transaction that
    currently makes provisioning atomic, and Principle VI forbids spanning a transaction
    across modules. Resolving it REQUIRES an ADR that picks one of — a saga/compensating
    sequence over idempotent steps, an `academic`-owned provisioning use case that takes
    the whole applicant payload, or an explicit, documented exemption for provisioning.
    Do not extend the current pattern in the meantime.
-4. **`backend/src/admission` is a flat module (Technology: domain vs module)** — it
+5. **`backend/src/admission` is a flat module (Technology: domain vs module)** — it
    holds four repository ports (wave, announcement, applicant, application), five
    controllers, and 31 use cases in one module, so the "split on the second bounded
    concern" trigger passed long ago. The four ports and five controllers already mark
    the seams; splitting into sibling `wave/`, `announcement/`, `applicant/`, and
    `application/` modules also resolves item 1's two oversized repositories and gives
-   item 3 a natural home.
+   item 4 a natural home.
 
 This section MUST be re-surveyed and updated whenever the constitution is amended. An
 item that is fixed is deleted from the list, not marked done.
@@ -459,4 +525,4 @@ the code or corrected here; it is never left standing as fiction.
 **Runtime development guidance**: root `CLAUDE.md` for the workspace,
 `backend/docs/NESTJS-RULES.md` for backend work.
 
-**Version**: 1.0.0 | **Ratified**: 2026-08-06 | **Last Amended**: 2026-08-06
+**Version**: 1.1.0 | **Ratified**: 2026-08-06 | **Last Amended**: 2026-08-07

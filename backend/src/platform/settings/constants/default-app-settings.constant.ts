@@ -31,4 +31,11 @@ export const DEFAULT_APP_SETTINGS: Record<AppKey, DefaultAppSettingValues> = {
     loginTitle: 'Masuk ke Portal PSB',
     metaDescription: 'Penerimaan Santri Baru MTs Persis 241 Al-Ikhlash',
   },
+  PORTAL: {
+    appTitle: 'Portal 241',
+    appSubtitle: 'MTs Persis 241 Al-Ikhlash',
+    loginTitle: 'Masuk ke Portal 241',
+    metaDescription:
+      'Berita, artikel, agenda, dan informasi resmi MTs Persis 241 Al-Ikhlash',
+  },
 };

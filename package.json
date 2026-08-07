@@ -11,6 +11,7 @@
     "dev:academic": "pnpm --filter academic-web dev",
     "dev:inventory": "pnpm --filter inventory-web dev",
     "dev:admission": "pnpm --filter admission-web dev",
+    "dev:portal": "pnpm --filter portal-web dev",
     "build": "pnpm -r --filter \"*-web\" build",
     "typecheck": "pnpm -r --filter \"*-web\" typecheck",
     "lint": "pnpm -r --filter \"*-web\" lint",

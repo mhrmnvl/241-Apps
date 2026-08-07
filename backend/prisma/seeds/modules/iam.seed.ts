@@ -1,5 +1,8 @@
 import { Permission, PrismaClient, Role } from '@prisma/client';
-import { SYSTEM_PERMISSIONS } from '../../../src/platform/access-control/permissions/constants/permission-codes.constants.js';
+import { SYSTEM_PERMISSIONS } from '../../../src/platform/access-control/permission/constants/permission-codes.constants.js';
+
+/** Must match ROLE_BYPASS_EXEMPT_PREFIXES in permission.guard.ts (ADR-0006). */
+const PORTAL_PERMISSION_PREFIX = 'portal-';
 
 export async function seedIam(prisma: PrismaClient) {
   console.log('  [iam] seeding roles and permissions...');
@@ -117,8 +120,17 @@ export async function seedIam(prisma: PrismaClient) {
     });
   }
 
-  // ADMIN gets all permissions
+  // ADMIN gets every permission EXCEPT the portal's.
+  //
+  // The guard exemption (ADR-0006) stops ADMIN's blanket role bypass at
+  // `portal-*`, but a bypass that is removed and then handed back as an
+  // explicit grant is no boundary at all — FR-062 would fail on a seeded
+  // install while passing every guard test. The two have to agree.
+  //
+  // SUPER_ADMIN above keeps everything, and the seeded admin user holds both
+  // roles, so a fresh install still has a way into the portal.
   for (const perm of permissions) {
+    if (perm.code.startsWith(PORTAL_PERMISSION_PREFIX)) continue;
     await prisma.rolePermission.create({
       data: { roleId: adminRole.id, permissionId: perm.id },
     });

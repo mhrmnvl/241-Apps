@@ -18,6 +18,12 @@ model User {
   passwordResetTokens  PasswordResetToken[]
   admissionApplication AdmissionApplication?
   updatedAppSettings   AppSetting[]
+  // Restrict, not Cascade: a user row backing published portal content cannot be
+  // hard-deleted, which is what preserves attribution after deactivation.
+  portalPosts          Post[]               @relation("PortalPostAuthor")
+  portalPages          PortalPage[]         @relation("PortalPageAuthor")
+  portalAgendaEntries  AgendaEntry[]        @relation("PortalAgendaAuthor")
+  portalAlbums         GalleryAlbum[]       @relation("PortalAlbumAuthor")
 
   @@map("users")
 }

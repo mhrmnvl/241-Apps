@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository overview
 
-pnpm monorepo for the information system of MTs Persis 241 Al-Ikhlash: three Vue 3
+pnpm monorepo for the information system of MTs Persis 241 Al-Ikhlash: four Vue 3
 frontends sharing code via workspace packages, plus one NestJS + Prisma backend, all
 in a single workspace/git repo.
 
@@ -13,6 +13,7 @@ in a single workspace/git repo.
 | `apps/academic` | `academic-web` | SIAKAD 241 — academic info system (students, staff, curriculum, schedule, grades) |
 | `apps/inventory` | `inventory-web` | SIMAS 241 — asset management (assets, circulation, approval) |
 | `apps/admission` | `admission-web` | Admission app |
+| `apps/portal` | `portal-web` | Portal 241 — the school's public website plus the management area for its content (see ADR-0005) |
 | `packages/ui` | `@241/ui` | shadcn-vue components + `cn()` util, shared by all apps |
 | `packages/shared` | `@241/shared` | Composables, utils, types, config — cross-app |
 | `packages/master-data` | `@241/master-data` | Reference-data CRUD engine (list view, form dialog, schema/column generation) driven by a per-entity `config.ts` — see ADR-0001 |
@@ -36,6 +37,7 @@ pnpm install
 pnpm dev:academic      # http://localhost:5173
 pnpm dev:inventory
 pnpm dev:admission
+pnpm dev:portal        # http://localhost:5176
 pnpm --filter backend dev   # nest start --watch, http://localhost:3000
 ```
 
@@ -64,7 +66,7 @@ pnpm format:check     # Prettier check, all frontend apps
 > runs jest through its own filter. Packages with no `test` script are skipped
 > (`@241/ui` has none).
 
-Per-app (substitute `academic-web` / `inventory-web` / `admission-web`):
+Per-app (substitute `academic-web` / `inventory-web` / `admission-web` / `portal-web`):
 
 ```bash
 pnpm --filter inventory-web dev
@@ -184,6 +186,20 @@ artifacts and completed one-off runbooks have been deleted rather than archived:
 stale doc that contradicts the code is worse than no doc. Recover one from git history
 if you ever need it; treat the code, this file, and `docs/adr/` as the source of truth.
 
+`portal/` is the fourth frontend's backend domain: seven sibling modules (`post`,
+`taxonomy`, `media`, `homepage`, `page`, `agenda`, `gallery`) plus a `shared/`
+folder for the response cache and the `@PortalPublic()` decorator. Two things
+about it are load-bearing and easy to break:
+
+- **Public visibility is a read-time predicate**, defined once per model in
+  `*.where.ts` and composed by every public query. A hand-rolled filter anywhere
+  else is a silent leak of unpublished content;
+  `test/portal-public-visibility.e2e-spec.ts` is the sweep that catches it.
+- **`PortalHtmlModule` must stay last** in `PortalModule`'s imports. Its only
+  controller answers `GET *` to serve the SPA shell with injected link-preview
+  metadata, and Nest matches controllers in registration order — a module listed
+  after it never receives a request.
+
 Top-level domains under `backend/src/`: `core/` (infra: config, database,
 decorators, filters, interceptors, logger, storage, health, cache, types — the
 guards live with their feature, in `platform/auth/` and
@@ -193,10 +209,11 @@ permissions, session, audit-log, profile, school-unit, dashboard, notification,
 file, settings, master-data, ...), `academic/` (student, teacher, classroom,
 curriculum, subject, schedule, assessment, attendance, report-card, enrollment,
 graduation, ...), `inventory/` (asset, circulation, approval, master-data),
-`admission/`. `src/types/` holds ambient declarations only (`express.d.ts`) — it is
-not a domain. New modules are registered in `src/app.module.ts`.
+`admission/`, `portal/`. `src/types/` holds ambient declarations only
+(`express.d.ts`) — it is not a domain. New modules are registered in `src/app.module.ts`.
 
-`platform/`, `academic/`, and `inventory/` are **domains containing sibling modules**;
+`platform/`, `academic/`, `inventory/`, and `portal/` are **domains containing sibling
+modules**;
 each module owns the layered layout below. `admission/` is the exception — it is
 currently one flat module holding four repository interfaces (wave, announcement,
 applicant, application), five controllers, and 31 use cases. That is technical debt,

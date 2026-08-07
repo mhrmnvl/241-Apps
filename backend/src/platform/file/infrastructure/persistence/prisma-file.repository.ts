@@ -14,6 +14,17 @@ export class PrismaFileRepository implements IFileRepository {
     });
   }
 
+  async findManyByAppKey(appKey: string) {
+    return this.prisma.file.findMany({
+      where: {
+        deletedAt: null,
+        storageKey: { contains: `/${appKey.toLowerCase()}/` },
+      },
+      include: { category: true, uploader: true },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
   async findById(id: string) {
     return this.prisma.file.findUnique({
       where: { id, deletedAt: null },

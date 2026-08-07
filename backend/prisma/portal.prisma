@@ -1,0 +1,356 @@
+// Public school portal (portal-web). Content here is anonymous-readable once
+// published; nothing in this file is period-scoped, because a news article does
+// not belong to a semester. See specs/001-content-management-system/data-model.md.
+
+enum PostType {
+  BERITA
+  ARTIKEL
+  PENGUMUMAN
+}
+
+enum ContentStatus {
+  DRAFT
+  SCHEDULED
+  PUBLISHED
+  ARCHIVED
+}
+
+enum MediaUsageKind {
+  COVER
+  BODY
+  ATTACHMENT
+  ALBUM_PHOTO
+}
+
+/// Berita, Artikel, and Pengumuman share one model and one lifecycle; only the
+/// type-specific columns differ (expiresAt/attachmentFileId are PENGUMUMAN-only).
+/// Public visibility is derived at read time from status + publishedAt, never
+/// stored as a flag — see post.where.ts.
+model Post {
+  id     String   @id @default(uuid()) @db.Uuid
+  type   PostType
+  title  String   @db.VarChar(200)
+  slug   String   @db.VarChar(220)
+  summary String  @db.VarChar(500)
+  body   String   @db.Text
+
+  coverFileId  String? @map("cover_file_id") @db.Uuid
+  coverAltText String? @map("cover_alt_text") @db.VarChar(300)
+  categoryId   String? @map("category_id") @db.Uuid
+
+  status      ContentStatus @default(DRAFT)
+  publishedAt DateTime?     @map("published_at") @db.Timestamptz()
+  scheduledAt DateTime?     @map("scheduled_at") @db.Timestamptz()
+
+  // PENGUMUMAN only — rejected at the use case for BERITA and ARTIKEL.
+  expiresAt        DateTime? @map("expires_at") @db.Timestamptz()
+  attachmentFileId String?   @map("attachment_file_id") @db.Uuid
+
+  pinnedAt DateTime? @map("pinned_at") @db.Timestamptz()
+
+  metaTitle       String? @map("meta_title") @db.VarChar(200)
+  metaDescription String? @map("meta_description") @db.VarChar(300)
+
+  authorId String @map("author_id") @db.Uuid
+  // Optimistic lock: updates match on this and increment it, so a second
+  // editor's save cannot silently discard the first's.
+  version  Int    @default(0)
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  category   PostCategory? @relation(fields: [categoryId], references: [id])
+  author     User          @relation("PortalPostAuthor", fields: [authorId], references: [id], onDelete: Restrict)
+  coverFile  File?         @relation("PortalPostCover", fields: [coverFileId], references: [id])
+  attachment File?         @relation("PortalPostAttachment", fields: [attachmentFileId], references: [id])
+
+  slugHistory PostSlugHistory[]
+  tags        PostTagOnPost[]
+  mediaUsages PortalMediaUsage[]
+
+  @@unique([type, slug])
+  @@index([type, status, publishedAt])
+  @@index([type, pinnedAt, publishedAt])
+  @@index([deletedAt])
+  @@map("portal_posts")
+}
+
+/// A public address that used to belong to a post. A detail request that misses
+/// on Post.slug falls back here and redirects, so links already shared on
+/// WhatsApp or indexed by Google keep working after a rename.
+model PostSlugHistory {
+  id        String   @id @default(uuid()) @db.Uuid
+  postId    String   @map("post_id") @db.Uuid
+  type      PostType
+  slug      String   @db.VarChar(220)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([type, slug])
+  @@index([postId])
+  @@map("portal_post_slug_history")
+}
+
+model PostCategory {
+  id           String    @id @default(uuid()) @db.Uuid
+  name         String    @db.VarChar(100)
+  slug         String    @unique @db.VarChar(120)
+  description  String?   @db.Text
+  isActive     Boolean   @default(true) @map("is_active")
+  displayOrder Int       @default(0) @map("display_order")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+  deletedAt    DateTime? @map("deleted_at")
+
+  posts Post[]
+
+  @@map("portal_post_categories")
+}
+
+/// Free-form labels, created on first use and shared across content types
+/// (FR-038). Unlike a category, a tag carries no editorial meaning and nothing
+/// requires one — which is why it has no isActive and no displayOrder.
+model PostTag {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String   @db.VarChar(60)
+  slug      String   @unique @db.VarChar(80)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  posts PostTagOnPost[]
+
+  @@map("portal_tags")
+}
+
+/// Deleting a tag removes its join rows and nothing else — a post never
+/// disappears because a label was tidied away.
+model PostTagOnPost {
+  postId String @map("post_id") @db.Uuid
+  tagId  String @map("tag_id") @db.Uuid
+
+  post Post    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  tag  PostTag @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([postId, tagId])
+  @@index([tagId])
+  @@map("portal_post_tags")
+}
+
+/// A set of photos from one school activity.
+model GalleryAlbum {
+  id          String  @id @default(uuid()) @db.Uuid
+  title       String  @db.VarChar(200)
+  slug        String  @unique @db.VarChar(220)
+  description String? @db.Text
+
+  /// When the activity happened, which is not when the album was published —
+  /// an album uploaded in March may document an event from January.
+  eventDate DateTime @map("event_date") @db.Date
+
+  coverFileId String? @map("cover_file_id") @db.Uuid
+
+  status      ContentStatus @default(DRAFT)
+  publishedAt DateTime?     @map("published_at") @db.Timestamptz()
+  scheduledAt DateTime?     @map("scheduled_at") @db.Timestamptz()
+
+  authorId String @map("author_id") @db.Uuid
+  version  Int    @default(0)
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  author    User          @relation("PortalAlbumAuthor", fields: [authorId], references: [id], onDelete: Restrict)
+  coverFile File?         @relation("PortalAlbumCover", fields: [coverFileId], references: [id])
+  photos    GalleryPhoto[]
+
+  @@index([status, publishedAt])
+  @@index([status, eventDate])
+  @@index([deletedAt])
+  @@map("portal_gallery_albums")
+}
+
+/// One photo in an album. `altText` is required — a gallery of images with no
+/// descriptions is unusable with a screen reader, and requiring it at the point
+/// of upload is the only moment the person can see what they are describing.
+model GalleryPhoto {
+  id      String  @id @default(uuid()) @db.Uuid
+  albumId String  @map("album_id") @db.Uuid
+  fileId  String  @map("file_id") @db.Uuid
+  caption String? @db.VarChar(300)
+  altText String  @map("alt_text") @db.VarChar(300)
+
+  displayOrder Int @default(0) @map("display_order")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  album GalleryAlbum @relation(fields: [albumId], references: [id], onDelete: Cascade)
+  file  File         @relation("PortalGalleryPhoto", fields: [fileId], references: [id], onDelete: Restrict)
+
+  @@index([albumId, displayOrder])
+  @@map("portal_gallery_photos")
+}
+
+/// A school activity with a date, shown on the homepage and in a full listing.
+///
+/// Wholly separate from the internal `Event` model: that one is classroom- and
+/// audience-scoped for people already inside SIAKAD, this one is the school
+/// telling the public what is happening (FR-046).
+model AgendaEntry {
+  id          String @id @default(uuid()) @db.Uuid
+  title       String @db.VarChar(200)
+  slug        String @unique @db.VarChar(220)
+  description String @db.Text
+
+  /// Timestamptz, matching the existing Event model. Entry and display are
+  /// WIB; storage is absolute, so an entry set for 07:00 WIB fires at 07:00 WIB
+  /// wherever the server happens to run.
+  startTime DateTime @map("start_time") @db.Timestamptz()
+  endTime   DateTime @map("end_time") @db.Timestamptz()
+  location  String   @db.VarChar(200)
+
+  coverFileId String? @map("cover_file_id") @db.Uuid
+
+  status      ContentStatus @default(DRAFT)
+  publishedAt DateTime?     @map("published_at") @db.Timestamptz()
+  scheduledAt DateTime?     @map("scheduled_at") @db.Timestamptz()
+
+  authorId String @map("author_id") @db.Uuid
+  version  Int    @default(0)
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  author    User  @relation("PortalAgendaAuthor", fields: [authorId], references: [id], onDelete: Restrict)
+  coverFile File? @relation("PortalAgendaCover", fields: [coverFileId], references: [id])
+
+  @@index([status, startTime])
+  @@index([status, endTime])
+  @@index([deletedAt])
+  @@map("portal_agenda_entries")
+}
+
+/// Profil, Visi & Misi, Sejarah, Kontak. An informational page: no category, no
+/// tags, no feed placement, and no expiry — it is the school describing itself
+/// rather than reporting something (FR-052).
+model PortalPage {
+  id    String @id @default(uuid()) @db.Uuid
+  title String @db.VarChar(200)
+  slug  String @unique @db.VarChar(220)
+  body  String @db.Text
+
+  metaTitle       String? @map("meta_title") @db.VarChar(200)
+  metaDescription String? @map("meta_description") @db.VarChar(300)
+
+  status      ContentStatus @default(DRAFT)
+  publishedAt DateTime?     @map("published_at") @db.Timestamptz()
+
+  authorId String @map("author_id") @db.Uuid
+  version  Int    @default(0)
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  author User @relation("PortalPageAuthor", fields: [authorId], references: [id], onDelete: Restrict)
+
+  slugHistory PortalPageSlugHistory[]
+  navItems    PortalNavItem[]
+
+  @@index([status, publishedAt])
+  @@index([deletedAt])
+  @@map("portal_pages")
+}
+
+/// Same purpose as PostSlugHistory, without the type discriminator — pages
+/// share one flat address space.
+model PortalPageSlugHistory {
+  id        String   @id @default(uuid()) @db.Uuid
+  pageId    String   @map("page_id") @db.Uuid
+  slug      String   @unique @db.VarChar(220)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  page PortalPage @relation(fields: [pageId], references: [id], onDelete: Cascade)
+
+  @@index([pageId])
+  @@map("portal_page_slug_history")
+}
+
+/// The public menu, editable by staff without a deployment (FR-053).
+///
+/// Exactly one of pageId / routeKey / externalUrl is set — enforced in the use
+/// case, since Prisma has no way to express it. An item pointing at an
+/// unpublished page is omitted from the public navigation rather than rendering
+/// a link into a 404.
+model PortalNavItem {
+  id          String  @id @default(uuid()) @db.Uuid
+  label       String  @db.VarChar(60)
+  pageId      String? @map("page_id") @db.Uuid
+  /// A built-in listing: berita, artikel, agenda, galeri, pengumuman.
+  routeKey    String? @map("route_key") @db.VarChar(60)
+  /// e.g. the PPDB application, which the portal links to and never duplicates.
+  externalUrl String? @map("external_url") @db.VarChar(500)
+
+  displayOrder Int     @default(0) @map("display_order")
+  isActive     Boolean @default(true) @map("is_active")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  page PortalPage? @relation(fields: [pageId], references: [id], onDelete: Cascade)
+
+  @@index([isActive, displayOrder])
+  @@map("portal_nav_items")
+}
+
+/// Every reference from portal content to a stored file — the table that makes
+/// media authorization derivable rather than flagged (research R2).
+///
+/// The bucket is private and served by expiring signed URLs, which a public
+/// website cannot use. `GET /portal/public/media/:fileId` is authorized by
+/// "does a usage row exist whose owner is publicly visible", so unpublishing an
+/// item revokes its images with no second action and nothing to forget.
+///
+/// Rows are recomputed on every content save: delete-then-insert inside the
+/// same single-module transaction as the content write.
+model PortalMediaUsage {
+  id     String         @id @default(uuid()) @db.Uuid
+  fileId String         @map("file_id") @db.Uuid
+  kind   MediaUsageKind
+
+  // Exactly one owner column is set — enforced in the use case, because a
+  // check constraint here would not survive a schema regeneration.
+  postId   String? @map("post_id") @db.Uuid
+  agendaId String? @map("agenda_id") @db.Uuid
+  albumId  String? @map("album_id") @db.Uuid
+  pageId   String? @map("page_id") @db.Uuid
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  file File @relation("PortalMediaUsageFile", fields: [fileId], references: [id], onDelete: Restrict)
+  post Post? @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@index([fileId])
+  @@index([postId])
+  @@index([agendaId])
+  @@index([albumId])
+  @@index([pageId])
+  @@map("portal_media_usages")
+}
+
+/// Which homepage sections render, in what order, and how many items each
+/// shows. The only state the homepage module owns — the content itself is
+/// borrowed through the sibling modules' repository ports (Principle VI).
+model PortalHomepageSection {
+  id           String   @id @default(uuid()) @db.Uuid
+  key          String   @unique @db.VarChar(40)
+  itemCount    Int      @default(3) @map("item_count")
+  isEnabled    Boolean  @default(true) @map("is_enabled")
+  displayOrder Int      @default(0) @map("display_order")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@map("portal_homepage_sections")
+}
