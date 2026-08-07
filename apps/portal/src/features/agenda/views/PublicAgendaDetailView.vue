@@ -2,7 +2,9 @@
 import { computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { NotFoundView } from '@/features/platform/auth'
-import { CalendarDays, MapPin } from 'lucide-vue-next'
+import { CalendarDays, MapPin, Loader2 } from 'lucide-vue-next'
+import { Skeleton } from '@/ui/skeleton'
+import { Separator } from '@/ui/separator'
 import { agendaService } from '../services/agendaService'
 import { useAgendaStore } from '../stores/agendaStore'
 
@@ -33,12 +35,23 @@ const when = computed(() => {
 </script>
 
 <template>
-  <p
+  <div
     v-if="store.loading"
-    class="text-center text-sm text-muted-foreground"
+    class="space-y-6"
   >
-    Memuat…
-  </p>
+    <div class="flex items-center gap-2 text-sm text-muted-foreground">
+      <Loader2 class="size-4 animate-spin" />
+      Memuat…
+    </div>
+    <Skeleton class="h-8 w-3/4" />
+    <Skeleton class="h-4 w-1/2" />
+    <Skeleton class="aspect-video w-full rounded-lg" />
+    <div class="space-y-2">
+      <Skeleton class="h-4 w-full" />
+      <Skeleton class="h-4 w-full" />
+      <Skeleton class="h-4 w-2/3" />
+    </div>
+  </div>
 
   <NotFoundView v-else-if="store.notFound" />
 
@@ -57,15 +70,19 @@ const when = computed(() => {
       <h1 class="text-3xl font-bold leading-tight tracking-tight">
         {{ store.publicCurrent.title }}
       </h1>
-      <p class="flex items-center gap-2 text-sm text-muted-foreground">
-        <CalendarDays class="size-4 shrink-0" />
-        {{ when }}
-      </p>
-      <p class="flex items-center gap-2 text-sm text-muted-foreground">
-        <MapPin class="size-4 shrink-0" />
-        {{ store.publicCurrent.location }}
-      </p>
+      <div class="flex flex-wrap gap-x-4 gap-y-1.5">
+        <p class="flex items-center gap-2 text-sm text-muted-foreground">
+          <CalendarDays class="size-4 shrink-0" />
+          {{ when }}
+        </p>
+        <p class="flex items-center gap-2 text-sm text-muted-foreground">
+          <MapPin class="size-4 shrink-0" />
+          {{ store.publicCurrent.location }}
+        </p>
+      </div>
     </header>
+
+    <Separator />
 
     <img
       v-if="store.publicCurrent.coverImageUrl"

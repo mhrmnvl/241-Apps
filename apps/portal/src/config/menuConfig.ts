@@ -1,14 +1,13 @@
 import {
   CalendarDays,
   Images,
+  ListChecks,
   Megaphone,
   FileStack,
   FileText,
-  FolderTree,
   Menu,
   Newspaper,
   Settings,
-  Tags,
 } from 'lucide-vue-next'
 
 export type {
@@ -24,11 +23,6 @@ import type { MenuSection } from '@/shared/types/menu.types'
  *
  * Every entry carries a `requiredPermission`, so a staff member with no
  * `portal-*` codes sees no management surface at all (FR-063).
- *
- * Entries appear here only once their route exists. A menu item pointing at an
- * unregistered route sends the user to a 404, which reads as a broken app
- * rather than an unbuilt feature. Pengumuman joins with US10, Agenda with US9,
- * Galeri with US11, Halaman with US8, and Kategori with US5.
  */
 export const menuSections: MenuSection[] = [
   {
@@ -63,18 +57,6 @@ export const menuSections: MenuSection[] = [
         icon: Images,
         requiredPermission: 'portal-albums.read',
       },
-      {
-        title: 'Kategori',
-        url: '/admin/kategori',
-        icon: FolderTree,
-        requiredPermission: 'portal-categories.read',
-      },
-      {
-        title: 'Tag',
-        url: '/admin/tag',
-        icon: Tags,
-        requiredPermission: 'portal-tags.read',
-      },
     ],
   },
 
@@ -99,6 +81,25 @@ export const menuSections: MenuSection[] = [
         url: '/admin/menu',
         icon: Menu,
         requiredPermission: 'portal-pages.read',
+      },
+      {
+        key: 'settings-master-data',
+        title: 'Master Data',
+        url: '#',
+        icon: ListChecks,
+        requiredPermission: 'portal-categories.read',
+        items: [
+          {
+            title: 'Kategori',
+            url: '/admin/kategori',
+            requiredPermission: 'portal-categories.read',
+          },
+          {
+            title: 'Tag',
+            url: '/admin/tag',
+            requiredPermission: 'portal-tags.read',
+          },
+        ],
       },
     ],
   },
