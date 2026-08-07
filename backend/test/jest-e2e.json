@@ -5,7 +5,11 @@
   "transform": {
     "^.+\\.(t|j)s$": "ts-jest"
   },
+  "transformIgnorePatterns": [
+    "/\\.pnpm/(?!(htmlparser2|domhandler|domutils|dom-serializer|entities|domelementtype)@)"
+  ],
   "moduleNameMapper": {
+    "^file-type$": "<rootDir>/test/stubs/file-type.stub.ts",
     "^(\\.{1,2}/.*)\\.js$": "$1"
   },
   "testEnvironment": "node"

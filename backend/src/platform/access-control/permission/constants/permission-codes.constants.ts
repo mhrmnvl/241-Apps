@@ -673,6 +673,201 @@ export const SYSTEM_PERMISSIONS: SystemPermission[] = [
     description: 'Update positions',
   },
 
+  // portal-agendas
+  {
+    module: 'portal-agendas',
+    action: 'create',
+    code: 'portal-agendas.create',
+    description: 'Create portal agenda entries',
+  },
+  {
+    module: 'portal-agendas',
+    action: 'delete',
+    code: 'portal-agendas.delete',
+    description: 'Delete portal agenda entries',
+  },
+  {
+    module: 'portal-agendas',
+    action: 'publish',
+    code: 'portal-agendas.publish',
+    description: 'Publish or unpublish portal agenda entries',
+  },
+  {
+    module: 'portal-agendas',
+    action: 'read',
+    code: 'portal-agendas.read',
+    description: 'Read portal agenda entries',
+  },
+  {
+    module: 'portal-agendas',
+    action: 'update',
+    code: 'portal-agendas.update',
+    description: 'Update portal agenda entries',
+  },
+
+  // portal-albums
+  {
+    module: 'portal-albums',
+    action: 'create',
+    code: 'portal-albums.create',
+    description: 'Create portal photo albums',
+  },
+  {
+    module: 'portal-albums',
+    action: 'delete',
+    code: 'portal-albums.delete',
+    description: 'Delete portal photo albums',
+  },
+  {
+    module: 'portal-albums',
+    action: 'publish',
+    code: 'portal-albums.publish',
+    description: 'Publish or unpublish portal photo albums',
+  },
+  {
+    module: 'portal-albums',
+    action: 'read',
+    code: 'portal-albums.read',
+    description: 'Read portal photo albums',
+  },
+  {
+    module: 'portal-albums',
+    action: 'update',
+    code: 'portal-albums.update',
+    description: 'Update portal photo albums',
+  },
+
+  // portal-categories
+  {
+    module: 'portal-categories',
+    action: 'create',
+    code: 'portal-categories.create',
+    description: 'Create portal content categories',
+  },
+  {
+    module: 'portal-categories',
+    action: 'delete',
+    code: 'portal-categories.delete',
+    description: 'Delete portal content categories',
+  },
+  {
+    module: 'portal-categories',
+    action: 'read',
+    code: 'portal-categories.read',
+    description: 'Read portal content categories',
+  },
+  {
+    module: 'portal-categories',
+    action: 'update',
+    code: 'portal-categories.update',
+    description: 'Update portal content categories',
+  },
+
+  // portal-pages
+  {
+    module: 'portal-pages',
+    action: 'create',
+    code: 'portal-pages.create',
+    description: 'Create portal informational pages',
+  },
+  {
+    module: 'portal-pages',
+    action: 'delete',
+    code: 'portal-pages.delete',
+    description: 'Delete portal informational pages',
+  },
+  {
+    module: 'portal-pages',
+    action: 'publish',
+    code: 'portal-pages.publish',
+    description: 'Publish or unpublish portal informational pages',
+  },
+  {
+    module: 'portal-pages',
+    action: 'read',
+    code: 'portal-pages.read',
+    description: 'Read portal informational pages',
+  },
+  {
+    module: 'portal-pages',
+    action: 'update',
+    code: 'portal-pages.update',
+    description: 'Update portal informational pages and public navigation',
+  },
+
+  // portal-posts
+  {
+    module: 'portal-posts',
+    action: 'create',
+    code: 'portal-posts.create',
+    description: 'Create portal news, articles, and announcements',
+  },
+  {
+    module: 'portal-posts',
+    action: 'delete',
+    code: 'portal-posts.delete',
+    description: 'Delete and restore portal news, articles, and announcements',
+  },
+  {
+    module: 'portal-posts',
+    action: 'publish',
+    code: 'portal-posts.publish',
+    description:
+      'Publish, unpublish, archive, and pin portal content — granted separately from create/update so writing and publishing can be different people',
+  },
+  {
+    module: 'portal-posts',
+    action: 'read',
+    code: 'portal-posts.read',
+    description: 'Read portal news, articles, and announcements',
+  },
+  {
+    module: 'portal-posts',
+    action: 'update',
+    code: 'portal-posts.update',
+    description: 'Update portal news, articles, and announcements',
+  },
+
+  // portal-settings
+  {
+    module: 'portal-settings',
+    action: 'read',
+    code: 'portal-settings.read',
+    description: 'Read portal homepage section configuration',
+  },
+  {
+    module: 'portal-settings',
+    action: 'update',
+    code: 'portal-settings.update',
+    description: 'Update portal homepage section configuration',
+  },
+
+  // portal-tags
+  {
+    module: 'portal-tags',
+    action: 'create',
+    code: 'portal-tags.create',
+    description: 'Create portal content tags',
+  },
+  {
+    module: 'portal-tags',
+    action: 'delete',
+    code: 'portal-tags.delete',
+    description: 'Delete portal content tags',
+  },
+  {
+    module: 'portal-tags',
+    action: 'read',
+    code: 'portal-tags.read',
+    description: 'Read portal content tags',
+  },
+  {
+    module: 'portal-tags',
+    action: 'update',
+    code: 'portal-tags.update',
+    description: 'Update portal content tags',
+  },
+
   // profiles
   {
     module: 'profiles',

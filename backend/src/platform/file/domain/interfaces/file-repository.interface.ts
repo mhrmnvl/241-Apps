@@ -12,6 +12,15 @@ export interface CreateFileRepositoryInput {
 
 export abstract class IFileRepository {
   abstract findMany(): Promise<FileEntity[]>;
+
+  /**
+   * Files uploaded under one application, newest first.
+   *
+   * Matched on the storage key, which `StorageKeyBuilder` composes as
+   * `{env}/{app}/…` — there is no `appKey` column, and adding one would
+   * duplicate a fact the key already carries.
+   */
+  abstract findManyByAppKey(appKey: string): Promise<FileEntity[]>;
   abstract findById(id: string): Promise<FileEntity | null>;
   abstract create(
     input: CreateFileRepositoryInput,

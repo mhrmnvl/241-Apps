@@ -30,6 +30,12 @@ model File {
   appSettingLogos        AppSetting[]        @relation("AppSettingLogo")
   appSettingFavicons     AppSetting[]        @relation("AppSettingFavicon")
   profileAvatars         Profile[]           @relation("ProfileAvatar")
+  portalPostCovers       Post[]              @relation("PortalPostCover")
+  portalPostAttachments  Post[]              @relation("PortalPostAttachment")
+  portalMediaUsages      PortalMediaUsage[]  @relation("PortalMediaUsageFile")
+  portalAgendaCovers     AgendaEntry[]       @relation("PortalAgendaCover")
+  portalAlbumCovers      GalleryAlbum[]      @relation("PortalAlbumCover")
+  portalGalleryPhotos    GalleryPhoto[]      @relation("PortalGalleryPhoto")
 
   @@index([categoryId])
   @@map("files")

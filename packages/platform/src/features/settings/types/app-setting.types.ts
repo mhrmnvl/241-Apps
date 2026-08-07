@@ -1,4 +1,4 @@
-export type AppKey = 'ACADEMIC' | 'INVENTORY' | 'ADMISSION'
+export type AppKey = 'ACADEMIC' | 'INVENTORY' | 'ADMISSION' | 'PORTAL'
 
 export interface AppSetting {
   id: string

@@ -1,0 +1,24 @@
+{
+  "files": [],
+  "references": [
+    {
+      "path": "./tsconfig.app.json"
+    },
+    {
+      "path": "./tsconfig.node.json"
+    }
+  ],
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@/features/platform/*": ["../../packages/platform/src/features/*"],
+      "@/shared/*": ["../../packages/shared/src/*"],
+      "@/ui": ["../../packages/ui/src/index.ts"],
+      "@/ui/*": ["../../packages/ui/src/components/ui/*/index.ts"],
+      "@/ui/utils": ["../../packages/ui/src/utils/index.ts"],
+      "@/master-data": ["../../packages/master-data/src/index.ts"],
+      "@/master-data/*": ["../../packages/master-data/src/*"]
+    }
+  }
+}

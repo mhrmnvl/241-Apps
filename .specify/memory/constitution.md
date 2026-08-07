@@ -385,12 +385,31 @@ is an architectural decision and REQUIRES an ADR.
   `NESTJS-RULES.md`, the doc MUST be updated in the same change. Those files are kept
   in sync with the code by contract, and agents rely on them as current.
 
-## Compliance Baseline (2026-08-06)
+## Compliance Baseline (re-surveyed 2026-08-07)
 
 The codebase largely holds these principles: no `repositories/` folders, no `any` in
 backend `src/`, no cross-app imports, no package→app reverse dependency, every
 controller and use case within budget, and the `*.includes.ts` / `*.where.ts` split
 pattern adopted across 43 files.
+
+**Re-surveyed after feature `001-content-management-system`**, which added a fourth
+app (`apps/portal`, package `portal-web`) and a seventh backend domain
+(`backend/src/portal/`, seven sibling modules). Findings:
+
+- The new domain adds **no items to this list**. All seven of its Prisma repositories
+  are under 200 lines, every module exposes an `index.ts`, no DTO imports a barrel,
+  and `portal/` reaches `academic/`, `inventory/`, and `admission/` not at all —
+  asserted by `src/portal/portal-siakad-disjointness.spec.ts` rather than by review.
+- Two deliberate deviations were introduced and are recorded as ADRs rather than as
+  debt, because both are decisions rather than shortcuts: **ADR-0005** (a fourth app)
+  and **ADR-0006** (narrowing the `ADMIN` permission bypass at `portal-*`, which
+  amends the single sanctioned exception named in Principle III).
+- One new sanctioned global: `PortalSharedModule` and `PortalFileUsageModule` are
+  `@Global()`. Both are justified in their own docblocks — the first carries the
+  public response cache that every portal module reaches for, the second registers
+  the portal's implementation of a `platform/file` port so file deletion can be vetoed
+  without `platform/` learning anything about the portal (dependency inversion, not a
+  boundary violation).
 
 The deviations below were found by survey and are recorded as debt. They are NOT
 precedent: new code MUST NOT extend them, and a change touching one of these files
@@ -406,7 +425,14 @@ SHOULD fix it in passing.
    domain into `asset`, `circulation`, and `approval` modules. 14 view/component files
    call `api/` directly as a result. Splitting it to match the backend is the target
    shape; `apps/academic` (37 features, 33 with `services/`) is the reference.
-3. **Admission provisions accounts by writing other domains' tables
+3. **The `ADMIN` permission bypass is now narrowed (Principle III)** — the guard's
+   blanket bypass no longer covers permissions whose module segment begins `portal-`;
+   `SUPER_ADMIN` retains it as break-glass. `iam.seed.ts` matches, granting `ADMIN`
+   every permission *except* the portal's — a bypass removed and then handed back as
+   an explicit grant would be no boundary at all. Recorded in full as ADR-0006. This
+   is an amendment to Principle III's stated exception, not a deviation from it, and
+   is listed here so the next survey does not read it as drift.
+4. **Admission provisions accounts by writing other domains' tables
    (Principle VI)** — `enrollAsStudent` in `prisma-admission-application.repository.ts`
    opens one `$transaction` and writes `tx.student`, `tx.studentEnrollment`,
    `tx.studentParent`, `tx.parent`, and `tx.semester` (owned by `academic/`) plus
@@ -414,20 +440,21 @@ SHOULD fix it in passing.
    Two reads, `isNisTaken` / `isNisnTaken`, hit `prisma.student` the same way even
    though `IStudentRepository` already exposes `findByNis` / `findByNisn`.
 
-   This is the sharpest open tension in the codebase and MUST NOT be fixed by reflex:
+   This remains the sharpest open tension in the codebase and MUST NOT be fixed by
+   reflex:
    routing the writes through the owning modules removes the shared transaction that
    currently makes provisioning atomic, and Principle VI forbids spanning a transaction
    across modules. Resolving it REQUIRES an ADR that picks one of — a saga/compensating
    sequence over idempotent steps, an `academic`-owned provisioning use case that takes
    the whole applicant payload, or an explicit, documented exemption for provisioning.
    Do not extend the current pattern in the meantime.
-4. **`backend/src/admission` is a flat module (Technology: domain vs module)** — it
+5. **`backend/src/admission` is a flat module (Technology: domain vs module)** — it
    holds four repository ports (wave, announcement, applicant, application), five
    controllers, and 31 use cases in one module, so the "split on the second bounded
    concern" trigger passed long ago. The four ports and five controllers already mark
    the seams; splitting into sibling `wave/`, `announcement/`, `applicant/`, and
    `application/` modules also resolves item 1's two oversized repositories and gives
-   item 3 a natural home.
+   item 4 a natural home.
 
 This section MUST be re-surveyed and updated whenever the constitution is amended. An
 item that is fixed is deleted from the list, not marked done.

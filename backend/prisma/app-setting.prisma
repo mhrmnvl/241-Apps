@@ -2,6 +2,7 @@ enum AppKey {
   ACADEMIC
   INVENTORY
   ADMISSION
+  PORTAL
 }
 
 model AppSetting {

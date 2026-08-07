@@ -1,0 +1,38 @@
+{
+  "extends": "@vue/tsconfig/tsconfig.dom.json",
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "baseUrl": ".",
+    "moduleResolution": "bundler",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@/features/platform/*": ["../../packages/platform/src/features/*"],
+      "@/shared/*": ["../../packages/shared/src/*"],
+      "@/ui": ["../../packages/ui/src/index.ts"],
+      "@/ui/*": ["../../packages/ui/src/components/ui/*/index.ts"],
+      "@/ui/utils": ["../../packages/ui/src/utils/index.ts"],
+      "@/master-data": ["../../packages/master-data/src/index.ts"],
+      "@/master-data/*": ["../../packages/master-data/src/*"]
+    },
+
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedSideEffectImports": true
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/**/*.vue",
+    "../../packages/ui/src/**/*.ts",
+    "../../packages/ui/src/**/*.vue",
+    "../../packages/shared/src/**/*.ts",
+    "../../packages/shared/src/**/*.vue",
+    "../../packages/master-data/src/**/*.ts",
+    "../../packages/master-data/src/**/*.vue",
+    "../../packages/platform/src/**/*.ts",
+    "../../packages/platform/src/**/*.vue"
+  ]
+}
