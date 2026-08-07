@@ -2,6 +2,7 @@
 import { computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { Button } from '@/ui/button'
+import PagePagination from '@/components/PagePagination.vue'
 import AgendaCard from '../components/AgendaCard.vue'
 import { agendaService } from '../services/agendaService'
 import { useAgendaStore } from '../stores/agendaStore'
@@ -101,5 +102,12 @@ function setScope(next: AgendaScope) {
         :entry="entry"
       />
     </div>
+
+    <PagePagination
+      v-if="!store.loading && !store.unavailable"
+      :page="page"
+      :total="store.publicTotal"
+      :limit="store.publicLimit"
+    />
   </div>
 </template>

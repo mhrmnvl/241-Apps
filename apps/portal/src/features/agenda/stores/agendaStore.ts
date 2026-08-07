@@ -10,6 +10,7 @@ export const useAgendaStore = defineStore('portal-agenda', () => {
   const publicEntries = ref<PublicAgendaEntry[]>([])
   const publicCurrent = ref<PublicAgendaEntry | null>(null)
   const publicTotal = ref(0)
+  const publicLimit = ref(10)
 
   const loading = ref(false)
   const isSaving = ref(false)
@@ -35,6 +36,7 @@ export const useAgendaStore = defineStore('portal-agenda', () => {
     publicEntries,
     publicCurrent,
     publicTotal,
+    publicLimit,
     loading,
     isSaving,
     conflict,

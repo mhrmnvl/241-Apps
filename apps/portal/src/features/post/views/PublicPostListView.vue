@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { Button } from '@/ui/button'
 import { Input } from '@/ui/input'
 import { categoryService, type PublicPostCategory } from '@/features/taxonomy'
+import PagePagination from '@/components/PagePagination.vue'
 import PostCard from '../components/PostCard.vue'
 import { postService } from '../services/postService'
 import { usePublicPostStore } from '../stores/publicPostStore'
@@ -25,10 +26,6 @@ const page = computed(() => {
   const raw = Number(route.query.page)
   return Number.isInteger(raw) && raw > 0 ? raw : 1
 })
-
-const totalPages = computed(() =>
-  store.limit > 0 ? Math.ceil(store.total / store.limit) : 1,
-)
 
 // The filters live in the address too, for the same reason the page does: a
 // visitor sharing "berita tentang prestasi" is sharing a link, not a click path
@@ -60,10 +57,6 @@ function load() {
 }
 
 watch([type, page, categorySlug, tagSlug, search], load, { immediate: true })
-
-function goTo(next: number) {
-  void router.push({ query: { ...route.query, page: next } })
-}
 
 /** Any filter change resets to page 1 — page 4 of a narrower result set is
  *  usually empty, and an empty page reads as "nothing matched". */
@@ -189,31 +182,11 @@ const hasFilters = computed(
         />
       </div>
 
-      <nav
-        v-if="totalPages > 1"
-        class="flex items-center justify-center gap-4"
-        aria-label="Navigasi halaman"
-      >
-        <Button
-          variant="outline"
-          size="sm"
-          :disabled="page <= 1"
-          @click="goTo(page - 1)"
-        >
-          Sebelumnya
-        </Button>
-        <span class="text-sm text-muted-foreground">
-          Halaman {{ page }} dari {{ totalPages }}
-        </span>
-        <Button
-          variant="outline"
-          size="sm"
-          :disabled="page >= totalPages"
-          @click="goTo(page + 1)"
-        >
-          Berikutnya
-        </Button>
-      </nav>
+      <PagePagination
+        :page="page"
+        :total="store.total"
+        :limit="store.limit"
+      />
     </template>
   </div>
 </template>

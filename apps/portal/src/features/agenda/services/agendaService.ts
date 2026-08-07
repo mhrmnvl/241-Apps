@@ -142,6 +142,7 @@ export const agendaService = {
       const { data } = await publicAgendaApi.list(query)
       store.publicEntries = data.data ?? []
       store.publicTotal = data.meta?.total ?? store.publicEntries.length
+      store.publicLimit = data.meta?.limit ?? store.publicLimit
     } catch {
       store.publicEntries = []
       store.publicTotal = 0

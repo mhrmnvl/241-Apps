@@ -179,9 +179,12 @@ nothing is the most expensive failure mode available in this repository.
 pnpm --filter backend test:e2e        # includes portal-public-visibility.e2e-spec.ts
 ```
 
-107 assertions over every content type × every unpublished state × every public
+126 assertions over every content type × every unpublished state × every public
 surface, plus a control proving a published item *is* visible. This is the automated
 form of SC-004 and replaces the manual sweep the coverage map below used to defer.
+It also covers the crawler surface: that `/sitemap.xml` omits every unpublished item
+across all four types, and that the control item's entry is a well-formed absolute
+URL (SC-014).
 
 It caught two real defects on its first run, which is the argument for having written
 it: the public detail route passed the lowercase URL segment straight to Prisma as an
@@ -196,9 +199,9 @@ rather than predicting a visitor's experience.
 
 | Check | Result |
 |---|---|
-| Backend unit suite | 520 passed (265 in `src/portal`) |
-| Backend e2e | 107 passed |
-| `portal-web` vitest | 25 passed |
+| Backend unit suite | 1,568 passed across 273 suites |
+| Backend e2e | 126 passed |
+| `portal-web` vitest | 28 passed |
 | Public surface, concurrency 20 | ~860 req/s, p50 18 ms, p95 44 ms, p99 61 ms |
 | `/health` sampled mid-load | 200 in 247 ms — SIAKAD-facing routes unaffected (SC-012) |
 | SC-006: `ACADEMIC.maintenanceMode = true` | every `/portal/public/*` endpoint still 200 |
@@ -220,12 +223,25 @@ from a single NAT address — roughly 750 requests in a burst, against a 300/min
 production limit. The default was raised to 2,000/min with that arithmetic recorded in
 `app.module.ts`.
 
-**What it did not establish.** SC-007 (main text painted within 2.5 s on 4G) is a
-front-end delivery measurement and needs a throttled browser profile against a
-production build behind the real network — not a local API benchmark. SC-010
-(management search over 500 items) needs a dataset of that size; the seed does not
-provide one. Both remain open, and are listed as such below rather than quietly
-counted as passed.
+**What it did not establish.** SC-007 (main text painted within 2.5 s) is a front-end
+delivery measurement and needs a throttled browser profile against a production build,
+not a local API benchmark. The criterion now names that profile — Chrome DevTools
+"Slow 4G", 400 kb/s / 400 ms RTT, cache disabled, measured as LCP — so it can be run
+and passed rather than argued about. SC-010 (management search over 500 items) needs a
+dataset of that size; the seed does not provide one. Both remain open, and are listed
+as such below rather than quietly counted as passed.
+
+### Amended 2026-08-07 — post-remediation
+
+A second `/speckit-analyze` pass after the feature shipped found 16 issues, all now
+closed. Three were in the constitution rather than the code (it still said "three
+apps", and Principle III's text no longer matched the guard it describes — bumped to
+1.1.0). The one user-visible defect: only the Berita/Artikel listing had page
+controls, so a visitor could reach page 2 of the agenda, album, or announcement
+listings only by editing the URL by hand — the addresses worked, the buttons did not
+exist, and the gallery service was discarding the pagination meta that would have told
+it a second page existed. Fixed by one shared `PagePagination.vue` used by all four,
+with `galleryService.spec.ts` covering the dropped-meta regression.
 
 ---
 
@@ -244,6 +260,10 @@ counted as passed.
 **Not covered by manual walkthrough**, and needing measurement rather than clicking:
 
 - **SC-004** — now automated as `backend/test/portal-public-visibility.e2e-spec.ts`.
+- **SC-014** — now automated in the same sweep, against the restated criterion: the
+  sitemap lists the published item as an absolute URL and omits every unpublished one,
+  and `/robots.txt` permits the path. Index inclusion itself is the search engine's
+  decision and is deliberately not a criterion this project claims to pass.
 - **SC-012** — exercised by the recorded run above: the public surface saturating its
   own throttle bucket left `/health` responding normally.
 - **SC-007** (2.5 s to main text on 4G) — still open. Needs a throttled browser profile

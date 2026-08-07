@@ -21,6 +21,22 @@ const DEFAULT_HOMEPAGE_SECTIONS = [
   { key: 'galeri', itemCount: 3, displayOrder: 4 },
 ];
 
+// The starting public menu. Built-in listings resolve to `/<routeKey>`; the PPDB
+// entry is the one FR-004 actually requires — the portal MUST link visitors to
+// the admission application, and a nav item nobody creates is not a link. Its
+// address is deployment-specific, so it comes from the environment with the
+// admission dev server as the fallback.
+const PPDB_URL = process.env.PPDB_BASE_URL ?? 'http://localhost:5175';
+
+const DEFAULT_NAV_ITEMS = [
+  { label: 'Berita', routeKey: 'berita', displayOrder: 1 },
+  { label: 'Artikel', routeKey: 'artikel', displayOrder: 2 },
+  { label: 'Pengumuman', routeKey: 'pengumuman', displayOrder: 3 },
+  { label: 'Agenda', routeKey: 'agenda', displayOrder: 4 },
+  { label: 'Galeri', routeKey: 'galeri', displayOrder: 5 },
+  { label: 'PPDB', externalUrl: PPDB_URL, displayOrder: 6 },
+];
+
 /**
  * Everything a humas account needs to run the portal, and nothing else.
  *
@@ -108,9 +124,21 @@ export async function seedPortal(prisma: PrismaClient) {
     });
   }
 
+  // PortalNavItem carries no unique column — the label is admin-editable and the
+  // same routeKey may legitimately appear twice. Matching on label keeps a
+  // reseed idempotent without inventing a constraint the admin UI would fight.
+  console.log('  [portal] Seeding public navigation...');
+  for (const item of DEFAULT_NAV_ITEMS) {
+    const existing = await prisma.portalNavItem.findFirst({
+      where: { label: item.label },
+      select: { id: true },
+    });
+    if (!existing) await prisma.portalNavItem.create({ data: item });
+  }
+
   await seedPortalEditorRole(prisma);
 
   console.log(
-    `  [portal] ${await prisma.postCategory.count()} categories, ${await prisma.portalHomepageSection.count()} homepage sections`,
+    `  [portal] ${await prisma.postCategory.count()} categories, ${await prisma.portalHomepageSection.count()} homepage sections, ${await prisma.portalNavItem.count()} nav items`,
   );
 }

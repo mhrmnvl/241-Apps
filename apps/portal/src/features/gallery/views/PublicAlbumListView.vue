@@ -2,6 +2,7 @@
 import { computed, watch } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 import { Images } from 'lucide-vue-next'
+import PagePagination from '@/components/PagePagination.vue'
 import { galleryService } from '../services/galleryService'
 import { useGalleryStore } from '../stores/galleryStore'
 
@@ -91,5 +92,12 @@ function formatDate(value: string) {
         </div>
       </RouterLink>
     </div>
+
+    <PagePagination
+      v-if="!store.loading && !store.unavailable"
+      :page="page"
+      :total="store.publicTotal"
+      :limit="store.publicLimit"
+    />
   </div>
 </template>

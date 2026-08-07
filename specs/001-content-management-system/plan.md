@@ -63,7 +63,8 @@ per-`AppKey` setting and the portal gets its own key. Media URLs must survive be
 cached by a third party (FR-065).
 
 **Scale/Scope**: 1,000 published items, 200 albums, 10,000 monthly visitors (SC-012).
-11 user stories, 68 functional requirements, 6 new backend modules, ~6 frontend features.
+11 user stories, 68 functional requirements, 7 new backend modules (plus a `shared/`
+folder that is not a module), 7 frontend features.
 
 ## Constitution Check
 
@@ -127,15 +128,16 @@ backend/
 │   └── portal.prisma                   # NEW — all portal models
 └── src/
     ├── portal/                         # NEW top-level domain
-    │   ├── portal.module.ts
+    │   ├── portal.module.ts            # PortalHtmlModule MUST be imported LAST
+    │   ├── portal-siakad-disjointness.spec.ts   # asserts portal/ touches no SIAKAD table
     │   ├── post/                       # Berita | Artikel | Pengumuman
     │   │   ├── presentation/           # post.controller.ts + post-public.controller.ts
-    │   │   ├── use-cases/              # create/update/publish/unpublish/archive/delete/restore/get*
+    │   │   ├── use-cases/              # create/update/publish/unpublish/archive/delete/restore/get*/preview
     │   │   ├── domain/                 # entities, enums, interfaces (IPostRepository)
-    │   │   ├── infrastructure/persistence/  # prisma-post.repository.ts + .includes/.where/.writer
+    │   │   ├── infrastructure/persistence/  # prisma-post.repository.ts + .includes/.where/.writer/.reader
     │   │   ├── dto/{request,response}/
     │   │   ├── constants/
-    │   │   ├── services/               # slug-builder, html-sanitizer (stateless helpers)
+    │   │   ├── services/               # post-audit, post-status-sync (stateless helpers)
     │   │   ├── post.module.ts
     │   │   └── index.ts
     │   ├── agenda/                     # same layout
@@ -143,11 +145,23 @@ backend/
     │   ├── page/                       # Halaman + public navigation
     │   ├── taxonomy/                   # categories + tags
     │   ├── media/                      # PortalMediaUsage + public media endpoint
-    │   └── homepage/                   # section config + cross-module aggregation
+    │   ├── homepage/                   # section config + cross-module aggregation
+    │   │   ├── presentation/           # + portal-html.controller.ts (GET *, metadata injection)
+    │   │   └── infrastructure/         # meta-tag.builder.ts, sitemap-xml.builder.ts
+    │   └── shared/                     # NOT a module: @PortalPublic(), response cache,
+    │                                   #   optimistic-update helper. @Global().
     ├── platform/access-control/permission/
     │   ├── constants/permission-codes.constants.ts   # + portal-* entries
     │   └── guards/permission.guard.ts                # + bypass exemption (ADR-0006)
+    ├── platform/file/
+    │   └── domain/interfaces/file-usage-checker.interface.ts  # port portal implements,
+    │                                   #   so platform/ never depends on portal/
     ├── shared/domain/enums/app-key.enum.ts           # + PORTAL
+    ├── shared/helpers/                 # slug.helper, html-sanitizer.service,
+    │                                   #   plain-summary.helper — text utilities with no
+    │                                   #   domain knowledge, needed by four portal modules,
+    │                                   #   so NOT under post/services/ (would force a
+    │                                   #   cross-module barrel import, Principle II)
     └── app.module.ts                                 # + PortalModule
 
 apps/portal/                            # NEW app, package name "portal-web"
@@ -163,11 +177,13 @@ apps/portal/                            # NEW app, package name "portal-web"
     │   ├── AppLayout.vue               # management shell
     │   └── NotFoundPage.vue
     ├── config/menuConfig.ts            # app-specific, stays here (constitution II)
+    ├── components/                     # cross-feature, single-app UI (PagePagination.vue)
     └── features/
         ├── post/                       # api/ services/ stores/ components/ views/ types/ index.ts
         ├── agenda/
         ├── gallery/
         ├── page/
+        ├── media/                      # MediaLibraryDialog, shared by every editor surface
         ├── taxonomy/                   # config.ts per entity → @241/master-data engine
         └── homepage/
 
@@ -177,12 +193,12 @@ docs/adr/
 └── 0006-narrow-admin-permission-bypass.md  # NEW
 ```
 
-**Structure Decision**: a new frontend app plus a new backend domain of six sibling
+**Structure Decision**: a new frontend app plus a new backend domain of seven sibling
 modules. No new workspace package: nothing here is consumed by a second app, and
 promoting speculatively would violate constitution II ("code used by two or more apps"),
 so portal code stays in `apps/portal` until a second consumer actually exists.
 
-The six-module split follows the seams the spec already draws — Post, Agenda, Gallery,
+The seven-module split follows the seams the spec already draws — Post, Agenda, Gallery,
 Page, Taxonomy, Media, Homepage each own distinct tables. Building this as one flat
 `portal/` module would reproduce exactly the debt the constitution's Compliance Baseline
 records against `admission/` (item 7), and the split costs nothing now while costing a

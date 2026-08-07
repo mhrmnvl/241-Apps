@@ -1,6 +1,38 @@
 <!--
 Sync Impact Report
 ==================
+Version change: 1.0.0 → 1.1.0 (2026-08-07)
+Bump rationale: MINOR — Principle III's sanctioned exception is materially expanded,
+and two structural facts are corrected. Amendment (a)-(e) per the procedure below:
+
+  (a) Edits: Principle III, Technology (workspace shape, domain vs module),
+      Compliance Baseline item 3, this report.
+  (b) Version and rationale: stated here.
+  (c) Docs affected: none further. CLAUDE.md already records four apps, seven portal
+      modules, and the portal domain; no divergence was introduced.
+  (d) Migration plan: none needed — this describes code that already shipped.
+  (e) Compliance Baseline: re-surveyed 2026-08-07 (below), unchanged by this bump.
+
+What 1.1.0 fixes, all three found by `/speckit-analyze` re-run after feature
+001-content-management-system shipped:
+
+  - III: the principle said the sanctioned exception was "the `SUPER_ADMIN`/`ADMIN`
+    bypass" flatly, while `PermissionGuard` had already narrowed it — ADMIN does not
+    bypass `portal-*` (ADR-0006). The correction existed ONLY as a footnote in
+    Baseline item 3, which called itself "an amendment to Principle III". A
+    NON-NEGOTIABLE principle whose text the code contradicts is exactly the fiction
+    Governance forbids, and the failure mode is specific: an agent reading III alone
+    concludes ADMIN can publish to the school's public website. Now stated in the
+    principle, with the exemption list named so adding a prefix is visibly an
+    amendment rather than a config tweak.
+  - Technology: "three apps" contradicted the Compliance Baseline 100 lines later,
+    which recorded the fourth. Now four.
+  - Technology: `portal/` added to the domains-holding-sibling-modules list; it is
+    the newest and cleanest example of the target shape.
+
+Version 1.0.0's report follows, retained because it records how the principles were
+derived and which four the code overturned.
+
 Version change: (unfilled template) → 1.0.0
 Bump rationale: initial ratification. Every placeholder token replaced with concrete
 governance. No prior version was ever committed, so this is a single first release
@@ -160,8 +192,14 @@ Every query is scoped and every action is permission-controlled.
 - Authorization MUST use permissions (`@RequirePermissions('students.create')`, module
   segment plural). Role-name and role-code string comparisons are forbidden in
   controllers, use cases, and repositories. The single sanctioned exception is the
-  `SUPER_ADMIN`/`ADMIN` bypass inside `PermissionGuard` itself — the guard is where
-  role-to-permission resolution belongs, and that check MUST NOT be copied elsewhere.
+  role bypass inside `PermissionGuard` itself — the guard is where role-to-permission
+  resolution belongs, and that check MUST NOT be copied elsewhere. The bypass is not
+  uniform: `SUPER_ADMIN` passes every permission as break-glass, while `ADMIN` passes
+  every permission **except** those whose module segment is listed in
+  `ROLE_BYPASS_EXEMPT_PREFIXES` (currently `portal-`). An exempt prefix means a
+  boundary the top operational role does not walk through by virtue of its role
+  (ADR-0006); adding one is an amendment to this principle, not a configuration
+  change.
 
 Rationale: wrong data in a school record looks exactly like correct data to the user
 reading it. Scoping and permission failures are silent by nature, so they must be
@@ -290,8 +328,9 @@ and reviewed.
   them in `dependencies` gives the package its own copy and reintroduces the duplicate
   runtime instance (Pinia's "reading `_s` of undefined") that the TypeScript pin exists
   to prevent. pnpm's strict `node_modules` will not cover an undeclared import.
-- **Workspace shape**: three apps (`academic`, `inventory`, `admission`), four packages
-  (`@241/ui`, `@241/shared`, `@241/platform`, `@241/master-data`), one `backend`.
+- **Workspace shape**: four apps (`academic`, `inventory`, `admission`, `portal`), four
+  packages (`@241/ui`, `@241/shared`, `@241/platform`, `@241/master-data`), one
+  `backend`.
 - **Frontend stack**: Vue 3 (Composition API, `<script setup>`), TypeScript, Vite,
   Tailwind CSS v4, shadcn-vue + Reka UI, Pinia, Vue Router, vee-validate + Zod,
   TanStack Vue Table, Lucide, Axios, FullCalendar. Adding a cross-cutting dependency
@@ -309,8 +348,8 @@ and reviewed.
   exceptions, interfaces), `infrastructure/` (persistence, mappers, parsers), `dto/`
   (`request/`, `response/`), `constants/`, `<name>.module.ts`, `index.ts`. There is no
   `repositories/` folder. New modules are registered in `src/app.module.ts`.
-- **Domain vs module**: `platform/`, `academic/`, and `inventory/` are domains holding
-  sibling modules, and that is the target shape for every domain. `admission/` is a
+- **Domain vs module**: `platform/`, `academic/`, `inventory/`, and `portal/` are domains
+  holding sibling modules, and that is the target shape for every domain. `admission/` is a
   single flat module at domain level that has already outgrown it — see the Compliance
   Baseline. New admission work MUST NOT extend the flat layout.
 - **Prisma schema** is split per domain under `backend/prisma/*.prisma`. A new model
@@ -429,9 +468,9 @@ SHOULD fix it in passing.
    blanket bypass no longer covers permissions whose module segment begins `portal-`;
    `SUPER_ADMIN` retains it as break-glass. `iam.seed.ts` matches, granting `ADMIN`
    every permission *except* the portal's — a bypass removed and then handed back as
-   an explicit grant would be no boundary at all. Recorded in full as ADR-0006. This
-   is an amendment to Principle III's stated exception, not a deviation from it, and
-   is listed here so the next survey does not read it as drift.
+   an explicit grant would be no boundary at all. Recorded in full as ADR-0006, and
+   now stated directly in Principle III — this entry is history, not a correction
+   living outside the principle it corrects.
 4. **Admission provisions accounts by writing other domains' tables
    (Principle VI)** — `enrollAsStudent` in `prisma-admission-application.repository.ts`
    opens one `$transaction` and writes `tx.student`, `tx.studentEnrollment`,
@@ -486,4 +525,4 @@ the code or corrected here; it is never left standing as fiction.
 **Runtime development guidance**: root `CLAUDE.md` for the workspace,
 `backend/docs/NESTJS-RULES.md` for backend work.
 
-**Version**: 1.0.0 | **Ratified**: 2026-08-06 | **Last Amended**: 2026-08-06
+**Version**: 1.1.0 | **Ratified**: 2026-08-06 | **Last Amended**: 2026-08-07

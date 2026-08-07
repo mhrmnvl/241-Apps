@@ -12,6 +12,8 @@ export const useGalleryStore = defineStore('portal-gallery', () => {
 
   const publicAlbums = ref<PublicAlbumSummary[]>([])
   const publicAlbum = ref<PublicAlbumDetail | null>(null)
+  const publicTotal = ref(0)
+  const publicLimit = ref(12)
 
   const loading = ref(false)
   const isSaving = ref(false)
@@ -38,6 +40,8 @@ export const useGalleryStore = defineStore('portal-gallery', () => {
     current,
     publicAlbums,
     publicAlbum,
+    publicTotal,
+    publicLimit,
     loading,
     isSaving,
     loadingMorePhotos,

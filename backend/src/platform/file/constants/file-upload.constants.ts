@@ -6,6 +6,9 @@ export const ALLOWED_UPLOAD_MIME_TYPES = [
   'application/pdf',
 ] as const;
 
+/** Human-readable form of the list above, for the rejection message (FR-056). */
+export const ACCEPTED_UPLOAD_FORMATS_LABEL = 'JPG, PNG, WebP, GIF, PDF';
+
 // GIF is excluded: sharp only reads the first frame unless given {animated:
 // true}, which would silently flatten any animated GIF during optimization.
 export const OPTIMIZABLE_IMAGE_MIME_TYPES = [

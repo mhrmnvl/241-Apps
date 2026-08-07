@@ -4,7 +4,8 @@
 
 **Created**: 2026-08-06
 
-**Status**: Draft
+**Status**: Implemented (2026-08-07) — see `tasks.md` (T001–T159) and branch
+`feat/portal-content-management-system`
 
 **Input**: User description: "Saya mau membuat Content Management System dimana nanti akan ditampilkan di landing page sebagian, sehingga datanya dinamis, cms ini terdiri dari berita, artikel dll yang best practice, boleh direkomendasikan ke saya ya"
 
@@ -280,7 +281,7 @@ After an event, portal staff create an album, upload the photo set once, give it
 
 ### Functional Requirements — Content Types and Taxonomy
 
-- **FR-034**: The portal MUST support these content types, each with its own public listing and its own address space: **Berita**, **Artikel**, **Pengumuman**, **Agenda**, **Galeri**, and **Halaman**.
+- **FR-034**: The portal MUST support these content types, each with its own address space: **Berita**, **Artikel**, **Pengumuman**, **Agenda**, **Galeri**, and **Halaman**. All except **Halaman** MUST additionally have their own public listing. Halaman is exempt deliberately: informational pages are reached from the navigation menu (FR-053) and from links inside other content, never by browsing an index of them — an "all pages" listing is a site-map artefact no visitor asks for, and building one would invite pages to be published without a navigation entry, which FR-053 exists to prevent.
 - **FR-035**: Berita, Artikel, and Pengumuman MUST share one authoring experience and one lifecycle, differing only in their type-specific fields and their public placement.
 - **FR-036**: Administrators MUST be able to create, rename, and deactivate categories.
 - **FR-037**: The system MUST refuse to delete a category still assigned to content, or require the content to be reassigned first.
@@ -362,14 +363,14 @@ After an event, portal staff create an album, upload the photo set once, give it
 - **SC-004**: Zero unpublished items are ever retrievable by an anonymous visitor — verified by attempting direct access to draft, scheduled, archived, and deleted addresses across every content type, with every attempt returning "not found".
 - **SC-005**: A portal operator account holds zero access to student, grade, personnel, asset, or applicant data — verified by attempting every such area and being refused in all of them.
 - **SC-006**: The portal stays publicly readable for 100% of a SIAKAD maintenance window.
-- **SC-007**: 95% of public content page loads render their main text and headline within 2.5 seconds on a typical Indonesian mobile connection.
+- **SC-007**: 95% of public content page loads render their main text and headline within 2.5 seconds, measured as Largest Contentful Paint against a **production build** under Chrome DevTools' "Slow 4G" profile (400 kb/s down, 400 kb/s up, 400 ms RTT) with cache disabled. The profile is named because "a typical Indonesian mobile connection" cannot be passed or failed — two people measuring it in good faith get different answers.
 - **SC-008**: A visitor can reach the full text of any highlighted item from the homepage in a single click.
 - **SC-009**: An item's public address remains valid indefinitely after publication, including after its title is edited — measured as zero broken addresses among previously shared links.
 - **SC-010**: An editor can locate any item among the most recent 500 within 10 seconds using the management screen's search and filters.
 - **SC-011**: An accidentally deleted item can be restored by staff within 30 days without developer or database intervention.
 - **SC-012**: The portal serves at least 1,000 published items, 200 albums, and 10,000 monthly visitors with no measurable degradation of SIAKAD, inventory, or PPDB.
 - **SC-013**: 100% of shared public addresses produce a rich preview showing headline, summary, and image on the messaging platforms the school actually uses.
-- **SC-014**: Every published item is discoverable through search engines within one indexing cycle of publication.
+- **SC-014**: Every published item is submitted for search-engine discovery — verified by what the portal controls, not by what a crawler chooses to do: the item appears in `/sitemap.xml` within 60 seconds of publication, that document validates against the sitemap protocol with absolute `<loc>` values, `/robots.txt` permits the path, and the item's detail page carries a canonical URL. Actual index inclusion and its timing are the search engine's decision and cannot be a criterion this project passes or fails.
 - **SC-015**: A published album of 50 photos becomes usable to a visitor on a mobile connection within 3 seconds, without waiting for every photo to arrive.
 
 ## Assumptions

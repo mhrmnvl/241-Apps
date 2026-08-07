@@ -5,6 +5,7 @@ import { RouterLink } from 'vue-router'
 import { Badge } from '@/ui/badge'
 import { Button } from '@/ui/button'
 import { Paperclip } from 'lucide-vue-next'
+import PagePagination from '@/components/PagePagination.vue'
 import { postService } from '../services/postService'
 import { usePublicPostStore } from '../stores/publicPostStore'
 
@@ -138,6 +139,13 @@ function formatDate(value: string) {
         </RouterLink>
       </li>
     </ul>
+
+    <PagePagination
+      v-if="!store.loading && !store.unavailable"
+      :page="page"
+      :total="store.total"
+      :limit="store.limit"
+    />
 
     <!-- The attachment indicator lives on the detail page rather than here:
          the listing payload is a summary and does not carry it. -->

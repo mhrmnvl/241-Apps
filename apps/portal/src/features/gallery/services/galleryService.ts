@@ -233,8 +233,13 @@ export const galleryService = {
     try {
       const { data } = await publicGalleryApi.list({ page })
       store.publicAlbums = data.data ?? []
+      // Without the meta the view cannot know a second page exists, and the
+      // pager silently never renders (FR-021).
+      store.publicTotal = data.meta?.total ?? store.publicAlbums.length
+      store.publicLimit = data.meta?.limit ?? store.publicLimit
     } catch {
       store.publicAlbums = []
+      store.publicTotal = 0
       store.unavailable = true
     } finally {
       store.loading = false

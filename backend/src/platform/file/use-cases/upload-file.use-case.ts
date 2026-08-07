@@ -7,6 +7,7 @@ import { ImageOptimizerService } from '../domain/interfaces/image-optimizer.inte
 import { StorageService } from '../../../core/storage/storage.service.js';
 import { StorageKeyBuilder } from '../../../core/storage/storage-key-builder.service.js';
 import {
+  ACCEPTED_UPLOAD_FORMATS_LABEL,
   ALLOWED_UPLOAD_MIME_TYPES,
   OPTIMIZABLE_IMAGE_MIME_TYPES,
   sharePreviewKey,
@@ -46,7 +47,11 @@ export class UploadFileUseCase {
         detectedType.mime as (typeof ALLOWED_UPLOAD_MIME_TYPES)[number],
       )
     ) {
-      throw new BadRequestException('File type is not allowed');
+      // Naming the accepted formats is the requirement, not a nicety (FR-056):
+      // "not allowed" leaves the editor guessing which of their files will work.
+      throw new BadRequestException(
+        `File type is not allowed. Accepted formats: ${ACCEPTED_UPLOAD_FORMATS_LABEL}`,
+      );
     }
 
     let buffer: Buffer = file.buffer;

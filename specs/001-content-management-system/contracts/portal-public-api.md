@@ -61,7 +61,17 @@ immediately, with no separate revocation step.
 |---|---|---|---|
 | `GET` | `/portal/public/meta` | `PageMetaDto` | Query: `path` (a public portal path). Consumed by the backend's own HTML-serving controller, which injects these tags into `index.html` before responding (research R3, Option A). FR-065 |
 | `GET` | `/portal/public/media/:fileId?variant=preview` | `302` → signed URL | The 1200×630 JPEG share-preview variant. This is what `og:image` points at — never the original, which is large enough that WhatsApp will drop the image from the card |
-| `GET` | `/portal/public/sitemap` | `SitemapEntryDto[]` | Every [VISIBLE] item across all types with its `lastModified`. Rendered as XML by the portal host. FR-067 |
+| `GET` | `/portal/public/sitemap` | `SitemapEntryDto[]` | Every [VISIBLE] item across all types — posts, agenda, albums, pages — plus the static listing paths, each with its `lastModified`. The JSON form, for tooling. FR-067 |
+
+**Root-level crawler endpoints.** These are not under `/portal/public/` because a search
+engine looks for them at the host root, and they are served by `PortalHtmlController`
+**before** its `GET *` catch-all — Nest matches in registration order, so a route declared
+after the catch-all is never reached.
+
+| Method | Path | Response | Notes |
+|---|---|---|---|
+| `GET` | `/sitemap.xml` | `application/xml` | The sitemap protocol document a crawler actually consumes: `<urlset>` with absolute `<loc>` values built from `PORTAL_BASE_URL` and XML-escaped. Same entries as `/portal/public/sitemap`. FR-067, SC-014 |
+| `GET` | `/robots.txt` | `text/plain` | `Allow: /`, `Disallow: /admin/`, `Disallow: /login`, and an absolute `Sitemap:` line. SC-014 |
 
 `PageMetaDto`: `{ title, description, canonicalUrl, imageUrl, type, publishedAt }`.
 `imageUrl` is always a `/portal/public/media/:fileId` address, never a signed URL — a

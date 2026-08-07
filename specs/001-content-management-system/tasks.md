@@ -163,6 +163,7 @@ Both open items from plan.md are now closed, and the tasks below reflect them:
 - [X] T066 [P] [US2] Build `apps/portal/src/features/post/components/PostCard.vue`, shared by the homepage sections and the public listing
 - [X] T067 [US2] Register public routes `/berita`, `/berita/:slug`, `/artikel`, `/artikel/:slug` and wire the 404 path so an unknown, draft, or deleted slug renders `NotFoundPage.vue`
 - [X] T068 [US2] Write `apps/portal/src/features/post/services/postService.spec.ts` covering the public/draft boundary as the service sees it
+- [X] T068a [US2] Implement `PreviewPostUseCase` in `backend/src/portal/post/use-cases/preview-post.use-case.ts` with spec, and add `GET /portal/posts/:id/preview` to `post.controller.ts` guarded by `portal-posts.read` (FR-011, contracts/portal-admin-api.md). It deliberately bypasses the visibility predicate — a draft has no public address, which is the whole point — and is safe because the route is not `@PortalPublic()`. It MUST reuse the same `toPublicDetail` mapper as the public page: a preview assembled from the admin shape drifts the moment either changes, and a preview that lies is worse than none. **Added retroactively** — the contract carried this endpoint from the start but `/speckit-tasks` emitted no task for it, so FR-011 reached implementation with zero task coverage
 
 **Checkpoint**: content is readable and shareable end to end.
 

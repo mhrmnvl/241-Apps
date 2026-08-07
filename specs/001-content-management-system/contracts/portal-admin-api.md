@@ -70,7 +70,8 @@ missing fields (FR-012, FR-057). Draft saves skip all of it.
 | `POST` | `/portal/albums` | `portal-albums.create` |
 | `PATCH` | `/portal/albums/:id` | `portal-albums.update` |
 | `POST` | `/portal/albums/:id/photos` | `portal-albums.update` — body: `{ fileId, altText, caption? }` |
-| `PATCH` | `/portal/albums/:id/photos/order` | `portal-albums.update` — body: `{ photoIds: string[] }` (FR-048) |
+| `PATCH` | `/portal/albums/:id/photos/order` | `portal-albums.update` — body: `{ photoIds: string[] }`. The display-order half of FR-048 |
+| `PATCH` | `/portal/albums/:id/photos/:photoId` | `portal-albums.update` — body: `{ caption?, altText? }`. The caption half of FR-048. Scoped by album, so a photo id from another album is a `404`, not a cross-album edit. An empty caption clears it; a blank `altText` is a `400`, because publishing already refuses a photo without one (FR-057) |
 | `DELETE` | `/portal/albums/:id/photos/:photoId` | `portal-albums.update` |
 | `POST` | `/portal/albums/:id/publish` \| `/unpublish` \| `/archive` | `portal-albums.publish` |
 | `DELETE` | `/portal/albums/:id` | `portal-albums.delete` |
