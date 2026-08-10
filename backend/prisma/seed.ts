@@ -57,6 +57,9 @@ import { seedAdmission } from './seeds/modules/admission.seed.js';
 
 import { seedAppSettings } from './seeds/modules/app-setting.seed.js';
 
+import { seedWorkPatterns } from './seeds/modules/work-pattern.seed.js';
+import { seedLeaveTypes } from './seeds/modules/leave-type.seed.js';
+
 import { seedPortal } from './seeds/modules/portal.seed.js';
 
 const connectionString = process.env.DIRECT_URL ?? process.env.DATABASE_URL;
@@ -185,6 +188,10 @@ async function main() {
 
   console.log('\n── Portal ──');
   await seedPortal(prisma);
+
+  console.log('\n── Presence ──');
+  await seedWorkPatterns(prisma);
+  await seedLeaveTypes(prisma);
 
   console.log('\n── App Settings ──');
   await seedAppSettings(prisma);

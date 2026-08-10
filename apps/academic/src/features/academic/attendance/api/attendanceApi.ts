@@ -13,6 +13,7 @@ import type {
   AttendanceRecapQueryParams,
   AttendanceTrendPoint,
   AttendanceTrendQueryParams,
+  AttendanceSuggestionResult,
 } from '../types'
 
 export const attendanceApi = {
@@ -54,6 +55,21 @@ export const attendanceApi = {
   getMonthlyTrend: (params: AttendanceTrendQueryParams) => {
     return api.get<ApiSingleResponse<AttendanceTrendPoint[]>>(
       '/attendances/recap/trend',
+      { params },
+    )
+  },
+
+  /**
+   * What the gate saw for this class today. Read-only — the teacher's save is
+   * still the only thing that writes a per-lesson record.
+   */
+  getGateSuggestions: (params: {
+    classroomId: string
+    semesterId: string
+    date: string
+  }) => {
+    return api.get<ApiSingleResponse<AttendanceSuggestionResult>>(
+      '/attendances/suggestions',
       { params },
     )
   },

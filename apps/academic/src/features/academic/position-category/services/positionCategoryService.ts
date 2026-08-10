@@ -1,4 +1,5 @@
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
+import { PAGINATION } from '@/shared/constants/pagination'
 import { toast } from 'vue-sonner'
 import { positionCategoryApi } from '../api/positionCategoryApi'
 import type {
@@ -11,7 +12,7 @@ export const positionCategoryService = {
   getPositionCategories: async (): Promise<PositionCategory[]> => {
     try {
       const res = await positionCategoryApi.getPositionCategories({
-        limit: 100,
+        limit: PAGINATION.REFERENCE_LIMIT,
       })
       return res.data.data
     } catch {

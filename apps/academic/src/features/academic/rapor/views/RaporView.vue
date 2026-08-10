@@ -35,6 +35,9 @@ import { toast } from 'vue-sonner'
 
 const {
   rapors,
+  totalItems,
+  currentPage,
+  pageSize,
   loading,
   isGenerating,
   classrooms,
@@ -46,6 +49,8 @@ const {
   bulkGenerateRapor,
   togglePublish,
   exportReportCard,
+  setPage,
+  setPageSize,
 } = useRapor()
 
 const openForm = ref(false)
@@ -282,9 +287,14 @@ onMounted(async () => {
           v-if="hasDisplayedData"
           :columns="tableColumns"
           :data="rapors"
-          :loading="loading"
+          :is-loading="loading"
+          :total-items="totalItems"
+          :page="currentPage"
+          :page-size="pageSize"
           search-key="name"
           search-placeholder="Cari nama siswa..."
+          @update:page="setPage"
+          @update:page-size="setPageSize"
         />
 
         <div

@@ -35,7 +35,6 @@ const recapColumns = createRecapColumns()
     <DataTable
       :columns="recapColumns"
       :data="recapItems"
-      :total-items="recapItems.length"
       :is-loading="recapLoading"
       item-label="siswa"
       filter-column="studentName"

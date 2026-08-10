@@ -1,6 +1,32 @@
 <!--
 Sync Impact Report
 ==================
+Version change: 1.1.0 → 1.2.0 (2026-08-10)
+Bump rationale: MINOR — Principle III's sanctioned exception is materially expanded.
+`payroll-` joins `portal-` in ROLE_BYPASS_EXEMPT_PREFIXES. Amendment (a)-(e):
+
+  (a) Edits: Principle III (exemption list + a sentence on what an exemption actually
+      does), this report, the version footer.
+  (b) Version and rationale: stated here.
+  (c) Docs affected: docs/adr/0007-presence-domain.md and
+      docs/adr/0008-narrow-admin-bypass-payroll.md added in the same change; CLAUDE.md
+      updated with the two new backend domains.
+  (d) Migration plan: none — the prefix is added together with the payroll module that
+      uses it, so no existing access changes. No endpoint outside backend/src/payroll/
+      uses a payroll-* code.
+  (e) Compliance Baseline: re-surveyed 2026-08-10, at the end of feature 002 (T213),
+      once the code existed. A survey written before it would have been a guess.
+
+Why this is an amendment rather than a config tweak: without it, every ADMIN account
+reads every salary in the school by virtue of holding the role, and no permission grant
+can prevent it — the bypass runs before grants are consulted. The failure mode is exactly
+the one ADR-0006 identified for the portal, with money instead of press releases. The
+added sentence in III exists because "just don't grant the permission" is the intuitive
+mitigation and it does not work; an agent or reviewer reaching for it should hit the
+correction in the principle itself rather than in an ADR they may not open.
+
+Version 1.1.0's report follows.
+
 Version change: 1.0.0 → 1.1.0 (2026-08-07)
 Bump rationale: MINOR — Principle III's sanctioned exception is materially expanded,
 and two structural facts are corrected. Amendment (a)-(e) per the procedure below:
@@ -196,10 +222,13 @@ Every query is scoped and every action is permission-controlled.
   resolution belongs, and that check MUST NOT be copied elsewhere. The bypass is not
   uniform: `SUPER_ADMIN` passes every permission as break-glass, while `ADMIN` passes
   every permission **except** those whose module segment is listed in
-  `ROLE_BYPASS_EXEMPT_PREFIXES` (currently `portal-`). An exempt prefix means a
-  boundary the top operational role does not walk through by virtue of its role
-  (ADR-0006); adding one is an amendment to this principle, not a configuration
-  change.
+  `ROLE_BYPASS_EXEMPT_PREFIXES` (currently `portal-` and `payroll-`). An exempt prefix
+  means a boundary the top operational role does not walk through by virtue of its role
+  (ADR-0006 for `portal-`, ADR-0008 for `payroll-`); adding one is an amendment to this
+  principle, not a configuration change. Note what an exemption does and does not do: it
+  removes the free pass, so the permission must be granted explicitly. It is therefore
+  the only mechanism that makes a grant meaningful at all — "simply do not grant it" is
+  no protection against a bypass that runs before grants are read.
 
 Rationale: wrong data in a school record looks exactly like correct data to the user
 reading it. Scoping and permission failures are silent by nature, so they must be
@@ -424,7 +453,7 @@ is an architectural decision and REQUIRES an ADR.
   `NESTJS-RULES.md`, the doc MUST be updated in the same change. Those files are kept
   in sync with the code by contract, and agents rely on them as current.
 
-## Compliance Baseline (re-surveyed 2026-08-07)
+## Compliance Baseline (re-surveyed 2026-08-10)
 
 The codebase largely holds these principles: no `repositories/` folders, no `any` in
 backend `src/`, no cross-app imports, no package→app reverse dependency, every
@@ -449,6 +478,29 @@ app (`apps/portal`, package `portal-web`) and a seventh backend domain
   the portal's implementation of a `platform/file` port so file deletion can be vetoed
   without `platform/` learning anything about the portal (dependency inversion, not a
   boundary violation).
+
+**Re-surveyed after feature `002-qr-attendance-payroll`**, which added two backend
+domains (`backend/src/presence/`, eight sibling modules; `backend/src/payroll/`, five)
+and 21 features to `apps/academic`. Findings:
+
+- The two new domains add **no items to the debt list below**. Every Prisma repository
+  is under 200 lines — four were over during implementation and were split with the
+  sanctioned `*.includes.ts` / `*.writer.ts` / sibling-function pattern rather than
+  left as debt — every controller is under 150, and no file under either domain
+  contains `any`.
+- Three structural claims are asserted by tests rather than by review:
+  `presence-roster-independence.spec.ts` (nothing branches on a position — FR-055,
+  FR-056), `presence-academic-direction.spec.ts` (presence never imports `academic/`),
+  and `test/payroll-authorization.e2e-spec.ts` (every payroll route refuses an `ADMIN`
+  with no explicit grant — the ADR-0008 regression net).
+- One deliberate deviation, recorded as an ADR rather than as debt: **ADR-0008**
+  (extending Principle III's bypass exemption to `payroll-*`). **ADR-0007** records the
+  new `presence/` domain and the one-way `academic → presence` edge.
+- One deviation from the tasks as written, recorded here because it is a pattern rather
+  than a one-off: `@241/master-data` expresses only text and boolean fields, so any
+  entity needing a select builds a bespoke dialog. `academic/position` set that
+  precedent; `leave-type` and `payroll/component` follow it. The task list called for a
+  master-data `config.ts` for salary components, and that was not possible.
 
 The deviations below were found by survey and are recorded as debt. They are NOT
 precedent: new code MUST NOT extend them, and a change touching one of these files
@@ -525,4 +577,4 @@ the code or corrected here; it is never left standing as fiction.
 **Runtime development guidance**: root `CLAUDE.md` for the workspace,
 `backend/docs/NESTJS-RULES.md` for backend work.
 
-**Version**: 1.1.0 | **Ratified**: 2026-08-06 | **Last Amended**: 2026-08-07
+**Version**: 1.2.0 | **Ratified**: 2026-08-06 | **Last Amended**: 2026-08-10

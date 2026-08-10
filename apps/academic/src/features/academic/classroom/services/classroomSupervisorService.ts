@@ -2,6 +2,7 @@ import type { ClassroomSupervisorSavePayload } from '../types'
 import { classroomApi } from '../api/classroomApi'
 import { useClassroomStore } from '../stores/classroomStore'
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
+import { PAGINATION } from '@/shared/constants/pagination'
 
 export const classroomSupervisorService = {
   saveClassroomSupervisor: async (
@@ -54,7 +55,7 @@ export const classroomSupervisorService = {
     try {
       const res = await classroomApi.getClassroomSupervisors({
         classroomId,
-        limit: 100,
+        limit: PAGINATION.CHILD_ENTITY_LIMIT,
       })
       store.classroomSupervisorAssignments = res.data.data ?? []
     } catch (error: unknown) {

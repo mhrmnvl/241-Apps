@@ -6,6 +6,7 @@ import { semesterApi } from '@/features/academic/semester'
 import { subjectApi } from '@/features/academic/subject'
 import { teachingAssignmentApi } from '@/features/academic/teaching-assignment'
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
+import { PAGINATION } from '@/shared/constants/pagination'
 import { toast } from 'vue-sonner'
 
 export const assessmentItemService = {
@@ -13,9 +14,9 @@ export const assessmentItemService = {
     const store = useAssessmentItemStore()
     try {
       const [classroomRes, subjectRes, semesterRes] = await Promise.all([
-        classroomApi.getClassrooms({ limit: 100 }),
-        subjectApi.getSubjects({ limit: 100 }),
-        semesterApi.getSemesters({ limit: 100 }),
+        classroomApi.getClassrooms({ limit: PAGINATION.REFERENCE_LIMIT }),
+        subjectApi.getSubjects({ limit: PAGINATION.REFERENCE_LIMIT }),
+        semesterApi.getSemesters({ limit: PAGINATION.REFERENCE_LIMIT }),
       ])
       store.classrooms = classroomRes.data?.data ?? []
       store.subjects = subjectRes.data?.data ?? []
@@ -62,7 +63,7 @@ export const assessmentItemService = {
 
       const itemsRes = await assessmentItemApi.getAssessmentItems({
         teachingAssignmentId: store.teachingAssignment.id,
-        limit: 100,
+        limit: PAGINATION.CHILD_ENTITY_LIMIT,
       })
       store.items = itemsRes.data?.data ?? []
       store.totalItems = store.items.length

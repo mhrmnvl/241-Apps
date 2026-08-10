@@ -7,6 +7,8 @@ export function useParent() {
   const {
     items,
     totalItems,
+    currentPage,
+    pageSize,
     loading,
     isSaving,
     formError,
@@ -15,9 +17,22 @@ export function useParent() {
     selectedOccupationId,
   } = storeToRefs(store)
 
+  const setPage = async (page: number) => {
+    store.currentPage = page
+    await parentService.fetchParents()
+  }
+
+  const setPageSize = async (size: number) => {
+    store.pageSize = size
+    store.currentPage = 1
+    await parentService.fetchParents()
+  }
+
   return {
     items,
     totalItems,
+    currentPage,
+    pageSize,
     loading,
     isSaving,
     formError,
@@ -28,5 +43,7 @@ export function useParent() {
     fetchParents: parentService.fetchParents,
     saveParent: parentService.saveParent,
     deleteParent: parentService.deleteParent,
+    setPage,
+    setPageSize,
   }
 }

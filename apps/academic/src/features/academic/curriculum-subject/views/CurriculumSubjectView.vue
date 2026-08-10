@@ -1,4 +1,4 @@
-﻿<script setup lang="ts">
+<script setup lang="ts">
 import type { CurriculumSubject, CurriculumSubjectSavePayload } from '../types'
 import CurriculumSubjectFormDialog from '../components/CurriculumSubjectFormDialog.vue'
 import AddCurriculumSubjectDialog from '../components/AddCurriculumSubjectDialog.vue'
@@ -19,7 +19,6 @@ const curriculumId = route.params.id as string
 
 const {
   items,
-  totalItems,
   loading,
   isSaving,
   formError,
@@ -145,7 +144,6 @@ onMounted(async () => {
         <DataTable
           :columns="tableColumns"
           :data="items"
-          :total-items="totalItems"
           :is-loading="loading"
           item-label="mata pelajaran kurikulum"
           filter-column="subject"

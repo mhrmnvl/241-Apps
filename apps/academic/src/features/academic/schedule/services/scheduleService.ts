@@ -3,6 +3,7 @@ import { lessonService } from '@/features/academic/lesson'
 import { useScheduleStore } from '../stores/scheduleStore'
 import { timeSlotApi } from '@/features/academic/time-slot'
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
+import { PAGINATION } from '@/shared/constants/pagination'
 import { toast } from 'vue-sonner'
 
 export const scheduleService = {
@@ -11,7 +12,7 @@ export const scheduleService = {
     store.isLoadingClassrooms = true
     try {
       const res = await classroomApi.getClassrooms({
-        limit: 100,
+        limit: PAGINATION.REFERENCE_LIMIT,
         isActive: true,
       })
       store.classrooms = res.data.data
@@ -44,13 +45,15 @@ export const scheduleService = {
     store.timeSlots = []
 
     try {
-      const tsPromise = timeSlotApi.getTimeSlots({ limit: 100 })
+      const tsPromise = timeSlotApi.getTimeSlots({
+        limit: PAGINATION.REFERENCE_LIMIT,
+      })
       let lessonPromise
 
       if (isTeacher) {
         lessonPromise = lessonService.getLessons({
           teacherId: teacherId!,
-          limit: 100,
+          limit: PAGINATION.REFERENCE_LIMIT,
         })
       } else {
         lessonPromise = lessonService.getLessonsByClassroom(selectedClassroomId)

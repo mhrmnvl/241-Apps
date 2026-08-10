@@ -5,7 +5,7 @@ export interface CalendarQueryParams {
   limit?: number
   academicYearId?: string
   semesterId?: string
-  type?: string
+  typeId?: string
 }
 
 export interface DateClickInfo {

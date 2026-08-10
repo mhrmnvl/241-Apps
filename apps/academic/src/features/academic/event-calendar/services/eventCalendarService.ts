@@ -1,6 +1,7 @@
 import { eventCalendarApi } from '../api/eventCalendarApi'
 import { useEventCalendarStore } from '../stores/eventCalendarStore'
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
+import { PAGINATION } from '@/shared/constants/pagination'
 import { toast } from 'vue-sonner'
 import type {
   EventQueryParams,
@@ -24,7 +25,7 @@ export const eventCalendarService = {
     store.currentRange = range
     store.loading = true
     try {
-      const params: EventQueryParams = { limit: 100 }
+      const params: EventQueryParams = { limit: PAGINATION.REFERENCE_LIMIT }
       const res = await eventCalendarApi.getEvents(params)
       store.events = extractList(res)
     } catch (error: unknown) {
@@ -40,7 +41,7 @@ export const eventCalendarService = {
     const store = useEventCalendarStore()
     store.tableLoading = true
     try {
-      const params: EventQueryParams = { limit: 100 }
+      const params: EventQueryParams = { limit: PAGINATION.REFERENCE_LIMIT }
       if (store.currentFilters.classroomId) {
         params.classroomId = store.currentFilters.classroomId
       }

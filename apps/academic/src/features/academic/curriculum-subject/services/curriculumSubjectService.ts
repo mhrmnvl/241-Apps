@@ -1,6 +1,7 @@
 import { curriculumSubjectApi } from '../api/curriculumSubjectApi'
 import { useCurriculumSubjectStore } from '../stores/curriculumSubjectStore'
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
+import { PAGINATION } from '@/shared/constants/pagination'
 import { toast } from 'vue-sonner'
 import { subjectApi } from '@/features/academic/subject'
 import { curriculaApi } from '@/features/academic/curriculum'
@@ -13,7 +14,9 @@ export const curriculumSubjectService = {
   fetchReferenceData: async () => {
     const store = useCurriculumSubjectStore()
     try {
-      const res = await subjectApi.getSubjects({ limit: 100 })
+      const res = await subjectApi.getSubjects({
+        limit: PAGINATION.REFERENCE_LIMIT,
+      })
       store.subjects = res.data?.data ?? []
     } catch (error: unknown) {
       toast.error(
@@ -28,7 +31,7 @@ export const curriculumSubjectService = {
     try {
       const params: CurriculumSubjectQueryParams = {
         curriculumId,
-        limit: 100,
+        limit: PAGINATION.CHILD_ENTITY_LIMIT,
       }
 
       const res = await curriculumSubjectApi.getCurriculumSubjects(params)

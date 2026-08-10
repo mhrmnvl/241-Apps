@@ -29,9 +29,9 @@ model SchoolUnit {
   isActive  Boolean          @default(true) @map("is_active")
   deletedAt DateTime?        @map("deleted_at")
 
-  type           SchoolUnitType?         @relation(fields: [typeId], references: [id])
-  socialMedias   SchoolUnitSocialMedia[]
-  addresses      Address[]
+  type         SchoolUnitType?         @relation(fields: [typeId], references: [id])
+  socialMedias SchoolUnitSocialMedia[]
+  addresses    Address[]
 
   @@map("school_units")
 }

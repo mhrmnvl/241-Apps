@@ -1,5 +1,6 @@
 import { onMounted, ref } from 'vue'
 import api from '@/shared/utils/api'
+import { PAGINATION } from '@/shared/constants/pagination'
 import type { EmploymentTypeOption } from '../types'
 
 export function useEmploymentTypeOptions() {
@@ -9,7 +10,7 @@ export function useEmploymentTypeOptions() {
     try {
       const res = await api.get<{ data: EmploymentTypeOption[] }>(
         '/employment-types',
-        { params: { limit: 100 } },
+        { params: { limit: PAGINATION.REFERENCE_LIMIT } },
       )
       employmentTypes.value = res.data.data ?? []
     } catch {

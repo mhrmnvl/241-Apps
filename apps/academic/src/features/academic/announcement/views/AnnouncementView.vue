@@ -1,5 +1,6 @@
-﻿<script setup lang="ts">
+<script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
+import { watchDebounced } from '@vueuse/core'
 import { DataTable } from '@/ui'
 import { AppCombobox } from '@/ui'
 import type { ComboboxOption } from '@/ui'
@@ -17,6 +18,8 @@ import type { Announcement, AnnouncementSavePayload } from '../types'
 const {
   items,
   totalItems,
+  currentPage,
+  pageSize,
   loading,
   isSaving,
   formError,
@@ -27,6 +30,8 @@ const {
   fetchAnnouncements,
   saveAnnouncement,
   deleteAnnouncement,
+  setPage,
+  setPageSize,
 } = useAnnouncement()
 
 const isAddModalOpen = ref(false)
@@ -79,9 +84,19 @@ watch(isAddModalOpen, (isOpen) => {
   }
 })
 
-watch([selectedClassroomId, searchQuery], () => {
+watch(selectedClassroomId, () => {
+  currentPage.value = 1
   void fetchAnnouncements()
 })
+
+watchDebounced(
+  searchQuery,
+  () => {
+    currentPage.value = 1
+    void fetchAnnouncements()
+  },
+  { debounce: 300 },
+)
 
 onMounted(async () => {
   await fetchFilterOptions()
@@ -126,9 +141,13 @@ onMounted(async () => {
         <DataTable
           :columns="tableColumns"
           :data="items"
-          :total-items="totalItems"
           :is-loading="loading"
+          :total-items="totalItems"
+          :page="currentPage"
+          :page-size="pageSize"
           item-label="pengumuman"
+          @update:page="setPage"
+          @update:page-size="setPageSize"
         >
           <template #header-right>
             <div class="relative w-full sm:w-[240px]">

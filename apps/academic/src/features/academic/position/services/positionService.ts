@@ -1,4 +1,5 @@
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
+import { PAGINATION } from '@/shared/constants/pagination'
 import { toast } from 'vue-sonner'
 import { positionApi } from '../api/positionApi'
 import { usePositionStore } from '../stores/positionStore'
@@ -10,7 +11,7 @@ export const positionService = {
     store.loading = true
     try {
       const actualParams = {
-        limit: 100,
+        limit: PAGINATION.REFERENCE_LIMIT,
         ...params,
       }
       const res = await positionApi.getPositions(actualParams)

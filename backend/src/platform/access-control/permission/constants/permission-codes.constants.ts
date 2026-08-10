@@ -1324,4 +1324,284 @@ export const SYSTEM_PERMISSIONS: SystemPermission[] = [
     code: 'users.update',
     description: 'Update users',
   },
+
+  // presence-credentials
+  {
+    module: 'presence-credentials',
+    action: 'create',
+    code: 'presence-credentials.create',
+    description: 'Create presence credentials',
+  },
+  {
+    module: 'presence-credentials',
+    action: 'delete',
+    code: 'presence-credentials.delete',
+    description: 'Delete presence credentials',
+  },
+  {
+    module: 'presence-credentials',
+    action: 'read',
+    code: 'presence-credentials.read',
+    description: 'Read presence credentials',
+  },
+  {
+    module: 'presence-credentials',
+    action: 'update',
+    code: 'presence-credentials.update',
+    description: 'Update presence credentials',
+  },
+
+  // presence-devices
+  {
+    module: 'presence-devices',
+    action: 'create',
+    code: 'presence-devices.create',
+    description: 'Create gate devices',
+  },
+  {
+    module: 'presence-devices',
+    action: 'delete',
+    code: 'presence-devices.delete',
+    description: 'Delete gate devices',
+  },
+  {
+    module: 'presence-devices',
+    action: 'read',
+    code: 'presence-devices.read',
+    description: 'Read gate devices',
+  },
+  {
+    module: 'presence-devices',
+    action: 'update',
+    code: 'presence-devices.update',
+    description: 'Update gate devices',
+  },
+
+  // presence-scans
+  {
+    module: 'presence-scans',
+    action: 'read',
+    code: 'presence-scans.read',
+    description: 'Read the gate scan log, including rejected attempts',
+  },
+
+  // presence-records
+  {
+    module: 'presence-records',
+    action: 'create',
+    code: 'presence-records.create',
+    description: 'Record a daily presence manually',
+  },
+  {
+    module: 'presence-records',
+    action: 'read',
+    code: 'presence-records.read',
+    description: 'Read the daily presence of any person',
+  },
+  {
+    module: 'presence-records',
+    action: 'read-own',
+    code: 'presence-records.read-own',
+    description: 'Read only your own daily presence',
+  },
+  {
+    module: 'presence-records',
+    action: 'update',
+    code: 'presence-records.update',
+    description: 'Correct a daily presence record',
+  },
+
+  // presence-periods
+  {
+    module: 'presence-periods',
+    action: 'close',
+    code: 'presence-periods.close',
+    description: 'Close an attendance period, fixing its recap',
+  },
+
+  // work-patterns
+  {
+    module: 'work-patterns',
+    action: 'create',
+    code: 'work-patterns.create',
+    description: 'Create work patterns',
+  },
+  {
+    module: 'work-patterns',
+    action: 'delete',
+    code: 'work-patterns.delete',
+    description: 'Delete work patterns',
+  },
+  {
+    module: 'work-patterns',
+    action: 'read',
+    code: 'work-patterns.read',
+    description: 'Read work patterns',
+  },
+  {
+    module: 'work-patterns',
+    action: 'update',
+    code: 'work-patterns.update',
+    description: 'Update work patterns',
+  },
+
+  // non-working-days
+  {
+    module: 'non-working-days',
+    action: 'create',
+    code: 'non-working-days.create',
+    description: 'Create non-working days',
+  },
+  {
+    module: 'non-working-days',
+    action: 'delete',
+    code: 'non-working-days.delete',
+    description: 'Delete non-working days',
+  },
+  {
+    module: 'non-working-days',
+    action: 'read',
+    code: 'non-working-days.read',
+    description: 'Read non-working days',
+  },
+  {
+    module: 'non-working-days',
+    action: 'update',
+    code: 'non-working-days.update',
+    description: 'Update non-working days',
+  },
+
+  // leave-types
+  {
+    module: 'leave-types',
+    action: 'create',
+    code: 'leave-types.create',
+    description: 'Create leave types',
+  },
+  {
+    module: 'leave-types',
+    action: 'delete',
+    code: 'leave-types.delete',
+    description: 'Delete leave types',
+  },
+  {
+    module: 'leave-types',
+    action: 'read',
+    code: 'leave-types.read',
+    description: 'Read leave types',
+  },
+  {
+    module: 'leave-types',
+    action: 'update',
+    code: 'leave-types.update',
+    description: 'Update leave types',
+  },
+
+  // leave-requests
+  {
+    module: 'leave-requests',
+    action: 'approve',
+    code: 'leave-requests.approve',
+    description: 'Approve or reject a leave request',
+  },
+  {
+    module: 'leave-requests',
+    action: 'create',
+    code: 'leave-requests.create',
+    description: 'Submit a leave request',
+  },
+  {
+    module: 'leave-requests',
+    action: 'read',
+    code: 'leave-requests.read',
+    description: 'Read all leave requests',
+  },
+  {
+    module: 'leave-requests',
+    action: 'read-own',
+    code: 'leave-requests.read-own',
+    description: 'Read only your own leave requests',
+  },
+
+  // --- payroll: exempt from the ADMIN role bypass (ADR-0008) ---
+
+  // payroll-components
+  {
+    module: 'payroll-components',
+    action: 'create',
+    code: 'payroll-components.create',
+    description: 'Create salary components',
+  },
+  {
+    module: 'payroll-components',
+    action: 'delete',
+    code: 'payroll-components.delete',
+    description: 'Delete salary components',
+  },
+  {
+    module: 'payroll-components',
+    action: 'read',
+    code: 'payroll-components.read',
+    description: 'Read salary components',
+  },
+  {
+    module: 'payroll-components',
+    action: 'update',
+    code: 'payroll-components.update',
+    description: 'Update salary components',
+  },
+
+  // payroll-salaries
+  {
+    module: 'payroll-salaries',
+    action: 'read',
+    code: 'payroll-salaries.read',
+    description: 'Read salary assignments',
+  },
+  {
+    module: 'payroll-salaries',
+    action: 'update',
+    code: 'payroll-salaries.update',
+    description: 'Set or change what an employee is paid',
+  },
+
+  // payroll-runs
+  {
+    module: 'payroll-runs',
+    action: 'approve',
+    code: 'payroll-runs.approve',
+    description: 'Approve a payroll run, making it final',
+  },
+  {
+    module: 'payroll-runs',
+    action: 'create',
+    code: 'payroll-runs.create',
+    description: 'Create and calculate a payroll run',
+  },
+  {
+    module: 'payroll-runs',
+    action: 'read',
+    code: 'payroll-runs.read',
+    description: 'Read payroll runs',
+  },
+  {
+    module: 'payroll-runs',
+    action: 'update',
+    code: 'payroll-runs.update',
+    description: 'Recalculate or submit a draft payroll run',
+  },
+
+  // payroll-payslips
+  {
+    module: 'payroll-payslips',
+    action: 'read',
+    code: 'payroll-payslips.read',
+    description: 'Read the payslip of any employee',
+  },
+  {
+    module: 'payroll-payslips',
+    action: 'read-own',
+    code: 'payroll-payslips.read-own',
+    description: 'Read only your own payslip',
+  },
 ];

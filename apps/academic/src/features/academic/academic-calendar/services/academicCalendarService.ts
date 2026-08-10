@@ -1,6 +1,7 @@
 import { academicCalendarApi } from '../api/academicCalendarApi'
 import { useAcademicCalendarStore } from '../stores/academicCalendarStore'
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
+import { PAGINATION } from '@/shared/constants/pagination'
 import { toast } from 'vue-sonner'
 import type { ApiPaginatedResponse } from '@/shared/types/api'
 import type {
@@ -40,7 +41,7 @@ export const academicCalendarService = {
     store.currentRange = range
     store.loading = true
     try {
-      const params: CalendarQueryParams = { limit: 100 }
+      const params: CalendarQueryParams = { limit: PAGINATION.REFERENCE_LIMIT }
       const calRes = await academicCalendarApi.getCalendars(params)
       const cals = extractList(calRes)
       store.events = cals.map(normalizeCalendar)
@@ -55,7 +56,7 @@ export const academicCalendarService = {
     const store = useAcademicCalendarStore()
     store.tableLoading = true
     try {
-      const params: CalendarQueryParams = { limit: 100 }
+      const params: CalendarQueryParams = { limit: PAGINATION.REFERENCE_LIMIT }
       const calRes = await academicCalendarApi.getCalendars(params)
       const cals = extractList(calRes)
 

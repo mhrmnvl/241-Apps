@@ -1,4 +1,5 @@
 import { studentApi } from '../api/studentApi'
+import { PAGINATION } from '@/shared/constants/pagination'
 import { classroomApi } from '@/features/academic/classroom'
 import { useStudentStore } from '../stores/studentStore'
 import type {
@@ -44,7 +45,7 @@ export const studentService = {
     const store = useStudentStore()
     try {
       const res = await classroomApi.getClassrooms({
-        limit: 100,
+        limit: PAGINATION.REFERENCE_LIMIT,
         isActive: true,
         ...(gradeId && gradeId !== 'all' ? { gradeId } : {}),
       })
@@ -58,7 +59,7 @@ export const studentService = {
     const store = useStudentStore()
     try {
       const res = await api.get<ApiPaginatedResponse<GradeOption>>('/grades', {
-        params: { limit: 100, isActive: true },
+        params: { limit: PAGINATION.REFERENCE_LIMIT, isActive: true },
       })
       store.grades = res.data.data
     } catch (error: unknown) {

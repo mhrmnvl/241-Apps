@@ -1,4 +1,4 @@
-﻿<script setup lang="ts">
+<script setup lang="ts">
 import { useStudent } from '../composables/useStudent'
 import { createAccountColumns } from '../components/columns'
 import { DataTable } from '@/ui'
@@ -76,6 +76,8 @@ const {
   classrooms,
   grades,
   totalStudents,
+  currentPage,
+  pageSize,
   loading,
   filters,
   fetchStudents,
@@ -83,9 +85,9 @@ const {
   fetchGrades,
   deleteStudent,
   updateStudentCredentials,
+  setPage,
+  setPageSize,
 } = useStudent()
-
-const keyword = ref('')
 
 const isFilterDialogOpen = ref(false)
 
@@ -105,20 +107,11 @@ function handleFilterChange(key: 'gradeId' | 'classroomId', value: unknown) {
   filters.value[key] = typeof value === 'string' ? value : 'all'
 }
 
-const filteredData = computed(() => {
-  if (!keyword.value) return students.value
-  const low = keyword.value.toLowerCase()
-  return students.value.filter(
-    (s) =>
-      s.user.identifier.toLowerCase().includes(low) ||
-      s.user.profile.name.toLowerCase().includes(low),
-  )
-})
-
 watch(
   () => filters.value.gradeId,
   async (newGradeId) => {
     filters.value.classroomId = 'all'
+    currentPage.value = 1
     await fetchClassrooms(newGradeId === 'all' ? undefined : newGradeId)
     await fetchStudents()
   },
@@ -126,13 +119,17 @@ watch(
 
 watch(
   () => filters.value.classroomId,
-  () => fetchStudents(),
+  () => {
+    currentPage.value = 1
+    void fetchStudents()
+  },
 )
 
 watchDebounced(
-  keyword,
+  () => filters.value.keyword,
   () => {
-    /* noop */
+    currentPage.value = 1
+    void fetchStudents()
   },
   { debounce: 300 },
 )
@@ -224,10 +221,14 @@ onMounted(async () => {
 
         <DataTable
           :columns="tableColumns"
-          :data="filteredData"
-          :total-items="totalStudents"
+          :data="students"
           :is-loading="loading"
+          :total-items="totalStudents"
+          :page="currentPage"
+          :page-size="pageSize"
           item-label="akun siswa"
+          @update:page="setPage"
+          @update:page-size="setPageSize"
         >
           <template #header-right>
             <div class="relative w-full sm:w-48 max-w-[200px]">
@@ -235,7 +236,7 @@ onMounted(async () => {
                 class="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground"
               />
               <Input
-                v-model="keyword"
+                v-model="filters.keyword"
                 placeholder="Cari siswa..."
                 class="h-8 pl-8 w-full text-xs"
               />

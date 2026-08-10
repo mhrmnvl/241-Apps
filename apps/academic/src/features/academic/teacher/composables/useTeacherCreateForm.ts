@@ -10,6 +10,7 @@ import {
   useMultiStepForm,
 } from '@/features/academic/shared/multi-step-form'
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
+import { PAGINATION } from '@/shared/constants/pagination'
 import api from '@/shared/utils/api'
 import { teacherApi } from '../api/teacherApi'
 import { teacherService } from '../services/teacherService'
@@ -191,9 +192,12 @@ export function useTeacherCreateForm() {
     try {
       const [empRes, posRes] = await Promise.all([
         api.get<{ data: EmploymentTypeOption[] }>('/employment-types', {
-          params: { limit: 100 },
+          params: { limit: PAGINATION.REFERENCE_LIMIT },
         }),
-        teacherApi.getPositions({ limit: 100, isActive: true }),
+        teacherApi.getPositions({
+          limit: PAGINATION.REFERENCE_LIMIT,
+          isActive: true,
+        }),
       ])
       employmentTypes.value = empRes.data.data ?? []
       positions.value = posRes.data.data ?? []

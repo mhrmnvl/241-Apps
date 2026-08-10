@@ -1,4 +1,4 @@
-﻿<script setup lang="ts">
+<script setup lang="ts">
 import type { Curricula } from '../types'
 import CurriculaFormSheet from '../components/CurriculaFormSheet.vue'
 import { createCurriculaColumns } from '../components/columns'
@@ -22,7 +22,6 @@ const router = useRouter()
 const {
   curricula,
   academicYears,
-  totalCurricula,
   loading,
   fetchCurricula,
   fetchAcademicYears,
@@ -109,7 +108,6 @@ onMounted(async () => {
         <DataTable
           :columns="tableColumns"
           :data="curricula"
-          :total-items="totalCurricula"
           :is-loading="loading"
           item-label="kurikulum"
           filter-column="name"

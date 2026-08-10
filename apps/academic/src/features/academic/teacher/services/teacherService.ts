@@ -1,4 +1,5 @@
 import { teacherApi } from '../api/teacherApi'
+import { PAGINATION } from '@/shared/constants/pagination'
 import { addressApi } from '@/features/platform/address'
 import { useTeacherStore } from '../stores/teacherStore'
 import { positionCategoryApi } from '../../position-category/api/positionCategoryApi'
@@ -27,10 +28,15 @@ export const teacherService = {
       }
       if (store.filters.keyword.trim())
         params.search = store.filters.keyword.trim()
-      if (store.filters.positionCategoryId)
-        params.positionCategoryId = store.filters.positionCategoryId
-      if (store.filters.statusFilter !== 'all')
-        params.isActive = store.filters.statusFilter === 'active'
+      // TeacherListView uses positionCategoryId; TeacherAccountView uses categoryFilter
+      const categoryId =
+        store.filters.positionCategoryId ||
+        (store.filters.categoryFilter !== 'all'
+          ? store.filters.categoryFilter
+          : '')
+      if (categoryId) params.positionCategoryId = categoryId
+      const statusFilter = store.filters.statusFilter
+      if (statusFilter !== 'all') params.isActive = statusFilter === 'active'
 
       const res = await teacherApi.getTeachers(params)
       store.teachers = res.data.data
@@ -45,7 +51,10 @@ export const teacherService = {
   fetchPositions: async () => {
     const store = useTeacherStore()
     try {
-      const res = await teacherApi.getPositions({ limit: 100, isActive: true })
+      const res = await teacherApi.getPositions({
+        limit: PAGINATION.REFERENCE_LIMIT,
+        isActive: true,
+      })
       store.positions = res.data.data
     } catch (error: unknown) {
       toast.error(
@@ -58,7 +67,7 @@ export const teacherService = {
     const store = useTeacherStore()
     try {
       const res = await positionCategoryApi.getPositionCategories({
-        limit: 100,
+        limit: PAGINATION.REFERENCE_LIMIT,
       })
       store.positionCategories = res.data.data
     } catch (error: unknown) {
@@ -219,7 +228,10 @@ export const teacherService = {
 
   getPositionsList: async () => {
     try {
-      const res = await teacherApi.getPositions({ limit: 100, isActive: true })
+      const res = await teacherApi.getPositions({
+        limit: PAGINATION.REFERENCE_LIMIT,
+        isActive: true,
+      })
       const raw = res.data?.data ?? []
       return Array.isArray(raw) ? raw : []
     } catch (error: unknown) {

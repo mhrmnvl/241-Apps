@@ -3,13 +3,16 @@ import { useParentStore } from '../stores/parentStore'
 import type { ParentSavePayload } from '../types'
 import { occupationApi } from '@/features/academic/occupation'
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
+import { PAGINATION } from '@/shared/constants/pagination'
 import { toast } from 'vue-sonner'
 
 export const parentService = {
   fetchFilterOptions: async () => {
     const store = useParentStore()
     try {
-      const res = await occupationApi.getOccupations({ limit: 100 })
+      const res = await occupationApi.getOccupations({
+        limit: PAGINATION.REFERENCE_LIMIT,
+      })
       store.occupations = res.data?.data ?? []
     } catch (error: unknown) {
       toast.error(
@@ -23,7 +26,8 @@ export const parentService = {
     store.loading = true
     try {
       const params = {
-        limit: 100,
+        page: store.currentPage,
+        limit: store.pageSize,
         ...(store.searchQuery ? { search: store.searchQuery } : {}),
         ...(store.selectedOccupationId
           ? { occupationId: store.selectedOccupationId }

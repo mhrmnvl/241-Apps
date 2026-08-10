@@ -1,6 +1,7 @@
 import { academicYearApi } from '../api/academicYearApi'
 import { useAcademicYearStore } from '../stores/academicYearStore'
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
+import { PAGINATION } from '@/shared/constants/pagination'
 import { toast } from 'vue-sonner'
 import type { AcademicYearSavePayload } from '../types'
 
@@ -9,7 +10,9 @@ export const academicYearService = {
     const store = useAcademicYearStore()
     store.loading = true
     try {
-      const res = await academicYearApi.getAcademicYears({ limit: 100 })
+      const res = await academicYearApi.getAcademicYears({
+        limit: PAGINATION.REFERENCE_LIMIT,
+      })
       store.academicYears = res.data.data
       store.totalItems = res.data.meta?.total ?? res.data.data.length
     } catch (error: unknown) {

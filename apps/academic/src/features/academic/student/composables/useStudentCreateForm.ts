@@ -13,6 +13,7 @@ import {
   useMultiStepForm,
 } from '@/features/academic/shared/multi-step-form'
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
+import { PAGINATION } from '@/shared/constants/pagination'
 import api from '@/shared/utils/api'
 import type { ApiPaginatedResponse } from '@/shared/types/api'
 import { studentService } from '../services/studentService'
@@ -225,10 +226,13 @@ export function useStudentCreateForm() {
     try {
       const [gradeRes, classroomRes, occupationRes] = await Promise.all([
         api.get<ApiPaginatedResponse<GradeOption>>('/grades', {
-          params: { limit: 100, isActive: true },
+          params: { limit: PAGINATION.REFERENCE_LIMIT, isActive: true },
         }),
-        classroomApi.getClassrooms({ limit: 100, isActive: true }),
-        occupationApi.getOccupations({ limit: 100 }),
+        classroomApi.getClassrooms({
+          limit: PAGINATION.REFERENCE_LIMIT,
+          isActive: true,
+        }),
+        occupationApi.getOccupations({ limit: PAGINATION.REFERENCE_LIMIT }),
       ])
       grades.value = gradeRes.data.data ?? []
       classrooms.value = classroomRes.data.data ?? []

@@ -1,6 +1,7 @@
 import { studentGraduationApi } from '../api/studentGraduationApi'
 import { useStudentGraduationStore } from '../stores/studentGraduationStore'
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
+import { PAGINATION } from '@/shared/constants/pagination'
 import { toast } from 'vue-sonner'
 import { studentApi } from '@/features/academic/student'
 import { academicYearApi } from '@/features/academic/academic-year'
@@ -11,8 +12,11 @@ export const studentGraduationService = {
     const store = useStudentGraduationStore()
     try {
       const [studentRes, academicYearRes] = await Promise.all([
-        studentApi.getStudents({ limit: 100, status: 'ACTIVE' }),
-        academicYearApi.getAcademicYears({ limit: 100 }),
+        studentApi.getStudents({
+          limit: PAGINATION.REFERENCE_LIMIT,
+          status: 'ACTIVE',
+        }),
+        academicYearApi.getAcademicYears({ limit: PAGINATION.REFERENCE_LIMIT }),
       ])
       store.students = studentRes.data?.data ?? []
       store.academicYears = academicYearRes.data?.data ?? []
@@ -28,7 +32,8 @@ export const studentGraduationService = {
     store.loading = true
     try {
       const res = await studentGraduationApi.getStudentGraduations({
-        limit: 100,
+        page: store.currentPage,
+        limit: store.pageSize,
         ...(store.selectedAcademicYearId
           ? { academicYearId: store.selectedAcademicYearId }
           : {}),

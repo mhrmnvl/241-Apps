@@ -4,6 +4,7 @@ import {
   type ExtraSheetContext,
 } from '@/features/platform/profile'
 import { Plus } from 'lucide-vue-next'
+import { PAGINATION } from '@/shared/constants/pagination'
 import { toast } from 'vue-sonner'
 
 import SchoolIdentityTab from './components/SchoolIdentityTab.vue'
@@ -54,7 +55,7 @@ export function setupProfileFeature() {
   configureProfile({
     socialMediaProvider: async () => {
       const { fetchSocialMedias, socialMedias } = useSocialMedia()
-      await fetchSocialMedias({ limit: 100 })
+      await fetchSocialMedias({ limit: PAGINATION.REFERENCE_LIMIT })
       return socialMedias.value
     },
     extraTabs: [

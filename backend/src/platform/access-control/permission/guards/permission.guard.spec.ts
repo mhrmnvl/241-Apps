@@ -143,6 +143,59 @@ describe('PermissionGuard', () => {
     });
   });
 
+  // ADR-0008. Salary is the second exempt prefix, and the reason is sharper than
+  // the portal's: without the exemption no grant configuration can keep an ADMIN
+  // out, because the bypass runs before permissions are read.
+  describe('the payroll exemption', () => {
+    it('refuses an ADMIN a payroll code they do not hold', async () => {
+      await expect(attempt(['payroll-runs.read'], ['ADMIN'])).rejects.toThrow(
+        ForbiddenException,
+      );
+    });
+
+    it('refuses an ADMIN the salary-setting code specifically', async () => {
+      await expect(
+        attempt(['payroll-salaries.update'], ['ADMIN']),
+      ).rejects.toThrow(ForbiddenException);
+    });
+
+    // The exemption must stay narrow. An ADMIN administers attendance; only the
+    // money is fenced off.
+    it('still passes an ADMIN every presence code by role alone', async () => {
+      await expect(
+        attempt(['presence-records.update'], ['ADMIN']),
+      ).resolves.toBe(true);
+      await expect(
+        attempt(['presence-credentials.create'], ['ADMIN']),
+      ).resolves.toBe(true);
+    });
+
+    it('passes an ADMIN who actually holds the payroll permission', async () => {
+      await expect(
+        attempt(['payroll-runs.read'], ['ADMIN'], ['payroll-runs.read']),
+      ).resolves.toBe(true);
+    });
+
+    it('refuses an ADMIN when only one of several required codes is a payroll code', async () => {
+      await expect(
+        attempt(['presence-records.read', 'payroll-payslips.read'], ['ADMIN']),
+      ).rejects.toThrow(ForbiddenException);
+    });
+
+    it('keeps SUPER_ADMIN break-glass over payroll', async () => {
+      await expect(
+        attempt(['payroll-salaries.update'], ['SUPER_ADMIN']),
+      ).resolves.toBe(true);
+    });
+
+    // The two exempt prefixes are independent; neither implies the other.
+    it('refuses an ADMIN a payroll code even while holding every portal code', async () => {
+      await expect(
+        attempt(['payroll-runs.approve'], ['ADMIN'], ['portal-posts.publish']),
+      ).rejects.toThrow(ForbiddenException);
+    });
+  });
+
   describe('the ordinary permission path', () => {
     it('requires every listed permission, not just one', async () => {
       await expect(

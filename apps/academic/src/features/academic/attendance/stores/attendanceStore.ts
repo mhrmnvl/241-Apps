@@ -29,6 +29,13 @@ export const useAttendanceStore = defineStore('attendance', () => {
 
   const inputRows = ref<AttendanceInputRow[]>([])
 
+  /**
+   * False when presence could not be reached. The screen then behaves exactly
+   * as it did before this feature — every student needing a decision — and says
+   * so rather than silently offering no pre-fill.
+   */
+  const gateAvailable = ref(true)
+
   const recapItems = ref<AttendanceRecapItem[]>([])
   const recapLoading = ref(false)
 
@@ -51,6 +58,7 @@ export const useAttendanceStore = defineStore('attendance', () => {
     selectedMonth,
     selectedYear,
     inputRows,
+    gateAvailable,
     recapItems,
     recapLoading,
     trendData,

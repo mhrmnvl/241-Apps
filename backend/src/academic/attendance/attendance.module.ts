@@ -1,5 +1,8 @@
 import { Module } from '@nestjs/common';
 import { EnrollmentModule } from '../enrollment/enrollment.module.js';
+// The `.module.js` directly, never the barrel: a DTO reaching a barrel closes an
+// ESM cycle and crashes boot (CLAUDE.md).
+import { DailyRecordModule } from '../../presence/daily-record/daily-record.module.js';
 import { AttendanceController } from './presentation/attendance.controller.js';
 import { PrismaAttendanceRepository } from './infrastructure/persistence/prisma-attendance.repository.js';
 import { GetAttendancesUseCase } from './use-cases/get-attendances.use-case.js';
@@ -10,10 +13,11 @@ import { DeleteAttendanceUseCase } from './use-cases/delete-attendance.use-case.
 import { BulkUpsertAttendanceUseCase } from './use-cases/bulk-upsert-attendance.use-case.js';
 import { GetAttendanceRecapUseCase } from './use-cases/get-attendance-recap.use-case.js';
 import { GetAttendanceTrendUseCase } from './use-cases/get-attendance-trend.use-case.js';
+import { GetAttendanceSuggestionsUseCase } from './use-cases/get-attendance-suggestions.use-case.js';
 import { IAttendanceRepository } from './domain/interfaces/attendance-repository.interface.js';
 
 @Module({
-  imports: [EnrollmentModule],
+  imports: [EnrollmentModule, DailyRecordModule],
   controllers: [AttendanceController],
   providers: [
     {
@@ -28,6 +32,7 @@ import { IAttendanceRepository } from './domain/interfaces/attendance-repository
     BulkUpsertAttendanceUseCase,
     GetAttendanceRecapUseCase,
     GetAttendanceTrendUseCase,
+    GetAttendanceSuggestionsUseCase,
   ],
   exports: [IAttendanceRepository],
 })

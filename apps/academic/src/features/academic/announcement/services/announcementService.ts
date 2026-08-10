@@ -3,13 +3,16 @@ import { useAnnouncementStore } from '../stores/announcementStore'
 import type { AnnouncementSavePayload } from '../types'
 import { classroomApi } from '@/features/academic/classroom'
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
+import { PAGINATION } from '@/shared/constants/pagination'
 import { toast } from 'vue-sonner'
 
 export const announcementService = {
   fetchFilterOptions: async () => {
     const store = useAnnouncementStore()
     try {
-      const classroomRes = await classroomApi.getClassrooms({ limit: 100 })
+      const classroomRes = await classroomApi.getClassrooms({
+        limit: PAGINATION.REFERENCE_LIMIT,
+      })
       store.classrooms = classroomRes.data?.data ?? []
     } catch (error: unknown) {
       toast.error(getIndonesianErrorMessage(error, 'Gagal memuat data kelas.'))
@@ -21,7 +24,8 @@ export const announcementService = {
     store.loading = true
     try {
       const params = {
-        limit: 100,
+        page: store.currentPage,
+        limit: store.pageSize,
         ...(store.selectedClassroomId
           ? { classroomId: store.selectedClassroomId }
           : {}),

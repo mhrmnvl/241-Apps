@@ -1,0 +1,357 @@
+// Gate presence: QR-card scanning for students and employees alike.
+//
+// Every model here keys on `userId`, never on Student or Teacher — that is what
+// keeps `presence/` free of any dependency on `academic/` (ADR-0007).
+
+enum PresenceSubjectType {
+  STUDENT
+  EMPLOYEE
+}
+
+enum CredentialStatus {
+  ACTIVE
+  REVOKED
+  REPLACED
+}
+
+enum ScanOutcome {
+  ACCEPTED
+  DUPLICATE
+  REJECTED_UNKNOWN
+  REJECTED_REVOKED
+  REJECTED_INACTIVE
+  REJECTED_STALE
+}
+
+/// Answers "was this person at school today, and were they expected to be".
+/// Deliberately not AttendanceStatus, which answers "was this pupil in this lesson".
+enum PresenceDayStatus {
+  PRESENT
+  LATE
+  ABSENT
+  ON_LEAVE
+  OFFICIAL_DUTY
+  NOT_EXPECTED
+}
+
+enum PresenceValueSource {
+  SCAN
+  MANUAL
+}
+
+enum LeaveTreatment {
+  ON_LEAVE
+  OFFICIAL_DUTY
+}
+
+enum LeaveRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  WITHDRAWN
+}
+
+enum AttendancePeriodStatus {
+  OPEN
+  CLOSED
+}
+
+/// The card. Also the source of truth for whether a person was expected on a
+/// date — presence cannot read hire or enrolment dates without closing the
+/// domain cycle, and card validity is closer to the truth anyway (ADR-0007).
+model PresenceCredential {
+  id            String              @id @default(uuid()) @db.Uuid
+  userId        String              @map("user_id") @db.Uuid
+  subjectType   PresenceSubjectType @map("subject_type")
+  code          String              @unique @db.VarChar(64)
+  status        CredentialStatus    @default(ACTIVE)
+  issuedAt      DateTime            @default(now()) @map("issued_at")
+  issuedBy      String?             @map("issued_by") @db.Uuid
+  revokedAt     DateTime?           @map("revoked_at")
+  revokedReason String?             @map("revoked_reason") @db.VarChar(255)
+  replacedById  String?             @map("replaced_by_id") @db.Uuid
+  deletedAt     DateTime?           @map("deleted_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user       User                 @relation("PresenceCredentialUser", fields: [userId], references: [id])
+  issuer     User?                @relation("PresenceCredentialIssuer", fields: [issuedBy], references: [id])
+  replacedBy PresenceCredential?  @relation("CredentialReplacement", fields: [replacedById], references: [id])
+  replaces   PresenceCredential[] @relation("CredentialReplacement")
+  scans      PresenceScan[]
+
+  @@unique([userId], map: "presence_credentials_active_user_key", where: { status: "ACTIVE", deletedAt: null })
+  @@index([userId])
+  @@index([status])
+  @@map("presence_credentials")
+}
+
+/// A registered gate terminal. `lastSeenAt` is how an outage becomes visible
+/// rather than inferred from missing attendance.
+model PresenceDevice {
+  id            String    @id @default(uuid()) @db.Uuid
+  name          String    @db.VarChar(100)
+  location      String?   @db.VarChar(150)
+  tokenHash     String    @map("token_hash") @db.VarChar(255)
+  tokenIssuedAt DateTime  @map("token_issued_at")
+  isActive      Boolean   @default(true) @map("is_active")
+  lastSeenAt    DateTime? @map("last_seen_at")
+  deletedAt     DateTime? @map("deleted_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  scans PresenceScan[]
+
+  @@map("presence_devices")
+}
+
+/// Every presentation of a code, accepted or not. Append-only evidence log:
+/// no soft delete, nothing edits a scan.
+model PresenceScan {
+  id              String      @id @default(uuid()) @db.Uuid
+  deviceId        String      @map("device_id") @db.Uuid
+  credentialId    String?     @map("credential_id") @db.Uuid
+  presentedCode   String      @map("presented_code") @db.VarChar(64)
+  clientEventId   String      @map("client_event_id") @db.Uuid
+  occurredAt      DateTime    @map("occurred_at")
+  receivedAt      DateTime    @default(now()) @map("received_at")
+  outcome         ScanOutcome
+  rejectionReason String?     @map("rejection_reason") @db.VarChar(255)
+
+  device     PresenceDevice      @relation(fields: [deviceId], references: [id])
+  credential PresenceCredential? @relation(fields: [credentialId], references: [id])
+
+  // The idempotency guarantee for the offline flush. A partially applied batch
+  // followed by a retry is the normal path, not an edge case.
+  @@unique([deviceId, clientEventId])
+  @@index([credentialId, occurredAt])
+  @@index([occurredAt])
+  @@index([outcome])
+  @@map("presence_scans")
+}
+
+/// One row per person per date. The unit recaps and payroll read.
+model DailyPresence {
+  id                String               @id @default(uuid()) @db.Uuid
+  userId            String               @map("user_id") @db.Uuid
+  subjectType       PresenceSubjectType  @map("subject_type")
+  date              DateTime             @db.Date
+  checkInAt         DateTime?            @map("check_in_at")
+  checkOutAt        DateTime?            @map("check_out_at")
+  checkInSource     PresenceValueSource? @map("check_in_source")
+  checkOutSource    PresenceValueSource? @map("check_out_source")
+  status            PresenceDayStatus
+  statusSource      PresenceValueSource  @default(SCAN) @map("status_source")
+  lateMinutes       Int                  @default(0) @map("late_minutes")
+  earlyLeaveMinutes Int                  @default(0) @map("early_leave_minutes")
+  // The pattern actually judged against, so a later pattern edit cannot
+  // retroactively change a closed period (FR-027).
+  workPatternId     String?              @map("work_pattern_id") @db.Uuid
+  leaveRequestId    String?              @map("leave_request_id") @db.Uuid
+  note              String?              @db.Text
+  deletedAt         DateTime?            @map("deleted_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user         User                 @relation(fields: [userId], references: [id])
+  workPattern  WorkPattern?         @relation(fields: [workPatternId], references: [id])
+  leaveRequest LeaveRequest?        @relation(fields: [leaveRequestId], references: [id])
+  corrections  PresenceCorrection[]
+
+  @@unique([userId, date], map: "daily_presences_user_date_key", where: { deletedAt: null })
+  @@index([date, subjectType])
+  @@index([userId, date])
+  @@map("daily_presences")
+}
+
+/// The trail behind every manual change. Append-only.
+model PresenceCorrection {
+  id              String   @id @default(uuid()) @db.Uuid
+  dailyPresenceId String   @map("daily_presence_id") @db.Uuid
+  field           String   @db.VarChar(40)
+  previousValue   String?  @map("previous_value") @db.VarChar(255)
+  newValue        String?  @map("new_value") @db.VarChar(255)
+  reason          String   @db.VarChar(255)
+  actorId         String   @map("actor_id") @db.Uuid
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  dailyPresence DailyPresence @relation(fields: [dailyPresenceId], references: [id], onDelete: Cascade)
+  actor         User          @relation(fields: [actorId], references: [id])
+
+  @@index([dailyPresenceId])
+  @@map("presence_corrections")
+}
+
+model WorkPattern {
+  id           String    @id @default(uuid()) @db.Uuid
+  name         String    @db.VarChar(100)
+  isDefault    Boolean   @default(false) @map("is_default")
+  graceMinutes Int       @default(0) @map("grace_minutes")
+  deletedAt    DateTime? @map("deleted_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  days           WorkPatternDay[]
+  assignments    WorkPatternAssignment[]
+  dailyPresences DailyPresence[]
+
+  @@unique([isDefault], map: "work_patterns_single_default_key", where: { isDefault: true, deletedAt: null })
+  @@map("work_patterns")
+}
+
+/// Times are "HH:mm" strings, not DateTime: a pattern's start is a recurring
+/// wall-clock time with no date, and a DateTime column would invite a timezone
+/// conversion that silently shifts every school day by hours.
+model WorkPatternDay {
+  id            String  @id @default(uuid()) @db.Uuid
+  workPatternId String  @map("work_pattern_id") @db.Uuid
+  weekday       Int
+  isWorkingDay  Boolean @default(true) @map("is_working_day")
+  startTime     String  @map("start_time") @db.VarChar(5)
+  endTime       String  @map("end_time") @db.VarChar(5)
+
+  workPattern WorkPattern @relation(fields: [workPatternId], references: [id], onDelete: Cascade)
+
+  @@unique([workPatternId, weekday])
+  @@map("work_pattern_days")
+}
+
+model WorkPatternAssignment {
+  id            String    @id @default(uuid()) @db.Uuid
+  userId        String    @map("user_id") @db.Uuid
+  workPatternId String    @map("work_pattern_id") @db.Uuid
+  effectiveFrom DateTime  @map("effective_from") @db.Date
+  effectiveTo   DateTime? @map("effective_to") @db.Date
+  deletedAt     DateTime? @map("deleted_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user        User        @relation(fields: [userId], references: [id])
+  workPattern WorkPattern @relation(fields: [workPatternId], references: [id])
+
+  @@index([userId, effectiveFrom])
+  @@map("work_pattern_assignments")
+}
+
+/// Owned by presence, imported from the academic calendar by the operator's
+/// browser rather than by a backend call — that is what keeps the domain graph
+/// one-way (research R9).
+model NonWorkingDay {
+  id               String    @id @default(uuid()) @db.Uuid
+  date             DateTime  @db.Date
+  name             String    @db.VarChar(150)
+  /// Provenance only. Deliberately NOT a foreign key across the domain boundary.
+  sourceCalendarId String?   @map("source_calendar_id") @db.Uuid
+  deletedAt        DateTime? @map("deleted_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([date], map: "non_working_days_date_key", where: { deletedAt: null })
+  @@map("non_working_days")
+}
+
+model LeaveType {
+  id               String              @id @default(uuid()) @db.Uuid
+  code             String              @unique @db.VarChar(30)
+  name             String              @db.VarChar(100)
+  treatment        LeaveTreatment
+  consumesQuota    Boolean             @default(false) @map("consumes_quota")
+  annualQuota      Int?                @map("annual_quota")
+  requiresDocument Boolean             @default(false) @map("requires_document")
+  appliesTo        PresenceSubjectType @map("applies_to")
+  isActive         Boolean             @default(true) @map("is_active")
+  deletedAt        DateTime?           @map("deleted_at")
+
+  requests LeaveRequest[]
+  balances LeaveBalance[]
+
+  @@map("leave_types")
+}
+
+model LeaveRequest {
+  id              String             @id @default(uuid()) @db.Uuid
+  requesterId     String             @map("requester_id") @db.Uuid
+  leaveTypeId     String             @map("leave_type_id") @db.Uuid
+  startDate       DateTime           @map("start_date") @db.Date
+  endDate         DateTime           @map("end_date") @db.Date
+  reason          String             @db.Text
+  documentFileId  String?            @map("document_file_id") @db.Uuid
+  status          LeaveRequestStatus @default(PENDING)
+  approverId      String?            @map("approver_id") @db.Uuid
+  decidedAt       DateTime?          @map("decided_at")
+  decisionReason  String?            @map("decision_reason") @db.VarChar(255)
+  /// Materialised at submission against the pattern and holidays then in force.
+  workingDayCount Int                @map("working_day_count")
+  deletedAt       DateTime?          @map("deleted_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  requester      User            @relation("LeaveRequester", fields: [requesterId], references: [id])
+  approver       User?           @relation("LeaveApprover", fields: [approverId], references: [id])
+  leaveType      LeaveType       @relation(fields: [leaveTypeId], references: [id])
+  documentFile   File?           @relation(fields: [documentFileId], references: [id])
+  days           LeaveDay[]
+  dailyPresences DailyPresence[]
+
+  @@index([requesterId, status])
+  @@index([status])
+  @@map("leave_requests")
+}
+
+/// One row per *working* day covered. Materialised so "is this person on leave
+/// today" is a single indexed lookup rather than a range scan.
+model LeaveDay {
+  id             String   @id @default(uuid()) @db.Uuid
+  leaveRequestId String   @map("leave_request_id") @db.Uuid
+  date           DateTime @db.Date
+
+  leaveRequest LeaveRequest @relation(fields: [leaveRequestId], references: [id], onDelete: Cascade)
+
+  @@unique([leaveRequestId, date])
+  @@index([date])
+  @@map("leave_days")
+}
+
+/// `used` is deliberately absent — it is counted from approved LeaveDay rows, so
+/// a withdrawn or rejected request cannot leave a stale counter behind.
+model LeaveBalance {
+  id          String @id @default(uuid()) @db.Uuid
+  userId      String @map("user_id") @db.Uuid
+  leaveTypeId String @map("leave_type_id") @db.Uuid
+  year        Int
+  quota       Int
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user      User      @relation(fields: [userId], references: [id])
+  leaveType LeaveType @relation(fields: [leaveTypeId], references: [id])
+
+  @@unique([userId, leaveTypeId, year])
+  @@map("leave_balances")
+}
+
+/// Closing a month fixes its recap and is what payroll refuses to run without.
+model AttendancePeriod {
+  id       String                 @id @default(uuid()) @db.Uuid
+  year     Int
+  month    Int
+  status   AttendancePeriodStatus @default(OPEN)
+  closedAt DateTime?              @map("closed_at")
+  closedBy String?                @map("closed_by") @db.Uuid
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  closer User? @relation(fields: [closedBy], references: [id])
+
+  @@unique([year, month])
+  @@map("attendance_periods")
+}

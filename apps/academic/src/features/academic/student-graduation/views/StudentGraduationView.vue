@@ -1,4 +1,4 @@
-﻿<script setup lang="ts">
+<script setup lang="ts">
 import type { StudentGraduation, StudentGraduationSavePayload } from '../types'
 import StudentGraduationFormDialog from '../components/StudentGraduationFormDialog.vue'
 import { createStudentGraduationColumns } from '../components/columns'
@@ -16,6 +16,8 @@ import { computed, onMounted, ref, watch } from 'vue'
 const {
   items,
   totalItems,
+  currentPage,
+  pageSize,
   loading,
   isSaving,
   formError,
@@ -25,6 +27,8 @@ const {
   fetchStudentGraduations,
   saveStudentGraduation,
   deleteStudentGraduation,
+  setPage,
+  setPageSize,
 } = useStudentGraduation()
 
 const { can } = useRoleGuard()
@@ -77,6 +81,7 @@ watch(isAddModalOpen, (isOpen) => {
 })
 
 watch(selectedAcademicYearId, () => {
+  currentPage.value = 1
   void fetchStudentGraduations()
 })
 
@@ -126,11 +131,15 @@ onMounted(async () => {
         <DataTable
           :columns="tableColumns"
           :data="items"
-          :total-items="totalItems"
           :is-loading="loading"
+          :total-items="totalItems"
+          :page="currentPage"
+          :page-size="pageSize"
           item-label="alumni"
           filter-column="studentName"
           filter-placeholder="Cari nama siswa..."
+          @update:page="setPage"
+          @update:page-size="setPageSize"
         />
 
         <StudentGraduationFormDialog

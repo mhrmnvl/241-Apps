@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { toast } from 'vue-sonner'
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
+import { PAGINATION } from '@/shared/constants/pagination'
 import { ref, onMounted } from 'vue'
 import type { CalendarEventData, CalendarSavePayload } from '../types'
 import { useCalendarDialogForm } from '../composables/useCalendarDialogForm'
@@ -76,7 +77,7 @@ const calendarTypes = ref<{ id: string; name: string }[]>([])
 onMounted(async () => {
   try {
     const res = await academicCalendarTypeApi.getAcademicCalendarTypes({
-      limit: 100,
+      limit: PAGINATION.REFERENCE_LIMIT,
       isActive: true,
     })
     calendarTypes.value = res.data?.data ?? []

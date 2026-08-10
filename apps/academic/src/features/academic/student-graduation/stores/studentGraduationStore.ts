@@ -8,6 +8,8 @@ export const useStudentGraduationStore = defineStore(
   () => {
     const items = ref<StudentGraduation[]>([])
     const totalItems = ref(0)
+    const currentPage = ref(1)
+    const pageSize = ref(10)
     const loading = ref(false)
     const isSaving = ref(false)
     const formError = ref<string | null>(null)
@@ -20,6 +22,8 @@ export const useStudentGraduationStore = defineStore(
     return {
       items,
       totalItems,
+      currentPage,
+      pageSize,
       loading,
       isSaving,
       formError,

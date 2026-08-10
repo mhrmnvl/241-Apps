@@ -1,4 +1,4 @@
-﻿<script setup lang="ts">
+<script setup lang="ts">
 import { onMounted, ref, watch } from 'vue'
 import { DataTable } from '@/ui'
 import { Button } from '@/ui/button'
@@ -13,6 +13,8 @@ import type { StudentParent, StudentParentFormPayload } from '../types'
 const {
   items,
   totalItems,
+  currentPage,
+  pageSize,
   loading,
   isSaving,
   formError,
@@ -23,6 +25,8 @@ const {
   deleteStudentParent,
   fetchStudents,
   fetchParents,
+  setPage,
+  setPageSize,
 } = useStudentParent()
 
 const isFormOpen = ref(false)
@@ -94,9 +98,13 @@ onMounted(async () => {
         <DataTable
           :columns="columns"
           :data="items"
-          :total-items="totalItems"
           :is-loading="loading"
+          :total-items="totalItems"
+          :page="currentPage"
+          :page-size="pageSize"
           item-label="relasi"
+          @update:page="setPage"
+          @update:page-size="setPageSize"
         />
 
         <StudentParentFormDialog

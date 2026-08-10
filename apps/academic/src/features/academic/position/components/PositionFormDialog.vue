@@ -4,6 +4,7 @@ import { toTypedSchema } from '@vee-validate/zod'
 import { useForm } from 'vee-validate'
 import * as z from 'zod'
 import api from '@/shared/utils/api'
+import { PAGINATION } from '@/shared/constants/pagination'
 import { Button } from '@/ui/button'
 import { ScrollArea } from '@/ui/scroll-area'
 import {
@@ -51,7 +52,7 @@ onMounted(async () => {
     const res = await api.get<{ data: PositionCategoryOption[] }>(
       '/position-categories',
       {
-        params: { limit: 100 },
+        params: { limit: PAGINATION.REFERENCE_LIMIT },
       },
     )
     categories.value = res.data.data ?? []

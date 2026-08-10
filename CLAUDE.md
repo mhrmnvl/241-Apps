@@ -209,16 +209,40 @@ permissions, session, audit-log, profile, school-unit, dashboard, notification,
 file, settings, master-data, ...), `academic/` (student, teacher, classroom,
 curriculum, subject, schedule, assessment, attendance, report-card, enrollment,
 graduation, ...), `inventory/` (asset, circulation, approval, master-data),
-`admission/`, `portal/`. `src/types/` holds ambient declarations only
+`admission/`, `portal/`, `presence/` (credential, device, scan, daily-record,
+work-pattern, leave, attendance-period, shared), `payroll/` (component,
+assignment, run, payslip, shared). `src/types/` holds ambient declarations only
 (`express.d.ts`) — it is not a domain. New modules are registered in `src/app.module.ts`.
 
-`platform/`, `academic/`, `inventory/`, and `portal/` are **domains containing sibling
-modules**;
+`platform/`, `academic/`, `inventory/`, `portal/`, `presence/`, and `payroll/` are
+**domains containing sibling modules**;
 each module owns the layered layout below. `admission/` is the exception — it is
 currently one flat module holding four repository interfaces (wave, announcement,
 applicant, application), five controllers, and 31 use cases. That is technical debt,
 not a second valid layout: prefer splitting along its existing repository seams over
 adding to the flat structure.
+
+`presence/` is gate presence — one row per person per day, keyed on `userId`, fed
+by a QR scan at the gate. It is **not** `academic/attendance`, which stays per-lesson
+and is untouched by it (ADR-0007). Three things there are load-bearing:
+
+- **Credential validity defines a person's expected days.** `NOT_EXPECTED` has three
+  distinct causes — a non-working weekday, a holiday, and a date outside the window in
+  which the person held a card — and conflating them is what turns "no card yet" into
+  "absent" on someone's payslip.
+- **The direction is one-way**: `academic/` and `payroll/` read presence through
+  `IDailyPresenceReadPort`; presence never reads back, and never imports from
+  `academic/`. `presence-academic-direction.spec.ts` is the sweep that holds the line.
+- **Nothing branches on a position.** Positions are master data the school edits, so a
+  new one must work with no deployment — `presence-roster-independence.spec.ts` proves
+  no file under `presence/` or `payroll/` can name one (FR-055, FR-056).
+
+`payroll/` is the only place holding salary. Every permission is prefixed `payroll-`,
+which is exempt from the `ADMIN` role bypass (ADR-0008) — an administrative role grants
+nothing here. Rounding is per line and then summed, never the reverse; a salary
+assignment is superseded rather than overwritten, which is what lets an earlier month
+recalculate to its original figures; and an `APPROVED` run is terminal, corrected only
+by an adjustment run.
 
 Within a module (e.g. `academic/student/`), the established layering is:
 

@@ -13,6 +13,8 @@ export const useTeachingAssignmentStore = defineStore(
   () => {
     const items = ref<TeachingAssignment[]>([])
     const totalItems = ref(0)
+    const currentPage = ref(1)
+    const pageSize = ref(10)
     const loading = ref(false)
     const isSaving = ref(false)
     const formError = ref<string | null>(null)
@@ -28,6 +30,8 @@ export const useTeachingAssignmentStore = defineStore(
     return {
       items,
       totalItems,
+      currentPage,
+      pageSize,
       loading,
       isSaving,
       formError,

@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from '@/ui/select'
 import api from '@/shared/utils/api'
+import { PAGINATION } from '@/shared/constants/pagination'
 import { useStudent } from '@/features/academic/student'
 import { useTeacher } from '@/features/academic/teacher'
 import type {
@@ -82,7 +83,7 @@ onMounted(async () => {
       const res = await api.get<{ data: EmploymentType[] }>(
         '/employment-types',
         {
-          params: { limit: 100 },
+          params: { limit: PAGINATION.REFERENCE_LIMIT },
         },
       )
       employmentTypes.value = res.data.data ?? []

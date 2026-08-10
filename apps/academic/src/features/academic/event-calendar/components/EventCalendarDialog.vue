@@ -44,6 +44,7 @@ import type { DateRange } from 'reka-ui'
 import { useForm } from 'vee-validate'
 import { computed, onMounted, ref, watch } from 'vue'
 import * as z from 'zod'
+import { PAGINATION } from '@/shared/constants/pagination'
 
 const props = defineProps<{
   open?: boolean
@@ -90,7 +91,7 @@ onMounted(async () => {
   try {
     const res = await import('@/shared/utils/api').then((m) =>
       m.default.get<{ data: AudienceGroupOption[] }>('/audience-groups', {
-        params: { limit: 100 },
+        params: { limit: PAGINATION.REFERENCE_LIMIT },
       }),
     )
     audienceGroups.value = res.data.data ?? []

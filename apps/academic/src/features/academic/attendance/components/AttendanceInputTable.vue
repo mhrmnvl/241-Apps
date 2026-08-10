@@ -30,11 +30,20 @@ const emit = defineEmits<{
   save: []
 }>()
 
+/**
+ * The moment a teacher touches a row it stops being the gate's suggestion and
+ * becomes their value, so both flags are cleared. Leaving them would keep
+ * showing "belum dikonfirmasi" over a value the teacher just chose.
+ */
+function confirmed(row: AttendanceInputRow): AttendanceInputRow {
+  return { ...row, fromGate: false, needsDecision: false }
+}
+
 function updateRowStatus(index: number, status: AttendanceStatus) {
   const row = props.rows[index]
   if (!row) return
   const updated = [...props.rows]
-  updated[index] = { ...row, status }
+  updated[index] = { ...confirmed(row), status }
   emit('update:rows', updated)
 }
 
@@ -42,8 +51,13 @@ function updateRowNote(index: number, note: string) {
   const row = props.rows[index]
   if (!row) return
   const updated = [...props.rows]
-  updated[index] = { ...row, note }
+  updated[index] = { ...confirmed(row), note }
   emit('update:rows', updated)
+}
+
+/** "2026-08-10T07:25:00.000Z" → "07:25" */
+function gateTime(value: string) {
+  return new Date(value).toISOString().slice(11, 16)
 }
 </script>
 
@@ -67,7 +81,39 @@ function updateRowNote(index: number, note: string) {
           >
             <TableCell class="text-center">{{ index + 1 }}</TableCell>
             <TableCell>{{ row.nis }}</TableCell>
-            <TableCell>{{ row.studentName }}</TableCell>
+            <TableCell>
+              <div class="flex flex-wrap items-center gap-2">
+                <span>{{ row.studentName }}</span>
+
+                <!-- FR-017: pre-filled, not confirmed. The badge disappears the
+                     moment the teacher touches the row, because from then on it
+                     is their value rather than the gate's. -->
+                <span
+                  v-if="row.fromGate"
+                  class="rounded-full bg-sky-100 px-2 py-0.5 text-xs text-sky-800 dark:bg-sky-950 dark:text-sky-300"
+                >
+                  dari gerbang, belum dikonfirmasi
+                </span>
+
+                <!-- FR-018: the gate saw nothing. That is not evidence of
+                     absence — it needs a decision. -->
+                <span
+                  v-else-if="row.needsDecision"
+                  class="rounded-full bg-amber-100 px-2 py-0.5 text-xs text-amber-900 dark:bg-amber-950 dark:text-amber-300"
+                >
+                  perlu keputusan
+                </span>
+              </div>
+
+              <!-- FR-021: what time they actually arrived, so the teacher can
+                   judge a late arrival rather than guess. -->
+              <p
+                v-if="row.gateCheckInAt"
+                class="text-muted-foreground mt-0.5 text-xs"
+              >
+                Tap gerbang {{ gateTime(row.gateCheckInAt) }}
+              </p>
+            </TableCell>
             <TableCell>
               <Select
                 :model-value="row.status"

@@ -3,6 +3,7 @@ import { academicYearApi } from '@/features/academic/academic-year'
 import { semesterTypeApi } from '@/features/academic/semester-type/api/semesterTypeApi'
 import { useSemesterStore } from '../stores/semesterStore'
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
+import { PAGINATION } from '@/shared/constants/pagination'
 import { toast } from 'vue-sonner'
 import type {
   GenerateRecommendationPayload,
@@ -16,7 +17,9 @@ export const semesterService = {
     const store = useSemesterStore()
     store.loading = true
     try {
-      const res = await semesterApi.getSemesters({ limit: 100 })
+      const res = await semesterApi.getSemesters({
+        limit: PAGINATION.REFERENCE_LIMIT,
+      })
       store.semesters = res.data.data ?? []
       store.totalSemesters = res.data.meta?.total ?? store.semesters.length
     } catch (error: unknown) {
@@ -31,7 +34,9 @@ export const semesterService = {
   fetchAcademicYears: async () => {
     const store = useSemesterStore()
     try {
-      const res = await academicYearApi.getAcademicYears({ limit: 100 })
+      const res = await academicYearApi.getAcademicYears({
+        limit: PAGINATION.REFERENCE_LIMIT,
+      })
       store.academicYears = res.data.data
     } catch (error: unknown) {
       toast.error(
@@ -43,7 +48,9 @@ export const semesterService = {
   fetchSemesterTypes: async () => {
     const store = useSemesterStore()
     try {
-      const res = await semesterTypeApi.getSemesterTypes({ limit: 100 })
+      const res = await semesterTypeApi.getSemesterTypes({
+        limit: PAGINATION.REFERENCE_LIMIT,
+      })
       store.semesterTypes = res.data.data ?? []
     } catch (error: unknown) {
       toast.error(

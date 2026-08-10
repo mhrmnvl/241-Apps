@@ -35,6 +35,7 @@ import { academicYearApi } from '@/features/academic/academic-year'
 import { curriculaApi } from '@/features/academic/curriculum'
 import type { AcademicYear } from '@/features/academic/academic-year'
 import type { Curricula } from '@/features/academic/curriculum'
+import { PAGINATION } from '@/shared/constants/pagination'
 
 const props = defineProps<{
   open: boolean
@@ -94,8 +95,8 @@ async function loadCurriculumData() {
   loadingCurriculum.value = true
   try {
     const [ayRes, curRes, assRes] = await Promise.all([
-      academicYearApi.getAcademicYears({ limit: 100 }),
-      curriculaApi.getCurricula({ limit: 100 }),
+      academicYearApi.getAcademicYears({ limit: PAGINATION.REFERENCE_LIMIT }),
+      curriculaApi.getCurricula({ limit: PAGINATION.REFERENCE_LIMIT }),
       gradeAcademicYearService.getAssignments(),
     ])
     academicYears.value = ayRes.data?.data ?? []

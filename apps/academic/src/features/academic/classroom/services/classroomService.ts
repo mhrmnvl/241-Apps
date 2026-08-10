@@ -7,6 +7,7 @@ import type {
 import { classroomApi } from '../api/classroomApi'
 import { useClassroomStore } from '../stores/classroomStore'
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
+import { PAGINATION } from '@/shared/constants/pagination'
 import { toast } from 'vue-sonner'
 
 export const classroomService = {
@@ -32,7 +33,7 @@ export const classroomService = {
 
       try {
         const supervisorRes = await classroomApi.getClassroomSupervisors({
-          limit: 100,
+          limit: PAGINATION.REFERENCE_LIMIT,
         })
         const assignments = supervisorRes.data.data ?? []
         const supervisorByClassroomId = new Map<

@@ -2,6 +2,7 @@ import { computed, ref } from 'vue'
 import { toast } from 'vue-sonner'
 import { timeSlotApi } from '../api/timeSlotApi'
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
+import { PAGINATION } from '@/shared/constants/pagination'
 import type { TimeSlot, TimeSlotType } from '../types'
 
 export interface EditableTimeSlotRow {
@@ -69,7 +70,7 @@ export function useTimeSlotManager() {
     loading.value = true
     try {
       const [timeSlotRes, typeRes] = await Promise.all([
-        timeSlotApi.getTimeSlots({ limit: 100 }),
+        timeSlotApi.getTimeSlots({ limit: PAGINATION.REFERENCE_LIMIT }),
         timeSlotApi.getTimeSlotTypes(),
       ])
       rows.value = (timeSlotRes.data.data ?? [])

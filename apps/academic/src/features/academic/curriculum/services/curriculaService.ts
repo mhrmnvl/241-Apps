@@ -2,6 +2,7 @@ import { curriculaApi } from '../api/curriculaApi'
 import { academicYearApi } from '@/features/academic/academic-year'
 import { useCurriculaStore } from '../stores/curriculaStore'
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
+import { PAGINATION } from '@/shared/constants/pagination'
 import { toast } from 'vue-sonner'
 import type { CurriculaSavePayload } from '../types'
 
@@ -15,7 +16,7 @@ export const curriculaService = {
     store.loading = true
     try {
       const res = await curriculaApi.getCurricula({
-        limit: 100,
+        limit: PAGINATION.REFERENCE_LIMIT,
         academicYearId,
       })
       store.curricula = res.data.data ?? []
@@ -32,7 +33,9 @@ export const curriculaService = {
   fetchAcademicYears: async () => {
     const store = useCurriculaStore()
     try {
-      const res = await academicYearApi.getAcademicYears({ limit: 100 })
+      const res = await academicYearApi.getAcademicYears({
+        limit: PAGINATION.REFERENCE_LIMIT,
+      })
       store.academicYears = res.data.data
     } catch (error: unknown) {
       toast.error(
