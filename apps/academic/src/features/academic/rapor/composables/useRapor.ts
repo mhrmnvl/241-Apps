@@ -5,6 +5,17 @@ import { raporService } from '../services/raporService'
 export const useRapor = () => {
   const store = useRaporStore()
 
+  const setPage = async (page: number) => {
+    store.currentPage = page
+    await raporService.fetchRapors()
+  }
+
+  const setPageSize = async (size: number) => {
+    store.pageSize = size
+    store.currentPage = 1
+    await raporService.fetchRapors()
+  }
+
   return {
     ...storeToRefs(store),
 
@@ -18,5 +29,7 @@ export const useRapor = () => {
     togglePublish: raporService.togglePublish.bind(raporService),
     fetchScoresForRapor: raporService.fetchScoresForRapor.bind(raporService),
     exportReportCard: raporService.exportReportCard.bind(raporService),
+    setPage,
+    setPageSize,
   }
 }

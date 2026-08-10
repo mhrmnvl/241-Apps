@@ -137,4 +137,29 @@ export interface AttendanceInputRow {
   status: AttendanceStatus
   note: string
   existingId?: string
+  /**
+   * Pre-filled from the gate and not yet confirmed by a teacher. Cleared the
+   * moment the teacher touches the row, because at that point it is their
+   * value, not the gate's (FR-017).
+   */
+  fromGate?: boolean
+  /** Shown when the arrival was later than the school start time (FR-021). */
+  gateCheckInAt?: string | null
+  /** The gate saw nothing. Needs a decision, not a default (FR-018). */
+  needsDecision?: boolean
+}
+
+export interface AttendanceSuggestion {
+  enrollmentId: string
+  suggestedStatus: 'PRESENT' | 'LATE'
+  checkInAt: string | null
+  lateMinutes: number
+}
+
+export interface AttendanceSuggestionResult {
+  date: string
+  suggestions: AttendanceSuggestion[]
+  unscannedEnrollmentIds: string[]
+  /** False when presence could not be reached; the screen says so. */
+  available: boolean
 }

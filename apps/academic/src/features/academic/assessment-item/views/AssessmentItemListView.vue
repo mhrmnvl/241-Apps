@@ -33,7 +33,6 @@ const { can } = useRoleGuard()
 
 const {
   items,
-  totalItems,
   loading,
   formError,
   classrooms,
@@ -301,7 +300,6 @@ onMounted(async () => {
           v-if="hasDisplayedData"
           :columns="columns"
           :data="items"
-          :total-items="totalItems"
           :is-loading="loading"
           item-label="tugas"
           filter-column="name"

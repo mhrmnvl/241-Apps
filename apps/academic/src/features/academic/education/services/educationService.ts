@@ -1,4 +1,5 @@
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
+import { PAGINATION } from '@/shared/constants/pagination'
 import { toast } from 'vue-sonner'
 import { educationApi } from '../api/educationApi'
 import type {
@@ -20,7 +21,9 @@ const FALLBACK_LEVELS: EducationLevel[] = [
 export const educationService = {
   getEducationLevels: async (): Promise<EducationLevel[]> => {
     try {
-      const res = await educationApi.getEducationLevels({ limit: 100 })
+      const res = await educationApi.getEducationLevels({
+        limit: PAGINATION.REFERENCE_LIMIT,
+      })
       return res.data.data
     } catch {
       return FALLBACK_LEVELS

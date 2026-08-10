@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import { useEmploymentTypeOptions } from './useEmploymentTypeOptions'
+import { PAGINATION } from '@/shared/constants/pagination'
 
 const mockGet = vi.hoisted(() => vi.fn())
 
@@ -19,7 +20,7 @@ describe('useEmploymentTypeOptions', () => {
     await fetchEmploymentTypes()
 
     expect(mockGet).toHaveBeenCalledWith('/employment-types', {
-      params: { limit: 100 },
+      params: { limit: PAGINATION.REFERENCE_LIMIT },
     })
     expect(employmentTypes.value).toEqual([
       { id: 'et-1', code: 'PNS', name: 'PNS' },

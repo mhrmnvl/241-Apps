@@ -1,5 +1,6 @@
-﻿<script setup lang="ts">
+<script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
+import { watchDebounced } from '@vueuse/core'
 import { DataTable } from '@/ui'
 import { AppCombobox } from '@/ui'
 import type { ComboboxOption } from '@/ui'
@@ -17,6 +18,8 @@ import type { Parent, ParentSavePayload } from '../types'
 const {
   items,
   totalItems,
+  currentPage,
+  pageSize,
   loading,
   isSaving,
   formError,
@@ -27,6 +30,8 @@ const {
   fetchParents,
   saveParent,
   deleteParent,
+  setPage,
+  setPageSize,
 } = useParent()
 
 const isAddModalOpen = ref(false)
@@ -76,9 +81,19 @@ watch(isAddModalOpen, (isOpen) => {
   }
 })
 
-watch([selectedOccupationId, searchQuery], () => {
+watch(selectedOccupationId, () => {
+  currentPage.value = 1
   void fetchParents()
 })
+
+watchDebounced(
+  searchQuery,
+  () => {
+    currentPage.value = 1
+    void fetchParents()
+  },
+  { debounce: 300 },
+)
 
 onMounted(async () => {
   await fetchFilterOptions()
@@ -123,9 +138,13 @@ onMounted(async () => {
         <DataTable
           :columns="tableColumns"
           :data="items"
-          :total-items="totalItems"
           :is-loading="loading"
+          :total-items="totalItems"
+          :page="currentPage"
+          :page-size="pageSize"
           item-label="orang tua"
+          @update:page="setPage"
+          @update:page-size="setPageSize"
         >
           <template #header-right>
             <div class="relative w-full sm:w-[240px]">

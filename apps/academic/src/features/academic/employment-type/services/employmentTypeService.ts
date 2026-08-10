@@ -1,4 +1,5 @@
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
+import { PAGINATION } from '@/shared/constants/pagination'
 import { toast } from 'vue-sonner'
 import { employmentTypeApi } from '../api/employmentTypeApi'
 import type {
@@ -10,7 +11,9 @@ import type {
 export const employmentTypeService = {
   getEmploymentTypes: async (): Promise<EmploymentType[]> => {
     try {
-      const res = await employmentTypeApi.getEmploymentTypes({ limit: 100 })
+      const res = await employmentTypeApi.getEmploymentTypes({
+        limit: PAGINATION.REFERENCE_LIMIT,
+      })
       return res.data.data
     } catch {
       return []

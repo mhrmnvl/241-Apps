@@ -38,6 +38,11 @@ import { DeleteAttendanceUseCase } from '../use-cases/delete-attendance.use-case
 import { BulkUpsertAttendanceUseCase } from '../use-cases/bulk-upsert-attendance.use-case.js';
 import { GetAttendanceRecapUseCase } from '../use-cases/get-attendance-recap.use-case.js';
 import { GetAttendanceTrendUseCase } from '../use-cases/get-attendance-trend.use-case.js';
+import {
+  AttendanceSuggestionResult,
+  GetAttendanceSuggestionsUseCase,
+} from '../use-cases/get-attendance-suggestions.use-case.js';
+import { AttendanceSuggestionQueryDto } from '../dto/request/attendance-suggestion-query.dto.js';
 
 @ApiTags('Attendances')
 @ApiBearerAuth()
@@ -53,7 +58,23 @@ export class AttendanceController {
     private readonly bulkUpsertUC: BulkUpsertAttendanceUseCase,
     private readonly recapUC: GetAttendanceRecapUseCase,
     private readonly trendUC: GetAttendanceTrendUseCase,
+    private readonly suggestionsUC: GetAttendanceSuggestionsUseCase,
   ) {}
+
+  /**
+   * What the gate saw for this class today, as a suggestion.
+   *
+   * Declared before the bare `@Get()` so "suggestions" is never taken for a
+   * list query. It writes nothing — the teacher's save still owns the record.
+   */
+  @Get('suggestions')
+  @RequirePermissions('attendances.read')
+  @ApiOperation({ summary: 'Gate pre-fill for a class, unconfirmed' })
+  async suggestions(
+    @Query() query: AttendanceSuggestionQueryDto,
+  ): Promise<AttendanceSuggestionResult> {
+    return this.suggestionsUC.execute(query);
+  }
 
   @Get()
   @RequirePermissions('attendances.read')

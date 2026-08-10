@@ -32,14 +32,19 @@ const { can } = useRoleGuard()
 const {
   filters,
   loading,
+  teachers,
+  totalTeachers,
+  currentPage,
+  pageSize,
   fetchTeachers,
-  filteredTeachers,
   toggleActive,
   deleteTeacher,
   positions,
   positionCategories,
   fetchPositions,
   fetchPositionCategories,
+  setPage,
+  setPageSize,
 } = useTeacher()
 
 const tableColumns = createAccountColumns({
@@ -87,6 +92,8 @@ function resetAllFilters() {
   filters.value.categoryFilter = 'all'
   filters.value.positionFilter = 'all'
   filters.value.statusFilter = 'all'
+  currentPage.value = 1
+  void fetchTeachers()
 }
 
 function handleFilterChange(
@@ -94,10 +101,15 @@ function handleFilterChange(
   value: unknown,
 ) {
   filters.value[key] = typeof value === 'string' ? value : 'all'
+  currentPage.value = 1
+  void fetchTeachers()
 }
 watchDebounced(
   () => filters.value.keyword,
-  () => fetchTeachers(),
+  () => {
+    currentPage.value = 1
+    void fetchTeachers()
+  },
   { debounce: 400 },
 )
 
@@ -207,10 +219,14 @@ onMounted(() => {
 
         <DataTable
           :columns="tableColumns"
-          :data="filteredTeachers"
-          :total-items="filteredTeachers.length"
+          :data="teachers"
           :is-loading="loading"
+          :total-items="totalTeachers"
+          :page="currentPage"
+          :page-size="pageSize"
           item-label="akun guru"
+          @update:page="setPage"
+          @update:page-size="setPageSize"
         >
           <template #header-right>
             <div class="relative w-full sm:w-48 max-w-[200px]">

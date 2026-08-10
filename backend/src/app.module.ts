@@ -19,6 +19,8 @@ import { PlatformModule } from './platform/platform.module.js';
 import { InventoryModule } from './inventory/inventory.module.js';
 import { AdmissionModule } from './admission/admission.module.js';
 import { PortalModule } from './portal/portal.module.js';
+import { PresenceModule } from './presence/presence.module.js';
+import { PayrollModule } from './payroll/payroll.module.js';
 import { JwtAuthGuard } from './platform/auth/index.js';
 import { PermissionGuard } from './platform/access-control/permission/guards/permission.guard.js';
 
@@ -101,6 +103,11 @@ import { PermissionGuard } from './platform/access-control/permission/guards/per
     AcademicModule,
     InventoryModule,
     AdmissionModule,
+    PresenceModule,
+    PayrollModule,
+    // PortalModule stays last: its PortalHtmlModule answers `GET *` to serve
+    // the SPA shell, and Nest matches controllers in registration order, so a
+    // module listed after it never receives a request.
     PortalModule,
   ],
   controllers: [],

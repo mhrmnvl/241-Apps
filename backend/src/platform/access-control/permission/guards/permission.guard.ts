@@ -11,18 +11,23 @@ import { IPermissionRepository } from '../domain/interfaces/permission-repositor
 /**
  * Codes the ADMIN blanket bypass does not cover.
  *
- * Holding an administrative role in SIAKAD must not by itself confer the right
- * to publish to the school's public website — its operators may be different
- * people, and a boundary the top delegated role walks straight through is not a
- * boundary (FR-062, ADR-0006).
+ * `portal-`: holding an administrative role in SIAKAD must not by itself confer
+ * the right to publish to the school's public website — its operators may be
+ * different people, and a boundary the top delegated role walks straight through
+ * is not a boundary (FR-062, ADR-0006).
+ *
+ * `payroll-`: the same argument with money. Without the exemption every ADMIN
+ * reads every salary in the school by virtue of the role, and — the part that
+ * matters — no grant configuration can prevent it, because the bypass runs
+ * before permissions are consulted (ADR-0008).
  *
  * SUPER_ADMIN keeps the full bypass on purpose: it is the break-glass path that
- * keeps the portal recoverable if every portal operator is locked out.
+ * keeps both recoverable if every operator is locked out.
  *
  * This is data, not new branching. Blast radius is zero for everything outside
- * the prefix.
+ * the prefixes.
  */
-const ROLE_BYPASS_EXEMPT_PREFIXES = ['portal-'] as const;
+const ROLE_BYPASS_EXEMPT_PREFIXES = ['portal-', 'payroll-'] as const;
 
 const SUPER_ADMIN_ROLE = 'SUPER_ADMIN';
 const ADMIN_ROLE = 'ADMIN';

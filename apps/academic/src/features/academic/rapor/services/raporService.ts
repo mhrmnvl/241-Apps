@@ -1,6 +1,7 @@
 import { raporApi } from '../api/raporApi'
 import { useRaporStore } from '../stores/raporStore'
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
+import { PAGINATION } from '@/shared/constants/pagination'
 import { toast } from 'vue-sonner'
 import type {
   BulkGenerateResult,
@@ -19,8 +20,8 @@ export const raporService = {
     const store = useRaporStore()
     try {
       const [classroomRes, semesterRes] = await Promise.all([
-        classroomApi.getClassrooms({ limit: 100 }),
-        semesterApi.getSemesters({ limit: 100 }),
+        classroomApi.getClassrooms({ limit: PAGINATION.REFERENCE_LIMIT }),
+        semesterApi.getSemesters({ limit: PAGINATION.REFERENCE_LIMIT }),
       ])
       store.classrooms = classroomRes.data?.data ?? []
       store.semesters = semesterRes.data?.data ?? []
@@ -41,7 +42,8 @@ export const raporService = {
     store.loading = true
     try {
       const params: RaporQueryParams = {
-        limit: 100,
+        page: store.currentPage,
+        limit: store.pageSize,
         classroomId: store.selectedClassroomId,
         semesterId: store.selectedSemesterId,
       }
@@ -191,7 +193,10 @@ export const raporService = {
     enrollmentId: string,
   ): Promise<RaporScoreRow[]> => {
     try {
-      const res = await studentScoreApi.getScores({ enrollmentId, limit: 100 })
+      const res = await studentScoreApi.getScores({
+        enrollmentId,
+        limit: PAGINATION.CHILD_ENTITY_LIMIT,
+      })
       const rawScores = res.data?.data ?? []
       return rawScores.map(
         (s: StudentScoreItem): RaporScoreRow => ({

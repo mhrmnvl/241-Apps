@@ -1,0 +1,161 @@
+// Payroll: the only place in this codebase that holds salary.
+//
+// Every permission guarding these tables carries the `payroll-` prefix, which is
+// exempt from the ADMIN role bypass (ADR-0008). Money is Decimal(15,2), matching
+// inventory.prisma; amounts on payslip lines are already rounded to whole rupiah.
+
+enum SalaryComponentType {
+  BASE
+  ALLOWANCE
+  ATTENDANCE_DRIVEN
+  DEDUCTION
+}
+
+enum AttendanceDriver {
+  PRESENT_DAYS
+  ABSENT_DAYS
+  LATE_COUNT
+  LATE_MINUTES
+  EARLY_LEAVE_COUNT
+  LEAVE_DAYS
+  OFFICIAL_DUTY_DAYS
+}
+
+enum PayrollRunStatus {
+  DRAFT
+  SUBMITTED
+  APPROVED
+}
+
+enum PayrollRunKind {
+  ORIGINAL
+  ADJUSTMENT
+}
+
+model SalaryComponent {
+  id        String              @id @default(uuid()) @db.Uuid
+  code      String              @unique @db.VarChar(30)
+  name      String              @db.VarChar(100)
+  type      SalaryComponentType
+  /// Required for ATTENDANCE_DRIVEN, optional for DEDUCTION (a deduction per
+  /// absent day is both), forbidden on BASE and ALLOWANCE. The type decides the
+  /// sign; this decides whether the amount is fixed or counted.
+  driver    AttendanceDriver?
+  isActive  Boolean             @default(true) @map("is_active")
+  deletedAt DateTime?           @map("deleted_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  assignments  SalaryAssignment[]
+  payslipLines PayslipLine[]
+
+  @@map("salary_components")
+}
+
+/// Effective-dated. Superseding closes the old row and inserts a new one; an
+/// amount is never updated in place, which is what lets a run for an earlier
+/// month reproduce its original figures.
+model SalaryAssignment {
+  id            String    @id @default(uuid()) @db.Uuid
+  userId        String    @map("user_id") @db.Uuid
+  componentId   String    @map("component_id") @db.Uuid
+  amount        Decimal?  @db.Decimal(15, 2)
+  rate          Decimal?  @db.Decimal(15, 2)
+  effectiveFrom DateTime  @map("effective_from") @db.Date
+  effectiveTo   DateTime? @map("effective_to") @db.Date
+  createdBy     String    @map("created_by") @db.Uuid
+  deletedAt     DateTime? @map("deleted_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user      User            @relation("SalaryAssignmentUser", fields: [userId], references: [id])
+  creator   User            @relation("SalaryAssignmentCreator", fields: [createdBy], references: [id])
+  component SalaryComponent @relation(fields: [componentId], references: [id])
+
+  @@index([userId, effectiveFrom])
+  @@map("salary_assignments")
+}
+
+model PayrollRun {
+  id           String           @id @default(uuid()) @db.Uuid
+  year         Int
+  month        Int
+  kind         PayrollRunKind   @default(ORIGINAL)
+  sequence     Int              @default(1)
+  status       PayrollRunStatus @default(DRAFT)
+  /// Recorded rather than assumed, so a payslip can be re-derived years later.
+  roundingRule String           @default("HALF_UP_RUPIAH") @map("rounding_rule") @db.VarChar(20)
+  createdBy    String           @map("created_by") @db.Uuid
+  submittedBy  String?          @map("submitted_by") @db.Uuid
+  submittedAt  DateTime?        @map("submitted_at")
+  approvedBy   String?          @map("approved_by") @db.Uuid
+  approvedAt   DateTime?        @map("approved_at")
+  note         String?          @db.Text
+  deletedAt    DateTime?        @map("deleted_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  creator   User      @relation("PayrollRunCreator", fields: [createdBy], references: [id])
+  submitter User?     @relation("PayrollRunSubmitter", fields: [submittedBy], references: [id])
+  approver  User?     @relation("PayrollRunApprover", fields: [approvedBy], references: [id])
+  payslips  Payslip[]
+
+  @@unique([year, month, kind, sequence], map: "payroll_runs_period_key")
+  @@index([year, month])
+  @@map("payroll_runs")
+}
+
+/// The attendance snapshot is explicit columns, not JSON: a payslip must be
+/// defensible years later, and columns are typed and queryable where a Json blob
+/// silently drifts in shape.
+model Payslip {
+  id               String  @id @default(uuid()) @db.Uuid
+  payrollRunId     String  @map("payroll_run_id") @db.Uuid
+  userId           String  @map("user_id") @db.Uuid
+  grossAmount      Decimal @map("gross_amount") @db.Decimal(15, 2)
+  deductionAmount  Decimal @map("deduction_amount") @db.Decimal(15, 2)
+  netAmount        Decimal @map("net_amount") @db.Decimal(15, 2)
+  presentDays      Int     @default(0) @map("present_days")
+  absentDays       Int     @default(0) @map("absent_days")
+  lateCount        Int     @default(0) @map("late_count")
+  lateMinutes      Int     @default(0) @map("late_minutes")
+  earlyLeaveCount  Int     @default(0) @map("early_leave_count")
+  leaveDays        Int     @default(0) @map("leave_days")
+  officialDutyDays Int     @default(0) @map("official_duty_days")
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  payrollRun PayrollRun    @relation(fields: [payrollRunId], references: [id], onDelete: Cascade)
+  user       User          @relation(fields: [userId], references: [id])
+  lines      PayslipLine[]
+
+  @@unique([payrollRunId, userId])
+  @@index([userId])
+  @@map("payslips")
+}
+
+/// Component code and name are denormalised so a payslip still reads correctly
+/// after the component is renamed or retired.
+model PayslipLine {
+  id            String              @id @default(uuid()) @db.Uuid
+  payslipId     String              @map("payslip_id") @db.Uuid
+  componentId   String?             @map("component_id") @db.Uuid
+  componentCode String              @map("component_code") @db.VarChar(30)
+  componentName String              @map("component_name") @db.VarChar(100)
+  componentType SalaryComponentType @map("component_type")
+  amount        Decimal             @db.Decimal(15, 2)
+  driver        AttendanceDriver?
+  driverCount   Int?                @map("driver_count")
+  rate          Decimal?            @db.Decimal(15, 2)
+
+  payslip   Payslip          @relation(fields: [payslipId], references: [id], onDelete: Cascade)
+  component SalaryComponent? @relation(fields: [componentId], references: [id])
+
+  @@index([payslipId])
+  @@map("payslip_lines")
+}

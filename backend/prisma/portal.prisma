@@ -27,12 +27,12 @@ enum MediaUsageKind {
 /// Public visibility is derived at read time from status + publishedAt, never
 /// stored as a flag — see post.where.ts.
 model Post {
-  id     String   @id @default(uuid()) @db.Uuid
-  type   PostType
-  title  String   @db.VarChar(200)
-  slug   String   @db.VarChar(220)
-  summary String  @db.VarChar(500)
-  body   String   @db.Text
+  id      String   @id @default(uuid()) @db.Uuid
+  type    PostType
+  title   String   @db.VarChar(200)
+  slug    String   @db.VarChar(220)
+  summary String   @db.VarChar(500)
+  body    String   @db.Text
 
   coverFileId  String? @map("cover_file_id") @db.Uuid
   coverAltText String? @map("cover_alt_text") @db.VarChar(300)
@@ -161,8 +161,8 @@ model GalleryAlbum {
   updatedAt DateTime  @updatedAt @map("updated_at")
   deletedAt DateTime? @map("deleted_at")
 
-  author    User          @relation("PortalAlbumAuthor", fields: [authorId], references: [id], onDelete: Restrict)
-  coverFile File?         @relation("PortalAlbumCover", fields: [coverFileId], references: [id])
+  author    User           @relation("PortalAlbumAuthor", fields: [authorId], references: [id], onDelete: Restrict)
+  coverFile File?          @relation("PortalAlbumCover", fields: [coverFileId], references: [id])
   photos    GalleryPhoto[]
 
   @@index([status, publishedAt])
@@ -329,7 +329,7 @@ model PortalMediaUsage {
 
   createdAt DateTime @default(now()) @map("created_at")
 
-  file File @relation("PortalMediaUsageFile", fields: [fileId], references: [id], onDelete: Restrict)
+  file File  @relation("PortalMediaUsageFile", fields: [fileId], references: [id], onDelete: Restrict)
   post Post? @relation(fields: [postId], references: [id], onDelete: Cascade)
 
   @@index([fileId])

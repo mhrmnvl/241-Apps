@@ -1,6 +1,7 @@
 import { attendanceApi } from '../api/attendanceApi'
 import { useAttendanceStore } from '../stores/attendanceStore'
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
+import { PAGINATION } from '@/shared/constants/pagination'
 import { toast } from 'vue-sonner'
 import { classroomApi } from '@/features/academic/classroom'
 import { semesterApi } from '@/features/academic/semester'
@@ -13,8 +14,8 @@ export const attendanceService = {
     const store = useAttendanceStore()
     try {
       const [classroomRes, semesterRes] = await Promise.all([
-        classroomApi.getClassrooms({ limit: 100 }),
-        semesterApi.getSemesters({ limit: 100 }),
+        classroomApi.getClassrooms({ limit: PAGINATION.REFERENCE_LIMIT }),
+        semesterApi.getSemesters({ limit: PAGINATION.REFERENCE_LIMIT }),
       ])
       store.classrooms = classroomRes.data?.data ?? []
       store.semesters = semesterRes.data?.data ?? []
@@ -41,14 +42,14 @@ export const attendanceService = {
       const enrollmentRes = await studentEnrollmentApi.getEnrollments({
         classroomId: store.selectedClassroomId,
         semesterId: store.selectedSemesterId,
-        limit: 100,
+        limit: PAGINATION.CHILD_ENTITY_LIMIT,
       })
       const enrollments: StudentEnrollment[] = enrollmentRes.data?.data ?? []
 
       const attendanceRes = await attendanceApi.getAttendances({
         classroomId: store.selectedClassroomId,
         date: store.selectedDate,
-        limit: 100,
+        limit: PAGINATION.CHILD_ENTITY_LIMIT,
       })
       const existingAttendances = attendanceRes.data?.data ?? []
 
@@ -56,15 +57,34 @@ export const attendanceService = {
         existingAttendances.map((a) => [a.enrollmentId, a]),
       )
 
+      // What the gate saw, as a suggestion. Never persisted here — the
+      // teacher's save is the only thing that writes (FR-020, research R6).
+      const gate = await attendanceService.loadGateSuggestions()
+      const suggestionMap = new Map(
+        gate.suggestions.map((s) => [s.enrollmentId, s]),
+      )
+      const unscanned = new Set(gate.unscannedEnrollmentIds)
+
       store.inputRows = enrollments.map((enrollment): AttendanceInputRow => {
         const existing = attendanceMap.get(enrollment.id)
+        const suggestion = suggestionMap.get(enrollment.id)
+
+        // A saved record is the teacher's own value and always wins — a later
+        // gate flush must never overwrite a decision already made (research R6).
+        const status =
+          existing?.status ??
+          (suggestion?.suggestedStatus === 'LATE' ? 'LATE' : 'PRESENT')
+
         return {
           enrollmentId: enrollment.id,
           studentName: enrollment.student?.user?.profile?.name ?? '-',
           nis: enrollment.student?.nis ?? '-',
-          status: existing?.status ?? 'PRESENT',
+          status,
           note: existing?.note ?? '',
           existingId: existing?.id,
+          fromGate: !existing && Boolean(suggestion),
+          gateCheckInAt: suggestion?.checkInAt ?? null,
+          needsDecision: !existing && unscanned.has(enrollment.id),
         }
       })
     } catch (error: unknown) {
@@ -73,6 +93,31 @@ export const attendanceService = {
       )
     } finally {
       store.loading = false
+    }
+  },
+
+  /**
+   * Presence being unavailable must not stop a teacher taking attendance. The
+   * backend already degrades to an empty suggestion set; this catch covers the
+   * request itself failing.
+   */
+  loadGateSuggestions: async () => {
+    const store = useAttendanceStore()
+    try {
+      const res = await attendanceApi.getGateSuggestions({
+        classroomId: store.selectedClassroomId,
+        semesterId: store.selectedSemesterId,
+        date: store.selectedDate,
+      })
+      const data = res.data?.data
+      store.gateAvailable = data?.available ?? false
+      return {
+        suggestions: data?.suggestions ?? [],
+        unscannedEnrollmentIds: data?.unscannedEnrollmentIds ?? [],
+      }
+    } catch {
+      store.gateAvailable = false
+      return { suggestions: [], unscannedEnrollmentIds: [] }
     }
   },
 

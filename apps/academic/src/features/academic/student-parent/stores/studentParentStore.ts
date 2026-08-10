@@ -5,6 +5,8 @@ import type { StudentParent, StudentOption, ParentOption } from '../types'
 export const useStudentParentStore = defineStore('student-parent', () => {
   const items = ref<StudentParent[]>([])
   const totalItems = ref(0)
+  const currentPage = ref(1)
+  const pageSize = ref(10)
   const loading = ref(false)
   const isSaving = ref(false)
   const formError = ref<string | null>(null)
@@ -23,6 +25,8 @@ export const useStudentParentStore = defineStore('student-parent', () => {
   return {
     items,
     totalItems,
+    currentPage,
+    pageSize,
     loading,
     isSaving,
     formError,

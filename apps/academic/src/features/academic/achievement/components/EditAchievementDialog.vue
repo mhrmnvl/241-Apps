@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { toast } from 'vue-sonner'
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
+import { PAGINATION } from '@/shared/constants/pagination'
 import { ref, onMounted } from 'vue'
 import { useAchievementForm } from '../composables/useAchievementForm'
 import { Button } from '@/ui/button'
@@ -53,7 +54,7 @@ const achievementTypes = ref<{ id: string; name: string }[]>([])
 onMounted(async () => {
   try {
     const res = await achievementTypeApi.getAchievementTypes({
-      limit: 100,
+      limit: PAGINATION.REFERENCE_LIMIT,
       isActive: true,
     })
     achievementTypes.value = res.data?.data ?? []

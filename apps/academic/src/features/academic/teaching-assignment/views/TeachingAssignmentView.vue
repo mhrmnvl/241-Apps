@@ -1,4 +1,4 @@
-﻿<script setup lang="ts">
+<script setup lang="ts">
 import type {
   TeachingAssignment,
   TeachingAssignmentCreatePayload,
@@ -20,6 +20,8 @@ import { computed, onMounted, ref, watch } from 'vue'
 const {
   items,
   totalItems,
+  currentPage,
+  pageSize,
   loading,
   isSaving,
   formError,
@@ -31,6 +33,8 @@ const {
   fetchTeachingAssignments,
   saveTeachingAssignment,
   deleteTeachingAssignment,
+  setPage,
+  setPageSize,
 } = useTeachingAssignment()
 
 const isAddModalOpen = ref(false)
@@ -93,6 +97,7 @@ watch(isAddModalOpen, (isOpen) => {
 })
 
 watch([selectedSemesterId, selectedClassroomId], () => {
+  currentPage.value = 1
   void fetchTeachingAssignments()
 })
 
@@ -152,11 +157,15 @@ onMounted(async () => {
         <DataTable
           :columns="tableColumns"
           :data="items"
-          :total-items="totalItems"
           :is-loading="loading"
+          :total-items="totalItems"
+          :page="currentPage"
+          :page-size="pageSize"
           item-label="penugasan mengajar"
           filter-column="teacher"
           filter-placeholder="Cari guru..."
+          @update:page="setPage"
+          @update:page-size="setPageSize"
         />
 
         <TeachingAssignmentFormDialog

@@ -1,4 +1,4 @@
-﻿<script setup lang="ts">
+<script setup lang="ts">
 import type { RolloverSemesterPayload, Semester } from '../types'
 import RolloverSemesterDialog from '../components/RolloverSemesterDialog.vue'
 import SemesterFormSheet from '../components/SemesterFormSheet.vue'
@@ -25,7 +25,6 @@ import { toast } from 'vue-sonner'
 
 const {
   semesters,
-  totalSemesters,
   loading,
   academicYears,
   fetchSemesters,
@@ -150,7 +149,6 @@ onMounted(() => {
         <DataTable
           :columns="tableColumns"
           :data="semesters"
-          :total-items="totalSemesters"
           :is-loading="loading"
           item-label="semester"
           filter-column="type"

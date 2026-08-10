@@ -36,6 +36,7 @@ model File {
   portalAgendaCovers     AgendaEntry[]       @relation("PortalAgendaCover")
   portalAlbumCovers      GalleryAlbum[]      @relation("PortalAlbumCover")
   portalGalleryPhotos    GalleryPhoto[]      @relation("PortalGalleryPhoto")
+  leaveDocuments         LeaveRequest[]
 
   @@index([categoryId])
   @@map("files")

@@ -1,5 +1,6 @@
 import { studentParentApi } from '../api/studentParentApi'
 import { useStudentParentStore } from '../stores/studentParentStore'
+import { PAGINATION } from '@/shared/constants/pagination'
 import type {
   StudentParentQueryParams,
   StudentParentSavePayload,
@@ -15,7 +16,12 @@ export const studentParentService = {
     const store = useStudentParentStore()
     store.loading = true
     try {
-      const res = await studentParentApi.getAll(params)
+      const mergedParams: StudentParentQueryParams = {
+        page: store.currentPage,
+        limit: store.pageSize,
+        ...params,
+      }
+      const res = await studentParentApi.getAll(mergedParams)
       store.items = res.data?.data ?? []
       store.totalItems = res.data?.meta?.total ?? 0
     } catch (error: unknown) {
@@ -80,7 +86,9 @@ export const studentParentService = {
   fetchStudents: async () => {
     const store = useStudentParentStore()
     try {
-      const res = await studentApi.getStudents({ limit: 100 })
+      const res = await studentApi.getStudents({
+        limit: PAGINATION.REFERENCE_LIMIT,
+      })
       const data = res.data?.data ?? []
       store.students = data.map((item) => ({
         id: item.id,
@@ -97,7 +105,9 @@ export const studentParentService = {
   fetchParents: async () => {
     const store = useStudentParentStore()
     try {
-      const res = await parentApi.getParents({ limit: 100 })
+      const res = await parentApi.getParents({
+        limit: PAGINATION.REFERENCE_LIMIT,
+      })
       const data = res.data?.data ?? []
       store.parents = data.map((item) => ({
         id: item.id,

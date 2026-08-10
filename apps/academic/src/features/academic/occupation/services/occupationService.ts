@@ -1,4 +1,5 @@
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
+import { PAGINATION } from '@/shared/constants/pagination'
 import { toast } from 'vue-sonner'
 import { occupationApi } from '../api/occupationApi'
 import type {
@@ -10,7 +11,9 @@ import type {
 export const occupationService = {
   getOccupations: async (): Promise<Occupation[]> => {
     try {
-      const res = await occupationApi.getOccupations({ limit: 100 })
+      const res = await occupationApi.getOccupations({
+        limit: PAGINATION.REFERENCE_LIMIT,
+      })
       return res.data.data
     } catch {
       return []

@@ -1,6 +1,7 @@
 import { teachingAssignmentApi } from '../api/teachingAssignmentApi'
 import { useTeachingAssignmentStore } from '../stores/teachingAssignmentStore'
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
+import { PAGINATION } from '@/shared/constants/pagination'
 import { toast } from 'vue-sonner'
 import { classroomApi } from '@/features/academic/classroom'
 import { subjectApi } from '@/features/academic/subject'
@@ -32,14 +33,16 @@ async function fetchAssignableSubjects(): Promise<
   )
 
   if (!activeCurriculum) {
-    const subjectRes = await subjectApi.getSubjects({ limit: 100 })
+    const subjectRes = await subjectApi.getSubjects({
+      limit: PAGINATION.REFERENCE_LIMIT,
+    })
     return subjectRes.data?.data ?? []
   }
 
   const curriculumSubjectRes = await curriculumSubjectApi.getCurriculumSubjects(
     {
       curriculumId: activeCurriculum.id,
-      limit: 100,
+      limit: PAGINATION.REFERENCE_LIMIT,
     },
   )
 
@@ -57,9 +60,9 @@ export const teachingAssignmentService = {
       // so they run alongside the three flat lists rather than after them.
       const [classroomRes, semesterRes, teacherRes, subjects] =
         await Promise.all([
-          classroomApi.getClassrooms({ limit: 100 }),
-          semesterApi.getSemesters({ limit: 100 }),
-          teacherApi.getTeachers({ limit: 100 }),
+          classroomApi.getClassrooms({ limit: PAGINATION.REFERENCE_LIMIT }),
+          semesterApi.getSemesters({ limit: PAGINATION.REFERENCE_LIMIT }),
+          teacherApi.getTeachers({ limit: PAGINATION.REFERENCE_LIMIT }),
           fetchAssignableSubjects(),
         ])
       store.classrooms = classroomRes.data?.data ?? []
@@ -78,7 +81,8 @@ export const teachingAssignmentService = {
     store.loading = true
     try {
       const params: TeachingAssignmentQueryParams = {
-        limit: 100,
+        page: store.currentPage,
+        limit: store.pageSize,
         ...(store.selectedSemesterId
           ? { semesterId: store.selectedSemesterId }
           : {}),

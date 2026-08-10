@@ -6,6 +6,8 @@ import type { Occupation } from '@/features/academic/occupation'
 export const useParentStore = defineStore('parent', () => {
   const items = ref<Parent[]>([])
   const totalItems = ref(0)
+  const currentPage = ref(1)
+  const pageSize = ref(10)
   const loading = ref(false)
   const isSaving = ref(false)
   const formError = ref<string | null>(null)
@@ -17,6 +19,8 @@ export const useParentStore = defineStore('parent', () => {
   return {
     items,
     totalItems,
+    currentPage,
+    pageSize,
     loading,
     isSaving,
     formError,

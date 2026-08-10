@@ -4,6 +4,7 @@ import { useClassroomStore } from '../stores/classroomStore'
 import { studentApi } from '@/features/academic/student'
 import type { Student } from '@/features/academic/student'
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
+import { PAGINATION } from '@/shared/constants/pagination'
 import { toast } from 'vue-sonner'
 
 export const classroomEnrollmentService = {
@@ -17,7 +18,7 @@ export const classroomEnrollmentService = {
       const res = await studentEnrollmentApi.getEnrollments({
         classroomId,
         semesterId,
-        limit: 100,
+        limit: PAGINATION.CHILD_ENTITY_LIMIT,
       })
       const enrollments: ClassroomEnrollment[] = (res.data.data ?? []).map(
         (e) => ({
@@ -54,7 +55,7 @@ export const classroomEnrollmentService = {
     const store = useClassroomStore()
     try {
       const studentsRes = await studentApi.getStudents({
-        limit: 100,
+        limit: PAGINATION.REFERENCE_LIMIT,
         isActive: true,
       })
 

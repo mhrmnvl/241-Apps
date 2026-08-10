@@ -7,6 +7,8 @@ export function useTeachingAssignment() {
   const {
     items,
     totalItems,
+    currentPage,
+    pageSize,
     loading,
     isSaving,
     formError,
@@ -18,9 +20,22 @@ export function useTeachingAssignment() {
     selectedClassroomId,
   } = storeToRefs(store)
 
+  const setPage = async (page: number) => {
+    store.currentPage = page
+    await teachingAssignmentService.fetchTeachingAssignments()
+  }
+
+  const setPageSize = async (size: number) => {
+    store.pageSize = size
+    store.currentPage = 1
+    await teachingAssignmentService.fetchTeachingAssignments()
+  }
+
   return {
     items,
     totalItems,
+    currentPage,
+    pageSize,
     loading,
     isSaving,
     formError,
@@ -36,5 +51,7 @@ export function useTeachingAssignment() {
     saveTeachingAssignment: teachingAssignmentService.saveTeachingAssignment,
     deleteTeachingAssignment:
       teachingAssignmentService.deleteTeachingAssignment,
+    setPage,
+    setPageSize,
   }
 }

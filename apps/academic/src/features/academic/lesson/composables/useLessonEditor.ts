@@ -1,5 +1,6 @@
 import { ref, computed } from 'vue'
 import { lessonService } from '../services/lessonService'
+import { PAGINATION } from '@/shared/constants/pagination'
 import { isLessonSlot } from '../types'
 import type {
   LessonClassItem,
@@ -38,8 +39,8 @@ export function useLessonEditor(classroomId: string) {
     try {
       const [classroomRes, tsRes, subRes, lessonRes] = await Promise.all([
         lessonService.getClassroomById(classroomId),
-        lessonService.getTimeSlots({ limit: 100 }),
-        lessonService.getSubjects({ limit: 100 }),
+        lessonService.getTimeSlots({ limit: PAGINATION.REFERENCE_LIMIT }),
+        lessonService.getSubjects({ limit: PAGINATION.REFERENCE_LIMIT }),
         lessonService.getLessonsByClassroom(classroomId),
       ])
 

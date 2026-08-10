@@ -13,6 +13,7 @@ import { DeleteAttendanceUseCase } from '../use-cases/delete-attendance.use-case
 import { BulkUpsertAttendanceUseCase } from '../use-cases/bulk-upsert-attendance.use-case.js';
 import { GetAttendanceRecapUseCase } from '../use-cases/get-attendance-recap.use-case.js';
 import { GetAttendanceTrendUseCase } from '../use-cases/get-attendance-trend.use-case.js';
+import { GetAttendanceSuggestionsUseCase } from '../use-cases/get-attendance-suggestions.use-case.js';
 import { AttendanceController } from './attendance.controller.js';
 import type { AuthenticatedUser } from '../../../core/types/authenticated-user.type.js';
 
@@ -26,6 +27,7 @@ describe('AttendanceController', () => {
   const mockDelete = { execute: jest.fn() };
   const mockBulkUpsert = { execute: jest.fn() };
   const mockRecap = { execute: jest.fn() };
+  const mockSuggestions = { execute: jest.fn() };
   const mockTrend = { execute: jest.fn() };
 
   const mockUser: AuthenticatedUser = {
@@ -50,6 +52,7 @@ describe('AttendanceController', () => {
         },
         { provide: GetAttendanceRecapUseCase, useValue: mockRecap },
         { provide: GetAttendanceTrendUseCase, useValue: mockTrend },
+        { provide: GetAttendanceSuggestionsUseCase, useValue: mockSuggestions },
       ],
     }).compile();
 
@@ -155,6 +158,60 @@ describe('AttendanceController', () => {
       const result = await controller.getTrend(mockUser, q);
       expect(mockTrend.execute).toHaveBeenCalledWith(q);
       expect(result).toEqual([]);
+    });
+  });
+
+  describe('suggestions', () => {
+    const q = {
+      classroomId: 'cls-1',
+      semesterId: 'sem-1',
+      date: '2026-08-10',
+    };
+
+    it('should delegate to GetAttendanceSuggestionsUseCase', async () => {
+      const expected = {
+        date: '2026-08-10',
+        suggestions: [],
+        unscannedEnrollmentIds: [],
+        available: true,
+      };
+      mockSuggestions.execute.mockResolvedValue(expected);
+
+      await expect(controller.suggestions(q)).resolves.toEqual(expected);
+      expect(mockSuggestions.execute).toHaveBeenCalledWith(q);
+    });
+
+    // FR-022: the gate suggestion path must not reach any write. If it ever
+    // does, this is the test that notices.
+    it('never touches a write use case', async () => {
+      mockSuggestions.execute.mockResolvedValue({
+        date: '2026-08-10',
+        suggestions: [],
+        unscannedEnrollmentIds: [],
+        available: true,
+      });
+
+      await controller.suggestions(q);
+
+      expect(mockCreate.execute).not.toHaveBeenCalled();
+      expect(mockUpdate.execute).not.toHaveBeenCalled();
+      expect(mockBulkUpsert.execute).not.toHaveBeenCalled();
+      expect(mockDelete.execute).not.toHaveBeenCalled();
+    });
+
+    // FR-020 / FR-037: the recap and the report card read teacher-confirmed
+    // per-lesson records. Fetching suggestions changes neither.
+    it('leaves the recap untouched', async () => {
+      mockSuggestions.execute.mockResolvedValue({
+        date: '2026-08-10',
+        suggestions: [],
+        unscannedEnrollmentIds: [],
+        available: true,
+      });
+
+      await controller.suggestions(q);
+
+      expect(mockRecap.execute).not.toHaveBeenCalled();
     });
   });
 });

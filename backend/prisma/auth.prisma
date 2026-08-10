@@ -20,10 +20,29 @@ model User {
   updatedAppSettings   AppSetting[]
   // Restrict, not Cascade: a user row backing published portal content cannot be
   // hard-deleted, which is what preserves attribution after deactivation.
-  portalPosts          Post[]               @relation("PortalPostAuthor")
-  portalPages          PortalPage[]         @relation("PortalPageAuthor")
-  portalAgendaEntries  AgendaEntry[]        @relation("PortalAgendaAuthor")
-  portalAlbums         GalleryAlbum[]       @relation("PortalAlbumAuthor")
+  portalPosts          Post[]                @relation("PortalPostAuthor")
+  portalPages          PortalPage[]          @relation("PortalPageAuthor")
+  portalAgendaEntries  AgendaEntry[]         @relation("PortalAgendaAuthor")
+  portalAlbums         GalleryAlbum[]        @relation("PortalAlbumAuthor")
+
+  // Presence keys on the user rather than on Student or Teacher — that is what
+  // keeps `presence/` free of any dependency on `academic/` (ADR-0007).
+  presenceCredentials     PresenceCredential[]    @relation("PresenceCredentialUser")
+  issuedCredentials       PresenceCredential[]    @relation("PresenceCredentialIssuer")
+  dailyPresences          DailyPresence[]
+  presenceCorrections     PresenceCorrection[]
+  workPatternAssignments  WorkPatternAssignment[]
+  leaveRequests           LeaveRequest[]          @relation("LeaveRequester")
+  approvedLeaveRequests   LeaveRequest[]          @relation("LeaveApprover")
+  leaveBalances           LeaveBalance[]
+  closedAttendancePeriods AttendancePeriod[]
+
+  salaryAssignments        SalaryAssignment[] @relation("SalaryAssignmentUser")
+  createdSalaryAssignments SalaryAssignment[] @relation("SalaryAssignmentCreator")
+  createdPayrollRuns       PayrollRun[]       @relation("PayrollRunCreator")
+  submittedPayrollRuns     PayrollRun[]       @relation("PayrollRunSubmitter")
+  approvedPayrollRuns      PayrollRun[]       @relation("PayrollRunApprover")
+  payslips                 Payslip[]
 
   @@map("users")
 }

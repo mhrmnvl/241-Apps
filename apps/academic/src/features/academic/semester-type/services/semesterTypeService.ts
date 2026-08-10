@@ -1,4 +1,5 @@
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
+import { PAGINATION } from '@/shared/constants/pagination'
 import { toast } from 'vue-sonner'
 import { semesterTypeApi } from '../api/semesterTypeApi'
 import type {
@@ -10,7 +11,9 @@ import type {
 export const semesterTypeService = {
   getSemesterTypes: async (): Promise<SemesterType[]> => {
     try {
-      const res = await semesterTypeApi.getSemesterTypes({ limit: 100 })
+      const res = await semesterTypeApi.getSemesterTypes({
+        limit: PAGINATION.REFERENCE_LIMIT,
+      })
       return res.data.data
     } catch {
       return []

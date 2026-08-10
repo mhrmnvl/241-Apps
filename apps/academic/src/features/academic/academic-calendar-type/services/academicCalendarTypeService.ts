@@ -1,4 +1,5 @@
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
+import { PAGINATION } from '@/shared/constants/pagination'
 import { toast } from 'vue-sonner'
 import { academicCalendarTypeApi } from '../api/academicCalendarTypeApi'
 import type {
@@ -11,7 +12,7 @@ export const academicCalendarTypeService = {
   getAcademicCalendarTypes: async (): Promise<AcademicCalendarType[]> => {
     try {
       const res = await academicCalendarTypeApi.getAcademicCalendarTypes({
-        limit: 100,
+        limit: PAGINATION.REFERENCE_LIMIT,
       })
       return res.data.data
     } catch {

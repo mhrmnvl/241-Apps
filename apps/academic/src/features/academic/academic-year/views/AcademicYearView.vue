@@ -1,4 +1,4 @@
-﻿<script setup lang="ts">
+<script setup lang="ts">
 import type { AcademicYear } from '../types'
 import AcademicYearFormSheet from '../components/AcademicYearFormSheet.vue'
 import { createAcademicYearColumns } from '../components/columns'
@@ -22,7 +22,6 @@ import { onMounted, ref, watch } from 'vue'
 
 const {
   academicYears,
-  totalItems,
   loading,
   fetchAcademicYears,
   deleteAcademicYear,
@@ -115,7 +114,6 @@ onMounted(() => {
         <DataTable
           :columns="tableColumns"
           :data="academicYears"
-          :total-items="totalItems"
           :is-loading="loading"
           item-label="tahun ajaran"
           filter-column="name"
