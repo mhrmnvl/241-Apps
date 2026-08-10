@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Card, CardDescription, CardHeader, CardTitle } from '@/ui/card'
 import { Badge } from '@/ui/badge'
 import { Button } from '@/ui/button'
 import { Input } from '@/ui/input'
@@ -45,76 +46,86 @@ onMounted(() => void credentialService.fetchCredentials())
 </script>
 
 <template>
-  <div class="space-y-4 p-4 md:p-6 lg:p-8">
-    <div class="flex items-center justify-between gap-4">
-      <div>
-        <h1 class="text-lg font-semibold">Kartu Presensi</h1>
-        <p class="text-muted-foreground text-sm">
-          Menerbitkan kartu memulai riwayat kehadiran; mencabutnya mengakhiri.
-        </p>
-      </div>
-      <Button @click="issueOpen = true">
-        <Plus class="mr-2 h-4 w-4" />
-        Terbitkan
-      </Button>
-    </div>
+  <div class="p-4 md:p-6 lg:p-8">
+    <Card
+      class="overflow-hidden rounded-2xl shadow-sm shadow-black/5 ring-1 ring-black/4"
+    >
+      <CardHeader
+        class="flex flex-col gap-4 border-b px-6 py-5 sm:flex-row sm:items-center sm:justify-between"
+      >
+        <div>
+          <CardTitle class="text-2xl font-bold tracking-tight">
+            Kartu Presensi
+          </CardTitle>
+          <CardDescription class="mt-1">
+            Menerbitkan kartu memulai riwayat kehadiran; mencabutnya mengakhiri.
+          </CardDescription>
+        </div>
+        <Button @click="issueOpen = true">
+          <Plus class="mr-2 h-4 w-4" />
+          Terbitkan
+        </Button>
+      </CardHeader>
 
-    <Input
-      v-model="store.search"
-      placeholder="Cari nama pemegang kartu…"
-      class="max-w-sm"
-      @keyup.enter="search"
-    />
+      <div class="p-6 space-y-6">
+        <Input
+          v-model="store.search"
+          placeholder="Cari nama pemegang kartu…"
+          class="max-w-sm"
+          @keyup.enter="search"
+        />
 
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Nama</TableHead>
-          <TableHead>Identitas</TableHead>
-          <TableHead>Jenis</TableHead>
-          <TableHead>Status</TableHead>
-          <TableHead class="text-right">Aksi</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        <TableRow
-          v-for="item in store.items"
-          :key="item.id"
-        >
-          <TableCell>{{ item.holder.displayName ?? '—' }}</TableCell>
-          <TableCell class="font-mono text-sm">
-            {{ item.holder.identifier }}
-          </TableCell>
-          <TableCell>
-            {{ item.subjectType === 'STUDENT' ? 'Siswa' : 'Pegawai' }}
-          </TableCell>
-          <TableCell>
-            <Badge :variant="statusVariant(item.status)">
-              {{ STATUS_LABEL[item.status] }}
-            </Badge>
-          </TableCell>
-          <TableCell class="text-right">
-            <Button
-              v-if="item.status === 'ACTIVE'"
-              variant="ghost"
-              size="sm"
-              @click="revoke(item.id)"
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Nama</TableHead>
+              <TableHead>Identitas</TableHead>
+              <TableHead>Jenis</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead class="text-right">Aksi</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            <TableRow
+              v-for="item in store.items"
+              :key="item.id"
             >
-              Cabut
-            </Button>
-          </TableCell>
-        </TableRow>
-        <TableRow v-if="!store.loading && store.items.length === 0">
-          <TableCell
-            colspan="5"
-            class="text-muted-foreground py-10 text-center"
-          >
-            Belum ada kartu diterbitkan.
-          </TableCell>
-        </TableRow>
-      </TableBody>
-    </Table>
+              <TableCell>{{ item.holder.displayName ?? '—' }}</TableCell>
+              <TableCell class="font-mono text-sm">
+                {{ item.holder.identifier }}
+              </TableCell>
+              <TableCell>
+                {{ item.subjectType === 'STUDENT' ? 'Siswa' : 'Pegawai' }}
+              </TableCell>
+              <TableCell>
+                <Badge :variant="statusVariant(item.status)">
+                  {{ STATUS_LABEL[item.status] }}
+                </Badge>
+              </TableCell>
+              <TableCell class="text-right">
+                <Button
+                  v-if="item.status === 'ACTIVE'"
+                  variant="ghost"
+                  size="sm"
+                  @click="revoke(item.id)"
+                >
+                  Cabut
+                </Button>
+              </TableCell>
+            </TableRow>
+            <TableRow v-if="!store.loading && store.items.length === 0">
+              <TableCell
+                colspan="5"
+                class="text-muted-foreground py-10 text-center"
+              >
+                Belum ada kartu diterbitkan.
+              </TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
 
-    <IssueCredentialDialog v-model:open="issueOpen" />
+        <IssueCredentialDialog v-model:open="issueOpen" />
+      </div>
+    </Card>
   </div>
 </template>

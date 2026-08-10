@@ -2,6 +2,7 @@
 import { teacherApi } from '@/features/academic/teacher'
 import { PAGINATION } from '@/shared/constants/pagination'
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
+import { Card, CardDescription, CardHeader, CardTitle } from '@/ui/card'
 import { Button } from '@/ui/button'
 import {
   Dialog,
@@ -102,87 +103,102 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="space-y-4 p-4 md:p-6 lg:p-8">
-    <div class="flex items-center justify-between gap-4">
-      <div>
-        <h1 class="text-lg font-semibold">Penugasan Pola Kerja</h1>
-        <p class="text-muted-foreground text-sm">
-          Pegawai tanpa penugasan memakai pola default — penugasan di sini hanya
-          untuk yang jam kerjanya berbeda.
-        </p>
+  <div class="p-4 md:p-6 lg:p-8">
+    <Card
+      class="overflow-hidden rounded-2xl shadow-sm shadow-black/5 ring-1 ring-black/10"
+    >
+      <CardHeader
+        class="flex flex-col gap-4 border-b px-6 py-5 sm:flex-row sm:items-center sm:justify-between"
+      >
+        <div>
+          <CardTitle class="text-2xl font-bold tracking-tight"
+            >Penugasan Pola Kerja</CardTitle
+          >
+          <CardDescription class="mt-1">
+            Pegawai tanpa penugasan memakai pola default — penugasan di sini
+            hanya untuk yang jam kerjanya berbeda.
+          </CardDescription>
+        </div>
+        <Button @click="dialogOpen = true">
+          <Plus class="mr-2 h-4 w-4" />
+          Tugaskan
+        </Button>
+      </CardHeader>
+
+      <div class="p-6 space-y-6">
+        <div>
+          <h2 class="mb-2 text-sm font-medium">Berlaku saat ini</h2>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Pegawai</TableHead>
+                <TableHead>Pola kerja</TableHead>
+                <TableHead>Berlaku mulai</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              <TableRow
+                v-for="assignment in current"
+                :key="assignment.id"
+              >
+                <TableCell>
+                  {{
+                    assignment.holder.displayName ??
+                    assignment.holder.identifier
+                  }}
+                </TableCell>
+                <TableCell>{{ assignment.patternName }}</TableCell>
+                <TableCell>{{
+                  assignment.effectiveFrom.slice(0, 10)
+                }}</TableCell>
+              </TableRow>
+
+              <TableRow v-if="!loading && current.length === 0">
+                <TableCell
+                  colspan="3"
+                  class="text-muted-foreground py-10 text-center"
+                >
+                  Belum ada penugasan khusus. Semua pegawai memakai pola
+                  default.
+                </TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        </div>
+
+        <div v-if="superseded.length > 0">
+          <h2 class="mb-2 text-sm font-medium">Riwayat</h2>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Pegawai</TableHead>
+                <TableHead>Pola kerja</TableHead>
+                <TableHead>Periode</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              <TableRow
+                v-for="assignment in superseded"
+                :key="assignment.id"
+                class="text-muted-foreground"
+              >
+                <TableCell>
+                  {{
+                    assignment.holder.displayName ??
+                    assignment.holder.identifier
+                  }}
+                </TableCell>
+                <TableCell>{{ assignment.patternName }}</TableCell>
+                <TableCell>
+                  {{ assignment.effectiveFrom.slice(0, 10) }} —
+                  {{ assignment.effectiveTo?.slice(0, 10) }}
+                </TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        </div>
       </div>
-      <Button @click="dialogOpen = true">
-        <Plus class="mr-2 h-4 w-4" />
-        Tugaskan
-      </Button>
-    </div>
-
-    <div>
-      <h2 class="mb-2 text-sm font-medium">Berlaku saat ini</h2>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Pegawai</TableHead>
-            <TableHead>Pola kerja</TableHead>
-            <TableHead>Berlaku mulai</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          <TableRow
-            v-for="assignment in current"
-            :key="assignment.id"
-          >
-            <TableCell>
-              {{
-                assignment.holder.displayName ?? assignment.holder.identifier
-              }}
-            </TableCell>
-            <TableCell>{{ assignment.patternName }}</TableCell>
-            <TableCell>{{ assignment.effectiveFrom.slice(0, 10) }}</TableCell>
-          </TableRow>
-
-          <TableRow v-if="!loading && current.length === 0">
-            <TableCell
-              colspan="3"
-              class="text-muted-foreground py-10 text-center"
-            >
-              Belum ada penugasan khusus. Semua pegawai memakai pola default.
-            </TableCell>
-          </TableRow>
-        </TableBody>
-      </Table>
-    </div>
-
-    <div v-if="superseded.length > 0">
-      <h2 class="mb-2 text-sm font-medium">Riwayat</h2>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Pegawai</TableHead>
-            <TableHead>Pola kerja</TableHead>
-            <TableHead>Periode</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          <TableRow
-            v-for="assignment in superseded"
-            :key="assignment.id"
-            class="text-muted-foreground"
-          >
-            <TableCell>
-              {{
-                assignment.holder.displayName ?? assignment.holder.identifier
-              }}
-            </TableCell>
-            <TableCell>{{ assignment.patternName }}</TableCell>
-            <TableCell>
-              {{ assignment.effectiveFrom.slice(0, 10) }} —
-              {{ assignment.effectiveTo?.slice(0, 10) }}
-            </TableCell>
-          </TableRow>
-        </TableBody>
-      </Table>
-    </div>
+    </Card>
 
     <Dialog v-model:open="dialogOpen">
       <DialogContent class="sm:max-w-md">
