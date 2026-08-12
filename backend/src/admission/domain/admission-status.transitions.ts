@@ -27,7 +27,7 @@ export function assertTransition(
   to: AdmissionStatus,
 ): void {
   if (!ALLOWED_TRANSITIONS[from].includes(to)) {
-    throw new ConflictException(`Transisi status tidak valid: ${from} → ${to}`);
+    throw new ConflictException(`Invalid status transition: ${from} → ${to}`);
   }
 }
 

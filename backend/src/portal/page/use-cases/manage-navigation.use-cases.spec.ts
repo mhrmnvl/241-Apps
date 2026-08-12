@@ -165,7 +165,7 @@ describe('ReorderNavigationUseCase', () => {
     const useCase = await build(ReorderNavigationUseCase);
 
     await expect(
-      useCase.execute({ itemIds: ['nav-1', 'nav-sudah-dihapus'] }),
+      useCase.execute({ itemIds: ['nav-1', 'nav-already-deleted'] }),
     ).rejects.toThrow(BadRequestException);
     expect(repository.reorder).not.toHaveBeenCalled();
   });

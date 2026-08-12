@@ -25,7 +25,7 @@ export class RecordStudentAbsenceDto {
   @IsDateString()
   endDate?: string;
 
-  @ApiProperty({ example: 'Surat sakit dari orang tua' })
+  @ApiProperty({ example: 'Sick note from the parents' })
   @IsString()
   @MinLength(3)
   @MaxLength(1000)

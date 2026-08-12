@@ -4,7 +4,7 @@ import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
 import { PAGINATION } from '@/shared/constants/pagination'
 import { toast } from 'vue-sonner'
 import { subjectApi } from '@/features/academic/subject'
-import { curriculaApi } from '@/features/academic/curriculum'
+import { curriculumApi } from '@/features/academic/curriculum'
 import type {
   CurriculumSubjectSavePayload,
   CurriculumSubjectQueryParams,
@@ -52,7 +52,7 @@ export const curriculumSubjectService = {
   fetchCurriculumInfo: async (curriculumId: string) => {
     const store = useCurriculumSubjectStore()
     try {
-      const res = await curriculaApi.getCurriculumById(curriculumId)
+      const res = await curriculumApi.getCurriculumById(curriculumId)
       const curriculum = res.data?.data
       if (curriculum) {
         store.curriculumName = curriculum.name
@@ -100,15 +100,17 @@ export const curriculumSubjectService = {
     store.isSaving = true
     store.formError = null
     try {
-      await Promise.all(
-        subjectIds.map((subjectId) =>
-          curriculumSubjectApi.createCurriculumSubject({
-            curriculumId,
-            subjectId,
-          }),
-        ),
-      )
-      toast.success(`${subjectIds.length} mata pelajaran berhasil ditambahkan`)
+      const items = subjectIds.map((subjectId) => ({ curriculumId, subjectId }))
+      const res = await curriculumSubjectApi.bulkCreateCurriculumSubjects(items)
+      const created = res.data?.data?.created ?? 0
+      const skipped = res.data?.data?.skipped ?? 0
+      if (skipped > 0) {
+        toast.success(
+          `${created} mata pelajaran berhasil ditambahkan, ${skipped} sudah ada sebelumnya`,
+        )
+      } else {
+        toast.success(`${created} mata pelajaran berhasil ditambahkan`)
+      }
       return { success: true }
     } catch (error: unknown) {
       store.formError = getIndonesianErrorMessage(

@@ -20,7 +20,7 @@ export const ADMISSION_MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
 
 export function assertValidAdmissionFile(file: Express.Multer.File): void {
   if (!ADMISSION_ALLOWED_MIME_TYPES.includes(file.mimetype)) {
-    throw new BadRequestException('Format berkas harus JPG, PNG, atau PDF');
+    throw new BadRequestException('File must be a JPG, PNG or PDF');
   }
   if (file.size > ADMISSION_MAX_FILE_SIZE) {
     throw new BadRequestException('Ukuran berkas maksimal 5 MB');
@@ -63,11 +63,11 @@ export class UploadAdmissionDocumentUseCase {
     const application =
       await this.admissionApplicantRepository.findMyApplication(userId);
     if (!application) {
-      throw new NotFoundException('Data pendaftaran tidak ditemukan');
+      throw new NotFoundException('Application not found');
     }
     if (!isEditable(application.status)) {
       throw new ConflictException(
-        'Berkas hanya dapat diunggah saat status Draft atau Perlu Revisi',
+        'Documents can only be uploaded while the application is DRAFT or NEEDS_REVISION',
       );
     }
 
@@ -77,7 +77,7 @@ export class UploadAdmissionDocumentUseCase {
       );
     if (!documentType) {
       throw new NotFoundException(
-        `Jenis berkas '${documentTypeCode}' tidak dikenal`,
+        `Unknown document type '${documentTypeCode}'`,
       );
     }
 

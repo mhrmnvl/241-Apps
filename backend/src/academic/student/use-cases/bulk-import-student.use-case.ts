@@ -88,7 +88,7 @@ export class BulkImportStudentsUseCase {
               status: 'FAILED',
               identifier: dto.identifier,
               data: dto,
-              error: `Tingkat ${dto.grade} tidak ditemukan`,
+              error: `Tingkat ${dto.grade} not found`,
             });
             continue;
           }
@@ -104,7 +104,7 @@ export class BulkImportStudentsUseCase {
               status: 'FAILED',
               identifier: dto.identifier,
               data: dto,
-              error: `Kelas dengan kode "${dto.classroomCode}" tidak ditemukan`,
+              error: `Classroom with code "${dto.classroomCode}" not found`,
             });
             continue;
           }

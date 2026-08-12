@@ -1,3 +1,4 @@
+import { AssessmentType } from '@prisma/client';
 import {
   PaginatedResult,
   PaginationQueryInput,
@@ -21,15 +22,28 @@ export interface ReportCardScoreRow {
   assessmentItem: {
     id: string;
     name: string;
+    type: AssessmentType;
+    /** Weight within its type; see AssessmentWeight for the outer layer. */
     weight?: number | null;
     maxScore?: number | null;
     teachingAssignment: {
       id: string;
+      /** Overrides the curriculum's passing score for this class only. */
+      passingScore?: number | null;
       subject: {
         id: string;
         name: string;
         code?: string | null;
       };
+      /**
+       * The grade and year the class sits in — together they pick the
+       * curriculum, and the curriculum is what sets the passing score.
+       */
+      classroom: {
+        gradeId: string;
+        academicYearId: string;
+      };
+      assessmentWeights: { type: AssessmentType; weight: number }[];
     };
   };
 }

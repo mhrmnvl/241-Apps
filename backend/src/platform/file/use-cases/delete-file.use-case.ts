@@ -32,7 +32,7 @@ export class DeleteFileUseCase {
     const references = (await this.usageChecker?.findReferences(id)) ?? [];
     if (references.length > 0) {
       throw new ConflictException({
-        message: `Berkas ini masih dipakai oleh ${references.length} konten portal. Lepaskan dari konten tersebut sebelum menghapus.`,
+        message: `This file is still used by ${references.length} portal item(s). Detach it from them before deleting.`,
         references,
       });
     }

@@ -28,7 +28,7 @@ export class DeletePostUseCase {
   async execute(id: string, actorId: string | null): Promise<void> {
     const existing = await this.postRepository.findById(id);
     if (!existing || existing.deletedAt) {
-      throw new NotFoundException(`Konten dengan ID ${id} tidak ditemukan`);
+      throw new NotFoundException(`Konten dengan ID ${id} not found`);
     }
 
     await this.postRepository.softDelete(id);

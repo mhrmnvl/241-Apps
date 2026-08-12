@@ -12,7 +12,7 @@ export class GetApplicationByIdUseCase {
     const application =
       await this.admissionApplicationRepository.findAdminDetailById(id);
     if (!application) {
-      throw new NotFoundException('Data pendaftaran tidak ditemukan');
+      throw new NotFoundException('Application not found');
     }
 
     // Duplicate-NIK warning for admins (NIK is intentionally not unique here).

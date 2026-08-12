@@ -31,20 +31,18 @@ export class RestorePostUseCase {
   async execute(id: string, now: Date = new Date()) {
     const existing = await this.postRepository.findById(id);
     if (!existing) {
-      throw new NotFoundException(`Konten dengan ID ${id} tidak ditemukan`);
+      throw new NotFoundException(`Konten dengan ID ${id} not found`);
     }
 
     if (!existing.deletedAt) {
-      throw new BadRequestException(
-        'Konten ini tidak berada di tempat sampah.',
-      );
+      throw new BadRequestException('This content is not in the trash');
     }
 
     const elapsedDays =
       (now.getTime() - existing.deletedAt.getTime()) / DAY_IN_MS;
     if (elapsedDays > RESTORE_WINDOW_DAYS) {
       throw new BadRequestException(
-        `Konten hanya dapat dipulihkan dalam ${RESTORE_WINDOW_DAYS} hari setelah dihapus.`,
+        `Content can only be restored within ${RESTORE_WINDOW_DAYS} days of deletion`,
       );
     }
 

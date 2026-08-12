@@ -12,12 +12,12 @@ export class DeleteTimeSlotTypeUseCase {
   async execute(id: string) {
     const type = await this.timeSlotRepository.findTypeById(id);
     if (!type) {
-      throw new NotFoundException('Tipe jam tidak ditemukan');
+      throw new NotFoundException('Time slot type not found');
     }
     const inUse = await this.timeSlotRepository.countSlotsUsingType(id);
     if (inUse > 0) {
       throw new ConflictException(
-        'Tipe masih dipakai oleh jam pelajaran, tidak bisa dihapus',
+        'Time slot type is still used by a time slot and cannot be deleted',
       );
     }
     return this.timeSlotRepository.removeType(id);

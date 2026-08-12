@@ -37,7 +37,7 @@ export class PublishPostUseCase {
   ) {
     const existing = await this.postRepository.findById(id);
     if (!existing || existing.deletedAt) {
-      throw new NotFoundException(`Konten dengan ID ${id} tidak ditemukan`);
+      throw new NotFoundException(`Konten dengan ID ${id} not found`);
     }
 
     assertReadyToPublish(existing);
@@ -47,7 +47,7 @@ export class PublishPostUseCase {
 
     if (scheduledAt && scheduledAt.getTime() <= now.getTime()) {
       throw new BadRequestException(
-        'Jadwal terbit harus di masa depan. Kosongkan untuk menerbitkan sekarang.',
+        'The scheduled publish time must be in the future. Leave it empty to publish now.',
       );
     }
 
@@ -62,7 +62,7 @@ export class PublishPostUseCase {
 
     if (!published) {
       throw new ConflictException(
-        'Konten ini sudah diubah oleh pengguna lain. Muat ulang sebelum menerbitkan.',
+        'This content was changed by someone else. Reload before publishing.',
       );
     }
 
@@ -92,14 +92,14 @@ function assertReadyToPublish(post: PostWithDetails) {
 
   if (missing.length > 0) {
     throw new UnprocessableEntityException({
-      message: 'Konten belum lengkap untuk diterbitkan.',
+      message: 'The content is not complete enough to publish',
       missingFields: missing,
     });
   }
 
   if (post.coverFileId && !post.coverAltText?.trim()) {
     throw new UnprocessableEntityException({
-      message: 'Teks alternatif gambar sampul wajib diisi sebelum terbit.',
+      message: 'Cover image alt text is required before publishing',
       missingFields: ['coverAltText'],
     });
   }

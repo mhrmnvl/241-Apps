@@ -31,7 +31,7 @@ export class PreviewPostUseCase {
     // Soft-deleted items have no preview: restore first. Anything else — draft,
     // scheduled, archived — is precisely what an editor wants to look at.
     if (!post || post.deletedAt) {
-      throw new NotFoundException(`Konten dengan ID ${id} tidak ditemukan`);
+      throw new NotFoundException(`Konten dengan ID ${id} not found`);
     }
 
     return {

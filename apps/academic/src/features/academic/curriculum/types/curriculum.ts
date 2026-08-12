@@ -4,7 +4,7 @@ export interface AcademicYearRef {
   isActive: boolean
 }
 
-export interface Curricula {
+export interface Curriculum {
   id: string
   name: string
   academicYearId: string
@@ -12,11 +12,11 @@ export interface Curricula {
   academicYear?: AcademicYearRef
 }
 
-export interface CurriculaColumnActions {
-  onEdit?: (curriculum: Curricula) => void
-  onView?: (curriculum: Curricula) => void
+export interface CurriculumColumnActions {
+  onEdit?: (curriculum: Curriculum) => void
+  onView?: (curriculum: Curriculum) => void
   onDelete?: (
-    curriculum: Curricula,
+    curriculum: Curriculum,
     callbacks: { closeAlert: () => void; setLoading: (s: boolean) => void },
   ) => Promise<void>
   showActions?: boolean

@@ -5,22 +5,30 @@ import type {
   InternalAxiosRequestConfig,
 } from 'axios'
 import { toast } from 'vue-sonner'
+import { AUTH_USER_STORAGE_KEY } from '../constants/storage'
 
-// Narrow local shape for the refresh-token response — kept here rather than
+// Narrow local shapes for the refresh-token response — kept here rather than
 // imported from @/features/platform/auth so packages/shared never depends on
 // packages/platform (see CLAUDE.md: platform depends on shared, not the
 // reverse).
+
+/** Who the refresh cookie says the caller is. Identity only — no authorization. */
+export interface RefreshedUser {
+  id: string
+  identifier: string
+  isActive: boolean
+}
+
 interface RefreshTokenResponse {
-  data?: { accessToken?: string }
+  data?: { accessToken?: string; user?: RefreshedUser }
   accessToken?: string
+  user?: RefreshedUser
 }
 
 const API_BASE_URL = (
   (import.meta.env.VITE_API_BASE_URL as string | undefined) ??
   'http://localhost:3000'
 ).replace(/\/+$/, '')
-
-const USER_KEY = 'siakad_user'
 
 // The access token is kept in memory only — never in localStorage/sessionStorage.
 // This means an injected script (XSS) cannot read it from web storage and it is
@@ -47,7 +55,7 @@ function setAccessToken(token: string) {
 function clearSession() {
   accessToken = null
   if (typeof window !== 'undefined') {
-    window.localStorage.removeItem(USER_KEY)
+    window.localStorage.removeItem(AUTH_USER_STORAGE_KEY)
   }
 }
 
@@ -57,14 +65,20 @@ function clearSession() {
  * The access token lives in memory only, so on a fresh page load there is no
  * token yet. This mints one from the HttpOnly refresh cookie up front:
  *  - success → the first API calls already carry a token (no 401 flash), and
- *    the optimistically-persisted user is confirmed valid.
+ *    the caller learns who the cookie belongs to.
  *  - failure → the session is dead/absent, so the stale persisted user is
  *    cleared (via clearSession) and the guard lands cleanly on /login instead
  *    of bouncing dashboard ⇄ login.
  *
+ * The cookie is set by the API host, not by any single frontend, so a session
+ * opened in one app restores in all of them. Returning the user rather than a
+ * boolean is what lets the caller finish that restore on an app whose own
+ * localStorage has never seen this person — see `authService.restoreSession`
+ * in @241/platform, which owns that step because it needs the profile API.
+ *
  * Uses a raw axios call so it bypasses the 401 interceptor (no recursion).
  */
-async function restoreSession(): Promise<boolean> {
+async function restoreSession(): Promise<RefreshedUser | null> {
   try {
     const res = await axios.post<RefreshTokenResponse>(
       `${API_BASE_URL}/auth/refresh`,
@@ -75,10 +89,10 @@ async function restoreSession(): Promise<boolean> {
       res.data?.data?.accessToken ?? res.data?.accessToken
     if (!token) throw new Error('No access token in refresh response')
     setAccessToken(token)
-    return true
+    return res.data?.data?.user ?? res.data?.user ?? null
   } catch {
     clearSession()
-    return false
+    return null
   }
 }
 
@@ -90,7 +104,7 @@ api.interceptors.request.use((config) => {
 
   // Retrieve the school unit ID from local storage for multi-tenancy
   try {
-    const storedUser = window.localStorage.getItem(USER_KEY)
+    const storedUser = window.localStorage.getItem(AUTH_USER_STORAGE_KEY)
     if (storedUser) {
       const parsed = JSON.parse(storedUser)
       if (parsed?.schoolUnitId) {
@@ -98,7 +112,10 @@ api.interceptors.request.use((config) => {
       }
     }
   } catch (e) {
-    console.error('Failed to parse siakad_user from localStorage', e)
+    console.error(
+      `Failed to parse ${AUTH_USER_STORAGE_KEY} from localStorage`,
+      e,
+    )
   }
 
   if (config.data instanceof FormData) {

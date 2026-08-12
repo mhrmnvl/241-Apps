@@ -27,17 +27,17 @@ export class CreateClassroomStructureUseCase {
       );
 
     const positionEntries = [
-      { field: 'Ketua Kelas', id: dto.presidentId },
-      { field: 'Wakil Ketua', id: dto.vicePresidentId },
-      { field: 'Sekretaris', id: dto.secretaryId },
-      { field: 'Bendahara', id: dto.treasurerId },
+      { field: 'president', id: dto.presidentId },
+      { field: 'vicePresident', id: dto.vicePresidentId },
+      { field: 'secretary', id: dto.secretaryId },
+      { field: 'treasurer', id: dto.treasurerId },
     ].filter((e): e is { field: string; id: string } => !!e.id);
 
     const studentIds = positionEntries.map((e) => e.id);
     const uniqueIds = new Set(studentIds);
     if (uniqueIds.size !== studentIds.length) {
       throw new BadRequestException(
-        'Satu siswa tidak boleh menjabat lebih dari satu posisi dalam struktur yang sama',
+        'A student cannot hold more than one position in the same structure',
       );
     }
 

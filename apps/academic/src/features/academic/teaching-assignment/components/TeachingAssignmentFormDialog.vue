@@ -1,9 +1,12 @@
 <script setup lang="ts">
-import { computed, toRefs, ref, watch } from 'vue'
+import { computed, toRefs, ref, watch, onMounted } from 'vue'
 import { toTypedSchema } from '@vee-validate/zod'
 import { useForm } from 'vee-validate'
 import * as z from 'zod'
 import { useTeachingAssignment } from '../composables/useTeachingAssignment'
+import { semesterApi } from '@/features/academic/semester'
+import type { Semester } from '@/features/academic/semester'
+import { PAGINATION } from '@/shared/constants/pagination'
 import { Alert, AlertDescription, AlertTitle } from '@/ui/alert'
 import {
   AlertDialog,
@@ -33,6 +36,7 @@ import {
 import { AppCombobox } from '@/ui'
 import type { ComboboxOption } from '@/ui'
 import { Checkbox } from '@/ui/checkbox'
+import { Input } from '@/ui/input'
 import { AlertCircle } from 'lucide-vue-next'
 import type {
   TeachingAssignment,
@@ -65,7 +69,19 @@ const open = computed({
 const { editData } = toRefs(props)
 const isEditing = computed(() => !!editData?.value)
 
-const { teachers, subjects, classrooms, semesters } = useTeachingAssignment()
+const { teachers, subjects, classrooms } = useTeachingAssignment()
+const semesters = ref<Semester[]>([])
+
+onMounted(async () => {
+  try {
+    const res = await semesterApi.getSemesters({
+      limit: PAGINATION.REFERENCE_LIMIT,
+    })
+    semesters.value = res.data?.data ?? []
+  } catch (err) {
+    console.error('Gagal memuat semester:', err)
+  }
+})
 
 const teacherOptions = computed<ComboboxOption[]>(() =>
   teachers.value.map((e) => ({
@@ -118,6 +134,17 @@ const formSchema = toTypedSchema(
     subjectId: z.string().min(1, 'Mata pelajaran wajib dipilih.'),
     classroomIds: z.array(z.string()).min(1, 'Pilih minimal satu kelas.'),
     semesterId: z.string().min(1, 'Semester wajib dipilih.'),
+    // Empty means "follow the subject's own KKM", which is why this is a
+    // string here rather than a number: an empty number input coerces to 0,
+    // and 0 is a real pass mark.
+    passingScore: z
+      .string()
+      .refine(
+        (value) =>
+          value === '' ||
+          (/^\d+$/.test(value) && Number(value) >= 0 && Number(value) <= 100),
+        'KKM harus bilangan bulat 0-100, atau kosongkan untuk mengikuti mata pelajaran.',
+      ),
   }),
 )
 
@@ -128,6 +155,7 @@ const { handleSubmit, resetForm, setValues } = useForm({
     subjectId: '',
     classroomIds: [] as string[],
     semesterId: '',
+    passingScore: '',
   },
 })
 
@@ -153,6 +181,10 @@ watch(
           subjectId: data.subjectId || '',
           classroomIds: data.classroomId ? [data.classroomId] : [],
           semesterId: data.semesterId || '',
+          passingScore:
+            data.passingScore === null || data.passingScore === undefined
+              ? ''
+              : String(data.passingScore),
         })
       } else {
         resetForm()
@@ -169,14 +201,22 @@ function buildPayload(values: {
   subjectId: string
   classroomIds: string[]
   semesterId: string
+  passingScore: string
 }): TeachingAssignmentCreatePayload | TeachingAssignmentUpdatePayload {
   const base = {
     teacherId: values.teacherId,
     subjectId: values.subjectId,
     semesterId: values.semesterId,
   }
+  // The override belongs to one class, so it is only offered while editing a
+  // single row — creating fans the teacher across a whole grade at once.
   return isEditing.value
-    ? { ...base, classroomId: values.classroomIds[0] ?? '' }
+    ? {
+        ...base,
+        classroomId: values.classroomIds[0] ?? '',
+        passingScore:
+          values.passingScore === '' ? null : Number(values.passingScore),
+      }
     : { ...base, classroomIds: values.classroomIds }
 }
 
@@ -350,6 +390,34 @@ function confirmSave() {
                   @update:model-value="(val) => handleChange(val)"
                 />
               </FormControl>
+              <FormMessage />
+            </FormItem>
+          </FormField>
+
+          <!--
+            Editing only: an override belongs to one class, while creating fans
+            the same teacher across a whole grade at once.
+          -->
+          <FormField
+            v-if="isEditing"
+            v-slot="{ componentField }"
+            name="passingScore"
+          >
+            <FormItem>
+              <FormLabel>KKM Kelas Ini</FormLabel>
+              <FormControl>
+                <Input
+                  type="number"
+                  min="0"
+                  max="100"
+                  placeholder="Ikuti KKM kurikulum"
+                  v-bind="componentField"
+                />
+              </FormControl>
+              <p class="text-xs text-muted-foreground">
+                Kosongkan untuk mengikuti KKM yang ditetapkan kurikulum. Isi
+                hanya jika kelas ini memang dinilai dengan batas berbeda.
+              </p>
               <FormMessage />
             </FormItem>
           </FormField>

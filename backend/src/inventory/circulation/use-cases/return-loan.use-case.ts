@@ -25,7 +25,7 @@ export class ReturnLoanUseCase {
 
     if (!returnedStatus || !availStatus || !txType) {
       throw new NotFoundException(
-        'Peran status "Baru Dikembalikan"/"Tersedia" belum diatur, atau tipe transaksi TX-LOAN-IN belum tersedia.',
+        'The JUST_RETURNED/AVAILABLE status roles are not configured, or the TX-LOAN-IN transaction type is missing',
       );
     }
 

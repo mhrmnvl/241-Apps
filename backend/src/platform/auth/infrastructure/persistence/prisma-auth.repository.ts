@@ -21,12 +21,22 @@ export class PrismaAuthRepository extends IAuthRepository {
     });
   }
 
+  // Pulls the role → permission edge because GET /auth/me is what every
+  // frontend bootstraps its authorization from. Without it the caller would
+  // have to reach for /profiles/me, whose include graph is six levels deep and
+  // is maintained for the profile page, not for session bootstrap.
   async findUserById(userId: string) {
     return this.prisma.user.findUnique({
       where: { id: userId },
       include: {
         profile: true,
-        userRoles: { include: { role: true } },
+        userRoles: {
+          include: {
+            role: {
+              include: { rolePermissions: { include: { permission: true } } },
+            },
+          },
+        },
       },
     });
   }

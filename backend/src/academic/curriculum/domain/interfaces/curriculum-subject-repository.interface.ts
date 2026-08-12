@@ -19,10 +19,22 @@ export interface CreateCurriculumSubjectRepositoryInput {
   subjectId: string;
   gradeId?: string | null;
   hoursPerWeek?: number;
+  passingScore?: number;
 }
 
 export type UpdateCurriculumSubjectRepositoryInput =
   Partial<CreateCurriculumSubjectRepositoryInput>;
+
+/** Which curriculum applies: a grade in an academic year picks exactly one. */
+export interface PassingScoreQuery {
+  gradeId: string;
+  academicYearId: string;
+  subjectId: string;
+}
+
+export interface ResolvedPassingScore extends PassingScoreQuery {
+  passingScore: number;
+}
 
 export abstract class ICurriculumSubjectRepository {
   abstract findAll(
@@ -48,6 +60,20 @@ export abstract class ICurriculumSubjectRepository {
     id: string,
     input?: UpdateCurriculumSubjectRepositoryInput,
   ): Promise<CurriculumSubjectWithDetails>;
+  /**
+   * The passing marks in force for a set of (grade, year, subject) triples.
+   *
+   * Batched because a report card asks for a dozen at once, and answered from
+   * the curriculum rather than the subject: a subject is master data, while
+   * the mark is a curriculum decision that differs between curricula.
+   *
+   * A triple with no curriculum subject row is simply absent from the result;
+   * the caller decides what an unlisted subject falls back to.
+   */
+  abstract findPassingScores(
+    queries: PassingScoreQuery[],
+  ): Promise<ResolvedPassingScore[]>;
+
   abstract findDuplicate(
     curriculaId: string,
     subjectId: string,

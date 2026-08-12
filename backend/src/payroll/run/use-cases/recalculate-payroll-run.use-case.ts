@@ -62,7 +62,7 @@ export class RecalculatePayrollRunUseCase {
 
     if (unconfigured.length > 0) {
       throw new UnprocessableEntityException({
-        message: 'Pegawai berikut belum punya komponen gaji',
+        message: 'The following employees have no salary components',
         employees: this.roster.name(employees, unconfigured),
       });
     }

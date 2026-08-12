@@ -38,7 +38,7 @@ export class AddPhotoUseCase {
     // @IsNotEmpty on some inputs — and an alt of " " is worse than none,
     // because a screen reader announces nothing and no tooling flags it.
     if (!dto.altText.trim()) {
-      throw new BadRequestException('Teks alternatif wajib diisi.');
+      throw new BadRequestException('Alt text is required');
     }
 
     const photo = await this.galleryRepository.addPhoto({
@@ -64,7 +64,7 @@ export class AddPhotoUseCase {
   private async assertAlbum(albumId: string) {
     const album = await this.galleryRepository.findAlbumById(albumId);
     if (!album || album.deletedAt) {
-      throw new NotFoundException(`Album dengan ID ${albumId} tidak ditemukan`);
+      throw new NotFoundException(`Album ${albumId} not found`);
     }
     return album;
   }
@@ -87,14 +87,14 @@ export class UpdatePhotoUseCase {
   async execute(albumId: string, photoId: string, dto: UpdatePhotoDto) {
     const album = await this.galleryRepository.findAlbumById(albumId);
     if (!album || album.deletedAt) {
-      throw new NotFoundException(`Album dengan ID ${albumId} tidak ditemukan`);
+      throw new NotFoundException(`Album ${albumId} not found`);
     }
 
     // Alt text may be changed but never cleared — a photo without it is
     // unusable with a screen reader, and publishing already refuses one
     // (FR-057).
     if (dto.altText !== undefined && !dto.altText.trim()) {
-      throw new BadRequestException('Teks alternatif wajib diisi.');
+      throw new BadRequestException('Alt text is required');
     }
 
     const photo = await this.galleryRepository.updatePhoto(albumId, photoId, {
@@ -106,7 +106,7 @@ export class UpdatePhotoUseCase {
 
     if (!photo) {
       throw new NotFoundException(
-        `Foto dengan ID ${photoId} tidak ada di album ini`,
+        `Photo ${photoId} does not belong to this album`,
       );
     }
 
@@ -127,7 +127,7 @@ export class RemovePhotoUseCase {
   async execute(albumId: string, photoId: string): Promise<void> {
     const album = await this.galleryRepository.findAlbumById(albumId);
     if (!album || album.deletedAt) {
-      throw new NotFoundException(`Album dengan ID ${albumId} tidak ditemukan`);
+      throw new NotFoundException(`Album ${albumId} not found`);
     }
 
     await this.galleryRepository.removePhoto(albumId, photoId);
@@ -155,7 +155,7 @@ export class ReorderPhotosUseCase {
   async execute(albumId: string, dto: ReorderPhotosDto): Promise<void> {
     const album = await this.galleryRepository.findAlbumById(albumId);
     if (!album || album.deletedAt) {
-      throw new NotFoundException(`Album dengan ID ${albumId} tidak ditemukan`);
+      throw new NotFoundException(`Album ${albumId} not found`);
     }
 
     // A stale client list would reorder around a photo that no longer exists,
@@ -164,7 +164,7 @@ export class ReorderPhotosUseCase {
     const unknown = dto.photoIds.filter((id) => !known.has(id));
     if (unknown.length > 0) {
       throw new BadRequestException(
-        'Urutan memuat foto yang tidak ada di album ini. Muat ulang album.',
+        'The order references a photo that is not in this album. Reload the album.',
       );
     }
 

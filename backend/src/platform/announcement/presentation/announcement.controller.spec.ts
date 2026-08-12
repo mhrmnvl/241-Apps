@@ -94,8 +94,7 @@ describe('AnnouncementController', () => {
     it('should delegate to CreateAnnouncementUseCase with dto', async () => {
       const dto: CreateAnnouncementDto = {
         title: 'Jadwal Ujian Akhir Semester',
-        description:
-          'Ujian akhir semester genap dilaksanakan pada tanggal 20-25 Mei 2025.',
+        description: 'End-of-term exams run from 20-25 May 2025.',
         date: '2025-05-20',
       };
       const expected = { id: 'ann-new', ...dto };

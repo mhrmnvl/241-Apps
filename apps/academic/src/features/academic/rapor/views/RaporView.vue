@@ -202,57 +202,55 @@ onMounted(async () => {
       </CardHeader>
 
       <div class="space-y-6 p-6">
-        <div class="rounded-lg border bg-muted/20 p-4">
-          <div class="flex flex-col sm:flex-row gap-4 items-end">
-            <div class="space-y-2 flex-1 max-w-[250px]">
-              <Label>Tahun Ajaran & Semester</Label>
-              <AppCombobox
-                v-model="selectedSemesterId"
-                :options="raporSemesterOptions"
-                placeholder="Pilih Semester"
-                search-placeholder="Cari semester..."
-                empty-text="Semester tidak ditemukan."
-              />
-            </div>
-
-            <div class="space-y-2 flex-1 max-w-[250px]">
-              <Label>Kelas</Label>
-              <AppCombobox
-                v-model="selectedClassroomId"
-                :options="raporClassroomOptions"
-                placeholder="Pilih Kelas"
-                search-placeholder="Cari kelas..."
-                empty-text="Kelas tidak ditemukan."
-              />
-            </div>
-
-            <Button
-              :disabled="!isFilterReady || loading"
-              class="w-full sm:w-auto"
-              @click="handleFilter"
-            >
-              <Search class="mr-2 h-4 w-4" /> Tampilkan
-            </Button>
-
-            <div class="flex-1"></div>
-
-            <Button
-              v-if="
-                hasDisplayedData &&
-                (can('report-cards.create') || can('report-cards.update'))
-              "
-              variant="outline"
-              :disabled="!isFilterReady || isGenerating"
-              class="w-full sm:w-auto"
-              @click="showBulkConfirm = true"
-            >
-              <Loader2
-                v-if="isGenerating"
-                class="mr-2 h-4 w-4 animate-spin"
-              />
-              Generate Rapor Massal
-            </Button>
+        <div class="flex flex-col sm:flex-row gap-4 items-end">
+          <div class="space-y-2 flex-1 max-w-[250px]">
+            <Label>Tahun Ajaran & Semester</Label>
+            <AppCombobox
+              v-model="selectedSemesterId"
+              :options="raporSemesterOptions"
+              placeholder="Pilih Semester"
+              search-placeholder="Cari semester..."
+              empty-text="Semester tidak ditemukan."
+            />
           </div>
+
+          <div class="space-y-2 flex-1 max-w-[250px]">
+            <Label>Kelas</Label>
+            <AppCombobox
+              v-model="selectedClassroomId"
+              :options="raporClassroomOptions"
+              placeholder="Pilih Kelas"
+              search-placeholder="Cari kelas..."
+              empty-text="Kelas tidak ditemukan."
+            />
+          </div>
+
+          <Button
+            :disabled="!isFilterReady || loading"
+            class="w-full sm:w-auto"
+            @click="handleFilter"
+          >
+            <Search class="mr-2 h-4 w-4" /> Tampilkan
+          </Button>
+
+          <div class="flex-1"></div>
+
+          <Button
+            v-if="
+              hasDisplayedData &&
+              (can('report-cards.create') || can('report-cards.update'))
+            "
+            variant="outline"
+            :disabled="!isFilterReady || isGenerating"
+            class="w-full sm:w-auto"
+            @click="showBulkConfirm = true"
+          >
+            <Loader2
+              v-if="isGenerating"
+              class="mr-2 h-4 w-4 animate-spin"
+            />
+            Generate Rapor Massal
+          </Button>
         </div>
 
         <div

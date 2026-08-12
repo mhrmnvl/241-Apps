@@ -33,8 +33,8 @@ export class RecordScanUseCase {
   /**
    * The gate's hot path.
    *
-   * **Rejections return a result, not an exception.** The kiosk must render
-   * "kartu tidak berlaku" exactly like a success; an HTTP error would be
+   * **Rejections return a result, not an exception.** The kiosk must render an
+   * expired card exactly like a successful scan; an HTTP error would be
    * indistinguishable from a network failure the offline queue should retry,
    * so a revoked card would be retried forever.
    */
@@ -69,7 +69,7 @@ export class RecordScanUseCase {
         dto,
         occurredAt,
         'REJECTED_UNKNOWN',
-        'Kartu tidak dikenal',
+        'Unknown credential',
       );
     }
     if (credential.status !== 'ACTIVE') {
@@ -78,7 +78,7 @@ export class RecordScanUseCase {
         dto,
         occurredAt,
         'REJECTED_REVOKED',
-        'Kartu sudah tidak berlaku',
+        'The credential is no longer valid',
         credential.id,
       );
     }
@@ -88,7 +88,7 @@ export class RecordScanUseCase {
         dto,
         occurredAt,
         'REJECTED_INACTIVE',
-        'Pemegang kartu tidak aktif',
+        'The credential holder is not active',
         credential.id,
       );
     }

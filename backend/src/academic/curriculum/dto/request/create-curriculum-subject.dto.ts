@@ -27,4 +27,17 @@ export class CreateCurriculumSubjectDto {
   @Min(1)
   @Max(10)
   hoursPerWeek?: number;
+
+  @ApiPropertyOptional({
+    description:
+      'Minimum pass mark for this subject under this curriculum. Also fixes the A/B/C/D scale, whose D/C boundary is this value. A teacher may override it for one class.',
+    example: 75,
+    default: 75,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  @Max(100)
+  passingScore?: number;
 }

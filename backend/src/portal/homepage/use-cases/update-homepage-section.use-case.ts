@@ -21,7 +21,7 @@ export class UpdateHomepageSectionUseCase {
   ): Promise<HomepageSectionSettingDto> {
     const existing = await this.sectionRepository.findByKey(key);
     if (!existing) {
-      throw new NotFoundException(`Seksi beranda "${key}" tidak ditemukan`);
+      throw new NotFoundException(`Seksi beranda "${key}" not found`);
     }
 
     if (
@@ -29,7 +29,7 @@ export class UpdateHomepageSectionUseCase {
       (dto.itemCount < MIN_SECTION_ITEMS || dto.itemCount > MAX_SECTION_ITEMS)
     ) {
       throw new BadRequestException(
-        `Jumlah item harus antara ${MIN_SECTION_ITEMS} dan ${MAX_SECTION_ITEMS}.`,
+        `Item count must be between ${MIN_SECTION_ITEMS} and ${MAX_SECTION_ITEMS}.`,
       );
     }
 

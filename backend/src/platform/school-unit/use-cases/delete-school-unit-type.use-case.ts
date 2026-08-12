@@ -17,14 +17,14 @@ export class DeleteSchoolUnitTypeUseCase {
   async execute(id: string) {
     const existing = await this.schoolUnitTypeRepository.findById(id);
     if (!existing) {
-      throw new NotFoundException('Tipe sekolah tidak ditemukan');
+      throw new NotFoundException('School unit type not found');
     }
 
     const linkedCount =
       await this.schoolUnitTypeRepository.countSchoolUnitsWithType(id);
     if (linkedCount > 0) {
       throw new ConflictException(
-        'Tipe sekolah tidak bisa dihapus karena masih digunakan oleh beberapa unit sekolah',
+        'School unit type is still used by one or more school units and cannot be deleted',
       );
     }
 

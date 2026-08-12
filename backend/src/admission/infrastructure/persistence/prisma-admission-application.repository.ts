@@ -451,7 +451,7 @@ export class PrismaAdmissionApplicationRepository extends IAdmissionApplicationR
         });
         if (!activeSemester) {
           throw new ConflictException(
-            'Tidak ada semester aktif untuk pendaftaran kelas',
+            'No active semester is available for classroom enrolment',
           );
         }
         await tx.studentEnrollment.create({

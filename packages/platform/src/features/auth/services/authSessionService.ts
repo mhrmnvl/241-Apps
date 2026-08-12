@@ -1,6 +1,5 @@
 import type { AuthUser } from '../types'
-
-const USER_KEY = 'siakad_user'
+import { AUTH_USER_STORAGE_KEY as USER_KEY } from '@/shared/constants/storage'
 
 export const authSessionService = {
   persistUser: (user: AuthUser) => {

@@ -12,7 +12,7 @@ export class GetMyApplicationUseCase {
     const application =
       await this.admissionApplicantRepository.findMyDetail(userId);
     if (!application) {
-      throw new NotFoundException('Data pendaftaran tidak ditemukan');
+      throw new NotFoundException('Application not found');
     }
 
     const documentTypes =

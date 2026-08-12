@@ -12,7 +12,9 @@ export class CreateAdmissionWaveUseCase {
   async execute(dto: CreateAdmissionWaveDto) {
     const existing = await this.admissionWaveRepository.findByCode(dto.code);
     if (existing) {
-      throw new ConflictException(`Kode gelombang '${dto.code}' sudah dipakai`);
+      throw new ConflictException(
+        `Admission wave code '${dto.code}' is already in use`,
+      );
     }
 
     const created = await this.admissionWaveRepository.create({

@@ -27,8 +27,8 @@ import { Public } from '../../../core/decorators/public.decorator.js';
 import {
   AuthResponseDto,
   LogoutResponseDto,
-  UserInfoDto,
 } from '../dto/response/auth-response.dto.js';
+import { SessionIdentityDto } from '../dto/response/session-identity.dto.js';
 import { LoginDto } from '../dto/request/login.dto.js';
 import { ChangePasswordDto } from '../dto/request/change-password.dto.js';
 import { ForgotPasswordDto } from '../dto/request/forgot-password.dto.js';
@@ -166,11 +166,11 @@ export class AuthController {
   @Get('me')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Get current authenticated user profile' })
+  @ApiOperation({ summary: 'Get the current session identity' })
   @ApiResponse({
     status: 200,
-    description: 'Current user profile',
-    type: UserInfoDto,
+    description: 'Who the caller is and what they may do',
+    type: SessionIdentityDto,
   })
   @ApiResponse({ status: 401, description: 'Missing or invalid access token' })
   async getMe(@CurrentUser() user: AuthenticatedUser) {
@@ -189,7 +189,7 @@ export class AuthController {
     @Body() dto: ChangePasswordDto,
   ) {
     await this.changePasswordUseCase.execute(user.id, user.sessionId, dto);
-    return { success: true, message: 'Password berhasil diubah' };
+    return { success: true, message: 'Password changed successfully' };
   }
 
   @Throttle({ auth: {} })
@@ -214,7 +214,7 @@ export class AuthController {
   @ApiResponse({ status: 400, description: 'Invalid or expired token' })
   async resetPassword(@Body() dto: ResetPasswordDto) {
     await this.resetPasswordUseCase.execute(dto);
-    return { success: true, message: 'Password berhasil direset' };
+    return { success: true, message: 'Password reset successfully' };
   }
 
   private setRefreshTokenCookie(res: Response, token: string, maxAge: number) {

@@ -19,6 +19,7 @@ import {
   ApiBearerAuth,
   ApiOperation,
   ApiParam,
+  ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
 
@@ -26,10 +27,13 @@ import { JwtAuthGuard } from '../../../platform/auth/index.js';
 import { CurrentUser } from '../../../core/decorators/current-user.decorator.js';
 import type { AuthenticatedUser } from '../../../core/types/authenticated-user.type.js';
 
+import { BulkGenerateReportCardDto } from '../dto/request/bulk-generate-report-card.dto.js';
+import { BulkGenerateReportCardResponseDto } from '../dto/response/bulk-generate-report-card-response.dto.js';
 import { GenerateReportCardDto } from '../dto/request/generate-report-card.dto.js';
 import { ReportCardQueryDto } from '../dto/request/report-card-query.dto.js';
 import { UpdateReportCardDto } from '../dto/request/update-report-card.dto.js';
 import { DeleteReportCardUseCase } from '../use-cases/delete-report-card.use-case.js';
+import { BulkGenerateReportCardsUseCase } from '../use-cases/bulk-generate-report-cards.use-case.js';
 import { GenerateReportCardUseCase } from '../use-cases/generate-report-card.use-case.js';
 import { GetReportCardByIdUseCase } from '../use-cases/get-report-card-by-id.use-case.js';
 import { GetReportCardsUseCase } from '../use-cases/get-report-cards.use-case.js';
@@ -46,6 +50,7 @@ export class ReportCardController {
     private readonly getReportCardsService: GetReportCardsUseCase,
     private readonly getReportCardByIdService: GetReportCardByIdUseCase,
     private readonly generateReportCardService: GenerateReportCardUseCase,
+    private readonly bulkGenerateReportCardsService: BulkGenerateReportCardsUseCase,
     private readonly updateReportCardService: UpdateReportCardUseCase,
     private readonly publishReportCardService: PublishReportCardUseCase,
     private readonly deleteReportCardService: DeleteReportCardUseCase,
@@ -81,6 +86,21 @@ export class ReportCardController {
     @Body() dto: GenerateReportCardDto,
   ) {
     return this.generateReportCardService.execute(dto);
+  }
+
+  @Post('generate/bulk')
+  @RequirePermissions('report-cards.create')
+  @ApiOperation({
+    summary: 'Generate report cards for every active enrolment in a classroom',
+    description:
+      'Published cards are left untouched and reported as skipped, so one issued report does not block the rest of the class.',
+  })
+  @ApiResponse({ status: 201, type: BulkGenerateReportCardResponseDto })
+  bulkGenerate(
+    @CurrentUser() user: AuthenticatedUser,
+    @Body() dto: BulkGenerateReportCardDto,
+  ) {
+    return this.bulkGenerateReportCardsService.execute(dto);
   }
 
   @Patch(':id')

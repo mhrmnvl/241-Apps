@@ -19,16 +19,16 @@ export class VerifyPaymentUseCase {
 
   async execute(applicationId: string, dto: VerifyPaymentDto, adminId: string) {
     if (dto.status === AdmissionPaymentStatus.REJECTED && !dto.note?.trim()) {
-      throw new BadRequestException('Alasan penolakan pembayaran wajib diisi');
+      throw new BadRequestException('A payment rejection reason is required');
     }
 
     const payment =
       await this.admissionApplicationRepository.findPayment(applicationId);
     if (!payment) {
-      throw new NotFoundException('Data pembayaran tidak ditemukan');
+      throw new NotFoundException('Payment record not found');
     }
     if (payment.status === 'UNPAID' || !payment.proofFileId) {
-      throw new ConflictException('Bukti pembayaran belum diunggah');
+      throw new ConflictException('Payment proof has not been uploaded');
     }
 
     const updated =

@@ -1,6 +1,32 @@
 <!--
 Sync Impact Report
 ==================
+Version change: 1.2.0 → 1.3.0 (2026-08-12)
+Bump rationale: MINOR — Principle II gains a sanctioned channel it did not name, and
+the workspace grows a fifth app. Amendment (a)-(e):
+
+  (a) Edits: Principle II (a bullet on cross-app data over HTTP), Technology Constraints
+      (workspace shape: four apps → five), this report, the version footer.
+  (b) Version and rationale: stated here.
+  (c) Docs affected: docs/adr/0009-presence-web-fifth-app.md added in the same change;
+      docs/adr/0007-presence-domain.md marked partially superseded; CLAUDE.md updated
+      with the fifth app, dev:presence, and the same boundary rule.
+  (d) Migration plan: none. No existing import changes and no access changes — the new
+      app reaches academic over HTTP, which nothing previously did by any means.
+  (e) Compliance Baseline: not re-surveyed. This amendment moves frontend features
+      between apps and adds no backend code, so the 2026-08-10 survey still holds; the
+      one item it named for apps/ (inventory feature granularity) is untouched.
+
+Why this is an amendment rather than a clarification: Principle II said only that an
+app must not import another app, which left the real question — what an app MAY do when
+it needs data another app owns — unanswered. Read strictly, the silence forbids nothing
+and permits anything, including copying the owning app's types, which is the failure the
+principle exists to prevent. The new bullet names HTTP as the channel and requires a
+single anti-corruption feature to hold it, so the boundary stays reviewable now that a
+frontend split has made cross-app reads real for the first time.
+
+Version 1.2.0's report follows.
+
 Version change: 1.1.0 → 1.2.0 (2026-08-10)
 Bump rationale: MINOR — Principle III's sanctioned exception is materially expanded.
 `payroll-` joins `portal-` in ROLE_BYPASS_EXEMPT_PREFIXES. Amendment (a)-(e):
@@ -189,6 +215,13 @@ One domain = one feature, and every feature is consumed only through its public 
   available export is a Module class, which the ESM-cycle rule above forbids.
 - An app MUST NOT import from another app, by alias or by relative path. Apps are
   siblings, never dependencies.
+- Where an app needs data another app owns, **HTTP is the only channel**. It calls the
+  backend endpoint directly and declares its own narrow read model naming just the
+  fields it uses — never a type imported or copied from the owning app, whose payloads
+  are free to grow. That read model and its calls MUST be confined to one feature
+  acting as the anti-corruption layer; `presence-web`'s `features/lookup` is the
+  reference (ADR-0009). This is not a loophole in the rule above: nothing is imported,
+  and the dependency is on a published API rather than on another app's source.
 - Code used by two or more apps MUST be promoted to `packages/*`. Code specific to one
   app (`menuConfig`, `AppSidebar`) stays in that app. Copying shared code between apps
   is forbidden.
@@ -357,15 +390,21 @@ and reviewed.
   them in `dependencies` gives the package its own copy and reintroduces the duplicate
   runtime instance (Pinia's "reading `_s` of undefined") that the TypeScript pin exists
   to prevent. pnpm's strict `node_modules` will not cover an undeclared import.
-- **Workspace shape**: four apps (`academic`, `inventory`, `admission`, `portal`), four
-  packages (`@241/ui`, `@241/shared`, `@241/platform`, `@241/master-data`), one
-  `backend`.
+- **Workspace shape**: five apps (`academic`, `inventory`, `admission`, `portal`,
+  `presence`), four packages (`@241/ui`, `@241/shared`, `@241/platform`,
+  `@241/master-data`), one `backend`.
 - **Frontend stack**: Vue 3 (Composition API, `<script setup>`), TypeScript, Vite,
   Tailwind CSS v4, shadcn-vue + Reka UI, Pinia, Vue Router, vee-validate + Zod,
   TanStack Vue Table, Lucide, Axios, FullCalendar. Adding a cross-cutting dependency
   REQUIRES justification in the feature plan.
 - **No build step between packages and apps**: `packages/*` are consumed directly as
   TypeScript source through path aliases. Do not introduce a publish or build step.
+- **Backend language**: `backend/` is written in English — messages, Swagger text,
+  logs, identifiers, comments. Indonesian belongs to the frontend, which owns
+  presentation. Exempt is text that leaves the system as the final thing a person
+  reads, with no frontend in between: rendered documents (the rapor PDF, the
+  student spreadsheet's column headers), messages delivered directly to a person
+  (reset emails, admission notifications), and seed data. See NESTJS-RULES.md.
 - **shadcn-vue components** live in `packages/ui` and MUST be added through its CLI and
   `components.json`, not copied into an app.
 - **Reference-data CRUD** MUST go through `@241/master-data` with a per-entity
@@ -577,4 +616,4 @@ the code or corrected here; it is never left standing as fiction.
 **Runtime development guidance**: root `CLAUDE.md` for the workspace,
 `backend/docs/NESTJS-RULES.md` for backend work.
 
-**Version**: 1.2.0 | **Ratified**: 2026-08-06 | **Last Amended**: 2026-08-10
+**Version**: 1.3.0 | **Ratified**: 2026-08-06 | **Last Amended**: 2026-08-12

@@ -57,6 +57,9 @@ const open = computed({
 const { editData } = toRefs(props)
 const isEditing = computed(() => !!editData?.value)
 
+/** Matches the backend default, so a new row opens on the same number. */
+const DEFAULT_PASSING_SCORE = 75
+
 const formSchema = toTypedSchema(
   z.object({
     subjectId: z.string().min(1, 'Mata pelajaran wajib dipilih.'),
@@ -64,6 +67,11 @@ const formSchema = toTypedSchema(
       .number()
       .min(1, 'Minimal 1 jam per minggu.')
       .max(10, 'Maksimal 10 jam per minggu.'),
+    passingScore: z.coerce
+      .number()
+      .int('KKM harus bilangan bulat.')
+      .min(0, 'KKM minimal 0.')
+      .max(100, 'KKM maksimal 100.'),
   }),
 )
 
@@ -72,6 +80,7 @@ const { handleSubmit, resetForm, setValues } = useForm({
   initialValues: {
     subjectId: '',
     hoursPerWeek: 2,
+    passingScore: DEFAULT_PASSING_SCORE,
   },
 })
 
@@ -84,6 +93,7 @@ watch(
         setValues({
           subjectId: data.subjectId || '',
           hoursPerWeek: data.hoursPerWeek ?? 2,
+          passingScore: data.passingScore ?? DEFAULT_PASSING_SCORE,
         })
       } else {
         resetForm()
@@ -98,11 +108,13 @@ const showConfirmAlert = ref(false)
 function buildPayload(values: {
   subjectId: string
   hoursPerWeek: number
+  passingScore: number
 }): CurriculumSubjectSavePayload {
   return {
     curriculumId: props.curriculumId,
     subjectId: values.subjectId,
     hoursPerWeek: values.hoursPerWeek,
+    passingScore: values.passingScore,
   }
 }
 
@@ -186,6 +198,35 @@ function confirmSave() {
                   @update:model-value="(val) => handleChange(val)"
                 />
               </FormControl>
+              <FormMessage />
+            </FormItem>
+          </FormField>
+
+          <FormField
+            v-slot="{ value, handleChange }"
+            name="passingScore"
+          >
+            <FormItem>
+              <FormLabel>
+                KKM
+                <span class="text-destructive">*</span>
+              </FormLabel>
+              <FormControl>
+                <Input
+                  :model-value="value"
+                  type="number"
+                  min="0"
+                  max="100"
+                  placeholder="75"
+                  @update:model-value="(val) => handleChange(val)"
+                />
+              </FormControl>
+              <p class="text-xs text-muted-foreground">
+                Batas nilai tuntas untuk mata pelajaran ini di kurikulum ini.
+                Menentukan juga predikat A/B/C/D di rapor — predikat D selalu di
+                bawah angka ini. Guru dapat menaikkan atau menurunkannya untuk
+                kelas yang diampunya lewat Penugasan Mengajar.
+              </p>
               <FormMessage />
             </FormItem>
           </FormField>

@@ -128,7 +128,7 @@ describe('GetPageMetaUseCase', () => {
   });
 
   it('404s on a path that is not part of the public address space', async () => {
-    await expect(useCase.execute('/tidak-ada/apa-pun')).rejects.toThrow(
+    await expect(useCase.execute('/does-not-exist/anything')).rejects.toThrow(
       NotFoundException,
     );
   });

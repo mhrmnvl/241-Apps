@@ -11,7 +11,7 @@ export class DeleteAdmissionAnnouncementUseCase {
     const announcement =
       await this.admissionAnnouncementRepository.findActiveById(id);
     if (!announcement) {
-      throw new NotFoundException('Pengumuman tidak ditemukan');
+      throw new NotFoundException('Announcement not found');
     }
 
     return this.admissionAnnouncementRepository.softDelete(id);

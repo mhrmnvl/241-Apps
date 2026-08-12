@@ -37,7 +37,7 @@ describe('CreateEventUseCase', () => {
     const mockEvent = {
       id: 'evt-1',
       title: 'Pekan Ilmiah Siswa',
-      description: 'Kegiatan pameran karya ilmiah siswa.',
+      description: 'Science fair for students.',
       startTime: new Date('2024-03-05T08:00:00Z'),
       endTime: new Date('2024-03-05T10:00:00Z'),
     };
@@ -45,7 +45,7 @@ describe('CreateEventUseCase', () => {
     it('should create a school-wide event (no classroomIds)', async () => {
       const dto: CreateEventDto = {
         title: 'Pekan Ilmiah Siswa',
-        description: 'Kegiatan pameran karya ilmiah siswa.',
+        description: 'Science fair for students.',
         startTime: '2024-03-05T08:00:00Z',
         endTime: '2024-03-05T10:00:00Z',
       };
@@ -65,7 +65,7 @@ describe('CreateEventUseCase', () => {
     it('should create a classroom-specific event after validating each classroom', async () => {
       const dto: CreateEventDto = {
         title: 'Pekan Ilmiah Siswa',
-        description: 'Kegiatan pameran karya ilmiah siswa.',
+        description: 'Science fair for students.',
         startTime: '2024-03-05T08:00:00Z',
         endTime: '2024-03-05T10:00:00Z',
         classroomIds: ['cls-1', 'cls-2'],
@@ -91,7 +91,7 @@ describe('CreateEventUseCase', () => {
     it('should throw NotFoundException when a target classroom does not exist', async () => {
       const dto: CreateEventDto = {
         title: 'Pekan Ilmiah Siswa',
-        description: 'Kegiatan pameran karya ilmiah siswa.',
+        description: 'Science fair for students.',
         startTime: '2024-03-05T08:00:00Z',
         endTime: '2024-03-05T10:00:00Z',
         classroomIds: ['cls-nonexistent'],
@@ -105,7 +105,7 @@ describe('CreateEventUseCase', () => {
     it('should NOT call findClassroomById when classroomIds is empty array', async () => {
       const dto: CreateEventDto = {
         title: 'Pekan Ilmiah Siswa',
-        description: 'Kegiatan pameran karya ilmiah siswa.',
+        description: 'Science fair for students.',
         startTime: '2024-03-05T08:00:00Z',
         endTime: '2024-03-05T10:00:00Z',
         classroomIds: [],

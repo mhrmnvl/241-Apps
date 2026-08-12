@@ -27,10 +27,12 @@ import type { AuthenticatedUser } from '../../../core/types/authenticated-user.t
 
 import { CurriculumSubjectQueryDto } from '../dto/request/curriculum-subject-query.dto.js';
 import { CreateCurriculumSubjectDto } from '../dto/request/create-curriculum-subject.dto.js';
+import { BulkCreateCurriculumSubjectDto } from '../dto/request/bulk-create-curriculum-subject.dto.js';
 import { UpdateCurriculumSubjectDto } from '../dto/request/update-curriculum-subject.dto.js';
 import { GetCurriculumSubjectsUseCase } from '../use-cases/get-curriculum-subjects.use-case.js';
 import { GetCurriculumSubjectByIdUseCase } from '../use-cases/get-curriculum-subject-by-id.use-case.js';
 import { CreateCurriculumSubjectUseCase } from '../use-cases/create-curriculum-subject.use-case.js';
+import { BulkCreateCurriculumSubjectsUseCase } from '../use-cases/bulk-create-curriculum-subjects.use-case.js';
 import { UpdateCurriculumSubjectUseCase } from '../use-cases/update-curriculum-subject.use-case.js';
 import { DeleteCurriculumSubjectUseCase } from '../use-cases/delete-curriculum-subject.use-case.js';
 
@@ -43,6 +45,7 @@ export class CurriculumSubjectController {
     private readonly getAll: GetCurriculumSubjectsUseCase,
     private readonly getById: GetCurriculumSubjectByIdUseCase,
     private readonly createService: CreateCurriculumSubjectUseCase,
+    private readonly bulkCreateService: BulkCreateCurriculumSubjectsUseCase,
     private readonly updateService: UpdateCurriculumSubjectUseCase,
     private readonly deleteService: DeleteCurriculumSubjectUseCase,
   ) {}
@@ -79,6 +82,19 @@ export class CurriculumSubjectController {
     @CurrentUser() user: AuthenticatedUser,
   ) {
     return this.createService.execute(dto);
+  }
+
+  @Post('bulk')
+  @RequirePermissions('curriculum-subjects.create')
+  @ApiOperation({
+    summary: 'Bulk create curriculum subjects (skips duplicates)',
+  })
+  @ApiResponse({ status: 201, description: 'Created count and skipped count' })
+  async bulkCreate(
+    @Body() dto: BulkCreateCurriculumSubjectDto,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    return this.bulkCreateService.execute(dto);
   }
 
   @Patch(':id')

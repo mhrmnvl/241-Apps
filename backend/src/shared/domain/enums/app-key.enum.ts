@@ -3,4 +3,5 @@ export enum AppKey {
   ADMISSION = 'ADMISSION',
   INVENTORY = 'INVENTORY',
   PORTAL = 'PORTAL',
+  PRESENCE = 'PRESENCE',
 }

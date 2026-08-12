@@ -134,7 +134,7 @@ describe('GetHomepageUseCase', () => {
   // in seed data should not 500 the school's homepage.
   it('resolves an unrecognised section key to an empty list', async () => {
     mockSections.findAllEnabled.mockResolvedValue([
-      { key: 'tidak-dikenal', itemCount: 3, displayOrder: 2 },
+      { key: 'unknown', itemCount: 3, displayOrder: 2 },
     ]);
 
     const result = await useCase.execute();
@@ -303,7 +303,7 @@ describe('UpdateHomepageSectionUseCase', () => {
     mockSections.findByKey.mockResolvedValue(null);
 
     await expect(
-      useCase.execute('tidak-ada', { itemCount: 3 }),
+      useCase.execute('does-not-exist', { itemCount: 3 }),
     ).rejects.toThrow(NotFoundException);
   });
 

@@ -16,14 +16,14 @@ export class UpdateAdmissionWaveUseCase {
   async execute(id: string, dto: UpdateAdmissionWaveDto) {
     const wave = await this.admissionWaveRepository.findById(id);
     if (!wave) {
-      throw new NotFoundException('Gelombang tidak ditemukan');
+      throw new NotFoundException('Admission wave not found');
     }
 
     if (dto.code && dto.code !== wave.code) {
       const existing = await this.admissionWaveRepository.findByCode(dto.code);
       if (existing) {
         throw new ConflictException(
-          `Kode gelombang '${dto.code}' sudah dipakai`,
+          `Admission wave code '${dto.code}' is already in use`,
         );
       }
     }

@@ -48,14 +48,14 @@ export class SubmitApplicationUseCase {
     const application =
       await this.admissionApplicantRepository.findMyDetail(userId);
     if (!application) {
-      throw new NotFoundException('Data pendaftaran tidak ditemukan');
+      throw new NotFoundException('Application not found');
     }
 
     assertTransition(application.status, 'SUBMITTED');
 
     const today = new Date();
     if (!application.wave || application.wave.endDate < today) {
-      throw new ConflictException('Gelombang pendaftaran sudah ditutup');
+      throw new ConflictException('The admission wave is closed');
     }
 
     const missing = REQUIRED_FIELDS.filter((f) => !application[f]).map(
@@ -89,9 +89,7 @@ export class SubmitApplicationUseCase {
     }
 
     if (missing.length > 0) {
-      throw new BadRequestException(
-        `Data belum lengkap: ${missing.join(', ')}`,
-      );
+      throw new BadRequestException(`Incomplete data: ${missing.join(', ')}`);
     }
 
     const updated = await this.admissionApplicantRepository.submitApplication(

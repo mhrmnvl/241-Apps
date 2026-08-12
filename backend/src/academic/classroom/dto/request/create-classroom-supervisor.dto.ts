@@ -11,7 +11,7 @@ export class CreateClassroomSupervisorDto {
   classroomId: string;
 
   @ApiProperty({
-    description: 'Teacher ID (UUID) � wali kelas',
+    description: 'Teacher ID (UUID) — the homeroom teacher',
     example: '550e8400-e29b-41d4-a716-446655440002',
   })
   @IsUUID()

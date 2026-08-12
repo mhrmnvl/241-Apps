@@ -1,16 +1,16 @@
-export interface CurriculaEditData {
+export interface CurriculumEditData {
   academicYearId?: string
   name?: string
   isActive?: boolean
 }
 
-export interface CurriculaSavePayload {
+export interface CurriculumSavePayload {
   academicYearId: string
   name: string
   isActive: boolean
 }
 
-export interface CurriculaQueryParams {
+export interface CurriculumQueryParams {
   page?: number
   limit?: number
   search?: string

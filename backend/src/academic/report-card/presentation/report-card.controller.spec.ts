@@ -3,6 +3,7 @@ import { GenerateReportCardDto } from '../dto/request/generate-report-card.dto.j
 import { ReportCardQueryDto } from '../dto/request/report-card-query.dto.js';
 import { UpdateReportCardDto } from '../dto/request/update-report-card.dto.js';
 import { DeleteReportCardUseCase } from '../use-cases/delete-report-card.use-case.js';
+import { BulkGenerateReportCardsUseCase } from '../use-cases/bulk-generate-report-cards.use-case.js';
 import { GenerateReportCardUseCase } from '../use-cases/generate-report-card.use-case.js';
 import { GetReportCardByIdUseCase } from '../use-cases/get-report-card-by-id.use-case.js';
 import { GetReportCardsUseCase } from '../use-cases/get-report-cards.use-case.js';
@@ -23,6 +24,7 @@ describe('ReportCardController', () => {
   const mockGetReportCards = { execute: jest.fn() };
   const mockGetReportCardById = { execute: jest.fn() };
   const mockGenerateReportCard = { execute: jest.fn() };
+  const mockBulkGenerateReportCards = { execute: jest.fn() };
   const mockUpdateReportCard = { execute: jest.fn() };
   const mockPublishReportCard = { execute: jest.fn() };
   const mockDeleteReportCard = { execute: jest.fn() };
@@ -44,6 +46,10 @@ describe('ReportCardController', () => {
         {
           provide: GenerateReportCardUseCase,
           useValue: mockGenerateReportCard,
+        },
+        {
+          provide: BulkGenerateReportCardsUseCase,
+          useValue: mockBulkGenerateReportCards,
         },
         { provide: UpdateReportCardUseCase, useValue: mockUpdateReportCard },
         { provide: PublishReportCardUseCase, useValue: mockPublishReportCard },

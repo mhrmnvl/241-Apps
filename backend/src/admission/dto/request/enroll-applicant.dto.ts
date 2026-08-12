@@ -20,7 +20,10 @@ export class EnrollApplicantDto {
   @MaxLength(20)
   nisn: string;
 
-  @ApiProperty({ format: 'uuid', description: 'Tingkat kelas siswa (wajib)' })
+  @ApiProperty({
+    format: 'uuid',
+    description: 'Grade level of the student (required)',
+  })
   @IsUUID()
   @IsNotEmpty()
   gradeId: string;
@@ -28,7 +31,7 @@ export class EnrollApplicantDto {
   @ApiPropertyOptional({
     format: 'uuid',
     description:
-      'Jika diisi, siswa langsung didaftarkan ke kelas ini pada semester aktif',
+      'When set, the student is enrolled into this classroom for the active semester',
   })
   @IsOptional()
   @IsUUID()

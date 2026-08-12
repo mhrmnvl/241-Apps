@@ -62,75 +62,73 @@ const selectedYearStr = computed({
   <div>
     <!-- Desktop Filter Bar -->
     <div class="hidden lg:block">
-      <div class="rounded-lg border bg-muted/20 p-4">
-        <div class="flex flex-wrap items-center gap-3">
-          <Select v-model="selectedSemesterId">
-            <SelectTrigger class="w-[180px]">
-              <SelectValue placeholder="Pilih Semester" />
+      <div class="flex flex-wrap items-center gap-3">
+        <Select v-model="selectedSemesterId">
+          <SelectTrigger class="w-[180px]">
+            <SelectValue placeholder="Pilih Semester" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem
+              v-for="s in semesterFilterOptions"
+              :key="s.value"
+              :value="s.value"
+            >
+              {{ s.label }}
+            </SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Select v-model="selectedClassroomId">
+          <SelectTrigger class="w-[140px]">
+            <SelectValue placeholder="Pilih Kelas" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem
+              v-for="c in classroomFilterOptions"
+              :key="c.value"
+              :value="c.value"
+            >
+              {{ c.label }}
+            </SelectItem>
+          </SelectContent>
+        </Select>
+
+        <DatePicker
+          v-if="props.activeTab === 'input'"
+          v-model="selectedDate"
+          class="w-[160px]"
+        />
+        <template v-else>
+          <Select v-model="selectedMonthStr">
+            <SelectTrigger class="w-[130px]">
+              <SelectValue placeholder="Pilih Bulan" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem
-                v-for="s in semesterFilterOptions"
-                :key="s.value"
-                :value="s.value"
+                v-for="m in monthOptions"
+                :key="m.value"
+                :value="m.value"
               >
-                {{ s.label }}
+                {{ m.label }}
               </SelectItem>
             </SelectContent>
           </Select>
 
-          <Select v-model="selectedClassroomId">
-            <SelectTrigger class="w-[140px]">
-              <SelectValue placeholder="Pilih Kelas" />
+          <Select v-model="selectedYearStr">
+            <SelectTrigger class="w-[110px]">
+              <SelectValue placeholder="Pilih Tahun" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem
-                v-for="c in classroomFilterOptions"
-                :key="c.value"
-                :value="c.value"
+                v-for="y in yearFilterOptions"
+                :key="y.value"
+                :value="y.value"
               >
-                {{ c.label }}
+                {{ y.label }}
               </SelectItem>
             </SelectContent>
           </Select>
-
-          <DatePicker
-            v-if="props.activeTab === 'input'"
-            v-model="selectedDate"
-            class="w-[160px]"
-          />
-          <template v-else>
-            <Select v-model="selectedMonthStr">
-              <SelectTrigger class="w-[130px]">
-                <SelectValue placeholder="Pilih Bulan" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem
-                  v-for="m in monthOptions"
-                  :key="m.value"
-                  :value="m.value"
-                >
-                  {{ m.label }}
-                </SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Select v-model="selectedYearStr">
-              <SelectTrigger class="w-[110px]">
-                <SelectValue placeholder="Pilih Tahun" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem
-                  v-for="y in yearFilterOptions"
-                  :key="y.value"
-                  :value="y.value"
-                >
-                  {{ y.label }}
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </template>
-        </div>
+        </template>
       </div>
     </div>
 

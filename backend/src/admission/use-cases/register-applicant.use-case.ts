@@ -20,7 +20,7 @@ export class RegisterApplicantUseCase {
 
   async execute(dto: RegisterApplicantDto) {
     if (dto.password !== dto.passwordConfirm) {
-      throw new BadRequestException('Konfirmasi kata sandi tidak cocok');
+      throw new BadRequestException('Password confirmation does not match');
     }
 
     const wave = await this.admissionApplicantRepository.findOpenWave(
@@ -28,7 +28,7 @@ export class RegisterApplicantUseCase {
     );
     if (!wave) {
       throw new BadRequestException(
-        'Gelombang pendaftaran tidak ditemukan atau sudah ditutup',
+        'Admission wave not found or already closed',
       );
     }
 
@@ -38,14 +38,16 @@ export class RegisterApplicantUseCase {
         identifier,
       );
     if (existingUser) {
-      throw new ConflictException('Email sudah terdaftar. Silakan login.');
+      throw new ConflictException(
+        'Email is already registered. Sign in instead.',
+      );
     }
 
     const applicantRoleId =
       await this.admissionApplicantRepository.findApplicantRoleId();
     if (!applicantRoleId) {
       throw new InternalServerErrorException(
-        'Role APPLICANT belum tersedia. Hubungi administrator.',
+        'The APPLICANT role has not been provisioned. Contact an administrator.',
       );
     }
 

@@ -1,10 +1,10 @@
 export type {
   AcademicYearRef,
-  Curricula,
-  CurriculaColumnActions,
+  Curriculum,
+  CurriculumColumnActions,
 } from './curriculum'
 export type {
-  CurriculaSavePayload,
-  CurriculaEditData,
-  CurriculaQueryParams,
+  CurriculumSavePayload,
+  CurriculumEditData,
+  CurriculumQueryParams,
 } from './curriculum-payload'

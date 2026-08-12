@@ -50,7 +50,7 @@ export class BatchUpsertScheduleUseCase {
 
         if (!teacherId) {
           throw new BadRequestException(
-            `Tidak ada guru yang mengajar mapel dengan ID ${row.subjectId}`,
+            `No teacher is assigned to the subject ${row.subjectId}`,
           );
         }
 

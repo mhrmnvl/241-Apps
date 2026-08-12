@@ -53,6 +53,11 @@ export interface TeachingAssignment {
   classroomId: string
   subjectId: string
   semesterId: string
+  /**
+   * Overrides the subject's own KKM for this class only. Null means follow the
+   * subject default, which is the normal case.
+   */
+  passingScore?: number | null
   teacher?: TeachingAssignmentTeacher
   classroom?: TeachingAssignmentClassroom
   subject?: TeachingAssignmentSubject
@@ -76,6 +81,8 @@ export interface TeachingAssignmentUpdatePayload {
   classroomId: string
   subjectId: string
   semesterId: string
+  /** Null clears the override so the subject's KKM applies again. */
+  passingScore?: number | null
 }
 
 /** A classroom that already had this assignment and was left untouched. */

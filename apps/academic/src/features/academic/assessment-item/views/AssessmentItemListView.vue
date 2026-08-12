@@ -24,7 +24,8 @@ import {
   DialogTitle,
 } from '@/ui/dialog'
 import { useRoleGuard } from '@/features/platform/auth'
-import { Plus, Filter } from 'lucide-vue-next'
+import { AssessmentWeightDialog } from '@/features/academic/assessment-weight'
+import { Plus, Filter, Scale } from 'lucide-vue-next'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 
@@ -70,10 +71,20 @@ const openForm = ref(false)
 const editingItem = ref<AssessmentItem | null>(null)
 const hasDisplayedData = ref(false)
 const isFilterDialogOpen = ref(false)
+const weightDialogOpen = ref(false)
 
 const isFilterReady = computed(() =>
   Boolean(selectedClassroomId.value && selectedSubjectId.value),
 )
+
+/** Names the class and subject whose weights the dialog is about to edit. */
+const weightContextLabel = computed(() => {
+  const classroom = classrooms.value.find(
+    (c) => c.id === selectedClassroomId.value,
+  )
+  const subject = subjects.value.find((s) => s.id === selectedSubjectId.value)
+  return [subject?.name, classroom?.code].filter(Boolean).join(' · ')
+})
 
 const canCreate = computed(() => can('assessment-items.create'))
 const canUpdate = computed(() => can('assessment-items.update'))
@@ -147,13 +158,23 @@ onMounted(async () => {
         <CardTitle class="text-2xl font-bold tracking-tight">
           Tugas & Nilai
         </CardTitle>
-        <Button
-          v-if="hasDisplayedData && teachingAssignment && canCreate"
-          @click="openAddForm"
-        >
-          <Plus class="size-4 mr-2" />
-          Tambah Tugas
-        </Button>
+        <div class="flex items-center gap-2">
+          <Button
+            v-if="teachingAssignment && canCreate"
+            variant="outline"
+            @click="weightDialogOpen = true"
+          >
+            <Scale class="size-4 mr-2" />
+            Bobot Penilaian
+          </Button>
+          <Button
+            v-if="hasDisplayedData && teachingAssignment && canCreate"
+            @click="openAddForm"
+          >
+            <Plus class="size-4 mr-2" />
+            Tambah Tugas
+          </Button>
+        </div>
       </CardHeader>
 
       <div class="space-y-6 p-6">
@@ -330,6 +351,13 @@ onMounted(async () => {
           :teaching-assignment-id="teachingAssignment?.id ?? null"
           :edit-data="editingItem"
           @save-success="fetchItems"
+        />
+
+        <AssessmentWeightDialog
+          v-if="teachingAssignment"
+          v-model:open="weightDialogOpen"
+          :teaching-assignment-id="teachingAssignment.id"
+          :context-label="weightContextLabel"
         />
       </div>
     </Card>

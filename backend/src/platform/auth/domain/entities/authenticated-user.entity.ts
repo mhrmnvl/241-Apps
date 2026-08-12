@@ -11,6 +11,12 @@ export interface UserWithProfileAndRoles {
   profile?: { id: string; userId: string; name: string } | null;
   userRoles?: {
     roleId: string;
-    role: { id: string; code: string; name: string };
+    role: {
+      id: string;
+      code: string;
+      name: string;
+      /** Present on the `findUserById` path, which GET /auth/me reads. */
+      rolePermissions?: { permission: { code: string } }[];
+    };
   }[];
 }

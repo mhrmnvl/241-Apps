@@ -4,9 +4,8 @@ import App from '@/app/App.vue'
 import router from '@/app/providers/router'
 import store from '@/app/providers/store'
 import type { Component } from 'vue'
-import { configureAuth } from '@/features/platform/auth'
+import { authService, configureAuth } from '@/features/platform/auth'
 import { useSettingsStore, useBranding } from '@/features/platform/settings'
-import { restoreSession } from '@/shared/utils/api'
 
 configureAuth({
   appKey: 'ADMISSION',
@@ -16,9 +15,10 @@ configureAuth({
   loginTitle: 'Masuk ke Portal PSB',
 })
 
-// Restore the session from the HttpOnly refresh cookie before mounting so the
-// auth gate reflects real session validity (no dashboard ⇄ login bounce).
-void restoreSession().finally(() => {
+// Restore the session before mounting so the auth gate reflects real session
+// validity (no dashboard ⇄ login bounce). The refresh cookie belongs to the
+// API host, so this also picks up a session opened in a sibling app.
+void authService.restoreSession().finally(() => {
   const app = createApp(App as Component).use(store)
 
   // Fire-and-forget: first paint uses configureAuth's hardcoded defaults

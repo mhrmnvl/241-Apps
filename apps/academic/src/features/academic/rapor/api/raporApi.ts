@@ -1,5 +1,8 @@
 import api from '@/shared/utils/api'
-import type { ApiPaginatedResponse } from '@/shared/types/api'
+import type {
+  ApiPaginatedResponse,
+  ApiSingleResponse,
+} from '@/shared/types/api'
 import type {
   BulkGeneratePayload,
   BulkGenerateResult,
@@ -24,7 +27,10 @@ export const raporApi = {
     return api.post<RaporData>('/rapors/generate', payload)
   },
   bulkGenerateRapor: (payload: BulkGeneratePayload) => {
-    return api.post<BulkGenerateResult>('/rapors/generate/bulk', payload)
+    return api.post<ApiSingleResponse<BulkGenerateResult>>(
+      '/rapors/generate/bulk',
+      payload,
+    )
   },
   updateRapor: (id: string, payload: UpdateRaporPayload) => {
     return api.patch<RaporData>(`/rapors/${id}`, payload)

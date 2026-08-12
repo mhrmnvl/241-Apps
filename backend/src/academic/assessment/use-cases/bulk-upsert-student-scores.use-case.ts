@@ -3,6 +3,7 @@ import { IAssessmentItemRepository } from '../domain/interfaces/assessment-item-
 import { IEnrollmentRepository } from '../../enrollment/domain/interfaces/enrollment-repository.interface.js';
 import { IStudentScoreRepository } from '../domain/interfaces/student-score-repository.interface.js';
 import { BulkUpsertStudentScoreDto } from '../dto/request/bulk-upsert-student-score.dto.js';
+import { assertScoreInRange } from '../services/assert-score-in-range.js';
 
 @Injectable()
 export class BulkUpsertStudentScoresUseCase {
@@ -39,6 +40,10 @@ export class BulkUpsertStudentScoresUseCase {
       throw new BadRequestException(
         'Some enrollments do not belong to the assessment item classroom',
       );
+    }
+
+    for (const record of dto.records) {
+      assertScoreInRange(record.score, assessmentItem.maxScore);
     }
 
     return this.studentScoreRepository.bulkUpsert(

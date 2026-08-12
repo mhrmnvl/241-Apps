@@ -164,7 +164,7 @@ describe('PortalHtmlController', () => {
     it('still returns the SPA shell with a 200', async () => {
       const { res, sent } = responseSpy();
 
-      await controller.serve(request('/berita/tidak-ada'), res);
+      await controller.serve(request('/berita/does-not-exist'), res);
 
       expect(sent.status).toBe(200);
       expect(sent.body as string).toContain('<div id="app">');
@@ -173,7 +173,7 @@ describe('PortalHtmlController', () => {
     it('falls back to the default tags rather than inventing any', async () => {
       const { res, sent } = responseSpy();
 
-      await controller.serve(request('/berita/tidak-ada'), res);
+      await controller.serve(request('/berita/does-not-exist'), res);
       const html = sent.body as string;
 
       expect(html).toContain('<title>Portal MTs Persis 241 Al-Ikhlash</title>');

@@ -13,7 +13,7 @@ export class CreateSchoolUnitTypeUseCase {
   async execute(dto: CreateSchoolUnitTypeDto) {
     const existing = await this.schoolUnitTypeRepository.findByCode(dto.code);
     if (existing) {
-      throw new ConflictException('Kode tipe sekolah sudah terdaftar');
+      throw new ConflictException('School unit type code already exists');
     }
 
     const schoolUnitType = await this.schoolUnitTypeRepository.create({

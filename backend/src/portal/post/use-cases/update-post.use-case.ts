@@ -33,7 +33,7 @@ export class UpdatePostUseCase {
   async execute(id: string, dto: UpdatePostDto) {
     const existing = await this.postRepository.findById(id);
     if (!existing || existing.deletedAt) {
-      throw new NotFoundException(`Konten dengan ID ${id} tidak ditemukan`);
+      throw new NotFoundException(`Konten dengan ID ${id} not found`);
     }
 
     assertTypeSpecificFields({
@@ -81,7 +81,7 @@ export class UpdatePostUseCase {
     const updated = await this.postRepository.update(id, dto.version, data);
     if (!updated) {
       throw new ConflictException(
-        'Konten ini sudah diubah oleh pengguna lain. Muat ulang sebelum menyimpan.',
+        'This content was changed by someone else. Reload before saving.',
       );
     }
 

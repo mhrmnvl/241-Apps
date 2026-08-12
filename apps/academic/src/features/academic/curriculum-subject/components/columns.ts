@@ -26,6 +26,12 @@ export const createCurriculumSubjectColumns = (
     meta: { align: 'center' },
     cell: ({ row }) => row.original.hoursPerWeek,
   },
+  {
+    id: 'passingScore',
+    header: 'KKM',
+    meta: { align: 'center' },
+    cell: ({ row }) => row.original.passingScore,
+  },
   ...(actions.showActions !== false
     ? [
         {

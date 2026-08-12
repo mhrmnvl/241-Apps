@@ -20,7 +20,7 @@ import {
 import { PortalCacheService } from '../../shared/services/portal-cache.service.js';
 
 const CONFLICT_MESSAGE =
-  'Halaman ini sudah diubah oleh pengguna lain. Muat ulang sebelum menyimpan.';
+  'This page was changed by someone else. Reload before saving.';
 
 @Injectable()
 export class GetPagesUseCase {
@@ -38,7 +38,7 @@ export class GetPageByIdUseCase {
   async execute(id: string) {
     const page = await this.pageRepository.findById(id);
     if (!page || page.deletedAt) {
-      throw new NotFoundException(`Halaman dengan ID ${id} tidak ditemukan`);
+      throw new NotFoundException(`Page ${id} not found`);
     }
     return page;
   }
@@ -58,7 +58,7 @@ export class CreatePageUseCase {
     const base = toSlug(dto.slug ?? dto.title);
     if (base.length === 0) {
       throw new BadRequestException(
-        'Judul tidak menghasilkan alamat yang valid. Gunakan minimal satu huruf atau angka.',
+        'The title does not produce a valid slug. Use at least one letter or digit.',
       );
     }
     const taken = await this.pageRepository.findTakenSlugs(base);
@@ -98,7 +98,7 @@ export class UpdatePageUseCase {
   async execute(id: string, dto: UpdatePageDto) {
     const existing = await this.pageRepository.findById(id);
     if (!existing || existing.deletedAt) {
-      throw new NotFoundException(`Halaman dengan ID ${id} tidak ditemukan`);
+      throw new NotFoundException(`Page ${id} not found`);
     }
 
     const data: UpdatePageInput = {};
@@ -147,14 +147,14 @@ export class PublishPageUseCase {
   async execute(id: string, dto: PageVersionDto) {
     const existing = await this.pageRepository.findById(id);
     if (!existing || existing.deletedAt) {
-      throw new NotFoundException(`Halaman dengan ID ${id} tidak ditemukan`);
+      throw new NotFoundException(`Page ${id} not found`);
     }
 
     // A page needs a title and a body and nothing else — it has no category,
     // no cover, and no feed placement to be missing (FR-052).
     if (!existing.title.trim() || !existing.body.trim()) {
       throw new BadRequestException(
-        'Halaman memerlukan judul dan isi sebelum dapat diterbitkan.',
+        'A page needs a title and a body before it can be published',
       );
     }
 
@@ -187,7 +187,7 @@ export class UnpublishPageUseCase {
   async execute(id: string, dto: PageVersionDto) {
     const existing = await this.pageRepository.findById(id);
     if (!existing || existing.deletedAt) {
-      throw new NotFoundException(`Halaman dengan ID ${id} tidak ditemukan`);
+      throw new NotFoundException(`Page ${id} not found`);
     }
 
     const updated = await this.pageRepository.unpublish(id, dto.version);
@@ -217,7 +217,7 @@ export class DeletePageUseCase {
   async execute(id: string): Promise<void> {
     const existing = await this.pageRepository.findById(id);
     if (!existing || existing.deletedAt) {
-      throw new NotFoundException(`Halaman dengan ID ${id} tidak ditemukan`);
+      throw new NotFoundException(`Page ${id} not found`);
     }
 
     await this.pageRepository.softDelete(id);

@@ -102,6 +102,6 @@ export class PostPublicController {
  */
 function assertPostType(segment: string): `${PostType}` {
   const type = postTypeFromPath(segment);
-  if (!type) throw new NotFoundException('Halaman tidak ditemukan');
+  if (!type) throw new NotFoundException('Page not found');
   return type;
 }

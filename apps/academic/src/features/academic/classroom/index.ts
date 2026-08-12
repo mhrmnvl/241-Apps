@@ -14,7 +14,7 @@ export { useClassroomStructure } from './composables/useClassroomStructure'
 export { classroomRoutes } from './routes'
 export type {
   AcademicYear,
-  Curricula,
+  Curriculum,
   Semester,
   Grade,
   ClassroomLevel,

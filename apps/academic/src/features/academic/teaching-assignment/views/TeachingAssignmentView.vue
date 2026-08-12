@@ -8,11 +8,15 @@ import TeachingAssignmentFormDialog from '../components/TeachingAssignmentFormDi
 import { createTeachingAssignmentColumns } from '../components/columns'
 import { useTeachingAssignment } from '../composables/useTeachingAssignment'
 import { DataTable } from '@/ui'
-import { AppCombobox } from '@/ui'
-import type { ComboboxOption } from '@/ui'
 import { Button } from '@/ui/button'
 import { Card, CardHeader, CardTitle } from '@/ui/card'
-import { Label } from '@/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/ui/select'
 import { useRoleGuard } from '@/features/platform/auth'
 import { Plus } from 'lucide-vue-next'
 import { computed, onMounted, ref, watch } from 'vue'
@@ -26,8 +30,6 @@ const {
   isSaving,
   formError,
   classrooms,
-  semesters,
-  selectedSemesterId,
   selectedClassroomId,
   fetchFilterOptions,
   fetchTeachingAssignments,
@@ -41,16 +43,7 @@ const isAddModalOpen = ref(false)
 const editingItem = ref<TeachingAssignment | null>(null)
 const { can } = useRoleGuard()
 
-const semesterFilterOptions = computed<ComboboxOption[]>(() => [
-  { value: '', label: 'Semua Semester' },
-  ...semesters.value.map((s) => ({
-    value: s.id,
-    label:
-      `${s.type?.name === 'ODD' ? 'Ganjil' : 'Genap'} ${s.academicYear?.name ?? ''}`.trim(),
-  })),
-])
-
-const classroomFilterOptions = computed<ComboboxOption[]>(() => [
+const classroomFilterOptions = computed(() => [
   { value: '', label: 'Semua Kelas' },
   ...classrooms.value.map((c) => ({
     value: c.id,
@@ -96,7 +89,7 @@ watch(isAddModalOpen, (isOpen) => {
   }
 })
 
-watch([selectedSemesterId, selectedClassroomId], () => {
+watch(selectedClassroomId, () => {
   currentPage.value = 1
   void fetchTeachingAssignments()
 })
@@ -128,32 +121,6 @@ onMounted(async () => {
       </CardHeader>
 
       <div class="p-6 space-y-6">
-        <div class="rounded-lg border bg-muted/20 p-4">
-          <div class="grid items-end gap-4 sm:grid-cols-2">
-            <div class="grid gap-2">
-              <Label>Semester</Label>
-              <AppCombobox
-                v-model="selectedSemesterId"
-                :options="semesterFilterOptions"
-                placeholder="Pilih Semester"
-                search-placeholder="Cari semester..."
-                empty-text="Semester tidak ditemukan."
-              />
-            </div>
-
-            <div class="grid gap-2">
-              <Label>Kelas</Label>
-              <AppCombobox
-                v-model="selectedClassroomId"
-                :options="classroomFilterOptions"
-                placeholder="Pilih Kelas"
-                search-placeholder="Cari kelas..."
-                empty-text="Kelas tidak ditemukan."
-              />
-            </div>
-          </div>
-        </div>
-
         <DataTable
           :columns="tableColumns"
           :data="items"
@@ -166,7 +133,24 @@ onMounted(async () => {
           filter-placeholder="Cari guru..."
           @update:page="setPage"
           @update:page-size="setPageSize"
-        />
+        >
+          <template #header-right>
+            <Select v-model="selectedClassroomId">
+              <SelectTrigger class="h-8 w-[160px] text-xs">
+                <SelectValue placeholder="Semua Kelas" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem
+                  v-for="opt in classroomFilterOptions"
+                  :key="opt.value"
+                  :value="opt.value"
+                >
+                  {{ opt.label }}
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </template>
+        </DataTable>
 
         <TeachingAssignmentFormDialog
           v-if="isAddModalOpen"

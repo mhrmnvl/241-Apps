@@ -5,7 +5,7 @@ import { academicYearRoutes } from '@/features/academic/academic-year'
 import { authRoutes } from '@/features/platform/auth'
 import { classroomRoutes } from '@/features/academic/classroom'
 import { gradeRoutes } from '@/features/academic/grade'
-import { curriculaRoutes } from '@/features/academic/curriculum'
+import { curriculumRoutes } from '@/features/academic/curriculum'
 import { curriculumSubjectRoutes } from '@/features/academic/curriculum-subject'
 import { dashboardRoutes } from '@/features/platform/dashboard'
 import { teacherRoutes } from '@/features/academic/teacher'
@@ -30,17 +30,6 @@ import { assessmentItemRoutes } from '@/features/academic/assessment-item'
 import { subjectRoutes } from '@/features/academic/subject'
 import { teachingAssignmentRoutes } from '@/features/academic/teaching-assignment'
 import { attendanceRoutes } from '@/features/academic/attendance'
-import { credentialRoutes } from '@/features/presence/credential'
-import { presenceDeviceRoutes } from '@/features/presence/device'
-import { employeeAttendanceRoutes } from '@/features/presence/employee-attendance'
-import { workPatternRoutes } from '@/features/presence/work-pattern'
-import { leaveRoutes } from '@/features/presence/leave'
-import { leaveTypeRoutes } from '@/features/presence/leave-type'
-import { kioskRoutes } from '@/features/presence/kiosk'
-import { salaryComponentRoutes } from '@/features/payroll/component'
-import { salaryAssignmentRoutes } from '@/features/payroll/assignment'
-import { payrollRunRoutes } from '@/features/payroll/run'
-import { payslipRoutes } from '@/features/payroll/payslip'
 import { timeSlotRoutes } from '@/features/academic/time-slot'
 import { raporRoutes } from '@/features/academic/rapor/routes'
 import { announcementRoutes } from '@/features/academic/announcement'
@@ -69,10 +58,6 @@ const router = createRouter({
       redirect: '/dashboard',
     },
     ...authRoutes,
-    // Unattended gate terminal: no app shell and no user session — it
-    // authenticates as a device (research R7), so it must stay outside
-    // AppLayout and outside the auth guard.
-    ...kioskRoutes,
     {
       path: '/',
       component: () => import('@/layouts/AppLayout.vue'),
@@ -87,16 +72,6 @@ const router = createRouter({
         ...subjectRoutes,
         ...teachingAssignmentRoutes,
         ...attendanceRoutes,
-        ...credentialRoutes,
-        ...presenceDeviceRoutes,
-        ...employeeAttendanceRoutes,
-        ...workPatternRoutes,
-        ...leaveRoutes,
-        ...leaveTypeRoutes,
-        ...salaryComponentRoutes,
-        ...salaryAssignmentRoutes,
-        ...payrollRunRoutes,
-        ...payslipRoutes,
         ...timeSlotRoutes,
         ...lessonRoutes,
         ...scheduleRoutes,
@@ -104,7 +79,7 @@ const router = createRouter({
         ...eventCalendarRoutes,
         ...academicYearRoutes,
         ...semesterRoutes,
-        ...curriculaRoutes,
+        ...curriculumRoutes,
         ...curriculumSubjectRoutes,
         ...socialMediaRoutes,
         ...classroomRoutes,

@@ -95,8 +95,16 @@ export const raporService = {
       })
       toast.promise(promise, {
         loading: 'Sedang men-generate semua rapor...',
-        success: (res: { data: BulkGenerateResult }) =>
-          `Berhasil men-generate ${res.data.generated} rapor dari ${res.data.totalStudents} siswa.`,
+        // The skipped count is named rather than folded into the total: those
+        // rapor were left alone because they are already terbit, and a teacher
+        // who does not see that will wonder why the numbers do not match.
+        success: (res: { data: { data?: BulkGenerateResult } }) => {
+          const result = res.data?.data
+          const base = `Berhasil men-generate ${result?.generated ?? 0} rapor dari ${result?.total ?? 0} siswa.`
+          return result?.skipped
+            ? `${base} ${result.skipped} dilewati karena sudah terbit.`
+            : base
+        },
         error: (err: unknown) =>
           getIndonesianErrorMessage(
             err,

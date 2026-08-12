@@ -4,9 +4,8 @@ import App from '@/app/App.vue'
 import router from '@/app/providers/router'
 import store from '@/app/providers/store'
 import type { Component } from 'vue'
-import { configureAuth } from '@/features/platform/auth'
+import { authService, configureAuth } from '@/features/platform/auth'
 import { useSettingsStore, useBranding } from '@/features/platform/settings'
-import { restoreSession } from '@/shared/utils/api'
 
 // The auth feature in @241/platform is brand-neutral by contract — configured
 // per app here, never forked.
@@ -20,7 +19,7 @@ configureAuth({
 
 // Restore the session from the HttpOnly refresh cookie before mounting so the
 // auth gate reflects real session validity (no shell ⇄ login bounce).
-void restoreSession().finally(() => {
+void authService.restoreSession().finally(() => {
   const app = createApp(App as Component).use(store)
 
   // Fire-and-forget: first paint uses configureAuth's defaults above; this

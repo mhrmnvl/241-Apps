@@ -3,6 +3,7 @@ export { authApi } from './api/authApi'
 export { accountApi } from './api/accountApi'
 export { authService } from './services/authService'
 export { authSessionService } from './services/authSessionService'
+export { authIdentityService } from './services/authIdentityService'
 export { authProfileService } from './services/authProfileService'
 export { accountService } from './services/accountService'
 export { useAuthStore } from './stores/authStore'
@@ -18,6 +19,7 @@ export type {
   LoginResponse,
   LogoutResponse,
   RefreshTokenResponse,
+  SessionIdentity,
   LoginPayload,
   ChangePasswordPayload,
   AuthChangePasswordPayload,

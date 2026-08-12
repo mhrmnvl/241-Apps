@@ -16,7 +16,7 @@ export class DeleteStatusUseCase {
     }
     if (status.systemKey) {
       throw new BadRequestException(
-        `Status "${status.name}" berperan sebagai "${status.systemKey}" dalam alur pinjam-meminjam dan tidak dapat dihapus. Lepaskan peran sistemnya terlebih dahulu.`,
+        `Status "${status.name}" fills the "${status.systemKey}" role in the loan workflow and cannot be deleted. Release its system role first.`,
       );
     }
     return this.statusRepository.delete(id);

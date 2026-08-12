@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository overview
 
-pnpm monorepo for the information system of MTs Persis 241 Al-Ikhlash: four Vue 3
+pnpm monorepo for the information system of MTs Persis 241 Al-Ikhlash: five Vue 3
 frontends sharing code via workspace packages, plus one NestJS + Prisma backend, all
 in a single workspace/git repo.
 
@@ -14,6 +14,7 @@ in a single workspace/git repo.
 | `apps/inventory` | `inventory-web` | SIMAS 241 — asset management (assets, circulation, approval) |
 | `apps/admission` | `admission-web` | Admission app |
 | `apps/portal` | `portal-web` | Portal 241 — the school's public website plus the management area for its content (see ADR-0005) |
+| `apps/presence` | `presence-web` | SIPRES 241 — gate presence, leave, and payroll (see ADR-0009) |
 | `packages/ui` | `@241/ui` | shadcn-vue components + `cn()` util, shared by all apps |
 | `packages/shared` | `@241/shared` | Composables, utils, types, config — cross-app |
 | `packages/master-data` | `@241/master-data` | Reference-data CRUD engine (list view, form dialog, schema/column generation) driven by a per-entity `config.ts` — see ADR-0001 |
@@ -38,6 +39,7 @@ pnpm dev:academic      # http://localhost:5173
 pnpm dev:inventory
 pnpm dev:admission
 pnpm dev:portal        # http://localhost:5176
+pnpm dev:presence
 pnpm --filter backend dev   # nest start --watch, http://localhost:3000
 ```
 
@@ -66,7 +68,8 @@ pnpm format:check     # Prettier check, all frontend apps
 > runs jest through its own filter. Packages with no `test` script are skipped
 > (`@241/ui` has none).
 
-Per-app (substitute `academic-web` / `inventory-web` / `admission-web` / `portal-web`):
+Per-app (substitute `academic-web` / `inventory-web` / `admission-web` / `portal-web` /
+`presence-web`):
 
 ```bash
 pnpm --filter inventory-web dev
@@ -145,6 +148,11 @@ Boundary rules:
   never the reverse. `@241/master-data` depends on `@241/ui` + `@241/shared` only —
   it must never import `@241/platform` (ADR-0001: that cycle is why it is its own
   package).
+- **No app imports another app.** Where one needs another's data it calls the HTTP
+  API and declares its own narrow read models. `presence-web`'s `features/lookup` is
+  the reference: five read-only calls into academic's endpoints, typed to just the
+  fields it uses. Nothing outside `lookup/` may reach academic by another path
+  (ADR-0009).
 
 Path aliases (see `apps/*/vite.config.ts` and `tsconfig.app.json`):
 
@@ -169,6 +177,26 @@ configureAuth({
   loginTitle: 'Masuk ke SIMAS',
 })
 ```
+
+### One session, five apps
+
+The refresh cookie is set by the **backend**, on the API host — not by any
+frontend — so all five apps share one session (ADR-0010). Signing in through
+any of them signs in to all; login pages stay per-app and are simply never
+reached again. Three rules follow:
+
+- **`GET /auth/me` is the only source of "who is signed in"** — identity, roles,
+  and permissions. Both signing in and restoring a session go through
+  `authIdentityService.fetchIdentity()`, so they cannot disagree. Do not read
+  authorization from `/profiles/me`: that is the profile page's six-level graph,
+  and it is fetched after mount for display data only.
+- **`localStorage['241_auth_user']` is a per-origin cache, never the session.**
+  The key is declared once, in `@241/shared/constants/storage`. An app whose
+  cache is empty re-derives it from the cookie rather than showing a login form.
+- **Every frontend must share a registrable domain with the API.** The cookie is
+  `sameSite: 'strict'`, so a frontend on a foreign domain gets no cookie and
+  therefore no login at all — and this cannot reproduce locally, where every app
+  is `localhost`. Stated in each `apps/*/.env.example`.
 
 ### Tech stack
 
@@ -224,7 +252,9 @@ adding to the flat structure.
 
 `presence/` is gate presence — one row per person per day, keyed on `userId`, fed
 by a QR scan at the gate. It is **not** `academic/attendance`, which stays per-lesson
-and is untouched by it (ADR-0007). Three things there are load-bearing:
+and is untouched by it (ADR-0007). Both `presence/` and `payroll/` are served to
+`presence-web`, not `academic-web` (ADR-0009); the split is frontend-only, so these
+modules stay here beside the domains they read. Three things there are load-bearing:
 
 - **Credential validity defines a person's expected days.** `NOT_EXPECTED` has three
   distinct causes — a non-working weekday, a holiday, and a date outside the window in
@@ -296,6 +326,25 @@ Core rules from `NESTJS-RULES.md` (enforced by convention, not by lint):
   `{ statusCode, message, data, meta? }` — there is no `success` field. Repositories
   return `{ data, total, page, limit }` and the interceptor folds it into
   `data` + `meta` (see `core/interceptors/response.interceptor.ts`).
+- **The backend is written in English.** Exception and validation messages,
+  Swagger summaries and descriptions, log lines, identifiers, and comments — all
+  English. Indonesian belongs to the frontend, which owns presentation and can
+  translate an English code or message into whatever the screen should say. This
+  is also why field names are English: `passingScore`, not `kkm`.
+
+  Three things are exempt, on one principle — text that leaves the system as the
+  final thing a person reads, with no frontend in between to translate it:
+
+  - **Rendered documents**: `report-card-pdf.template.ts` prints the rapor handed
+    to a parent, and the student import/export spreadsheet's column headers are
+    the contract with a file the TU already fills in.
+  - **Messages delivered to a person**: password-reset email bodies, and the
+    admission notification titles and bodies, which are stored and displayed
+    verbatim to the applicant.
+  - **Seed data** under `prisma/seeds/`: subject names, positions, and holidays
+    are real school data, not interface text.
+
+  Everything else that reads as Indonesian in `backend/src/` is a bug.
 
 Import style: backend uses NodeNext ESM — relative imports include the `.js`
 extension (e.g. `from './app.module.js'`) even though the source is `.ts`. A

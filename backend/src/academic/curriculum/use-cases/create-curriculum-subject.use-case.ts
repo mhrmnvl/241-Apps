@@ -26,6 +26,7 @@ export class CreateCurriculumSubjectUseCase {
     if (softDeleted) {
       return this.curriculumSubjectRepository.restore(softDeleted.id, {
         hoursPerWeek: dto.hoursPerWeek,
+        passingScore: dto.passingScore,
       });
     }
 
@@ -33,6 +34,7 @@ export class CreateCurriculumSubjectUseCase {
       curriculumId: dto.curriculumId,
       subjectId: dto.subjectId,
       hoursPerWeek: dto.hoursPerWeek,
+      passingScore: dto.passingScore,
     });
   }
 }

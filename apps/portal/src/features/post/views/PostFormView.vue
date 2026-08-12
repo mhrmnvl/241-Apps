@@ -2,6 +2,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { categoryService } from '@/features/taxonomy'
+import { useDateTimeParts } from '@/composables/useDateTimeParts'
 import { Button } from '@/ui/button'
 import {
   Card,
@@ -78,37 +79,21 @@ const categories = ref<PostCategoryRef[]>([])
 const scheduledAt = ref('')
 const showSchedule = ref(false)
 
-const expiresDate = computed({
-  get: () => form.value.expiresAt.split('T')[0] ?? '',
-  set: (date) => {
-    const time = form.value.expiresAt.split('T')[1] || '23:59'
-    form.value.expiresAt = date ? `${date}T${time}` : ''
+const { date: expiresDate, time: expiresTimeVal } = useDateTimeParts(
+  () => form.value.expiresAt,
+  (value) => {
+    form.value.expiresAt = value
   },
-})
+  '23:59',
+)
 
-const expiresTimeVal = computed({
-  get: () => form.value.expiresAt.split('T')[1] || '23:59',
-  set: (time) => {
-    const date = form.value.expiresAt.split('T')[0] || ''
-    if (date) form.value.expiresAt = `${date}T${time}`
+const { date: scheduledDate, time: scheduledTimeVal } = useDateTimeParts(
+  () => scheduledAt.value,
+  (value) => {
+    scheduledAt.value = value
   },
-})
-
-const scheduledDate = computed({
-  get: () => scheduledAt.value.split('T')[0] ?? '',
-  set: (date) => {
-    const time = scheduledAt.value.split('T')[1] || '08:00'
-    scheduledAt.value = date ? `${date}T${time}` : ''
-  },
-})
-
-const scheduledTimeVal = computed({
-  get: () => scheduledAt.value.split('T')[1] || '08:00',
-  set: (time) => {
-    const date = scheduledAt.value.split('T')[0] || ''
-    if (date) scheduledAt.value = `${date}T${time}`
-  },
-})
+  '08:00',
+)
 
 const tagInput = ref('')
 const tagList = computed(() =>

@@ -1,10 +1,10 @@
-﻿import type { RouteRecordRaw } from 'vue-router'
+import type { RouteRecordRaw } from 'vue-router'
 
-export const curriculaRoutes: RouteRecordRaw[] = [
+export const curriculumRoutes: RouteRecordRaw[] = [
   {
     path: '/academic/curriculum',
     name: 'curricula',
-    component: () => import('./views/CurriculaView.vue'),
+    component: () => import('./views/CurriculumView.vue'),
     meta: {
       requiresAuth: true,
       requiredPermission: 'curricula.read',

@@ -42,7 +42,7 @@ export class GetPublicAgendaBySlugUseCase {
     // address, so a link shared before it happened still works afterwards.
     const entry = await this.agendaRepository.findPublicBySlug(slug);
     if (!entry) {
-      throw new NotFoundException('Halaman tidak ditemukan');
+      throw new NotFoundException('Page not found');
     }
     return toPublicAgenda(entry);
   }

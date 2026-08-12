@@ -21,7 +21,7 @@ export class VerifyApplicationUseCase {
         applicationId,
       );
     if (!application) {
-      throw new NotFoundException('Data pendaftaran tidak ditemukan');
+      throw new NotFoundException('Application not found');
     }
 
     assertTransition(application.status, 'VERIFIED');
@@ -36,16 +36,14 @@ export class VerifyApplicationUseCase {
     });
     if (unapproved.length > 0) {
       throw new ConflictException(
-        `Semua berkas wajib harus disetujui dahulu: ${unapproved
+        `All required documents must be approved first: ${unapproved
           .map((t) => t.name)
           .join(', ')}`,
       );
     }
 
     if (application.payment?.status !== 'VERIFIED') {
-      throw new ConflictException(
-        'Pembayaran harus diverifikasi terlebih dahulu',
-      );
+      throw new ConflictException('The payment must be verified first');
     }
 
     const updated = await this.admissionApplicationRepository.setVerified(

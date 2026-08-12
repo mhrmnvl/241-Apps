@@ -21,7 +21,7 @@ export class ChangePasswordUseCase {
   ): Promise<void> {
     const user = await this.authRepository.findUserById(userId);
     if (!user) {
-      throw new NotFoundException('Pengguna tidak ditemukan');
+      throw new NotFoundException('User not found');
     }
 
     const isCurrentValid = await this.passwordManagerService.validatePassword(
@@ -34,7 +34,7 @@ export class ChangePasswordUseCase {
 
     if (dto.currentPassword === dto.newPassword) {
       throw new BadRequestException(
-        'Password baru tidak boleh sama dengan password saat ini',
+        'New password must differ from the current one',
       );
     }
 

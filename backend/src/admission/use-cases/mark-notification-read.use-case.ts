@@ -14,7 +14,7 @@ export class MarkNotificationReadUseCase {
         notificationId,
       );
     if (!notification) {
-      throw new NotFoundException('Notifikasi tidak ditemukan');
+      throw new NotFoundException('Notification not found');
     }
 
     return this.admissionApplicantRepository.markNotificationRead(

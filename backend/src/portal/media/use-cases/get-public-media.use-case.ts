@@ -35,12 +35,12 @@ export class GetPublicMediaUseCase {
     // 404, never 403. A 403 would confirm the file exists and is merely
     // withheld, which is a way to enumerate unpublished work by its images.
     if (!authorized) {
-      throw new NotFoundException('Berkas tidak ditemukan');
+      throw new NotFoundException('Document not found');
     }
 
     const file = await this.fileRepository.findById(fileId);
     if (!file) {
-      throw new NotFoundException('Berkas tidak ditemukan');
+      throw new NotFoundException('Document not found');
     }
 
     // The share-preview variant is derived from the original's key rather than

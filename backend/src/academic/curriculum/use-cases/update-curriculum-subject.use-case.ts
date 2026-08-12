@@ -42,6 +42,7 @@ export class UpdateCurriculumSubjectUseCase {
       curriculumId: dto.curriculumId,
       subjectId: dto.subjectId,
       hoursPerWeek: dto.hoursPerWeek,
+      passingScore: dto.passingScore,
     });
   }
 }

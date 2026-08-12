@@ -79,7 +79,7 @@ describe('EventController', () => {
     it('should delegate to CreateEventUseCase with dto and schoolUnitId', async () => {
       const dto: CreateEventDto = {
         title: 'Pekan Ilmiah',
-        description: 'Kegiatan pameran karya ilmiah siswa.',
+        description: 'Science fair for students.',
         startTime: '2024-03-05T08:00:00Z',
         endTime: '2024-03-05T10:00:00Z',
       };
