@@ -3,6 +3,7 @@ import { useTeachingAssignmentStore } from '../stores/teachingAssignmentStore'
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
 import { PAGINATION } from '@/shared/constants/pagination'
 import { toast } from 'vue-sonner'
+import { useReferenceList } from '@/features/platform/reference-data'
 import { classroomApi } from '@/features/academic/classroom'
 import { subjectApi } from '@/features/academic/subject'
 import { teacherApi } from '@/features/academic/teacher'
@@ -57,14 +58,29 @@ export const teachingAssignmentService = {
     try {
       // Subjects need a second round trip to resolve the active curriculum,
       // so they run alongside the two flat lists rather than after them.
-      const [classroomRes, teacherRes, subjects] = await Promise.all([
-        classroomApi.getClassrooms({ limit: PAGINATION.REFERENCE_LIMIT }),
-        teacherApi.getTeachers({ limit: PAGINATION.REFERENCE_LIMIT }),
+      //
+      // The two flat lists are cached for the session; the subjects are not.
+      // They are narrowed by whichever curriculum is active, so one key would
+      // hold one curriculum's answer and serve it to the next.
+      const cache = useReferenceList()
+      const [classrooms, teachers, subjects] = await Promise.all([
+        cache.read('classrooms', async () => {
+          const res = await classroomApi.getClassrooms({
+            limit: PAGINATION.REFERENCE_LIMIT,
+          })
+          return res.data?.data ?? []
+        }),
+        cache.read('teachers', async () => {
+          const res = await teacherApi.getTeachers({
+            limit: PAGINATION.REFERENCE_LIMIT,
+          })
+          return res.data?.data ?? []
+        }),
         fetchAssignableSubjects(),
       ])
-      store.classrooms = classroomRes.data?.data ?? []
+      store.classrooms = classrooms
       store.subjects = subjects
-      store.teachers = teacherRes.data?.data ?? []
+      store.teachers = teachers
     } catch (error: unknown) {
       toast.error(
         getIndonesianErrorMessage(error, 'Gagal memuat data referensi.'),

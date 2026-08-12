@@ -189,23 +189,28 @@ async function openAddStudentDialog() {
 }
 
 async function reloadData() {
-  await Promise.all([
-    fetchClassroomDetail(classroomId.value),
-    fetchClassrooms(),
-    fetchSemesters(),
-    fetchTeachers(),
-    fetchClassroomSupervisors(classroomId.value),
-    fetchAcademicYears(),
-  ])
+  // Only the enrolment and structure reads need a semester; the other five were
+  // waiting behind them for no reason. Resolving the semester first turns a
+  // full barrier into a single dependency — and since semesters are held for
+  // the session, every visit after the first starts with it already answered.
+  await fetchSemesters()
 
   const semId =
     semesters.value.find((s) => s.isActive)?.id ?? semesters.value[0]?.id ?? ''
-  if (semId) {
-    await Promise.all([
-      fetchClassroomEnrollments(classroomId.value, semId),
-      fetchClassroomStructure(classroomId.value, semId),
-    ])
-  }
+
+  await Promise.all([
+    fetchClassroomDetail(classroomId.value),
+    fetchClassrooms(),
+    fetchTeachers(),
+    fetchClassroomSupervisors(classroomId.value),
+    fetchAcademicYears(),
+    ...(semId
+      ? [
+          fetchClassroomEnrollments(classroomId.value, semId),
+          fetchClassroomStructure(classroomId.value, semId),
+        ]
+      : []),
+  ])
 }
 
 onMounted(async () => {

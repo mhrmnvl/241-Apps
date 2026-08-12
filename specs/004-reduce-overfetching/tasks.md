@@ -109,25 +109,25 @@ Monorepo: `backend/src/…` for the API, `apps/<app>/src/…` for the five front
 
 ### The store
 
-- [ ] T028 [US3] Create `packages/platform/src/features/reference-data/stores/referenceDataStore.ts` holding `CachedList` entries per [data-model.md](./data-model.md), with `key`, `items`, `fetchedAt` and `status`
-- [ ] T029 [US3] Implement read-through, single-flight and bounded staleness in `packages/platform/src/features/reference-data/composables/useReferenceList.ts` per [contracts/read-projections.md](./contracts/read-projections.md) C3
-- [ ] T030 [US3] Implement per-list expiry from the table in [data-model.md](./data-model.md), and invalidation on write
-- [ ] T031 [US3] Clear the store on sign-out by hooking `authService.logoutUser` in `packages/platform/src/features/auth/services/authService.ts`
-- [ ] T032 [US3] Export the composable and store from `packages/platform/src/features/reference-data/index.ts`
+- [X] T028 [US3] Create `packages/platform/src/features/reference-data/stores/referenceDataStore.ts` holding `CachedList` entries per [data-model.md](./data-model.md), with `key`, `items`, `fetchedAt` and `status`
+- [X] T029 [US3] Implement read-through, single-flight and bounded staleness in `packages/platform/src/features/reference-data/composables/useReferenceList.ts` per [contracts/read-projections.md](./contracts/read-projections.md) C3
+- [X] T030 [US3] Implement per-list expiry from the table in [data-model.md](./data-model.md), and invalidation on write
+- [X] T031 [US3] Clear the store on sign-out by hooking `authService.logoutUser` in `packages/platform/src/features/auth/services/authService.ts`
+- [X] T032 [US3] Export the composable and store from `packages/platform/src/features/reference-data/index.ts`
 
 ### Tests — this is new behaviour, so it is tested
 
-- [ ] T033 [P] [US3] Test in `packages/platform/src/features/reference-data/composables/useReferenceList.spec.ts` that a second read inside the expiry window issues no request
-- [ ] T034 [P] [US3] Test that two simultaneous reads of a cold list issue exactly one request
-- [ ] T035 [P] [US3] Test that a read after the expiry window issues a fresh request
-- [ ] T036 [P] [US3] Test that invalidating a list causes the next read to refetch, and that sign-out empties the store
+- [X] T033 [P] [US3] Test in `packages/platform/src/features/reference-data/composables/useReferenceList.spec.ts` that a second read inside the expiry window issues no request
+- [X] T034 [P] [US3] Test that two simultaneous reads of a cold list issue exactly one request
+- [X] T035 [P] [US3] Test that a read after the expiry window issues a fresh request
+- [X] T036 [P] [US3] Test that invalidating a list causes the next read to refetch, and that sign-out empties the store
 
 ### Adoption, one screen at a time
 
-- [ ] T037 [US3] Read academic years, semesters, classrooms and teachers through the cache in `apps/academic/src/features/academic/classroom/views/ClassroomManageView.vue`, and collapse its two sequential `Promise.all` blocks into one where the second does not depend on the first
-- [ ] T038 [P] [US3] Read the shared reference lists through the cache in `apps/academic/src/features/academic/teaching-assignment/views/TeachingAssignmentView.vue`
-- [ ] T039 [P] [US3] Read the shared reference lists through the cache in `apps/academic/src/features/academic/attendance/views/AttendanceView.vue`
-- [ ] T040 [P] [US3] Read the shared reference lists through the cache in `apps/academic/src/features/academic/rapor/views/RaporView.vue`
+- [X] T037 [US3] Read academic years, semesters, classrooms and teachers through the cache in `apps/academic/src/features/academic/classroom/views/ClassroomManageView.vue`, and collapse its two sequential `Promise.all` blocks into one where the second does not depend on the first
+- [X] T038 [P] [US3] Read the shared reference lists through the cache in `apps/academic/src/features/academic/teaching-assignment/views/TeachingAssignmentView.vue`
+- [X] T039 [P] [US3] Read the shared reference lists through the cache in `apps/academic/src/features/academic/attendance/views/AttendanceView.vue`
+- [X] T040 [P] [US3] Read the shared reference lists through the cache in `apps/academic/src/features/academic/rapor/views/RaporView.vue`
 
 **Checkpoint**: Navigating between four pages requests each shared list once.
 

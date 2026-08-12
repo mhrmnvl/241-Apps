@@ -9,6 +9,7 @@ import { useClassroomStore } from '../stores/classroomStore'
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
 import { PAGINATION } from '@/shared/constants/pagination'
 import { toast } from 'vue-sonner'
+import { useReferenceList } from '@/features/platform/reference-data'
 
 export const classroomService = {
   fetchClassrooms: async (params?: ClassroomQueryParams) => {
@@ -95,6 +96,8 @@ export const classroomService = {
       } else {
         await classroomApi.createClassroom(payload)
       }
+      // The list this screen picks from is now out of date.
+      useReferenceList().invalidate('classrooms')
       return { success: true }
     } catch (error: unknown) {
       store.formError = getIndonesianErrorMessage(
@@ -111,6 +114,8 @@ export const classroomService = {
     try {
       await classroomApi.deleteClassroom(id)
       toast.success('Kelas berhasil dihapus.')
+      // The list this screen picks from is now out of date.
+      useReferenceList().invalidate('classrooms')
       return { success: true }
     } catch (error: unknown) {
       toast.error(getIndonesianErrorMessage(error, 'Gagal menghapus kelas.'))

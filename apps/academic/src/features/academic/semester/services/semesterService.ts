@@ -5,6 +5,7 @@ import { useSemesterStore } from '../stores/semesterStore'
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
 import { PAGINATION } from '@/shared/constants/pagination'
 import { toast } from 'vue-sonner'
+import { useReferenceList } from '@/features/platform/reference-data'
 import type {
   GenerateRecommendationPayload,
   PromotionPayload,
@@ -69,6 +70,8 @@ export const semesterService = {
       } else {
         await semesterApi.createSemester(payload)
       }
+      // The list this screen picks from is now out of date.
+      useReferenceList().invalidate('semesters')
       return { success: true }
     } catch (error: unknown) {
       store.formError = getIndonesianErrorMessage(
@@ -85,6 +88,8 @@ export const semesterService = {
     try {
       await semesterApi.deleteSemester(id)
       toast.success('Semester berhasil dihapus.')
+      // The list this screen picks from is now out of date.
+      useReferenceList().invalidate('semesters')
       return { success: true }
     } catch (error: unknown) {
       const msg = getIndonesianErrorMessage(error, 'Gagal menghapus semester.')
@@ -117,6 +122,8 @@ export const semesterService = {
     try {
       await semesterApi.activateSemester(id)
       toast.success('Semester berhasil diaktifkan.')
+      // The list this screen picks from is now out of date.
+      useReferenceList().invalidate('semesters')
       return { success: true }
     } catch (error: unknown) {
       const msg = getIndonesianErrorMessage(
@@ -132,6 +139,8 @@ export const semesterService = {
     try {
       await semesterApi.deactivateSemester(id)
       toast.success('Semester berhasil dinonaktifkan.')
+      // The list this screen picks from is now out of date.
+      useReferenceList().invalidate('semesters')
       return { success: true }
     } catch (error: unknown) {
       const msg = getIndonesianErrorMessage(

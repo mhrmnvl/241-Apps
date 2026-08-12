@@ -3,6 +3,7 @@ import { useRaporStore } from '../stores/raporStore'
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
 import { PAGINATION } from '@/shared/constants/pagination'
 import { toast } from 'vue-sonner'
+import { useReferenceList } from '@/features/platform/reference-data'
 import type {
   BulkGenerateResult,
   GenerateRaporPayload,
@@ -19,12 +20,23 @@ export const raporService = {
   fetchFilterOptions: async () => {
     const store = useRaporStore()
     try {
-      const [classroomRes, semesterRes] = await Promise.all([
-        classroomApi.getClassrooms({ limit: PAGINATION.REFERENCE_LIMIT }),
-        semesterApi.getSemesters({ limit: PAGINATION.REFERENCE_LIMIT }),
+      const cache = useReferenceList()
+      const [classrooms, semesters] = await Promise.all([
+        cache.read('classrooms', async () => {
+          const res = await classroomApi.getClassrooms({
+            limit: PAGINATION.REFERENCE_LIMIT,
+          })
+          return res.data?.data ?? []
+        }),
+        cache.read('semesters', async () => {
+          const res = await semesterApi.getSemesters({
+            limit: PAGINATION.REFERENCE_LIMIT,
+          })
+          return res.data?.data ?? []
+        }),
       ])
-      store.classrooms = classroomRes.data?.data ?? []
-      store.semesters = semesterRes.data?.data ?? []
+      store.classrooms = classrooms
+      store.semesters = semesters
     } catch (error: unknown) {
       toast.error(getIndonesianErrorMessage(error, 'Gagal memuat opsi filter.'))
     }

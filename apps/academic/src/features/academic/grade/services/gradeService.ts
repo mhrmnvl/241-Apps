@@ -3,6 +3,7 @@ import { useGradeStore } from '../stores/gradeStore'
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
 import { toast } from 'vue-sonner'
 import type { GradeSavePayload, GradeQueryParams } from '../types'
+import { useReferenceList } from '@/features/platform/reference-data'
 
 export const gradeService = {
   fetchGrades: async (params?: GradeQueryParams) => {
@@ -38,6 +39,8 @@ export const gradeService = {
       } else {
         await gradeApi.createGrade(payload)
       }
+      // The list this screen picks from is now out of date.
+      useReferenceList().invalidate('grades')
       return { success: true }
     } catch (error: unknown) {
       store.formError = getIndonesianErrorMessage(
@@ -54,6 +57,8 @@ export const gradeService = {
     try {
       await gradeApi.deleteGrade(id)
       toast.success('Tingkat kelas berhasil dihapus.')
+      // The list this screen picks from is now out of date.
+      useReferenceList().invalidate('grades')
       return { success: true }
     } catch (error: unknown) {
       toast.error(
