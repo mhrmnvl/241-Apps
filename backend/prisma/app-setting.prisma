@@ -3,6 +3,7 @@ enum AppKey {
   INVENTORY
   ADMISSION
   PORTAL
+  PRESENCE
 }
 
 model AppSetting {

@@ -1,0 +1,52 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build outputs
+dist/
+build/
+.next/
+
+# Turbo
+.turbo/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Testing
+coverage/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor & Tools
+.vscode/
+.idea/
+.agents/
+
+# Prisma
+prisma/migrations/**/migration_lock.toml
+
+# Uploads / temp
+uploads/
+
+# Vercel
+.vercel/
+
+# TypeScript
+*.tsbuildinfo
+
+# Linter
+.eslintcache
+
+# Docs (temporary)
+docs/

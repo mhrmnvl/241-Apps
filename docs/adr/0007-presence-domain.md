@@ -1,5 +1,7 @@
 # A `presence/` domain keyed on the user, not on the student or the teacher
 
+> **Partially superseded by [ADR-0009](0009-presence-web-fifth-app.md).** The frontend now *does* live in a fifth application, `presence-web`, for a reason outside this ADR's scope. Everything below about the backend domain — keying on `userId`, the acyclic graph, credential validity as the expectation window — is current and unchanged.
+
 **Context**: the school needs QR-card gate attendance for **both** students and employees, plus employee working patterns, leave, and payroll. Student per-lesson attendance already exists in `academic/attendance`, is FK-bound to `StudentEnrollment` and `Schedule`, and feeds the report card. Employee attendance does not exist at all — no table, no code.
 
 The requester's original question was whether employee attendance should become a separate application or live in `academic`. That question resolves into two decisions, and only the second is interesting.

@@ -38,4 +38,11 @@ export const DEFAULT_APP_SETTINGS: Record<AppKey, DefaultAppSettingValues> = {
     metaDescription:
       'Berita, artikel, agenda, dan informasi resmi MTs Persis 241 Al-Ikhlash',
   },
+  PRESENCE: {
+    appTitle: 'SIPRES 241',
+    appSubtitle: 'Sistem Informasi Presensi & Penggajian',
+    loginTitle: 'Masuk ke SIPRES',
+    metaDescription:
+      'Sistem Informasi Presensi & Penggajian MTs Persis 241 Al-Ikhlash',
+  },
 };
