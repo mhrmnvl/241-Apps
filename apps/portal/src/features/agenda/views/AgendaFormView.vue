@@ -17,6 +17,7 @@ import { Label } from '@/ui/label'
 import { Separator } from '@/ui/separator'
 import { AlertTriangle, EyeOff, Save, Send } from 'lucide-vue-next'
 import { CONTENT_STATUS_LABELS, RichTextEditor } from '@/features/post'
+import { useDateTimeParts } from '@/composables/useDateTimeParts'
 import { agendaService } from '../services/agendaService'
 import { useAgendaStore } from '../stores/agendaStore'
 
@@ -52,37 +53,21 @@ const rangeError = computed(() => {
     : null
 })
 
-const startDate = computed({
-  get: () => form.value.startTime.split('T')[0] ?? '',
-  set: (date) => {
-    const time = form.value.startTime.split('T')[1] || '08:00'
-    form.value.startTime = date ? `${date}T${time}` : ''
+const { date: startDate, time: startTimeVal } = useDateTimeParts(
+  () => form.value.startTime,
+  (value) => {
+    form.value.startTime = value
   },
-})
+  '08:00',
+)
 
-const startTimeVal = computed({
-  get: () => form.value.startTime.split('T')[1] || '08:00',
-  set: (time) => {
-    const date = form.value.startTime.split('T')[0] || ''
-    if (date) form.value.startTime = `${date}T${time}`
+const { date: endDate, time: endTimeVal } = useDateTimeParts(
+  () => form.value.endTime,
+  (value) => {
+    form.value.endTime = value
   },
-})
-
-const endDate = computed({
-  get: () => form.value.endTime.split('T')[0] ?? '',
-  set: (date) => {
-    const time = form.value.endTime.split('T')[1] || '12:00'
-    form.value.endTime = date ? `${date}T${time}` : ''
-  },
-})
-
-const endTimeVal = computed({
-  get: () => form.value.endTime.split('T')[1] || '12:00',
-  set: (time) => {
-    const date = form.value.endTime.split('T')[0] || ''
-    if (date) form.value.endTime = `${date}T${time}`
-  },
-})
+  '12:00',
+)
 
 const canSave = computed(
   () =>
