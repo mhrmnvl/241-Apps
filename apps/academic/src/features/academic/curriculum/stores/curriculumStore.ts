@@ -1,9 +1,9 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import type { AcademicYearRef, Curricula } from '../types'
+import type { AcademicYearRef, Curriculum } from '../types'
 
-export const useCurriculaStore = defineStore('curricula', () => {
-  const curricula = ref<Curricula[]>([])
+export const useCurriculumStore = defineStore('curricula', () => {
+  const curricula = ref<Curriculum[]>([])
   const academicYears = ref<AcademicYearRef[]>([])
   const totalCurricula = ref(0)
   const loading = ref(false)

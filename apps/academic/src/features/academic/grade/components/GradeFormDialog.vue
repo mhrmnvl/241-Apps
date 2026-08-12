@@ -32,9 +32,9 @@ import {
   FormMessage,
 } from '@/ui/form'
 import { academicYearApi } from '@/features/academic/academic-year'
-import { curriculaApi } from '@/features/academic/curriculum'
+import { curriculumApi } from '@/features/academic/curriculum'
 import type { AcademicYear } from '@/features/academic/academic-year'
-import type { Curricula } from '@/features/academic/curriculum'
+import type { Curriculum } from '@/features/academic/curriculum'
 import { PAGINATION } from '@/shared/constants/pagination'
 
 const props = defineProps<{
@@ -63,7 +63,7 @@ const levelForm = useGradeForm({
 })
 
 const academicYears = ref<AcademicYear[]>([])
-const curricula = ref<Curricula[]>([])
+const curricula = ref<Curriculum[]>([])
 const assignments = ref<GradeAcademicYear[]>([])
 const loadingCurriculum = ref(false)
 const savingCurriculum = ref<Record<string, boolean>>({})
@@ -96,7 +96,7 @@ async function loadCurriculumData() {
   try {
     const [ayRes, curRes, assRes] = await Promise.all([
       academicYearApi.getAcademicYears({ limit: PAGINATION.REFERENCE_LIMIT }),
-      curriculaApi.getCurricula({ limit: PAGINATION.REFERENCE_LIMIT }),
+      curriculumApi.getCurricula({ limit: PAGINATION.REFERENCE_LIMIT }),
       gradeAcademicYearService.getAssignments(),
     ])
     academicYears.value = ayRes.data?.data ?? []

@@ -6,10 +6,6 @@ export { useSubjectForm } from './composables/useSubjectForm'
 export { useSubjectDelete } from './composables/useSubjectDelete'
 export { subjectRoutes } from './routes'
 export type {
-  SubjectTeacherProfile,
-  SubjectTeacherUser,
-  SubjectClassroom,
-  SubjectTeachingAssignment,
   Subject,
   SubjectSavePayload,
   SubjectQueryParams,

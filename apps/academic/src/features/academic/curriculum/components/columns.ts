@@ -3,11 +3,11 @@ import type { ColumnDef } from '@tanstack/vue-table'
 import { ActionCell } from '@/ui'
 import { Badge } from '@/ui/badge'
 import { formatEntityName } from '@/shared/utils/utils'
-import type { Curricula, CurriculaColumnActions } from '../types'
+import type { Curriculum, CurriculumColumnActions } from '../types'
 
-export const createCurriculaColumns = (
-  actions: CurriculaColumnActions,
-): ColumnDef<Curricula>[] => [
+export const createCurriculumColumns = (
+  actions: CurriculumColumnActions,
+): ColumnDef<Curriculum>[] => [
   {
     id: 'name',
     header: 'Nama Kurikulum',
@@ -41,7 +41,7 @@ export const createCurriculaColumns = (
         {
           id: 'actions',
           header: 'Opsi',
-          cell: ({ row }: { row: { original: Curricula } }) => {
+          cell: ({ row }: { row: { original: Curriculum } }) => {
             const curriculum = row.original
             return h(ActionCell, {
               viewLabel: 'Mata Pelajaran',

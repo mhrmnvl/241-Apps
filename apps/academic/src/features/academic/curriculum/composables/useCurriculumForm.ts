@@ -3,18 +3,22 @@ import { storeToRefs } from 'pinia'
 import { toTypedSchema } from '@vee-validate/zod'
 import { useForm } from 'vee-validate'
 import * as z from 'zod'
-import { curriculaService } from '../services/curriculaService'
-import { useCurriculaStore } from '../stores/curriculaStore'
+import { curriculumService } from '../services/curriculumService'
+import { useCurriculumStore } from '../stores/curriculumStore'
 import { formatEntityName } from '@/shared/utils/utils'
-import type { AcademicYearRef, Curricula, CurriculaSavePayload } from '../types'
+import type {
+  AcademicYearRef,
+  Curriculum,
+  CurriculumSavePayload,
+} from '../types'
 
-export function useCurriculaForm(options?: {
+export function useCurriculumForm(options?: {
   academicYears: () => AcademicYearRef[]
-  editData?: () => Curricula | null
+  editData?: () => Curriculum | null
   isOpen?: () => boolean
   onSuccess?: () => void | Promise<void>
 }) {
-  const store = useCurriculaStore()
+  const store = useCurriculumStore()
   const { isSaving, formError } = storeToRefs(store)
   const showConfirmAlert = ref(false)
 
@@ -102,12 +106,12 @@ export function useCurriculaForm(options?: {
     isActive: boolean
   }) {
     const editItem = options?.editData?.()
-    const payload: CurriculaSavePayload = {
+    const payload: CurriculumSavePayload = {
       academicYearId: values.academicYearId,
       name: values.name.trim(),
       isActive: values.isActive,
     }
-    const result = await curriculaService.saveCurriculum(
+    const result = await curriculumService.saveCurriculum(
       editItem?.id ?? null,
       payload,
     )

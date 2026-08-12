@@ -20,6 +20,15 @@ export interface CurriculumSubject {
   curriculumId: string
   subjectId: string
   hoursPerWeek: number
+  /**
+   * Minimum pass mark, shown as "KKM".
+   *
+   * It lives on the curriculum rather than on the subject so retuning it never
+   * disturbs the subject catalogue, and so two curricula can hold the same
+   * subject to different standards. A teacher may override it for one class
+   * they teach, on Penugasan Mengajar.
+   */
+  passingScore: number
   curriculum?: CurriculumSubjectCurriculum
   subject?: CurriculumSubjectSubject
 }
@@ -28,6 +37,7 @@ export interface CurriculumSubjectSavePayload {
   curriculumId: string
   subjectId: string
   hoursPerWeek?: number
+  passingScore?: number
 }
 
 export interface CurriculumSubjectQueryParams {

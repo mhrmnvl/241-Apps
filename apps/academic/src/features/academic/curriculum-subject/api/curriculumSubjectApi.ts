@@ -9,6 +9,17 @@ import type {
   CurriculumSubjectSavePayload,
 } from '../types'
 
+export interface BulkCreateCurriculumSubjectPayload {
+  curriculumId: string
+  subjectId: string
+  hoursPerWeek?: number
+}
+
+export interface BulkCreateResult {
+  created: number
+  skipped: number
+}
+
 export const curriculumSubjectApi = {
   getCurriculumSubjects: (params?: CurriculumSubjectQueryParams) => {
     return api.get<ApiPaginatedResponse<CurriculumSubject>>(
@@ -21,6 +32,17 @@ export const curriculumSubjectApi = {
     return api.post<ApiSingleResponse<CurriculumSubject>>(
       '/curriculum-subjects',
       payload,
+    )
+  },
+
+  bulkCreateCurriculumSubjects: (
+    items: BulkCreateCurriculumSubjectPayload[],
+  ) => {
+    // Enveloped like every other response: the global interceptor wraps the
+    // body in `{ statusCode, message, data }`, so the counts sit one level in.
+    return api.post<ApiSingleResponse<BulkCreateResult>>(
+      '/curriculum-subjects/bulk',
+      { items },
     )
   },
 

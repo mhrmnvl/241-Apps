@@ -5,7 +5,7 @@ import { academicYearRoutes } from '@/features/academic/academic-year'
 import { authRoutes } from '@/features/platform/auth'
 import { classroomRoutes } from '@/features/academic/classroom'
 import { gradeRoutes } from '@/features/academic/grade'
-import { curriculaRoutes } from '@/features/academic/curriculum'
+import { curriculumRoutes } from '@/features/academic/curriculum'
 import { curriculumSubjectRoutes } from '@/features/academic/curriculum-subject'
 import { dashboardRoutes } from '@/features/platform/dashboard'
 import { teacherRoutes } from '@/features/academic/teacher'
@@ -79,7 +79,7 @@ const router = createRouter({
         ...eventCalendarRoutes,
         ...academicYearRoutes,
         ...semesterRoutes,
-        ...curriculaRoutes,
+        ...curriculumRoutes,
         ...curriculumSubjectRoutes,
         ...socialMediaRoutes,
         ...classroomRoutes,

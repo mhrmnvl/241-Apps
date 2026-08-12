@@ -1,13 +1,13 @@
-export { curriculaApi } from './api/curriculaApi'
-export { curriculaService } from './services/curriculaService'
-export { useCurriculaStore } from './stores/curriculaStore'
-export { useCurriculaList } from './composables/useCurriculaList'
-export { useCurriculaForm } from './composables/useCurriculaForm'
-export { curriculaRoutes } from './routes'
+export { curriculumApi } from './api/curriculumApi'
+export { curriculumService } from './services/curriculumService'
+export { useCurriculumStore } from './stores/curriculumStore'
+export { useCurriculumList } from './composables/useCurriculumList'
+export { useCurriculumForm } from './composables/useCurriculumForm'
+export { curriculumRoutes } from './routes'
 export type {
   AcademicYearRef,
-  Curricula,
-  CurriculaSavePayload,
-  CurriculaEditData,
-  CurriculaQueryParams,
+  Curriculum,
+  CurriculumSavePayload,
+  CurriculumEditData,
+  CurriculumQueryParams,
 } from './types'

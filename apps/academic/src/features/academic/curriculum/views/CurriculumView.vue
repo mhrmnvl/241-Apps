@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import type { Curricula } from '../types'
-import CurriculaFormSheet from '../components/CurriculaFormSheet.vue'
-import { createCurriculaColumns } from '../components/columns'
-import { useCurriculaList } from '../composables/useCurriculaList'
+import type { Curriculum } from '../types'
+import CurriculumFormSheet from '../components/CurriculumFormSheet.vue'
+import { createCurriculumColumns } from '../components/columns'
+import { useCurriculumList } from '../composables/useCurriculumList'
 import { DataTable } from '@/ui'
 import { Button } from '@/ui/button'
 import { Card, CardHeader, CardTitle } from '@/ui/card'
@@ -26,24 +26,24 @@ const {
   fetchCurricula,
   fetchAcademicYears,
   deleteCurriculum,
-} = useCurriculaList()
+} = useCurriculumList()
 
 const isAddModalOpen = ref(false)
-const editingItem = ref<Curricula | null>(null)
+const editingItem = ref<Curriculum | null>(null)
 const { can } = useRoleGuard()
 
-const tableColumns = createCurriculaColumns({
+const tableColumns = createCurriculumColumns({
   showActions: can('curricula.update') || can('curricula.delete'),
   canUpdate: can('curricula.update'),
   canDelete: can('curricula.delete'),
-  onView: (item: Curricula) => {
-    void router.push(`/academic/curriculum/${item.id}/mata-pelajaran`)
+  onView: (item: Curriculum) => {
+    void router.push(`/academic/curriculum/${item.id}/subject`)
   },
-  onEdit: (item: Curricula) => {
+  onEdit: (item: Curriculum) => {
     editingItem.value = item
     isAddModalOpen.value = true
   },
-  onDelete: async (item: Curricula, { closeAlert, setLoading }) => {
+  onDelete: async (item: Curriculum, { closeAlert, setLoading }) => {
     setLoading(true)
     const result = await deleteCurriculum(item.id)
     if (result.success) {
@@ -134,7 +134,7 @@ onMounted(async () => {
           </template>
         </DataTable>
 
-        <CurriculaFormSheet
+        <CurriculumFormSheet
           v-if="isAddModalOpen"
           v-model:open="isAddModalOpen"
           :academic-years="academicYears"

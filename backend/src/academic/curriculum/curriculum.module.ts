@@ -12,6 +12,7 @@ import { GetCurriculaUseCase } from './use-cases/get-curricula.use-case.js';
 import { UpdateCurriculaUseCase } from './use-cases/update-curriculum.use-case.js';
 
 import { CreateCurriculumSubjectUseCase } from './use-cases/create-curriculum-subject.use-case.js';
+import { BulkCreateCurriculumSubjectsUseCase } from './use-cases/bulk-create-curriculum-subjects.use-case.js';
 import { DeleteCurriculumSubjectUseCase } from './use-cases/delete-curriculum-subject.use-case.js';
 import { GetCurriculumSubjectByIdUseCase } from './use-cases/get-curriculum-subject-by-id.use-case.js';
 import { GetCurriculumSubjectsUseCase } from './use-cases/get-curriculum-subjects.use-case.js';
@@ -37,6 +38,7 @@ import { ICurriculumSubjectRepository } from './domain/interfaces/curriculum-sub
     GetCurriculumSubjectsUseCase,
     GetCurriculumSubjectByIdUseCase,
     CreateCurriculumSubjectUseCase,
+    BulkCreateCurriculumSubjectsUseCase,
     UpdateCurriculumSubjectUseCase,
     DeleteCurriculumSubjectUseCase,
   ],

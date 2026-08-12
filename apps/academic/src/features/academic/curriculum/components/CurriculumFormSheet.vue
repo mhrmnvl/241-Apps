@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, toRefs } from 'vue'
-import { useCurriculaForm } from '../composables/useCurriculaForm'
-import type { AcademicYearRef, Curricula } from '../types'
+import { useCurriculumForm } from '../composables/useCurriculumForm'
+import type { AcademicYearRef, Curriculum } from '../types'
 import { Button } from '@/ui/button'
 import {
   Dialog,
@@ -43,7 +43,7 @@ import {
 const props = defineProps<{
   open: boolean
   academicYears: AcademicYearRef[]
-  editData?: Curricula | null
+  editData?: Curriculum | null
 }>()
 
 const emit = defineEmits<{
@@ -58,7 +58,7 @@ const open = computed({
 
 const { editData, academicYears } = toRefs(props)
 
-const curriculaForm = useCurriculaForm({
+const curriculumForm = useCurriculumForm({
   academicYears: () => academicYears.value,
   editData: () => editData.value ?? null,
   isOpen: () => props.open,
@@ -75,7 +75,7 @@ const curriculaForm = useCurriculaForm({
       <DialogHeader class="px-6 py-5 border-b shrink-0 bg-muted/20">
         <DialogTitle>
           {{
-            curriculaForm.isEditing.value
+            curriculumForm.isEditing.value
               ? 'Edit Kurikulum'
               : 'Tambah Kurikulum Baru'
           }}
@@ -85,9 +85,9 @@ const curriculaForm = useCurriculaForm({
 
       <ScrollArea class="flex-1 min-h-0">
         <form
-          id="curricula-form"
+          id="curriculum-form"
           class="space-y-4 px-6 py-4"
-          @submit.prevent="curriculaForm.onSubmit"
+          @submit.prevent="curriculumForm.onSubmit"
         >
           <FormField
             v-slot="{ value, handleChange }"
@@ -109,7 +109,7 @@ const curriculaForm = useCurriculaForm({
                 </FormControl>
                 <SelectContent>
                   <SelectItem
-                    v-for="opt in curriculaForm.academicYearOptions.value"
+                    v-for="opt in curriculumForm.academicYearOptions.value"
                     :key="opt.value"
                     :value="opt.value"
                   >
@@ -165,13 +165,13 @@ const curriculaForm = useCurriculaForm({
           </FormField>
 
           <Alert
-            v-if="curriculaForm.formError.value"
+            v-if="curriculumForm.formError.value"
             variant="destructive"
             class="mt-2"
           >
             <AlertCircle class="h-4 w-4" />
             <AlertDescription>{{
-              curriculaForm.formError.value
+              curriculumForm.formError.value
             }}</AlertDescription>
           </Alert>
         </form>
@@ -183,28 +183,28 @@ const curriculaForm = useCurriculaForm({
         <Button
           type="button"
           variant="outline"
-          :disabled="curriculaForm.isSaving.value"
+          :disabled="curriculumForm.isSaving.value"
           @click="open = false"
         >
           Batal
         </Button>
         <Button
           type="submit"
-          form="curricula-form"
+          form="curriculum-form"
           variant="default"
-          :disabled="curriculaForm.isSaving.value"
+          :disabled="curriculumForm.isSaving.value"
         >
           <Loader2
-            v-if="curriculaForm.isSaving.value"
+            v-if="curriculumForm.isSaving.value"
             class="size-4 mr-1.5 animate-spin"
           />
-          {{ curriculaForm.isSaving.value ? 'Menyimpan...' : 'Simpan' }}
+          {{ curriculumForm.isSaving.value ? 'Menyimpan...' : 'Simpan' }}
         </Button>
       </DialogFooter>
     </DialogContent>
   </Dialog>
 
-  <AlertDialog v-model:open="curriculaForm.showConfirmAlert.value">
+  <AlertDialog v-model:open="curriculumForm.showConfirmAlert.value">
     <AlertDialogContent>
       <AlertDialogHeader>
         <AlertDialogTitle>Simpan Perubahan?</AlertDialogTitle>
@@ -214,14 +214,14 @@ const curriculaForm = useCurriculaForm({
       </AlertDialogHeader>
       <AlertDialogFooter>
         <AlertDialogCancel
-          :disabled="curriculaForm.isSaving.value"
-          @click="curriculaForm.showConfirmAlert.value = false"
+          :disabled="curriculumForm.isSaving.value"
+          @click="curriculumForm.showConfirmAlert.value = false"
         >
           Batal
         </AlertDialogCancel>
         <AlertDialogAction
-          :disabled="curriculaForm.isSaving.value"
-          @click="curriculaForm.confirmSave"
+          :disabled="curriculumForm.isSaving.value"
+          @click="curriculumForm.confirmSave"
         >
           Simpan
         </AlertDialogAction>

@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CreateCurriculumSubjectUseCase } from '../use-cases/create-curriculum-subject.use-case.js';
+import { BulkCreateCurriculumSubjectsUseCase } from '../use-cases/bulk-create-curriculum-subjects.use-case.js';
 import { DeleteCurriculumSubjectUseCase } from '../use-cases/delete-curriculum-subject.use-case.js';
 import { GetCurriculumSubjectByIdUseCase } from '../use-cases/get-curriculum-subject-by-id.use-case.js';
 import { GetCurriculumSubjectsUseCase } from '../use-cases/get-curriculum-subjects.use-case.js';
@@ -13,6 +14,7 @@ describe('CurriculumSubjectController', () => {
   const mockGetAll = { execute: jest.fn() };
   const mockGetById = { execute: jest.fn() };
   const mockCreate = { execute: jest.fn() };
+  const mockBulkCreate = { execute: jest.fn() };
   const mockUpdate = { execute: jest.fn() };
   const mockDelete = { execute: jest.fn() };
 
@@ -30,6 +32,10 @@ describe('CurriculumSubjectController', () => {
         { provide: GetCurriculumSubjectsUseCase, useValue: mockGetAll },
         { provide: GetCurriculumSubjectByIdUseCase, useValue: mockGetById },
         { provide: CreateCurriculumSubjectUseCase, useValue: mockCreate },
+        {
+          provide: BulkCreateCurriculumSubjectsUseCase,
+          useValue: mockBulkCreate,
+        },
         { provide: UpdateCurriculumSubjectUseCase, useValue: mockUpdate },
         { provide: DeleteCurriculumSubjectUseCase, useValue: mockDelete },
       ],
@@ -79,6 +85,24 @@ describe('CurriculumSubjectController', () => {
       await controller.create(dto, mockUser);
 
       expect(mockCreate.execute).toHaveBeenCalledWith(dto);
+    });
+  });
+
+  describe('bulkCreate', () => {
+    it('should delegate to BulkCreateCurriculumSubjectsUseCase', async () => {
+      const dto = {
+        items: [
+          { curriculumId: 'c-1', subjectId: 's-1' },
+          { curriculumId: 'c-1', subjectId: 's-2' },
+        ],
+      };
+      const result = { created: 2, skipped: 0 };
+      mockBulkCreate.execute.mockResolvedValue(result);
+
+      const response = await controller.bulkCreate(dto, mockUser);
+
+      expect(mockBulkCreate.execute).toHaveBeenCalledWith(dto);
+      expect(response).toEqual(result);
     });
   });
 
