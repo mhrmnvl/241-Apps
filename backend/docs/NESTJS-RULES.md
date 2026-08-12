@@ -333,6 +333,49 @@ A response DTO living under dto/request/ (or vice versa)
 
 ---
 
+## Read only the fields the caller shows
+
+A `Profile` holds sixteen columns, most of them identifying. Reading the whole
+record to draw a name carries all of it out of the database on every row of
+every list, and silently adds any column defined later to every screen at once.
+
+**Every read that reaches a profile uses one of three shapes** from
+`shared/domain/prisma-selects.ts`. `profile: true`, or an inline profile select,
+is a defect.
+
+| Situation | Shape |
+|---|---|
+| A person appears as a label | `PROFILE_NAME_SELECT` |
+| A person's picture is drawn | `PROFILE_DISPLAY_SELECT` |
+| Student, teacher or enrolment list | `PROFILE_ROSTER_SELECT` |
+| A spreadsheet export or the profile screen | Its own explicit select, at the call site, with a comment |
+
+Each shape carries `satisfies Prisma.ProfileDefaultArgs`, so a field that does
+not exist fails to compile. Widening a shape reaches every caller — add the
+field at the call site instead.
+
+**The domain row must be as narrow as the query.** `ProfileNameRef`,
+`ProfileDisplayRef` and `ProfileRosterRef` mirror the three shapes;
+`UserRef<TProfile>` and `PersonRef<TProfile>` take the projection as a
+parameter, defaulting to the name.
+
+> **A row that types its fields as optional cannot catch a narrowing.** This has
+> already cost a bug: the student list narrowed to three fields, the spreadsheet
+> export shared its query, and because `StudentWithDetails` typed birth place,
+> birth date, email and phone as optional, it compiled and would have written
+> four empty columns. A read whose fields must be present types them as
+> **required** — see `StudentExportWithDetails`.
+
+Two more habits the same rule implies:
+
+- **A list and a detail read differently.** Aliasing them (`LIST = DETAIL`) means
+  the list page fetches whatever the detail screen needs.
+- **A bare `true` on a relation pulls every column.** Select what the domain row
+  declares. On a to-one relation Prisma takes no `where`, so soft-deleted rows
+  cannot be filtered in the include — select `deletedAt` and let the caller check.
+
+---
+
 ## Language: the backend is written in English
 
 Exception and validation messages, Swagger summaries and descriptions, log

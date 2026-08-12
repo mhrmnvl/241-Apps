@@ -146,8 +146,8 @@ Monorepo: `backend/src/…` for the API, `apps/<app>/src/…` for the five front
 - [X] T045 [P] [US4] Separate `STUDENT_LIST_INCLUDE` from `STUDENT_DETAIL_INCLUDE` in `backend/src/academic/student/infrastructure/persistence/prisma-student.includes.ts` so the list carries strictly less
 - [X] T046 [P] [US4] Separate `USER_SELECT` into list and detail variants in `backend/src/academic/teacher/infrastructure/persistence/prisma-teacher.includes.ts`, dropping `createdAt` and `updatedAt` from the list
 - [X] T047 [P] [US4] Add `where: { deletedAt: null }` to the `curricula` include in `backend/src/academic/grade/infrastructure/persistence/prisma-grade-academic-year.includes.ts`, and replace the bare `grade`/`academicYear` includes with explicit selects
-- [ ] T048 [US4] Add a scratch column to `Profile` in `backend/prisma/profile.prisma`, run `prisma:generate` and `typecheck`, confirm no response carries it, then remove the column without migrating it
-- [ ] T049 [US4] Record the projection rules in `CLAUDE.md` and `backend/docs/NESTJS-RULES.md`: every read touching a person uses one of the three shapes, `profile: true` is a defect, and a screen needing more states it at the call site
+- [X] T048 [US4] Add a scratch column to `Profile` in `backend/prisma/profile.prisma`, run `prisma:generate` and `typecheck`, confirm no response carries it, then remove the column without migrating it
+- [X] T049 [US4] Record the projection rules in `CLAUDE.md` and `backend/docs/NESTJS-RULES.md`: every read touching a person uses one of the three shapes, `profile: true` is a defect, and a screen needing more states it at the call site
 
 **Checkpoint**: A schema change is safe, and the rule is where the next person will find it.
 

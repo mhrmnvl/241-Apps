@@ -326,6 +326,14 @@ Core rules from `NESTJS-RULES.md` (enforced by convention, not by lint):
   `{ statusCode, message, data, meta? }` — there is no `success` field. Repositories
   return `{ data, total, page, limit }` and the interceptor folds it into
   `data` + `meta` (see `core/interceptors/response.interceptor.ts`).
+- **Read only the fields the caller shows.** Every Prisma read that reaches a
+  `Profile` uses one of the three shapes in `shared/domain/prisma-selects.ts` —
+  name, display (name + avatar file), or roster (name + gender + NIK).
+  `profile: true` is a defect, and so is a bare `true` on any relation. The
+  domain row must be as narrow as the query: `UserRef<TProfile>` takes the
+  projection as a parameter. A row that types its fields as **optional** cannot
+  catch a narrowing — that is how a list narrowing once emptied four columns of
+  the student spreadsheet while still compiling. See NESTJS-RULES.md.
 - **The backend is written in English.** Exception and validation messages,
   Swagger summaries and descriptions, log lines, identifiers, and comments — all
   English. Indonesian belongs to the frontend, which owns presentation and can
