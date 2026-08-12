@@ -4,14 +4,10 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { GetSchoolUnitUseCase } from '../../../platform/school-unit/index.js';
-import { IStudentScoreRepository } from '../../assessment/domain/interfaces/student-score-repository.interface.js';
 import { IAttendanceRepository } from '../../attendance/domain/interfaces/attendance-repository.interface.js';
 import { IReportCardRepository } from '../domain/interfaces/report-card-repository.interface.js';
 import { PdfService } from '../services/pdf.service.js';
-import {
-  calculateSubjectGrades,
-  SubjectScoreInput,
-} from '../services/calculate-subject-grades.js';
+import { type SubjectGradeRow } from '../services/calculate-subject-grades.js';
 import {
   buildReportCardHtml,
   ReportCardPdfViewModel,
@@ -21,7 +17,6 @@ import {
 export class ExportReportCardPdfUseCase {
   constructor(
     private readonly reportCardRepository: IReportCardRepository,
-    private readonly studentScoreRepository: IStudentScoreRepository,
     private readonly attendanceRepository: IAttendanceRepository,
     private readonly pdfService: PdfService,
     private readonly getSchoolUnitUseCase: GetSchoolUnitUseCase,
@@ -30,20 +25,18 @@ export class ExportReportCardPdfUseCase {
   async execute(id: string): Promise<Buffer> {
     const reportCard = await this.reportCardRepository.findById(id);
     if (!reportCard) {
-      throw new NotFoundException('Rapor tidak ditemukan');
+      throw new NotFoundException('Report card not found');
     }
 
     if (!reportCard.isPublished) {
-      throw new BadRequestException('Rapor belum dipublikasikan');
+      throw new BadRequestException('Report card has not been published yet');
     }
 
     const enrollmentId =
       reportCard.enrollmentId ?? reportCard.studentEnrollmentId ?? '';
 
-    const [scores, attendanceCounts] = await Promise.all([
-      this.studentScoreRepository.findAllForReportCard(enrollmentId),
-      this.attendanceRepository.getStatusCounts(enrollmentId),
-    ]);
+    const attendanceCounts =
+      await this.attendanceRepository.getStatusCounts(enrollmentId);
 
     // Fetch School Unit info
     let schoolName = 'SIAKAD Sekolah';
@@ -56,19 +49,23 @@ export class ExportReportCardPdfUseCase {
       // Use default values if school unit not set up yet
     }
 
-    const subjectScores: SubjectScoreInput[] = scores
-      .filter(
-        (s): s is typeof s & { score: number } =>
-          s.score !== null && s.score !== undefined,
-      )
-      .map((s) => ({
-        subjectId: s.assessmentItem.teachingAssignment.subject.id,
-        subjectName: s.assessmentItem.teachingAssignment.subject.name,
-        subjectCode: s.assessmentItem.teachingAssignment.subject.code ?? '',
-        score: s.score,
-      }));
-
-    const subjectsData = calculateSubjectGrades(subjectScores);
+    // Printed from the lines stored when the card was generated, never
+    // recomputed. A published card must keep printing what it said even after
+    // a KKM is revised or a weight retuned.
+    const subjectsData: SubjectGradeRow[] = (reportCard.subjects ?? []).map(
+      (subject, index) => ({
+        no: index + 1,
+        subjectId: subject.subjectId,
+        code: subject.subjectCode ?? '',
+        name: subject.subjectName,
+        score: subject.score.toFixed(2),
+        scoreValue: subject.score,
+        kkm: subject.kkm,
+        predicate: subject.predicate,
+        description: subject.description,
+        isComplete: subject.isComplete,
+      }),
+    );
 
     const studentName =
       reportCard.enrollment?.student?.user?.profile?.name ?? '-';

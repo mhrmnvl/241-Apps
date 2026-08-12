@@ -53,11 +53,14 @@ export type StudentScoreWithDetails = Prisma.StudentScoreGetPayload<{
  * `STUDENT_SCORE_WITH_DETAILS_INCLUDE` stops at `assessmentItem` scalars, which
  * left `assessmentItem.teachingAssignment` undefined for the PDF export.
  */
+// Carries everything a report card needs to grade a score without a second
+// query: the item's own maximum and within-type weight, the subject and its
+// KKM, and the teacher's per-type weights plus any KKM they set for this class.
 export const REPORT_CARD_SCORE_INCLUDE = {
   assessmentItem: {
     include: {
       teachingAssignment: {
-        include: { subject: true },
+        include: { subject: true, assessmentWeights: true },
       },
     },
   },

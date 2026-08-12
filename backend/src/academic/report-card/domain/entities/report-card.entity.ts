@@ -13,7 +13,25 @@ export interface ReportCardEntity {
   deletedAt?: Date | null;
 }
 
+/**
+ * One subject's line, exactly as it was frozen when the card was generated.
+ *
+ * Read, never recomputed — the PDF and the detail view print these figures so
+ * a card that has already gone home keeps saying what it said.
+ */
+export interface ReportCardSubjectEntity {
+  subjectId: string;
+  subjectCode?: string | null;
+  subjectName: string;
+  score: number;
+  kkm: number;
+  predicate: string;
+  description: string;
+  isComplete: boolean;
+}
+
 export interface ReportCardWithDetails extends ReportCardEntity {
+  subjects?: ReportCardSubjectEntity[];
   enrollment?: {
     id: string;
     student?: {

@@ -7,6 +7,7 @@ import { IAssessmentItemRepository } from '../domain/interfaces/assessment-item-
 import { IEnrollmentRepository } from '../../enrollment/domain/interfaces/enrollment-repository.interface.js';
 import { IStudentScoreRepository } from '../domain/interfaces/student-score-repository.interface.js';
 import { CreateStudentScoreDto } from '../dto/request/create-student-score.dto.js';
+import { assertScoreInRange } from '../services/assert-score-in-range.js';
 
 @Injectable()
 export class CreateStudentScoreUseCase {
@@ -22,6 +23,8 @@ export class CreateStudentScoreUseCase {
     if (!assessmentItem) {
       throw new BadRequestException('Assessment item not found');
     }
+
+    assertScoreInRange(dto.score, assessmentItem.maxScore);
 
     const enrollment = await this.enrollmentRepository.findById(
       dto.enrollmentId,

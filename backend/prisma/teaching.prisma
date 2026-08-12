@@ -42,6 +42,9 @@ model TeachingAssignment {
   classroomId String    @map("classroom_id") @db.Uuid
   subjectId   String    @map("subject_id") @db.Uuid
   semesterId  String    @map("semester_id") @db.Uuid
+  /// Overrides Subject.kkm for this class only. Null means follow the
+  /// subject's school-wide default, which is the normal case.
+  kkm         Int?
   deletedAt   DateTime? @map("deleted_at")
 
   teacher   Teacher   @relation(fields: [teacherId], references: [id])
@@ -49,8 +52,9 @@ model TeachingAssignment {
   subject   Subject   @relation(fields: [subjectId], references: [id])
   semester  Semester  @relation(fields: [semesterId], references: [id])
 
-  schedules       Schedule[]
-  assessmentItems AssessmentItem[]
+  schedules         Schedule[]
+  assessmentItems   AssessmentItem[]
+  assessmentWeights AssessmentWeight[]
 
   @@unique([teacherId, classroomId, subjectId, semesterId], where: { deletedAt: null })
   @@index([teacherId])

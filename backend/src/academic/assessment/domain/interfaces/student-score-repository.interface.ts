@@ -1,3 +1,4 @@
+import { AssessmentType } from '@prisma/client';
 import {
   PaginatedResult,
   PaginationQueryInput,
@@ -21,15 +22,21 @@ export interface ReportCardScoreRow {
   assessmentItem: {
     id: string;
     name: string;
+    type: AssessmentType;
+    /** Weight within its type; see AssessmentWeight for the outer layer. */
     weight?: number | null;
     maxScore?: number | null;
     teachingAssignment: {
       id: string;
+      /** Overrides the subject's KKM for this class only. */
+      kkm?: number | null;
       subject: {
         id: string;
         name: string;
         code?: string | null;
+        kkm: number;
       };
+      assessmentWeights: { type: AssessmentType; weight: number }[];
     };
   };
 }

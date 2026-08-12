@@ -25,11 +25,29 @@ const emit = defineEmits<{
   save: []
 }>()
 
+/**
+ * Holds the mark inside what the assessment is out of.
+ *
+ * The `max` attribute on a number input only styles it invalid — it does not
+ * stop the typing, and the value still reaches the model. Since every subject
+ * average is a percentage of `maxScore`, a mark above it would push a score
+ * past 100 and lift the student's rank, so the server rejects it too; clamping
+ * here is what keeps the teacher from discovering that on save.
+ */
 function updateRowScore(index: number, value: string) {
   const row = props.rows[index]
   if (!row) return
+
+  let score: number | null = null
+  if (value !== '') {
+    const parsed = Number(value)
+    score = Number.isNaN(parsed)
+      ? null
+      : Math.min(Math.max(parsed, 0), props.maxScore)
+  }
+
   const updated = [...props.rows]
-  updated[index] = { ...row, score: value === '' ? null : Number(value) }
+  updated[index] = { ...row, score }
   emit('update:rows', updated)
 }
 

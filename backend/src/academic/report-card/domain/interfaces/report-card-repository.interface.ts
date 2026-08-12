@@ -16,12 +16,26 @@ export interface ReportCardQueryInput extends PaginationQueryInput {
   isPublished?: boolean;
 }
 
+/** One subject's frozen line, as generation resolved it. */
+export interface ReportCardSubjectInput {
+  subjectId: string;
+  subjectCode?: string | null;
+  subjectName: string;
+  score: number;
+  kkm: number;
+  predicate: string;
+  description: string;
+  isComplete: boolean;
+}
+
 export interface CreateReportCardRepositoryInput {
   enrollmentId: string;
   totalAverage?: number | null;
   rank?: number | null;
   teacherNote?: string | null;
   isPublished?: boolean;
+  /** Replaces the stored lines wholesale when present. */
+  subjects?: ReportCardSubjectInput[];
 }
 
 export interface UpdateReportCardRepositoryInput {

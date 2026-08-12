@@ -4,6 +4,7 @@ import { PrismaService } from '../../../../core/database/prisma.service.js';
 import type {
   ReportCardQueryInput,
   CreateReportCardRepositoryInput,
+  ReportCardSubjectInput,
   UpdateReportCardRepositoryInput,
 } from '../../domain/interfaces/report-card-repository.interface.js';
 import { resolveSemesterId } from '../../../../shared/utils/active-academic-year.helper.js';
@@ -13,6 +14,20 @@ import {
   REPORT_CARD_WITH_DETAILS_INCLUDE,
   ReportCardWithDetails,
 } from './prisma-report-card.includes.js';
+
+/** Maps a resolved subject line onto its stored columns. */
+function toSubjectRow(subject: ReportCardSubjectInput) {
+  return {
+    subjectId: subject.subjectId,
+    subjectCode: subject.subjectCode ?? null,
+    subjectName: subject.subjectName,
+    score: subject.score,
+    kkm: subject.kkm,
+    predicate: subject.predicate,
+    description: subject.description,
+    isComplete: subject.isComplete,
+  };
+}
 
 @Injectable()
 export class PrismaReportCardRepository extends IReportCardRepository {
@@ -84,8 +99,15 @@ export class PrismaReportCardRepository extends IReportCardRepository {
   async create(
     dto: CreateReportCardRepositoryInput,
   ): Promise<ReportCardWithDetails> {
+    const { subjects, ...fields } = dto;
+
     return this.prisma.reportCard.create({
-      data: dto,
+      data: {
+        ...fields,
+        ...(subjects?.length
+          ? { subjects: { create: subjects.map(toSubjectRow) } }
+          : {}),
+      },
       include: REPORT_CARD_WITH_DETAILS_INCLUDE,
     });
   }
@@ -93,13 +115,36 @@ export class PrismaReportCardRepository extends IReportCardRepository {
   async upsert(
     input: CreateReportCardRepositoryInput,
   ): Promise<ReportCardWithDetails> {
-    const { enrollmentId, ...fields } = input;
+    const { enrollmentId, subjects, ...fields } = input;
 
-    return this.prisma.reportCard.upsert({
-      where: { enrollmentId },
-      create: { enrollmentId, ...fields },
-      update: fields,
-      include: REPORT_CARD_WITH_DETAILS_INCLUDE,
+    // The card and its lines are one document, so they are written together:
+    // a card left carrying the previous run's subject rows would print figures
+    // that no longer match its own average.
+    return this.prisma.$transaction(async (tx) => {
+      const card = await tx.reportCard.upsert({
+        where: { enrollmentId },
+        create: { enrollmentId, ...fields },
+        update: fields,
+      });
+
+      if (subjects) {
+        await tx.reportCardSubject.deleteMany({
+          where: { reportCardId: card.id },
+        });
+        if (subjects.length > 0) {
+          await tx.reportCardSubject.createMany({
+            data: subjects.map((subject) => ({
+              reportCardId: card.id,
+              ...toSubjectRow(subject),
+            })),
+          });
+        }
+      }
+
+      return tx.reportCard.findUniqueOrThrow({
+        where: { id: card.id },
+        include: REPORT_CARD_WITH_DETAILS_INCLUDE,
+      });
     });
   }
 

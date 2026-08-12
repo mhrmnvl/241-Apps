@@ -2,10 +2,19 @@ model Subject {
   id        String    @id @default(uuid()) @db.Uuid
   code      String?   @db.VarChar(20)
   name      String    @db.VarChar(100)
+  /// The school's minimum pass mark for this subject, set by the curriculum
+  /// team. A teacher may override it for one class they teach
+  /// (TeachingAssignment.kkm); this is the value used when they do not.
+  ///
+  /// It also fixes the whole predicate scale: the D/C boundary is the KKM and
+  /// the rest of the range is split in three, so A/B/C/D can never contradict
+  /// whether a student passed.
+  kkm       Int       @default(75)
   deletedAt DateTime? @map("deleted_at")
 
   teachingAssignments TeachingAssignment[]
   curriculumSubjects  CurriculumSubject[]
+  reportCardSubjects  ReportCardSubject[]
 
   @@unique([code], where: { deletedAt: null })
   @@unique([name], where: { deletedAt: null })

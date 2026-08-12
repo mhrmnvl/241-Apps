@@ -5,6 +5,7 @@ import { AttendanceModule } from '../attendance/attendance.module.js';
 import { SchoolUnitModule } from '../../platform/school-unit/school-unit.module.js';
 import { ReportCardController } from './presentation/report-card.controller.js';
 import { PrismaReportCardRepository } from './infrastructure/persistence/prisma-report-card.repository.js';
+import { BulkGenerateReportCardsUseCase } from './use-cases/bulk-generate-report-cards.use-case.js';
 import { DeleteReportCardUseCase } from './use-cases/delete-report-card.use-case.js';
 import { GenerateReportCardUseCase } from './use-cases/generate-report-card.use-case.js';
 import { GetReportCardByIdUseCase } from './use-cases/get-report-card-by-id.use-case.js';
@@ -31,6 +32,7 @@ import { IReportCardRepository } from './domain/interfaces/report-card-repositor
     GetReportCardsUseCase,
     GetReportCardByIdUseCase,
     GenerateReportCardUseCase,
+    BulkGenerateReportCardsUseCase,
     UpdateReportCardUseCase,
     PublishReportCardUseCase,
     DeleteReportCardUseCase,
