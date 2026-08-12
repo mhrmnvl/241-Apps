@@ -15,7 +15,7 @@ export interface SubjectGradeInput {
   subjectCode: string | null;
   subjectName: string;
   /** The pass mark this subject is judged against, already resolved. */
-  kkm: number;
+  passingScore: number;
   /** Percentage each type contributes. Missing or non-positive types are ignored. */
   typeWeights: Partial<Record<AssessmentType, number>>;
   assessments: ScoredAssessment[];
@@ -30,7 +30,7 @@ export interface SubjectGradeRow {
   score: string;
   /** The same number, for storing and averaging. */
   scoreValue: number;
-  kkm: number;
+  passingScore: number;
   predicate: string;
   description: string;
   isComplete: boolean;
@@ -48,7 +48,7 @@ function round2(value: number): number {
 }
 
 /**
- * The Kurikulum 2013 scale: the D/C boundary *is* the KKM, and the range above
+ * The Kurikulum 2013 scale: the D/C boundary *is* the passing score, and the range above
  * it splits into three equal bands.
  *
  * Deriving it rather than storing four thresholds is what makes it impossible
@@ -57,17 +57,18 @@ function round2(value: number): number {
  */
 export function predicateFor(
   score: number,
-  kkm: number,
+  passingScore: number,
 ): { predicate: keyof typeof PREDICATE_DESCRIPTIONS; isComplete: boolean } {
-  const safeKkm = Math.min(Math.max(kkm, 0), 100);
-  if (score < safeKkm) return { predicate: 'D', isComplete: false };
+  const safePassingScore = Math.min(Math.max(passingScore, 0), 100);
+  if (score < safePassingScore) return { predicate: 'D', isComplete: false };
 
-  const interval = (100 - safeKkm) / 3;
-  // A KKM of 100 leaves no room to grade above it; passing is the top band.
+  const interval = (100 - safePassingScore) / 3;
+  // A passing score of 100 leaves no room to grade above it; passing is the top band.
   if (interval <= 0) return { predicate: 'A', isComplete: true };
 
-  if (score < safeKkm + interval) return { predicate: 'C', isComplete: true };
-  if (score < safeKkm + interval * 2)
+  if (score < safePassingScore + interval)
+    return { predicate: 'C', isComplete: true };
+  if (score < safePassingScore + interval * 2)
     return { predicate: 'B', isComplete: true };
   return { predicate: 'A', isComplete: true };
 }
@@ -139,7 +140,10 @@ export function calculateSubjectGrades(
     if (raw === null) continue;
 
     const scoreValue = round2(raw);
-    const { predicate, isComplete } = predicateFor(scoreValue, subject.kkm);
+    const { predicate, isComplete } = predicateFor(
+      scoreValue,
+      subject.passingScore,
+    );
 
     rows.push({
       no: rows.length + 1,
@@ -148,7 +152,7 @@ export function calculateSubjectGrades(
       name: subject.subjectName,
       score: scoreValue.toFixed(2),
       scoreValue,
-      kkm: subject.kkm,
+      passingScore: subject.passingScore,
       predicate,
       description: PREDICATE_DESCRIPTIONS[predicate],
       isComplete,

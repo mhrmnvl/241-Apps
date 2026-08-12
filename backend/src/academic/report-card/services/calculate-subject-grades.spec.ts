@@ -24,7 +24,7 @@ function subject(
     subjectId: 'sub-1',
     subjectCode: 'MTK',
     subjectName: 'Matematika',
-    kkm: 75,
+    passingScore: 75,
     typeWeights: { DAILY: 40, MIDTERM: 30, FINAL: 30 },
     assessments: [],
     ...overrides,
@@ -32,7 +32,7 @@ function subject(
 }
 
 describe('predicateFor', () => {
-  // The whole point of deriving the scale: the D/C boundary is the KKM, so a
+  // The whole point of deriving the scale: the D/C boundary is the passing score, so a
   // student can never be "Cukup" and not yet passed at the same time.
   it.each([
     [75, 100, 'A'],
@@ -43,21 +43,24 @@ describe('predicateFor', () => {
     [75, 75, 'C'],
     [75, 74.99, 'D'],
     [75, 0, 'D'],
-  ])('KKM %s: a score of %s is %s', (kkm, score, expected) => {
-    expect(predicateFor(score, kkm).predicate).toBe(expected);
-  });
+  ])(
+    'passing score %s: a score of %s is %s',
+    (passingScore, score, expected) => {
+      expect(predicateFor(score, passingScore).predicate).toBe(expected);
+    },
+  );
 
-  it('moves every band when the KKM moves', () => {
+  it('moves every band when the passing score moves', () => {
     expect(predicateFor(85, 70).predicate).toBe('B');
     expect(predicateFor(85, 80).predicate).toBe('C');
   });
 
-  it('marks anything below the KKM as not yet passed', () => {
+  it('marks anything below the passing score as not yet passed', () => {
     expect(predicateFor(74.99, 75).isComplete).toBe(false);
     expect(predicateFor(75, 75).isComplete).toBe(true);
   });
 
-  it('treats a KKM of 100 as leaving only the top band', () => {
+  it('treats a passing score of 100 as leaving only the top band', () => {
     expect(predicateFor(100, 100)).toEqual({
       predicate: 'A',
       isComplete: true,
@@ -68,7 +71,7 @@ describe('predicateFor', () => {
     });
   });
 
-  it('clamps a KKM outside 0-100 rather than inverting the scale', () => {
+  it('clamps a passing score outside 0-100 rather than inverting the scale', () => {
     expect(predicateFor(50, -10).isComplete).toBe(true);
     expect(predicateFor(50, 150).isComplete).toBe(false);
   });
@@ -203,7 +206,7 @@ describe('calculateSubjectGrades', () => {
       name: 'Matematika',
       score: '82.50',
       scoreValue: 82.5,
-      kkm: 75,
+      passingScore: 75,
       predicate: 'C',
       description: 'Cukup',
       isComplete: true,
@@ -215,7 +218,7 @@ describe('calculateSubjectGrades', () => {
   it('derives the predicate from the rounded score', () => {
     const [row] = calculateSubjectGrades([
       subject({
-        kkm: 75,
+        passingScore: 75,
         typeWeights: { DAILY: 100 },
         assessments: [assessment('DAILY', 74.999, 100)],
       }),
@@ -236,24 +239,24 @@ describe('calculateSubjectGrades', () => {
     expect(rows[0]?.no).toBe(1);
   });
 
-  it('carries the KKM each subject was judged against', () => {
+  it('carries the passing score each subject was judged against', () => {
     const rows = calculateSubjectGrades([
       subject({
         subjectId: 'sub-1',
-        kkm: 70,
+        passingScore: 70,
         typeWeights: { DAILY: 100 },
         assessments: [assessment('DAILY', 72)],
       }),
       subject({
         subjectId: 'sub-2',
-        kkm: 80,
+        passingScore: 80,
         typeWeights: { DAILY: 100 },
         assessments: [assessment('DAILY', 72)],
       }),
     ]);
 
-    expect(rows[0]).toMatchObject({ kkm: 70, isComplete: true });
-    expect(rows[1]).toMatchObject({ kkm: 80, isComplete: false });
+    expect(rows[0]).toMatchObject({ passingScore: 70, isComplete: true });
+    expect(rows[1]).toMatchObject({ passingScore: 80, isComplete: false });
   });
 
   it('returns nothing for a student with no scores at all', () => {

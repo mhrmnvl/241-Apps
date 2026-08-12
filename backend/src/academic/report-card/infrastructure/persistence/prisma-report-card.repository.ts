@@ -22,7 +22,7 @@ function toSubjectRow(subject: ReportCardSubjectInput) {
     subjectCode: subject.subjectCode ?? null,
     subjectName: subject.subjectName,
     score: subject.score,
-    kkm: subject.kkm,
+    passingScore: subject.passingScore,
     predicate: subject.predicate,
     description: subject.description,
     isComplete: subject.isComplete,

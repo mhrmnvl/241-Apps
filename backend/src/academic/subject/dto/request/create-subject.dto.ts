@@ -41,5 +41,5 @@ export class CreateSubjectDto {
   @IsInt()
   @Min(0)
   @Max(100)
-  kkm?: number;
+  passingScore?: number;
 }

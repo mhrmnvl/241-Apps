@@ -29,14 +29,16 @@ export interface RaporEnrollment {
  * One subject's line, frozen when the rapor was generated.
  *
  * These are stored values, not a live calculation — a published rapor keeps
- * the KKM and predicate it was issued with even after the school revises them.
+ * the pass mark and predicate it was issued with even after the school revises
+ * them. `passingScore` is what the backend calls it; "KKM" is the label the
+ * teacher reads, which is why the translation lives here and not there.
  */
 export interface RaporSubject {
   subjectId: string
   subjectCode: string | null
   subjectName: string
   score: number
-  kkm: number
+  passingScore: number
   predicate: string
   description: string
   isComplete: boolean

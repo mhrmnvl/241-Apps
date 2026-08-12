@@ -14,8 +14,8 @@ function scoreRow(options: {
   maxScore?: number;
   subjectId?: string;
   subjectName?: string;
-  subjectKkm?: number;
-  assignmentKkm?: number | null;
+  subjectPassingScore?: number;
+  assignmentPassingScore?: number | null;
   typeWeights?: { type: string; weight: number }[];
 }) {
   return {
@@ -26,12 +26,12 @@ function scoreRow(options: {
       maxScore: options.maxScore ?? 100,
       teachingAssignment: {
         id: 'ta-1',
-        kkm: options.assignmentKkm ?? null,
+        passingScore: options.assignmentPassingScore ?? null,
         subject: {
           id: options.subjectId ?? 'subj-1',
           name: options.subjectName ?? 'Matematika',
           code: 'MTK',
-          kkm: options.subjectKkm ?? 75,
+          passingScore: options.subjectPassingScore ?? 75,
         },
         assessmentWeights: options.typeWeights ?? [
           { type: 'DAILY', weight: 100 },
@@ -128,15 +128,15 @@ describe('GenerateReportCardUseCase', () => {
       );
     });
 
-    it('stores a line per subject with the KKM it was judged against', async () => {
+    it('stores a line per subject with the passing score it was judged against', async () => {
       mockScoreRepository.findAllForReportCard.mockResolvedValue([
-        scoreRow({ score: 72, subjectId: 'subj-1', subjectKkm: 70 }),
+        scoreRow({ score: 72, subjectId: 'subj-1', subjectPassingScore: 70 }),
         scoreRow({
           score: 72,
           subjectId: 'subj-2',
           subjectName: 'IPA',
-          subjectKkm: 70,
-          assignmentKkm: 80,
+          subjectPassingScore: 70,
+          assignmentPassingScore: 80,
         }),
       ]);
 
@@ -146,12 +146,12 @@ describe('GenerateReportCardUseCase', () => {
       expect(subjects).toEqual([
         expect.objectContaining({
           subjectId: 'subj-1',
-          kkm: 70,
+          passingScore: 70,
           isComplete: true,
         }),
         expect.objectContaining({
           subjectId: 'subj-2',
-          kkm: 80,
+          passingScore: 80,
           isComplete: false,
         }),
       ]);

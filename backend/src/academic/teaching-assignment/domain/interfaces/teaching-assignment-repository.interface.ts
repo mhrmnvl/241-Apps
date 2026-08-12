@@ -33,8 +33,8 @@ export interface CreateTeachingAssignmentRepositoryInput {
 
 export type UpdateTeachingAssignmentRepositoryInput =
   Partial<CreateTeachingAssignmentRepositoryInput> & {
-    /** Null clears the override so the subject's own KKM applies again. */
-    kkm?: number | null;
+    /** Null clears the override so the subject's own passing score applies again. */
+    passingScore?: number | null;
   };
 
 export type RestoreTeachingAssignmentRepositoryInput =

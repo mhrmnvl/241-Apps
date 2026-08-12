@@ -1,5 +1,5 @@
 -- =====================================================================
--- Assessment: configurable weights per assessment type, a KKM per subject
+-- Assessment: configurable weights per assessment type, a passing score per subject
 -- with an optional per-class override, and a frozen per-subject snapshot on
 -- the report card.
 --
@@ -19,10 +19,10 @@
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 -- AlterTable: the school's pass mark per subject.
-ALTER TABLE "subjects" ADD COLUMN "kkm" INTEGER NOT NULL DEFAULT 75;
+ALTER TABLE "subjects" ADD COLUMN "passing_score" INTEGER NOT NULL DEFAULT 75;
 
 -- AlterTable: a teacher's override of it, for one class only.
-ALTER TABLE "teaching_assignments" ADD COLUMN "kkm" INTEGER;
+ALTER TABLE "teaching_assignments" ADD COLUMN "passing_score" INTEGER;
 
 -- CreateTable
 CREATE TABLE "assessment_weights" (
@@ -50,7 +50,7 @@ CREATE TABLE "report_card_subjects" (
     "subject_code" VARCHAR(20),
     "subject_name" VARCHAR(100) NOT NULL,
     "score" DOUBLE PRECISION NOT NULL,
-    "kkm" INTEGER NOT NULL,
+    "passing_score" INTEGER NOT NULL,
     "predicate" VARCHAR(2) NOT NULL,
     "description" VARCHAR(50) NOT NULL,
     "is_complete" BOOLEAN NOT NULL,

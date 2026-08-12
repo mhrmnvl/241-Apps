@@ -115,7 +115,7 @@ model ReportCard {
 ///
 /// Deliberately a stored snapshot rather than a view over StudentScore: a
 /// published report card is a document that has been handed to a parent, and
-/// it must keep saying what it said even after a KKM is revised, a weight is
+/// it must keep saying what it said even after a passing score is revised, a weight is
 /// retuned, or a subject is renamed. That is also why the subject's name and
 /// code are copied in rather than read through the relation.
 model ReportCardSubject {
@@ -126,13 +126,13 @@ model ReportCardSubject {
   subjectCode String? @map("subject_code") @db.VarChar(20)
   subjectName String  @map("subject_name") @db.VarChar(100)
 
-  score Float
-  /// The KKM this line was judged against, copied from the teaching
+  score        Float
+  /// The passing score this line was judged against, copied from the teaching
   /// assignment's override or the subject's default at generation time.
-  kkm         Int
-  predicate   String  @db.VarChar(2)
-  description String  @db.VarChar(50)
-  isComplete  Boolean @map("is_complete")
+  passingScore Int     @map("passing_score")
+  predicate    String  @db.VarChar(2)
+  description  String  @db.VarChar(50)
+  isComplete   Boolean @map("is_complete")
 
   reportCard ReportCard @relation(fields: [reportCardId], references: [id], onDelete: Cascade)
   subject    Subject    @relation(fields: [subjectId], references: [id])

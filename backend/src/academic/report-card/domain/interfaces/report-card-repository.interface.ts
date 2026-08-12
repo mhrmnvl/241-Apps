@@ -22,7 +22,7 @@ export interface ReportCardSubjectInput {
   subjectCode?: string | null;
   subjectName: string;
   score: number;
-  kkm: number;
+  passingScore: number;
   predicate: string;
   description: string;
   isComplete: boolean;

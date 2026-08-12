@@ -187,7 +187,7 @@ function formatType(type: string): string {
                   <td
                     class="px-3 py-2 text-right font-mono text-muted-foreground"
                   >
-                    {{ subject.kkm }}
+                    {{ subject.passingScore }}
                   </td>
                   <td class="px-3 py-2 text-right font-mono font-semibold">
                     {{ Number(subject.score).toFixed(2) }}

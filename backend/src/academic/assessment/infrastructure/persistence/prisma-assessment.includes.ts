@@ -55,7 +55,7 @@ export type StudentScoreWithDetails = Prisma.StudentScoreGetPayload<{
  */
 // Carries everything a report card needs to grade a score without a second
 // query: the item's own maximum and within-type weight, the subject and its
-// KKM, and the teacher's per-type weights plus any KKM they set for this class.
+// passing score, and the teacher's per-type weights plus any passing score they set for this class.
 export const REPORT_CARD_SCORE_INCLUDE = {
   assessmentItem: {
     include: {

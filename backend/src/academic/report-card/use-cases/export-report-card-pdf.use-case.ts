@@ -51,7 +51,7 @@ export class ExportReportCardPdfUseCase {
 
     // Printed from the lines stored when the card was generated, never
     // recomputed. A published card must keep printing what it said even after
-    // a KKM is revised or a weight retuned.
+    // a passing score is revised or a weight retuned.
     const subjectsData: SubjectGradeRow[] = (reportCard.subjects ?? []).map(
       (subject, index) => ({
         no: index + 1,
@@ -60,7 +60,7 @@ export class ExportReportCardPdfUseCase {
         name: subject.subjectName,
         score: subject.score.toFixed(2),
         scoreValue: subject.score,
-        kkm: subject.kkm,
+        passingScore: subject.passingScore,
         predicate: subject.predicate,
         description: subject.description,
         isComplete: subject.isComplete,

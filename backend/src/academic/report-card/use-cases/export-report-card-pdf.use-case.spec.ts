@@ -35,7 +35,7 @@ describe('ExportReportCardPdfUseCase', () => {
         subjectCode: 'IPA',
         subjectName: 'IPA',
         score: 90,
-        kkm: 75,
+        passingScore: 75,
         predicate: 'A',
         description: 'Sangat Baik',
         isComplete: true,
@@ -111,7 +111,7 @@ describe('ExportReportCardPdfUseCase', () => {
     expect(result).toEqual(Buffer.from('pdf'));
   });
 
-  // The figures are the stored ones, so revising a KKM or retuning a weight
+  // The figures are the stored ones, so revising a passing score or retuning a weight
   // afterwards cannot change a card that has already gone home.
   it('prints the stored lines rather than recalculating them', async () => {
     mockRepo.findById.mockResolvedValue(baseReportCard);

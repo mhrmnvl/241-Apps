@@ -37,15 +37,15 @@ model TimeSlot {
 }
 
 model TeachingAssignment {
-  id          String    @id @default(uuid()) @db.Uuid
-  teacherId   String    @map("teacher_id") @db.Uuid
-  classroomId String    @map("classroom_id") @db.Uuid
-  subjectId   String    @map("subject_id") @db.Uuid
-  semesterId  String    @map("semester_id") @db.Uuid
-  /// Overrides Subject.kkm for this class only. Null means follow the
+  id           String    @id @default(uuid()) @db.Uuid
+  teacherId    String    @map("teacher_id") @db.Uuid
+  classroomId  String    @map("classroom_id") @db.Uuid
+  subjectId    String    @map("subject_id") @db.Uuid
+  semesterId   String    @map("semester_id") @db.Uuid
+  /// Overrides Subject.passingScore for this class only. Null means follow the
   /// subject's school-wide default, which is the normal case.
-  kkm         Int?
-  deletedAt   DateTime? @map("deleted_at")
+  passingScore Int?      @map("passing_score")
+  deletedAt    DateTime? @map("deleted_at")
 
   teacher   Teacher   @relation(fields: [teacherId], references: [id])
   classroom Classroom @relation(fields: [classroomId], references: [id])

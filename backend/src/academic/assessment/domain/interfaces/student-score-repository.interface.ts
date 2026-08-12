@@ -28,13 +28,13 @@ export interface ReportCardScoreRow {
     maxScore?: number | null;
     teachingAssignment: {
       id: string;
-      /** Overrides the subject's KKM for this class only. */
-      kkm?: number | null;
+      /** Overrides the subject's passing score for this class only. */
+      passingScore?: number | null;
       subject: {
         id: string;
         name: string;
         code?: string | null;
-        kkm: number;
+        passingScore: number;
       };
       assessmentWeights: { type: AssessmentType; weight: number }[];
     };

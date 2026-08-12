@@ -31,7 +31,7 @@ export class UpdateTeachingAssignmentDto {
 
   @ApiPropertyOptional({
     description:
-      "Overrides the subject's KKM for this class only. Send null to fall back to the subject default.",
+      "Overrides the subject's passing score for this class only. Send null to fall back to the subject default.",
     example: 72,
     nullable: true,
   })
@@ -40,5 +40,5 @@ export class UpdateTeachingAssignmentDto {
   @IsInt()
   @Min(0)
   @Max(100)
-  kkm?: number | null;
+  passingScore?: number | null;
 }

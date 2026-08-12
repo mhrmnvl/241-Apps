@@ -32,7 +32,7 @@ export class GenerateReportCardUseCase {
   /**
    * Regroups a student's scores into one input per subject.
    *
-   * The KKM and the type weights are read off the teaching assignment that
+   * The passing score and the type weights are read off the teaching assignment that
    * owns each score, so two classes of the same subject can be graded on
    * different terms without either knowing about the other.
    */
@@ -57,7 +57,7 @@ export class GenerateReportCardUseCase {
           subjectId: subject.id,
           subjectCode: subject.code ?? null,
           subjectName: subject.name,
-          kkm: assignment.kkm ?? subject.kkm,
+          passingScore: assignment.passingScore ?? subject.passingScore,
           typeWeights,
           assessments: [],
         };
@@ -118,7 +118,7 @@ export class GenerateReportCardUseCase {
         subjectCode: row.code || null,
         subjectName: row.name,
         score: row.scoreValue,
-        kkm: row.kkm,
+        passingScore: row.passingScore,
         predicate: row.predicate,
         description: row.description,
         isComplete: row.isComplete,
