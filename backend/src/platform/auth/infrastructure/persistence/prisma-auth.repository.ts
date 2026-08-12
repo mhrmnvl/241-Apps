@@ -6,7 +6,10 @@ import {
   UpdateSessionTokenData,
 } from '../../types/auth-session.types.js';
 import { IAuthRepository } from '../../domain/interfaces/auth-repository.interface.js';
-import { PROFILE_NAME_SELECT } from '../../../../shared/domain/prisma-selects.js';
+import {
+  PROFILE_NAME_SELECT,
+  USER_ROLES_FOR_AUTHZ_SELECT,
+} from '../../../../shared/domain/prisma-selects.js';
 
 /**
  * What a session or a reset token needs of its user, and nothing more.
@@ -49,13 +52,11 @@ export class PrismaAuthRepository extends IAuthRepository {
         // profile at all. This row is now read on every cold start of all five
         // apps, so the columns it does not need are the ones worth not reading.
         profile: PROFILE_NAME_SELECT,
-        userRoles: {
-          include: {
-            role: {
-              include: { rolePermissions: { include: { permission: true } } },
-            },
-          },
-        },
+        // Codes only. `GetProfileUseCase` maps this tree to
+        // `rp.permission.code` and reads nothing else of it, while `permission:
+        // true` carried six columns per row — 60 KB for a member of staff, on
+        // every cold start of every app.
+        userRoles: USER_ROLES_FOR_AUTHZ_SELECT,
       },
     });
   }

@@ -97,3 +97,38 @@ export const USER_DISPLAY_SELECT = {
 export const USER_ROSTER_SELECT = {
   select: { ...USER_REF_FIELDS, profile: PROFILE_ROSTER_SELECT },
 } satisfies Prisma.UserDefaultArgs;
+
+/**
+ * A person's roles, read as an authorisation answer.
+ *
+ * The identity paths ask one question of this tree — *may they do X* — and
+ * answer it from `permission.code` alone. Reading it with `include` instead
+ * carried every column of every permission: id, module, action, description and
+ * two timestamps, none of them read.
+ *
+ * That is the single largest read in the system. A member of staff holds 173
+ * permissions, at 348 bytes each: **60 KB of the 61 KB** that `GET /profiles/me`
+ * returns is this tree, and `GET /auth/me` reads the same rows on every cold
+ * start of all five applications.
+ *
+ * Not for the access-control screens. The role editor and the permission list
+ * render `module`, `action` and `description`, so they read the whole row on
+ * purpose — see `prisma-role.repository.ts` and `prisma-permission.repository.ts`.
+ * This shape is for deciding, not for displaying.
+ */
+export const USER_ROLES_FOR_AUTHZ_SELECT = {
+  select: {
+    userId: true,
+    roleId: true,
+    role: {
+      select: {
+        id: true,
+        code: true,
+        name: true,
+        rolePermissions: {
+          select: { permission: { select: { code: true } } },
+        },
+      },
+    },
+  },
+} satisfies Prisma.UserRoleDefaultArgs;

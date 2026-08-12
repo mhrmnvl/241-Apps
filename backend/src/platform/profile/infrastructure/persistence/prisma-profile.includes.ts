@@ -1,5 +1,8 @@
 import { Prisma } from '@prisma/client';
-import { USER_REF_SELECT } from '../../../../shared/domain/prisma-selects.js';
+import {
+  USER_REF_SELECT,
+  USER_ROLES_FOR_AUTHZ_SELECT,
+} from '../../../../shared/domain/prisma-selects.js';
 
 export const PROFILE_INCLUDE = {
   socialMedias: {
@@ -33,17 +36,11 @@ export type ProfileWithDetails = Prisma.ProfileGetPayload<{
 export const USER_IDENTITY_SELECT = {
   id: true,
   identifier: true,
-  userRoles: {
-    include: {
-      role: {
-        include: {
-          rolePermissions: {
-            include: { permission: true },
-          },
-        },
-      },
-    },
-  },
+  // Codes only. The frontend's own contract for this branch is
+  // `rolePermissions?: { permission: { code: string } }[]`; `permission: true`
+  // was sending six columns per row, which for a member of staff is 60 KB of
+  // the 61 KB this endpoint returns.
+  userRoles: USER_ROLES_FOR_AUTHZ_SELECT,
   profile: { include: PROFILE_INCLUDE },
   teacher: { select: { id: true } },
   student: { select: { id: true } },
