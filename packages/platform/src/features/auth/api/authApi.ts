@@ -6,11 +6,24 @@ import type {
   LogoutResponse,
   AuthChangePasswordPayload,
   ResetPasswordPayload,
+  SessionIdentity,
 } from '../types'
 
 export const authApi = {
   login: (payload: LoginPayload) => {
     return api.post<ApiEnvelope<LoginResponse>>('/auth/login', payload)
+  },
+
+  /**
+   * Who the bearer token belongs to, and what it may do.
+   *
+   * Deliberately not `/profiles/me`: that answers with the full biodata graph
+   * (addresses, achievements, enrolments, the class supervisor's own profile),
+   * which is the wrong weight for something every app loads before its router
+   * can resolve a single route.
+   */
+  me: () => {
+    return api.get<ApiEnvelope<SessionIdentity>>('/auth/me')
   },
 
   logout: () => {

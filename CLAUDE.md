@@ -178,6 +178,26 @@ configureAuth({
 })
 ```
 
+### One session, five apps
+
+The refresh cookie is set by the **backend**, on the API host — not by any
+frontend — so all five apps share one session (ADR-0010). Signing in through
+any of them signs in to all; login pages stay per-app and are simply never
+reached again. Three rules follow:
+
+- **`GET /auth/me` is the only source of "who is signed in"** — identity, roles,
+  and permissions. Both signing in and restoring a session go through
+  `authIdentityService.fetchIdentity()`, so they cannot disagree. Do not read
+  authorization from `/profiles/me`: that is the profile page's six-level graph,
+  and it is fetched after mount for display data only.
+- **`localStorage['241_auth_user']` is a per-origin cache, never the session.**
+  The key is declared once, in `@241/shared/constants/storage`. An app whose
+  cache is empty re-derives it from the cookie rather than showing a login form.
+- **Every frontend must share a registrable domain with the API.** The cookie is
+  `sameSite: 'strict'`, so a frontend on a foreign domain gets no cookie and
+  therefore no login at all — and this cannot reproduce locally, where every app
+  is `localhost`. Stated in each `apps/*/.env.example`.
+
 ### Tech stack
 
 Vue 3 (Composition API, `<script setup>`) · TypeScript · Vite · Tailwind CSS v4 ·
