@@ -20,12 +20,9 @@ export type ReferenceListKey =
   | 'occupations'
   | 'educationLevels'
 
+/**
+ * Our four words for what TanStack Query reports as `status` plus
+ * `fetchStatus`, kept so a caller can ask "is this list loading" without
+ * learning that vocabulary.
+ */
 export type ReferenceListStatus = 'idle' | 'loading' | 'ready' | 'failed'
-
-/** One held list. `items` is deliberately opaque — the cache never inspects it. */
-export interface CachedList<T = unknown> {
-  key: ReferenceListKey
-  items: T[]
-  fetchedAt: number
-  status: ReferenceListStatus
-}

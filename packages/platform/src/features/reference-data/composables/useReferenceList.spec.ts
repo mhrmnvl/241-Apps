@@ -1,25 +1,29 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { createPinia, setActivePinia } from 'pinia'
 import { useReferenceList } from './useReferenceList'
-import { useReferenceDataStore } from '../stores/referenceDataStore'
+import { queryClient, referenceQueryKey } from '../client'
 import { REFERENCE_EXPIRY_MS } from '../constants'
 
 /**
- * The four guarantees of contract C3, one test each, plus the expiry table.
+ * The four guarantees of contract C3, one test each.
  *
- * Every case counts *requests*, not values — the point of the cache is what it
+ * These now sit on top of TanStack Query rather than on a store we wrote, and
+ * they are kept for exactly that reason: they describe what the *call sites*
+ * are entitled to, so they hold whatever backs them. They caught nothing when
+ * the implementation was swapped — which is the evidence that the swap was
+ * behaviour-preserving.
+ *
+ * Every case counts *requests*, not values. The point of a cache is what it
  * does not ask for, and an assertion on the returned list would pass just as
  * well with no cache at all.
  */
 
 function countingFetcher(items: string[] = ['a', 'b']) {
-  const fetcher = vi.fn(() => Promise.resolve(items))
-  return fetcher
+  return vi.fn(() => Promise.resolve(items))
 }
 
 describe('useReferenceList', () => {
   beforeEach(() => {
-    setActivePinia(createPinia())
+    queryClient.clear()
     vi.useRealTimers()
   })
 
@@ -88,7 +92,9 @@ describe('useReferenceList', () => {
     expect(fetcher).toHaveBeenCalledTimes(2)
 
     clear()
-    expect(useReferenceDataStore().get('subjects')).toBeUndefined()
+    expect(
+      queryClient.getQueryData(referenceQueryKey('subjects')),
+    ).toBeUndefined()
     await read('subjects', fetcher)
     expect(fetcher).toHaveBeenCalledTimes(3)
   })
@@ -104,7 +110,9 @@ describe('useReferenceList', () => {
     await read('grades', countingFetcher(['VII']))
     invalidate('grades')
 
-    expect(useReferenceDataStore().get('grades')?.items).toEqual(['VII'])
+    expect(queryClient.getQueryData(referenceQueryKey('grades'))).toEqual([
+      'VII',
+    ])
   })
 
   it('rejects on failure and lets the next read retry', async () => {
@@ -121,13 +129,22 @@ describe('useReferenceList', () => {
     expect(succeeding).toHaveBeenCalledTimes(1)
   })
 
+  it('reports a list nobody has asked for as idle', () => {
+    expect(useReferenceList().statusOf('occupations')).toBe('idle')
+  })
+
   /**
-   * A key with no expiry would be read from `undefined` and compared against
-   * `NaN`, which is falsy — so the list would silently never cache.
+   * A key with no expiry would be handed `undefined` as its `staleTime`, which
+   * TanStack reads as zero — the list would silently never cache.
    */
   it('states an expiry for every list it can hold', () => {
     const entries = Object.values(REFERENCE_EXPIRY_MS)
     expect(entries.length).toBeGreaterThan(0)
     expect(entries.every((ms) => ms > 0)).toBe(true)
+  })
+
+  /** Namespaced, so adopting `useQuery` elsewhere cannot collide with these. */
+  it('namespaces its keys', () => {
+    expect(referenceQueryKey('teachers')).toEqual(['reference', 'teachers'])
   })
 })
