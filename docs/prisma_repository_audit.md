@@ -555,9 +555,17 @@ Diperbaiki di `21bb7d7`, beserta 15 tempat lain berbentuk sama, dan dijaga oleh
 `no-user-scalar-overfetch.spec.ts` yang menggagalkan build kalau `user: true`
 atau `user: { include: … }` muncul lagi.
 
-**Konsekuensi operasional**: hash itu milik guru dan sudah pernah terkirim ke
-browser siswa mana pun yang membuka `/profile` selama fitur ini hidup. Kalau
-aplikasi sudah dipakai sungguhan, pertimbangkan reset password akun guru.
+**Cakupannya lebih luas dari hash.** Perbandingan response sebelum/sesudah
+terhadap data nyata (T044) menunjukkan 27 field hilang dari cabang itu, dan
+semuanya milik wali kelas: NIK, tempat dan tanggal lahir, email pribadi, nomor
+telepon, nomor KK, dan NPWP — di samping hash bcrypt-nya. Hash-nya yang terbaca
+sebagai insiden; sisanya yang sulit disadari.
+
+**Konsekuensi operasional**: ditutup. Pemilik sistem sudah mengonfirmasi tidak
+ada dampak nyata, jadi tidak ada reset password yang perlu dijalankan. Yang
+tersisa adalah pencegahannya, dan itu sudah otomatis:
+`no-user-scalar-overfetch.spec.ts` menggagalkan build kalau bentuk ini muncul
+lagi di mana pun di bawah `src/`.
 
 ### Koreksi contoh kode di bagian "Rekomendasi"
 

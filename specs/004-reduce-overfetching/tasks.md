@@ -27,8 +27,8 @@ Monorepo: `backend/src/…` for the API, `apps/<app>/src/…` for the five front
 
 **Purpose**: Establish what "better" will be measured against, and finish the inventory the plan deliberately left open.
 
-- [ ] T001 Capture request count and total transferred for the six screens in [quickstart.md](./quickstart.md) Step 1, and write them to `specs/004-reduce-overfetching/baseline.md`
-- [ ] T002 [P] Record the size of one student row and one teacher row from the list responses in `specs/004-reduce-overfetching/baseline.md`
+- [X] T001 Capture request count and total transferred for the six screens in [quickstart.md](./quickstart.md) Step 1, and write them to `specs/004-reduce-overfetching/baseline.md`
+- [X] T002 [P] Record the size of one student row and one teacher row from the list responses in `specs/004-reduce-overfetching/baseline.md`
 - [X] T003 [P] Enumerate every view that fetches a `PAGINATION.REFERENCE_LIMIT` list in `onMounted` but reads it only inside a dialog, and append the list to `specs/004-reduce-overfetching/baseline.md` under "Dialog-only reads"
 
 **Checkpoint**: The numbers exist. Nothing after this can be judged without them.
@@ -79,7 +79,7 @@ Monorepo: `backend/src/…` for the API, `apps/<app>/src/…` for the five front
 
 - [X] T020 [US1] Confirm `grep -rn "profile: true" backend/src --include=*.ts` returns nothing outside `platform/profile` (which US4 handles)
 - [X] T021 [US1] Run `pnpm --filter backend test`, `typecheck` and `lint:strict`; all must pass unchanged
-- [ ] T022 [US1] Walk [quickstart.md](./quickstart.md) Step 2 by eye: gender on the student list, NIK and gender on the teacher list, gender in Tambah Siswa, and the avatar in every app's header
+- [X] T022 [US1] Walk [quickstart.md](./quickstart.md) Step 2 by eye: gender on the student list, NIK and gender on the teacher list, gender in Tambah Siswa, and the avatar in every app's header
 
 **Checkpoint**: Shippable on its own. Every list reads a name; three lists read the two extra columns they show; sign-in reads nothing it does not need.
 
@@ -142,7 +142,7 @@ Monorepo: `backend/src/…` for the API, `apps/<app>/src/…` for the five front
 - [X] T041 [US4] Split `USER_DETAIL_SELECT` in `backend/src/platform/profile/infrastructure/persistence/prisma-profile.includes.ts` into an identity read plus conditional teacher and student reads, per [data-model.md](./data-model.md)
 - [X] T042 [US4] Compose the three reads in `backend/src/platform/profile/infrastructure/persistence/prisma-profile.repository.ts` so `findDetailByUserId` returns a body byte-identical to the current one
 - [X] T043 [US4] Replace the depth-six `profile: true` on the classroom supervisor branch with `PROFILE_NAME_SELECT`, since only the wali kelas's name is shown
-- [ ] T044 [US4] Compare the `GET /profiles/me` response before and after T041–T043 for the same user and confirm they match field for field
+- [X] T044 [US4] Compare the `GET /profiles/me` response before and after T041–T043 for the same user and confirm they match field for field
 - [X] T045 [P] [US4] Separate `STUDENT_LIST_INCLUDE` from `STUDENT_DETAIL_INCLUDE` in `backend/src/academic/student/infrastructure/persistence/prisma-student.includes.ts` so the list carries strictly less
 - [X] T046 [P] [US4] Separate `USER_SELECT` into list and detail variants in `backend/src/academic/teacher/infrastructure/persistence/prisma-teacher.includes.ts`, dropping `createdAt` and `updatedAt` from the list
 - [X] T047 [P] [US4] Add `where: { deletedAt: null }` to the `curricula` include in `backend/src/academic/grade/infrastructure/persistence/prisma-grade-academic-year.includes.ts`, and replace the bare `grade`/`academicYear` includes with explicit selects
@@ -155,8 +155,8 @@ Monorepo: `backend/src/…` for the API, `apps/<app>/src/…` for the five front
 
 ## Phase 7: Polish
 
-- [ ] T050 Re-measure the six screens from T001 and record the results beside the baseline in `specs/004-reduce-overfetching/baseline.md`
-- [ ] T051 Confirm SC-002 to SC-004 against the two sets of numbers, and note any criterion that did not move and why
+- [X] T050 Re-measure the six screens from T001 and record the results beside the baseline in `specs/004-reduce-overfetching/baseline.md`
+- [X] T051 Confirm SC-002 to SC-004 against the two sets of numbers, and note any criterion that did not move and why
 - [X] T052 [P] Run the full gate: `pnpm typecheck`, `pnpm lint`, `pnpm lint:strict`, `pnpm format:check`, `pnpm test`, `pnpm build`, and `pnpm --filter backend validate`
 - [X] T053 [P] Update `docs/prisma_repository_audit.md` and `docs/api_fetching_audit.md` to mark the findings this feature closed, and to correct the two that were wrong
 

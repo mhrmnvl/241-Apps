@@ -227,8 +227,21 @@ flight, kedaluwarsa per-daftar, invalidasi saat tulis — masing-masing satu tes
   jadi satu key akan menyimpan jawaban satu kurikulum dan menyerahkannya ke
   kurikulum berikutnya.
 
-### Belum diverifikasi
+### Angka before/after
 
-Angka before/after (SC-002…SC-004) belum diambil — perlu browser dengan tab
-Network terhadap stack yang berjalan. Kerangkanya sudah ada di
-`specs/004-reduce-overfetching/baseline.md`.
+Sudah diambil, di lapisan Prisma dan read-only terhadap database nyata —
+bentuk query sebelum perubahan diambil dari commit `fb09b52`, lalu dijalankan
+berdampingan dengan bentuk sesudahnya untuk baris yang sama.
+
+| Layar | Sebelum | Sesudah |
+|---|---|---|
+| Daftar siswa | 1.764 byte/baris | 1.482 (−16,0%) |
+| Daftar guru | 904 byte/baris | 517 (−42,8%) |
+| `/profiles/me` (siswa) | 4.409 byte | 3.543 (−19,6%) |
+| Halaman kelola kelas | 8 request, dua gelombang | 5 request, satu gelombang (kunjungan berikutnya) |
+
+Rinciannya, termasuk yang **tidak** membaik dan alasannya, ada di
+[`specs/004-reduce-overfetching/baseline.md`](../specs/004-reduce-overfetching/baseline.md).
+
+Yang tidak diklaim: waktu muat halaman. Tidak diukur, dan bergantung pada
+jaringan antara sekolah dan Neon.
