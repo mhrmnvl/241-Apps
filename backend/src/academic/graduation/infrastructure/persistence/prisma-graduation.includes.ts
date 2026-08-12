@@ -1,11 +1,12 @@
 import { Prisma } from '@prisma/client';
+import { PROFILE_NAME_SELECT } from '../../../../shared/domain/prisma-selects.js';
 
 export const GRADUATION_WITH_DETAILS_INCLUDE = {
   student: {
     include: {
       user: {
         include: {
-          profile: true,
+          profile: PROFILE_NAME_SELECT,
         },
       },
     },

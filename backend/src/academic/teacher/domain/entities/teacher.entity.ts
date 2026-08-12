@@ -1,5 +1,6 @@
 import type {
   NamedRef,
+  ProfileRosterRef,
   UserRef,
 } from '../../../../shared/domain/entities/index.js';
 import type { AddressEntity } from '../../../../shared/domain/entities/index.js';
@@ -30,4 +31,23 @@ export interface TeacherWithDetails extends TeacherEntity {
   teachingAssignments?: TeacherAssignmentRef[];
 }
 
-export type TeacherListWithDetails = TeacherWithDetails;
+/** The list shows a name, a gender and a NIK — see PROFILE_ROSTER_SELECT. */
+export type TeacherListWithDetails = Omit<TeacherWithDetails, 'user'> & {
+  user: UserRef<ProfileRosterRef>;
+};
+
+/**
+ * The spreadsheet export has a column per personal field, so it reads them.
+ * Declared here rather than widening a shared shape, because it is the only
+ * caller that needs this width.
+ */
+export interface TeacherExportProfileRef extends ProfileRosterRef {
+  birthPlace: string;
+  birthDate: Date;
+  email: string | null;
+  phone: string | null;
+}
+
+export type TeacherExportWithDetails = Omit<TeacherWithDetails, 'user'> & {
+  user: UserRef<TeacherExportProfileRef>;
+};

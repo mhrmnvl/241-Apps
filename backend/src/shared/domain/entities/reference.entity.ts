@@ -11,30 +11,45 @@ import { UserGender } from '../enums/user-gender.enum.js';
  * Enum-typed columns use the value union (`` `${Enum}` ``) because persistence
  * returns plain strings and a TS string enum is nominal.
  */
-export interface ProfileRef {
-  id: string;
+/**
+ * The three profile projections, mirroring the three query shapes in
+ * `shared/domain/prisma-selects.ts`. A row can only describe what was actually
+ * selected, so a query narrowed to a name must be typed as a name.
+ */
+
+/** A person as a label — what most joins need. */
+export interface ProfileNameRef {
   name: string;
-  nik: string;
-  gender: `${UserGender}`;
-  birthPlace: string;
-  birthDate: Date;
-  email: string | null;
-  phone: string | null;
-  avatarFileId: string | null;
 }
 
-export interface UserRef {
+/** A person shown with their picture. The URL is derived from the storage key. */
+export interface ProfileDisplayRef extends ProfileNameRef {
+  avatarFile?: { storageKey: string } | null;
+}
+
+/** A person on a roster whose list shows gender, and for teachers the NIK. */
+export interface ProfileRosterRef extends ProfileNameRef {
+  nik: string;
+  gender: `${UserGender}`;
+}
+
+/**
+ * Defaulted to the name projection because that is what nearly every join
+ * selects. A roster or display join states its shape:
+ * `PersonRef<ProfileRosterRef>`.
+ */
+export interface UserRef<TProfile = ProfileNameRef> {
   id: string;
   identifier: string;
   isActive: boolean;
-  profile?: ProfileRef | null;
+  profile?: TProfile | null;
 }
 
 /** A person row reached through its user account, e.g. a student or teacher. */
-export interface PersonRef {
+export interface PersonRef<TProfile = ProfileNameRef> {
   id: string;
   userId: string;
-  user?: UserRef;
+  user?: UserRef<TProfile>;
 }
 
 export interface GradeRef {

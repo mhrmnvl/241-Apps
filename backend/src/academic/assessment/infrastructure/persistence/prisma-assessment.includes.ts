@@ -1,4 +1,5 @@
 import { Prisma } from '@prisma/client';
+import { PROFILE_NAME_SELECT } from '../../../../shared/domain/prisma-selects.js';
 
 export const ASSESSMENT_ITEM_WITH_DETAILS_INCLUDE = {
   teachingAssignment: {
@@ -9,7 +10,7 @@ export const ASSESSMENT_ITEM_WITH_DETAILS_INCLUDE = {
         include: {
           user: {
             include: {
-              profile: true,
+              profile: PROFILE_NAME_SELECT,
             },
           },
         },
@@ -34,7 +35,7 @@ export const STUDENT_SCORE_WITH_DETAILS_INCLUDE = {
         include: {
           user: {
             include: {
-              profile: true,
+              profile: PROFILE_NAME_SELECT,
             },
           },
         },

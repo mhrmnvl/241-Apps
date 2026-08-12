@@ -5,6 +5,7 @@ import {
   UpdateSessionTokenData,
 } from '../../types/auth-session.types.js';
 import { IAuthRepository } from '../../domain/interfaces/auth-repository.interface.js';
+import { PROFILE_NAME_SELECT } from '../../../../shared/domain/prisma-selects.js';
 
 @Injectable()
 export class PrismaAuthRepository extends IAuthRepository {
@@ -29,7 +30,11 @@ export class PrismaAuthRepository extends IAuthRepository {
     return this.prisma.user.findUnique({
       where: { id: userId },
       include: {
-        profile: true,
+        // Name only: the two callers are GET /auth/me, which returns the name
+        // and nothing else of the profile, and change-password, which reads no
+        // profile at all. This row is now read on every cold start of all five
+        // apps, so the columns it does not need are the ones worth not reading.
+        profile: PROFILE_NAME_SELECT,
         userRoles: {
           include: {
             role: {

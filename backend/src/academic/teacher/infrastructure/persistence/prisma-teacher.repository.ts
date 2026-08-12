@@ -8,9 +8,11 @@ import type {
 } from '../../../../platform/profile/domain/entities/profile.entity.js';
 import { ITeacherRepository } from '../../domain/interfaces/teacher-repository.interface.js';
 import {
+  TEACHER_EXPORT_INCLUDE,
   TEACHER_LIST_INCLUDE,
   TEACHER_DETAIL_INCLUDE,
   TeacherWithDetails,
+  TeacherExportWithDetails,
   TeacherListWithDetails,
 } from './prisma-teacher.includes.js';
 import type {
@@ -69,10 +71,10 @@ export class PrismaTeacherRepository extends ITeacherRepository {
 
   async findAllForExport(
     filters: ExportTeacherQueryInput,
-  ): Promise<TeacherListWithDetails[]> {
+  ): Promise<TeacherExportWithDetails[]> {
     return this.prisma.teacher.findMany({
       where: buildTeacherExportWhere(filters),
-      include: TEACHER_LIST_INCLUDE,
+      include: TEACHER_EXPORT_INCLUDE,
       orderBy: { user: { profile: { name: 'asc' } } },
     });
   }

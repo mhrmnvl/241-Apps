@@ -1,4 +1,5 @@
 import { Prisma } from '@prisma/client';
+import { PROFILE_NAME_SELECT } from '../../../shared/domain/prisma-selects.js';
 
 export const WAVE_WITH_DETAILS_INCLUDE = {
   academicYear: true,
@@ -16,7 +17,7 @@ export type WaveWithDetails = Prisma.AdmissionWaveGetPayload<{
 export const APPLICATION_WITH_DETAILS_INCLUDE = {
   user: {
     include: {
-      profile: true,
+      profile: PROFILE_NAME_SELECT,
     },
   },
   wave: { include: { academicYear: true } },

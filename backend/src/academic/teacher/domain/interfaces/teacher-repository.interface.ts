@@ -11,6 +11,7 @@ import {
 import { TeacherEntity } from '../entities/teacher.entity.js';
 import {
   TeacherWithDetails,
+  TeacherExportWithDetails,
   TeacherListWithDetails,
 } from '../entities/teacher.entity.js';
 
@@ -62,7 +63,7 @@ export abstract class ITeacherRepository {
   ): Promise<PaginatedResult<TeacherListWithDetails>>;
   abstract findAllForExport(
     filters: ExportTeacherQueryInput,
-  ): Promise<TeacherListWithDetails[]>;
+  ): Promise<TeacherExportWithDetails[]>;
   abstract findById(id: string): Promise<TeacherWithDetails | null>;
   abstract findUserByIdentifier(identifier: string): Promise<UserEntity | null>;
   abstract findProfileByNik(nik: string): Promise<ProfileEntity | null>;

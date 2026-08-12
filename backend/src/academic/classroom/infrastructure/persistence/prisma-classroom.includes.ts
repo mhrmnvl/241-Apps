@@ -1,4 +1,5 @@
 import { Prisma } from '@prisma/client';
+import { PROFILE_NAME_SELECT } from '../../../../shared/domain/prisma-selects.js';
 
 export const CLASSROOM_WITH_DETAILS_INCLUDE = {
   grade: true,
@@ -21,7 +22,7 @@ export const SUPERVISOR_WITH_DETAILS_INCLUDE = {
     include: {
       user: {
         include: {
-          profile: true,
+          profile: PROFILE_NAME_SELECT,
         },
       },
     },
@@ -43,7 +44,7 @@ export const STRUCTURE_WITH_DETAILS_INCLUDE = {
     include: {
       user: {
         include: {
-          profile: true,
+          profile: PROFILE_NAME_SELECT,
         },
       },
     },
@@ -52,7 +53,7 @@ export const STRUCTURE_WITH_DETAILS_INCLUDE = {
     include: {
       user: {
         include: {
-          profile: true,
+          profile: PROFILE_NAME_SELECT,
         },
       },
     },
@@ -61,7 +62,7 @@ export const STRUCTURE_WITH_DETAILS_INCLUDE = {
     include: {
       user: {
         include: {
-          profile: true,
+          profile: PROFILE_NAME_SELECT,
         },
       },
     },
@@ -70,7 +71,7 @@ export const STRUCTURE_WITH_DETAILS_INCLUDE = {
     include: {
       user: {
         include: {
-          profile: true,
+          profile: PROFILE_NAME_SELECT,
         },
       },
     },

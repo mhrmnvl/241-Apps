@@ -1,4 +1,5 @@
 import { Prisma } from '@prisma/client';
+import { PROFILE_NAME_SELECT } from '../../../../shared/domain/prisma-selects.js';
 
 export const ATTENDANCE_WITH_DETAILS_INCLUDE = {
   schedule: {
@@ -17,7 +18,7 @@ export const ATTENDANCE_WITH_DETAILS_INCLUDE = {
         include: {
           user: {
             include: {
-              profile: true,
+              profile: PROFILE_NAME_SELECT,
             },
           },
         },

@@ -1,4 +1,5 @@
 import { Prisma } from '@prisma/client';
+import { PROFILE_ROSTER_SELECT } from '../../../../shared/domain/prisma-selects.js';
 
 export const STUDENT_INCLUDE = {
   user: {
@@ -8,7 +9,7 @@ export const STUDENT_INCLUDE = {
       isActive: true,
       createdAt: true,
       updatedAt: true,
-      profile: true,
+      profile: PROFILE_ROSTER_SELECT,
     },
   },
   grade: true,

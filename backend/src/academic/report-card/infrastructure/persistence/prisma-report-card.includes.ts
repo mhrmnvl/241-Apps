@@ -1,4 +1,5 @@
 import { Prisma } from '@prisma/client';
+import { PROFILE_NAME_SELECT } from '../../../../shared/domain/prisma-selects.js';
 
 export const REPORT_CARD_WITH_DETAILS_INCLUDE = {
   enrollment: {
@@ -7,7 +8,7 @@ export const REPORT_CARD_WITH_DETAILS_INCLUDE = {
         include: {
           user: {
             include: {
-              profile: true,
+              profile: PROFILE_NAME_SELECT,
             },
           },
         },

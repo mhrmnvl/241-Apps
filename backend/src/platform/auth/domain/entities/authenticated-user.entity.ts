@@ -8,7 +8,8 @@ export interface UserWithProfileAndRoles {
   createdAt: Date;
   updatedAt: Date;
   deletedAt?: Date | null;
-  profile?: { id: string; userId: string; name: string } | null;
+  /** Narrowed to the name: the session reads nothing else of the profile. */
+  profile?: { name: string } | null;
   userRoles?: {
     roleId: string;
     role: {
