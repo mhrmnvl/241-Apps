@@ -25,6 +25,7 @@
     "@241/ui": "workspace:*",
     "@internationalized/date": "^3.12.2",
     "@tailwindcss/vite": "^4.3.0",
+    "@tanstack/vue-query": "^5.101.4",
     "@tanstack/vue-table": "^8.21.3",
     "@tiptap/extension-image": "^3.29.2",
     "@tiptap/extension-link": "^3.29.2",

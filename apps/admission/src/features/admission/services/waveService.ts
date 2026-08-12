@@ -3,6 +3,7 @@ import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
 import { admissionApi } from '../api/admissionApi'
 import { useWaveStore } from '../stores/waveStore'
 import type { WaveSavePayload } from '../types'
+import { useReferenceList } from '@/features/platform/reference-data'
 
 export const waveService = {
   fetchWaves: async () => {
@@ -41,6 +42,8 @@ export const waveService = {
         await admissionApi.createWave(payload)
         toast.success('Gelombang baru berhasil dibuat.')
       }
+      // The dropdowns elsewhere are now out of date.
+      useReferenceList().invalidate('admissionWaves')
       return { success: true }
     } catch (error: unknown) {
       store.formError = getIndonesianErrorMessage(
@@ -58,6 +61,8 @@ export const waveService = {
     try {
       await admissionApi.deleteWave(id)
       toast.success('Gelombang dihapus.')
+      // The dropdowns elsewhere are now out of date.
+      useReferenceList().invalidate('admissionWaves')
       return { success: true }
     } catch (error: unknown) {
       const msg = getIndonesianErrorMessage(error, 'Gagal menghapus gelombang.')

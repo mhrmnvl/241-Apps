@@ -10,7 +10,9 @@ import type { ReferenceListKey, ReferenceListStatus } from '../types'
  *
  * - **Read-through** — `fetchQuery` resolves with the list or rejects. It never
  *   returns an empty array meaning "not loaded yet", which is what makes a
- *   select silently render no options.
+ *   select silently render no options. The value need not be an array:
+ *   inventory's categories, conditions and locations arrive as one object from
+ *   one endpoint, and that object is the entry.
  * - **Single flight** — two callers asking for the same key while a request is
  *   in flight share it; TanStack deduplicates on the query key.
  * - **Bounded staleness** — `staleTime` per list, from the table in
@@ -32,8 +34,8 @@ import type { ReferenceListKey, ReferenceListStatus } from '../types'
 export function useReferenceList() {
   async function read<T>(
     key: ReferenceListKey,
-    fetcher: () => Promise<T[]>,
-  ): Promise<T[]> {
+    fetcher: () => Promise<T>,
+  ): Promise<T> {
     return queryClient.fetchQuery({
       queryKey: referenceQueryKey(key),
       queryFn: fetcher,

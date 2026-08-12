@@ -3,19 +3,24 @@ import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
 import { admissionApi } from '../api/admissionApi'
 import { useAnnouncementStore } from '../stores/announcementStore'
 import type { AnnouncementSavePayload } from '../types'
+import { useReferenceList } from '@/features/platform/reference-data'
 
 export const announcementService = {
   fetchData: async () => {
     const store = useAnnouncementStore()
     store.loading = true
     try {
-      const [annRes, waveRes] = await Promise.all([
+      const [annRes, waves] = await Promise.all([
         admissionApi.getManageAnnouncements({ limit: 100 }),
-        admissionApi.getWaves({ limit: 100 }),
+        // The wave list is a dropdown here, not the thing being managed.
+        useReferenceList().read('admissionWaves', async () => {
+          const res = await admissionApi.getWaves({ limit: 100 })
+          return res.data.data ?? []
+        }),
       ])
       store.announcements = annRes.data.data ?? []
       store.totalItems = annRes.data.meta?.total ?? store.announcements.length
-      store.waves = waveRes.data.data ?? []
+      store.waves = waves
     } catch (error: unknown) {
       toast.error(getIndonesianErrorMessage(error, 'Gagal memuat pengumuman.'))
     } finally {

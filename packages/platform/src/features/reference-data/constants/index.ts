@@ -30,4 +30,20 @@ export const REFERENCE_EXPIRY_MS: Record<ReferenceListKey, number> = {
 
   classrooms: 5 * MINUTE,
   teachers: 5 * MINUTE,
+
+  // Presence reads people through its lookup layer, filtered to the active
+  // ones. Same volatility as the academic roster, different query.
+  employees: 5 * MINUTE,
+  students: 5 * MINUTE,
+  calendarTypes: 60 * MINUTE,
+
+  // Inventory's categories, conditions and locations arrive as one bundle from
+  // `/inventory/metadata`, and are edited while the asset register is set up.
+  inventoryMetadata: 10 * MINUTE,
+
+  // Admission waves change at the boundaries of an intake, not during one.
+  admissionWaves: 30 * MINUTE,
+
+  portalCategories: 10 * MINUTE,
+  portalPublicCategories: 10 * MINUTE,
 }

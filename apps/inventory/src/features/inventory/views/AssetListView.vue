@@ -32,6 +32,7 @@ import type {
   AssetQueryParams,
 } from '../types'
 import { createColumns } from '../components/columns'
+import { inventoryReferenceService } from '../services/inventoryReferenceService'
 
 const { can } = useRoleGuard()
 const router = useRouter()
@@ -144,9 +145,9 @@ async function fetchAssets() {
 
 async function fetchMetadata() {
   try {
-    const response = await inventoryApi.getInventoryMetadata()
-    if (response.data?.data) {
-      metadata.value = response.data.data
+    const data = await inventoryReferenceService.fetchMetadata()
+    if (data) {
+      metadata.value = data
     }
   } catch (e) {
     toast.error(

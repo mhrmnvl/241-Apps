@@ -1,4 +1,5 @@
 import { lookupApi } from '../api/lookupApi'
+import { useReferenceList } from '@/features/platform/reference-data'
 import type {
   AcademicYearOption,
   CalendarEntry,
@@ -19,35 +20,51 @@ import type {
  * These functions throw on failure. Every caller already wraps the load in its
  * own try/catch with a view-specific message, so swallowing the error here
  * would only hide it.
+ *
+ * The four whole-list reads are held for the session. `listEmployees` alone is
+ * called from four places — salary assignment, the credential dialog, manual
+ * attendance entry and work-pattern assignment — each of which was fetching the
+ * entire staff roster over academic's HTTP API every time it opened.
+ *
+ * `listCalendarEntries` is not held: it is narrowed by year and type, so one
+ * key would serve one year's holidays to another.
  */
 export const lookupService = {
   /** Staff and teachers — the people who have work patterns and salaries. */
   listEmployees: async (): Promise<PersonOption[]> => {
-    const res = await lookupApi.getTeachers()
-    return (res.data?.data ?? []).map((teacher) => ({
-      userId: teacher.user.id,
-      name: teacher.user.profile.name,
-      identifier: teacher.nip ?? teacher.user.identifier,
-    }))
+    return useReferenceList().read('employees', async () => {
+      const res = await lookupApi.getTeachers()
+      return (res.data?.data ?? []).map((teacher) => ({
+        userId: teacher.user.id,
+        name: teacher.user.profile.name,
+        identifier: teacher.nip ?? teacher.user.identifier,
+      }))
+    })
   },
 
   listStudents: async (): Promise<PersonOption[]> => {
-    const res = await lookupApi.getStudents()
-    return (res.data?.data ?? []).map((student) => ({
-      userId: student.user.id,
-      name: student.user.profile.name,
-      identifier: student.user.identifier,
-    }))
+    return useReferenceList().read('students', async () => {
+      const res = await lookupApi.getStudents()
+      return (res.data?.data ?? []).map((student) => ({
+        userId: student.user.id,
+        name: student.user.profile.name,
+        identifier: student.user.identifier,
+      }))
+    })
   },
 
   listAcademicYears: async (): Promise<AcademicYearOption[]> => {
-    const res = await lookupApi.getAcademicYears()
-    return res.data?.data ?? []
+    return useReferenceList().read('academicYears', async () => {
+      const res = await lookupApi.getAcademicYears()
+      return res.data?.data ?? []
+    })
   },
 
   listCalendarTypes: async (): Promise<CalendarTypeOption[]> => {
-    const res = await lookupApi.getCalendarTypes()
-    return res.data?.data ?? []
+    return useReferenceList().read('calendarTypes', async () => {
+      const res = await lookupApi.getCalendarTypes()
+      return res.data?.data ?? []
+    })
   },
 
   listCalendarEntries: async (

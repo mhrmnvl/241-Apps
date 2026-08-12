@@ -36,6 +36,7 @@ import {
   DialogTitle,
 } from '@/ui/dialog'
 import { ChevronLeft, Plus, Printer } from 'lucide-vue-next'
+import { inventoryReferenceService } from '../services/inventoryReferenceService'
 
 const router = useRouter()
 const route = useRoute()
@@ -55,12 +56,12 @@ const metadata = ref<InventoryMetadata>({
 
 async function loadMetadataAndAsset() {
   try {
-    const [metaRes, assetRes] = await Promise.all([
-      inventoryApi.getInventoryMetadata(),
+    const [meta, assetRes] = await Promise.all([
+      inventoryReferenceService.fetchMetadata(),
       inventoryApi.getAssetById(assetId),
     ])
-    if (metaRes.data?.data) {
-      metadata.value = metaRes.data.data
+    if (meta) {
+      metadata.value = meta
     }
     if (assetRes.data?.data) {
       asset.value = assetRes.data.data

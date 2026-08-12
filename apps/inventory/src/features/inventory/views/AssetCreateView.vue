@@ -9,6 +9,7 @@ import type { InventoryMetadata, AssetSavePayload } from '../types'
 import AssetForm from '../components/AssetForm.vue'
 import { Button } from '@/ui'
 import { ChevronLeft } from 'lucide-vue-next'
+import { inventoryReferenceService } from '../services/inventoryReferenceService'
 
 const router = useRouter()
 const isSaving = ref(false)
@@ -22,9 +23,9 @@ const metadata = ref<InventoryMetadata>({
 
 async function loadMetadata() {
   try {
-    const response = await inventoryApi.getInventoryMetadata()
-    if (response.data?.data) {
-      metadata.value = response.data.data
+    const data = await inventoryReferenceService.fetchMetadata()
+    if (data) {
+      metadata.value = data
     }
   } catch {
     toast.error('Gagal memuat metadata referensi.')
