@@ -2,8 +2,9 @@
 import { teacherApi } from '@/features/academic/teacher'
 import { PAGINATION } from '@/shared/constants/pagination'
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
-import { Card, CardDescription, CardHeader, CardTitle } from '@/ui/card'
+import { DataTable, DatePicker } from '@/ui'
 import { Button } from '@/ui/button'
+import { Card, CardHeader, CardTitle } from '@/ui/card'
 import {
   Dialog,
   DialogContent,
@@ -12,7 +13,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/ui/dialog'
-import { Input } from '@/ui/input'
 import { Label } from '@/ui/label'
 import {
   Select,
@@ -21,17 +21,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/ui/select'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/ui/table'
 import { Plus } from 'lucide-vue-next'
 import { computed, onMounted, ref } from 'vue'
 import { toast } from 'vue-sonner'
+import {
+  createCurrentAssignmentColumns,
+  createHistoryAssignmentColumns,
+} from '../components/workPatternAssignmentColumns'
 import {
   assignments,
   loading,
@@ -39,11 +35,7 @@ import {
   workPatternService,
 } from '../services/workPatternService'
 
-interface EmployeeOption {
-  userId: string
-  name: string
-  identifier: string
-}
+import type { EmployeeOption } from '../types'
 
 const employees = ref<EmployeeOption[]>([])
 const dialogOpen = ref(false)
@@ -67,6 +59,9 @@ const current = computed(() =>
 const superseded = computed(() =>
   assignments.value.filter((assignment) => assignment.effectiveTo !== null),
 )
+
+const currentColumns = computed(() => createCurrentAssignmentColumns())
+const historyColumns = computed(() => createHistoryAssignmentColumns())
 
 async function loadEmployees() {
   try {
@@ -108,17 +103,11 @@ onMounted(async () => {
       class="overflow-hidden rounded-2xl shadow-sm shadow-black/5 ring-1 ring-black/10"
     >
       <CardHeader
-        class="flex flex-col gap-4 border-b px-6 py-5 sm:flex-row sm:items-center sm:justify-between"
+        class="flex flex-row items-center justify-between border-b px-6 py-5"
       >
-        <div>
-          <CardTitle class="text-2xl font-bold tracking-tight"
-            >Penugasan Pola Kerja</CardTitle
-          >
-          <CardDescription class="mt-1">
-            Pegawai tanpa penugasan memakai pola default — penugasan di sini
-            hanya untuk yang jam kerjanya berbeda.
-          </CardDescription>
-        </div>
+        <CardTitle class="text-2xl font-bold tracking-tight">
+          Penugasan Pola Kerja
+        </CardTitle>
         <Button @click="dialogOpen = true">
           <Plus class="mr-2 h-4 w-4" />
           Tugaskan
@@ -127,94 +116,43 @@ onMounted(async () => {
 
       <div class="p-6 space-y-6">
         <div>
-          <h2 class="mb-2 text-sm font-medium">Berlaku saat ini</h2>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Pegawai</TableHead>
-                <TableHead>Pola kerja</TableHead>
-                <TableHead>Berlaku mulai</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              <TableRow
-                v-for="assignment in current"
-                :key="assignment.id"
-              >
-                <TableCell>
-                  {{
-                    assignment.holder.displayName ??
-                    assignment.holder.identifier
-                  }}
-                </TableCell>
-                <TableCell>{{ assignment.patternName }}</TableCell>
-                <TableCell>{{
-                  assignment.effectiveFrom.slice(0, 10)
-                }}</TableCell>
-              </TableRow>
-
-              <TableRow v-if="!loading && current.length === 0">
-                <TableCell
-                  colspan="3"
-                  class="text-muted-foreground py-10 text-center"
-                >
-                  Belum ada penugasan khusus. Semua pegawai memakai pola
-                  default.
-                </TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
+          <DataTable
+            :columns="currentColumns"
+            :data="current"
+            :is-loading="loading"
+            item-label="penugasan pola kerja"
+          />
         </div>
 
-        <div v-if="superseded.length > 0">
-          <h2 class="mb-2 text-sm font-medium">Riwayat</h2>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Pegawai</TableHead>
-                <TableHead>Pola kerja</TableHead>
-                <TableHead>Periode</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              <TableRow
-                v-for="assignment in superseded"
-                :key="assignment.id"
-                class="text-muted-foreground"
-              >
-                <TableCell>
-                  {{
-                    assignment.holder.displayName ??
-                    assignment.holder.identifier
-                  }}
-                </TableCell>
-                <TableCell>{{ assignment.patternName }}</TableCell>
-                <TableCell>
-                  {{ assignment.effectiveFrom.slice(0, 10) }} —
-                  {{ assignment.effectiveTo?.slice(0, 10) }}
-                </TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
+        <div
+          v-if="superseded.length > 0"
+          class="pt-4 border-t"
+        >
+          <h3 class="mb-3 text-base font-semibold">Riwayat Penugasan</h3>
+          <DataTable
+            :columns="historyColumns"
+            :data="superseded"
+            :is-loading="loading"
+            item-label="riwayat penugasan"
+          />
         </div>
       </div>
     </Card>
 
     <Dialog v-model:open="dialogOpen">
-      <DialogContent class="sm:max-w-md">
-        <DialogHeader>
+      <DialogContent
+        class="sm:max-w-md flex flex-col gap-0 p-0 overflow-hidden"
+      >
+        <DialogHeader class="px-6 py-5 border-b shrink-0 bg-muted/20">
           <DialogTitle>Tugaskan Pola Kerja</DialogTitle>
-          <DialogDescription>
-            Penugasan sebelumnya ditutup sehari sebelum tanggal ini, sehingga
-            rekap bulan lalu tetap dihitung dengan pola yang berlaku waktu itu.
-          </DialogDescription>
+          <DialogDescription class="sr-only" />
         </DialogHeader>
 
-        <div class="space-y-3">
+        <div class="px-6 py-5 space-y-4 max-h-[70vh] overflow-y-auto">
           <div class="space-y-1.5">
             <Label>Pegawai</Label>
             <Select v-model="form.userId">
-              <SelectTrigger>
+              <SelectTrigger class="w-full">
                 <SelectValue placeholder="Pilih pegawai" />
               </SelectTrigger>
               <SelectContent>
@@ -223,7 +161,7 @@ onMounted(async () => {
                   :key="employee.userId"
                   :value="employee.userId"
                 >
-                  {{ employee.name }} — {{ employee.identifier }}
+                  {{ employee.name }}
                 </SelectItem>
               </SelectContent>
             </Select>
@@ -232,7 +170,7 @@ onMounted(async () => {
           <div class="space-y-1.5">
             <Label>Pola kerja</Label>
             <Select v-model="form.workPatternId">
-              <SelectTrigger>
+              <SelectTrigger class="w-full">
                 <SelectValue placeholder="Pilih pola kerja" />
               </SelectTrigger>
               <SelectContent>
@@ -248,16 +186,14 @@ onMounted(async () => {
           </div>
 
           <div class="space-y-1.5">
-            <Label for="assignment-from">Berlaku mulai</Label>
-            <Input
-              id="assignment-from"
-              v-model="form.effectiveFrom"
-              type="date"
-            />
+            <Label>Berlaku mulai</Label>
+            <DatePicker v-model="form.effectiveFrom" />
           </div>
         </div>
 
-        <DialogFooter>
+        <DialogFooter
+          class="px-6 py-4 border-t bg-muted/20 flex flex-row items-center justify-end gap-2 shrink-0"
+        >
           <Button
             variant="outline"
             @click="dialogOpen = false"
@@ -267,8 +203,9 @@ onMounted(async () => {
           <Button
             :disabled="saving || !form.userId || !form.workPatternId"
             @click="submit"
-            >Simpan</Button
           >
+            Simpan
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

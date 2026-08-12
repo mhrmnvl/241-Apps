@@ -1,18 +1,28 @@
 <script setup lang="ts">
-import { Card, CardDescription, CardHeader, CardTitle } from '@/ui/card'
-import { Badge } from '@/ui/badge'
+import { DataTable } from '@/ui'
 import { Button } from '@/ui/button'
+import { Card, CardHeader, CardTitle } from '@/ui/card'
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/ui/table'
-import { Check, X } from 'lucide-vue-next'
-import { onMounted, ref } from 'vue'
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/ui/dialog'
+import { Label } from '@/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/ui/select'
+import { Textarea } from '@/ui/textarea'
+import { computed, onMounted, ref } from 'vue'
 import { toast } from 'vue-sonner'
+import { useAuthStore } from '@/features/platform/auth'
+import { createLeaveApprovalColumns } from '../components/leaveApprovalColumns'
 import {
   isSaving,
   leaveService,
@@ -20,26 +30,45 @@ import {
   pendingRequests,
   requests,
 } from '../services/leaveService'
-import { STATUS_LABEL, STATUS_VARIANT } from '../types'
 
-const showAll = ref(false)
+const authStore = useAuthStore()
+const statusFilter = ref<'PENDING' | 'ALL'>('PENDING')
+const rejectOpen = ref(false)
+const rejectTargetId = ref('')
+const rejectReason = ref('')
 
-function formatDate(value: string) {
-  return new Date(value).toLocaleDateString('id-ID', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-  })
+function handleOpenReject(id: string) {
+  rejectTargetId.value = id
+  rejectReason.value = ''
+  rejectOpen.value = true
 }
 
-async function reject(id: string) {
-  const reason = window.prompt('Alasan penolakan')
-  if (!reason) {
-    toast.error('Alasan penolakan wajib diisi.')
+async function confirmReject() {
+  if (rejectReason.value.trim().length < 3) {
+    toast.error('Alasan penolakan wajib diisi (minimal 3 karakter).')
     return
   }
-  await leaveService.reject(id, reason)
+  const ok = await leaveService.reject(
+    rejectTargetId.value,
+    rejectReason.value.trim(),
+  )
+  if (ok) {
+    rejectOpen.value = false
+  }
 }
+
+const tableColumns = computed(() =>
+  createLeaveApprovalColumns(
+    (id) => void leaveService.approve(id),
+    handleOpenReject,
+    isSaving.value,
+    authStore.user?.id ?? null,
+  ),
+)
+
+const displayedData = computed(() =>
+  statusFilter.value === 'ALL' ? requests.value : pendingRequests.value,
+)
 
 onMounted(() => void leaveService.fetchRequests())
 </script>
@@ -50,112 +79,72 @@ onMounted(() => void leaveService.fetchRequests())
       class="overflow-hidden rounded-2xl shadow-sm shadow-black/5 ring-1 ring-black/4"
     >
       <CardHeader
-        class="flex flex-col gap-4 border-b px-6 py-5 sm:flex-row sm:items-center sm:justify-between"
+        class="flex flex-row items-center justify-between border-b px-6 py-5"
       >
-        <div>
-          <CardTitle class="text-2xl font-bold tracking-tight">
-            Persetujuan Izin & Cuti
-          </CardTitle>
-          <CardDescription class="mt-1">
-            Anda tidak dapat menyetujui pengajuan Anda sendiri. Pengajuan yang
-            melebihi kuota ditolak dengan menyebutkan kekurangannya.
-          </CardDescription>
-        </div>
-        <Button
-          variant="outline"
-          @click="showAll = !showAll"
-        >
-          {{ showAll ? 'Hanya yang menunggu' : 'Tampilkan semua' }}
-        </Button>
+        <CardTitle class="text-2xl font-bold tracking-tight">
+          Persetujuan Izin & Cuti
+        </CardTitle>
       </CardHeader>
 
-      <div class="p-6 space-y-4">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Pemohon</TableHead>
-              <TableHead>Jenis</TableHead>
-              <TableHead>Tanggal</TableHead>
-              <TableHead class="text-right">Hari</TableHead>
-              <TableHead>Alasan</TableHead>
-              <TableHead class="text-right">Aksi</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            <TableRow
-              v-for="request in showAll ? requests : pendingRequests"
-              :key="request.id"
-            >
-              <TableCell>{{ request.requester.displayName ?? '—' }}</TableCell>
-              <TableCell>
-                {{ request.leaveType.name }}
-                <!-- Working elsewhere, not leave — it must not read as absence. -->
-                <Badge
-                  v-if="request.leaveType.treatment === 'OFFICIAL_DUTY'"
-                  variant="outline"
-                  class="ml-1"
-                >
-                  Dinas
-                </Badge>
-              </TableCell>
-              <TableCell>
-                {{ formatDate(request.startDate) }} –
-                {{ formatDate(request.endDate) }}
-              </TableCell>
-              <TableCell class="text-right">{{
-                request.workingDayCount
-              }}</TableCell>
-              <TableCell class="max-w-xs truncate">{{
-                request.reason
-              }}</TableCell>
-              <TableCell class="space-x-1 text-right">
-                <template v-if="request.status === 'PENDING'">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    :disabled="isSaving"
-                    class="text-emerald-600"
-                    @click="leaveService.approve(request.id)"
-                  >
-                    <Check class="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    :disabled="isSaving"
-                    class="text-red-600"
-                    @click="reject(request.id)"
-                  >
-                    <X class="h-4 w-4" />
-                  </Button>
-                </template>
-                <Badge
-                  v-else
-                  :variant="STATUS_VARIANT[request.status] as 'default'"
-                >
-                  {{ STATUS_LABEL[request.status] }}
-                </Badge>
-              </TableCell>
-            </TableRow>
+      <div class="p-6 space-y-6">
+        <div class="flex flex-wrap items-center gap-3">
+          <Select v-model="statusFilter">
+            <SelectTrigger class="w-[180px]">
+              <SelectValue placeholder="Filter status..." />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="PENDING">Menunggu Persetujuan</SelectItem>
+              <SelectItem value="ALL">Semua Status</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <DataTable
+          :columns="tableColumns"
+          :data="displayedData"
+          :is-loading="loading"
+          item-label="persetujuan izin/cuti"
+        />
 
-            <TableRow
-              v-if="
-                !loading && (showAll ? requests : pendingRequests).length === 0
-              "
-            >
-              <TableCell
-                colspan="6"
-                class="text-muted-foreground py-10 text-center"
+        <Dialog v-model:open="rejectOpen">
+          <DialogContent
+            class="sm:max-w-lg flex flex-col gap-0 p-0 overflow-hidden"
+          >
+            <DialogHeader class="px-6 py-5 border-b shrink-0 bg-muted/20">
+              <DialogTitle>Tolak Pengajuan Izin / Cuti</DialogTitle>
+              <DialogDescription class="sr-only" />
+            </DialogHeader>
+
+            <div class="px-6 py-5 space-y-4 max-h-[70vh] overflow-y-auto">
+              <div class="space-y-1">
+                <Label for="reject-reason">
+                  Alasan Penolakan <span class="text-red-500">*</span>
+                </Label>
+                <Textarea
+                  id="reject-reason"
+                  v-model="rejectReason"
+                  placeholder="Tuliskan alasan penolakan pengajuan..."
+                  rows="3"
+                />
+              </div>
+            </div>
+
+            <DialogFooter class="px-6 py-4 border-t bg-muted/20">
+              <Button
+                variant="outline"
+                @click="rejectOpen = false"
               >
-                {{
-                  showAll
-                    ? 'Belum ada pengajuan.'
-                    : 'Tidak ada yang menunggu persetujuan.'
-                }}
-              </TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
+                Batal
+              </Button>
+              <Button
+                variant="destructive"
+                :disabled="isSaving"
+                @click="confirmReject"
+              >
+                Tolak Pengajuan
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </Card>
   </div>

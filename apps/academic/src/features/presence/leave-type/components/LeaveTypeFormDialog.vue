@@ -27,7 +27,7 @@ import {
 import { Switch } from '@/ui/switch'
 import { toTypedSchema } from '@vee-validate/zod'
 import { useForm } from 'vee-validate'
-import { computed, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import * as z from 'zod'
 import { isSaving, leaveTypeService } from '../services/leaveTypeService'
 import type { LeaveAppliesTo, LeaveTreatment, LeaveType } from '../types'
@@ -70,7 +70,7 @@ const formSchema = toTypedSchema(
     }),
 )
 
-const { handleSubmit, setValues, resetForm, values } = useForm({
+const { handleSubmit, setValues, setFieldValue, resetForm, values } = useForm({
   validationSchema: formSchema,
   initialValues: {
     code: '',
@@ -84,12 +84,15 @@ const { handleSubmit, setValues, resetForm, values } = useForm({
   },
 })
 
+const lastQuota = ref<number | undefined>(undefined)
+
 watch(
   () => props.open,
   (isOpen) => {
     if (!isOpen) return
 
     if (props.initialData) {
+      lastQuota.value = props.initialData.annualQuota ?? undefined
       setValues({
         code: props.initialData.code,
         name: props.initialData.name,
@@ -101,11 +104,27 @@ watch(
         isActive: props.initialData.isActive,
       })
     } else {
+      lastQuota.value = undefined
       resetForm()
     }
   },
   { immediate: true },
 )
+
+function toggleConsumesQuota(currentValue: boolean) {
+  const nextValue = !currentValue
+  if (!nextValue) {
+    if (values.annualQuota !== undefined) {
+      lastQuota.value = values.annualQuota
+    }
+    setFieldValue('annualQuota', undefined)
+  } else {
+    if (lastQuota.value !== undefined) {
+      setFieldValue('annualQuota', lastQuota.value)
+    }
+  }
+  setFieldValue('consumesQuota', nextValue)
+}
 
 const onSubmit = handleSubmit(async (form) => {
   const ok = await leaveTypeService.save(props.initialData?.id ?? null, {
@@ -131,184 +150,176 @@ const onSubmit = handleSubmit(async (form) => {
     :open="open"
     @update:open="emit('update:open', $event)"
   >
-    <DialogContent class="sm:max-w-lg">
-      <DialogHeader>
+    <DialogContent class="sm:max-w-lg flex flex-col gap-0 p-0 overflow-hidden">
+      <DialogHeader class="px-6 py-5 border-b shrink-0 bg-muted/20">
         <DialogTitle>
           {{ isEdit ? 'Ubah Jenis Izin' : 'Tambah Jenis Izin' }}
         </DialogTitle>
-        <DialogDescription>
-          Dinas Luar dicatat sebagai bekerja di luar sekolah, bukan izin —
-          sehingga tidak terbaca sebagai ketidakhadiran di rekap.
-        </DialogDescription>
+        <DialogDescription class="sr-only" />
       </DialogHeader>
 
       <form
-        class="space-y-4"
+        class="flex flex-col flex-1 overflow-hidden"
         @submit="onSubmit"
       >
-        <FormField
-          v-slot="{ componentField }"
-          name="code"
-        >
-          <FormItem>
-            <FormLabel>Kode</FormLabel>
-            <FormControl>
-              <Input
-                v-bind="componentField"
-                :disabled="isEdit"
-                placeholder="CUTI_MELAHIRKAN"
-              />
-            </FormControl>
-            <FormDescription v-if="isEdit">
-              Kode tidak dapat diubah setelah dibuat.
-            </FormDescription>
-            <FormMessage />
-          </FormItem>
-        </FormField>
-
-        <FormField
-          v-slot="{ componentField }"
-          name="name"
-        >
-          <FormItem>
-            <FormLabel>Nama</FormLabel>
-            <FormControl>
-              <Input
-                v-bind="componentField"
-                placeholder="Cuti Melahirkan"
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        </FormField>
-
-        <div class="grid grid-cols-2 gap-3">
+        <div class="px-6 py-5 space-y-4 max-h-[70vh] overflow-y-auto">
           <FormField
             v-slot="{ componentField }"
-            name="treatment"
+            name="code"
           >
             <FormItem>
-              <FormLabel>Perlakuan</FormLabel>
-              <Select v-bind="componentField">
-                <FormControl>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="ON_LEAVE">Izin/Cuti</SelectItem>
-                  <SelectItem value="OFFICIAL_DUTY">Dinas Luar</SelectItem>
-                </SelectContent>
-              </Select>
+              <FormLabel>Kode</FormLabel>
+              <FormControl>
+                <Input
+                  v-bind="componentField"
+                  :disabled="isEdit"
+                  placeholder="CUTI_MELAHIRKAN"
+                />
+              </FormControl>
+              <FormDescription v-if="isEdit">
+                Kode tidak dapat diubah setelah dibuat.
+              </FormDescription>
               <FormMessage />
             </FormItem>
           </FormField>
 
           <FormField
             v-slot="{ componentField }"
-            name="appliesTo"
+            name="name"
           >
             <FormItem>
-              <FormLabel>Berlaku untuk</FormLabel>
-              <Select v-bind="componentField">
-                <FormControl>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="EMPLOYEE">Pegawai</SelectItem>
-                  <SelectItem value="STUDENT">Siswa</SelectItem>
-                </SelectContent>
-              </Select>
+              <FormLabel>Nama</FormLabel>
+              <FormControl>
+                <Input
+                  v-bind="componentField"
+                  placeholder="Cuti Melahirkan"
+                />
+              </FormControl>
               <FormMessage />
+            </FormItem>
+          </FormField>
+
+          <div class="grid grid-cols-2 gap-3">
+            <FormField
+              v-slot="{ componentField }"
+              name="treatment"
+            >
+              <FormItem>
+                <FormLabel>Perlakuan</FormLabel>
+                <Select v-bind="componentField">
+                  <FormControl>
+                    <SelectTrigger class="w-full"
+                      ><SelectValue
+                    /></SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="ON_LEAVE">Izin/Cuti</SelectItem>
+                    <SelectItem value="OFFICIAL_DUTY">Dinas Luar</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            </FormField>
+
+            <FormField
+              v-slot="{ componentField }"
+              name="appliesTo"
+            >
+              <FormItem>
+                <FormLabel>Berlaku untuk</FormLabel>
+                <Select v-bind="componentField">
+                  <FormControl>
+                    <SelectTrigger class="w-full"
+                      ><SelectValue
+                    /></SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="EMPLOYEE">Pegawai</SelectItem>
+                    <SelectItem value="STUDENT">Siswa</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            </FormField>
+          </div>
+
+          <FormField
+            v-slot="{ value }"
+            name="consumesQuota"
+          >
+            <FormItem
+              class="flex items-center justify-between rounded-lg border p-3 cursor-pointer select-none hover:bg-accent/50 transition-colors"
+              @click="toggleConsumesQuota(Boolean(value))"
+            >
+              <span class="text-sm font-medium">Memakai kuota tahunan</span>
+              <FormControl>
+                <Switch
+                  :model-value="value"
+                  class="pointer-events-none"
+                />
+              </FormControl>
+            </FormItem>
+          </FormField>
+
+          <FormField
+            v-if="values.consumesQuota"
+            v-slot="{ componentField }"
+            name="annualQuota"
+          >
+            <FormItem>
+              <FormLabel>Kuota tahunan (hari kerja)</FormLabel>
+              <FormControl>
+                <Input
+                  v-bind="componentField"
+                  type="number"
+                  min="1"
+                  max="365"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          </FormField>
+
+          <FormField
+            v-slot="{ value, handleChange }"
+            name="requiresDocument"
+          >
+            <FormItem
+              class="flex items-center justify-between rounded-lg border p-3 cursor-pointer select-none hover:bg-accent/50 transition-colors"
+              @click="handleChange(!value)"
+            >
+              <span class="text-sm font-medium">Wajib surat pendukung</span>
+              <FormControl>
+                <Switch
+                  :model-value="value"
+                  class="pointer-events-none"
+                />
+              </FormControl>
+            </FormItem>
+          </FormField>
+
+          <FormField
+            v-slot="{ value, handleChange }"
+            name="isActive"
+          >
+            <FormItem
+              class="flex items-center justify-between rounded-lg border p-3 cursor-pointer select-none hover:bg-accent/50 transition-colors"
+              @click="handleChange(!value)"
+            >
+              <span class="text-sm font-medium">Aktif</span>
+              <FormControl>
+                <Switch
+                  :model-value="value"
+                  class="pointer-events-none"
+                />
+              </FormControl>
             </FormItem>
           </FormField>
         </div>
 
-        <FormField
-          v-slot="{ value, handleChange }"
-          name="consumesQuota"
+        <DialogFooter
+          class="px-6 py-4 border-t bg-muted/20 flex flex-row items-center justify-end gap-2 shrink-0"
         >
-          <FormItem
-            class="flex items-center justify-between rounded-lg border p-3"
-          >
-            <div class="space-y-0.5">
-              <FormLabel>Memakai kuota tahunan</FormLabel>
-              <FormDescription>
-                Pengajuan yang melebihi sisa kuota akan ditolak.
-              </FormDescription>
-            </div>
-            <FormControl>
-              <Switch
-                :model-value="value"
-                @update:model-value="handleChange"
-              />
-            </FormControl>
-          </FormItem>
-        </FormField>
-
-        <FormField
-          v-if="values.consumesQuota"
-          v-slot="{ componentField }"
-          name="annualQuota"
-        >
-          <FormItem>
-            <FormLabel>Kuota tahunan (hari kerja)</FormLabel>
-            <FormControl>
-              <Input
-                v-bind="componentField"
-                type="number"
-                min="1"
-                max="365"
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        </FormField>
-
-        <FormField
-          v-slot="{ value, handleChange }"
-          name="requiresDocument"
-        >
-          <FormItem
-            class="flex items-center justify-between rounded-lg border p-3"
-          >
-            <div class="space-y-0.5">
-              <FormLabel>Wajib surat pendukung</FormLabel>
-              <FormDescription>
-                Pengajuan tanpa lampiran akan ditolak.
-              </FormDescription>
-            </div>
-            <FormControl>
-              <Switch
-                :model-value="value"
-                @update:model-value="handleChange"
-              />
-            </FormControl>
-          </FormItem>
-        </FormField>
-
-        <FormField
-          v-slot="{ value, handleChange }"
-          name="isActive"
-        >
-          <FormItem
-            class="flex items-center justify-between rounded-lg border p-3"
-          >
-            <div class="space-y-0.5">
-              <FormLabel>Aktif</FormLabel>
-              <FormDescription>
-                Menonaktifkan menghentikan pengajuan baru tanpa menghapus
-                riwayat.
-              </FormDescription>
-            </div>
-            <FormControl>
-              <Switch
-                :model-value="value"
-                @update:model-value="handleChange"
-              />
-            </FormControl>
-          </FormItem>
-        </FormField>
-
-        <DialogFooter>
           <Button
             type="button"
             variant="outline"
@@ -319,8 +330,9 @@ const onSubmit = handleSubmit(async (form) => {
           <Button
             type="submit"
             :disabled="isSaving"
-            >Simpan</Button
           >
+            Simpan
+          </Button>
         </DialogFooter>
       </form>
     </DialogContent>

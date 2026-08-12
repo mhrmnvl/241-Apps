@@ -2,7 +2,12 @@ import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
 import { ref } from 'vue'
 import { toast } from 'vue-sonner'
 import { salaryComponentApi } from '../api/salaryComponentApi'
-import type { SalaryComponent, SalaryComponentSavePayload } from '../types'
+import type {
+  CreateSalaryComponentPayload,
+  SalaryComponent,
+  SalaryComponentSavePayload,
+  UpdateSalaryComponentPayload,
+} from '../types'
 
 export const components = ref<SalaryComponent[]>([])
 export const loading = ref(false)
@@ -28,10 +33,23 @@ export const salaryComponentService = {
     isSaving.value = true
     try {
       if (id) {
-        await salaryComponentApi.updateComponent(id, payload)
+        const updatePayload: UpdateSalaryComponentPayload = {
+          code: payload.code,
+          name: payload.name,
+          type: payload.type,
+          driver: payload.driver,
+          isActive: payload.isActive,
+        }
+        await salaryComponentApi.updateComponent(id, updatePayload)
         toast.success('Komponen gaji diperbarui.')
       } else {
-        await salaryComponentApi.createComponent(payload)
+        const createPayload: CreateSalaryComponentPayload = {
+          code: payload.code,
+          name: payload.name,
+          type: payload.type,
+          driver: payload.driver,
+        }
+        await salaryComponentApi.createComponent(createPayload)
         toast.success('Komponen gaji ditambahkan.')
       }
       await salaryComponentService.fetch()

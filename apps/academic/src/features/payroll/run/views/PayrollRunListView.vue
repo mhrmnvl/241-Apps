@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { Badge } from '@/ui/badge'
+import { DataTable } from '@/ui'
 import { Button } from '@/ui/button'
+import { Card, CardHeader, CardTitle } from '@/ui/card'
 import {
   Dialog,
   DialogContent,
@@ -18,37 +19,45 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/ui/select'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/ui/table'
 import { Plus } from 'lucide-vue-next'
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { formatPeriod, formatRupiah, MONTH_NAMES } from '../../shared/money'
+import { MONTH_NAMES } from '../../shared/money'
+import { createPayrollRunColumns } from '../components/payrollRunColumns'
 import {
   isWorking,
   loading,
   payrollRunService,
   runs,
 } from '../services/payrollRunService'
-import { RUN_KIND_LABEL, RUN_STATUS_LABEL } from '../types'
-import type { CreatePayrollRunPayload } from '../types'
+import type { CreatePayrollRunPayload, PayrollRun } from '../types'
 
 const router = useRouter()
 const dialogOpen = ref(false)
 
 const now = new Date()
+const currentYear = now.getFullYear()
+const YEAR_OPTIONS = Array.from({ length: 5 }, (_, i) => currentYear - 2 + i)
+
 const form = ref<Required<CreatePayrollRunPayload>>({
-  year: now.getFullYear(),
-  // Payroll runs the month that just closed, not the one in progress.
+  year: currentYear,
   month: now.getMonth() === 0 ? 12 : now.getMonth(),
   kind: 'ORIGINAL',
   note: '',
+})
+
+const selectedFormYear = computed({
+  get: () => String(form.value.year),
+  set: (val: string) => {
+    form.value.year = Number(val)
+  },
+})
+
+const selectedFormMonth = computed({
+  get: () => String(form.value.month),
+  set: (val: string) => {
+    form.value.month = Number(val)
+  },
 })
 
 async function create() {
@@ -65,155 +74,132 @@ async function create() {
   }
 }
 
+function handleViewDetail(run: PayrollRun) {
+  void router.push({ name: 'PayrollRunDetail', params: { id: run.id } })
+}
+
+const tableColumns = computed(() =>
+  createPayrollRunColumns((run) => handleViewDetail(run)),
+)
+
 onMounted(() => void payrollRunService.fetch())
 </script>
 
 <template>
-  <div class="space-y-4 p-4 md:p-6 lg:p-8">
-    <div class="flex items-center justify-between gap-4">
-      <div>
-        <h1 class="text-lg font-semibold">Penggajian</h1>
-        <p class="text-muted-foreground text-sm">
-          Perhitungan bulanan dari kehadiran yang sudah ditutup.
-        </p>
+  <div class="p-4 md:p-6 lg:p-8">
+    <Card
+      class="overflow-hidden rounded-2xl shadow-sm shadow-black/5 ring-1 ring-black/4"
+    >
+      <CardHeader
+        class="flex flex-row items-center justify-between border-b px-6 py-5"
+      >
+        <CardTitle class="text-2xl font-bold tracking-tight">
+          Perhitungan Gaji
+        </CardTitle>
+        <Button @click="dialogOpen = true">
+          <Plus class="mr-2 h-4 w-4" />
+          Hitung Bulan
+        </Button>
+      </CardHeader>
+
+      <div class="p-6 space-y-6">
+        <DataTable
+          :columns="tableColumns"
+          :data="runs"
+          :is-loading="loading"
+          item-label="perhitungan gaji"
+        />
       </div>
-      <Button @click="dialogOpen = true">
-        <Plus class="mr-2 h-4 w-4" />
-        Hitung bulan
-      </Button>
-    </div>
+    </Card>
+  </div>
 
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Periode</TableHead>
-          <TableHead>Jenis</TableHead>
-          <TableHead class="text-right">Pegawai</TableHead>
-          <TableHead class="text-right">Total bersih</TableHead>
-          <TableHead>Status</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        <TableRow
-          v-for="run in runs"
-          :key="run.id"
-          class="cursor-pointer"
-          @click="
-            router.push({ name: 'PayrollRunDetail', params: { id: run.id } })
-          "
-        >
-          <TableCell class="font-medium">
-            {{ formatPeriod(run.year, run.month) }}
-            <span
-              v-if="run.sequence > 1"
-              class="text-muted-foreground"
-            >
-              #{{ run.sequence }}
-            </span>
-          </TableCell>
-          <TableCell>{{ RUN_KIND_LABEL[run.kind] }}</TableCell>
-          <TableCell class="text-right">
-            {{ run.totals.employeeCount }}
-          </TableCell>
-          <TableCell class="text-right font-medium">
-            {{ formatRupiah(run.totals.net) }}
-          </TableCell>
-          <TableCell>
-            <Badge
-              :variant="run.status === 'APPROVED' ? 'default' : 'secondary'"
-            >
-              {{ RUN_STATUS_LABEL[run.status] }}
-            </Badge>
-          </TableCell>
-        </TableRow>
+  <Dialog v-model:open="dialogOpen">
+    <DialogContent class="sm:max-w-md flex flex-col gap-0 p-0 overflow-hidden">
+      <DialogHeader class="px-6 py-5 border-b shrink-0 bg-muted/20">
+        <DialogTitle>Hitung Penggajian Bulanan</DialogTitle>
+        <DialogDescription class="sr-only" />
+      </DialogHeader>
 
-        <TableRow v-if="!loading && runs.length === 0">
-          <TableCell
-            colspan="5"
-            class="text-muted-foreground py-10 text-center"
-          >
-            Belum ada penggajian.
-          </TableCell>
-        </TableRow>
-      </TableBody>
-    </Table>
-
-    <Dialog v-model:open="dialogOpen">
-      <DialogContent class="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Hitung Penggajian</DialogTitle>
-          <DialogDescription>
-            Bulan yang dihitung harus sudah ditutup di Presensi — kalau belum,
-            koreksi kehadiran masih bisa mengubah angkanya.
-          </DialogDescription>
-        </DialogHeader>
-
-        <div class="space-y-3">
-          <div class="grid grid-cols-2 gap-3">
-            <div class="space-y-1.5">
-              <Label for="run-year">Tahun</Label>
-              <Input
-                id="run-year"
-                v-model="form.year"
-                type="number"
-                min="2000"
-                max="2100"
-              />
-            </div>
-            <div class="space-y-1.5">
-              <Label>Bulan</Label>
-              <Select v-model="form.month">
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem
-                    v-for="(name, index) in MONTH_NAMES"
-                    :key="name"
-                    :value="index + 1"
-                  >
-                    {{ name }}
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
+      <div class="px-6 py-5 space-y-4 max-h-[70vh] overflow-y-auto">
+        <div class="grid grid-cols-2 gap-3">
           <div class="space-y-1.5">
-            <Label>Jenis</Label>
-            <Select v-model="form.kind">
-              <SelectTrigger><SelectValue /></SelectTrigger>
+            <Label>Tahun <span class="text-destructive">*</span></Label>
+            <Select v-model="selectedFormYear">
+              <SelectTrigger class="w-full">
+                <SelectValue placeholder="Tahun" />
+              </SelectTrigger>
               <SelectContent>
-                <SelectItem value="ORIGINAL">Utama</SelectItem>
-                <SelectItem value="ADJUSTMENT">Penyesuaian</SelectItem>
+                <SelectItem
+                  v-for="y in YEAR_OPTIONS"
+                  :key="y"
+                  :value="String(y)"
+                >
+                  {{ y }}
+                </SelectItem>
               </SelectContent>
             </Select>
-            <p class="text-muted-foreground text-xs">
-              Koreksi bulan yang sudah disetujui dibuat sebagai penyesuaian.
-            </p>
           </div>
 
           <div class="space-y-1.5">
-            <Label for="run-note">Catatan (opsional)</Label>
-            <Input
-              id="run-note"
-              v-model="form.note"
-            />
+            <Label>Bulan <span class="text-destructive">*</span></Label>
+            <Select v-model="selectedFormMonth">
+              <SelectTrigger class="w-full">
+                <SelectValue placeholder="Bulan" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem
+                  v-for="(name, index) in MONTH_NAMES"
+                  :key="name"
+                  :value="String(index + 1)"
+                >
+                  {{ name }}
+                </SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
-        <DialogFooter>
-          <Button
-            variant="outline"
-            @click="dialogOpen = false"
+        <div class="space-y-1.5">
+          <Label
+            >Jenis Perhitungan <span class="text-destructive">*</span></Label
           >
-            Batal
-          </Button>
-          <Button
-            :disabled="isWorking"
-            @click="create"
-            >Hitung</Button
-          >
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  </div>
+          <Select v-model="form.kind">
+            <SelectTrigger class="w-full">
+              <SelectValue placeholder="Pilih jenis" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ORIGINAL">Utama</SelectItem>
+              <SelectItem value="ADJUSTMENT">Penyesuaian</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div class="space-y-1.5">
+          <Label for="run-note">Catatan</Label>
+          <Input
+            id="run-note"
+            v-model="form.note"
+            placeholder="Masukkan catatan..."
+          />
+        </div>
+      </div>
+
+      <DialogFooter
+        class="px-6 py-4 border-t bg-muted/20 flex flex-row items-center justify-end gap-2 shrink-0"
+      >
+        <Button
+          variant="outline"
+          @click="dialogOpen = false"
+        >
+          Batal
+        </Button>
+        <Button
+          :disabled="isWorking"
+          @click="create"
+        >
+          Hitung
+        </Button>
+      </DialogFooter>
+    </DialogContent>
+  </Dialog>
 </template>

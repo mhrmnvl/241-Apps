@@ -136,136 +136,141 @@ const onSubmit = handleSubmit(async (form) => {
     :open="open"
     @update:open="emit('update:open', $event)"
   >
-    <DialogContent class="sm:max-w-lg">
-      <DialogHeader>
+    <DialogContent class="sm:max-w-md flex flex-col gap-0 p-0 overflow-hidden">
+      <DialogHeader class="px-6 py-5 border-b shrink-0 bg-muted/20">
         <DialogTitle>
           {{ isEdit ? 'Ubah Komponen Gaji' : 'Tambah Komponen Gaji' }}
         </DialogTitle>
-        <DialogDescription>
-          Jenis menentukan menambah atau mengurangi; dasar perhitungan
-          menentukan tetap atau dihitung dari kehadiran.
-        </DialogDescription>
+        <DialogDescription class="sr-only" />
       </DialogHeader>
 
       <form
-        class="space-y-4"
+        class="flex flex-col flex-1 min-h-0"
         @submit="onSubmit"
       >
-        <FormField
-          v-slot="{ componentField }"
-          name="code"
-        >
-          <FormItem>
-            <FormLabel>Kode</FormLabel>
-            <FormControl>
-              <Input
-                v-bind="componentField"
-                :disabled="isEdit"
-                placeholder="TUNJ_TRANSPORT"
-              />
-            </FormControl>
-            <FormDescription v-if="isEdit">
-              Kode tidak dapat diubah setelah dibuat.
-            </FormDescription>
-            <FormMessage />
-          </FormItem>
-        </FormField>
-
-        <FormField
-          v-slot="{ componentField }"
-          name="name"
-        >
-          <FormItem>
-            <FormLabel>Nama</FormLabel>
-            <FormControl>
-              <Input
-                v-bind="componentField"
-                placeholder="Tunjangan Transport"
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        </FormField>
-
-        <FormField
-          v-slot="{ componentField }"
-          name="type"
-        >
-          <FormItem>
-            <FormLabel>Jenis</FormLabel>
-            <Select v-bind="componentField">
-              <FormControl>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                <SelectItem
-                  v-for="(label, value) in COMPONENT_TYPE_LABEL"
-                  :key="value"
-                  :value="value"
-                >
-                  {{ label }}
-                </SelectItem>
-              </SelectContent>
-            </Select>
-            <FormMessage />
-          </FormItem>
-        </FormField>
-
-        <FormField
-          v-if="canBeDriven"
-          v-slot="{ componentField }"
-          name="driver"
-        >
-          <FormItem>
-            <FormLabel>Dasar perhitungan</FormLabel>
-            <Select v-bind="componentField">
-              <FormControl>
-                <SelectTrigger>
-                  <SelectValue placeholder="Pilih dasar perhitungan" />
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                <SelectItem
-                  v-for="(label, value) in DRIVER_LABEL"
-                  :key="value"
-                  :value="value"
-                >
-                  {{ label }}
-                </SelectItem>
-              </SelectContent>
-            </Select>
-            <FormDescription>
-              Nilainya nanti diisi sebagai tarif per satuan, bukan nominal
-              tetap.
-            </FormDescription>
-            <FormMessage />
-          </FormItem>
-        </FormField>
-
-        <FormField
-          v-slot="{ value, handleChange }"
-          name="isActive"
-        >
-          <FormItem
-            class="flex items-center justify-between rounded-lg border p-3"
+        <div class="px-6 py-5 space-y-4 max-h-[70vh] overflow-y-auto">
+          <FormField
+            v-slot="{ componentField }"
+            name="code"
           >
-            <div class="space-y-0.5">
-              <FormLabel>Aktif</FormLabel>
-              <FormDescription>
-                Menonaktifkan menghentikan penetapan baru tanpa mengubah slip
-                gaji yang sudah terbit.
+            <FormItem>
+              <FormLabel>
+                Kode <span class="text-destructive">*</span>
+              </FormLabel>
+              <FormControl>
+                <Input
+                  v-bind="componentField"
+                  :disabled="isEdit"
+                  placeholder="TUNJ_TRANSPORT"
+                />
+              </FormControl>
+              <FormDescription v-if="isEdit">
+                Kode tidak dapat diubah setelah dibuat.
               </FormDescription>
-            </div>
-            <FormControl>
-              <Switch
-                :model-value="value"
-                @update:model-value="handleChange"
-              />
-            </FormControl>
-          </FormItem>
-        </FormField>
+              <FormMessage />
+            </FormItem>
+          </FormField>
 
-        <DialogFooter>
+          <FormField
+            v-slot="{ componentField }"
+            name="name"
+          >
+            <FormItem>
+              <FormLabel>
+                Nama <span class="text-destructive">*</span>
+              </FormLabel>
+              <FormControl>
+                <Input
+                  v-bind="componentField"
+                  placeholder="Tunjangan Transport"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          </FormField>
+
+          <FormField
+            v-slot="{ componentField }"
+            name="type"
+          >
+            <FormItem>
+              <FormLabel>
+                Jenis <span class="text-destructive">*</span>
+              </FormLabel>
+              <Select v-bind="componentField">
+                <FormControl>
+                  <SelectTrigger class="w-full">
+                    <SelectValue placeholder="Pilih jenis komponen" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem
+                    v-for="(label, value) in COMPONENT_TYPE_LABEL"
+                    :key="value"
+                    :value="value"
+                  >
+                    {{ label }}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          </FormField>
+
+          <FormField
+            v-if="canBeDriven"
+            v-slot="{ componentField }"
+            name="driver"
+          >
+            <FormItem>
+              <FormLabel>Dasar Perhitungan</FormLabel>
+              <Select v-bind="componentField">
+                <FormControl>
+                  <SelectTrigger class="w-full">
+                    <SelectValue placeholder="Pilih dasar perhitungan" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem
+                    v-for="(label, value) in DRIVER_LABEL"
+                    :key="value"
+                    :value="value"
+                  >
+                    {{ label }}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+              <FormDescription>
+                Nilainya nanti diisi sebagai tarif per satuan, bukan nominal
+                tetap.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          </FormField>
+
+          <FormField
+            v-if="isEdit"
+            v-slot="{ value, handleChange }"
+            name="isActive"
+          >
+            <FormItem
+              class="flex items-center justify-between rounded-lg border p-3 cursor-pointer select-none"
+              @click="handleChange(!value)"
+            >
+              <FormLabel class="cursor-pointer font-medium">Aktif</FormLabel>
+              <FormControl>
+                <Switch
+                  :model-value="value"
+                  @update:model-value="handleChange"
+                />
+              </FormControl>
+            </FormItem>
+          </FormField>
+        </div>
+
+        <DialogFooter
+          class="px-6 py-4 border-t bg-muted/20 flex flex-row items-center justify-end gap-2 shrink-0"
+        >
           <Button
             type="button"
             variant="outline"
@@ -276,8 +281,9 @@ const onSubmit = handleSubmit(async (form) => {
           <Button
             type="submit"
             :disabled="isSaving"
-            >Simpan</Button
           >
+            Simpan
+          </Button>
         </DialogFooter>
       </form>
     </DialogContent>

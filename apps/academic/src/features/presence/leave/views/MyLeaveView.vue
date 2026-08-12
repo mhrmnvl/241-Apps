@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { Card, CardDescription, CardHeader, CardTitle } from '@/ui/card'
-import { Badge } from '@/ui/badge'
+import { DataTable, DatePicker } from '@/ui'
 import { Button } from '@/ui/button'
+import { Card, CardHeader, CardTitle } from '@/ui/card'
 import {
   Dialog,
   DialogContent,
@@ -10,20 +10,19 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/ui/dialog'
-import { Input } from '@/ui/input'
 import { Label } from '@/ui/label'
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/ui/table'
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/ui/select'
 import { Textarea } from '@/ui/textarea'
 import { Plus } from 'lucide-vue-next'
 import { computed, onMounted, ref } from 'vue'
 import { toast } from 'vue-sonner'
+import { createMyLeaveColumns } from '../components/myLeaveColumns'
 import {
   balances,
   leaveService,
@@ -31,13 +30,16 @@ import {
   myRequests,
   types,
 } from '../services/leaveService'
-import { STATUS_LABEL, STATUS_VARIANT } from '../types'
 
 const open = ref(false)
 const leaveTypeId = ref('')
 const startDate = ref('')
 const endDate = ref('')
 const reason = ref('')
+
+const tableColumns = createMyLeaveColumns((id: string) => {
+  void leaveService.withdraw(id)
+})
 
 const employeeTypes = computed(() =>
   types.value.filter((t) => t.appliesTo === 'EMPLOYEE'),
@@ -46,14 +48,6 @@ const employeeTypes = computed(() =>
 const selectedType = computed(() =>
   types.value.find((t) => t.id === leaveTypeId.value),
 )
-
-function formatDate(value: string) {
-  return new Date(value).toLocaleDateString('id-ID', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-  })
-}
 
 async function submit() {
   if (
@@ -92,17 +86,11 @@ onMounted(() => {
       class="overflow-hidden rounded-2xl shadow-sm shadow-black/5 ring-1 ring-black/4"
     >
       <CardHeader
-        class="flex flex-col gap-4 border-b px-6 py-5 sm:flex-row sm:items-center sm:justify-between"
+        class="flex flex-row items-center justify-between border-b px-6 py-5"
       >
-        <div>
-          <CardTitle class="text-2xl font-bold tracking-tight">
-            Izin & Cuti Saya
-          </CardTitle>
-          <CardDescription class="mt-1">
-            Hanya hari kerja yang dihitung — akhir pekan dan hari libur di dalam
-            rentang tidak memakai kuota.
-          </CardDescription>
-        </div>
+        <CardTitle class="text-2xl font-bold tracking-tight">
+          Izin & Cuti Saya
+        </CardTitle>
         <Button @click="open = true">
           <Plus class="mr-2 h-4 w-4" />
           Ajukan
@@ -112,115 +100,93 @@ onMounted(() => {
       <div class="p-6 space-y-6">
         <div
           v-if="balances.length > 0"
-          class="grid gap-3 sm:grid-cols-3"
+          class="grid gap-4 sm:grid-cols-3"
         >
           <div
             v-for="balance in balances"
             :key="balance.leaveTypeId"
-            class="rounded-lg border p-4"
+            class="flex flex-col justify-between rounded-xl border bg-card p-4 shadow-sm space-y-3"
           >
-            <p class="text-muted-foreground text-xs">{{ balance.name }}</p>
-            <p class="text-2xl font-semibold">
-              {{ balance.remaining }}
-              <span class="text-muted-foreground text-sm font-normal">
-                / {{ balance.quota }} hari
+            <div class="flex items-center justify-between gap-2">
+              <span class="text-foreground font-semibold text-sm">
+                {{ balance.name }}
               </span>
-            </p>
-            <p class="text-muted-foreground text-xs">
-              {{ balance.used }} terpakai tahun {{ balance.year }}
-            </p>
+              <span
+                class="rounded-full bg-muted px-2.5 py-0.5 text-[11px] font-medium text-muted-foreground shrink-0"
+              >
+                Tahun {{ balance.year }}
+              </span>
+            </div>
+
+            <div>
+              <p class="text-2xl font-bold tracking-tight text-foreground">
+                {{ balance.remaining }}
+                <span class="text-xs font-normal text-muted-foreground">
+                  sisa hari
+                </span>
+              </p>
+            </div>
+
+            <div
+              class="flex items-center justify-between border-t pt-2.5 text-xs text-muted-foreground"
+            >
+              <span>
+                Total Kuota:
+                <strong class="font-semibold text-foreground">
+                  {{ balance.quota }} hari
+                </strong>
+              </span>
+              <span>
+                Terpakai:
+                <strong class="font-semibold text-foreground">
+                  {{ balance.used }} hari
+                </strong>
+              </span>
+            </div>
           </div>
         </div>
 
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Jenis</TableHead>
-              <TableHead>Tanggal</TableHead>
-              <TableHead class="text-right">Hari kerja</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead class="text-right">Aksi</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            <TableRow
-              v-for="request in myRequests"
-              :key="request.id"
-            >
-              <TableCell>{{ request.leaveType.name }}</TableCell>
-              <TableCell>
-                {{ formatDate(request.startDate) }} –
-                {{ formatDate(request.endDate) }}
-              </TableCell>
-              <TableCell class="text-right">
-                {{ request.workingDayCount }}
-              </TableCell>
-              <TableCell>
-                <Badge :variant="STATUS_VARIANT[request.status] as 'default'">
-                  {{ STATUS_LABEL[request.status] }}
-                </Badge>
-                <!-- FR-031: the requester is told why, not just that it failed. -->
-                <p
-                  v-if="request.status === 'REJECTED' && request.decisionReason"
-                  class="text-muted-foreground mt-1 text-xs italic"
-                >
-                  "{{ request.decisionReason }}"
-                </p>
-              </TableCell>
-              <TableCell class="text-right">
-                <Button
-                  v-if="request.status === 'PENDING'"
-                  variant="ghost"
-                  size="sm"
-                  @click="leaveService.withdraw(request.id)"
-                >
-                  Tarik
-                </Button>
-              </TableCell>
-            </TableRow>
-
-            <TableRow v-if="!loading && myRequests.length === 0">
-              <TableCell
-                colspan="5"
-                class="text-muted-foreground py-10 text-center"
-              >
-                Belum ada pengajuan.
-              </TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
+        <DataTable
+          :columns="tableColumns"
+          :data="myRequests"
+          :is-loading="loading"
+          item-label="pengajuan izin/cuti"
+        />
 
         <Dialog v-model:open="open">
-          <DialogContent class="sm:max-w-lg">
-            <DialogHeader>
+          <DialogContent
+            class="sm:max-w-lg flex flex-col gap-0 p-0 overflow-hidden"
+          >
+            <DialogHeader class="px-6 py-5 border-b shrink-0 bg-muted/20">
               <DialogTitle>Ajukan Izin / Cuti</DialogTitle>
-              <DialogDescription>
-                Hari kerja dihitung saat pengajuan dan disimpan — perubahan
-                kalender setelahnya tidak akan mengubah pengajuan yang sudah
-                disetujui.
-              </DialogDescription>
+              <DialogDescription class="sr-only" />
             </DialogHeader>
 
-            <div class="space-y-4">
+            <div class="px-6 py-5 space-y-4 max-h-[70vh] overflow-y-auto">
               <div class="space-y-1">
-                <Label for="leave-type">Jenis</Label>
-                <select
-                  id="leave-type"
-                  v-model="leaveTypeId"
-                  class="border-input bg-background h-9 w-full rounded-md border px-3 text-sm"
-                >
-                  <option value="">Pilih jenis…</option>
-                  <option
-                    v-for="type in employeeTypes"
-                    :key="type.id"
-                    :value="type.id"
+                <Label for="leave-type">
+                  Jenis <span class="text-red-500">*</span>
+                </Label>
+                <Select v-model="leaveTypeId">
+                  <SelectTrigger
+                    id="leave-type"
+                    class="w-full"
                   >
-                    {{ type.name }}
-                  </option>
-                </select>
+                    <SelectValue placeholder="Pilih jenis izin / cuti…" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem
+                      v-for="type in employeeTypes"
+                      :key="type.id"
+                      :value="type.id"
+                    >
+                      {{ type.name }}
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
                 <p
                   v-if="selectedType?.requiresDocument"
-                  class="text-xs text-amber-600"
+                  class="pt-1 text-xs font-medium text-amber-600"
                 >
                   Jenis ini memerlukan surat pendukung.
                 </p>
@@ -228,39 +194,35 @@ onMounted(() => {
 
               <div class="grid grid-cols-2 gap-3">
                 <div class="space-y-1">
-                  <Label for="leave-start">Mulai</Label>
-                  <Input
-                    id="leave-start"
-                    v-model="startDate"
-                    type="date"
-                  />
+                  <Label>Mulai <span class="text-red-500">*</span></Label>
+                  <DatePicker v-model="startDate" />
                 </div>
                 <div class="space-y-1">
-                  <Label for="leave-end">Sampai</Label>
-                  <Input
-                    id="leave-end"
-                    v-model="endDate"
-                    type="date"
-                  />
+                  <Label>Sampai <span class="text-red-500">*</span></Label>
+                  <DatePicker v-model="endDate" />
                 </div>
               </div>
 
               <div class="space-y-1">
-                <Label for="leave-reason">Alasan</Label>
+                <Label for="leave-reason">
+                  Alasan <span class="text-red-500">*</span>
+                </Label>
                 <Textarea
                   id="leave-reason"
                   v-model="reason"
+                  placeholder="Tuliskan alasan pengajuan..."
                   rows="3"
                 />
               </div>
             </div>
 
-            <DialogFooter>
+            <DialogFooter class="px-6 py-4 border-t bg-muted/20">
               <Button
                 variant="outline"
                 @click="open = false"
-                >Batal</Button
               >
+                Batal
+              </Button>
               <Button @click="submit">Kirim</Button>
             </DialogFooter>
           </DialogContent>

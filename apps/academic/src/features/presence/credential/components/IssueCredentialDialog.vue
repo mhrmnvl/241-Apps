@@ -1,4 +1,10 @@
 <script setup lang="ts">
+import { studentApi } from '@/features/academic/student'
+import { teacherApi } from '@/features/academic/teacher'
+import { PAGINATION } from '@/shared/constants/pagination'
+import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
+import { AppCombobox } from '@/ui'
+import type { ComboboxOption } from '@/ui'
 import { Button } from '@/ui/button'
 import {
   Dialog,
@@ -10,12 +16,19 @@ import {
 } from '@/ui/dialog'
 import { Input } from '@/ui/input'
 import { Label } from '@/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/ui/select'
 import { AlertTriangle, Check, Copy } from 'lucide-vue-next'
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { toast } from 'vue-sonner'
 import { credentialService } from '../services/credentialService'
 import { useCredentialStore } from '../stores/credentialStore'
-import type { PresenceSubjectType } from '../types'
+import type { PersonOption, PresenceSubjectType } from '../types'
 
 const open = defineModel<boolean>('open', { required: true })
 
@@ -23,9 +36,57 @@ const store = useCredentialStore()
 const userId = ref('')
 const subjectType = ref<PresenceSubjectType>('STUDENT')
 const copied = ref(false)
+const personOptions = ref<PersonOption[]>([])
+const loadingPersons = ref(false)
+
+const comboboxOptions = computed<ComboboxOption[]>(() =>
+  personOptions.value.map((person) => ({
+    value: person.userId,
+    label: person.name,
+  })),
+)
+
+async function loadPersons() {
+  loadingPersons.value = true
+  personOptions.value = []
+  try {
+    if (subjectType.value === 'STUDENT') {
+      const res = await studentApi.getStudents({
+        isActive: true,
+        limit: PAGINATION.REFERENCE_LIMIT,
+      })
+      personOptions.value = (res.data?.data ?? []).map((student) => ({
+        userId: student.user.id,
+        name: student.user.profile.name,
+      }))
+    } else {
+      const res = await teacherApi.getTeachers({
+        isActive: true,
+        limit: PAGINATION.REFERENCE_LIMIT,
+      })
+      personOptions.value = (res.data?.data ?? []).map((teacher) => ({
+        userId: teacher.user.id,
+        name: teacher.user.profile.name,
+      }))
+    }
+  } catch (error: unknown) {
+    toast.error(getIndonesianErrorMessage(error, 'Gagal memuat data pengguna.'))
+  } finally {
+    loadingPersons.value = false
+  }
+}
+
+watch(subjectType, () => {
+  userId.value = ''
+  if (open.value) {
+    void loadPersons()
+  }
+})
 
 watch(open, (isOpen) => {
-  if (!isOpen) {
+  if (isOpen) {
+    void loadPersons()
+  } else {
     userId.value = ''
     subjectType.value = 'STUDENT'
     copied.value = false
@@ -54,84 +115,99 @@ async function copyCode() {
 
 <template>
   <Dialog v-model:open="open">
-    <DialogContent class="sm:max-w-lg">
-      <DialogHeader>
-        <DialogTitle>Terbitkan Kartu</DialogTitle>
-        <DialogDescription>
-          Menerbitkan kartu memulai riwayat kehadiran orang ini. Hari sebelum
-          kartu terbit tidak dihitung alpa.
-        </DialogDescription>
+    <DialogContent class="sm:max-w-md flex flex-col gap-0 p-0 overflow-hidden">
+      <DialogHeader class="px-6 py-5 border-b shrink-0 bg-muted/20">
+        <DialogTitle>Terbitkan Kartu Presensi</DialogTitle>
+        <DialogDescription class="sr-only" />
       </DialogHeader>
 
-      <!-- Shown exactly once: the server never returns the code again on a list
-           or detail read, so this panel is the only chance to keep it. -->
-      <div
-        v-if="store.lastIssued"
-        class="space-y-3"
-      >
+      <div class="px-6 py-5 space-y-4 max-h-[70vh] overflow-y-auto">
+        <!-- Shown exactly once: the server never returns the code again on a list
+             or detail read, so this panel is the only chance to keep it. -->
         <div
-          class="flex items-start gap-2 rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-200"
+          v-if="store.lastIssued"
+          class="space-y-3"
         >
-          <AlertTriangle class="mt-0.5 h-4 w-4 shrink-0" />
-          <p>
-            Kode ini hanya ditampilkan sekali. Salin atau langsung cetak
-            kartunya — setelah dialog ditutup, kode tidak bisa dilihat lagi.
-          </p>
+          <div
+            class="flex items-start gap-2 rounded-lg border border-amber-300 bg-amber-50 p-3 text-xs text-amber-900 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-200"
+          >
+            <AlertTriangle class="mt-0.5 h-4 w-4 shrink-0" />
+            <p>
+              Kode ini hanya ditampilkan sekali. Salin atau langsung cetak
+              kartunya — setelah dialog ditutup, kode tidak bisa dilihat lagi.
+            </p>
+          </div>
+
+          <div class="space-y-1.5">
+            <Label>Kode Kartu Presensi</Label>
+            <div class="flex gap-2">
+              <Input
+                :model-value="store.lastIssued.code"
+                readonly
+                class="font-mono"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                @click="copyCode"
+              >
+                <Check
+                  v-if="copied"
+                  class="h-4 w-4"
+                />
+                <Copy
+                  v-else
+                  class="h-4 w-4"
+                />
+              </Button>
+            </div>
+          </div>
         </div>
 
-        <div class="space-y-1">
-          <Label>Kode kartu</Label>
-          <div class="flex gap-2">
-            <Input
-              :model-value="store.lastIssued.code"
-              readonly
-              class="font-mono"
+        <div
+          v-else
+          class="space-y-4"
+        >
+          <div class="space-y-1.5">
+            <Label>Jenis Pemegang Kartu</Label>
+            <Select v-model="subjectType">
+              <SelectTrigger class="w-full">
+                <SelectValue placeholder="Pilih jenis" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="STUDENT">Siswa</SelectItem>
+                <SelectItem value="EMPLOYEE">Pegawai</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div class="space-y-1.5">
+            <Label>Pemegang Kartu</Label>
+            <AppCombobox
+              v-model="userId"
+              :options="comboboxOptions"
+              :placeholder="
+                loadingPersons
+                  ? 'Memuat data...'
+                  : subjectType === 'STUDENT'
+                    ? 'Pilih siswa'
+                    : 'Pilih pegawai'
+              "
+              :search-placeholder="
+                subjectType === 'STUDENT'
+                  ? 'Cari nama siswa...'
+                  : 'Cari nama pegawai...'
+              "
+              empty-text="Data tidak ditemukan."
+              :disabled="loadingPersons"
             />
-            <Button
-              type="button"
-              variant="outline"
-              @click="copyCode"
-            >
-              <Check
-                v-if="copied"
-                class="h-4 w-4"
-              />
-              <Copy
-                v-else
-                class="h-4 w-4"
-              />
-            </Button>
           </div>
         </div>
       </div>
 
-      <div
-        v-else
-        class="space-y-4"
+      <DialogFooter
+        class="px-6 py-4 border-t bg-muted/20 flex flex-row items-center justify-end gap-2 shrink-0"
       >
-        <div class="space-y-1">
-          <Label for="credential-user">ID Pengguna</Label>
-          <Input
-            id="credential-user"
-            v-model="userId"
-            placeholder="UUID pengguna"
-          />
-        </div>
-
-        <div class="space-y-1">
-          <Label for="credential-subject">Jenis</Label>
-          <select
-            id="credential-subject"
-            v-model="subjectType"
-            class="border-input bg-background h-9 w-full rounded-md border px-3 text-sm"
-          >
-            <option value="STUDENT">Siswa</option>
-            <option value="EMPLOYEE">Pegawai</option>
-          </select>
-        </div>
-      </div>
-
-      <DialogFooter>
         <Button
           variant="outline"
           @click="open = false"
@@ -140,7 +216,7 @@ async function copyCode() {
         </Button>
         <Button
           v-if="!store.lastIssued"
-          :disabled="store.isSaving"
+          :disabled="store.isSaving || !userId || loadingPersons"
           @click="submit"
         >
           Terbitkan

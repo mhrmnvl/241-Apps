@@ -10,6 +10,13 @@ import {
 } from '@/ui/dialog'
 import { Input } from '@/ui/input'
 import { Label } from '@/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/ui/select'
 import { Textarea } from '@/ui/textarea'
 import { ref, watch } from 'vue'
 import { toast } from 'vue-sonner'
@@ -82,19 +89,20 @@ async function submit() {
 
 <template>
   <Dialog v-model:open="open">
-    <DialogContent class="sm:max-w-lg">
-      <DialogHeader>
-        <DialogTitle>
-          Koreksi Kehadiran — {{ record?.holder.displayName ?? '—' }}
-        </DialogTitle>
-        <DialogDescription>
-          Setiap perubahan tercatat beserta nilai sebelumnya, siapa yang
-          mengubah, dan alasannya. Anda tidak dapat mengoreksi catatan Anda
-          sendiri.
-        </DialogDescription>
+    <DialogContent class="sm:max-w-lg flex flex-col gap-0 p-0 overflow-hidden">
+      <DialogHeader class="px-6 py-5 border-b shrink-0 bg-muted/20">
+        <DialogTitle>Koreksi Kehadiran</DialogTitle>
+        <DialogDescription class="sr-only" />
       </DialogHeader>
 
-      <div class="space-y-4">
+      <div class="px-6 py-5 space-y-4 max-h-[70vh] overflow-y-auto">
+        <div class="space-y-1">
+          <Label>Pegawai</Label>
+          <Input
+            :model-value="record?.holder.displayName ?? '—'"
+            disabled
+          />
+        </div>
         <div class="grid grid-cols-2 gap-3">
           <div class="space-y-1">
             <Label for="correction-in">Jam masuk</Label>
@@ -116,19 +124,23 @@ async function submit() {
 
         <div class="space-y-1">
           <Label for="correction-status">Status</Label>
-          <select
-            id="correction-status"
-            v-model="status"
-            class="border-input bg-background h-9 w-full rounded-md border px-3 text-sm"
-          >
-            <option
-              v-for="(label, value) in DAY_STATUS_LABEL"
-              :key="value"
-              :value="value"
+          <Select v-model="status">
+            <SelectTrigger
+              id="correction-status"
+              class="w-full"
             >
-              {{ label }}
-            </option>
-          </select>
+              <SelectValue placeholder="Pilih status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem
+                v-for="(label, value) in DAY_STATUS_LABEL"
+                :key="value"
+                :value="value"
+              >
+                {{ label }}
+              </SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         <div class="space-y-1">
@@ -154,17 +166,21 @@ async function submit() {
         </div>
       </div>
 
-      <DialogFooter>
+      <DialogFooter
+        class="px-6 py-4 border-t bg-muted/20 flex flex-row items-center justify-end gap-2 shrink-0"
+      >
         <Button
           variant="outline"
           @click="open = false"
-          >Batal</Button
         >
+          Batal
+        </Button>
         <Button
           :disabled="store.isSaving"
           @click="submit"
-          >Simpan</Button
         >
+          Simpan
+        </Button>
       </DialogFooter>
     </DialogContent>
   </Dialog>

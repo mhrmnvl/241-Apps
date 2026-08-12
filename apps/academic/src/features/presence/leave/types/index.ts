@@ -72,9 +72,12 @@ export const STATUS_LABEL: Record<LeaveRequestStatus, string> = {
   WITHDRAWN: 'Ditarik',
 }
 
-export const STATUS_VARIANT: Record<LeaveRequestStatus, string> = {
+export const STATUS_VARIANT = {
   PENDING: 'outline',
   APPROVED: 'default',
   REJECTED: 'destructive',
   WITHDRAWN: 'secondary',
-}
+} satisfies Record<
+  LeaveRequestStatus,
+  'default' | 'secondary' | 'destructive' | 'outline'
+>

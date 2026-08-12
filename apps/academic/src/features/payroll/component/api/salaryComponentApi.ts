@@ -1,6 +1,10 @@
 import type { ApiSingleResponse } from '@/shared/types/api'
 import api from '@/shared/utils/api'
-import type { SalaryComponent, SalaryComponentSavePayload } from '../types'
+import type {
+  CreateSalaryComponentPayload,
+  SalaryComponent,
+  UpdateSalaryComponentPayload,
+} from '../types'
 
 export const salaryComponentApi = {
   getComponents: (includeInactive = true) =>
@@ -8,13 +12,13 @@ export const salaryComponentApi = {
       params: { includeInactive },
     }),
 
-  createComponent: (payload: SalaryComponentSavePayload) =>
+  createComponent: (payload: CreateSalaryComponentPayload) =>
     api.post<ApiSingleResponse<SalaryComponent>>(
       '/payroll/components',
       payload,
     ),
 
-  updateComponent: (id: string, payload: Partial<SalaryComponentSavePayload>) =>
+  updateComponent: (id: string, payload: UpdateSalaryComponentPayload) =>
     api.patch<ApiSingleResponse<SalaryComponent>>(
       `/payroll/components/${id}`,
       payload,

@@ -46,3 +46,8 @@ export interface IssueCredentialPayload {
 export interface RevokeCredentialPayload {
   reason: string
 }
+
+export interface PersonOption {
+  userId: string
+  name: string
+}

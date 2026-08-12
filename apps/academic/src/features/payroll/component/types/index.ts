@@ -22,11 +22,22 @@ export interface SalaryComponent {
   isActive: boolean
 }
 
-export interface SalaryComponentSavePayload {
+export interface CreateSalaryComponentPayload {
   code: string
   name: string
   type: SalaryComponentType
   driver?: AttendanceDriver | null
+}
+
+export interface UpdateSalaryComponentPayload {
+  code?: string
+  name?: string
+  type?: SalaryComponentType
+  driver?: AttendanceDriver | null
+  isActive?: boolean
+}
+
+export type SalaryComponentSavePayload = CreateSalaryComponentPayload & {
   isActive?: boolean
 }
 

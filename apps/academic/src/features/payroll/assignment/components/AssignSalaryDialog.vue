@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { DatePicker } from '@/ui'
 import { Button } from '@/ui/button'
 import {
   Dialog,
@@ -99,90 +100,92 @@ const onSubmit = handleSubmit(async (form) => {
     :open="open"
     @update:open="emit('update:open', $event)"
   >
-    <DialogContent class="sm:max-w-lg">
-      <DialogHeader>
-        <DialogTitle>Tetapkan Gaji</DialogTitle>
-        <DialogDescription>
-          Nilai lama tidak ditimpa — ditutup sehari sebelum tanggal berlaku ini,
-          sehingga slip gaji bulan sebelumnya tetap bisa dihitung ulang apa
-          adanya.
-        </DialogDescription>
+    <DialogContent class="sm:max-w-md flex flex-col gap-0 p-0 overflow-hidden">
+      <DialogHeader class="px-6 py-5 border-b shrink-0 bg-muted/20">
+        <DialogTitle>Tetapkan Gaji Pegawai</DialogTitle>
+        <DialogDescription class="sr-only" />
       </DialogHeader>
 
       <form
-        class="space-y-4"
+        class="flex flex-col flex-1 min-h-0"
         @submit="onSubmit"
       >
-        <FormField
-          v-slot="{ componentField }"
-          name="componentId"
-        >
-          <FormItem>
-            <FormLabel>Komponen</FormLabel>
-            <Select v-bind="componentField">
+        <div class="px-6 py-5 space-y-4 max-h-[70vh] overflow-y-auto">
+          <FormField
+            v-slot="{ componentField }"
+            name="componentId"
+          >
+            <FormItem>
+              <FormLabel>
+                Komponen Gaji <span class="text-destructive">*</span>
+              </FormLabel>
+              <Select v-bind="componentField">
+                <FormControl>
+                  <SelectTrigger class="w-full">
+                    <SelectValue placeholder="Pilih komponen gaji" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem
+                    v-for="component in activeComponents"
+                    :key="component.id"
+                    :value="component.id"
+                  >
+                    {{ component.name }}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          </FormField>
+
+          <FormField
+            v-slot="{ componentField }"
+            name="value"
+          >
+            <FormItem>
+              <FormLabel>
+                {{ isDriven ? 'Tarif per Satuan (Rp)' : 'Nominal (Rp)' }}
+                <span class="text-destructive">*</span>
+              </FormLabel>
               <FormControl>
-                <SelectTrigger>
-                  <SelectValue placeholder="Pilih komponen gaji" />
-                </SelectTrigger>
+                <Input
+                  v-bind="componentField"
+                  inputmode="numeric"
+                  placeholder="3500000"
+                />
               </FormControl>
-              <SelectContent>
-                <SelectItem
-                  v-for="component in activeComponents"
-                  :key="component.id"
-                  :value="component.id"
-                >
-                  {{ component.name }}
-                </SelectItem>
-              </SelectContent>
-            </Select>
-            <FormMessage />
-          </FormItem>
-        </FormField>
+              <FormDescription v-if="isDriven && selected?.driver">
+                Dikalikan {{ DRIVER_LABEL[selected.driver].toLowerCase() }} pada
+                bulan yang dihitung.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          </FormField>
 
-        <FormField
-          v-slot="{ componentField }"
-          name="value"
+          <FormField
+            v-slot="{ value, handleChange }"
+            name="effectiveFrom"
+          >
+            <FormItem>
+              <FormLabel>
+                Berlaku Mulai <span class="text-destructive">*</span>
+              </FormLabel>
+              <FormControl>
+                <DatePicker
+                  :model-value="value"
+                  placeholder="Pilih tanggal berlaku"
+                  @update:model-value="handleChange"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          </FormField>
+        </div>
+
+        <DialogFooter
+          class="px-6 py-4 border-t bg-muted/20 flex flex-row items-center justify-end gap-2 shrink-0"
         >
-          <FormItem>
-            <FormLabel>
-              {{ isDriven ? 'Tarif per satuan (Rp)' : 'Nominal (Rp)' }}
-            </FormLabel>
-            <FormControl>
-              <Input
-                v-bind="componentField"
-                inputmode="numeric"
-                placeholder="3500000"
-              />
-            </FormControl>
-            <FormDescription v-if="isDriven && selected?.driver">
-              Dikalikan {{ DRIVER_LABEL[selected.driver].toLowerCase() }} pada
-              bulan yang dihitung.
-            </FormDescription>
-            <FormMessage />
-          </FormItem>
-        </FormField>
-
-        <FormField
-          v-slot="{ componentField }"
-          name="effectiveFrom"
-        >
-          <FormItem>
-            <FormLabel>Berlaku mulai</FormLabel>
-            <FormControl>
-              <Input
-                v-bind="componentField"
-                type="date"
-              />
-            </FormControl>
-            <FormDescription>
-              Perhitungan memakai nilai yang berlaku pada hari terakhir bulan
-              tersebut.
-            </FormDescription>
-            <FormMessage />
-          </FormItem>
-        </FormField>
-
-        <DialogFooter>
           <Button
             type="button"
             variant="outline"
@@ -193,8 +196,9 @@ const onSubmit = handleSubmit(async (form) => {
           <Button
             type="submit"
             :disabled="isSaving || !userId"
-            >Simpan</Button
           >
+            Simpan
+          </Button>
         </DialogFooter>
       </form>
     </DialogContent>

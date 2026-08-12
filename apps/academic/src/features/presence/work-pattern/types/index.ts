@@ -47,6 +47,18 @@ export interface IncompleteRecord {
   date: string
 }
 
+export interface AttendancePeriodRow {
+  month: number
+  label: string
+  status: 'OPEN' | 'CLOSED'
+}
+
+export interface EmployeeOption {
+  userId: string
+  name: string
+  identifier: string
+}
+
 export const WEEKDAY_LABEL = [
   'Minggu',
   'Senin',
