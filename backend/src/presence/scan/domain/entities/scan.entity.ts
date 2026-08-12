@@ -24,8 +24,8 @@ export interface ScanHolderRef {
 /**
  * What the kiosk renders.
  *
- * `person` is absent on every rejection, so an unrecognised card shows "kartu
- * tidak dikenal" and nothing about anyone (FR-004, research R12).
+ * `person` is absent on every rejection, so an unrecognised card shows only
+ * that it was not recognised, and nothing about anyone (FR-004, research R12).
  */
 export interface ScanResult extends ScanFeedback {
   outcome: ScanOutcomeEnum;

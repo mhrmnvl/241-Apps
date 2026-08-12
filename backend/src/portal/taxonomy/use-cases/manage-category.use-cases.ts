@@ -148,7 +148,7 @@ export class DeleteCategoryUseCase {
     const usage = await this.categoryRepository.findUsage(id);
     if (usage.count > 0) {
       throw new ConflictException({
-        message: `Kategori masih dipakai oleh ${usage.count} konten. Nonaktifkan kategori ini jika tidak ingin dipakai lagi.`,
+        message: `Category is still used by ${usage.count} item(s). Deactivate it instead if it should no longer be applied.`,
         count: usage.count,
         sampleTitles: usage.sampleTitles,
       });

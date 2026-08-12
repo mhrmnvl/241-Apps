@@ -33,8 +33,8 @@ export class RecordScanUseCase {
   /**
    * The gate's hot path.
    *
-   * **Rejections return a result, not an exception.** The kiosk must render
-   * "kartu tidak berlaku" exactly like a success; an HTTP error would be
+   * **Rejections return a result, not an exception.** The kiosk must render an
+   * expired card exactly like a successful scan; an HTTP error would be
    * indistinguishable from a network failure the offline queue should retry,
    * so a revoked card would be retried forever.
    */

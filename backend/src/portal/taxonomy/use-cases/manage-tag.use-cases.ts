@@ -42,7 +42,7 @@ export class CreateTagUseCase {
 
     const existing = await this.tagRepository.findBySlug(slug);
     if (existing) {
-      throw new ConflictException(`Tag "${existing.name}" sudah ada.`);
+      throw new ConflictException(`Tag "${existing.name}" already exists`);
     }
 
     const tag = await this.tagRepository.create({ name: dto.name, slug });
