@@ -333,7 +333,10 @@ Core rules from `NESTJS-RULES.md` (enforced by convention, not by lint):
   domain row must be as narrow as the query: `UserRef<TProfile>` takes the
   projection as a parameter. A row that types its fields as **optional** cannot
   catch a narrowing — that is how a list narrowing once emptied four columns of
-  the student spreadsheet while still compiling. See NESTJS-RULES.md.
+  the student spreadsheet while still compiling. A user relation is reached with
+  `USER_REF_SELECT` / `USER_DISPLAY_SELECT` / `USER_ROSTER_SELECT`: `include`
+  returns every scalar the model owns, and `User` owns `passwordHash`.
+  `no-user-scalar-overfetch.spec.ts` enforces it. See NESTJS-RULES.md.
 - **The backend is written in English.** Exception and validation messages,
   Swagger summaries and descriptions, log lines, identifiers, and comments — all
   English. Indonesian belongs to the frontend, which owns presentation and can

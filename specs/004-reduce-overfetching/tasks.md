@@ -72,12 +72,12 @@ Monorepo: `backend/src/…` for the API, `apps/<app>/src/…` for the five front
 ### Session identity
 
 - [X] T017 [US1] Replace `profile: true` with `PROFILE_DISPLAY_SELECT` in `findUserById` in `backend/src/platform/auth/infrastructure/persistence/prisma-auth.repository.ts`, leaving the role and permission tree unchanged
-- [ ] T018 [P] [US1] Replace `profile: true` with `PROFILE_NAME_SELECT` in `backend/src/platform/auth/infrastructure/persistence/prisma-auth.includes.ts`
+- [X] T018 [P] [US1] Replace `profile: true` with `PROFILE_NAME_SELECT` in `backend/src/platform/auth/infrastructure/persistence/prisma-auth.includes.ts`
 - [X] T019 [US1] Confirm `GET /auth/me` returns exactly the same body as before, since `GetProfileUseCase` already maps to identity, roles and permissions only
 
 ### Verification
 
-- [ ] T020 [US1] Confirm `grep -rn "profile: true" backend/src --include=*.ts` returns nothing outside `platform/profile` (which US4 handles)
+- [X] T020 [US1] Confirm `grep -rn "profile: true" backend/src --include=*.ts` returns nothing outside `platform/profile` (which US4 handles)
 - [X] T021 [US1] Run `pnpm --filter backend test`, `typecheck` and `lint:strict`; all must pass unchanged
 - [ ] T022 [US1] Walk [quickstart.md](./quickstart.md) Step 2 by eye: gender on the student list, NIK and gender on the teacher list, gender in Tambah Siswa, and the avatar in every app's header
 
@@ -141,7 +141,7 @@ Monorepo: `backend/src/…` for the API, `apps/<app>/src/…` for the five front
 
 - [ ] T041 [US4] Split `USER_DETAIL_SELECT` in `backend/src/platform/profile/infrastructure/persistence/prisma-profile.includes.ts` into an identity read plus conditional teacher and student reads, per [data-model.md](./data-model.md)
 - [ ] T042 [US4] Compose the three reads in `backend/src/platform/profile/infrastructure/persistence/prisma-profile.repository.ts` so `findDetailByUserId` returns a body byte-identical to the current one
-- [ ] T043 [US4] Replace the depth-six `profile: true` on the classroom supervisor branch with `PROFILE_NAME_SELECT`, since only the wali kelas's name is shown
+- [X] T043 [US4] Replace the depth-six `profile: true` on the classroom supervisor branch with `PROFILE_NAME_SELECT`, since only the wali kelas's name is shown
 - [ ] T044 [US4] Compare the `GET /profiles/me` response before and after T041–T043 for the same user and confirm they match field for field
 - [X] T045 [P] [US4] Separate `STUDENT_LIST_INCLUDE` from `STUDENT_DETAIL_INCLUDE` in `backend/src/academic/student/infrastructure/persistence/prisma-student.includes.ts` so the list carries strictly less
 - [X] T046 [P] [US4] Separate `USER_SELECT` into list and detail variants in `backend/src/academic/teacher/infrastructure/persistence/prisma-teacher.includes.ts`, dropping `createdAt` and `updatedAt` from the list

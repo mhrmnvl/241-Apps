@@ -366,6 +366,29 @@ parameter, defaulting to the name.
 > four empty columns. A read whose fields must be present types them as
 > **required** — see `StudentExportWithDetails`.
 
+### Reaching a person *through their account*
+
+Narrowing the profile is only half of it. Prisma's `include` means "these
+relations **as well as** every scalar column I own", so this reads like a
+narrowed query and is not one:
+
+```ts
+user: { include: { profile: PROFILE_NAME_SELECT } } // every column of User
+```
+
+`User` owns `passwordHash`. Combined with a use case that returns what the
+repository handed it, that shape answered a student's own profile request with
+their homeroom teacher's bcrypt hash. Neither half was wrong alone.
+
+So a user relation is reached with `USER_REF_SELECT`, `USER_DISPLAY_SELECT` or
+`USER_ROSTER_SELECT` — id, identifier, isActive, and the matching profile.
+`user: true` and `user: { include: … }` are both defects, and
+`no-user-scalar-overfetch.spec.ts` fails the build on either. It strips comments
+first, so a file may name the shape it warns against.
+
+The same reasoning applies to any model holding a secret: prefer `select` over
+`include` at the point where one is reached.
+
 Two more habits the same rule implies:
 
 - **A list and a detail read differently.** Aliasing them (`LIST = DETAIL`) means

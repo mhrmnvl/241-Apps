@@ -1,4 +1,4 @@
-import type { UserWithProfileAndRoles } from './authenticated-user.entity.js';
+import type { SessionUserRef } from './authenticated-user.entity.js';
 
 export interface AuthSessionEntity {
   id: string;
@@ -14,5 +14,5 @@ export interface AuthSessionEntity {
 }
 
 export interface SessionWithUser extends AuthSessionEntity {
-  user: UserWithProfileAndRoles;
+  user: SessionUserRef;
 }

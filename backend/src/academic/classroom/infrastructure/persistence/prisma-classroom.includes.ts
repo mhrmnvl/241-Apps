@@ -1,5 +1,5 @@
 import { Prisma } from '@prisma/client';
-import { PROFILE_NAME_SELECT } from '../../../../shared/domain/prisma-selects.js';
+import { USER_REF_SELECT } from '../../../../shared/domain/prisma-selects.js';
 
 export const CLASSROOM_WITH_DETAILS_INCLUDE = {
   grade: true,
@@ -20,11 +20,7 @@ export const SUPERVISOR_WITH_DETAILS_INCLUDE = {
   classroom: true,
   teacher: {
     include: {
-      user: {
-        include: {
-          profile: PROFILE_NAME_SELECT,
-        },
-      },
+      user: USER_REF_SELECT,
     },
   },
   semester: { include: { academicYear: true } },
@@ -42,38 +38,22 @@ export const STRUCTURE_WITH_DETAILS_INCLUDE = {
   semester: { include: { academicYear: true } },
   president: {
     include: {
-      user: {
-        include: {
-          profile: PROFILE_NAME_SELECT,
-        },
-      },
+      user: USER_REF_SELECT,
     },
   },
   vicePresident: {
     include: {
-      user: {
-        include: {
-          profile: PROFILE_NAME_SELECT,
-        },
-      },
+      user: USER_REF_SELECT,
     },
   },
   secretary: {
     include: {
-      user: {
-        include: {
-          profile: PROFILE_NAME_SELECT,
-        },
-      },
+      user: USER_REF_SELECT,
     },
   },
   treasurer: {
     include: {
-      user: {
-        include: {
-          profile: PROFILE_NAME_SELECT,
-        },
-      },
+      user: USER_REF_SELECT,
     },
   },
 } satisfies Prisma.ClassroomStructureInclude;

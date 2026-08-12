@@ -1,4 +1,5 @@
 import { Prisma } from '@prisma/client';
+import { USER_REF_SELECT } from '../../../../shared/domain/prisma-selects.js';
 
 export const PROFILE_INCLUDE = {
   socialMedias: {
@@ -68,16 +69,22 @@ export const USER_DETAIL_SELECT = {
           classroom: {
             include: {
               grade: true,
+              // The homeroom teacher, of whom the screen shows a name.
+              //
+              // This branch used to read the teacher's `User` with an `include`,
+              // which returns every scalar of that row — `passwordHash` among
+              // them — and `GetProfileUseCase` spreads the row it is given
+              // straight into the response. A student asking for their own
+              // profile was answered with their homeroom teacher's bcrypt hash.
               classroomSupervisors: {
                 where: { deletedAt: null },
-                include: {
+                select: {
+                  semesterId: true,
                   teacher: {
-                    include: {
-                      user: {
-                        include: {
-                          profile: true,
-                        },
-                      },
+                    select: {
+                      id: true,
+                      userId: true,
+                      user: USER_REF_SELECT,
                     },
                   },
                 },
@@ -110,7 +117,10 @@ export type UserDetail = Prisma.UserGetPayload<{
 
 export const PROFILE_WITH_SOCIAL_MEDIAS_INCLUDE = {
   user: {
-    include: {
+    select: {
+      id: true,
+      identifier: true,
+      isActive: true,
       userRoles: {
         include: {
           role: true,

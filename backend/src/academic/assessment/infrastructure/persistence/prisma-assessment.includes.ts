@@ -1,5 +1,5 @@
 import { Prisma } from '@prisma/client';
-import { PROFILE_NAME_SELECT } from '../../../../shared/domain/prisma-selects.js';
+import { USER_REF_SELECT } from '../../../../shared/domain/prisma-selects.js';
 
 export const ASSESSMENT_ITEM_WITH_DETAILS_INCLUDE = {
   teachingAssignment: {
@@ -8,11 +8,7 @@ export const ASSESSMENT_ITEM_WITH_DETAILS_INCLUDE = {
       classroom: true,
       teacher: {
         include: {
-          user: {
-            include: {
-              profile: PROFILE_NAME_SELECT,
-            },
-          },
+          user: USER_REF_SELECT,
         },
       },
     },
@@ -33,11 +29,7 @@ export const STUDENT_SCORE_WITH_DETAILS_INCLUDE = {
     include: {
       student: {
         include: {
-          user: {
-            include: {
-              profile: PROFILE_NAME_SELECT,
-            },
-          },
+          user: USER_REF_SELECT,
         },
       },
     },

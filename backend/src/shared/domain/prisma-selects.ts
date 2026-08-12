@@ -60,3 +60,40 @@ export const PROFILE_ROSTER_SELECT = {
     nik: true,
   },
 } satisfies Prisma.ProfileDefaultArgs;
+
+/**
+ * A person reached through their user account.
+ *
+ * Narrowing the profile is not enough on its own. `user: { include: { profile } }`
+ * narrows the profile and still returns **every scalar column of `User`** —
+ * Prisma's `include` means "these relations *as well as* all my own fields". One
+ * of those fields is `passwordHash`.
+ *
+ * That is not hypothetical. `GetProfileUseCase` returns `{ ...user, profile }`,
+ * and the homeroom-teacher branch of the profile read reached a `User` this way,
+ * so `GET /profiles/me` answered a student with their teacher's bcrypt hash.
+ *
+ * These three shapes carry exactly what `UserRef` declares — id, identifier,
+ * isActive — and nothing else. Reaching a `User` any other way is a defect;
+ * `no-user-scalar-overfetch.spec.ts` is the sweep that says so.
+ */
+const USER_REF_FIELDS = {
+  id: true,
+  identifier: true,
+  isActive: true,
+} satisfies Prisma.UserSelect;
+
+/** A user account whose person is a label. */
+export const USER_REF_SELECT = {
+  select: { ...USER_REF_FIELDS, profile: PROFILE_NAME_SELECT },
+} satisfies Prisma.UserDefaultArgs;
+
+/** A user account whose person is drawn with their picture. */
+export const USER_DISPLAY_SELECT = {
+  select: { ...USER_REF_FIELDS, profile: PROFILE_DISPLAY_SELECT },
+} satisfies Prisma.UserDefaultArgs;
+
+/** A user account on a roster. */
+export const USER_ROSTER_SELECT = {
+  select: { ...USER_REF_FIELDS, profile: PROFILE_ROSTER_SELECT },
+} satisfies Prisma.UserDefaultArgs;

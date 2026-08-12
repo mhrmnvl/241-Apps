@@ -1,14 +1,10 @@
 import { Prisma } from '@prisma/client';
-import { PROFILE_ROSTER_SELECT } from '../../../../shared/domain/prisma-selects.js';
+import { USER_ROSTER_SELECT } from '../../../../shared/domain/prisma-selects.js';
 
 export const ENROLLMENT_WITH_DETAILS_INCLUDE = {
   student: {
     include: {
-      user: {
-        include: {
-          profile: PROFILE_ROSTER_SELECT,
-        },
-      },
+      user: USER_ROSTER_SELECT,
     },
   },
   classroom: {

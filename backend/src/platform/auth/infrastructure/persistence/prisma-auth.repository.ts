@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
 import {
   CreateSessionData,
@@ -6,6 +7,19 @@ import {
 } from '../../types/auth-session.types.js';
 import { IAuthRepository } from '../../domain/interfaces/auth-repository.interface.js';
 import { PROFILE_NAME_SELECT } from '../../../../shared/domain/prisma-selects.js';
+
+/**
+ * What a session or a reset token needs of its user, and nothing more.
+ *
+ * `passwordHash` is absent on purpose — see `SessionUserRef`. Only the sign-in
+ * path reads a credential.
+ */
+const SESSION_USER_SELECT = {
+  id: true,
+  identifier: true,
+  isActive: true,
+  deletedAt: true,
+} satisfies Prisma.UserSelect;
 
 @Injectable()
 export class PrismaAuthRepository extends IAuthRepository {
@@ -49,7 +63,7 @@ export class PrismaAuthRepository extends IAuthRepository {
   async findSessionWithUser(sessionId: string) {
     return this.prisma.authSession.findUnique({
       where: { id: sessionId },
-      include: { user: true },
+      include: { user: { select: SESSION_USER_SELECT } },
     });
   }
 
@@ -140,7 +154,7 @@ export class PrismaAuthRepository extends IAuthRepository {
         usedAt: null,
       },
       include: {
-        user: true,
+        user: { select: SESSION_USER_SELECT },
       },
     });
   }
