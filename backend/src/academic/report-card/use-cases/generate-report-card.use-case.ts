@@ -10,6 +10,11 @@ import {
   IStudentScoreRepository,
   ReportCardScoreRow,
 } from '../../assessment/domain/interfaces/student-score-repository.interface.js';
+import {
+  ICurriculumSubjectRepository,
+  type PassingScoreQuery,
+} from '../../curriculum/domain/interfaces/curriculum-subject-repository.interface.js';
+import { DEFAULT_PASSING_SCORE } from '../constants/report-card.constants.js';
 import { GenerateReportCardDto } from '../dto/request/generate-report-card.dto.js';
 import { IReportCardRepository } from '../domain/interfaces/report-card-repository.interface.js';
 import {
@@ -27,6 +32,7 @@ export class GenerateReportCardUseCase {
     private readonly reportCardRepository: IReportCardRepository,
     private readonly studentScoreRepository: IStudentScoreRepository,
     private readonly enrollmentRepository: IEnrollmentRepository,
+    private readonly curriculumSubjectRepository: ICurriculumSubjectRepository,
   ) {}
 
   /**
@@ -36,7 +42,54 @@ export class GenerateReportCardUseCase {
    * owns each score, so two classes of the same subject can be graded on
    * different terms without either knowing about the other.
    */
-  private groupBySubject(scores: ReportCardScoreRow[]): SubjectGradeInput[] {
+  /**
+   * The pass mark each subject is judged against.
+   *
+   * Resolution order is the teacher's override for their own class, then the
+   * curriculum's figure for that grade and year, then a workspace default for
+   * a subject taught but never listed in the curriculum — which is a data gap
+   * worth grading through rather than failing on.
+   */
+  private async resolvePassingScores(
+    scores: ReportCardScoreRow[],
+  ): Promise<Map<string, number>> {
+    const queries = new Map<string, PassingScoreQuery>();
+
+    for (const row of scores) {
+      const assignment = row.assessmentItem.teachingAssignment;
+      if (
+        assignment.passingScore !== null &&
+        assignment.passingScore !== undefined
+      ) {
+        continue;
+      }
+      const query: PassingScoreQuery = {
+        gradeId: assignment.classroom.gradeId,
+        academicYearId: assignment.classroom.academicYearId,
+        subjectId: assignment.subject.id,
+      };
+      queries.set(
+        `${query.gradeId}:${query.academicYearId}:${query.subjectId}`,
+        query,
+      );
+    }
+
+    const resolved = await this.curriculumSubjectRepository.findPassingScores([
+      ...queries.values(),
+    ]);
+
+    return new Map(
+      resolved.map((row) => [
+        `${row.gradeId}:${row.academicYearId}:${row.subjectId}`,
+        row.passingScore,
+      ]),
+    );
+  }
+
+  private groupBySubject(
+    scores: ReportCardScoreRow[],
+    curriculumPassingScores: Map<string, number>,
+  ): SubjectGradeInput[] {
     const bySubject = new Map<string, SubjectGradeInput>();
 
     for (const row of scores) {
@@ -57,7 +110,12 @@ export class GenerateReportCardUseCase {
           subjectId: subject.id,
           subjectCode: subject.code ?? null,
           subjectName: subject.name,
-          passingScore: assignment.passingScore ?? subject.passingScore,
+          passingScore:
+            assignment.passingScore ??
+            curriculumPassingScores.get(
+              `${assignment.classroom.gradeId}:${assignment.classroom.academicYearId}:${subject.id}`,
+            ) ??
+            DEFAULT_PASSING_SCORE,
           typeWeights,
           assessments: [],
         };
@@ -102,7 +160,10 @@ export class GenerateReportCardUseCase {
       dto.enrollmentId,
     );
 
-    const rows = calculateSubjectGrades(this.groupBySubject(scores));
+    const curriculumPassingScores = await this.resolvePassingScores(scores);
+    const rows = calculateSubjectGrades(
+      this.groupBySubject(scores, curriculumPassingScores),
+    );
     const totalAverage = calculateTotalAverage(rows);
 
     let calculatedRank = dto.rank ?? null;

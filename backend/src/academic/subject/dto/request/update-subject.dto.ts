@@ -1,13 +1,5 @@
 ﻿import { ApiPropertyOptional } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
-import {
-  IsInt,
-  IsOptional,
-  IsString,
-  Max,
-  MaxLength,
-  Min,
-} from 'class-validator';
+import { IsOptional, IsString, MaxLength } from 'class-validator';
 
 /**
  * Teachers are not editable here. An assignment is per (classroom, semester),
@@ -28,16 +20,4 @@ export class UpdateSubjectDto {
   @IsString()
   @MaxLength(100)
   name?: string;
-
-  @ApiPropertyOptional({
-    description:
-      'Minimum pass mark for this subject. Also sets the A/B/C/D scale, whose D/C boundary is this value.',
-    example: 75,
-  })
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  @Min(0)
-  @Max(100)
-  passingScore?: number;
 }

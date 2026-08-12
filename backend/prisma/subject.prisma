@@ -1,16 +1,8 @@
 model Subject {
-  id           String    @id @default(uuid()) @db.Uuid
-  code         String?   @db.VarChar(20)
-  name         String    @db.VarChar(100)
-  /// The school's minimum pass mark for this subject, set by the curriculum
-  /// team. A teacher may override it for one class they teach
-  /// (TeachingAssignment.passingScore); this is the value used when they do not.
-  ///
-  /// It also fixes the whole predicate scale: the D/C boundary is this value
-  /// and the rest of the range is split in three, so A/B/C/D can never
-  /// contradict whether a student passed.
-  passingScore Int       @default(75) @map("passing_score")
-  deletedAt    DateTime? @map("deleted_at")
+  id        String    @id @default(uuid()) @db.Uuid
+  code      String?   @db.VarChar(20)
+  name      String    @db.VarChar(100)
+  deletedAt DateTime? @map("deleted_at")
 
   teachingAssignments TeachingAssignment[]
   curriculumSubjects  CurriculumSubject[]
@@ -26,6 +18,18 @@ model CurriculumSubject {
   curriculumId String    @map("curriculum_id") @db.Uuid
   subjectId    String    @map("subject_id") @db.Uuid
   hoursPerWeek Int       @default(2) @map("hours_per_week")
+  /// The minimum pass mark for this subject *under this curriculum*.
+  ///
+  /// It sits here rather than on Subject because a subject is master data — a
+  /// stable catalogue — while the pass mark is a curriculum decision that
+  /// differs between curricula and between the grades each one covers.
+  /// Editing it must never disturb the catalogue.
+  ///
+  /// It also fixes the whole predicate scale on the rapor: the D/C boundary is
+  /// this value and the range above splits in three, so A/B/C/D can never
+  /// contradict whether the student passed. A teacher may override it for one
+  /// class they teach (TeachingAssignment.passingScore).
+  passingScore Int       @default(75) @map("passing_score")
   deletedAt    DateTime? @map("deleted_at")
 
   curricula Curricula @relation(fields: [curriculumId], references: [id])

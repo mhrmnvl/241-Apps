@@ -5,7 +5,6 @@ import type {
   TeachingAssignmentSubjectOption,
 } from '../types'
 import type { Classroom } from '@/features/academic/classroom'
-import type { Semester } from '@/features/academic/semester'
 import type { Teacher } from '@/features/academic/teacher'
 
 export const useTeachingAssignmentStore = defineStore(
@@ -21,10 +20,8 @@ export const useTeachingAssignmentStore = defineStore(
 
     const classrooms = ref<Classroom[]>([])
     const subjects = ref<TeachingAssignmentSubjectOption[]>([])
-    const semesters = ref<Semester[]>([])
     const teachers = ref<Teacher[]>([])
 
-    const selectedSemesterId = ref<string>('')
     const selectedClassroomId = ref<string>('')
 
     return {
@@ -37,9 +34,7 @@ export const useTeachingAssignmentStore = defineStore(
       formError,
       classrooms,
       subjects,
-      semesters,
       teachers,
-      selectedSemesterId,
       selectedClassroomId,
     }
   },

@@ -21,13 +21,11 @@ export interface SubjectQueryInput extends PaginationQueryInput {
 export interface CreateSubjectRepositoryInput {
   code?: string;
   name: string;
-  passingScore?: number;
 }
 
 export interface UpdateSubjectRepositoryInput {
   code?: string;
   name?: string;
-  passingScore?: number;
 }
 
 export abstract class ISubjectRepository {

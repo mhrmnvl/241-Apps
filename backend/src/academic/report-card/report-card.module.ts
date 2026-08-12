@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { EnrollmentModule } from '../enrollment/enrollment.module.js';
 import { AssessmentModule } from '../assessment/assessment.module.js';
+import { CurriculumModule } from '../curriculum/curriculum.module.js';
 import { AttendanceModule } from '../attendance/attendance.module.js';
 import { SchoolUnitModule } from '../../platform/school-unit/school-unit.module.js';
 import { ReportCardController } from './presentation/report-card.controller.js';
@@ -19,6 +20,7 @@ import { IReportCardRepository } from './domain/interfaces/report-card-repositor
 @Module({
   imports: [
     AssessmentModule,
+    CurriculumModule,
     EnrollmentModule,
     AttendanceModule,
     SchoolUnitModule,

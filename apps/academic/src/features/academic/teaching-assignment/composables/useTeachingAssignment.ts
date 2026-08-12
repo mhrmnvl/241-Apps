@@ -14,9 +14,7 @@ export function useTeachingAssignment() {
     formError,
     classrooms,
     subjects,
-    semesters,
     teachers,
-    selectedSemesterId,
     selectedClassroomId,
   } = storeToRefs(store)
 
@@ -41,9 +39,7 @@ export function useTeachingAssignment() {
     formError,
     classrooms,
     subjects,
-    semesters,
     teachers,
-    selectedSemesterId,
     selectedClassroomId,
     fetchFilterOptions: teachingAssignmentService.fetchFilterOptions,
     fetchTeachingAssignments:

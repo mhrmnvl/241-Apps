@@ -53,14 +53,24 @@ export type StudentScoreWithDetails = Prisma.StudentScoreGetPayload<{
  * `STUDENT_SCORE_WITH_DETAILS_INCLUDE` stops at `assessmentItem` scalars, which
  * left `assessmentItem.teachingAssignment` undefined for the PDF export.
  */
-// Carries everything a report card needs to grade a score without a second
-// query: the item's own maximum and within-type weight, the subject and its
-// passing score, and the teacher's per-type weights plus any passing score they set for this class.
+// Everything the report card needs to grade a score, except the passing mark:
+// the item's own maximum and within-type weight, the subject, the teacher's
+// per-type weights, and any override they set for this class.
+//
+// The passing mark is not here on purpose. It belongs to the curriculum, which
+// is two joins away (classroom grade + year -> curriculum -> its subjects), and
+// reaching it through this include would pull every subject of that curriculum
+// once per score row. The generate use case resolves it in one batched lookup
+// instead, which is why the classroom's grade and year are selected here.
 export const REPORT_CARD_SCORE_INCLUDE = {
   assessmentItem: {
     include: {
       teachingAssignment: {
-        include: { subject: true, assessmentWeights: true },
+        include: {
+          subject: true,
+          assessmentWeights: true,
+          classroom: { select: { gradeId: true, academicYearId: true } },
+        },
       },
     },
   },

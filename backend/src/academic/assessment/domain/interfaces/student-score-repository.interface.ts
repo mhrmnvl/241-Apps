@@ -28,13 +28,20 @@ export interface ReportCardScoreRow {
     maxScore?: number | null;
     teachingAssignment: {
       id: string;
-      /** Overrides the subject's passing score for this class only. */
+      /** Overrides the curriculum's passing score for this class only. */
       passingScore?: number | null;
       subject: {
         id: string;
         name: string;
         code?: string | null;
-        passingScore: number;
+      };
+      /**
+       * The grade and year the class sits in — together they pick the
+       * curriculum, and the curriculum is what sets the passing score.
+       */
+      classroom: {
+        gradeId: string;
+        academicYearId: string;
       };
       assessmentWeights: { type: AssessmentType; weight: number }[];
     };

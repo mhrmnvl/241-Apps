@@ -1,5 +1,5 @@
 -- =====================================================================
--- Assessment: configurable weights per assessment type, a passing score per subject
+-- Assessment: configurable weights per assessment type, a passing score per curriculum subject
 -- with an optional per-class override, and a frozen per-subject snapshot on
 -- the report card.
 --
@@ -18,8 +18,10 @@
 
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
--- AlterTable: the school's pass mark per subject.
-ALTER TABLE "subjects" ADD COLUMN "passing_score" INTEGER NOT NULL DEFAULT 75;
+-- AlterTable: the pass mark a curriculum sets for one of its subjects. On
+-- CurriculumSubject rather than Subject: the subject catalogue is master data
+-- and must not shift when a curriculum is retuned.
+ALTER TABLE "curriculum_subjects" ADD COLUMN "passing_score" INTEGER NOT NULL DEFAULT 75;
 
 -- AlterTable: a teacher's override of it, for one class only.
 ALTER TABLE "teaching_assignments" ADD COLUMN "passing_score" INTEGER;

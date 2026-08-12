@@ -20,7 +20,6 @@ export class CreateSubjectUseCase {
     const subject = await this.subjectRepository.create({
       code: dto.code,
       name: dto.name,
-      passingScore: dto.passingScore,
     });
     this.logger.log(`Subject created: ${dto.name}`);
     return subject;

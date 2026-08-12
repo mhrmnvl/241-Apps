@@ -5,9 +5,8 @@ import { PAGINATION } from '@/shared/constants/pagination'
 import { toast } from 'vue-sonner'
 import { classroomApi } from '@/features/academic/classroom'
 import { subjectApi } from '@/features/academic/subject'
-import { semesterApi } from '@/features/academic/semester'
 import { teacherApi } from '@/features/academic/teacher'
-import { curriculaApi } from '@/features/academic/curriculum'
+import { curriculumApi } from '@/features/academic/curriculum'
 import { curriculumSubjectApi } from '@/features/academic/curriculum-subject'
 import type {
   TeachingAssignmentCreatePayload,
@@ -27,7 +26,7 @@ import type {
 async function fetchAssignableSubjects(): Promise<
   TeachingAssignmentSubjectOption[]
 > {
-  const curriculaRes = await curriculaApi.getCurricula({ isActive: true })
+  const curriculaRes = await curriculumApi.getCurricula({ isActive: true })
   const activeCurriculum = (curriculaRes.data?.data ?? []).find(
     (c) => c.isActive,
   )
@@ -57,17 +56,14 @@ export const teachingAssignmentService = {
     const store = useTeachingAssignmentStore()
     try {
       // Subjects need a second round trip to resolve the active curriculum,
-      // so they run alongside the three flat lists rather than after them.
-      const [classroomRes, semesterRes, teacherRes, subjects] =
-        await Promise.all([
-          classroomApi.getClassrooms({ limit: PAGINATION.REFERENCE_LIMIT }),
-          semesterApi.getSemesters({ limit: PAGINATION.REFERENCE_LIMIT }),
-          teacherApi.getTeachers({ limit: PAGINATION.REFERENCE_LIMIT }),
-          fetchAssignableSubjects(),
-        ])
+      // so they run alongside the two flat lists rather than after them.
+      const [classroomRes, teacherRes, subjects] = await Promise.all([
+        classroomApi.getClassrooms({ limit: PAGINATION.REFERENCE_LIMIT }),
+        teacherApi.getTeachers({ limit: PAGINATION.REFERENCE_LIMIT }),
+        fetchAssignableSubjects(),
+      ])
       store.classrooms = classroomRes.data?.data ?? []
       store.subjects = subjects
-      store.semesters = semesterRes.data?.data ?? []
       store.teachers = teacherRes.data?.data ?? []
     } catch (error: unknown) {
       toast.error(
@@ -83,9 +79,6 @@ export const teachingAssignmentService = {
       const params: TeachingAssignmentQueryParams = {
         page: store.currentPage,
         limit: store.pageSize,
-        ...(store.selectedSemesterId
-          ? { semesterId: store.selectedSemesterId }
-          : {}),
         ...(store.selectedClassroomId
           ? { classroomId: store.selectedClassroomId }
           : {}),

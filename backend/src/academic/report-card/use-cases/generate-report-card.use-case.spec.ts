@@ -1,5 +1,6 @@
 import { ConflictException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
+import { ICurriculumSubjectRepository } from '../../curriculum/domain/interfaces/curriculum-subject-repository.interface.js';
 import { IEnrollmentRepository } from '../../enrollment/domain/interfaces/enrollment-repository.interface.js';
 import { IStudentScoreRepository } from '../../assessment/domain/interfaces/student-score-repository.interface.js';
 import { GenerateReportCardDto } from '../dto/request/generate-report-card.dto.js';
@@ -14,7 +15,7 @@ function scoreRow(options: {
   maxScore?: number;
   subjectId?: string;
   subjectName?: string;
-  subjectPassingScore?: number;
+  gradeId?: string;
   assignmentPassingScore?: number | null;
   typeWeights?: { type: string; weight: number }[];
 }) {
@@ -31,7 +32,10 @@ function scoreRow(options: {
           id: options.subjectId ?? 'subj-1',
           name: options.subjectName ?? 'Matematika',
           code: 'MTK',
-          passingScore: options.subjectPassingScore ?? 75,
+        },
+        classroom: {
+          gradeId: options.gradeId ?? 'grade-7',
+          academicYearId: 'ay-1',
         },
         assessmentWeights: options.typeWeights ?? [
           { type: 'DAILY', weight: 100 },
@@ -51,6 +55,7 @@ describe('GenerateReportCardUseCase', () => {
   };
   const mockScoreRepository = { findAllForReportCard: jest.fn() };
   const mockEnrollmentRepository = { findById: jest.fn() };
+  const mockCurriculumSubjectRepository = { findPassingScores: jest.fn() };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -59,6 +64,10 @@ describe('GenerateReportCardUseCase', () => {
         { provide: IReportCardRepository, useValue: mockRepo },
         { provide: IStudentScoreRepository, useValue: mockScoreRepository },
         { provide: IEnrollmentRepository, useValue: mockEnrollmentRepository },
+        {
+          provide: ICurriculumSubjectRepository,
+          useValue: mockCurriculumSubjectRepository,
+        },
       ],
     }).compile();
 
@@ -67,6 +76,7 @@ describe('GenerateReportCardUseCase', () => {
 
     mockEnrollmentRepository.findById.mockResolvedValue({ id: 'enr-1' });
     mockRepo.findByEnrollmentId.mockResolvedValue(null);
+    mockCurriculumSubjectRepository.findPassingScores.mockResolvedValue([]);
     mockRepo.upsert.mockImplementation((input: unknown) =>
       Promise.resolve({ id: 'rap-1', ...(input as object) }),
     );
@@ -130,14 +140,21 @@ describe('GenerateReportCardUseCase', () => {
 
     it('stores a line per subject with the passing score it was judged against', async () => {
       mockScoreRepository.findAllForReportCard.mockResolvedValue([
-        scoreRow({ score: 72, subjectId: 'subj-1', subjectPassingScore: 70 }),
+        scoreRow({ score: 72, subjectId: 'subj-1' }),
         scoreRow({
           score: 72,
           subjectId: 'subj-2',
           subjectName: 'IPA',
-          subjectPassingScore: 70,
           assignmentPassingScore: 80,
         }),
+      ]);
+      mockCurriculumSubjectRepository.findPassingScores.mockResolvedValue([
+        {
+          gradeId: 'grade-7',
+          academicYearId: 'ay-1',
+          subjectId: 'subj-1',
+          passingScore: 70,
+        },
       ]);
 
       await useCase.execute(dto);
