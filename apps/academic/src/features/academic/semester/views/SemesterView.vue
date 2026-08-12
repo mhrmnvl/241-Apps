@@ -26,9 +26,7 @@ import { toast } from 'vue-sonner'
 const {
   semesters,
   loading,
-  academicYears,
   fetchSemesters,
-  fetchAcademicYears,
   fetchSemesterTypes,
   deleteSemester,
   activateSemester,
@@ -111,7 +109,6 @@ watch(isRolloverModalOpen, (isOpen) => {
 
 onMounted(() => {
   void fetchSemesters()
-  void fetchAcademicYears()
   void fetchSemesterTypes()
 })
 </script>
@@ -158,7 +155,6 @@ onMounted(() => {
         <SemesterFormSheet
           v-if="isAddModalOpen"
           v-model:open="isAddModalOpen"
-          :academic-years="academicYears"
           :edit-data="editingItem"
           @save-success="fetchSemesters"
         />

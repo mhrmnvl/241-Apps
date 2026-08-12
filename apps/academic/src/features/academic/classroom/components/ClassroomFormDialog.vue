@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { computed, toRefs } from 'vue'
+import { computed, toRefs, watch } from 'vue'
 import { useClassroomForm } from '../composables/useClassroomForm'
-import type { AcademicYear, Classroom, Grade } from '../types'
+import { useClassroomList } from '../composables/useClassroomList'
+import type { AcademicYear, Classroom } from '../types'
 import { Alert, AlertDescription, AlertTitle } from '@/ui/alert'
 import {
   AlertDialog,
@@ -43,7 +44,6 @@ import {
 const props = defineProps<{
   open: boolean
   academicYears: AcademicYear[]
-  grades?: Grade[]
   editData?: Classroom | null
 }>()
 
@@ -58,6 +58,22 @@ const open = computed({
 })
 
 const { editData, academicYears } = toRefs(props)
+
+/**
+ * Grade levels are loaded here rather than by the pages that host this dialog.
+ *
+ * Two views open it, and neither showed the list itself — both fetched it on
+ * mount purely to hand it over. Loaded once per visit: grade levels change
+ * once a year at most.
+ */
+const { grades, fetchGrades } = useClassroomList()
+
+watch(
+  () => props.open,
+  (isOpen) => {
+    if (isOpen && grades.value.length === 0) void fetchGrades()
+  },
+)
 
 const classroomForm = useClassroomForm({
   academicYears: () => academicYears.value,

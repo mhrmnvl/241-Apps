@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { computed, toRefs } from 'vue'
+import { computed, toRefs, watch } from 'vue'
 import { useSemesterForm } from '../composables/useSemesterForm'
-import type { AcademicYearRef, Semester } from '../types'
+import { useSemesterList } from '../composables/useSemesterList'
+import type { Semester } from '../types'
 import { DatePicker } from '@/ui'
 import { Input } from '@/ui/input'
 import { Alert, AlertDescription } from '@/ui/alert'
@@ -33,9 +34,23 @@ import {
 
 const props = defineProps<{
   open: boolean
-  academicYears: AcademicYearRef[]
   editData?: Semester | null
 }>()
+
+/**
+ * Academic years are loaded here rather than by the semester list page.
+ *
+ * The list shows semesters, not years — it fetched them on mount only to fill
+ * this sheet's dropdown. Loaded once per visit; a school adds one a year.
+ */
+const { academicYears, fetchAcademicYears } = useSemesterList()
+
+watch(
+  () => props.open,
+  (isOpen) => {
+    if (isOpen && academicYears.value.length === 0) void fetchAcademicYears()
+  },
+)
 
 const emit = defineEmits<{
   'update:open': [value: boolean]
@@ -47,7 +62,7 @@ const open = computed({
   set: (value: boolean) => emit('update:open', value),
 })
 
-const { editData, academicYears } = toRefs(props)
+const { editData } = toRefs(props)
 
 const semesterForm = useSemesterForm({
   academicYears: () => academicYears.value,

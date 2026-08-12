@@ -94,7 +94,7 @@ Monorepo: `backend/src/…` for the API, `apps/<app>/src/…` for the five front
 - [X] T023 [US2] Move the `subjectApi.getSubjects({ limit: REFERENCE_LIMIT })` call out of `fetchReferenceData` in `apps/academic/src/features/academic/curriculum-subject/services/curriculumSubjectService.ts` so it is no longer invoked from the view's `onMounted`
 - [X] T024 [US2] Fetch the subject list inside `apps/academic/src/features/academic/curriculum-subject/components/AddCurriculumSubjectDialog.vue` when `open` becomes true, showing a loading state until it resolves
 - [X] T025 [US2] Remove `fetchReferenceData()` from the `onMounted` in `apps/academic/src/features/academic/curriculum-subject/views/CurriculumSubjectView.vue`
-- [ ] T026 [P] [US2] Apply the same move to each remaining view identified by T003, one commit per view
+- [X] T026 [P] [US2] Apply the same move to each remaining view identified by T003, one commit per view
 - [ ] T027 [US2] Confirm each converted dialog handles a failed fetch by saying so and offering a retry, without affecting the page behind it, per [contracts/read-projections.md](./contracts/read-projections.md) C4
 
 **Checkpoint**: Opening a page no longer transfers data belonging to a dialog that was never opened.

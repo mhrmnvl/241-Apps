@@ -49,7 +49,6 @@ const router = useRouter()
 
 const {
   teachers,
-  positions,
   positionCategories,
   loading,
   filters,
@@ -59,7 +58,6 @@ const {
   isSaving,
   formError,
   fetchTeachers,
-  fetchPositions,
   fetchPositionCategories,
   saveTeacher,
   savePosition,
@@ -215,7 +213,6 @@ watch(
 
 onMounted(() => {
   void fetchTeachers()
-  void fetchPositions()
   void fetchPositionCategories()
 })
 </script>
@@ -471,7 +468,6 @@ onMounted(() => {
     :form-error="formError"
     :is-saving="isSaving"
     :edit-data="editingItem"
-    :positions="positions"
     @save="handleSaveTeacher"
     @save-position="handleSavePosition"
   />

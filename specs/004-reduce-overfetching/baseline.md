@@ -45,10 +45,10 @@ the fetch is eager.
 | # | View | List | Fetched by | Bound only to | Status |
 |---|---|---|---|---|---|
 | D1 | `curriculum-subject/views/CurriculumSubjectView.vue` | subjects (1,000) | `fetchReferenceData()` | `AddCurriculumSubjectDialog` | **Done** — the dialog loads it itself |
-| D2 | `classroom/views/ClassroomView.vue` | grades | `fetchGrades()` | `ClassroomFormDialog` | Open |
-| D3 | `classroom/views/ClassroomManageView.vue` | grades, academicYears | `fetchGrades()`, `fetchAcademicYears()` | `ClassroomFormDialog` | Open |
-| D4 | `semester/views/SemesterView.vue` | academicYears | `fetchAcademicYears()` | the semester form dialog | Open |
-| D5 | `teacher/views/TeacherListView.vue` | positions | `fetchPositions()` | `TeacherFormDialog` | Open |
+| D2 | `classroom/views/ClassroomView.vue` | grades | `fetchGrades()` | `ClassroomFormDialog` | **Done** |
+| D3 | `classroom/views/ClassroomManageView.vue` | grades, academicYears | `fetchGrades()`, `fetchAcademicYears()` | `ClassroomFormDialog` | **Done** |
+| D4 | `semester/views/SemesterView.vue` | academicYears | `fetchAcademicYears()` | `SemesterFormSheet` | **Done** |
+| D5 | `teacher/views/TeacherListView.vue` | positions | `fetchPositions()` | `TeacherFormDialog` | **Done** |
 
 **Note on D2 and D3**: both bind `grades` into the same `ClassroomFormDialog`.
 Making that dialog fetch for itself changes both parents at once, so they are

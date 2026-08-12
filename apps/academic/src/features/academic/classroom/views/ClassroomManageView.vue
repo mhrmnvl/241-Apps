@@ -31,11 +31,9 @@ const {
   classrooms,
   semesters,
   academicYears,
-  grades,
   fetchClassrooms,
   fetchSemesters,
   fetchAcademicYears,
-  fetchGrades,
 } = useClassroomList()
 
 const { can } = useRoleGuard()
@@ -198,7 +196,6 @@ async function reloadData() {
     fetchTeachers(),
     fetchClassroomSupervisors(classroomId.value),
     fetchAcademicYears(),
-    fetchGrades(),
   ])
 
   const semId =
@@ -305,7 +302,6 @@ onMounted(async () => {
       v-if="can('classrooms.update') && isEditInfoOpen"
       v-model:open="isEditInfoOpen"
       :academic-years="academicYears"
-      :grades="grades"
       :edit-data="currentClassroom"
       @save-success="reloadData"
     />
