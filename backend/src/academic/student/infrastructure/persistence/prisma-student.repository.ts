@@ -15,7 +15,9 @@ import {
 } from '../../domain/interfaces/student-repository.interface.js';
 import {
   STUDENT_DETAIL_INCLUDE,
+  STUDENT_EXPORT_INCLUDE,
   STUDENT_LIST_INCLUDE,
+  StudentExportWithDetails,
   StudentWithDetails,
 } from './prisma-student.includes.js';
 import {
@@ -76,10 +78,10 @@ export class PrismaStudentRepository extends IStudentRepository {
 
   async findAllForExport(
     filters: ExportStudentQueryInput,
-  ): Promise<StudentWithDetails[]> {
+  ): Promise<StudentExportWithDetails[]> {
     return this.prisma.student.findMany({
       where: buildStudentExportWhere(filters),
-      include: STUDENT_LIST_INCLUDE,
+      include: STUDENT_EXPORT_INCLUDE,
       orderBy: { user: { profile: { name: 'asc' } } },
     });
   }

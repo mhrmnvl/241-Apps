@@ -95,7 +95,7 @@ Monorepo: `backend/src/…` for the API, `apps/<app>/src/…` for the five front
 - [X] T024 [US2] Fetch the subject list inside `apps/academic/src/features/academic/curriculum-subject/components/AddCurriculumSubjectDialog.vue` when `open` becomes true, showing a loading state until it resolves
 - [X] T025 [US2] Remove `fetchReferenceData()` from the `onMounted` in `apps/academic/src/features/academic/curriculum-subject/views/CurriculumSubjectView.vue`
 - [X] T026 [P] [US2] Apply the same move to each remaining view identified by T003, one commit per view
-- [ ] T027 [US2] Confirm each converted dialog handles a failed fetch by saying so and offering a retry, without affecting the page behind it, per [contracts/read-projections.md](./contracts/read-projections.md) C4
+- [X] T027 [US2] Confirm each converted dialog handles a failed fetch by saying so and offering a retry, without affecting the page behind it, per [contracts/read-projections.md](./contracts/read-projections.md) C4
 
 **Checkpoint**: Opening a page no longer transfers data belonging to a dialog that was never opened.
 
@@ -143,9 +143,9 @@ Monorepo: `backend/src/…` for the API, `apps/<app>/src/…` for the five front
 - [ ] T042 [US4] Compose the three reads in `backend/src/platform/profile/infrastructure/persistence/prisma-profile.repository.ts` so `findDetailByUserId` returns a body byte-identical to the current one
 - [ ] T043 [US4] Replace the depth-six `profile: true` on the classroom supervisor branch with `PROFILE_NAME_SELECT`, since only the wali kelas's name is shown
 - [ ] T044 [US4] Compare the `GET /profiles/me` response before and after T041–T043 for the same user and confirm they match field for field
-- [ ] T045 [P] [US4] Separate `STUDENT_LIST_INCLUDE` from `STUDENT_DETAIL_INCLUDE` in `backend/src/academic/student/infrastructure/persistence/prisma-student.includes.ts` so the list carries strictly less
-- [ ] T046 [P] [US4] Separate `USER_SELECT` into list and detail variants in `backend/src/academic/teacher/infrastructure/persistence/prisma-teacher.includes.ts`, dropping `createdAt` and `updatedAt` from the list
-- [ ] T047 [P] [US4] Add `where: { deletedAt: null }` to the `curricula` include in `backend/src/academic/grade/infrastructure/persistence/prisma-grade-academic-year.includes.ts`, and replace the bare `grade`/`academicYear` includes with explicit selects
+- [X] T045 [P] [US4] Separate `STUDENT_LIST_INCLUDE` from `STUDENT_DETAIL_INCLUDE` in `backend/src/academic/student/infrastructure/persistence/prisma-student.includes.ts` so the list carries strictly less
+- [X] T046 [P] [US4] Separate `USER_SELECT` into list and detail variants in `backend/src/academic/teacher/infrastructure/persistence/prisma-teacher.includes.ts`, dropping `createdAt` and `updatedAt` from the list
+- [X] T047 [P] [US4] Add `where: { deletedAt: null }` to the `curricula` include in `backend/src/academic/grade/infrastructure/persistence/prisma-grade-academic-year.includes.ts`, and replace the bare `grade`/`academicYear` includes with explicit selects
 - [ ] T048 [US4] Add a scratch column to `Profile` in `backend/prisma/profile.prisma`, run `prisma:generate` and `typecheck`, confirm no response carries it, then remove the column without migrating it
 - [ ] T049 [US4] Record the projection rules in `CLAUDE.md` and `backend/docs/NESTJS-RULES.md`: every read touching a person uses one of the three shapes, `profile: true` is a defect, and a screen needing more states it at the call site
 
