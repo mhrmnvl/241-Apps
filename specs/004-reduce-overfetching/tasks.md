@@ -157,8 +157,8 @@ Monorepo: `backend/src/…` for the API, `apps/<app>/src/…` for the five front
 
 - [ ] T050 Re-measure the six screens from T001 and record the results beside the baseline in `specs/004-reduce-overfetching/baseline.md`
 - [ ] T051 Confirm SC-002 to SC-004 against the two sets of numbers, and note any criterion that did not move and why
-- [ ] T052 [P] Run the full gate: `pnpm typecheck`, `pnpm lint`, `pnpm lint:strict`, `pnpm format:check`, `pnpm test`, `pnpm build`, and `pnpm --filter backend validate`
-- [ ] T053 [P] Update `docs/prisma_repository_audit.md` and `docs/api_fetching_audit.md` to mark the findings this feature closed, and to correct the two that were wrong
+- [X] T052 [P] Run the full gate: `pnpm typecheck`, `pnpm lint`, `pnpm lint:strict`, `pnpm format:check`, `pnpm test`, `pnpm build`, and `pnpm --filter backend validate`
+- [X] T053 [P] Update `docs/prisma_repository_audit.md` and `docs/api_fetching_audit.md` to mark the findings this feature closed, and to correct the two that were wrong
 
 ---
 

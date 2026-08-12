@@ -528,3 +528,41 @@ export const SCHEDULE_WITH_DETAILS_INCLUDE = {
 
 > [!IMPORTANT]
 > **Jangan fix sekarang.** Laporan ini adalah baseline untuk prioritisasi. Mulai dari K-1 (pecah `USER_DETAIL_SELECT`) dan K-2 (ganti `profile: true` massal) karena keduanya memiliki blast radius terbesar dan paling berisiko crash saat migrasi berikutnya.
+
+---
+
+## Status per 12 Agustus 2026 — apa yang sudah dikerjakan
+
+Ditindaklanjuti lewat `specs/004-reduce-overfetching/`. Bagian di atas dibiarkan
+utuh sebagai catatan kondisi saat audit ditulis; bagian ini yang berlaku sekarang.
+
+| Temuan | Status | Keterangan |
+|---|---|---|
+| **K-1** `USER_DETAIL_SELECT` 6 level | **Selesai** | Dipecah jadi tiga baca: identitas + cabang yang benar-benar dimiliki orangnya. Sebelumnya subtree guru dan siswa dijalankan dua-duanya untuk setiap orang. `097f5e2` |
+| **K-2** `profile: true` massal | **Selesai** | 19 kemunculan diganti tiga bentuk bersama di `shared/domain/prisma-selects.ts`. `4abb5cc` |
+| **T-1 … T-7**, **S-1 … S-5** | **Sebagian besar ikut selesai** | K-2 menutup mayoritasnya sebagai efek samping, sesuai dugaan di spec. |
+| **T-6** "data sensitif bocor ke frontend" | **Tidak valid** | Diverifikasi ke kode: `GetProfileUseCase` hanya memetakan `{ id, identifier, isActive, name, roles, permissions }`. NIK, birthDate dan NPWP dibaca dari Postgres tapi tidak pernah dikembalikan. Cacatnya over-fetch di level DB, bukan kebocoran. |
+
+### Yang tidak ada di audit ini, dan lebih serius dari semuanya
+
+`GET /profiles/me` mengembalikan **hash password wali kelas** kepada siswa yang
+membuka profilnya sendiri. Cabang wali kelas membaca akun guru dengan
+`user: { include: { profile: true } }` — `include` di Prisma berarti relasi itu
+*beserta seluruh kolom skalar model*, dan `User` punya `passwordHash` — lalu
+`GetProfileUseCase` menyebarkan baris itu apa adanya ke response.
+
+Diperbaiki di `21bb7d7`, beserta 15 tempat lain berbentuk sama, dan dijaga oleh
+`no-user-scalar-overfetch.spec.ts` yang menggagalkan build kalau `user: true`
+atau `user: { include: … }` muncul lagi.
+
+**Konsekuensi operasional**: hash itu milik guru dan sudah pernah terkirim ke
+browser siswa mana pun yang membuka `/profile` selama fitur ini hidup. Kalau
+aplikasi sudah dipakai sungguhan, pertimbangkan reset password akun guru.
+
+### Koreksi contoh kode di bagian "Rekomendasi"
+
+Contoh `PROFILE_DISPLAY_SELECT` di atas memakai `avatarFileId`. Itu keliru dan
+akan mengosongkan setiap avatar tanpa error: `withAvatarUrl` menurunkan URL
+bertanda tangan dari `storageKey`, jadi yang harus dipilih adalah relasi
+`avatarFile`, bukan kunci asingnya. Bentuk yang benar ada di
+`backend/src/shared/domain/prisma-selects.ts`.

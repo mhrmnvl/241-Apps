@@ -190,3 +190,45 @@ export function useAcademicYearsQuery() {
 2. ❌ **Jangan melakukan manual re-fetch tanpa caching** untuk data statis/referensi yang jarang berubah.
 3. ❌ **Jangan mengeksekusi request sekuensial (`await` beruntun)** untuk data yang independen; gunakan `Promise.all` atau parallel queries.
 4. ❌ **Jangan mengabaikan state tab yang aktif** saat men-trigger watcher data fetching.
+
+---
+
+## Status per 12 Agustus 2026 — apa yang sudah dikerjakan
+
+Ditindaklanjuti lewat `specs/004-reduce-overfetching/`. Bagian di atas dibiarkan
+utuh sebagai catatan kondisi saat audit ditulis.
+
+| Temuan | Status | Keterangan |
+|---|---|---|
+| **B-1** `ClassroomManageView` memanggil `fetchAvailableStudents()` (1.000 siswa) di `onMounted` | **Tidak valid** | Diverifikasi ke kode: dipanggil di `openAddStudentDialog()`, sudah lazy sejak awal. Yang memang eager di sana adalah tujuh panggilan master data — itu soal caching, bukan payload. |
+| **B-2** Wizard siswa/guru memuat master data step 4 di step 1 | **Belum** | Nyata, tapi sebuah step wizard bukan dialog. Diserahkan ke cache referensi, bukan ke pemindahan ke dialog. |
+| **B-3** `CurriculumSubjectView` memuat `/subjects?limit=1000` untuk dialog | **Selesai** | Dialog memuat sendiri saat dibuka. `a51c054` |
+| **B-4** Tidak ada caching master data | **Selesai** | Cache sesi di `@241/platform/features/reference-data`. `48f7b4d` |
+| **B-5** Bootstrap serial di `main.ts` | **Belum** | Di luar lingkup spec 004. |
+
+### Empat view lain berpola sama, ikut diperbaiki
+
+`ClassroomView`, `ClassroomManageView`, `SemesterView` dan `TeacherListView`
+memuat daftar referensi di `onMounted` yang hanya dibaca di dalam dialog.
+Sekarang dialognya yang memuat. `7336b5b`
+
+### Tentang rekomendasi TanStack Query
+
+Tidak diambil. Yang dibutuhkan cuma cache untuk daftar referensi, dan
+menambah satu dependensi query-layer ke lima aplikasi untuk itu tidak sebanding.
+Yang dibuat adalah store kecil dengan empat jaminan — read-through, single
+flight, kedaluwarsa per-daftar, invalidasi saat tulis — masing-masing satu tes.
+
+**Dua bacaan sengaja tidak di-cache**, dan keduanya akan salah kalau di-cache:
+
+- `classroomService.fetchClassrooms` paginated dan berfilter, jadi dua filter
+  berbeda akan bertabrakan di satu key dan saling menyajikan baris.
+- Mata pelajaran yang bisa ditugaskan disempitkan oleh kurikulum yang aktif,
+  jadi satu key akan menyimpan jawaban satu kurikulum dan menyerahkannya ke
+  kurikulum berikutnya.
+
+### Belum diverifikasi
+
+Angka before/after (SC-002…SC-004) belum diambil — perlu browser dengan tab
+Network terhadap stack yang berjalan. Kerangkanya sudah ada di
+`specs/004-reduce-overfetching/baseline.md`.
