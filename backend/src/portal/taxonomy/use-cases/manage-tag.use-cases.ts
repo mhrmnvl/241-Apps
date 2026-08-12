@@ -36,7 +36,7 @@ export class CreateTagUseCase {
     const slug = toSlug(dto.name);
     if (slug.length === 0) {
       throw new BadRequestException(
-        'Nama tag tidak menghasilkan alamat yang valid.',
+        'The tag name does not produce a valid slug',
       );
     }
 
@@ -60,7 +60,7 @@ export class UpdateTagUseCase {
   async execute(id: string, dto: UpdateTagDto) {
     const existing = await this.tagRepository.findById(id);
     if (!existing) {
-      throw new NotFoundException(`Tag dengan ID ${id} tidak ditemukan`);
+      throw new NotFoundException(`Tag dengan ID ${id} not found`);
     }
 
     // Label only. The slug is the public filter address and stays put.
@@ -79,7 +79,7 @@ export class DeleteTagUseCase {
   async execute(id: string): Promise<void> {
     const existing = await this.tagRepository.findById(id);
     if (!existing) {
-      throw new NotFoundException(`Tag dengan ID ${id} tidak ditemukan`);
+      throw new NotFoundException(`Tag dengan ID ${id} not found`);
     }
 
     // No in-use guard, unlike a category. A tag is a label rather than a

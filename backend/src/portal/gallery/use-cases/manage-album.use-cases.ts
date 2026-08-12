@@ -25,7 +25,7 @@ import { toAdminAlbum } from '../infrastructure/mappers/gallery.mapper.js';
 import { PortalCacheService } from '../../shared/services/portal-cache.service.js';
 
 const CONFLICT_MESSAGE =
-  'Album ini sudah diubah oleh pengguna lain. Muat ulang sebelum menyimpan.';
+  'This album was changed by someone else. Reload before saving.';
 
 @Injectable()
 export class GetAlbumsUseCase {
@@ -49,7 +49,7 @@ export class GetAlbumByIdUseCase {
   async execute(id: string) {
     const album = await this.galleryRepository.findAlbumById(id);
     if (!album || album.deletedAt) {
-      throw new NotFoundException(`Album dengan ID ${id} tidak ditemukan`);
+      throw new NotFoundException(`Album ${id} not found`);
     }
 
     const photos = await this.galleryRepository.findPhotos(id, 1, 200);
@@ -66,9 +66,7 @@ export class CreateAlbumUseCase {
   async execute(dto: CreateAlbumDto, authorId: string) {
     const base = toSlug(dto.slug ?? dto.title);
     if (base.length === 0) {
-      throw new BadRequestException(
-        'Judul tidak menghasilkan alamat yang valid.',
-      );
+      throw new BadRequestException('The title does not produce a valid slug');
     }
     const taken = await this.galleryRepository.findTakenSlugs(base);
 
@@ -96,7 +94,7 @@ export class UpdateAlbumUseCase {
   async execute(id: string, dto: UpdateAlbumDto) {
     const existing = await this.galleryRepository.findAlbumById(id);
     if (!existing || existing.deletedAt) {
-      throw new NotFoundException(`Album dengan ID ${id} tidak ditemukan`);
+      throw new NotFoundException(`Album ${id} not found`);
     }
 
     const data: UpdateAlbumInput = {};
@@ -135,7 +133,7 @@ export class PublishAlbumUseCase {
   async execute(id: string, dto: PublishAlbumDto) {
     const existing = await this.galleryRepository.findAlbumById(id);
     if (!existing || existing.deletedAt) {
-      throw new NotFoundException(`Album dengan ID ${id} tidak ditemukan`);
+      throw new NotFoundException(`Album ${id} not found`);
     }
 
     // FR-051. An empty album on the public site is a link to nothing — and
@@ -143,7 +141,7 @@ export class PublishAlbumUseCase {
     const photoCount = await this.galleryRepository.countPhotos(id);
     if (photoCount === 0) {
       throw new UnprocessableEntityException({
-        message: 'Album belum memiliki foto dan belum dapat diterbitkan.',
+        message: 'The album has no photos yet and cannot be published',
         missingFields: ['photos'],
       });
     }
@@ -152,7 +150,7 @@ export class PublishAlbumUseCase {
     const scheduledAt = dto.scheduledAt ? new Date(dto.scheduledAt) : null;
     if (scheduledAt && scheduledAt.getTime() <= now.getTime()) {
       throw new BadRequestException(
-        'Jadwal terbit harus di masa depan. Kosongkan untuk menerbitkan sekarang.',
+        'The scheduled publish time must be in the future. Leave it empty to publish now.',
       );
     }
 
@@ -194,7 +192,7 @@ export class UnpublishAlbumUseCase {
   async execute(id: string, dto: AlbumVersionDto) {
     const existing = await this.galleryRepository.findAlbumById(id);
     if (!existing || existing.deletedAt) {
-      throw new NotFoundException(`Album dengan ID ${id} tidak ditemukan`);
+      throw new NotFoundException(`Album ${id} not found`);
     }
 
     const updated = await this.galleryRepository.unpublishAlbum(
@@ -222,7 +220,7 @@ export class DeleteAlbumUseCase {
   async execute(id: string): Promise<void> {
     const existing = await this.galleryRepository.findAlbumById(id);
     if (!existing || existing.deletedAt) {
-      throw new NotFoundException(`Album dengan ID ${id} tidak ditemukan`);
+      throw new NotFoundException(`Album ${id} not found`);
     }
     await this.galleryRepository.softDeleteAlbum(id);
     await this.cache.invalidate();

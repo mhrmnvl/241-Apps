@@ -17,13 +17,15 @@ export class UpdateSchoolUnitTypeUseCase {
   async execute(id: string, dto: { code?: string; name?: string }) {
     const existing = await this.schoolUnitTypeRepository.findById(id);
     if (!existing) {
-      throw new NotFoundException('Jenis unit tidak ditemukan');
+      throw new NotFoundException('School unit type not found');
     }
 
     if (dto.code && typeof dto.code === 'string') {
       const dup = await this.schoolUnitTypeRepository.findByCode(dto.code);
       if (dup && dup.id !== id) {
-        throw new ConflictException(`Jenis unit '${dto.code}' sudah ada`);
+        throw new ConflictException(
+          `School unit type '${dto.code}' already exists`,
+        );
       }
     }
 

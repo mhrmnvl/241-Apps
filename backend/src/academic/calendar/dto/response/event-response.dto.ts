@@ -32,7 +32,7 @@ export class EventResponseDto {
   @ApiProperty({ example: 'Pekan Ilmiah Siswa' })
   title!: string;
 
-  @ApiProperty({ example: 'Kegiatan pameran karya ilmiah siswa.' })
+  @ApiProperty({ example: 'Science fair for students.' })
   description!: string;
 
   @ApiProperty({ type: () => [EventAudienceItemDto] })

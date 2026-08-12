@@ -37,8 +37,7 @@ describe('CreateAnnouncementUseCase', () => {
     const mockAnnouncement = {
       id: 'ann-1',
       title: 'Jadwal Ujian Akhir Semester',
-      description:
-        'Ujian akhir semester genap dilaksanakan pada tanggal 20-25 Mei 2025.',
+      description: 'End-of-term exams run from 20-25 May 2025.',
       date: new Date('2025-05-20'),
       classrooms: [],
     };
@@ -46,8 +45,7 @@ describe('CreateAnnouncementUseCase', () => {
     it('should create a school-wide announcement (no classroomIds)', async () => {
       const dto: CreateAnnouncementDto = {
         title: 'Jadwal Ujian Akhir Semester',
-        description:
-          'Ujian akhir semester genap dilaksanakan pada tanggal 20-25 Mei 2025.',
+        description: 'End-of-term exams run from 20-25 May 2025.',
         date: '2025-05-20',
       };
       mockRepository.create.mockResolvedValue(mockAnnouncement);
@@ -68,8 +66,7 @@ describe('CreateAnnouncementUseCase', () => {
       const classroomId = '550e8400-e29b-41d4-a716-446655440001';
       const dto: CreateAnnouncementDto = {
         title: 'Jadwal Ujian Akhir Semester',
-        description:
-          'Ujian akhir semester genap dilaksanakan pada tanggal 20-25 Mei 2025.',
+        description: 'End-of-term exams run from 20-25 May 2025.',
         date: '2025-05-20',
         classroomIds: [classroomId],
       };
@@ -100,8 +97,7 @@ describe('CreateAnnouncementUseCase', () => {
       const invalidClassroomId = '550e8400-e29b-41d4-a716-000000000000';
       const dto: CreateAnnouncementDto = {
         title: 'Jadwal Ujian Akhir Semester',
-        description:
-          'Ujian akhir semester genap dilaksanakan pada tanggal 20-25 Mei 2025.',
+        description: 'End-of-term exams run from 20-25 May 2025.',
         date: '2025-05-20',
         classroomIds: [invalidClassroomId],
       };
@@ -116,8 +112,7 @@ describe('CreateAnnouncementUseCase', () => {
       const invalidId = '550e8400-e29b-41d4-a716-000000000000';
       const dto: CreateAnnouncementDto = {
         title: 'Jadwal Ujian Akhir Semester',
-        description:
-          'Ujian akhir semester genap dilaksanakan pada tanggal 20-25 Mei 2025.',
+        description: 'End-of-term exams run from 20-25 May 2025.',
         date: '2025-05-20',
         classroomIds: [validId, invalidId],
       };

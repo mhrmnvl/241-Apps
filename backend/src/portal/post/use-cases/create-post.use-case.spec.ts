@@ -89,7 +89,7 @@ describe('CreatePostUseCase', () => {
   const baseDto: CreatePostDto = {
     type: PostType.BERITA,
     title: 'Juara 1 Olimpiade Matematika',
-    summary: 'Santri kelas VIII meraih juara 1.',
+    summary: 'A grade VIII student won first place.',
     body: '<p>Alhamdulillah</p>',
   };
 

@@ -19,7 +19,7 @@ export class GetRelatedPostsUseCase {
   async execute(type: `${PostType}`, slug: string): Promise<PostSummaryDto[]> {
     const anchor = await this.postRepository.findPublicBySlug(type, slug);
     if (!anchor) {
-      throw new NotFoundException('Halaman tidak ditemukan');
+      throw new NotFoundException('Page not found');
     }
 
     const related = await this.postRepository.findRelated({

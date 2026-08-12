@@ -13,12 +13,14 @@ export class UpdateTimeSlotTypeUseCase {
   async execute(id: string, dto: UpdateTimeSlotTypeDto) {
     const type = await this.timeSlotRepository.findTypeById(id);
     if (!type) {
-      throw new NotFoundException('Tipe jam tidak ditemukan');
+      throw new NotFoundException('Time slot type not found');
     }
     if (dto.code) {
       const dup = await this.timeSlotRepository.findTypeByCode(dto.code);
       if (dup && dup.id !== id) {
-        throw new ConflictException(`Kode tipe "${dto.code}" sudah digunakan`);
+        throw new ConflictException(
+          `Time slot type code "${dto.code}" is already in use`,
+        );
       }
     }
     return this.timeSlotRepository.updateType(id, {

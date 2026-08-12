@@ -20,7 +20,7 @@ function dto(overrides: Record<string, unknown> = {}) {
     studentUserId: STUDENT,
     leaveTypeId: 'type-1',
     startDate: '2026-09-01',
-    reason: 'Surat sakit dari orang tua',
+    reason: 'Sick note from the parents',
     ...overrides,
   };
 }

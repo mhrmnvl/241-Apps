@@ -72,14 +72,14 @@ export class CreateCategoryUseCase {
     const slug = toSlug(source);
     if (slug.length === 0) {
       throw new BadRequestException(
-        'Nama kategori tidak menghasilkan alamat yang valid.',
+        'The category name does not produce a valid slug',
       );
     }
     // Refused rather than suffixed, unlike a post slug: a duplicate category is
     // almost always someone recreating one that already exists, and quietly
     // giving them "prestasi-2" produces two categories nobody meant to have.
     if (await this.categoryRepository.findBySlug(slug)) {
-      throw new ConflictException(`Kategori "${slug}" sudah ada.`);
+      throw new ConflictException(`Category "${slug}" already exists`);
     }
     return slug;
   }
@@ -97,7 +97,7 @@ export class UpdateCategoryUseCase {
   async execute(id: string, dto: UpdateCategoryDto) {
     const existing = await this.categoryRepository.findById(id);
     if (!existing) {
-      throw new NotFoundException(`Kategori dengan ID ${id} tidak ditemukan`);
+      throw new NotFoundException(`Kategori dengan ID ${id} not found`);
     }
 
     const data: Parameters<ICategoryRepository['update']>[1] = {};
@@ -112,7 +112,8 @@ export class UpdateCategoryUseCase {
       const slug = toSlug(dto.slug);
       if (slug !== existing.slug) {
         const clash = await this.categoryRepository.findBySlug(slug);
-        if (clash) throw new ConflictException(`Kategori "${slug}" sudah ada.`);
+        if (clash)
+          throw new ConflictException(`Category "${slug}" already exists`);
         data.slug = slug;
       }
     }
@@ -137,7 +138,7 @@ export class DeleteCategoryUseCase {
   async execute(id: string): Promise<void> {
     const existing = await this.categoryRepository.findById(id);
     if (!existing) {
-      throw new NotFoundException(`Kategori dengan ID ${id} tidak ditemukan`);
+      throw new NotFoundException(`Kategori dengan ID ${id} not found`);
     }
 
     // FR-037: refused while anything still points here, and the message says

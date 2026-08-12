@@ -34,15 +34,15 @@ export class UploadPaymentProofUseCase {
         userId,
       );
     if (!application?.payment) {
-      throw new NotFoundException('Data pendaftaran tidak ditemukan');
+      throw new NotFoundException('Application not found');
     }
     if (!isEditable(application.status)) {
       throw new ConflictException(
-        'Bukti pembayaran hanya dapat diunggah saat status Draft atau Perlu Revisi',
+        'Payment proof can only be uploaded while the application is DRAFT or NEEDS_REVISION',
       );
     }
     if (application.payment.status === 'VERIFIED') {
-      throw new ConflictException('Pembayaran sudah diverifikasi');
+      throw new ConflictException('The payment has already been verified');
     }
 
     const { filename, storageKey } = await saveAdmissionFile(

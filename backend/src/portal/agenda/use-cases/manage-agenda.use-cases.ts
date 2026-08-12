@@ -25,7 +25,7 @@ import { toAdminAgenda } from '../infrastructure/mappers/agenda.mapper.js';
 import { PortalCacheService } from '../../shared/services/portal-cache.service.js';
 
 const CONFLICT_MESSAGE =
-  'Agenda ini sudah diubah oleh pengguna lain. Muat ulang sebelum menyimpan.';
+  'This agenda entry was changed by someone else. Reload before saving.';
 
 /**
  * FR-042. Checked as a pair rather than field by field, because neither time is
@@ -34,7 +34,7 @@ const CONFLICT_MESSAGE =
  */
 function assertValidRange(startTime: Date, endTime: Date) {
   if (endTime.getTime() <= startTime.getTime()) {
-    throw new BadRequestException('Waktu selesai harus setelah waktu mulai.');
+    throw new BadRequestException('End time must be after the start time');
   }
 }
 
@@ -65,7 +65,7 @@ export class GetAgendaByIdUseCase {
   async execute(id: string) {
     const entry = await this.agendaRepository.findById(id);
     if (!entry || entry.deletedAt) {
-      throw new NotFoundException(`Agenda dengan ID ${id} tidak ditemukan`);
+      throw new NotFoundException(`Agenda entry ${id} not found`);
     }
     return toAdminAgenda(entry);
   }
@@ -88,9 +88,7 @@ export class CreateAgendaUseCase {
 
     const base = toSlug(dto.slug ?? dto.title);
     if (base.length === 0) {
-      throw new BadRequestException(
-        'Judul tidak menghasilkan alamat yang valid.',
-      );
+      throw new BadRequestException('The title does not produce a valid slug');
     }
     const taken = await this.agendaRepository.findTakenSlugs(base);
 
@@ -131,7 +129,7 @@ export class UpdateAgendaUseCase {
   async execute(id: string, dto: UpdateAgendaDto) {
     const existing = await this.agendaRepository.findById(id);
     if (!existing || existing.deletedAt) {
-      throw new NotFoundException(`Agenda dengan ID ${id} tidak ditemukan`);
+      throw new NotFoundException(`Agenda entry ${id} not found`);
     }
 
     const data: UpdateAgendaInput = {};
@@ -189,14 +187,14 @@ export class PublishAgendaUseCase {
   async execute(id: string, dto: PublishAgendaDto) {
     const existing = await this.agendaRepository.findById(id);
     if (!existing || existing.deletedAt) {
-      throw new NotFoundException(`Agenda dengan ID ${id} tidak ditemukan`);
+      throw new NotFoundException(`Agenda entry ${id} not found`);
     }
 
     const now = new Date();
     const scheduledAt = dto.scheduledAt ? new Date(dto.scheduledAt) : null;
     if (scheduledAt && scheduledAt.getTime() <= now.getTime()) {
       throw new BadRequestException(
-        'Jadwal terbit harus di masa depan. Kosongkan untuk menerbitkan sekarang.',
+        'The scheduled publish time must be in the future. Leave it empty to publish now.',
       );
     }
 
@@ -226,7 +224,7 @@ export class UnpublishAgendaUseCase {
   async execute(id: string, dto: AgendaVersionDto) {
     const existing = await this.agendaRepository.findById(id);
     if (!existing || existing.deletedAt) {
-      throw new NotFoundException(`Agenda dengan ID ${id} tidak ditemukan`);
+      throw new NotFoundException(`Agenda entry ${id} not found`);
     }
 
     const updated = await this.agendaRepository.unpublish(id, dto.version);
@@ -247,7 +245,7 @@ export class ArchiveAgendaUseCase {
   async execute(id: string, dto: AgendaVersionDto) {
     const existing = await this.agendaRepository.findById(id);
     if (!existing || existing.deletedAt) {
-      throw new NotFoundException(`Agenda dengan ID ${id} tidak ditemukan`);
+      throw new NotFoundException(`Agenda entry ${id} not found`);
     }
 
     const updated = await this.agendaRepository.archive(id, dto.version);
@@ -268,7 +266,7 @@ export class DeleteAgendaUseCase {
   async execute(id: string): Promise<void> {
     const existing = await this.agendaRepository.findById(id);
     if (!existing || existing.deletedAt) {
-      throw new NotFoundException(`Agenda dengan ID ${id} tidak ditemukan`);
+      throw new NotFoundException(`Agenda entry ${id} not found`);
     }
     await this.agendaRepository.softDelete(id);
     await this.cache.invalidate();
@@ -282,12 +280,10 @@ export class RestoreAgendaUseCase {
   async execute(id: string) {
     const existing = await this.agendaRepository.findById(id);
     if (!existing) {
-      throw new NotFoundException(`Agenda dengan ID ${id} tidak ditemukan`);
+      throw new NotFoundException(`Agenda entry ${id} not found`);
     }
     if (!existing.deletedAt) {
-      throw new BadRequestException(
-        'Agenda ini tidak berada di tempat sampah.',
-      );
+      throw new BadRequestException('This agenda entry is not in the trash');
     }
 
     return toAdminAgenda(await this.agendaRepository.restore(id));

@@ -64,7 +64,7 @@ export class GetPageMetaUseCase {
     // 404 so the caller falls through to the portal's own default tags instead
     // of the API inventing metadata for something a visitor cannot see.
     if (resolved === null) {
-      throw new NotFoundException('Halaman tidak ditemukan');
+      throw new NotFoundException('Page not found');
     }
 
     return {

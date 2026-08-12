@@ -60,7 +60,7 @@ export class CreatePayrollRunUseCase {
     // correct figure, and the person only finds out on payday.
     if (unconfigured.length > 0) {
       throw new UnprocessableEntityException({
-        message: 'Pegawai berikut belum punya komponen gaji',
+        message: 'The following employees have no salary components',
         employees: this.roster.name(employees, unconfigured),
       });
     }

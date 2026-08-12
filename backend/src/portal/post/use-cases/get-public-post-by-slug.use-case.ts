@@ -37,7 +37,7 @@ export class GetPublicPostBySlugUseCase {
     // Tuesday", "archived", and "deleted". A visitor must not be able to tell
     // them apart, or the 404 becomes a way to enumerate unpublished work
     // (FR-022, FR-026).
-    throw new NotFoundException('Halaman tidak ditemukan');
+    throw new NotFoundException('Page not found');
   }
 
   /** The detail payload, or a throw. For callers that cannot follow a redirect
@@ -51,6 +51,6 @@ export class GetPublicPostBySlugUseCase {
 
     // A moved address is not the item. Resolving it here would mean the caller
     // silently got metadata for a different URL than the one requested.
-    throw new NotFoundException('Halaman tidak ditemukan');
+    throw new NotFoundException('Page not found');
   }
 }

@@ -22,8 +22,7 @@ export class CreateAnnouncementDto {
 
   @ApiProperty({
     description: 'Announcement description',
-    example:
-      'Ujian akhir semester genap dilaksanakan pada tanggal 20-25 Mei 2025.',
+    example: 'End-of-term exams run from 20-25 May 2025.',
   })
   @IsString()
   @IsNotEmpty()

@@ -22,7 +22,7 @@ export class AcceptApplicationUseCase {
         applicationId,
       );
     if (!application) {
-      throw new NotFoundException('Data pendaftaran tidak ditemukan');
+      throw new NotFoundException('Application not found');
     }
 
     assertTransition(application.status, 'ACCEPTED');
@@ -34,7 +34,7 @@ export class AcceptApplicationUseCase {
       );
     const quotaWarning =
       acceptedCount >= application.wave.quota
-        ? `Kuota gelombang (${application.wave.quota}) sudah terpenuhi — penerimaan ini melebihi kuota.`
+        ? `Wave quota (${application.wave.quota}) is already met; this acceptance exceeds it.`
         : null;
 
     const updated = await this.admissionApplicationRepository.setAccepted({

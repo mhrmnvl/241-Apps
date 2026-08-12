@@ -23,7 +23,7 @@ export class GetPayslipByIdUseCase {
    */
   async execute(id: string, actorId: string): Promise<PayslipDetail> {
     const payslip = await this.payslips.findById(id);
-    if (!payslip) throw new NotFoundException('Slip gaji tidak ditemukan');
+    if (!payslip) throw new NotFoundException('Payslip not found');
 
     await this.audit.record('payroll.payslip.read', actorId, id, {
       owner: payslip.employee.userId,

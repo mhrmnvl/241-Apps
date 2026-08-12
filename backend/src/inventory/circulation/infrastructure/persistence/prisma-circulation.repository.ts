@@ -251,7 +251,7 @@ export class PrismaCirculationRepository extends ICirculationRepository {
 
         if (!approvedStatus || !loanedStatus || !txType) {
           throw new Error(
-            'Peran status "Pinjam Disetujui"/"Dipinjam" belum diatur, atau tipe transaksi TX-LOAN-OUT belum tersedia.',
+            'The LOAN_APPROVED/ON_LOAN status roles are not configured, or the TX-LOAN-OUT transaction type is missing',
           );
         }
 

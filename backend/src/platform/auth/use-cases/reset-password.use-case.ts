@@ -21,7 +21,7 @@ export class ResetPasswordUseCase {
 
     if (!resetToken) {
       throw new BadRequestException(
-        'Tautan reset password tidak valid atau telah kadaluarsa',
+        'Password reset link is invalid or has expired',
       );
     }
 

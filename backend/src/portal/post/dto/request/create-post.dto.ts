@@ -25,8 +25,7 @@ export class CreatePostDto {
   @ApiProperty({
     description:
       'Short excerpt shown in listings and used as the default meta description',
-    example:
-      'Santri kelas VIII meraih juara 1 pada olimpiade tingkat kabupaten.',
+    example: 'A grade VIII student won first place at the district olympiad.',
   })
   @IsString()
   @IsNotEmpty()

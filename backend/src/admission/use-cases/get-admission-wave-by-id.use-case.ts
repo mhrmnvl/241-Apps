@@ -11,7 +11,7 @@ export class GetAdmissionWaveByIdUseCase {
   async execute(id: string) {
     const wave = await this.admissionWaveRepository.findById(id);
     if (!wave) {
-      throw new NotFoundException('Gelombang tidak ditemukan');
+      throw new NotFoundException('Admission wave not found');
     }
     return serializeWave(wave);
   }

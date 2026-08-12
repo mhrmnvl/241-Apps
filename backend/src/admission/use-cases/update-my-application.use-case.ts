@@ -22,11 +22,11 @@ export class UpdateMyApplicationUseCase {
     const application =
       await this.admissionApplicantRepository.findMyApplication(userId);
     if (!application) {
-      throw new NotFoundException('Data pendaftaran tidak ditemukan');
+      throw new NotFoundException('Application not found');
     }
     if (!isEditable(application.status)) {
       throw new ConflictException(
-        'Formulir hanya dapat diubah saat status Draft atau Perlu Revisi',
+        'The form can only be edited while the application is DRAFT or NEEDS_REVISION',
       );
     }
 

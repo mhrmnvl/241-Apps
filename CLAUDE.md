@@ -326,6 +326,25 @@ Core rules from `NESTJS-RULES.md` (enforced by convention, not by lint):
   `{ statusCode, message, data, meta? }` — there is no `success` field. Repositories
   return `{ data, total, page, limit }` and the interceptor folds it into
   `data` + `meta` (see `core/interceptors/response.interceptor.ts`).
+- **The backend is written in English.** Exception and validation messages,
+  Swagger summaries and descriptions, log lines, identifiers, and comments — all
+  English. Indonesian belongs to the frontend, which owns presentation and can
+  translate an English code or message into whatever the screen should say. This
+  is also why field names are English: `passingScore`, not `kkm`.
+
+  Three things are exempt, on one principle — text that leaves the system as the
+  final thing a person reads, with no frontend in between to translate it:
+
+  - **Rendered documents**: `report-card-pdf.template.ts` prints the rapor handed
+    to a parent, and the student import/export spreadsheet's column headers are
+    the contract with a file the TU already fills in.
+  - **Messages delivered to a person**: password-reset email bodies, and the
+    admission notification titles and bodies, which are stored and displayed
+    verbatim to the applicant.
+  - **Seed data** under `prisma/seeds/`: subject names, positions, and holidays
+    are real school data, not interface text.
+
+  Everything else that reads as Indonesian in `backend/src/` is a bug.
 
 Import style: backend uses NodeNext ESM — relative imports include the `.js`
 extension (e.g. `from './app.module.js'`) even though the source is `.ts`. A

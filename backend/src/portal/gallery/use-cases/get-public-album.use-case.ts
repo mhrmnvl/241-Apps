@@ -42,7 +42,7 @@ export class GetPublicAlbumBySlugUseCase {
   async execute(slug: string, query: PublicAlbumQueryDto) {
     const album = await this.galleryRepository.findPublicAlbumBySlug(slug);
     if (!album) {
-      throw new NotFoundException('Halaman tidak ditemukan');
+      throw new NotFoundException('Page not found');
     }
 
     const photos = await this.galleryRepository.findPhotos(

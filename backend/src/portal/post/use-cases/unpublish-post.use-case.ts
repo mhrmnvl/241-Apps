@@ -33,13 +33,13 @@ export class UnpublishPostUseCase {
   async execute(id: string, dto: PostVersionDto, actorId: string | null) {
     const existing = await this.postRepository.findById(id);
     if (!existing || existing.deletedAt) {
-      throw new NotFoundException(`Konten dengan ID ${id} tidak ditemukan`);
+      throw new NotFoundException(`Konten dengan ID ${id} not found`);
     }
 
     const updated = await this.postRepository.unpublish(id, dto.version);
     if (!updated) {
       throw new ConflictException(
-        'Konten ini sudah diubah oleh pengguna lain. Muat ulang sebelum menarik dari publikasi.',
+        'This content was changed by someone else. Reload before unpublishing.',
       );
     }
 

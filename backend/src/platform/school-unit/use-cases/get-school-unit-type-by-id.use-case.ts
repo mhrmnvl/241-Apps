@@ -10,7 +10,7 @@ export class GetSchoolUnitTypeByIdUseCase {
   async execute(id: string) {
     const item = await this.schoolUnitTypeRepository.findById(id);
     if (!item) {
-      throw new NotFoundException('Jenis unit tidak ditemukan');
+      throw new NotFoundException('School unit type not found');
     }
     return item;
   }

@@ -9,7 +9,9 @@ export class CreateTimeSlotTypeUseCase {
   async execute(dto: CreateTimeSlotTypeDto) {
     const existing = await this.timeSlotRepository.findTypeByCode(dto.code);
     if (existing) {
-      throw new ConflictException(`Kode tipe "${dto.code}" sudah digunakan`);
+      throw new ConflictException(
+        `Time slot type code "${dto.code}" is already in use`,
+      );
     }
     return this.timeSlotRepository.createType({
       code: dto.code,

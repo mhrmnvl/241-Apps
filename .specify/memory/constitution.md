@@ -399,6 +399,12 @@ and reviewed.
   REQUIRES justification in the feature plan.
 - **No build step between packages and apps**: `packages/*` are consumed directly as
   TypeScript source through path aliases. Do not introduce a publish or build step.
+- **Backend language**: `backend/` is written in English — messages, Swagger text,
+  logs, identifiers, comments. Indonesian belongs to the frontend, which owns
+  presentation. Exempt is text that leaves the system as the final thing a person
+  reads, with no frontend in between: rendered documents (the rapor PDF, the
+  student spreadsheet's column headers), messages delivered directly to a person
+  (reset emails, admission notifications), and seed data. See NESTJS-RULES.md.
 - **shadcn-vue components** live in `packages/ui` and MUST be added through its CLI and
   `components.json`, not copied into an app.
 - **Reference-data CRUD** MUST go through `@241/master-data` with a per-entity

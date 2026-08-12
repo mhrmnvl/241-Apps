@@ -31,7 +31,7 @@ export class EnrollApplicantUseCase {
         applicationId,
       );
     if (!application) {
-      throw new NotFoundException('Data pendaftaran tidak ditemukan');
+      throw new NotFoundException('Application not found');
     }
 
     assertTransition(application.status, 'ENROLLED');
@@ -42,12 +42,12 @@ export class EnrollApplicantUseCase {
       !application.birthDate
     ) {
       throw new BadRequestException(
-        'Data diri pendaftar belum lengkap (jenis kelamin, tempat/tanggal lahir)',
+        'Applicant profile is incomplete (gender, place and date of birth)',
       );
     }
     if (!application.nik) {
       throw new BadRequestException(
-        'NIK pendaftar wajib diisi sebelum diproses',
+        'A national ID is required before the applicant can be processed',
       );
     }
 
@@ -57,21 +57,21 @@ export class EnrollApplicantUseCase {
       this.admissionApplicationRepository.isNikTakenInProfiles(application.nik),
     ]);
     if (nisTaken) {
-      throw new ConflictException(`NIS ${dto.nis} sudah digunakan`);
+      throw new ConflictException(`NIS ${dto.nis} is already in use`);
     }
     if (nisnTaken) {
-      throw new ConflictException(`NISN ${dto.nisn} sudah digunakan`);
+      throw new ConflictException(`NISN ${dto.nisn} is already in use`);
     }
     if (nikTaken) {
       throw new ConflictException(
-        `NIK ${application.nik} sudah terdaftar pada profil lain`,
+        `NIK ${application.nik} is already registered to another profile`,
       );
     }
 
     const studentRoleId =
       await this.admissionApplicationRepository.findStudentRoleId();
     if (!studentRoleId) {
-      throw new ConflictException('Role STUDENT belum tersedia');
+      throw new ConflictException('The STUDENT role has not been provisioned');
     }
 
     const result = await this.admissionApplicationRepository.enrollAsStudent(

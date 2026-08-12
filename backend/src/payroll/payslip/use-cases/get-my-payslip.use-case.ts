@@ -26,9 +26,7 @@ export class GetMyPayslipUseCase {
   ): Promise<PayslipDetail> {
     const payslip = await this.payslips.findOwn(userId, query);
     if (!payslip) {
-      throw new NotFoundException(
-        'Belum ada slip gaji yang disetujui untuk periode ini',
-      );
+      throw new NotFoundException('No approved payslip exists for this period');
     }
 
     await this.audit.record('payroll.payslip.read-own', userId, payslip.id, {

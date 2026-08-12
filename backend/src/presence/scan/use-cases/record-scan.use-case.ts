@@ -69,7 +69,7 @@ export class RecordScanUseCase {
         dto,
         occurredAt,
         'REJECTED_UNKNOWN',
-        'Kartu tidak dikenal',
+        'Unknown credential',
       );
     }
     if (credential.status !== 'ACTIVE') {
@@ -78,7 +78,7 @@ export class RecordScanUseCase {
         dto,
         occurredAt,
         'REJECTED_REVOKED',
-        'Kartu sudah tidak berlaku',
+        'The credential is no longer valid',
         credential.id,
       );
     }
@@ -88,7 +88,7 @@ export class RecordScanUseCase {
         dto,
         occurredAt,
         'REJECTED_INACTIVE',
-        'Pemegang kartu tidak aktif',
+        'The credential holder is not active',
         credential.id,
       );
     }

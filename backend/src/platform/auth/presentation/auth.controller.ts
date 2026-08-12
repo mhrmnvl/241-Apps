@@ -189,7 +189,7 @@ export class AuthController {
     @Body() dto: ChangePasswordDto,
   ) {
     await this.changePasswordUseCase.execute(user.id, user.sessionId, dto);
-    return { success: true, message: 'Password berhasil diubah' };
+    return { success: true, message: 'Password changed successfully' };
   }
 
   @Throttle({ auth: {} })
@@ -214,7 +214,7 @@ export class AuthController {
   @ApiResponse({ status: 400, description: 'Invalid or expired token' })
   async resetPassword(@Body() dto: ResetPasswordDto) {
     await this.resetPasswordUseCase.execute(dto);
-    return { success: true, message: 'Password berhasil direset' };
+    return { success: true, message: 'Password reset successfully' };
   }
 
   private setRefreshTokenCookie(res: Response, token: string, maxAge: number) {

@@ -31,7 +31,7 @@ export class UpdateClassroomStructureUseCase {
     const uniqueIds = new Set(allIds);
     if (uniqueIds.size !== allIds.length) {
       throw new BadRequestException(
-        'Satu siswa tidak boleh menjabat lebih dari satu posisi dalam struktur yang sama',
+        'A student cannot hold more than one position in the same structure',
       );
     }
 

@@ -18,7 +18,7 @@ export class CreateAssetDto {
 
   @ApiPropertyOptional({
     description:
-      'Jumlah unit fisik yang dibuat (tiap unit dapat nomor sendiri)',
+      'Number of physical units to create (each gets its own number)',
     default: 1,
     minimum: 1,
   })

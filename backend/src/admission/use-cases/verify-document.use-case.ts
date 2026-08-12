@@ -22,7 +22,7 @@ export class VerifyDocumentUseCase {
     adminId: string,
   ) {
     if (dto.status === AdmissionDocumentStatus.REJECTED && !dto.note?.trim()) {
-      throw new BadRequestException('Alasan penolakan berkas wajib diisi');
+      throw new BadRequestException('A rejection reason is required');
     }
 
     const document = await this.admissionApplicationRepository.findDocument(
@@ -30,7 +30,7 @@ export class VerifyDocumentUseCase {
       documentId,
     );
     if (!document) {
-      throw new NotFoundException('Berkas tidak ditemukan');
+      throw new NotFoundException('Document not found');
     }
 
     const updated =

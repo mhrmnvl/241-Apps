@@ -8,7 +8,9 @@ export class VerifyDocumentDto {
   @IsIn(['APPROVED', 'REJECTED'])
   status: AdmissionDocumentStatus;
 
-  @ApiPropertyOptional({ description: 'Wajib diisi jika REJECTED' })
+  @ApiPropertyOptional({
+    description: 'Required when the decision is REJECTED',
+  })
   @IsOptional()
   @IsString()
   note?: string;

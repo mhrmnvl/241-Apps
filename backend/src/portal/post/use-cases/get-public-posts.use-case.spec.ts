@@ -191,7 +191,7 @@ describe('GetPublicPostBySlugUseCase', () => {
   it('gives an identical 404 whether the item is missing or merely unpublished', async () => {
     mockRepository.findPublicBySlug.mockResolvedValue(null);
 
-    const attempts = ['tidak-pernah-ada', 'masih-draft'].map(async (slug) => {
+    const attempts = ['never-existed', 'masih-draft'].map(async (slug) => {
       try {
         await useCase.execute(PostType.BERITA, slug);
         throw new Error('expected a rejection');
@@ -202,7 +202,7 @@ describe('GetPublicPostBySlugUseCase', () => {
 
     const [missing, draft] = await Promise.all(attempts);
     expect(missing).toBe(draft);
-    expect(missing).toBe('Halaman tidak ditemukan');
+    expect(missing).toBe('Page not found');
   });
 
   it('falls back to title and summary for the share metadata', async () => {

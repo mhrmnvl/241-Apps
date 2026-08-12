@@ -26,7 +26,7 @@ describe('ExportReportCardPdfUseCase', () => {
     id: 'rap-1',
     enrollmentId: 'enr-1',
     isPublished: true,
-    teacherNote: 'Anak yang rajin.',
+    teacherNote: 'A diligent student.',
     // The lines frozen when the card was generated. The exporter prints these
     // and never recomputes, so a published card cannot drift.
     subjects: [

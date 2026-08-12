@@ -14,11 +14,11 @@ export class DeleteAdmissionWaveUseCase {
   async execute(id: string) {
     const wave = await this.admissionWaveRepository.findById(id);
     if (!wave) {
-      throw new NotFoundException('Gelombang tidak ditemukan');
+      throw new NotFoundException('Admission wave not found');
     }
     if ((wave._count?.applications ?? 0) > 0) {
       throw new ConflictException(
-        'Gelombang dengan pendaftar tidak dapat dihapus. Nonaktifkan saja.',
+        'An admission wave with applicants cannot be deleted. Deactivate it instead.',
       );
     }
 

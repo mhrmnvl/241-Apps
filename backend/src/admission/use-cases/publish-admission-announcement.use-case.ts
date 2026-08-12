@@ -11,7 +11,7 @@ export class PublishAdmissionAnnouncementUseCase {
     const announcement =
       await this.admissionAnnouncementRepository.findActiveById(id);
     if (!announcement) {
-      throw new NotFoundException('Pengumuman tidak ditemukan');
+      throw new NotFoundException('Announcement not found');
     }
 
     const updated = await this.admissionAnnouncementRepository.publish(id);

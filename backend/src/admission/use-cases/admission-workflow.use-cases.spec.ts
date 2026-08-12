@@ -83,7 +83,7 @@ describe('Admission workflow use-cases', () => {
 
       const result = await accept.execute('app1', {}, 'admin1');
 
-      expect(result.quotaWarning).toContain('Kuota gelombang');
+      expect(result.quotaWarning).toContain('Wave quota');
       expect(notifications.notify).toHaveBeenCalled();
     });
   });

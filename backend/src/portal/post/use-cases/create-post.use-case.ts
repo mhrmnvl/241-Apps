@@ -73,7 +73,7 @@ export class CreatePostUseCase {
     const base = toSlug(source);
     if (base.length === 0) {
       throw new BadRequestException(
-        'Judul tidak menghasilkan alamat yang valid. Gunakan minimal satu huruf atau angka.',
+        'The title does not produce a valid slug. Use at least one letter or digit.',
       );
     }
     const taken = await this.postRepository.findTakenSlugs(type, base);
@@ -93,7 +93,7 @@ export function assertTypeSpecificFields(dto: {
   if (dto.type === PostType.PENGUMUMAN) return;
   if (dto.expiresAt || dto.attachmentFileId) {
     throw new BadRequestException(
-      'expiresAt dan attachmentFileId hanya berlaku untuk Pengumuman.',
+      'expiresAt and attachmentFileId apply to announcements only',
     );
   }
 }

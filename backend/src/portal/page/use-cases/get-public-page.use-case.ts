@@ -51,7 +51,7 @@ export class GetPublicPageUseCase {
     const moved = await this.pageRepository.findByHistoricalSlug(slug);
     if (moved) return { kind: 'moved', slug: moved.currentSlug };
 
-    throw new NotFoundException('Halaman tidak ditemukan');
+    throw new NotFoundException('Page not found');
   }
 }
 

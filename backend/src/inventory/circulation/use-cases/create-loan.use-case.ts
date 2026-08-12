@@ -16,7 +16,7 @@ export class CreateLoanUseCase {
 
     if (!pendingStatus) {
       throw new NotFoundException(
-        'Peran status "Menunggu Persetujuan" belum diatur di Referensi > Status Aset.',
+        'The PENDING_APPROVAL status role is not configured under Reference > Asset Status',
       );
     }
 

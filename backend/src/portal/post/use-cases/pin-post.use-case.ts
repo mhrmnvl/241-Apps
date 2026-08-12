@@ -29,7 +29,7 @@ export class PinPostUseCase {
   async execute(id: string, dto: PinPostDto) {
     const existing = await this.postRepository.findById(id);
     if (!existing || existing.deletedAt) {
-      throw new NotFoundException(`Konten dengan ID ${id} tidak ditemukan`);
+      throw new NotFoundException(`Konten dengan ID ${id} not found`);
     }
 
     const updated = await this.postRepository.pin(
@@ -39,7 +39,7 @@ export class PinPostUseCase {
     );
     if (!updated) {
       throw new ConflictException(
-        'Konten ini sudah diubah oleh pengguna lain. Muat ulang sebelum menyematkan.',
+        'This content was changed by someone else. Reload before pinning.',
       );
     }
 

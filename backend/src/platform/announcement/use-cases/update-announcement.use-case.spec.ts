@@ -20,8 +20,7 @@ describe('UpdateAnnouncementUseCase', () => {
   const mockExisting = {
     id: 'ann-1',
     title: 'Jadwal Ujian Akhir Semester',
-    description:
-      'Ujian akhir semester genap dilaksanakan pada tanggal 20-25 Mei 2025.',
+    description: 'End-of-term exams run from 20-25 May 2025.',
     date: new Date('2025-05-20'),
     classrooms: [],
   };

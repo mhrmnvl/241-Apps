@@ -96,7 +96,7 @@ export class UpdateNavItemUseCase {
   async execute(id: string, dto: UpdateNavItemDto) {
     const existing = await this.navigationRepository.findById(id);
     if (!existing) {
-      throw new NotFoundException(`Menu dengan ID ${id} tidak ditemukan`);
+      throw new NotFoundException(`Navigation item ${id} not found`);
     }
 
     const data: CreateNavItemInput = {
@@ -146,7 +146,7 @@ export class ReorderNavigationUseCase {
     const unknown = dto.itemIds.filter((id) => !known.has(id));
     if (unknown.length > 0) {
       throw new BadRequestException(
-        'Urutan memuat menu yang tidak ada. Muat ulang daftar menu.',
+        'The order references a menu item that does not exist. Reload the menu.',
       );
     }
 
@@ -167,7 +167,7 @@ export class DeleteNavItemUseCase {
   async execute(id: string): Promise<void> {
     const existing = await this.navigationRepository.findById(id);
     if (!existing) {
-      throw new NotFoundException(`Menu dengan ID ${id} tidak ditemukan`);
+      throw new NotFoundException(`Navigation item ${id} not found`);
     }
 
     // Hard delete: a menu entry holds no content of its own, and the page it

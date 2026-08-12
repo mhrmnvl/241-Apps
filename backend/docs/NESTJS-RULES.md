@@ -333,6 +333,30 @@ A response DTO living under dto/request/ (or vice versa)
 
 ---
 
+## Language: the backend is written in English
+
+Exception and validation messages, Swagger summaries and descriptions, log
+lines, field and class names, and comments are all English. Indonesian is the
+frontend's job: it owns presentation, and it can turn an English message or
+code into whatever the screen should say. A field is `passingScore`, never
+`kkm`.
+
+Exempt, on one principle — text that leaves the system as the final thing a
+person reads, with nothing in between to translate it:
+
+- **Rendered documents.** `report-card-pdf.template.ts` prints the rapor a
+  parent receives. The student import/export column headers are the contract
+  with a spreadsheet the TU already fills in; renaming them breaks their file.
+- **Messages delivered to a person.** Password-reset email bodies, and the
+  admission notification titles and bodies, which are stored and shown verbatim
+  to the applicant.
+- **Seed data** under `prisma/seeds/` — subject names, positions and holidays
+  are real school data, not interface text.
+
+Anything else reading as Indonesian under `src/` is a bug.
+
+---
+
 ## `*Dto` vs `*Input` — two boundaries, not two styles
 
 Both exist on purpose. They are not interchangeable and neither replaces

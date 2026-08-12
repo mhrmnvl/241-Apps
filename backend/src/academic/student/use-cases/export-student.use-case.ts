@@ -103,7 +103,7 @@ export class ExportStudentsUseCase {
       formulae: [levelsFormula],
       showErrorMessage: true,
       errorTitle: 'Tingkat Tidak Valid',
-      error: 'Silakan pilih tingkat sekolah yang sesuai dan aktif di sistem.',
+      error: 'Select a school level that exists and is active',
     });
 
     // Add Data Validation for Kelas (Col K) on rows 2 to 1000
@@ -114,7 +114,7 @@ export class ExportStudentsUseCase {
         formulae: [classroomsFormula],
         showErrorMessage: true,
         errorTitle: 'Kelas Tidak Valid',
-        error: 'Silakan pilih kode kelas yang sesuai dan aktif di sistem.',
+        error: 'Select a classroom code that exists and is active',
       });
     }
 

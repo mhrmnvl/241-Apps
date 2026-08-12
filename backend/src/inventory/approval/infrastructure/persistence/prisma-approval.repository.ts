@@ -176,7 +176,7 @@ export class PrismaApprovalRepository extends IApprovalRepository {
         });
         if (!rejectedStatus || !availStatus) {
           throw new Error(
-            'Peran status "Pinjam Ditolak"/"Tersedia" belum diatur di Referensi > Status Aset.',
+            'The LOAN_REJECTED/AVAILABLE status roles are not configured under Reference > Asset Status',
           );
         }
 
@@ -241,7 +241,7 @@ export class PrismaApprovalRepository extends IApprovalRepository {
 
           if (!approvedStatus || !loanedStatus || !txType) {
             throw new Error(
-              'Peran status "Pinjam Disetujui"/"Dipinjam" belum diatur, atau tipe transaksi TX-LOAN-OUT belum tersedia.',
+              'The LOAN_APPROVED/ON_LOAN status roles are not configured, or the TX-LOAN-OUT transaction type is missing',
             );
           }
 

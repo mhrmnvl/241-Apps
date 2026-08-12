@@ -11,7 +11,7 @@ export class GetMyNotificationsUseCase {
     const applicationId =
       await this.admissionApplicantRepository.findApplicationIdByUser(userId);
     if (!applicationId) {
-      throw new NotFoundException('Data pendaftaran tidak ditemukan');
+      throw new NotFoundException('Application not found');
     }
 
     return this.admissionApplicantRepository.findNotifications(applicationId);

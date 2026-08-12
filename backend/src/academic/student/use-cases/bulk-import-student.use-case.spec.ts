@@ -138,7 +138,7 @@ describe('BulkImportStudentsUseCase', () => {
 
       expect(result.failed).toBe(1);
       expect(result.results[0].status).toBe('FAILED');
-      expect(result.results[0].error).toContain('tidak ditemukan');
+      expect(result.results[0].error).toContain('not found');
       expect(mockCreateStudent.execute).not.toHaveBeenCalled();
     });
 

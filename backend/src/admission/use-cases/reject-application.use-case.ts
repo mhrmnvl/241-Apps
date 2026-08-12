@@ -20,7 +20,7 @@ export class RejectApplicationUseCase {
     const application =
       await this.admissionApplicationRepository.findActiveById(applicationId);
     if (!application) {
-      throw new NotFoundException('Data pendaftaran tidak ditemukan');
+      throw new NotFoundException('Application not found');
     }
 
     assertTransition(application.status, 'REJECTED');

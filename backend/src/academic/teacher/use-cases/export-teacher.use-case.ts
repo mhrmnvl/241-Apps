@@ -87,7 +87,7 @@ export class ExportTeachersUseCase {
       formulae: [empFormula],
       showErrorMessage: true,
       errorTitle: 'Pilihan Tidak Valid',
-      error: 'Silakan pilih status kepegawaian yang valid dan aktif di sistem.',
+      error: 'Select an employment type that exists and is active',
     });
 
     // Add Data Validation for Jenis Kelamin (Col F) on rows 2 to 1000

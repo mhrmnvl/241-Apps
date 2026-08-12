@@ -22,7 +22,7 @@ export class CreateEventDto {
 
   @ApiProperty({
     description: 'Event description',
-    example: 'Kegiatan pameran karya ilmiah siswa kelas 7-9.',
+    example: 'Science fair for grade 7-9 students.',
   })
   @IsString()
   @IsNotEmpty()
