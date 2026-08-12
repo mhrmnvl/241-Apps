@@ -8,7 +8,9 @@ import {
   ProfileWithDetails,
   UserDetail,
   ProfileWithSocialMedias,
-  USER_DETAIL_SELECT,
+  USER_IDENTITY_SELECT,
+  TEACHER_DETAIL_INCLUDE,
+  STUDENT_DETAIL_INCLUDE,
   PROFILE_WITH_SOCIAL_MEDIAS_INCLUDE,
 } from './prisma-profile.includes.js';
 
@@ -25,11 +27,39 @@ export class PrismaProfileRepository extends IProfileRepository {
     });
   }
 
+  /**
+   * Three reads instead of one six-level query.
+   *
+   * A user is a teacher or a student, never both, so the single query ran one
+   * of the two heavy subtrees for nothing on every request. The identity read
+   * carries a bare id for each; only the branch that exists is then fetched,
+   * and the two are composed back into the same shape and key order the
+   * caller had before.
+   */
   async findDetailByUserId(userId: string): Promise<UserDetail | null> {
-    return this.prisma.user.findUnique({
+    const user = await this.prisma.user.findUnique({
       where: { id: userId },
-      select: USER_DETAIL_SELECT,
+      select: USER_IDENTITY_SELECT,
     });
+
+    if (!user) return null;
+
+    const [teacher, student] = await Promise.all([
+      user.teacher
+        ? this.prisma.teacher.findUnique({
+            where: { id: user.teacher.id },
+            include: TEACHER_DETAIL_INCLUDE,
+          })
+        : null,
+      user.student
+        ? this.prisma.student.findUnique({
+            where: { id: user.student.id },
+            include: STUDENT_DETAIL_INCLUDE,
+          })
+        : null,
+    ]);
+
+    return { ...user, teacher, student };
   }
 
   async findByNik(nik: string, excludeUserId?: string) {

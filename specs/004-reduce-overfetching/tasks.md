@@ -139,8 +139,8 @@ Monorepo: `backend/src/…` for the API, `apps/<app>/src/…` for the five front
 
 **Independent test**: Add a scratch column to the personal record, regenerate, and confirm no screen changes and no response carries it.
 
-- [ ] T041 [US4] Split `USER_DETAIL_SELECT` in `backend/src/platform/profile/infrastructure/persistence/prisma-profile.includes.ts` into an identity read plus conditional teacher and student reads, per [data-model.md](./data-model.md)
-- [ ] T042 [US4] Compose the three reads in `backend/src/platform/profile/infrastructure/persistence/prisma-profile.repository.ts` so `findDetailByUserId` returns a body byte-identical to the current one
+- [X] T041 [US4] Split `USER_DETAIL_SELECT` in `backend/src/platform/profile/infrastructure/persistence/prisma-profile.includes.ts` into an identity read plus conditional teacher and student reads, per [data-model.md](./data-model.md)
+- [X] T042 [US4] Compose the three reads in `backend/src/platform/profile/infrastructure/persistence/prisma-profile.repository.ts` so `findDetailByUserId` returns a body byte-identical to the current one
 - [X] T043 [US4] Replace the depth-six `profile: true` on the classroom supervisor branch with `PROFILE_NAME_SELECT`, since only the wali kelas's name is shown
 - [ ] T044 [US4] Compare the `GET /profiles/me` response before and after T041–T043 for the same user and confirm they match field for field
 - [X] T045 [P] [US4] Separate `STUDENT_LIST_INCLUDE` from `STUDENT_DETAIL_INCLUDE` in `backend/src/academic/student/infrastructure/persistence/prisma-student.includes.ts` so the list carries strictly less
