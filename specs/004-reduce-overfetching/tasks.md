@@ -29,7 +29,7 @@ Monorepo: `backend/src/…` for the API, `apps/<app>/src/…` for the five front
 
 - [ ] T001 Capture request count and total transferred for the six screens in [quickstart.md](./quickstart.md) Step 1, and write them to `specs/004-reduce-overfetching/baseline.md`
 - [ ] T002 [P] Record the size of one student row and one teacher row from the list responses in `specs/004-reduce-overfetching/baseline.md`
-- [ ] T003 [P] Enumerate every view that fetches a `PAGINATION.REFERENCE_LIMIT` list in `onMounted` but reads it only inside a dialog, and append the list to `specs/004-reduce-overfetching/baseline.md` under "Dialog-only reads"
+- [X] T003 [P] Enumerate every view that fetches a `PAGINATION.REFERENCE_LIMIT` list in `onMounted` but reads it only inside a dialog, and append the list to `specs/004-reduce-overfetching/baseline.md` under "Dialog-only reads"
 
 **Checkpoint**: The numbers exist. Nothing after this can be judged without them.
 
@@ -91,9 +91,9 @@ Monorepo: `backend/src/…` for the API, `apps/<app>/src/…` for the five front
 
 **Independent test**: Open an affected page with the Network tab open and confirm the dialog's list is absent; open the dialog and confirm it arrives then.
 
-- [ ] T023 [US2] Move the `subjectApi.getSubjects({ limit: REFERENCE_LIMIT })` call out of `fetchReferenceData` in `apps/academic/src/features/academic/curriculum-subject/services/curriculumSubjectService.ts` so it is no longer invoked from the view's `onMounted`
-- [ ] T024 [US2] Fetch the subject list inside `apps/academic/src/features/academic/curriculum-subject/components/AddCurriculumSubjectDialog.vue` when `open` becomes true, showing a loading state until it resolves
-- [ ] T025 [US2] Remove `fetchReferenceData()` from the `onMounted` in `apps/academic/src/features/academic/curriculum-subject/views/CurriculumSubjectView.vue`
+- [X] T023 [US2] Move the `subjectApi.getSubjects({ limit: REFERENCE_LIMIT })` call out of `fetchReferenceData` in `apps/academic/src/features/academic/curriculum-subject/services/curriculumSubjectService.ts` so it is no longer invoked from the view's `onMounted`
+- [X] T024 [US2] Fetch the subject list inside `apps/academic/src/features/academic/curriculum-subject/components/AddCurriculumSubjectDialog.vue` when `open` becomes true, showing a loading state until it resolves
+- [X] T025 [US2] Remove `fetchReferenceData()` from the `onMounted` in `apps/academic/src/features/academic/curriculum-subject/views/CurriculumSubjectView.vue`
 - [ ] T026 [P] [US2] Apply the same move to each remaining view identified by T003, one commit per view
 - [ ] T027 [US2] Confirm each converted dialog handles a failed fetch by saying so and offering a retry, without affecting the page behind it, per [contracts/read-projections.md](./contracts/read-projections.md) C4
 
