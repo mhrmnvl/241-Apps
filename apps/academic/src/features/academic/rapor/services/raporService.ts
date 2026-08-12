@@ -20,15 +20,14 @@ export const raporService = {
   fetchFilterOptions: async () => {
     const store = useRaporStore()
     try {
-      const cache = useReferenceList()
       const [classrooms, semesters] = await Promise.all([
-        cache.read('classrooms', async () => {
+        useReferenceList().read('classrooms', async () => {
           const res = await classroomApi.getClassrooms({
             limit: PAGINATION.REFERENCE_LIMIT,
           })
           return res.data?.data ?? []
         }),
-        cache.read('semesters', async () => {
+        useReferenceList().read('semesters', async () => {
           const res = await semesterApi.getSemesters({
             limit: PAGINATION.REFERENCE_LIMIT,
           })

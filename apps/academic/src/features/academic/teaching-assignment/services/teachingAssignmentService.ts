@@ -62,15 +62,14 @@ export const teachingAssignmentService = {
       // The two flat lists are cached for the session; the subjects are not.
       // They are narrowed by whichever curriculum is active, so one key would
       // hold one curriculum's answer and serve it to the next.
-      const cache = useReferenceList()
       const [classrooms, teachers, subjects] = await Promise.all([
-        cache.read('classrooms', async () => {
+        useReferenceList().read('classrooms', async () => {
           const res = await classroomApi.getClassrooms({
             limit: PAGINATION.REFERENCE_LIMIT,
           })
           return res.data?.data ?? []
         }),
-        cache.read('teachers', async () => {
+        useReferenceList().read('teachers', async () => {
           const res = await teacherApi.getTeachers({
             limit: PAGINATION.REFERENCE_LIMIT,
           })
