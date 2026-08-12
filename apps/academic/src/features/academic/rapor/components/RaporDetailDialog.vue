@@ -150,6 +150,73 @@ function formatType(type: string): string {
         </div>
 
         <div class="space-y-3">
+          <h4 class="text-sm font-semibold">Nilai Akhir per Mata Pelajaran</h4>
+          <p class="text-xs text-muted-foreground">
+            Angka yang tercetak di rapor. Dibekukan saat rapor dibuat, jadi
+            tidak berubah walau KKM atau bobot diubah kemudian.
+          </p>
+
+          <div
+            v-if="!detailData.subjects?.length"
+            class="text-sm text-muted-foreground text-center py-4"
+          >
+            Belum ada mata pelajaran yang dinilai.
+          </div>
+
+          <div
+            v-else
+            class="rounded-lg border overflow-hidden"
+          >
+            <table class="w-full text-sm">
+              <thead class="bg-muted/50 text-left">
+                <tr>
+                  <th class="px-3 py-2 font-medium">Mata Pelajaran</th>
+                  <th class="px-3 py-2 font-medium text-right">KKM</th>
+                  <th class="px-3 py-2 font-medium text-right">Nilai</th>
+                  <th class="px-3 py-2 font-medium text-center">Predikat</th>
+                  <th class="px-3 py-2 font-medium">Status</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y">
+                <tr
+                  v-for="subject in detailData.subjects"
+                  :key="subject.subjectId"
+                  class="hover:bg-muted/20"
+                >
+                  <td class="px-3 py-2">{{ subject.subjectName }}</td>
+                  <td
+                    class="px-3 py-2 text-right font-mono text-muted-foreground"
+                  >
+                    {{ subject.kkm }}
+                  </td>
+                  <td class="px-3 py-2 text-right font-mono font-semibold">
+                    {{ Number(subject.score).toFixed(2) }}
+                  </td>
+                  <td class="px-3 py-2 text-center">
+                    <span class="font-semibold">{{ subject.predicate }}</span>
+                    <span class="ml-1 text-xs text-muted-foreground">
+                      {{ subject.description }}
+                    </span>
+                  </td>
+                  <td class="px-3 py-2">
+                    <span
+                      class="rounded-full px-2 py-0.5 text-xs font-medium"
+                      :class="
+                        subject.isComplete
+                          ? 'bg-emerald-100 text-emerald-700'
+                          : 'bg-red-100 text-red-700'
+                      "
+                    >
+                      {{ subject.isComplete ? 'Tuntas' : 'Belum Tuntas' }}
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="space-y-3">
           <h4 class="text-sm font-semibold">Rincian Nilai</h4>
 
           <div

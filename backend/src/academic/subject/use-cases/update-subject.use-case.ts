@@ -29,6 +29,7 @@ export class UpdateSubjectUseCase {
     const updated = await this.subjectRepository.update(id, {
       code: dto.code,
       name: dto.name,
+      kkm: dto.kkm,
     });
     this.logger.log(`Subject updated: ${id}`);
     return updated;

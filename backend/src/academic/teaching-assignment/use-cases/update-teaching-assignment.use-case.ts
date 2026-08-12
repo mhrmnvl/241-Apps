@@ -64,6 +64,7 @@ export class UpdateTeachingAssignmentUseCase {
       classroomId: dto.classroomId,
       subjectId: dto.subjectId,
       semesterId: dto.semesterId,
+      kkm: dto.kkm,
     });
   }
 }
