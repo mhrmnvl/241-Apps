@@ -15,6 +15,19 @@ Three tiers: local, dev, production.
 Work merges to `dev` and lands on the dev box. When it is proven there, `dev`
 merges to `main`. CI runs on both branches.
 
+**`main` is not a place to try something.** A merge there deploys to the school
+within minutes, so the order is never negotiable:
+
+```
+work -> dev -> deploys to development -> verified there -> PR dev->main -> production
+```
+
+`Promotion Guard` fails any pull request into `main` that does not come from
+`dev`, or whose exact commit has no successful `Deploy to Development` run — it
+queries the API for that run rather than taking the pull request's word for it.
+`.husky/pre-push` refuses a direct push. Neither can *block* a merge without
+branch protection, so they make a violation loud rather than impossible.
+
 ---
 
 ## What actually separates them

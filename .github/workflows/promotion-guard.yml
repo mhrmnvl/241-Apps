@@ -1,0 +1,82 @@
+name: Promotion Guard
+
+# `main` is production. A merge there deploys to the school, so what lands must
+# be code that has already run somewhere real.
+#
+# This enforces two things about any pull request into `main`:
+#
+#   1. it comes from `dev`, not from a feature branch or a fork
+#   2. the exact commit being promoted has already deployed to development,
+#      successfully
+#
+# Point 2 is the one that matters. "Tested in dev" is a claim; a successful
+# `Deploy to Development` run for this precise SHA is a fact, and this asks the
+# API for it rather than trusting the description of the pull request.
+#
+# Note what this can and cannot do. Without branch protection — which needs
+# GitHub Pro on a private repository — a red check does not *block* the merge
+# button. It makes the violation loud and recorded. Combined with
+# `.husky/pre-push`, that is the strongest guard available on this plan.
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+  actions: read # to look up the development deployment for this SHA
+
+concurrency:
+  group: promotion-guard-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  guard:
+    name: Promotion to production
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Source branch must be dev
+        run: |
+          head='${{ github.head_ref }}'
+          if [ "$head" != "dev" ]; then
+            echo "::error::A pull request into main must come from 'dev', not '$head'."
+            echo ""
+            echo "main is production. Work is proven on dev first, then promoted:"
+            echo ""
+            echo "    git switch dev && git merge $head"
+            echo "    git push origin dev          # deploys to development"
+            echo "    # verify it there, then open dev -> main"
+            echo ""
+            exit 1
+          fi
+          echo "Source branch is dev."
+
+      - name: This commit must already be deployed to development
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SHA: ${{ github.event.pull_request.head.sha }}
+          REPO: ${{ github.repository }}
+        run: |
+          echo "Looking for a successful development deployment of $SHA"
+
+          runs=$(gh api \
+            "repos/$REPO/actions/workflows/deploy-dev.yml/runs?head_sha=$SHA&status=success&per_page=1" \
+            --jq '.total_count' 2>/dev/null || echo 0)
+
+          if [ "${runs:-0}" -lt 1 ]; then
+            echo "::error::No successful 'Deploy to Development' run for $SHA."
+            echo ""
+            echo "This commit has never run on the development box, so promoting"
+            echo "it would make production the first place it executes."
+            echo ""
+            echo "Push it to dev, let the deployment finish, verify it, then"
+            echo "reopen or re-run this check."
+            echo ""
+            echo "If the deployment failed for a reason unrelated to this code —"
+            echo "the network timeout that has happened before — re-run it and"
+            echo "this check will pass."
+            exit 1
+          fi
+
+          echo "Found a successful development deployment for this commit."

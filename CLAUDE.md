@@ -370,6 +370,38 @@ Prisma schema is split per domain under `backend/prisma/*.prisma` (e.g.
 `student.prisma`, `academic.prisma`, `iam.prisma`, `inventory.prisma`,
 `admission.prisma`) rather than one monolithic `schema.prisma`.
 
+## Branches and deployment
+
+`dev` is development, `main` is production, and both deploy automatically to the
+one VPS the school runs — `/var/www/241-Apps-dev` on port 3001 and
+`/var/www/241-Apps` on port 3000, each with its own database and its own
+`JWT_SECRET`.
+
+**Nothing reaches `main` that has not already run on `dev`.** A merge to `main`
+deploys to the school within minutes, so `main` is not a place to try something.
+The order is always:
+
+```
+work -> dev -> deploys to development -> verified there -> PR dev->main -> production
+```
+
+Two mechanisms hold that line, and neither is a substitute for the other:
+
+- `.github/workflows/promotion-guard.yml` fails any pull request into `main`
+  that does not come from `dev`, or whose exact commit has no successful
+  `Deploy to Development` run. It asks the API rather than believing the pull
+  request description.
+- `.husky/pre-push` refuses a direct push to `main`.
+
+Both are advisory in the strict sense: branch protection would make the check
+blocking, and it needs GitHub Pro on a private repository, which this account
+does not have. So a red check is loud and recorded, not enforced, and
+`--no-verify` walks past the hook. Treat the rule as the thing that matters and
+the mechanisms as reminders.
+
+See `docs/environments.md` for what deploys where and `docs/vps-setup.md` for
+what a box needs.
+
 ## Cross-cutting notes
 
 - Node ≥ 20, pnpm ≥ 10 (`packageManager` pins pnpm 11.11.0).
