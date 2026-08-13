@@ -71,29 +71,35 @@ jobs:
             set -euo pipefail
             echo "==> Starting dev deployment..."
 
-            # Defaults to the same layout as production, on a different host.
-            # Override with a DEV_APP_PATH secret if the dev box differs.
             cd "${DEV_APP_PATH:-/var/www/241-Apps}"
 
             # Server working tree is disposable — reset to origin/dev rather
-            # than `git pull`, so a dirty tree or diverged history never blocks
-            # a deploy. .env / .env.* are gitignored, so the box's own secrets
-            # are untouched — which is what keeps the dev DATABASE_URL pointing
-            # at the dev database.
+            # than `git pull`, so a dirty tree or diverged history never blocks a
+            # deploy. .env / .env.* are gitignored, so the box's own secrets are
+            # untouched.
             git fetch --all --prune
             git reset --hard origin/dev
 
             pnpm install --frozen-lockfile
 
-            # Frontend: build all *-web apps (served statically by Nginx).
-            pnpm -r --filter "*-web" build
-
-            # Backend: migrate then build, run pm2 from backend/ so it loads
-            # backend/.env — the dev box's own, pointing at the dev database.
+            # Migrations first, before anything is published.
+            #
+            # This used to run after the frontend builds, and that ordering is
+            # what left production serving a new frontend against an old backend
+            # for a day: bad database credentials aborted the script only after
+            # the five *-web builds had already overwritten what Nginx serves.
+            # The step most likely to fail on configuration now fails before any
+            # of it is replaced.
             cd backend
             pnpm prisma:generate
             pnpm prisma:deploy
             pnpm build
+            cd ..
+
+            # Frontend: build all *-web apps (served statically by Nginx).
+            pnpm -r --filter "*-web" build
+
+            cd backend
             pm2 restart backend-241-dev --update-env || pm2 start dist/src/main.js --name backend-241-dev
             pm2 save
             pm2 status

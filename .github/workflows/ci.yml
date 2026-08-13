@@ -17,7 +17,7 @@ permissions:
 
 jobs:
   ci:
-    name: Lint · Type-check · Build (all apps)
+    name: Frontend · lint, types, tests, build
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
@@ -48,8 +48,101 @@ jobs:
       - name: Lint
         run: pnpm run lint
 
-      - name: Type check & Build
+      # Type-aware lint, which catches a different class of defect from the
+      # syntactic pass above and was not running here at all.
+      - name: Lint (type-aware)
+        run: pnpm run lint:strict
+
+      - name: Type check
+        run: pnpm run typecheck
+
+      # `pnpm test` covers the five apps and @241/{shared,platform,master-data}.
+      # These existed and ran only on developers' machines, which is the same as
+      # not having them: nothing stopped a merge that broke one.
+      - name: Test
+        run: pnpm run test
+
+      - name: Build
         run: pnpm run build
 
-      - name: Security audit
-        run: pnpm audit --prod || true
+  # The backend was absent from CI entirely — not linted, not type-checked, not
+  # tested, not built. Its 1,900+ tests ran only locally, and a change that broke
+  # it reached the deploy script before anything noticed. It has its own tooling
+  # (jest, its own ESLint configs), so it gets its own job rather than being
+  # bolted onto the frontend one.
+  backend:
+    name: Backend · lint, types, tests, build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm via Corepack
+        run: |
+          corepack enable
+          corepack prepare pnpm@11.11.0 --activate
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Every backend step needs the generated client; nothing here touches a
+      # database, so no DATABASE_URL is required.
+      - name: Generate Prisma client
+        run: pnpm --filter backend prisma:generate
+
+      - name: Check formatting
+        run: pnpm --filter backend format:check
+
+      - name: Lint
+        run: pnpm --filter backend lint
+
+      - name: Lint (type-aware)
+        run: pnpm --filter backend lint:strict
+
+      - name: Type check
+        run: pnpm --filter backend typecheck
+
+      - name: Test
+        run: pnpm --filter backend test
+
+      - name: Build
+        run: pnpm --filter backend build
+
+  audit:
+    name: Dependency audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # Advisory, and honest about it: this reports rather than blocks, because a
+    # transitive advisory with no fix available should not stop a school from
+    # shipping. It used to hide inside the build job behind `|| true`, where
+    # nobody would ever read it.
+    continue-on-error: true
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm via Corepack
+        run: |
+          corepack enable
+          corepack prepare pnpm@11.11.0 --activate
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Audit production dependencies
+        run: pnpm audit --prod

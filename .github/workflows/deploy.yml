@@ -1,5 +1,12 @@
-name: Deploy to VPS
+name: Deploy to Production VPS
 
+# Production. Nothing is here yet — see the guard below.
+#
+# The secrets are `PROD_*`, deliberately not the bare `HOST` / `USERNAME` /
+# `SSH_KEY` this workflow used to read. Those still point at the box that is
+# becoming the dev server, and a production job that could still read them would
+# deploy production onto dev the next time anything merged to `main`. Renaming
+# them is what makes that impossible rather than merely unlikely.
 on:
   push:
     branches: [main]
@@ -8,7 +15,7 @@ on:
 # Never run two deploys at once, and never cancel one mid-flight (a half-applied
 # deploy is worse than a queued one).
 concurrency:
-  group: deploy-vps
+  group: deploy-vps-prod
   cancel-in-progress: false
 
 # Least privilege: this job only reads the repo (the real work happens over SSH).
@@ -21,43 +28,82 @@ jobs:
     timeout-minutes: 30
     environment: production # gate behind the "production" environment (add approvers/secrets there)
 
+    # Passed into the SSH session below via the action's `envs` input.
+    env:
+      PROD_APP_PATH: ${{ secrets.PROD_APP_PATH }}
+
     steps:
+      # Skips rather than fails while production is unbuilt.
+      #
+      # A red cross on every merge would be noise, and noise on every merge is
+      # how a real failure gets scrolled past. A green run with a notice says
+      # the same thing without training anyone to ignore it.
+      - name: Check whether production is configured
+        id: check
+        env:
+          PROD_HOST: ${{ secrets.PROD_HOST }}
+          PROD_USERNAME: ${{ secrets.PROD_USERNAME }}
+          PROD_SSH_KEY: ${{ secrets.PROD_SSH_KEY }}
+        run: |
+          missing=""
+          [ -z "$PROD_HOST" ] && missing="$missing PROD_HOST"
+          [ -z "$PROD_USERNAME" ] && missing="$missing PROD_USERNAME"
+          [ -z "$PROD_SSH_KEY" ] && missing="$missing PROD_SSH_KEY"
+          if [ -n "$missing" ]; then
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Production is not wired up yet — skipping deploy. Missing:$missing (Settings → Environments → production)"
+          else
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Deploy via SSH
+        if: steps.check.outputs.configured == 'true'
         uses: appleboy/ssh-action@v1
         with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.SSH_KEY }}
-          port: ${{ secrets.PORT || 22 }}
+          host: ${{ secrets.PROD_HOST }}
+          username: ${{ secrets.PROD_USERNAME }}
+          key: ${{ secrets.PROD_SSH_KEY }}
+          port: ${{ secrets.PROD_PORT || 22 }}
           version: 1.8.2 # pin drone-ssh for reproducible runs (context7: appleboy/ssh-action)
           timeout: 60s # connection timeout — fail fast if the host is unreachable
           command_timeout: 30m # headroom for install + prisma + build
           script_stop: true # abort on the first failing command
-          # debug: true       # ← uncomment temporarily to troubleshoot connection issues
+          envs: PROD_APP_PATH
           script: |
             set -euo pipefail
-            echo "==> Starting deployment..."
+            echo "==> Starting production deployment..."
 
-            cd /var/www/241-Apps
+            cd "${PROD_APP_PATH:-/var/www/241-Apps}"
 
-            # Server working tree is disposable — reset to origin/main instead of
-            # `git pull` so a dirty tree or diverged history never blocks a deploy.
-            # .env / .env.* are gitignored, so real server secrets are untouched.
+            # Server working tree is disposable — reset to origin/main rather
+            # than `git pull`, so a dirty tree or diverged history never blocks a
+            # deploy. .env / .env.* are gitignored, so the box's own secrets are
+            # untouched.
             git fetch --all --prune
             git reset --hard origin/main
 
             pnpm install --frozen-lockfile
 
-            # Frontend: build all *-web apps (served statically by Nginx).
-            pnpm -r --filter "*-web" build
-
-            # Backend: migrate then build, run pm2 from backend/ so it loads backend/.env.
+            # Migrations first, before anything is published.
+            #
+            # This used to run after the frontend builds, and that ordering is
+            # what left production serving a new frontend against an old backend
+            # for a day: bad database credentials aborted the script only after
+            # the five *-web builds had already overwritten what Nginx serves.
+            # The step most likely to fail on configuration now fails before any
+            # of it is replaced.
             cd backend
             pnpm prisma:generate
             pnpm prisma:deploy
             pnpm build
+            cd ..
+
+            # Frontend: build all *-web apps (served statically by Nginx).
+            pnpm -r --filter "*-web" build
+
+            cd backend
             pm2 restart backend-241 --update-env || pm2 start dist/src/main.js --name backend-241
             pm2 save
             pm2 status
 
-            echo "==> Deployment completed successfully!"
+            echo "==> Production deployment completed successfully!"
