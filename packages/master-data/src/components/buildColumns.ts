@@ -31,6 +31,14 @@ export function buildColumns<T extends MasterDataEntity>(
       }
     }
 
+    if (field.kind === 'number') {
+      return {
+        accessorKey: field.key,
+        header: field.label,
+        meta: { align: 'center' },
+      }
+    }
+
     return {
       accessorKey: field.key,
       header: field.label,

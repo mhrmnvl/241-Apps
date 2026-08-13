@@ -21,6 +21,7 @@ export class CreateSemesterTypeUseCase {
 
     return this.semesterTypeRepository.create({
       name: dto.name,
+      ...(dto.sequence !== undefined && { sequence: dto.sequence }),
       isActive: dto.isActive ?? true,
     });
   }

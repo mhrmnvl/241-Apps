@@ -38,6 +38,14 @@ export function useSemesterTypeConfig(): MasterDataConfig<
         maxLength: 50,
         placeholder: 'Misal: ODD',
       },
+      {
+        key: 'sequence',
+        kind: 'number',
+        label: 'Urutan',
+        min: 1,
+        placeholder: 'Misal: 1',
+        hint: 'Urutan dalam satu tahun ajaran — Ganjil 1, Genap 2. Angka kecil tampil lebih dulu.',
+      },
       { key: 'isActive', kind: 'boolean', label: 'Status', default: true },
     ],
   }

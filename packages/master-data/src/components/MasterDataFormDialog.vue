@@ -124,6 +124,34 @@ const onSubmit = handleSubmit((values) => {
               <FormMessage />
             </FormItem>
 
+            <FormItem v-else-if="field.kind === 'number'">
+              <FormLabel>
+                {{ field.label }}
+                <span
+                  v-if="field.required"
+                  class="text-destructive"
+                  >*</span
+                >
+              </FormLabel>
+              <FormControl>
+                <Input
+                  type="number"
+                  :min="field.min"
+                  :max="field.max"
+                  :placeholder="field.placeholder"
+                  :disabled="isSubmitting"
+                  v-bind="componentField"
+                />
+              </FormControl>
+              <p
+                v-if="field.hint"
+                class="text-xs text-muted-foreground"
+              >
+                {{ field.hint }}
+              </p>
+              <FormMessage />
+            </FormItem>
+
             <FormItem
               v-else
               class="flex items-center justify-between gap-2"

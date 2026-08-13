@@ -9,6 +9,24 @@ export interface MasterDataTextField {
   readOnlyOnEdit?: boolean
 }
 
+/**
+ * A whole number, for the rare reference field that is one — an ordering
+ * column, a weight. Kept deliberately plain: no step, no float, because every
+ * use so far is "which comes first".
+ */
+export interface MasterDataNumberField {
+  key: string
+  kind: 'number'
+  label: string
+  required?: boolean
+  min?: number
+  max?: number
+  default?: number
+  placeholder?: string
+  /** Explains what the number means, since a bare integer rarely does. */
+  hint?: string
+}
+
 export interface MasterDataBooleanField {
   key: string
   kind: 'boolean'
@@ -18,7 +36,10 @@ export interface MasterDataBooleanField {
   falseLabel?: string
 }
 
-export type MasterDataField = MasterDataTextField | MasterDataBooleanField
+export type MasterDataField =
+  | MasterDataTextField
+  | MasterDataNumberField
+  | MasterDataBooleanField
 
 export interface MasterDataEntity {
   id: string
