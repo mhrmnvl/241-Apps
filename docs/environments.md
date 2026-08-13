@@ -115,7 +115,7 @@ like production is how the wrong thing gets deployed later.
 
 ### 6. Run it
 
-Actions → *Deploy to Dev VPS* → *Run workflow*. It checks its secrets before
+Actions → *Deploy to Development* → *Run workflow*. It checks its secrets before
 connecting, so a missing one is reported by name rather than as a connection
 error.
 

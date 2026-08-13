@@ -1,4 +1,4 @@
-name: Deploy to Dev VPS
+name: Deploy to Development
 
 # The development environment: everything merged to `dev` lands here first.
 #
@@ -14,7 +14,7 @@ on:
 # never cancels mid-flight either, since a half-applied deploy is worse than a
 # queued one.
 concurrency:
-  group: deploy-vps-dev
+  group: deploy-development
   cancel-in-progress: false
 
 permissions:
@@ -65,7 +65,9 @@ jobs:
           version: 1.8.2 # pin drone-ssh for reproducible runs
           timeout: 60s # connection timeout — fail fast if the host is unreachable
           command_timeout: 30m # headroom for install + prisma + build
-          script_stop: true # abort on the first failing command
+          # No `script_stop` — appleboy/ssh-action@v1 does not accept it and
+          # warns on every run that the input is unknown. The script's own
+          # `set -euo pipefail` is what actually aborts on the first failure.
           envs: DEV_APP_PATH
           script: |
             set -euo pipefail

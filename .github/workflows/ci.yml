@@ -1,4 +1,4 @@
-name: CI
+name: Continuous Integration
 
 # `dev` is where work lands and `main` is production, so both are checked —
 # `develop` was listed here and has never existed, so half of this ran nowhere.
@@ -9,7 +9,7 @@ on:
     branches: [main, dev]
 
 concurrency:
-  group: ci-${{ github.ref }}
+  group: continuous-integration-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
