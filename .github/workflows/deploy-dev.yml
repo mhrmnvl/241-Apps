@@ -1,0 +1,101 @@
+name: Deploy to Dev VPS
+
+# The development environment: everything merged to `dev` lands here first.
+#
+# A separate workflow rather than a branch condition inside the production one,
+# so the two cannot share a secret, an environment gate, or a concurrency slot
+# by accident. The only thing they have in common is the shape of the script.
+on:
+  push:
+    branches: [dev]
+  workflow_dispatch: {} # allow manual re-runs from the Actions tab
+
+# Its own group, so a dev deploy never queues behind a production one — and
+# never cancels mid-flight either, since a half-applied deploy is worse than a
+# queued one.
+concurrency:
+  group: deploy-vps-dev
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    # Gate behind the "development" environment. Create it in Settings →
+    # Environments and put DEV_HOST / DEV_USERNAME / DEV_SSH_KEY there, not in
+    # repository-wide secrets: an environment secret cannot be read by the
+    # production job, which is the point of separating them.
+    environment: development
+
+    # Passed into the SSH session below via the action's `envs` input, so the
+    # dev box can live somewhere other than production's path.
+    env:
+      DEV_APP_PATH: ${{ secrets.DEV_APP_PATH }}
+
+    steps:
+      # Fails the run rather than letting `appleboy/ssh-action` fall back to an
+      # empty host, which reads as a connection error and sends a reader looking
+      # at the network instead of at the missing secret.
+      - name: Verify dev secrets are configured
+        env:
+          DEV_HOST: ${{ secrets.DEV_HOST }}
+          DEV_USERNAME: ${{ secrets.DEV_USERNAME }}
+          DEV_SSH_KEY: ${{ secrets.DEV_SSH_KEY }}
+        run: |
+          missing=""
+          [ -z "$DEV_HOST" ] && missing="$missing DEV_HOST"
+          [ -z "$DEV_USERNAME" ] && missing="$missing DEV_USERNAME"
+          [ -z "$DEV_SSH_KEY" ] && missing="$missing DEV_SSH_KEY"
+          if [ -n "$missing" ]; then
+            echo "Missing secrets in the 'development' environment:$missing"
+            echo "Set them under Settings → Environments → development."
+            exit 1
+          fi
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.DEV_HOST }}
+          username: ${{ secrets.DEV_USERNAME }}
+          key: ${{ secrets.DEV_SSH_KEY }}
+          port: ${{ secrets.DEV_PORT || 22 }}
+          version: 1.8.2 # pin drone-ssh for reproducible runs
+          timeout: 60s # connection timeout — fail fast if the host is unreachable
+          command_timeout: 30m # headroom for install + prisma + build
+          script_stop: true # abort on the first failing command
+          envs: DEV_APP_PATH
+          script: |
+            set -euo pipefail
+            echo "==> Starting dev deployment..."
+
+            # Defaults to the same layout as production, on a different host.
+            # Override with a DEV_APP_PATH secret if the dev box differs.
+            cd "${DEV_APP_PATH:-/var/www/241-Apps}"
+
+            # Server working tree is disposable — reset to origin/dev rather
+            # than `git pull`, so a dirty tree or diverged history never blocks
+            # a deploy. .env / .env.* are gitignored, so the box's own secrets
+            # are untouched — which is what keeps the dev DATABASE_URL pointing
+            # at the dev database.
+            git fetch --all --prune
+            git reset --hard origin/dev
+
+            pnpm install --frozen-lockfile
+
+            # Frontend: build all *-web apps (served statically by Nginx).
+            pnpm -r --filter "*-web" build
+
+            # Backend: migrate then build, run pm2 from backend/ so it loads
+            # backend/.env — the dev box's own, pointing at the dev database.
+            cd backend
+            pnpm prisma:generate
+            pnpm prisma:deploy
+            pnpm build
+            pm2 restart backend-241-dev --update-env || pm2 start dist/src/main.js --name backend-241-dev
+            pm2 save
+            pm2 status
+
+            echo "==> Dev deployment completed successfully!"

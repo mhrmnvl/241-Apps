@@ -1,10 +1,12 @@
 name: CI
 
+# `dev` is where work lands and `main` is production, so both are checked —
+# `develop` was listed here and has never existed, so half of this ran nowhere.
 on:
   push:
-    branches: [main, develop]
+    branches: [main, dev]
   pull_request:
-    branches: [main, develop]
+    branches: [main, dev]
 
 concurrency:
   group: ci-${{ github.ref }}
