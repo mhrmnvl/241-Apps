@@ -10,14 +10,27 @@ import 'dotenv/config';
  * PermissionsGuard), so this is enough to log in and build/test the rest of the
  * data manually through the UI.
  *
- * Credentials are HARDCODED below (no SEED_* env vars needed). Only the DB
- * connection is read from the environment (DATABASE_URL / DIRECT_URL).
+ * The username and the fallback password are in this file, which is a
+ * deliberate trade-off for a bootstrap script: it has to work on an empty
+ * database with nothing configured. But a password committed to a repository is
+ * a password everyone with the repository knows, so SEED_ADMIN_PASSWORD
+ * overrides it — set that on the production box and the real credential never
+ * touches git.
+ *
+ *   SEED_ADMIN_PASSWORD='...' pnpm seed:admin-minimal
+ *
+ * Either way, change it after first login. This account is SUPER_ADMIN, which
+ * bypasses every permission check.
+ *
+ * Only the DB connection is otherwise read from the environment
+ * (DATABASE_URL / DIRECT_URL).
  *
  * Run (from backend/): pnpm seed:admin-minimal
  */
 const ADMIN = {
   username: 'admin',
-  password: 'admin123', // ⚠️ change this after first login
+  // Overridable, so a real password need not be committed. See the note above.
+  password: process.env.SEED_ADMIN_PASSWORD ?? '241MTsS!',
   name: 'Administrator',
   nik: '0000000000000001',
   gender: UserGender.MALE,
