@@ -43,6 +43,10 @@ how a real failure gets scrolled past.
 
 ---
 
+> Versions, prerequisites and the per-box `.env` contract are in
+> [`vps-setup.md`](vps-setup.md). This document covers which branch goes where;
+> that one covers what a box needs before either workflow can run on it.
+
 ## Turning the existing VPS into the dev box
 
 Do these in order. Step 1 is the one that matters.
