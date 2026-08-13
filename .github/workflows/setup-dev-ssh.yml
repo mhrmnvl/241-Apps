@@ -1,0 +1,86 @@
+name: Setup DEV SSH Key
+
+# Temporary. Delete this file once the key is installed.
+#
+# It exists to authorise one public key on the dev box without touching
+# deploy-dev.yml, which should stay a deploy workflow and nothing else. Manual
+# trigger only — it never runs on a push.
+#
+# The key below is public and safe to commit; the private half never leaves the
+# machine that generated it. To revoke access later, one line on the box:
+#
+#   sed -i '/241-dev-agent/d' ~/.ssh/authorized_keys
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    environment: development
+
+    steps:
+      - name: Verify dev secrets are configured
+        env:
+          DEV_HOST: ${{ secrets.DEV_HOST }}
+          DEV_USERNAME: ${{ secrets.DEV_USERNAME }}
+          DEV_SSH_KEY: ${{ secrets.DEV_SSH_KEY }}
+        run: |
+          missing=""
+          [ -z "$DEV_HOST" ] && missing="$missing DEV_HOST"
+          [ -z "$DEV_USERNAME" ] && missing="$missing DEV_USERNAME"
+          [ -z "$DEV_SSH_KEY" ] && missing="$missing DEV_SSH_KEY"
+          if [ -n "$missing" ]; then
+            echo "Missing secrets in the 'development' environment:$missing"
+            echo "Set them under Settings → Environments → development."
+            exit 1
+          fi
+
+      - name: Install SSH public key
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.DEV_HOST }}
+          username: ${{ secrets.DEV_USERNAME }}
+          key: ${{ secrets.DEV_SSH_KEY }}
+          port: ${{ secrets.DEV_PORT || 22 }}
+          version: 1.8.2
+          timeout: 60s
+          script_stop: true
+          script: |
+            set -euo pipefail
+
+            PUBKEY='ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJlufWsCfDaT0PojWUmnuj2LB4CE4XY0GDCHD1pEPDNl 241-dev-agent'
+
+            # $HOME, not a hardcoded /root. The key has to land in the home
+            # directory of whichever account DEV_USERNAME names — writing it to
+            # /root when the deploy user is someone else installs a key nobody
+            # can use, and the run still reports success.
+            SSH_DIR="$HOME/.ssh"
+            AUTH="$SSH_DIR/authorized_keys"
+
+            mkdir -p "$SSH_DIR"
+            chmod 700 "$SSH_DIR"
+            touch "$AUTH"
+            chmod 600 "$AUTH"
+
+            # Idempotent: re-running must not append a second copy.
+            if grep -qxF "$PUBKEY" "$AUTH"; then
+              echo "Key already present — nothing to do."
+            else
+              echo "$PUBKEY" >> "$AUTH"
+              echo "Key added."
+            fi
+
+            # Report what actually landed, rather than trusting that it did.
+            # sshd refuses a key whose directory or file is group/other-writable,
+            # and that failure looks like "permission denied" at connect time —
+            # far from here, and easy to misread as the wrong key.
+            echo "--- verification ---"
+            echo "user      : $(id -un) (uid $(id -u))"
+            echo "home      : $HOME"
+            echo "perms     : $(stat -c '%a %n' "$SSH_DIR") | $(stat -c '%a %n' "$AUTH")"
+            echo "matching  : $(grep -cxF "$PUBKEY" "$AUTH") entry/entries"
+            echo "fingerprint:"
+            grep -xF "$PUBKEY" "$AUTH" | ssh-keygen -lf - || true
