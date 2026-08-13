@@ -75,6 +75,12 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
+    # Nothing here connects to a database. `prisma.config.ts` throws without a
+    # URL, and the CLI needs one to parse the datasource, so a placeholder is
+    # enough — the unit tests mock every repository, and no step runs a query.
+    env:
+      DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
