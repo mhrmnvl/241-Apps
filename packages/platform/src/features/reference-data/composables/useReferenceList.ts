@@ -1,6 +1,28 @@
+import { PAGINATION } from '@/shared/constants/pagination'
 import { queryClient, referenceQueryKey } from '../client'
 import { REFERENCE_EXPIRY_MS } from '../constants'
 import type { ReferenceListKey, ReferenceListStatus } from '../types'
+
+/**
+ * A reference read asks for `REFERENCE_LIMIT` rows and treats the answer as the
+ * whole list. Coming back with exactly that many means the server had a page,
+ * not a list — the rest were dropped, with no error and nothing on screen to
+ * suggest a dropdown is missing options.
+ *
+ * Nothing here is near it today: the largest reference list in the school is 118
+ * students, against a ceiling of 1,000, and `PaginationQueryDto` caps `limit` at
+ * 1,000 so it cannot simply be raised. This exists so that the day a list grows
+ * past it, someone is told, rather than a teacher quietly not finding a name.
+ */
+function warnIfTruncated(key: ReferenceListKey, value: unknown) {
+  if (!Array.isArray(value) || value.length < PAGINATION.REFERENCE_LIMIT) return
+  console.warn(
+    `[reference-data] "${key}" returned ${value.length} rows, which is the ` +
+      `request limit (${PAGINATION.REFERENCE_LIMIT}). The list is probably ` +
+      `truncated and this dropdown is missing options. It needs server-side ` +
+      `search rather than a bigger limit — PaginationQueryDto caps it here.`,
+  )
+}
 
 /**
  * Read-through access to a reference list, on TanStack Query.
@@ -38,7 +60,11 @@ export function useReferenceList() {
   ): Promise<T> {
     return queryClient.fetchQuery({
       queryKey: referenceQueryKey(key),
-      queryFn: fetcher,
+      queryFn: async () => {
+        const value = await fetcher()
+        warnIfTruncated(key, value)
+        return value
+      },
       staleTime: REFERENCE_EXPIRY_MS[key],
     })
   }

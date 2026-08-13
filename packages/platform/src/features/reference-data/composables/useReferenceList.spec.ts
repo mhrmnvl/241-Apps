@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { useReferenceList } from './useReferenceList'
 import { queryClient, referenceQueryKey } from '../client'
 import { REFERENCE_EXPIRY_MS } from '../constants'
+import { PAGINATION } from '@/shared/constants/pagination'
 
 /**
  * The four guarantees of contract C3, one test each.
@@ -141,6 +142,32 @@ describe('useReferenceList', () => {
     const entries = Object.values(REFERENCE_EXPIRY_MS)
     expect(entries.length).toBeGreaterThan(0)
     expect(entries.every((ms) => ms > 0)).toBe(true)
+  })
+
+  /**
+   * A list that comes back exactly at the request ceiling was truncated by the
+   * server, and nothing on screen would say so. Warned about once, where every
+   * reference read passes.
+   */
+  it('warns when a list comes back at the request limit', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+    const full = Array.from({ length: PAGINATION.REFERENCE_LIMIT }, (_, i) => i)
+
+    await useReferenceList().read('students', () => Promise.resolve(full))
+
+    expect(warn).toHaveBeenCalledTimes(1)
+    expect(warn.mock.calls[0]?.[0]).toContain('students')
+    expect(warn.mock.calls[0]?.[0]).toContain('truncated')
+    warn.mockRestore()
+  })
+
+  it('says nothing about a list comfortably under the limit', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+
+    await useReferenceList().read('grades', () => Promise.resolve([1, 2, 3]))
+
+    expect(warn).not.toHaveBeenCalled()
+    warn.mockRestore()
   })
 
   /** Namespaced, so adopting `useQuery` elsewhere cannot collide with these. */

@@ -291,6 +291,44 @@ lebih parah daripada di academic.
 - **B-2** — wizard siswa & guru masih mengambil data master step 4 di step 1.
   Sebuah step wizard bukan dialog, dan memindahkannya mengubah alur form, jadi
   itu pekerjaan tersendiri.
-- **`REFERENCE_LIMIT` = 1.000** — 44 file masih memuat seribu baris sekaligus.
-  Menggantinya dengan pencarian sisi server mengubah perilaku dropdown, jadi
-  itu fitur, bukan pembersihan.
+### `REFERENCE_LIMIT` — diperiksa, dan **sebaiknya tidak diubah**
+
+Dua asumsi saya sebelumnya salah, keduanya sudah diverifikasi ke kode dan data.
+
+**"Butuh dukungan backend"** — tidak. `search` sudah ada di hampir semua DTO
+query referensi, mewarisi `PaginationQueryDto` (page/limit), dan repository
+benar-benar menerapkannya (`contains`, `mode: 'insensitive'`).
+
+**"44 file memuat seribu baris"** — tidak. `limit: 1000` itu *plafon*, bukan
+jumlah yang diambil. Jumlah baris sebenarnya di database sekolah:
+
+| Daftar | Baris | | Daftar | Baris |
+|---|---|---|---|---|
+| subjects | **23** | | occupations | 8 |
+| grades | 3 | | positions | 6 |
+| classrooms | 6 | | employmentTypes | 2 |
+| teachers | 24 | | religions | 6 |
+| semesters | 2 | | educations | 8 |
+| academicYears | 1 | | bloodTypes | 12 |
+| **students** | **118** | | | |
+
+Audit di atas menyebut "1.000 mata pelajaran di-load". Yang sebenarnya dimuat
+**23**. Setiap daftar referensi di bawah 25 baris kecuali siswa (118), dan
+daftar siswa sudah lazy di dalam dialog.
+
+Mengubahnya jadi pencarian sisi server akan **memperburuk**: menambah satu
+perjalanan jaringan per ketikan untuk menggantikan penyaringan lokal yang
+sekarang gratis, pada daftar berisi 3 sampai 23 item.
+
+### Risiko yang nyata: pemotongan senyap
+
+Bukan ukuran payload — **pemotongan**. Kalau suatu daftar melewati 1.000,
+server mengembalikan seribu pertama dan sisanya hilang tanpa error, tanpa
+apa pun di layar yang menunjukkan sebuah dropdown kehilangan pilihan. Dan
+`PaginationQueryDto` membatasi `@Max(1000)`, jadi plafonnya tidak bisa sekadar
+dinaikkan.
+
+Hari ini jaraknya lapang: terbesar 118 lawan 1.000. Yang dipasang adalah
+peringatannya, bukan perombakannya — `useReferenceList` memperingatkan begitu
+sebuah daftar kembali tepat di plafon, satu tempat yang dilewati semua bacaan
+referensi. Dua tes menjaganya.
