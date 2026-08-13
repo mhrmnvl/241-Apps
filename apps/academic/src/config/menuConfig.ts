@@ -238,10 +238,14 @@ export const menuSections: MenuSection[] = [
         requiredPermission: 'parents.read',
       },
       {
+        // `students.read`: the endpoint behind this screen is
+        // `student-parents`, guarded by `students.*`. The menu asked for
+        // `parents.read`, so someone holding one but not the other either saw
+        // a link that denied them or missed a screen they could use.
         title: 'Relasi Orang Tua',
         url: '/data/parent-relation',
         icon: Link2,
-        requiredPermission: 'parents.read',
+        requiredPermission: 'students.read',
       },
     ],
   },

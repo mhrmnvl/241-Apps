@@ -7,7 +7,10 @@ export const gradeRoutes: RouteRecordRaw[] = [
     component: () => import('./views/GradeView.vue'),
     meta: {
       requiresAuth: true,
-      requiredPermission: 'academic-years.read',
+      // `classrooms.read`, matching the menu and the endpoint. It asked for
+      // `academic-years.read`, so the gate on the way in and the gate at the
+      // API disagreed about who this screen is for.
+      requiredPermission: 'classrooms.read',
       title: 'Tingkat Kelas',
       breadcrumbs: [
         { title: 'Akademik', href: '#' },
