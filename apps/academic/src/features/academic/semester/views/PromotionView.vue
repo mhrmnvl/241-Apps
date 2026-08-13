@@ -12,6 +12,8 @@ import {
   PromotionStepSelect,
   PromotionStepExecuting,
 } from '../components'
+import { RouterLink } from 'vue-router'
+import { GraduationCap } from 'lucide-vue-next'
 import { useSemesterList } from '../composables/useSemesterList'
 import { useSemesterPromotion } from '../composables/useSemesterPromotion'
 import { Button } from '@/ui/button'
@@ -37,6 +39,7 @@ const {
   isPromoting,
   isLoadingRecommendations,
   promotionRecommendations,
+  excludedGraduatingCount,
   fetchPromotionRecommendation,
   executePromotion,
 } = useSemesterPromotion()
@@ -64,7 +67,7 @@ const canProceedStep1 = computed(() => {
   if (studentDecisions.value.length === 0) return false
   return studentDecisions.value.every((d) => {
     if (!d.approved && !d.declineReason) return false
-    if (d.action !== 'GRADUATE' && !d.targetClassroomId) return false
+    if (!d.targetClassroomId) return false
     return true
   })
 })
@@ -74,8 +77,7 @@ function buildPayload(): PromotionPayload {
     (d) => ({
       studentId: d.studentId,
       sourceClassroomId: d.sourceClassroomId,
-      targetClassroomId:
-        d.action === 'GRADUATE' ? undefined : d.targetClassroomId,
+      targetClassroomId: d.targetClassroomId,
       action: d.approved ? d.action : 'REPEAT',
       declineReason: d.approved ? undefined : d.declineReason,
     }),
@@ -221,6 +223,32 @@ onMounted(() => {
                 menyetujui atau menolak kenaikan kelas untuk setiap siswa. Siswa
                 yang ditolak wajib diberikan alasan.
               </p>
+            </div>
+
+            <!--
+              Final-year students are not in this list. Saying so beside the
+              table is the whole safeguard: without it a promotion run looks
+              complete while the graduating cohort is still enrolled.
+            -->
+            <div
+              v-if="!isLoadingRecommendations && excludedGraduatingCount > 0"
+              class="rounded-xl border border-blue-200 bg-blue-50 dark:border-blue-900 dark:bg-blue-950/20 p-4 flex items-start gap-3"
+            >
+              <GraduationCap class="h-5 w-5 text-blue-600 shrink-0 mt-0.5" />
+              <div class="text-sm">
+                <p class="font-semibold text-blue-900 dark:text-blue-200">
+                  {{ excludedGraduatingCount }} siswa tingkat akhir tidak
+                  termasuk dalam kenaikan kelas ini.
+                </p>
+                <p class="text-blue-800/80 dark:text-blue-300/80 mt-0.5">
+                  Kelulusan mereka dicatat terpisah lewat menu
+                  <RouterLink
+                    to="/student/alumni"
+                    class="font-medium underline underline-offset-2"
+                    >Kelulusan &amp; Alumni</RouterLink
+                  >.
+                </p>
+              </div>
             </div>
 
             <div

@@ -22,7 +22,6 @@ export interface StudentPromotionInput {
 export interface PromotionResult {
   promoted: number;
   repeated: number;
-  graduated: number;
   skipped: number;
 }
 

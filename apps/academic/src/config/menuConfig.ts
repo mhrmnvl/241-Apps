@@ -83,9 +83,15 @@ export const menuSections: MenuSection[] = [
             requiredPermission: 'semesters.read',
           },
           {
+            // `semesters.create`, matching the three endpoints behind this
+            // page. It used to ask for `graduations.read` — promotion does
+            // graduate the final year, so the intent was right, but that is a
+            // read permission on another resource and authorises nothing the
+            // page does. The route agrees with this now; before, the menu, the
+            // route and the API each required something different.
             title: 'Kenaikan Kelas',
             url: '/academic/semester/promotion',
-            requiredPermission: 'graduations.read',
+            requiredPermission: 'semesters.create',
           },
         ],
       },
@@ -212,7 +218,9 @@ export const menuSections: MenuSection[] = [
         requiredPermission: 'students.read',
       },
       {
-        title: 'Daftar Alumni',
+        // Named for the act, not just its result. This is where a student is
+        // graduated now — promotion no longer does it as a side effect.
+        title: 'Kelulusan & Alumni',
         url: '/student/alumni',
         icon: GraduationCap,
         requiredPermission: 'graduations.read',

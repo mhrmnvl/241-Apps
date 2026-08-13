@@ -66,7 +66,8 @@ describe('PreviewPromotionUseCase', () => {
         {
           studentId: 'stu-3',
           sourceClassroomId: 'cls-9a',
-          action: PromotionAction.GRADUATE,
+          targetClassroomId: 'cls-9b',
+          action: PromotionAction.REPEAT,
         },
       ],
     };
@@ -75,12 +76,11 @@ describe('PreviewPromotionUseCase', () => {
 
     expect(result.totalStudents).toBe(3);
     expect(result.promotedCount).toBe(2);
-    expect(result.graduatedCount).toBe(1);
-    expect(result.repeatedCount).toBe(0);
+    expect(result.repeatedCount).toBe(1);
     expect(result.items).toEqual(
       expect.arrayContaining([
         { action: PromotionAction.PROMOTE, studentCount: 2 },
-        { action: PromotionAction.GRADUATE, studentCount: 1 },
+        { action: PromotionAction.REPEAT, studentCount: 1 },
       ]),
     );
   });
@@ -93,7 +93,8 @@ describe('PreviewPromotionUseCase', () => {
         {
           studentId: 'stu-1',
           sourceClassroomId: 'cls-1',
-          action: PromotionAction.GRADUATE,
+          targetClassroomId: 'cls-2',
+          action: PromotionAction.PROMOTE,
         },
       ],
     };
@@ -114,7 +115,8 @@ describe('PreviewPromotionUseCase', () => {
         {
           studentId: 'stu-1',
           sourceClassroomId: 'cls-1',
-          action: PromotionAction.GRADUATE,
+          targetClassroomId: 'cls-2',
+          action: PromotionAction.PROMOTE,
         },
       ],
     };
@@ -134,7 +136,8 @@ describe('PreviewPromotionUseCase', () => {
         {
           studentId: 'stu-1',
           sourceClassroomId: 'cls-1',
-          action: PromotionAction.GRADUATE,
+          targetClassroomId: 'cls-2',
+          action: PromotionAction.PROMOTE,
         },
       ],
     };

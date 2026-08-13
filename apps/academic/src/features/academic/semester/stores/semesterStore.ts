@@ -22,6 +22,12 @@ export const useSemesterStore = defineStore('semester', () => {
   const isPromoting = ref(false)
   const promotionPreview = ref<PromotionPreviewResponse | null>(null)
   const promotionRecommendations = ref<PromotionRecommendationItem[]>([])
+  /**
+   * Final-year students the run left out. Held so the screen can say so — a
+   * promotion that omits the graduating cohort from both its list and its
+   * counts is how a year ends with those students still enrolled.
+   */
+  const excludedGraduatingCount = ref(0)
   const isLoadingRecommendations = ref(false)
 
   return {
@@ -37,6 +43,7 @@ export const useSemesterStore = defineStore('semester', () => {
     isPromoting,
     promotionPreview,
     promotionRecommendations,
+    excludedGraduatingCount,
     isLoadingRecommendations,
   }
 })

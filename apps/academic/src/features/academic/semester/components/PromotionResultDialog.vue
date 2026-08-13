@@ -40,7 +40,6 @@ const stats = computed(() => {
       value: props.result.repeated,
       color: 'text-amber-600',
     },
-    { label: 'Lulus', value: props.result.graduated, color: 'text-blue-600' },
     {
       label: 'Dilewati',
       value: props.result.skipped,

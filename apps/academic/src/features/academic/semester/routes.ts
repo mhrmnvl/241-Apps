@@ -21,7 +21,10 @@ export const semesterRoutes: RouteRecordRaw[] = [
     component: () => import('./views/PromotionView.vue'),
     meta: {
       requiresAuth: true,
-      requiredPermission: 'semesters.read',
+      // The page exists to run a promotion; every button on it posts to an
+      // endpoint guarded by `semesters.create`. Guarding the route on `read`
+      // let someone in to a screen where nothing would work.
+      requiredPermission: 'semesters.create',
       title: 'Kenaikan Kelas',
       breadcrumbs: [
         { title: 'Akademik', href: '#' },

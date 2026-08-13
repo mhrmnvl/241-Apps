@@ -61,15 +61,8 @@ export class PromoteStudentsUseCase {
         );
       }
 
-      if (student.action === PromotionAction.GRADUATE) {
-        if (student.targetClassroomId) {
-          throw new BadRequestException(
-            'GRADUATE action should not have a targetClassroomId',
-          );
-        }
-        continue;
-      }
-
+      // Every remaining action moves the student somewhere, so a target is
+      // always required — it used to be optional because GRADUATE had none.
       if (!student.targetClassroomId) {
         throw new BadRequestException(
           'PROMOTE/REPEAT action requires a targetClassroomId',
@@ -122,8 +115,7 @@ export class PromoteStudentsUseCase {
 
     this.logger.log(
       `Promotion completed: ${result.promoted} promoted, ` +
-        `${result.repeated} repeated, ${result.graduated} graduated, ` +
-        `${result.skipped} skipped`,
+        `${result.repeated} repeated, ${result.skipped} skipped`,
     );
 
     return result;

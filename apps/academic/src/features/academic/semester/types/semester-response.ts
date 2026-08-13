@@ -11,7 +11,8 @@ export interface RolloverSummary {
   schedules: RolloverCategoryResult
 }
 
-export type PromotionAction = 'PROMOTE' | 'REPEAT' | 'GRADUATE'
+/** Graduation left this flow — it is its own action now, under Kelulusan. */
+export type PromotionAction = 'PROMOTE' | 'REPEAT'
 
 export interface PromotionRecommendationItem {
   studentId: string
@@ -30,6 +31,8 @@ export interface PromotionRecommendationItem {
 export interface PromotionRecommendationResponse {
   items: PromotionRecommendationItem[]
   totalStudents: number
+  /** Final-year students, who are graduated under Kelulusan rather than here. */
+  excludedGraduatingCount: number
 }
 
 export interface PromotionStudentDecision {
@@ -46,13 +49,11 @@ export interface PromotionPreviewResponse {
   totalStudents: number
   promotedCount: number
   repeatedCount: number
-  graduatedCount: number
 }
 
 export interface PromotionResult {
   promoted: number
   repeated: number
-  graduated: number
   skipped: number
 }
 

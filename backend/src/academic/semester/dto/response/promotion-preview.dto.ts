@@ -12,5 +12,4 @@ export class PromotionPreviewDto {
   @ApiProperty() totalStudents: number;
   @ApiProperty() promotedCount: number;
   @ApiProperty() repeatedCount: number;
-  @ApiProperty() graduatedCount: number;
 }

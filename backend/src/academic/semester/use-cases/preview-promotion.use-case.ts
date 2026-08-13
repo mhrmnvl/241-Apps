@@ -48,7 +48,6 @@ export class PreviewPromotionUseCase {
 
     let promotedCount = 0;
     let repeatedCount = 0;
-    let graduatedCount = 0;
 
     const actionCounts = new Map<PromotionAction, number>();
 
@@ -63,9 +62,6 @@ export class PreviewPromotionUseCase {
         case PromotionAction.REPEAT:
           repeatedCount++;
           break;
-        case PromotionAction.GRADUATE:
-          graduatedCount++;
-          break;
       }
     }
 
@@ -79,7 +75,6 @@ export class PreviewPromotionUseCase {
       totalStudents: students.length,
       promotedCount,
       repeatedCount,
-      graduatedCount,
     };
   }
 }
