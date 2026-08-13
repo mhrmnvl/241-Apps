@@ -12,7 +12,7 @@ const platformRoot = path.resolve(
   '../../packages/platform/src/features',
 )
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   server: { port: 5175 },
   plugins: [vue(), tailwindcss(), tsconfigPaths()],
   resolve: {
@@ -41,4 +41,11 @@ export default defineConfig({
       { find: '@', replacement: path.resolve(__dirname, './src') },
     ],
   },
-})
+  build: {
+    // `vite build` defaults to `--mode production`, so the dev deploy passes
+    // `--mode development` explicitly — that is what loads `.env.development`
+    // and what selects this directory. Keeping the two outputs apart lets one
+    // machine serve both environments without a build overwriting the other.
+    outDir: mode === 'development' ? 'dist-dev' : 'dist',
+  },
+}))

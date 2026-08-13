@@ -62,8 +62,10 @@ upload rather than at install time.
 ```
 /var/www/241-Apps            # or DEV_APP_PATH / PROD_APP_PATH
 ├── backend/.env             # gitignored — the box's own
-├── apps/<app>/.env          # gitignored — one per frontend
-└── apps/<app>/dist/         # what Nginx serves
+├── apps/<app>/.env          # gitignored — production values
+├── apps/<app>/.env.development  # gitignored — dev values
+├── apps/<app>/dist/         # what Nginx serves in production
+└── apps/<app>/dist-dev/     # what Nginx serves in dev
 ```
 
 The deploy runs `git reset --hard`, which never touches those `.env` files
@@ -92,13 +94,41 @@ otherwise.
 
 ---
 
-## `apps/<app>/.env`
+## `apps/<app>/.env` and `.env.development`
 
-One per frontend: `academic`, `inventory`, `admission`, `portal`, `presence`.
+One pair per frontend: `academic`, `inventory`, `admission`, `portal`,
+`presence`.
 
+| File | Loaded when | Build writes to |
+|---|---|---|
+| `.env` | always | `dist` |
+| `.env.development` | `--mode development` only, and it overrides `.env` | `dist-dev` |
+
+```bash
+# .env — production
+VITE_API_BASE_URL=https://api.<domain>
+
+# .env.development — dev
+VITE_API_BASE_URL=https://dev.api.<domain>
 ```
-VITE_API_BASE_URL=https://api.<this-box's-domain>
+
+Both are gitignored, so `git reset --hard` never touches them and each box keeps
+its own.
+
+### The flag has to be passed exactly this way
+
+```bash
+pnpm -r --filter "*-web" build --mode development     # correct
+pnpm -r --filter "*-web" build -- --mode development  # silently wrong
 ```
+
+The second form reads as the conventional way to forward an argument, and it is
+how npm behaves. pnpm consumes the separator, vite never receives the flag, and
+the build lands in `dist` against the **production** API — with a zero exit code
+and no output saying so. Verified both ways: only the first produces `dist-dev`.
+
+A trailing slash on the URL is harmless either way; `packages/shared/src/utils/api.ts`
+strips it.
 
 Two things about this are easy to get wrong and both are silent.
 
@@ -147,7 +177,7 @@ pnpm build
 pm2 start dist/src/main.js --name backend-241-dev   # backend-241 on production
 pm2 save && pm2 startup
 cd ..
-pnpm -r --filter "*-web" build
+pnpm -r --filter "*-web" build --mode development   # production: drop the flag
 ```
 
 A fresh database has no accounts. Seed the first administrator with
@@ -168,6 +198,11 @@ psql -d <db> -c 'SELECT version();'       # 16+
 cd backend && grep -E 'DATABASE_URL|JWT_SECRET' .env   # not another box's
 pm2 status                                # one process, the right name
 curl -sf localhost:3000/health && echo OK # the API answers (no auth: @Public)
+
+# The built bundle points where you think it does. VITE_* is baked in, so this
+# is the only way to know — the .env file on disk proves nothing about what
+# was compiled.
+grep -rhoE 'https://[a-z0-9.-]+' apps/academic/dist-dev/assets/*.js | sort -u | head
 ```
 
 The `.env` check is the one that matters. Two boxes sharing a `DATABASE_URL` is

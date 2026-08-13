@@ -96,8 +96,16 @@ jobs:
             pnpm build
             cd ..
 
-            # Frontend: build all *-web apps (served statically by Nginx).
-            pnpm -r --filter "*-web" build
+            # Frontend: built in development mode, which does two things —
+            # loads apps/<app>/.env.development (the dev API host) and writes to
+            # dist-dev instead of dist, so this deploy cannot overwrite what a
+            # production build on the same machine produced.
+            #
+            # The flag goes straight after the script name. `build -- --mode
+            # development` looks right and is not: pnpm swallows the separator,
+            # vite never sees the flag, and the build lands in dist against the
+            # production API — silently, with a zero exit code.
+            pnpm -r --filter "*-web" build --mode development
 
             cd backend
             pm2 restart backend-241-dev --update-env || pm2 start dist/src/main.js --name backend-241-dev
