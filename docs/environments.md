@@ -15,6 +15,19 @@ Three tiers: local, dev, production.
 Work merges to `dev` and lands on the dev box. When it is proven there, `dev`
 merges to `main`. CI runs on both branches.
 
+**`main` is not a place to try something.** A merge there deploys to the school
+within minutes, so the order is never negotiable:
+
+```
+work -> dev -> deploys to development -> verified there -> PR dev->main -> production
+```
+
+`Promotion Guard` fails any pull request into `main` that does not come from
+`dev`, or whose exact commit has no successful `Deploy to Development` run — it
+queries the API for that run rather than taking the pull request's word for it.
+`.husky/pre-push` refuses a direct push. Neither can *block* a merge without
+branch protection, so they make a violation loud rather than impossible.
+
 ---
 
 ## What actually separates them
@@ -133,6 +146,13 @@ error.
 5. Add required reviewers on the `production` environment, so a merge to `main`
    waits for a person.
 6. Protect `main`: require a pull request and the CI checks. `dev` stays open.
+
+   **Not currently possible.** Both branch protection and rulesets return
+   `403 — Upgrade to GitHub Pro or make this repository public` on a private
+   repository under a free account, and so do environment reviewers. Until the
+   plan changes, `.husky/pre-push` refuses a direct push to `main` — which is a
+   guard on one machine, bypassable with `--no-verify`, and no substitute for
+   the server-side rule. It catches the slip, not the intent.
 
 ---
 
