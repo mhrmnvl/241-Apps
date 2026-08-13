@@ -207,7 +207,12 @@ export class PrismaAdmissionApplicationRepository extends IAdmissionApplicationR
   ): Promise<ApplicationWithParentsAndUser | null> {
     return this.prisma.admissionApplication.findFirst({
       where: { id, deletedAt: null },
-      include: { parents: true, user: true },
+      // `AdmissionUserRef` is three columns; `user: true` was every column of
+      // the account, credential included.
+      include: {
+        parents: true,
+        user: { select: { id: true, identifier: true, lastLoginAt: true } },
+      },
     });
   }
 

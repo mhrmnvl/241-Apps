@@ -16,6 +16,7 @@ import type {
 } from '../types'
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
 import { toast } from 'vue-sonner'
+import { useReferenceList } from '@/features/platform/reference-data'
 
 export const teacherService = {
   fetchTeachers: async () => {
@@ -51,11 +52,15 @@ export const teacherService = {
   fetchPositions: async () => {
     const store = useTeacherStore()
     try {
-      const res = await teacherApi.getPositions({
-        limit: PAGINATION.REFERENCE_LIMIT,
-        isActive: true,
+      // Same key and parameters as the create wizard's step 4, so whichever
+      // opens first pays for both.
+      store.positions = await useReferenceList().read('positions', async () => {
+        const res = await teacherApi.getPositions({
+          limit: PAGINATION.REFERENCE_LIMIT,
+          isActive: true,
+        })
+        return res.data.data
       })
-      store.positions = res.data.data
     } catch (error: unknown) {
       toast.error(
         getIndonesianErrorMessage(error, 'Gagal memuat data jabatan.'),
@@ -66,10 +71,15 @@ export const teacherService = {
   fetchPositionCategories: async () => {
     const store = useTeacherStore()
     try {
-      const res = await positionCategoryApi.getPositionCategories({
-        limit: PAGINATION.REFERENCE_LIMIT,
-      })
-      store.positionCategories = res.data.data
+      store.positionCategories = await useReferenceList().read(
+        'positionCategories',
+        async () => {
+          const res = await positionCategoryApi.getPositionCategories({
+            limit: PAGINATION.REFERENCE_LIMIT,
+          })
+          return res.data.data
+        },
+      )
     } catch (error: unknown) {
       toast.error(
         getIndonesianErrorMessage(error, 'Gagal memuat kategori jabatan.'),
@@ -90,6 +100,8 @@ export const teacherService = {
       } else {
         await teacherApi.createTeacher(payload as TeacherSavePayload)
       }
+      // The list this screen picks from is now out of date.
+      useReferenceList().invalidate('teachers')
       return { success: true }
     } catch (error: unknown) {
       store.formError = getIndonesianErrorMessage(
@@ -142,6 +154,8 @@ export const teacherService = {
         }
       }
 
+      // The list this screen picks from is now out of date.
+      useReferenceList().invalidate('teachers')
       return { success: true, teacherId, userId, warnings }
     } catch (error: unknown) {
       store.formError = getIndonesianErrorMessage(
@@ -155,11 +169,15 @@ export const teacherService = {
   },
 
   deleteTeacher: async (id: string) => {
-    return teacherApi.deleteTeacher(id)
+    const result = await teacherApi.deleteTeacher(id)
+    useReferenceList().invalidate('teachers')
+    return result
   },
 
   toggleActive: async (id: string, isActive: boolean) => {
-    return teacherApi.toggleActive(id, isActive)
+    const result = await teacherApi.toggleActive(id, isActive)
+    useReferenceList().invalidate('teachers')
+    return result
   },
 
   exportTeachers: async () => {
@@ -175,13 +193,17 @@ export const teacherService = {
   },
 
   bulkImport: async (file: File) => {
-    return teacherApi.bulkImport(file)
+    const result = await teacherApi.bulkImport(file)
+    useReferenceList().invalidate('teachers')
+    return result
   },
 
   resolveBulkImportConflicts: async (
     conflicts: ResolveBulkImportConflict[],
   ) => {
-    return teacherApi.resolveBulkImportConflicts(conflicts)
+    const result = await teacherApi.resolveBulkImportConflicts(conflicts)
+    useReferenceList().invalidate('teachers')
+    return result
   },
 
   savePosition: async (
@@ -202,6 +224,8 @@ export const teacherService = {
         )
         toast.success('Jabatan berhasil ditambahkan')
       }
+      // The list this screen picks from is now out of date.
+      useReferenceList().invalidate('teachers')
       return { success: true }
     } catch (error: unknown) {
       toast.error('Gagal menyimpan jabatan', {
@@ -217,6 +241,8 @@ export const teacherService = {
     try {
       await teacherApi.deletePosition(teacherId, positionId)
       toast.success('Riwayat jabatan berhasil dihapus')
+      // The list this screen picks from is now out of date.
+      useReferenceList().invalidate('teachers')
       return { success: true }
     } catch (error: unknown) {
       toast.error('Gagal menghapus jabatan', {

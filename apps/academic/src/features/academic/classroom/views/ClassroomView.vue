@@ -24,14 +24,12 @@ const router = useRouter()
 
 const {
   classrooms,
-  grades,
   academicYears,
   totalClassrooms,
   loading,
   currentFilters,
   fetchClassrooms,
   fetchAcademicYears,
-  fetchGrades,
   fetchSemesters,
   deleteClassroom,
 } = useClassroomList()
@@ -86,7 +84,7 @@ const tableColumns = createClassroomColumns({
 
 onMounted(async () => {
   await fetchSemesters()
-  await Promise.all([fetchClassrooms(), fetchAcademicYears(), fetchGrades()])
+  await Promise.all([fetchClassrooms(), fetchAcademicYears()])
   // Reflect the year the backend defaulted to, so the control is never blank.
   selectedAcademicYearId.value =
     currentFilters.value.academicYearId ??
@@ -162,7 +160,6 @@ onMounted(async () => {
           v-if="can('classrooms.create') && isAddModalOpen"
           v-model:open="isAddModalOpen"
           :academic-years="academicYears"
-          :grades="grades"
           @save-success="fetchClassrooms"
         />
       </div>

@@ -28,6 +28,7 @@
     "@fullcalendar/vue3": "^6.1.20",
     "@internationalized/date": "^3.12.2",
     "@tailwindcss/vite": "^4.3.0",
+    "@tanstack/vue-query": "^5.101.4",
     "@tanstack/vue-table": "^8.21.3",
     "@vee-validate/zod": "^4.15.1",
     "@vueuse/core": "^14.3.0",

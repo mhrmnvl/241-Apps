@@ -1,4 +1,5 @@
 import { Prisma } from '@prisma/client';
+import { USER_REF_SELECT } from '../../../../shared/domain/prisma-selects.js';
 
 export const SCHEDULE_WITH_DETAILS_INCLUDE = {
   timeSlot: { include: { type: true } },
@@ -6,11 +7,7 @@ export const SCHEDULE_WITH_DETAILS_INCLUDE = {
     include: {
       teacher: {
         include: {
-          user: {
-            include: {
-              profile: true,
-            },
-          },
+          user: USER_REF_SELECT,
         },
       },
       subject: true,

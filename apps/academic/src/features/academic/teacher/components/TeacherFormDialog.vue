@@ -1,10 +1,9 @@
 <script setup lang="ts">
-import { computed, toRefs } from 'vue'
+import { computed, toRefs, watch } from 'vue'
 import type {
   TeacherSavePayload,
   TeacherUpdatePayload,
   TeacherEditData,
-  PositionListItem,
 } from '../types'
 import {
   AlertDialog,
@@ -28,6 +27,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/tabs'
 import TeacherProfileTabFields from './TeacherProfileTabFields.vue'
 import TeacherEmploymentTabFields from './TeacherEmploymentTabFields.vue'
+import { useTeacher } from '../composables/useTeacher'
 import { useTeacherFormDialog } from '../composables/useTeacherFormDialog'
 
 const props = defineProps<{
@@ -35,7 +35,6 @@ const props = defineProps<{
   formError: string | null
   isSaving: boolean
   editData?: TeacherEditData | null
-  positions?: PositionListItem[]
 }>()
 
 const emit = defineEmits<{
@@ -56,8 +55,24 @@ const open = computed({
   },
 })
 
-const { editData, positions } = toRefs(props)
-const positionsRef = computed(() => positions?.value ?? [])
+const { editData } = toRefs(props)
+
+/**
+ * Positions are loaded here rather than by the teacher list page.
+ *
+ * The list never showed them — it fetched them on mount only to hand them to
+ * this dialog. Loaded once per visit; positions are master data the school
+ * edits a few times a year.
+ */
+const { positions, fetchPositions } = useTeacher()
+const positionsRef = computed(() => positions.value ?? [])
+
+watch(
+  () => props.open,
+  (isOpen) => {
+    if (isOpen && positions.value.length === 0) void fetchPositions()
+  },
+)
 
 const dialog = useTeacherFormDialog({
   open,

@@ -17,9 +17,10 @@ import {
 } from '@/ui/dialog'
 import { toast } from 'vue-sonner'
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
-import { inventoryApi } from '../api/inventoryApi'
 import type { ColumnDef } from '@tanstack/vue-table'
 import { h } from 'vue'
+import { inventoryReferenceService } from '../services/inventoryReferenceService'
+import { loanService } from '../services/loanService'
 import type {
   InventoryLoan,
   InventoryMetadata,
@@ -51,12 +52,12 @@ const returnForm = ref({
 async function loadData() {
   loading.value = true
   try {
-    const [metaRes, loansRes] = await Promise.all([
-      inventoryApi.getInventoryMetadata(),
-      inventoryApi.getLoans(),
+    const [meta, loansRes] = await Promise.all([
+      inventoryReferenceService.fetchMetadata(),
+      loanService.list(),
     ])
-    metadata.value = metaRes.data?.data ?? null
-    loans.value = loansRes.data?.data ?? []
+    metadata.value = meta
+    loans.value = loansRes
   } catch (error) {
     toast.error(
       getIndonesianErrorMessage(error, 'Gagal memuat data peminjaman.'),
@@ -81,20 +82,14 @@ function openReturnDialog(loan: InventoryLoan) {
 async function handleReturnLoan() {
   if (!selectedLoanForReturn.value) return
   isSubmitting.value = true
-  try {
-    await inventoryApi.returnLoan(selectedLoanForReturn.value.id, {
-      items: returnForm.value.items,
-    })
-    toast.success('Pengembalian aset berhasil diproses.')
-    isReturnOpen.value = false
-    await loadData()
-  } catch (error) {
-    toast.error(
-      getIndonesianErrorMessage(error, 'Gagal memproses pengembalian.'),
-    )
-  } finally {
-    isSubmitting.value = false
-  }
+  const returned = await loanService.returnLoan(
+    selectedLoanForReturn.value.id,
+    { items: returnForm.value.items },
+  )
+  isSubmitting.value = false
+  if (!returned) return
+  isReturnOpen.value = false
+  await loadData()
 }
 
 // Columns definition

@@ -1,6 +1,6 @@
-import { StudentWithDetails } from '../domain/interfaces/student-repository.interface.js';
+import { StudentExportWithDetails } from '../domain/entities/student.entity.js';
 
-export function mapStudentToExportRow(s: StudentWithDetails) {
+export function mapStudentToExportRow(s: StudentExportWithDetails) {
   const user = s.user;
   const latestEnrollment = s.enrollments?.[0];
   const profile = user.profile;

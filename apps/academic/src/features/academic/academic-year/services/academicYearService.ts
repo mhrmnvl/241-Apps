@@ -4,6 +4,7 @@ import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
 import { PAGINATION } from '@/shared/constants/pagination'
 import { toast } from 'vue-sonner'
 import type { AcademicYearSavePayload } from '../types'
+import { useReferenceList } from '@/features/platform/reference-data'
 
 export const academicYearService = {
   fetchAcademicYears: async () => {
@@ -48,6 +49,8 @@ export const academicYearService = {
       } else {
         await academicYearApi.createAcademicYear(payload)
       }
+      // The list this screen picks from is now out of date.
+      useReferenceList().invalidate('academicYears')
       return { success: true }
     } catch (error: unknown) {
       store.formError = getIndonesianErrorMessage(
@@ -64,6 +67,8 @@ export const academicYearService = {
     try {
       await academicYearApi.deleteAcademicYear(id)
       toast.success('Tahun ajaran berhasil dihapus.')
+      // The list this screen picks from is now out of date.
+      useReferenceList().invalidate('academicYears')
       return { success: true }
     } catch (error: unknown) {
       const msg = getIndonesianErrorMessage(
@@ -79,6 +84,8 @@ export const academicYearService = {
     try {
       await academicYearApi.activateAcademicYear(id)
       toast.success('Tahun ajaran berhasil diaktifkan.')
+      // The list this screen picks from is now out of date.
+      useReferenceList().invalidate('academicYears')
       return { success: true }
     } catch (error: unknown) {
       const msg = getIndonesianErrorMessage(
@@ -94,6 +101,8 @@ export const academicYearService = {
     try {
       await academicYearApi.deactivateAcademicYear(id)
       toast.success('Tahun ajaran berhasil dinonaktifkan.')
+      // The list this screen picks from is now out of date.
+      useReferenceList().invalidate('academicYears')
       return { success: true }
     } catch (error: unknown) {
       const msg = getIndonesianErrorMessage(

@@ -1,4 +1,4 @@
-import type { UserWithProfileAndRoles } from './authenticated-user.entity.js';
+import type { SessionUserRef } from './authenticated-user.entity.js';
 
 export interface PasswordResetTokenEntity {
   id: string;
@@ -10,5 +10,5 @@ export interface PasswordResetTokenEntity {
 }
 
 export interface PasswordResetTokenWithUser extends PasswordResetTokenEntity {
-  user: UserWithProfileAndRoles;
+  user: SessionUserRef;
 }

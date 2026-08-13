@@ -190,3 +190,145 @@ export function useAcademicYearsQuery() {
 2. ❌ **Jangan melakukan manual re-fetch tanpa caching** untuk data statis/referensi yang jarang berubah.
 3. ❌ **Jangan mengeksekusi request sekuensial (`await` beruntun)** untuk data yang independen; gunakan `Promise.all` atau parallel queries.
 4. ❌ **Jangan mengabaikan state tab yang aktif** saat men-trigger watcher data fetching.
+
+---
+
+## Status per 12 Agustus 2026 — apa yang sudah dikerjakan
+
+Ditindaklanjuti lewat `specs/004-reduce-overfetching/`. Bagian di atas dibiarkan
+utuh sebagai catatan kondisi saat audit ditulis.
+
+| Temuan | Status | Keterangan |
+|---|---|---|
+| **B-1** `ClassroomManageView` memanggil `fetchAvailableStudents()` (1.000 siswa) di `onMounted` | **Tidak valid** | Diverifikasi ke kode: dipanggil di `openAddStudentDialog()`, sudah lazy sejak awal. Yang memang eager di sana adalah tujuh panggilan master data — itu soal caching, bukan payload. |
+| **B-2** Wizard siswa/guru memuat master data step 4 di step 1 | **Belum** | Nyata, tapi sebuah step wizard bukan dialog. Diserahkan ke cache referensi, bukan ke pemindahan ke dialog. |
+| **B-3** `CurriculumSubjectView` memuat `/subjects?limit=1000` untuk dialog | **Selesai** | Dialog memuat sendiri saat dibuka. `a51c054` |
+| **B-4** Tidak ada caching master data | **Selesai** | Cache sesi di `@241/platform/features/reference-data`, di atas TanStack Query, terpasang di kelima aplikasi. `48f7b4d` → `20b1408` → `d96d544` |
+| **B-5** Bootstrap serial di `main.ts` | **Belum** | Di luar lingkup spec 004. |
+
+### Empat view lain berpola sama, ikut diperbaiki
+
+`ClassroomView`, `ClassroomManageView`, `SemesterView` dan `TeacherListView`
+memuat daftar referensi di `onMounted` yang hanya dibaca di dalam dialog.
+Sekarang dialognya yang memuat. `7336b5b`
+
+### Tentang rekomendasi TanStack Query — **diambil**
+
+Awalnya tidak. Yang dibuat lebih dulu adalah store Pinia sekitar 120 baris
+dengan empat jaminan itu, karena pola pengambilan data di repo ini imperatif
+berbasis service dan store kecil menempel tanpa menyentuh satu pun view.
+
+Lalu diganti ke `@tanstack/vue-query` (`20b1408`), dengan pemanggil tidak
+berubah: `useReferenceList().read / invalidate / clear` tetap sama, dan sepuluh
+tesnya lulus di kedua implementasi **tanpa diedit** — itu buktinya perilakunya
+setara, bukan migrasinya sendiri.
+
+Dua hal yang perlu diketahui pembaca berikutnya:
+
+- **Client-nya dibuat di `@241/platform`, bukan diserahkan ke default plugin.**
+  `useQueryClient()` lewat `inject` Vue dan butuh instance komponen aktif,
+  sementara daftar referensi dibaca dari service — objek biasa yang dipanggil
+  imperatif. Dengan memiliki instance-nya, keduanya jalan.
+- **Dua default diubah sengaja**: `retry` 1 (bukan 3 — dialog yang menunggu ada
+  orangnya di depan), dan `refetchOnWindowFocus` mati (daftar ini punya masa
+  kedaluwarsa sendiri).
+
+**Biayanya diukur**: +28 KB mentah pada bundle `presence` yang 3,4 MB (~0,8%),
+dibandingkan store buatan sendiri. Bukan angka gzip — tidak diukur.
+
+Sudah terpasang di **kelima aplikasi** (`d96d544`).
+
+**Empat bacaan sengaja tidak di-cache**, dan semuanya akan salah kalau di-cache:
+
+- `classroomService.fetchClassrooms` paginated dan berfilter — dua filter
+  berbeda akan bertabrakan di satu key dan saling menyajikan baris.
+- Mata pelajaran yang bisa ditugaskan disempitkan kurikulum aktif.
+- `waveService.fetchWaves` membaca `meta.total` — itu layar yang *mengelola*
+  gelombang, bukan dropdown. Tulisnya yang memicu invalidasi dropdown.
+- `lookupService.listCalendarEntries` disempitkan tahun dan tipe.
+
+**Satu jebakan yang hampir kejadian**: `taxonomyService` di portal menelan
+kegagalan dan mengembalikan `[]`. Kalau `catch`-nya ikut dibungkus cache,
+"tidak ada kategori" akan tersimpan sebagai jawaban sukses selama 10 menit
+setelah satu request gagal. `catch`-nya ditaruh di luar fetcher.
+
+### Angka before/after
+
+Sudah diambil, di lapisan Prisma dan read-only terhadap database nyata —
+bentuk query sebelum perubahan diambil dari commit `fb09b52`, lalu dijalankan
+berdampingan dengan bentuk sesudahnya untuk baris yang sama.
+
+| Layar | Sebelum | Sesudah |
+|---|---|---|
+| Daftar siswa | 1.764 byte/baris | 1.482 (−16,0%) |
+| Daftar guru | 904 byte/baris | 517 (−42,8%) |
+| `/profiles/me` (siswa) | 4.409 byte | 3.543 (−19,6%) |
+| Halaman kelola kelas | 8 request, dua gelombang | 5 request, satu gelombang (kunjungan berikutnya) |
+
+Rinciannya, termasuk yang **tidak** membaik dan alasannya, ada di
+[`specs/004-reduce-overfetching/baseline.md`](../specs/004-reduce-overfetching/baseline.md).
+
+Yang tidak diklaim: waktu muat halaman. Tidak diukur, dan bergantung pada
+jaringan antara sekolah dan Neon.
+
+---
+
+## Rollout ke lima aplikasi (`d96d544`)
+
+Menyebarkan cache-nya menemukan pola yang sama di mana-mana, dan di dua tempat
+lebih parah daripada di academic.
+
+| Aplikasi | Yang di-cache | Kenapa penting |
+|---|---|---|
+| **presence** | `employees`, `students`, `academicYears`, `calendarTypes` | `listEmployees()` dipanggil dari **empat layar** — penugasan gaji, dialog kredensial, entri kehadiran manual, penugasan pola kerja — masing-masing menarik seluruh roster pegawai lewat API academic setiap kali dibuka |
+| **inventory** | `inventoryMetadata` | `/inventory/metadata` diambil inline oleh **empat view**; pindah dari daftar aset ke form tambah mengambil ulang semuanya. Fiturnya tidak punya folder `services/` sama sekali — itu sebabnya ada empat salinan request yang sama |
+| **admission** | `admissionWaves` | Dropdown gelombang diambil oleh filter aplikasi dan layar pengumuman |
+| **portal** | `portalCategories`, `portalPublicCategories` | Daftar kategori, untuk editor pos dan arsip publik |
+| **academic** | 5 daftar | Sudah lebih dulu (`48f7b4d`) |
+
+### Sisa yang belum, dan sengaja
+
+- **B-2** — wizard siswa & guru masih mengambil data master step 4 di step 1.
+  Sebuah step wizard bukan dialog, dan memindahkannya mengubah alur form, jadi
+  itu pekerjaan tersendiri.
+### `REFERENCE_LIMIT` — diperiksa, dan **sebaiknya tidak diubah**
+
+Dua asumsi saya sebelumnya salah, keduanya sudah diverifikasi ke kode dan data.
+
+**"Butuh dukungan backend"** — tidak. `search` sudah ada di hampir semua DTO
+query referensi, mewarisi `PaginationQueryDto` (page/limit), dan repository
+benar-benar menerapkannya (`contains`, `mode: 'insensitive'`).
+
+**"44 file memuat seribu baris"** — tidak. `limit: 1000` itu *plafon*, bukan
+jumlah yang diambil. Jumlah baris sebenarnya di database sekolah:
+
+| Daftar | Baris | | Daftar | Baris |
+|---|---|---|---|---|
+| subjects | **23** | | occupations | 8 |
+| grades | 3 | | positions | 6 |
+| classrooms | 6 | | employmentTypes | 2 |
+| teachers | 24 | | religions | 6 |
+| semesters | 2 | | educations | 8 |
+| academicYears | 1 | | bloodTypes | 12 |
+| **students** | **118** | | | |
+
+Audit di atas menyebut "1.000 mata pelajaran di-load". Yang sebenarnya dimuat
+**23**. Setiap daftar referensi di bawah 25 baris kecuali siswa (118), dan
+daftar siswa sudah lazy di dalam dialog.
+
+Mengubahnya jadi pencarian sisi server akan **memperburuk**: menambah satu
+perjalanan jaringan per ketikan untuk menggantikan penyaringan lokal yang
+sekarang gratis, pada daftar berisi 3 sampai 23 item.
+
+### Risiko yang nyata: pemotongan senyap
+
+Bukan ukuran payload — **pemotongan**. Kalau suatu daftar melewati 1.000,
+server mengembalikan seribu pertama dan sisanya hilang tanpa error, tanpa
+apa pun di layar yang menunjukkan sebuah dropdown kehilangan pilihan. Dan
+`PaginationQueryDto` membatasi `@Max(1000)`, jadi plafonnya tidak bisa sekadar
+dinaikkan.
+
+Hari ini jaraknya lapang: terbesar 118 lawan 1.000. Yang dipasang adalah
+peringatannya, bukan perombakannya — `useReferenceList` memperingatkan begitu
+sebuah daftar kembali tepat di plafon, satu tempat yang dilewati semua bacaan
+referensi. Dua tes menjaganya.

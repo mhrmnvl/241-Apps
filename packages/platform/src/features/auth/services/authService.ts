@@ -10,6 +10,7 @@ import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
 import { authSessionService } from './authSessionService'
 import { authIdentityService } from './authIdentityService'
 import { authProfileService } from './authProfileService'
+import { useReferenceList } from '../../reference-data'
 
 export const authService = {
   loginUser: async (payload: LoginPayload) => {
@@ -84,6 +85,9 @@ export const authService = {
       authSessionService.clearPersistedSession()
       const store = useAuthStore()
       store.clearUser()
+      // No reference list survives a session. The next person to sign in on
+      // this browser may not be allowed to see the same classrooms or staff.
+      useReferenceList().clear()
     }
   },
 

@@ -1,6 +1,6 @@
-import { TeacherWithDetails } from '../domain/interfaces/teacher-repository.interface.js';
+import { TeacherExportWithDetails } from '../domain/entities/teacher.entity.js';
 
-export function mapTeacherToExportRow(e: TeacherWithDetails) {
+export function mapTeacherToExportRow(e: TeacherExportWithDetails) {
   return {
     Nama: e.user.profile?.name ?? '',
     NIK: e.user.profile?.nik ?? '',

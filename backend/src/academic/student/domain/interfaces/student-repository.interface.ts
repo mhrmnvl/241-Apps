@@ -12,13 +12,16 @@ import {
   ProfileUpdateInput,
 } from '../../../../platform/profile/domain/entities/profile.entity.js';
 import { StudentEntity } from '../entities/student.entity.js';
-import { StudentWithDetails } from '../entities/student.entity.js';
+import {
+  StudentExportWithDetails,
+  StudentWithDetails,
+} from '../entities/student.entity.js';
 import {
   AddressEntity,
   CreateAddressRepositoryInput,
 } from '../../../../shared/domain/entities/address.entity.js';
 
-export type { StudentWithDetails };
+export type { StudentExportWithDetails, StudentWithDetails };
 export interface CreateStudentResult extends UserEntity {
   student: StudentWithDetails | null;
 }
@@ -90,7 +93,7 @@ export abstract class IStudentRepository {
   ): Promise<PaginatedResult<StudentWithDetails>>;
   abstract findAllForExport(
     filters: ExportStudentQueryInput,
-  ): Promise<StudentWithDetails[]>;
+  ): Promise<StudentExportWithDetails[]>;
   abstract findById(id: string): Promise<StudentWithDetails | null>;
   abstract findByUserId(userId: string): Promise<{ id: string } | null>;
   abstract findByNis(nis: string): Promise<StudentEntity | null>;

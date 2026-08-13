@@ -6,6 +6,8 @@ import store from '@/app/providers/store'
 import type { Component } from 'vue'
 import { authService, configureAuth } from '@/features/platform/auth'
 import { useSettingsStore, useBranding } from '@/features/platform/settings'
+import { VueQueryPlugin } from '@tanstack/vue-query'
+import { queryClient } from '@/features/platform/reference-data'
 
 // The auth feature in @241/platform is brand-neutral by contract — configured
 // per app here, never forked.
@@ -20,7 +22,13 @@ configureAuth({
 // Restore the session from the HttpOnly refresh cookie before mounting so the
 // auth gate reflects real session validity (no shell ⇄ login bounce).
 void authService.restoreSession().finally(() => {
-  const app = createApp(App as Component).use(store)
+  // The client is created in @241/platform rather than left to the plugin's
+  // default, so that services — which are plain objects, not components — can
+  // reach it without Vue's inject. Components may still `useQuery`; it is the
+  // same instance behind both.
+  const app = createApp(App as Component)
+    .use(store)
+    .use(VueQueryPlugin, { queryClient })
 
   // Fire-and-forget: first paint uses configureAuth's defaults above; this
   // overlays admin-configured branding once it resolves, with no loading gate

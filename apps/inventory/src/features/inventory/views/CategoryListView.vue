@@ -7,15 +7,14 @@ import { Card, CardHeader, CardTitle } from '@/ui/card'
 import { Input } from '@/ui/input'
 import { Plus, Search } from 'lucide-vue-next'
 import { h } from 'vue'
-import { toast } from 'vue-sonner'
-import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
 import { useRoleGuard } from '@/features/platform/auth'
-import { inventoryApi } from '../api/inventoryApi'
+import { inventoryReferenceCrud } from '../services/inventoryReferenceCrudService'
 import CategoryFormDialog from '../components/CategoryFormDialog.vue'
 import type { ColumnDef } from '@tanstack/vue-table'
 import type { InventoryReferenceItem } from '../types'
 
 const { can } = useRoleGuard()
+const reference = inventoryReferenceCrud('categories')
 
 // State
 const dataItems = ref<InventoryReferenceItem[]>([])
@@ -72,60 +71,25 @@ const columns = computed<ColumnDef<InventoryReferenceItem>[]>(() => {
 // Fetch logic
 async function fetchCategories() {
   loading.value = true
-  try {
-    const response = await inventoryApi.getReferences(
-      'categories',
-      searchQuery.value.trim() ? searchQuery.value.trim() : undefined,
-    )
-    dataItems.value = response.data.data ?? []
-  } catch (e) {
-    toast.error(
-      getIndonesianErrorMessage(e, 'Gagal memuat data kategori aset.'),
-    )
-  } finally {
-    loading.value = false
-  }
+  dataItems.value = await reference.list(searchQuery.value)
+  loading.value = false
 }
 
 // Save logic
 async function handleSaveCategory(payload: Omit<InventoryReferenceItem, 'id'>) {
   isSaving.value = true
-  try {
-    if (selectedItem.value) {
-      await inventoryApi.updateReference(
-        'categories',
-        selectedItem.value.id,
-        payload,
-      )
-      toast.success('Data kategori aset berhasil diperbarui.')
-    } else {
-      await inventoryApi.createReference('categories', payload)
-      toast.success('Kategori aset baru berhasil ditambahkan.')
-    }
-    isFormOpen.value = false
-    await fetchCategories()
-  } catch (e) {
-    toast.error(
-      getIndonesianErrorMessage(e, 'Gagal menyimpan data kategori aset.'),
-    )
-  } finally {
-    isSaving.value = false
-  }
+  const saved = await reference.save(selectedItem.value?.id ?? null, payload)
+  isSaving.value = false
+  if (!saved) return
+  isFormOpen.value = false
+  await fetchCategories()
 }
 
 // Delete logic
 async function handleDeleteItem(id: string) {
   if (!confirm('Apakah Anda yakin ingin menghapus data kategori ini?')) return
 
-  try {
-    await inventoryApi.deleteReference('categories', id)
-    toast.success('Data kategori berhasil dihapus.')
-    await fetchCategories()
-  } catch (e) {
-    toast.error(
-      getIndonesianErrorMessage(e, 'Gagal menghapus data kategori aset.'),
-    )
-  }
+  if (await reference.remove(id)) await fetchCategories()
 }
 
 // Modal Form Triggering

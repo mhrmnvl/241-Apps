@@ -1,6 +1,7 @@
 import { toast } from 'vue-sonner'
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
 import { categoryApi, tagApi } from '../api/taxonomyApi'
+import { useReferenceList } from '@/features/platform/reference-data'
 import type {
   CategoryCreatePayload,
   CategoryUpdatePayload,
@@ -42,10 +43,20 @@ function inUseMessage(error: unknown): string | null {
 }
 
 export const categoryService = {
+  /**
+   * The category dropdown, held for the session.
+   *
+   * The catch stays outside the cached fetcher on purpose: it turns a failure
+   * into an empty list for this caller, and caching *that* would serve "no
+   * categories" for ten minutes after one bad request. Only a successful read
+   * is held.
+   */
   async list(): Promise<PostCategory[]> {
     try {
-      const { data } = await categoryApi.list()
-      return data.data ?? []
+      return await useReferenceList().read('portalCategories', async () => {
+        const { data } = await categoryApi.list()
+        return data.data ?? []
+      })
     } catch (error: unknown) {
       toast.error(getIndonesianErrorMessage(error, 'Gagal memuat kategori.'))
       return []
@@ -55,8 +66,13 @@ export const categoryService = {
   /** Anonymous. No toast — see postService.fetchPublicList for why. */
   async listPublic(): Promise<PublicPostCategory[]> {
     try {
-      const { data } = await categoryApi.listPublic()
-      return data.data ?? []
+      return await useReferenceList().read(
+        'portalPublicCategories',
+        async () => {
+          const { data } = await categoryApi.listPublic()
+          return data.data ?? []
+        },
+      )
     } catch {
       return []
     }
@@ -65,6 +81,9 @@ export const categoryService = {
   async create(payload: CategoryCreatePayload): Promise<boolean> {
     try {
       await categoryApi.create(payload)
+      // Both the admin dropdown and the public list now show a stale set.
+      useReferenceList().invalidate('portalCategories')
+      useReferenceList().invalidate('portalPublicCategories')
       toast.success('Kategori ditambahkan.')
       return true
     } catch (error: unknown) {
@@ -76,6 +95,9 @@ export const categoryService = {
   async update(id: string, payload: CategoryUpdatePayload): Promise<boolean> {
     try {
       await categoryApi.update(id, payload)
+      // Both the admin dropdown and the public list now show a stale set.
+      useReferenceList().invalidate('portalCategories')
+      useReferenceList().invalidate('portalPublicCategories')
       toast.success('Kategori diperbarui.')
       return true
     } catch (error: unknown) {
@@ -90,6 +112,9 @@ export const categoryService = {
     callbacks?.setLoading(true)
     try {
       await categoryApi.remove(id)
+      // Both the admin dropdown and the public list now show a stale set.
+      useReferenceList().invalidate('portalCategories')
+      useReferenceList().invalidate('portalPublicCategories')
       toast.success('Kategori dihapus.')
       callbacks?.closeAlert()
       return true

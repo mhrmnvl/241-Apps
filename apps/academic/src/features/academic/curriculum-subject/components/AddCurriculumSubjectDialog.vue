@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
-import type { Subject } from '@/features/academic/subject'
+import { useCurriculumSubject } from '../composables/useCurriculumSubject'
 import { Button } from '@/ui/button'
 import { Input } from '@/ui/input'
 import {
@@ -23,7 +23,6 @@ import { Loader2 } from 'lucide-vue-next'
 
 const props = defineProps<{
   open: boolean
-  subjects: Subject[]
   existingSubjectIds: string[]
   saving: boolean
 }>()
@@ -41,19 +40,36 @@ const dialogOpen = computed({
 const selectedIds = ref<Record<string, boolean>>({})
 const searchQuery = ref('')
 
+/**
+ * The whole subject catalogue is loaded here rather than by the page.
+ *
+ * It is only ever read inside this dialog, so fetching it on page load made
+ * every visitor who came to read the list pay for a thousand rows they never
+ * saw. Kept once loaded: reopening the dialog in the same visit does not
+ * refetch a catalogue that changes a few times a year.
+ */
+const { subjects, fetchReferenceData } = useCurriculumSubject()
+const loadingSubjects = ref(false)
+
 watch(
   () => props.open,
   (val) => {
-    if (val) {
-      selectedIds.value = {}
-      searchQuery.value = ''
-    }
+    if (!val) return
+
+    selectedIds.value = {}
+    searchQuery.value = ''
+
+    if (subjects.value.length > 0) return
+    loadingSubjects.value = true
+    void fetchReferenceData().finally(() => {
+      loadingSubjects.value = false
+    })
   },
 )
 
 // Filter out subjects that are already in the curriculum
 const availableSubjects = computed(() => {
-  return props.subjects.filter((s) => !props.existingSubjectIds.includes(s.id))
+  return subjects.value.filter((s) => !props.existingSubjectIds.includes(s.id))
 })
 
 const filteredSubjects = computed(() => {
@@ -117,7 +133,11 @@ function handleSave() {
       >
         <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
           <p class="text-sm text-muted-foreground shrink-0">
-            {{ filteredSubjects.length }} mata pelajaran tersedia
+            {{
+              loadingSubjects
+                ? 'Memuat mata pelajaran...'
+                : `${filteredSubjects.length} mata pelajaran tersedia`
+            }}
           </p>
         </div>
         <Input
@@ -149,7 +169,17 @@ function handleSave() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            <template v-if="filteredSubjects.length > 0">
+            <template v-if="loadingSubjects">
+              <TableRow>
+                <TableCell
+                  :colspan="4"
+                  class="h-24 text-center text-muted-foreground"
+                >
+                  <Loader2 class="mx-auto size-5 animate-spin" />
+                </TableCell>
+              </TableRow>
+            </template>
+            <template v-else-if="filteredSubjects.length > 0">
               <TableRow
                 v-for="(subject, idx) in filteredSubjects"
                 :key="subject.id"

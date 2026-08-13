@@ -24,8 +24,6 @@ const {
   formError,
   curriculumName,
   curriculumAcademicYear,
-  subjects,
-  fetchReferenceData,
   fetchCurriculumSubjects,
   fetchCurriculumInfo,
   saveCurriculumSubject,
@@ -97,8 +95,9 @@ watch(isEditSheetOpen, (isOpen) => {
 })
 
 onMounted(async () => {
+  // The subject catalogue is not fetched here: only AddCurriculumSubjectDialog
+  // reads it, and it loads it itself when opened.
   await Promise.all([
-    fetchReferenceData(),
     fetchCurriculumInfo(curriculumId),
     fetchCurriculumSubjects(curriculumId),
   ])
@@ -163,7 +162,6 @@ onMounted(async () => {
         <AddCurriculumSubjectDialog
           v-if="isAddDialogOpen"
           v-model:open="isAddDialogOpen"
-          :subjects="subjects"
           :existing-subject-ids="existingSubjectIds"
           :saving="isSaving"
           @save="handleBulkSave"
