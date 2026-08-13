@@ -46,9 +46,26 @@ export interface BulkGraduationStudentInput {
 }
 
 export interface BulkGraduationInput {
+  /** Derived from the active semester, never supplied by the caller. */
   academicYearId: string;
   graduationDate?: Date;
   students: BulkGraduationStudentInput[];
+}
+
+/**
+ * The candidate list and the term it was taken from.
+ *
+ * The year is reported, not asked for. A school has one active academic year,
+ * and requiring someone to name it is asking them to restate what the system
+ * already knows — with a chance of naming the wrong one, which here means
+ * graduating the wrong cohort.
+ */
+export interface GraduationCandidateList {
+  /** The active year the list was taken from — reported, never asked for. */
+  academicYear: { id: string; name: string } | null;
+  /** Which grade counts as final this year, e.g. "IX". Null when no classes. */
+  finalGradeName: string | null;
+  students: GraduationCandidate[];
 }
 
 /**
@@ -77,7 +94,8 @@ export abstract class IGraduationRepository {
   ): Promise<GraduationWithDetails>;
   abstract remove(id: string): Promise<StudentGraduationEntity>;
   abstract softDelete(id: string): Promise<StudentGraduationEntity>;
-  abstract findCandidates(semesterId: string): Promise<GraduationCandidate[]>;
+  abstract findCandidates(): Promise<GraduationCandidateList>;
+  abstract findActiveAcademicYearId(): Promise<string | null>;
   abstract executeBulk(
     input: BulkGraduationInput,
   ): Promise<BulkGraduationResult>;

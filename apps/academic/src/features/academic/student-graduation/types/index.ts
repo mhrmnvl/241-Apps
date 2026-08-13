@@ -71,8 +71,21 @@ export interface GraduationCandidate {
   gradeName: string
 }
 
+/** The year the server chose, reported so the screen shows it. */
+export interface GraduationTerm {
+  id: string
+  name: string
+}
+
+export interface GraduationCandidateList {
+  academicYear: GraduationTerm | null
+  /** Which grade counts as final this year, e.g. "IX". */
+  finalGradeName: string | null
+  students: GraduationCandidate[]
+}
+
+/** No academic year: the server takes it from the active academic year. */
 export interface BulkGraduationPayload {
-  academicYearId: string
   graduationDate?: string
   students: { studentId: string; certificateNo?: string; note?: string }[]
 }

@@ -19,13 +19,16 @@ export const studentGraduationService = {
    * who it must leave out, so the two cannot disagree about who is in the last
    * year.
    */
-  fetchCandidates: async (semesterId: string) => {
+  fetchCandidates: async () => {
     const store = useStudentGraduationStore()
     store.isLoadingCandidates = true
     store.candidates = []
     try {
-      const res = await studentGraduationApi.getCandidates(semesterId)
-      store.candidates = res.data.data ?? []
+      const res = await studentGraduationApi.getCandidates()
+      const data = res.data.data
+      store.candidates = data?.students ?? []
+      store.graduationTerm = data?.academicYear ?? null
+      store.finalGradeName = data?.finalGradeName ?? null
     } catch (error: unknown) {
       toast.error(
         getIndonesianErrorMessage(error, 'Gagal memuat calon lulusan.'),

@@ -16,6 +16,8 @@ export function useStudentGraduation() {
     academicYears,
     selectedAcademicYearId,
     candidates,
+    graduationTerm,
+    finalGradeName,
     isLoadingCandidates,
     isGraduating,
   } = storeToRefs(store)
@@ -43,6 +45,8 @@ export function useStudentGraduation() {
     academicYears,
     selectedAcademicYearId,
     candidates,
+    graduationTerm,
+    finalGradeName,
     isLoadingCandidates,
     isGraduating,
     fetchReferenceData: studentGraduationService.fetchReferenceData,

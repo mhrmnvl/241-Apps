@@ -12,8 +12,6 @@ import { Button } from '@/ui/button'
 import { Label } from '@/ui/label'
 import { Input } from '@/ui/input'
 import { Checkbox } from '@/ui/checkbox'
-import { AppCombobox } from '@/ui'
-import type { ComboboxOption } from '@/ui'
 import { GraduationCap, Loader2 } from 'lucide-vue-next'
 import { useStudentGraduation } from '../composables/useStudentGraduation'
 import type { GraduationCandidate } from '../types'
@@ -21,38 +19,31 @@ import type { GraduationCandidate } from '../types'
 /**
  * Graduating a cohort in one run.
  *
- * The candidate list comes from the server, which decides eligibility — final
- * grade, still enrolled, no record yet. Nothing here re-derives that: a screen
- * that decided for itself who is in the final year would eventually disagree
- * with the promotion screen, which uses the same rule to decide who to leave
- * out.
+ * There is no term to choose. A school has one active academic year and one
+ * final grade, and both are the server's answer — asking for either would be
+ * asking someone to restate what the system knows, with a chance of naming the
+ * wrong one. What the run will use is stated, not selected.
+ *
+ * Eligibility is likewise the server's: final grade, still enrolled, no record
+ * yet. Nothing here re-derives it, so this screen and the promotion screen
+ * cannot come to disagree about who is in the last year.
  */
-const props = defineProps<{
-  open: boolean
-  semesters: { id: string; name: string; academicYearId: string }[]
-}>()
+const props = defineProps<{ open: boolean }>()
 
 const emit = defineEmits<{ 'update:open': [value: boolean]; saved: [] }>()
 
 const {
   candidates,
+  graduationTerm,
+  finalGradeName,
   isLoadingCandidates,
   isGraduating,
   fetchCandidates,
   bulkGraduate,
 } = useStudentGraduation()
 
-const semesterId = ref('')
 const graduationDate = ref('')
 const selectedIds = ref<Set<string>>(new Set())
-
-const semesterOptions = computed<ComboboxOption[]>(() =>
-  props.semesters.map((s) => ({ value: s.id, label: s.name })),
-)
-
-const selectedSemester = computed(() =>
-  props.semesters.find((s) => s.id === semesterId.value),
-)
 
 const allSelected = computed(
   () =>
@@ -61,10 +52,7 @@ const allSelected = computed(
 )
 
 const canSubmit = computed(
-  () =>
-    selectedIds.value.size > 0 &&
-    !!selectedSemester.value &&
-    !isGraduating.value,
+  () => selectedIds.value.size > 0 && !isGraduating.value,
 )
 
 function toggle(id: string) {
@@ -80,33 +68,28 @@ function toggleAll() {
     : new Set(candidates.value.map((c: GraduationCandidate) => c.studentId))
 }
 
-// Every candidate starts selected: graduating the whole final year is the
-// normal case, and unticking the exceptions is less work than ticking the rest.
-watch(semesterId, async (id) => {
-  selectedIds.value = new Set()
-  if (!id) return
-  await fetchCandidates(id)
-  selectedIds.value = new Set(
-    candidates.value.map((c: GraduationCandidate) => c.studentId),
-  )
-})
-
+// Opening the dialog loads the list, and every candidate starts selected:
+// graduating the whole final year is the normal case, and unticking the
+// exceptions is less work than ticking the rest.
 watch(
   () => props.open,
-  (open) => {
-    if (open) return
-    semesterId.value = ''
-    graduationDate.value = ''
-    selectedIds.value = new Set()
+  async (open) => {
+    if (!open) {
+      graduationDate.value = ''
+      selectedIds.value = new Set()
+      return
+    }
+    await fetchCandidates()
+    selectedIds.value = new Set(
+      candidates.value.map((c: GraduationCandidate) => c.studentId),
+    )
   },
 )
 
 async function handleSubmit() {
-  const semester = selectedSemester.value
-  if (!semester || selectedIds.value.size === 0) return
+  if (selectedIds.value.size === 0) return
 
   const result = await bulkGraduate({
-    academicYearId: semester.academicYearId,
     ...(graduationDate.value ? { graduationDate: graduationDate.value } : {}),
     students: [...selectedIds.value].map((studentId) => ({ studentId })),
   })
@@ -130,29 +113,28 @@ async function handleSubmit() {
           Luluskan Siswa
         </DialogTitle>
         <DialogDescription>
-          Pilih semester akhir, lalu tentukan siapa yang diluluskan. Siswa yang
-          sudah punya data kelulusan tidak ditampilkan di sini.
+          <template v-if="graduationTerm">
+            Meluluskan siswa kelas
+            <strong class="text-foreground">{{
+              finalGradeName ?? 'akhir'
+            }}</strong>
+            pada tahun ajaran
+            <strong class="text-foreground">{{ graduationTerm.name }}</strong>
+            — tahun ajaran yang sedang aktif. Siswa yang sudah punya data
+            kelulusan tidak ditampilkan.
+          </template>
+          <template v-else>
+            Menentukan siswa yang diluluskan pada tahun ajaran yang aktif.
+          </template>
         </DialogDescription>
       </DialogHeader>
 
-      <div class="grid gap-4 sm:grid-cols-2">
-        <div class="grid gap-2">
-          <Label>Semester Akhir</Label>
-          <AppCombobox
-            v-model="semesterId"
-            :options="semesterOptions"
-            placeholder="Pilih semester"
-            search-placeholder="Cari semester..."
-            empty-text="Semester tidak ditemukan."
-          />
-        </div>
-        <div class="grid gap-2">
-          <Label>Tanggal Kelulusan</Label>
-          <Input
-            v-model="graduationDate"
-            type="date"
-          />
-        </div>
+      <div class="grid gap-2 max-w-xs">
+        <Label>Tanggal Kelulusan</Label>
+        <Input
+          v-model="graduationDate"
+          type="date"
+        />
       </div>
 
       <div class="rounded-lg border max-h-[45vh] overflow-y-auto">
@@ -165,17 +147,18 @@ async function handleSubmit() {
         </div>
 
         <p
-          v-else-if="!semesterId"
+          v-else-if="!graduationTerm"
           class="py-10 text-center text-sm text-muted-foreground"
         >
-          Pilih semester terlebih dahulu.
+          Belum ada tahun ajaran aktif. Aktifkan satu terlebih dahulu.
         </p>
 
         <p
           v-else-if="candidates.length === 0"
           class="py-10 text-center text-sm text-muted-foreground"
         >
-          Tidak ada siswa tingkat akhir yang bisa diluluskan di semester ini.
+          Tidak ada siswa kelas {{ finalGradeName ?? 'akhir' }} yang bisa
+          diluluskan saat ini.
         </p>
 
         <table

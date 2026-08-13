@@ -32,14 +32,6 @@ export class BulkGraduationStudentDto {
 }
 
 export class BulkGraduationDto {
-  @ApiProperty({
-    format: 'uuid',
-    description: 'Academic year they graduate in',
-  })
-  @IsUUID()
-  @IsNotEmpty()
-  academicYearId: string;
-
   /** One date for the whole cohort; a certificate number is still per student. */
   @ApiPropertyOptional({ example: '2026-06-15' })
   @IsOptional()

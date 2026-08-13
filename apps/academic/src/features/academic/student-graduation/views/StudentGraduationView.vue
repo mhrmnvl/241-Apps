@@ -9,8 +9,6 @@ import type { ComboboxOption } from '@/ui'
 import { Button } from '@/ui/button'
 import { GraduationCap } from 'lucide-vue-next'
 import BulkGraduationDialog from '../components/BulkGraduationDialog.vue'
-import { semesterApi } from '@/features/academic/semester'
-import { PAGINATION } from '@/shared/constants/pagination'
 import { Card, CardHeader, CardTitle } from '@/ui/card'
 import { Label } from '@/ui/label'
 import { useRoleGuard } from '@/features/platform/auth'
@@ -90,37 +88,10 @@ watch(selectedAcademicYearId, () => {
   void fetchStudentGraduations()
 })
 
-/**
- * Semesters for the bulk dialog's picker. Loaded here rather than inside the
- * dialog so opening it is instant, and left uncached: this read is filtered to
- * the active ones, and the shared `semesters` key holds the unfiltered list.
- */
-const semesters = ref<{ id: string; name: string; academicYearId: string }[]>(
-  [],
-)
-
 onMounted(async () => {
   selectedAcademicYearId.value = ''
   await fetchReferenceData()
   void fetchStudentGraduations()
-
-  if (!can('graduations.create')) return
-  try {
-    const res = await semesterApi.getSemesters({
-      limit: PAGINATION.REFERENCE_LIMIT,
-    })
-    // Labelled with the academic year: without it every "Genap" looks alike,
-    // and picking the wrong year graduates the wrong cohort.
-    semesters.value = (res.data.data ?? []).map((s) => ({
-      id: s.id,
-      name: `${s.type?.name === 'ODD' ? 'Ganjil' : 'Genap'}${
-        s.academicYear?.name ? ` — ${s.academicYear.name}` : ''
-      }`,
-      academicYearId: s.academicYearId,
-    }))
-  } catch {
-    // The dialog says "Semester tidak ditemukan"; the list behind it still works.
-  }
 })
 </script>
 
@@ -201,7 +172,6 @@ onMounted(async () => {
       <BulkGraduationDialog
         v-if="can('graduations.create')"
         v-model:open="isBulkOpen"
-        :semesters="semesters"
         @saved="fetchStudentGraduations"
       />
     </Card>

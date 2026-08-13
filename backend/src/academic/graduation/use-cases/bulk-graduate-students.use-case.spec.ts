@@ -6,7 +6,10 @@ import { BulkGraduateStudentsUseCase } from './bulk-graduate-students.use-case.j
 describe('BulkGraduateStudentsUseCase', () => {
   let useCase: BulkGraduateStudentsUseCase;
 
-  const mockRepo = { executeBulk: jest.fn() };
+  const mockRepo = {
+    executeBulk: jest.fn(),
+    findActiveAcademicYearId: jest.fn(),
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -18,13 +21,13 @@ describe('BulkGraduateStudentsUseCase', () => {
 
     useCase = module.get(BulkGraduateStudentsUseCase);
     jest.clearAllMocks();
+    mockRepo.findActiveAcademicYearId.mockResolvedValue('ay-1');
   });
 
   it('graduates the cohort it is given', async () => {
     mockRepo.executeBulk.mockResolvedValue({ graduated: 2, skipped: 0 });
 
     const result = await useCase.execute({
-      academicYearId: 'ay-1',
       students: [{ studentId: 'stu-1' }, { studentId: 'stu-2' }],
     });
 
@@ -36,13 +39,38 @@ describe('BulkGraduateStudentsUseCase', () => {
   });
 
   /**
+   * The academic year is the server's answer, not the caller's. A client that
+   * sent the wrong one would file a whole cohort under it, and nothing
+   * downstream would notice.
+   */
+  it('takes the academic year from the active semester', async () => {
+    mockRepo.findActiveAcademicYearId.mockResolvedValue('ay-active');
+    mockRepo.executeBulk.mockResolvedValue({ graduated: 1, skipped: 0 });
+
+    await useCase.execute({ students: [{ studentId: 'stu-1' }] });
+
+    expect(mockRepo.executeBulk).toHaveBeenCalledWith(
+      expect.objectContaining({ academicYearId: 'ay-active' }),
+    );
+  });
+
+  it('refuses to run when no semester is active', async () => {
+    mockRepo.findActiveAcademicYearId.mockResolvedValue(null);
+
+    await expect(
+      useCase.execute({ students: [{ studentId: 'stu-1' }] }),
+    ).rejects.toThrow(BadRequestException);
+
+    expect(mockRepo.executeBulk).not.toHaveBeenCalled();
+  });
+
+  /**
    * A duplicated id would be graduated once and then counted as skipped, which
    * reads as "already graduated" and hides that the caller sent them twice.
    */
   it('rejects a request naming the same student twice', async () => {
     await expect(
       useCase.execute({
-        academicYearId: 'ay-1',
         students: [{ studentId: 'stu-1' }, { studentId: 'stu-1' }],
       }),
     ).rejects.toThrow(BadRequestException);
@@ -51,9 +79,9 @@ describe('BulkGraduateStudentsUseCase', () => {
   });
 
   it('rejects an empty selection', async () => {
-    await expect(
-      useCase.execute({ academicYearId: 'ay-1', students: [] }),
-    ).rejects.toThrow(BadRequestException);
+    await expect(useCase.execute({ students: [] })).rejects.toThrow(
+      BadRequestException,
+    );
 
     expect(mockRepo.executeBulk).not.toHaveBeenCalled();
   });
@@ -63,7 +91,6 @@ describe('BulkGraduateStudentsUseCase', () => {
     mockRepo.executeBulk.mockResolvedValue({ graduated: 1, skipped: 0 });
 
     await useCase.execute({
-      academicYearId: 'ay-1',
       graduationDate: '2026-06-15',
       students: [{ studentId: 'stu-1' }],
     });
@@ -83,7 +110,6 @@ describe('BulkGraduateStudentsUseCase', () => {
     mockRepo.executeBulk.mockResolvedValue({ graduated: 1, skipped: 3 });
 
     const result = await useCase.execute({
-      academicYearId: 'ay-1',
       students: [
         { studentId: 'stu-1' },
         { studentId: 'stu-2' },

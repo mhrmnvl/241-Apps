@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import type {
   GraduationCandidate,
+  GraduationTerm,
   StudentGraduation,
   GraduationAcademicYear,
 } from '../types'
@@ -19,6 +20,9 @@ export const useStudentGraduationStore = defineStore(
 
     /** Bulk graduation: the candidate list and the run in progress. */
     const candidates = ref<GraduationCandidate[]>([])
+    /** The term the server used, and the grade it treated as final. */
+    const graduationTerm = ref<GraduationTerm | null>(null)
+    const finalGradeName = ref<string | null>(null)
     const isLoadingCandidates = ref(false)
     const isGraduating = ref(false)
     const formError = ref<string | null>(null)
@@ -36,6 +40,8 @@ export const useStudentGraduationStore = defineStore(
       loading,
       isSaving,
       candidates,
+      graduationTerm,
+      finalGradeName,
       isLoadingCandidates,
       isGraduating,
       formError,

@@ -15,7 +15,7 @@ import { IGraduationRepository } from '../../domain/interfaces/graduation-reposi
 import type {
   BulkGraduationInput,
   BulkGraduationResult,
-  GraduationCandidate,
+  GraduationCandidateList,
 } from '../../domain/interfaces/graduation-repository.interface.js';
 import { graduateStudentSteps } from './prisma-graduation.steps.js';
 import { PaginatedResult } from '../../../../shared/domain/interfaces/repository.interface.js';
@@ -145,31 +145,56 @@ export class PrismaGraduationRepository extends IGraduationRepository {
   }
 
   /**
-   * Students eligible to graduate from the given semester.
+   * Students eligible to graduate, from the active academic year.
    *
-   * "Final grade" is the highest level among the classrooms of that semester's
-   * academic year — the same rule the promotion recommendation uses to decide
-   * who it must leave out, so the two cannot disagree about who is in the last
-   * year. Anyone already holding a graduation record is filtered out here so
-   * the screen never offers a student it would then skip.
+   * The year, not the semester. Graduation is a year-end act and
+   * `StudentGraduation` records a year, so keying candidates on a semester
+   * would key them on something finer than the record they produce — and would
+   * find nobody whenever the semester flagged active is not the one the
+   * students are enrolled in, which is exactly the state this school is in
+   * today: every enrolment sits in Genap while Ganjil holds the active flag.
+   *
+   * Nothing is asked of the operator. A school has one active year, and
+   * requiring someone to name it is asking them to restate what the system
+   * knows — with a chance of naming the wrong one, which here means graduating
+   * the wrong cohort.
+   *
+   * "Final grade" is the highest level among that year's classrooms, so it is
+   * IX for an MTs, XII for an SMA and VI for an SD without anyone configuring
+   * it, and it shifts on its own if the school adds a level. The promotion
+   * recommendation derives it the same way to decide who it must leave out, so
+   * the two cannot disagree about who is in the last year.
+   *
+   * Anyone already holding a graduation record is filtered out here, so the
+   * screen never offers a student it would then skip.
    */
-  async findCandidates(semesterId: string): Promise<GraduationCandidate[]> {
-    const semester = await this.prisma.semester.findFirst({
-      where: { id: semesterId, deletedAt: null },
-      select: { academicYearId: true },
+  async findCandidates(): Promise<GraduationCandidateList> {
+    const academicYear = await this.prisma.academicYear.findFirst({
+      where: { isActive: true, deletedAt: null },
+      select: { id: true, name: true },
     });
-    if (!semester) return [];
+    if (!academicYear) {
+      return { academicYear: null, finalGradeName: null, students: [] };
+    }
+
+    const term = { id: academicYear.id, name: academicYear.name };
 
     const levels = await this.prisma.classroom.findMany({
-      where: { academicYearId: semester.academicYearId, deletedAt: null },
-      select: { grade: { select: { level: true } } },
+      where: { academicYearId: academicYear.id, deletedAt: null },
+      select: { grade: { select: { level: true, name: true } } },
     });
-    if (levels.length === 0) return [];
+    if (levels.length === 0) {
+      return { academicYear: term, finalGradeName: null, students: [] };
+    }
     const finalLevel = Math.max(...levels.map((c) => c.grade.level));
+    const finalGradeName =
+      levels.find((c) => c.grade.level === finalLevel)?.grade.name ?? null;
 
     const enrollments = await this.prisma.studentEnrollment.findMany({
       where: {
-        semesterId,
+        // Any semester of the year: which one carries the active flag is not
+        // what decides whether a student is finishing school.
+        semester: { academicYearId: academicYear.id, deletedAt: null },
         status: EnrollmentStatus.ACTIVE,
         deletedAt: null,
         student: {
@@ -196,14 +221,27 @@ export class PrismaGraduationRepository extends IGraduationRepository {
       orderBy: { student: { nis: 'asc' } },
     });
 
-    return enrollments.map((e) => ({
-      studentId: e.studentId,
-      studentName: e.student.user?.profile?.name ?? '-',
-      nis: e.student.nis,
-      classroomId: e.classroom.id,
-      classroomName: e.classroom.code,
-      gradeName: e.classroom.grade.name,
-    }));
+    return {
+      academicYear: term,
+      finalGradeName,
+      students: enrollments.map((e) => ({
+        studentId: e.studentId,
+        studentName: e.student.user?.profile?.name ?? '-',
+        nis: e.student.nis,
+        classroomId: e.classroom.id,
+        classroomName: e.classroom.code,
+        gradeName: e.classroom.grade.name,
+      })),
+    };
+  }
+
+  /** The year a bulk run files its graduations under. */
+  async findActiveAcademicYearId(): Promise<string | null> {
+    const year = await this.prisma.academicYear.findFirst({
+      where: { isActive: true, deletedAt: null },
+      select: { id: true },
+    });
+    return year?.id ?? null;
   }
 
   /**

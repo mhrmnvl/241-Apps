@@ -29,8 +29,18 @@ export class BulkGraduateStudentsUseCase {
       throw new BadRequestException('Duplicate students in the request');
     }
 
+    // Derived, not taken from the request: a client that sent the wrong year
+    // would file a whole cohort under it, and nothing downstream would notice.
+    const academicYearId =
+      await this.graduationRepository.findActiveAcademicYearId();
+    if (!academicYearId) {
+      throw new BadRequestException(
+        'No active semester; set one before graduating a cohort',
+      );
+    }
+
     const result = await this.graduationRepository.executeBulk({
-      academicYearId: dto.academicYearId,
+      academicYearId,
       ...(dto.graduationDate && {
         graduationDate: new Date(dto.graduationDate),
       }),

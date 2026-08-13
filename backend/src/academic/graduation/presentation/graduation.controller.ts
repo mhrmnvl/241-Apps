@@ -30,7 +30,7 @@ import { CreateStudentGraduationDto } from '../dto/request/create-student-gradua
 import { BulkGraduationDto } from '../dto/request/bulk-graduation.dto.js';
 import {
   BulkGraduationResultDto,
-  GraduationCandidateDto,
+  GraduationCandidateListDto,
 } from '../dto/response/graduation-candidate.dto.js';
 import { GetGraduationCandidatesUseCase } from '../use-cases/get-graduation-candidates.use-case.js';
 import { BulkGraduateStudentsUseCase } from '../use-cases/bulk-graduate-students.use-case.js';
@@ -64,14 +64,11 @@ export class GraduationController {
   @Get('candidates')
   @RequirePermissions('graduations.read')
   @ApiOperation({
-    summary: 'Students eligible to graduate from a semester',
+    summary: 'Students eligible to graduate, from the active semester',
   })
-  @ApiQuery({ name: 'semesterId', format: 'uuid' })
-  @ApiResponse({ status: 200, type: [GraduationCandidateDto] })
-  async findCandidates(
-    @Query('semesterId', ParseUUIDPipe) semesterId: string,
-  ): Promise<GraduationCandidateDto[]> {
-    return this.getCandidatesUC.execute(semesterId);
+  @ApiResponse({ status: 200, type: GraduationCandidateListDto })
+  async findCandidates(): Promise<GraduationCandidateListDto> {
+    return this.getCandidatesUC.execute();
   }
 
   @Post('bulk')

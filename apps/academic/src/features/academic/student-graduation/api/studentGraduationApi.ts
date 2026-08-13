@@ -6,7 +6,7 @@ import api from '@/shared/utils/api'
 import type {
   BulkGraduationPayload,
   BulkGraduationResult,
-  GraduationCandidate,
+  GraduationCandidateList,
   StudentGraduation,
   StudentGraduationQueryParams,
   StudentGraduationSavePayload,
@@ -47,10 +47,9 @@ export const studentGraduationApi = {
     return api.delete(`/student-graduations/${id}`)
   },
 
-  getCandidates: (semesterId: string) => {
-    return api.get<ApiSingleResponse<GraduationCandidate[]>>(
+  getCandidates: () => {
+    return api.get<ApiSingleResponse<GraduationCandidateList>>(
       '/student-graduations/candidates',
-      { params: { semesterId } },
     )
   },
 
