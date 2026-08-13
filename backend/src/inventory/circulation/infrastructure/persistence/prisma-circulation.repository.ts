@@ -8,6 +8,7 @@ import {
   Prisma,
 } from '@prisma/client';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
+import { InventoryReferenceDataMissingException } from '../../../shared/domain/exceptions/inventory-reference-data-missing.exception.js';
 import {
   CreateInventoryHistoryInput,
   CreateLoanRepositoryInput,
@@ -249,10 +250,12 @@ export class PrismaCirculationRepository extends ICirculationRepository {
           where: { code: 'TX-LOAN-OUT' },
         });
 
+        const missing: string[] = [];
+        if (!approvedStatus) missing.push('status role LOAN_APPROVED');
+        if (!loanedStatus) missing.push('status role LOANED');
+        if (!txType) missing.push('transaction type TX-LOAN-OUT');
         if (!approvedStatus || !loanedStatus || !txType) {
-          throw new Error(
-            'The LOAN_APPROVED/ON_LOAN status roles are not configured, or the TX-LOAN-OUT transaction type is missing',
-          );
+          throw new InventoryReferenceDataMissingException(missing);
         }
 
         const approvedLoan = await tx.inventoryLoan.update({

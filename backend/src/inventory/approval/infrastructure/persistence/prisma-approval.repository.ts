@@ -7,6 +7,7 @@ import {
   Prisma,
 } from '@prisma/client';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
+import { InventoryReferenceDataMissingException } from '../../../shared/domain/exceptions/inventory-reference-data-missing.exception.js';
 import {
   CreateApprovalLogInput,
   CreateApprovalWorkflowInput,
@@ -174,10 +175,16 @@ export class PrismaApprovalRepository extends IApprovalRepository {
         const availStatus = await tx.inventoryStatus.findUnique({
           where: { systemKey: 'AVAILABLE' },
         });
-        if (!rejectedStatus || !availStatus) {
-          throw new Error(
-            'The LOAN_REJECTED/AVAILABLE status roles are not configured under Reference > Asset Status',
-          );
+        const cancelType = await tx.inventoryTransactionType.findUnique({
+          where: { code: 'TX-LOAN-CANCEL' },
+        });
+
+        const missing: string[] = [];
+        if (!rejectedStatus) missing.push('status role LOAN_REJECTED');
+        if (!availStatus) missing.push('status role AVAILABLE');
+        if (!cancelType) missing.push('transaction type TX-LOAN-CANCEL');
+        if (!rejectedStatus || !availStatus || !cancelType) {
+          throw new InventoryReferenceDataMissingException(missing);
         }
 
         await tx.approvalInstance.update({
@@ -199,13 +206,11 @@ export class PrismaApprovalRepository extends IApprovalRepository {
           data: { statusId: availStatus.id },
         });
 
-        const txType = await tx.inventoryTransactionType.findFirst();
-
         for (const unitId of unitIds) {
           await tx.inventoryHistory.create({
             data: {
               unitId,
-              transactionTypeId: txType?.id ?? '',
+              transactionTypeId: cancelType.id,
               previousStatusId: params.pendingStatusId,
               newStatusId: availStatus.id,
               note: `Peminjaman ditolak (${params.note ?? 'Tanpa catatan'})`,
@@ -239,10 +244,12 @@ export class PrismaApprovalRepository extends IApprovalRepository {
             where: { code: 'TX-LOAN-OUT' },
           });
 
+          const missing: string[] = [];
+          if (!approvedStatus) missing.push('status role LOAN_APPROVED');
+          if (!loanedStatus) missing.push('status role LOANED');
+          if (!txType) missing.push('transaction type TX-LOAN-OUT');
           if (!approvedStatus || !loanedStatus || !txType) {
-            throw new Error(
-              'The LOAN_APPROVED/ON_LOAN status roles are not configured, or the TX-LOAN-OUT transaction type is missing',
-            );
+            throw new InventoryReferenceDataMissingException(missing);
           }
 
           await tx.approvalInstance.update({

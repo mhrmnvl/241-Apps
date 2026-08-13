@@ -4,6 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { ICirculationRepository } from '../domain/interfaces/circulation-repository.interface.js';
+import { InventoryReferenceDataMissingException } from '../../shared/domain/exceptions/inventory-reference-data-missing.exception.js';
 import { ReturnLoanDto } from '../dto/request/return-loan.dto.js';
 
 @Injectable()
@@ -23,10 +24,12 @@ export class ReturnLoanUseCase {
     const txType =
       await this.circulationRepository.findTransactionTypeByCode('TX-LOAN-IN');
 
+    const missing: string[] = [];
+    if (!returnedStatus) missing.push('status role LOAN_RETURNED');
+    if (!availStatus) missing.push('status role AVAILABLE');
+    if (!txType) missing.push('transaction type TX-LOAN-IN');
     if (!returnedStatus || !availStatus || !txType) {
-      throw new NotFoundException(
-        'The JUST_RETURNED/AVAILABLE status roles are not configured, or the TX-LOAN-IN transaction type is missing',
-      );
+      throw new InventoryReferenceDataMissingException(missing);
     }
 
     if (loan.actualReturnDate) {
