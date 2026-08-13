@@ -1,15 +1,23 @@
-name: Setup DEV SSH Key
+name: Setup VPS SSH Key
 
 # Temporary. Delete this file once the key is installed.
 #
-# It exists to authorise one public key on the dev box without touching
+# It exists to authorise one public key on the VPS without touching
 # deploy-dev.yml, which should stay a deploy workflow and nothing else. Manual
 # trigger only — it never runs on a push.
+#
+# Named for the machine, not for `dev`. One VPS hosts both environments, so a
+# key installed here reaches production as well — there is no "dev-only" access
+# to grant while the two share a box, and calling the key `241-dev-agent` would
+# have implied a boundary that does not exist.
+#
+# It connects with the DEV_* secrets because those are what currently describe
+# this machine, not because the access stops at dev.
 #
 # The key below is public and safe to commit; the private half never leaves the
 # machine that generated it. To revoke access later, one line on the box:
 #
-#   sed -i '/241-dev-agent/d' ~/.ssh/authorized_keys
+#   sed -i '/241-vps-agent/d' ~/.ssh/authorized_keys
 on:
   workflow_dispatch: {}
 
@@ -22,7 +30,7 @@ jobs:
     environment: development
 
     steps:
-      - name: Verify dev secrets are configured
+      - name: Verify VPS secrets are configured
         env:
           DEV_HOST: ${{ secrets.DEV_HOST }}
           DEV_USERNAME: ${{ secrets.DEV_USERNAME }}
@@ -51,7 +59,7 @@ jobs:
           script: |
             set -euo pipefail
 
-            PUBKEY='ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJlufWsCfDaT0PojWUmnuj2LB4CE4XY0GDCHD1pEPDNl 241-dev-agent'
+            PUBKEY='ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJlufWsCfDaT0PojWUmnuj2LB4CE4XY0GDCHD1pEPDNl 241-vps-agent'
 
             # $HOME, not a hardcoded /root. The key has to land in the home
             # directory of whichever account DEV_USERNAME names — writing it to
