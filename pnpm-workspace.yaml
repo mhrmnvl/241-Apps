@@ -10,6 +10,37 @@ packages:
 overrides:
   typescript: 5.8.3
 
+  # Transitive advisories, pinned to their patched line.
+  #
+  # Every one of these is a leaf utility reached through a dependency we do not
+  # control — `pnpm audit --prod` reports them and no direct upgrade clears them,
+  # because the intermediate package has not published a release that moves its
+  # own floor. An override is the only lever, and it is a safe one here: each is
+  # a patch or minor bump within the same major, on a package with no API surface
+  # of ours touching it.
+  #
+  # Remove an entry once the parent catches up — an override that is no longer
+  # doing anything is a pin nobody remembers agreeing to.
+  brace-expansion: ^2.1.4 # DoS via unbounded expansion (exceljs → archiver)
+  fast-uri: ^3.1.5 # host confusion via backslash authority (vue-router → unplugin)
+  js-yaml: ^5.2.2 # exponential parse time in flow collections (@nestjs/swagger)
+  nanoid: ^3.3.17 # custom generators can loop indefinitely (postcss)
+  postcss: ^8.5.23 # incomplete fix of GHSA-6g55-p6wh-862q (vite, @vue/compiler-sfc)
+
+  # Reached through `prisma → @prisma/dev`, which is the CLI's own dev server —
+  # the migration and generate commands the deploy runs never touch it. Pinned
+  # anyway, because `prisma` sits in dependencies (the server needs the CLI to
+  # migrate), so the advisories are reported against production.
+  hono: ^4.12.34 # ReDoS in CORS middleware, and three more
+  '@hono/node-server': ^1.19.15 # path traversal in serve-static
+  valibot: ^1.4.2 # record() paths can make flatten() throw
+  # The one major bump here, and the only entry that could plausibly break
+  # something: exceljs declares uuid ^8 and this forces 11. Verified rather than
+  # assumed — a workbook writes and reads back, and the student export suite
+  # passes. That export has been broken once before by a change that compiled
+  # cleanly, so it is checked by running it, not by reading it.
+  uuid: ^11.1.1 # missing buffer bounds check in v3/v5/v6 (exceljs)
+
 allowBuilds:
   esbuild: true
   vue-demi: true
