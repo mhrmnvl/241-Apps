@@ -21,7 +21,13 @@ overrides:
   #
   # Remove an entry once the parent catches up — an override that is no longer
   # doing anything is a pin nobody remembers agreeing to.
-  brace-expansion: ^2.1.4 # DoS via unbounded expansion (exceljs → archiver)
+  # Scoped per major, not pinned across both. An unscoped `^2.1.4` forces v2
+  # onto v1's consumers, and the two are not interchangeable: v1 exports the
+  # function itself, v2 exports `{ expand }`. ESLint reaches v1 through minimatch
+  # and dies with "brace_expansion_1.expand is not a function". Both majors had
+  # their own advisory, so both get their own floor.
+  'brace-expansion@1': ^1.1.18 # DoS via unbounded expansion (vite → stylus → glob)
+  'brace-expansion@2': ^2.1.4 # same, other major (exceljs → archiver)
   fast-uri: ^3.1.5 # host confusion via backslash authority (vue-router → unplugin)
   js-yaml: ^5.2.2 # exponential parse time in flow collections (@nestjs/swagger)
   nanoid: ^3.3.17 # custom generators can loop indefinitely (postcss)
