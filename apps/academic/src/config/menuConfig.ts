@@ -45,6 +45,18 @@ export const menuSections: MenuSection[] = [
         icon: School,
         requiredPermission: 'school-units.read',
       },
+      {
+        title: 'Pengumuman',
+        url: '/announcement',
+        icon: Megaphone,
+        requiredPermission: 'announcements.read',
+      },
+      {
+        title: 'Berkas & Dokumen',
+        url: '/files',
+        icon: FolderOpen,
+        requiredPermission: 'files.read',
+      },
     ],
   },
 
@@ -69,6 +81,29 @@ export const menuSections: MenuSection[] = [
             title: 'Semester',
             url: '/academic/semester',
             requiredPermission: 'semesters.read',
+          },
+          {
+            title: 'Kenaikan Kelas',
+            url: '/academic/semester/promotion',
+            requiredPermission: 'graduations.read',
+          },
+        ],
+      },
+      {
+        key: 'academic-calendars',
+        title: 'Kalender',
+        url: '#',
+        icon: CalendarRange,
+        items: [
+          {
+            title: 'Kalender Pendidikan',
+            url: '/academic/education-calendar',
+            requiredPermission: 'academic-calendars.read',
+          },
+          {
+            title: 'Kalender Kegiatan',
+            url: '/academic/event-calendar',
+            requiredPermission: 'events.read',
           },
         ],
       },
@@ -181,6 +216,24 @@ export const menuSections: MenuSection[] = [
         url: '/student/alumni',
         icon: GraduationCap,
         requiredPermission: 'graduations.read',
+      },
+      {
+        title: 'Prestasi Siswa',
+        url: '/achievement',
+        icon: Trophy,
+        requiredPermission: 'achievements.read',
+      },
+      {
+        title: 'Data Orang Tua',
+        url: '/data/parent',
+        icon: UserRound,
+        requiredPermission: 'parents.read',
+      },
+      {
+        title: 'Relasi Orang Tua',
+        url: '/data/parent-relation',
+        icon: Link2,
+        requiredPermission: 'parents.read',
       },
     ],
   },
@@ -334,63 +387,6 @@ export const menuSections: MenuSection[] = [
             requiredPermission: 'settings.update',
           },
         ],
-      },
-    ],
-  },
-
-  // ──────────────────── COMING SOON ────────────────────
-  {
-    key: 'coming-soon',
-    label: 'Segera Hadir',
-    requiredPermission: 'announcements.read',
-    items: [
-      {
-        title: 'Pengumuman',
-        url: '/announcement',
-        icon: Megaphone,
-        requiredPermission: 'announcements.read',
-      },
-      {
-        title: 'Berkas & Dokumen',
-        url: '/files',
-        icon: FolderOpen,
-        requiredPermission: 'files.read',
-      },
-      {
-        title: 'Kenaikan Kelas',
-        url: '/academic/semester/promotion',
-        icon: GraduationCap,
-        requiredPermission: 'graduations.read',
-      },
-      {
-        title: 'Kalender Pendidikan',
-        url: '/academic/education-calendar',
-        icon: CalendarDays,
-        requiredPermission: 'academic-calendars.read',
-      },
-      {
-        title: 'Kalender Kegiatan',
-        url: '/academic/event-calendar',
-        icon: CalendarRange,
-        requiredPermission: 'events.read',
-      },
-      {
-        title: 'Data Orang Tua',
-        url: '/data/parent',
-        icon: UserRound,
-        requiredPermission: 'parents.read',
-      },
-      {
-        title: 'Relasi Orang Tua',
-        url: '/data/parent-relation',
-        icon: Link2,
-        requiredPermission: 'parents.read',
-      },
-      {
-        title: 'Prestasi Siswa',
-        url: '/achievement',
-        icon: Trophy,
-        requiredPermission: 'achievements.read',
       },
     ],
   },

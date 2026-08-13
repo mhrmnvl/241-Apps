@@ -22,4 +22,18 @@ export interface Achievement {
   year: number
   description?: string | null
   deletedAt?: string | null
+  /**
+   * Present on the school-wide list, absent on the profile tab — there the
+   * person is the page, so the API is not asked to repeat them.
+   */
+  profile?: { id: string; name: string; userId: string } | null
+}
+
+/** Filters the standalone list offers; all optional, as the backend has them. */
+export interface AchievementQueryParams {
+  page?: number
+  limit?: number
+  typeId?: string
+  year?: number
+  profileId?: string
 }

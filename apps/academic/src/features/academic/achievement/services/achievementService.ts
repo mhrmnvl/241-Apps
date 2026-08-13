@@ -5,6 +5,34 @@ import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
 import type { AchievementSavePayload } from '../types'
 
 export const achievementService = {
+  /**
+   * The school-wide list.
+   *
+   * Paginated server-side rather than read whole: achievements accumulate one
+   * per student per competition and are the one list here with no natural
+   * ceiling, so this is a table, not a dropdown.
+   */
+  fetchAchievements: async () => {
+    const store = useAchievementStore()
+    store.loading = true
+    try {
+      const res = await achievementApi.getAllAchievements({
+        page: store.currentPage,
+        limit: store.pageSize,
+        ...(store.selectedTypeId ? { typeId: store.selectedTypeId } : {}),
+        ...(store.selectedYear ? { year: Number(store.selectedYear) } : {}),
+      })
+      store.items = res.data.data ?? []
+      store.totalItems = res.data.meta?.total ?? store.items.length
+    } catch (err: unknown) {
+      toast.error('Gagal memuat data prestasi', {
+        description: getIndonesianErrorMessage(err, 'Terjadi kesalahan.'),
+      })
+    } finally {
+      store.loading = false
+    }
+  },
+
   saveAchievement: async (
     payload: AchievementSavePayload | Omit<AchievementSavePayload, 'profileId'>,
     isCreate: boolean,

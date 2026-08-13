@@ -1,12 +1,39 @@
 import { h } from 'vue'
+import { RouterLink } from 'vue-router'
 import type { ColumnDef } from '@tanstack/vue-table'
 import { ActionCell } from '@/ui'
 import type { Achievement, AchievementColumnActions } from '../types'
 
+/**
+ * `showPerson` is for the school-wide list only. On the profile tab the person
+ * is the page, so naming them in every row would be noise — which is why this
+ * is opt-in rather than the default.
+ */
 export const createAchievementColumns = (
   isAdmin: boolean,
   handlers: AchievementColumnActions,
+  options: { showPerson?: boolean } = {},
 ): ColumnDef<Achievement>[] => {
+  const personColumn: ColumnDef<Achievement> = {
+    id: 'person',
+    header: 'Siswa',
+    meta: { align: 'left' },
+    cell: ({ row }) => {
+      const profile = row.original.profile
+      if (!profile) return '-'
+      // Links to the profile, which is where an achievement is added: the
+      // dialog needs a profileId, and on this screen there is no one person.
+      return h(
+        RouterLink,
+        {
+          to: `/profile/STUDENT/${profile.userId}`,
+          class: 'font-medium text-primary hover:underline',
+        },
+        () => profile.name,
+      )
+    },
+  }
+
   const baseColumns: ColumnDef<Achievement>[] = [
     {
       accessorKey: 'year',
@@ -67,5 +94,9 @@ export const createAchievementColumns = (
     },
   }
 
-  return isAdmin ? [...baseColumns, actionColumn] : baseColumns
+  const columns = options.showPerson
+    ? [personColumn, ...baseColumns]
+    : baseColumns
+
+  return isAdmin ? [...columns, actionColumn] : columns
 }
