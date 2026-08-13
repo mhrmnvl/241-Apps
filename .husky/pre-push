@@ -1,0 +1,36 @@
+# Refuse a direct push to `main`.
+#
+# `main` deploys to production the moment it moves, so an accidental push there
+# ships to the school without review. GitHub's own branch protection would stop
+# this at the server, but it needs Pro on a private repository, so this stands
+# in for it.
+#
+# Be clear about what it is: a client-side guard on this machine only. It does
+# not bind anyone else's clone, and `--no-verify` walks past it. It exists to
+# catch the slip — pushing while still on main after a merge — not to stop
+# someone who means it.
+#
+# The real fix is server-side. Until then, work lands on `dev`, and reaches
+# `main` through a pull request.
+
+while read -r _local_ref _local_sha remote_ref _remote_sha; do
+  case "$remote_ref" in
+    refs/heads/main)
+      echo ""
+      echo "  Direct push to 'main' refused."
+      echo ""
+      echo "  main deploys to production as soon as it moves. Open a pull"
+      echo "  request from 'dev' instead:"
+      echo ""
+      echo "      git push origin dev"
+      echo "      gh pr create --base main --head dev"
+      echo ""
+      echo "  If this really is intentional (a hotfix nobody can review yet),"
+      echo "  bypass with: git push --no-verify"
+      echo ""
+      exit 1
+      ;;
+  esac
+done
+
+exit 0

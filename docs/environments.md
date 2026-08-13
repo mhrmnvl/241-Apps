@@ -134,6 +134,13 @@ error.
    waits for a person.
 6. Protect `main`: require a pull request and the CI checks. `dev` stays open.
 
+   **Not currently possible.** Both branch protection and rulesets return
+   `403 — Upgrade to GitHub Pro or make this repository public` on a private
+   repository under a free account, and so do environment reviewers. Until the
+   plan changes, `.husky/pre-push` refuses a direct push to `main` — which is a
+   guard on one machine, bypassable with `--no-verify`, and no substitute for
+   the server-side rule. It catches the slip, not the intent.
+
 ---
 
 ## Why migrations run before the builds
