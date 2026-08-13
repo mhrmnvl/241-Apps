@@ -1,4 +1,4 @@
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { toTypedSchema } from '@vee-validate/zod'
 import { useForm } from 'vee-validate'
@@ -15,6 +15,7 @@ import api from '@/shared/utils/api'
 import { teacherApi } from '../api/teacherApi'
 import { teacherService } from '../services/teacherService'
 import { usePositionCategoryFilter } from './usePositionCategoryFilter'
+import { useReferenceList } from '@/features/platform/reference-data'
 import type {
   EmploymentTypeOption,
   PositionListItem,
@@ -188,25 +189,56 @@ export function useTeacherCreateForm() {
     }
   }
 
+  /** Step 2 needs employment types, so they load with the wizard — and once. */
   onMounted(async () => {
     try {
-      const [empRes, posRes] = await Promise.all([
-        api.get<{ data: EmploymentTypeOption[] }>('/employment-types', {
-          params: { limit: PAGINATION.REFERENCE_LIMIT },
-        }),
-        teacherApi.getPositions({
-          limit: PAGINATION.REFERENCE_LIMIT,
-          isActive: true,
-        }),
-      ])
-      employmentTypes.value = empRes.data.data ?? []
-      positions.value = posRes.data.data ?? []
+      employmentTypes.value = await useReferenceList().read(
+        'employmentTypes',
+        async () => {
+          const res = await api.get<{ data: EmploymentTypeOption[] }>(
+            '/employment-types',
+            { params: { limit: PAGINATION.REFERENCE_LIMIT } },
+          )
+          return res.data.data ?? []
+        },
+      )
     } catch (error: unknown) {
       toast.error(
         getIndonesianErrorMessage(error, 'Gagal memuat data pilihan.'),
       )
     }
   })
+
+  /**
+   * Positions belong to step 4 and were loaded at step 1.
+   *
+   * The same key and the same parameters as `teacherService.fetchPositions`,
+   * which TeacherFormDialog uses — so whichever of the two runs first pays for
+   * both.
+   */
+  watch(
+    activeStep,
+    (step) => {
+      if (step < 4 || positions.value.length > 0) return
+      void useReferenceList()
+        .read('positions', async () => {
+          const res = await teacherApi.getPositions({
+            limit: PAGINATION.REFERENCE_LIMIT,
+            isActive: true,
+          })
+          return res.data.data ?? []
+        })
+        .then((list) => {
+          positions.value = list
+        })
+        .catch((error: unknown) => {
+          toast.error(
+            getIndonesianErrorMessage(error, 'Gagal memuat data jabatan.'),
+          )
+        })
+    },
+    { immediate: true },
+  )
 
   // Callers address fields by a runtime string, while vee-validate types the path
   // as a union of the known schema keys, which a plain string cannot satisfy.

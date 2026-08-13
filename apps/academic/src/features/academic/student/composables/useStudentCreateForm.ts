@@ -1,4 +1,4 @@
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { toTypedSchema } from '@vee-validate/zod'
 import { useForm } from 'vee-validate'
@@ -18,6 +18,7 @@ import api from '@/shared/utils/api'
 import type { ApiPaginatedResponse } from '@/shared/types/api'
 import { studentService } from '../services/studentService'
 import type { GradeOption, StudentParentInput } from '../types'
+import { useReferenceList } from '@/features/platform/reference-data'
 
 export function useStudentCreateForm() {
   const router = useRouter()
@@ -222,9 +223,17 @@ export function useStudentCreateForm() {
     }
   }
 
+  /**
+   * Step 2 needs grades and classrooms, so they load with the wizard.
+   *
+   * Both are filtered to the active ones, which is why neither is held in the
+   * reference cache: the unfiltered lists live under those keys, and sharing
+   * one would serve an archived classroom to this form or hide a live one from
+   * the classroom screen.
+   */
   onMounted(async () => {
     try {
-      const [gradeRes, classroomRes, occupationRes] = await Promise.all([
+      const [gradeRes, classroomRes] = await Promise.all([
         api.get<ApiPaginatedResponse<GradeOption>>('/grades', {
           params: { limit: PAGINATION.REFERENCE_LIMIT, isActive: true },
         }),
@@ -232,17 +241,46 @@ export function useStudentCreateForm() {
           limit: PAGINATION.REFERENCE_LIMIT,
           isActive: true,
         }),
-        occupationApi.getOccupations({ limit: PAGINATION.REFERENCE_LIMIT }),
       ])
       grades.value = gradeRes.data.data ?? []
       classrooms.value = classroomRes.data.data ?? []
-      occupations.value = occupationRes.data.data ?? []
     } catch (error: unknown) {
       toast.error(
         getIndonesianErrorMessage(error, 'Gagal memuat data pilihan.'),
       )
     }
   })
+
+  /**
+   * Occupations belong to step 4 and were loaded at step 1, for every person
+   * who opened this form and every person who abandoned it at step 1.
+   *
+   * Held for the session once fetched — an occupation list does not change
+   * while someone is signed in — so reaching step 4 a second time, in this
+   * wizard or anywhere else, costs nothing.
+   */
+  watch(
+    activeStep,
+    (step) => {
+      if (step < 4 || occupations.value.length > 0) return
+      void useReferenceList()
+        .read('occupations', async () => {
+          const res = await occupationApi.getOccupations({
+            limit: PAGINATION.REFERENCE_LIMIT,
+          })
+          return res.data.data ?? []
+        })
+        .then((list) => {
+          occupations.value = list
+        })
+        .catch((error: unknown) => {
+          toast.error(
+            getIndonesianErrorMessage(error, 'Gagal memuat data pekerjaan.'),
+          )
+        })
+    },
+    { immediate: true },
+  )
 
   // Callers address fields by a runtime string, while vee-validate types the path
   // as a union of the known schema keys, which a plain string cannot satisfy.

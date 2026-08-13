@@ -52,11 +52,15 @@ export const teacherService = {
   fetchPositions: async () => {
     const store = useTeacherStore()
     try {
-      const res = await teacherApi.getPositions({
-        limit: PAGINATION.REFERENCE_LIMIT,
-        isActive: true,
+      // Same key and parameters as the create wizard's step 4, so whichever
+      // opens first pays for both.
+      store.positions = await useReferenceList().read('positions', async () => {
+        const res = await teacherApi.getPositions({
+          limit: PAGINATION.REFERENCE_LIMIT,
+          isActive: true,
+        })
+        return res.data.data
       })
-      store.positions = res.data.data
     } catch (error: unknown) {
       toast.error(
         getIndonesianErrorMessage(error, 'Gagal memuat data jabatan.'),
@@ -67,10 +71,15 @@ export const teacherService = {
   fetchPositionCategories: async () => {
     const store = useTeacherStore()
     try {
-      const res = await positionCategoryApi.getPositionCategories({
-        limit: PAGINATION.REFERENCE_LIMIT,
-      })
-      store.positionCategories = res.data.data
+      store.positionCategories = await useReferenceList().read(
+        'positionCategories',
+        async () => {
+          const res = await positionCategoryApi.getPositionCategories({
+            limit: PAGINATION.REFERENCE_LIMIT,
+          })
+          return res.data.data
+        },
+      )
     } catch (error: unknown) {
       toast.error(
         getIndonesianErrorMessage(error, 'Gagal memuat kategori jabatan.'),
