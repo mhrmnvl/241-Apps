@@ -1,5 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Prisma, StudentGraduation, StudentStatus } from '@prisma/client';
+import {
+  EnrollmentStatus,
+  Prisma,
+  StudentGraduation,
+  StudentStatus,
+} from '@prisma/client';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
 import type {
   StudentGraduationQueryInput,
@@ -111,6 +116,25 @@ export class PrismaGraduationRepository extends IGraduationRepository {
       await tx.student.update({
         where: { id: dto.studentId },
         data: { status: StudentStatus.GRADUATED },
+      });
+
+      // Closing the enrolment is part of graduating, not a separate errand.
+      //
+      // This path used to create the record and mark the student, and leave the
+      // enrolment open — so an alumnus stayed on their old class roster, and in
+      // its attendance and grading lists, indefinitely. The promotion flow's own
+      // graduation step always closed it; the two only differed because nothing
+      // made them agree.
+      await tx.studentEnrollment.updateMany({
+        where: {
+          studentId: dto.studentId,
+          status: EnrollmentStatus.ACTIVE,
+          deletedAt: null,
+        },
+        data: {
+          status: EnrollmentStatus.GRADUATED,
+          endedAt: new Date(),
+        },
       });
 
       return graduation;
