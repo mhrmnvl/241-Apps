@@ -11,8 +11,11 @@ name: Setup VPS SSH Key
 # to grant while the two share a box, and calling the key `241-dev-agent` would
 # have implied a boundary that does not exist.
 #
-# It connects with the DEV_* secrets because those are what currently describe
-# this machine, not because the access stops at dev.
+# It connects with the repository-level HOST / USERNAME / SSH_KEY, not with
+# DEV_*. Those four have existed since July and are what every successful deploy
+# has used, so this workflow needs nothing configured before it can run — which
+# matters, because GitHub secrets are write-only: copying them into an
+# environment means retyping values nobody can read back.
 #
 # The key below is public and safe to commit; the private half never leaves the
 # machine that generated it. To revoke access later, one line on the box:
@@ -27,32 +30,31 @@ permissions:
 jobs:
   setup:
     runs-on: ubuntu-latest
-    environment: development
 
     steps:
       - name: Verify VPS secrets are configured
         env:
-          DEV_HOST: ${{ secrets.DEV_HOST }}
-          DEV_USERNAME: ${{ secrets.DEV_USERNAME }}
-          DEV_SSH_KEY: ${{ secrets.DEV_SSH_KEY }}
+          HOST: ${{ secrets.HOST }}
+          USERNAME: ${{ secrets.USERNAME }}
+          SSH_KEY: ${{ secrets.SSH_KEY }}
         run: |
           missing=""
-          [ -z "$DEV_HOST" ] && missing="$missing DEV_HOST"
-          [ -z "$DEV_USERNAME" ] && missing="$missing DEV_USERNAME"
-          [ -z "$DEV_SSH_KEY" ] && missing="$missing DEV_SSH_KEY"
+          [ -z "$HOST" ] && missing="$missing HOST"
+          [ -z "$USERNAME" ] && missing="$missing USERNAME"
+          [ -z "$SSH_KEY" ] && missing="$missing SSH_KEY"
           if [ -n "$missing" ]; then
-            echo "Missing secrets in the 'development' environment:$missing"
-            echo "Set them under Settings → Environments → development."
+            echo "Missing repository secrets:$missing"
+            echo "Set them under Settings → Secrets and variables → Actions."
             exit 1
           fi
 
       - name: Install SSH public key
         uses: appleboy/ssh-action@v1
         with:
-          host: ${{ secrets.DEV_HOST }}
-          username: ${{ secrets.DEV_USERNAME }}
-          key: ${{ secrets.DEV_SSH_KEY }}
-          port: ${{ secrets.DEV_PORT || 22 }}
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.PORT || 22 }}
           version: 1.8.2
           timeout: 60s
           script_stop: true
