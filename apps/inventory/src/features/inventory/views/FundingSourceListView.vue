@@ -7,15 +7,14 @@ import { Card, CardHeader, CardTitle } from '@/ui/card'
 import { Input } from '@/ui/input'
 import { Plus, Search } from 'lucide-vue-next'
 import { h } from 'vue'
-import { toast } from 'vue-sonner'
-import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
 import { useRoleGuard } from '@/features/platform/auth'
-import { inventoryApi } from '../api/inventoryApi'
+import { inventoryReferenceCrud } from '../services/inventoryReferenceCrudService'
 import FundingSourceFormDialog from '../components/FundingSourceFormDialog.vue'
 import type { ColumnDef } from '@tanstack/vue-table'
 import type { InventoryReferenceItem } from '../types'
 
 const { can } = useRoleGuard()
+const reference = inventoryReferenceCrud('funding-sources')
 
 // State
 const dataItems = ref<InventoryReferenceItem[]>([])
@@ -72,17 +71,8 @@ const columns = computed<ColumnDef<InventoryReferenceItem>[]>(() => {
 // Fetch logic
 async function fetchFundingSources() {
   loading.value = true
-  try {
-    const response = await inventoryApi.getReferences(
-      'funding-sources',
-      searchQuery.value.trim() ? searchQuery.value.trim() : undefined,
-    )
-    dataItems.value = response.data.data ?? []
-  } catch (e) {
-    toast.error(getIndonesianErrorMessage(e, 'Gagal memuat data sumber dana.'))
-  } finally {
-    loading.value = false
-  }
+  dataItems.value = await reference.list(searchQuery.value)
+  loading.value = false
 }
 
 // Save logic
@@ -90,27 +80,11 @@ async function handleSaveFundingSource(
   payload: Omit<InventoryReferenceItem, 'id'>,
 ) {
   isSaving.value = true
-  try {
-    if (selectedItem.value) {
-      await inventoryApi.updateReference(
-        'funding-sources',
-        selectedItem.value.id,
-        payload,
-      )
-      toast.success('Data sumber dana berhasil diperbarui.')
-    } else {
-      await inventoryApi.createReference('funding-sources', payload)
-      toast.success('Sumber dana baru berhasil ditambahkan.')
-    }
-    isFormOpen.value = false
-    await fetchFundingSources()
-  } catch (e) {
-    toast.error(
-      getIndonesianErrorMessage(e, 'Gagal menyimpan data sumber dana.'),
-    )
-  } finally {
-    isSaving.value = false
-  }
+  const saved = await reference.save(selectedItem.value?.id ?? null, payload)
+  isSaving.value = false
+  if (!saved) return
+  isFormOpen.value = false
+  await fetchFundingSources()
 }
 
 // Delete logic
@@ -118,15 +92,7 @@ async function handleDeleteItem(id: string) {
   if (!confirm('Apakah Anda yakin ingin menghapus data sumber dana ini?'))
     return
 
-  try {
-    await inventoryApi.deleteReference('funding-sources', id)
-    toast.success('Data sumber dana berhasil dihapus.')
-    await fetchFundingSources()
-  } catch (e) {
-    toast.error(
-      getIndonesianErrorMessage(e, 'Gagal menghapus data sumber dana.'),
-    )
-  }
+  if (await reference.remove(id)) await fetchFundingSources()
 }
 
 // Modal Form Triggering

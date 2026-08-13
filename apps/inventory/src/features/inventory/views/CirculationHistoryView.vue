@@ -3,7 +3,6 @@ import { onMounted, ref } from 'vue'
 import { DataTable, Badge } from '@/ui'
 import { Card, CardHeader, CardTitle, CardContent } from '@/ui/card'
 import { toast } from 'vue-sonner'
-import { inventoryApi } from '../api/inventoryApi'
 import type { ColumnDef } from '@tanstack/vue-table'
 import { h } from 'vue'
 import type {
@@ -13,6 +12,8 @@ import type {
   InventoryCondition,
 } from '../types'
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
+import { inventoryReferenceService } from '../services/inventoryReferenceService'
+import { loanService } from '../services/loanService'
 
 // State
 const histories = ref<InventoryHistory[]>([])
@@ -22,12 +23,12 @@ const metadata = ref<InventoryMetadata | null>(null)
 async function loadData() {
   loading.value = true
   try {
-    const [metaRes, historyRes] = await Promise.all([
-      inventoryApi.getInventoryMetadata(),
-      inventoryApi.getHistories({ limit: 100, page: 1 }),
+    const [meta, historyRes] = await Promise.all([
+      inventoryReferenceService.fetchMetadata(),
+      loanService.listHistories(),
     ])
-    metadata.value = metaRes.data?.data ?? null
-    histories.value = historyRes.data?.data ?? []
+    metadata.value = meta
+    histories.value = historyRes
   } catch (error) {
     toast.error(
       getIndonesianErrorMessage(error, 'Gagal memuat riwayat sirkulasi.'),

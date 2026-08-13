@@ -4,8 +4,6 @@ import { useRouter, useRoute } from 'vue-router'
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/card'
 import { DataTable } from '@/ui'
 import { toast } from 'vue-sonner'
-import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
-import { inventoryApi } from '../api/inventoryApi'
 import type {
   InventoryAsset,
   InventoryAssetUnit,
@@ -37,6 +35,7 @@ import {
 } from '@/ui/dialog'
 import { ChevronLeft, Plus, Printer } from 'lucide-vue-next'
 import { inventoryReferenceService } from '../services/inventoryReferenceService'
+import { assetService } from '../services/assetService'
 
 const router = useRouter()
 const route = useRoute()
@@ -56,15 +55,15 @@ const metadata = ref<InventoryMetadata>({
 
 async function loadMetadataAndAsset() {
   try {
-    const [meta, assetRes] = await Promise.all([
+    const [meta, fetched] = await Promise.all([
       inventoryReferenceService.fetchMetadata(),
-      inventoryApi.getAssetById(assetId),
+      assetService.fetchOne(assetId),
     ])
     if (meta) {
       metadata.value = meta
     }
-    if (assetRes.data?.data) {
-      asset.value = assetRes.data.data
+    if (fetched) {
+      asset.value = fetched
     }
   } catch {
     toast.error('Gagal memuat detail data aset.')
@@ -79,25 +78,9 @@ onMounted(() => {
 
 async function handleSave(payload: AssetSavePayload) {
   isSaving.value = true
-  try {
-    // Parent/catalog fields only; per-unit fields are managed per unit.
-    await inventoryApi.updateAsset(assetId, {
-      name: payload.name,
-      categoryId: payload.categoryId,
-      brand: payload.brand,
-      model: payload.model,
-      purchaseDate: payload.purchaseDate,
-      purchasePrice: payload.purchasePrice,
-      fundingSourceId: payload.fundingSourceId,
-      notes: payload.notes,
-    })
-    toast.success('Detail data aset berhasil diperbarui.')
-    void router.push({ name: 'inventory-assets' })
-  } catch (e) {
-    toast.error(getIndonesianErrorMessage(e, 'Gagal memperbarui data aset.'))
-  } finally {
-    isSaving.value = false
-  }
+  const updated = await assetService.update(assetId, payload)
+  isSaving.value = false
+  if (updated) void router.push({ name: 'inventory-assets' })
 }
 
 function handleCancel() {
@@ -108,8 +91,8 @@ const isUnitSaving = ref(false)
 
 async function reloadAsset() {
   try {
-    const res = await inventoryApi.getAssetById(assetId)
-    if (res.data?.data) asset.value = res.data.data
+    const fresh = await assetService.fetchOne(assetId)
+    if (fresh) asset.value = fresh
   } catch {
     // non-blocking
   }
@@ -122,33 +105,20 @@ async function addOneUnit() {
     return
   }
   isUnitSaving.value = true
-  try {
-    await inventoryApi.addUnits(assetId, {
-      quantity: 1,
-      conditionId: first.conditionId,
-      statusId: first.statusId,
-      locationId: first.locationId,
-    })
-    toast.success('Unit baru berhasil ditambahkan.')
-    await reloadAsset()
-  } catch (e) {
-    toast.error(getIndonesianErrorMessage(e, 'Gagal menambah unit.'))
-  } finally {
-    isUnitSaving.value = false
-  }
+  const added = await assetService.addUnit(assetId, {
+    conditionId: first.conditionId,
+    statusId: first.statusId,
+    locationId: first.locationId,
+  })
+  isUnitSaving.value = false
+  if (added) await reloadAsset()
 }
 
 async function removeUnit(unitId: string) {
   isUnitSaving.value = true
-  try {
-    await inventoryApi.deleteAssetUnit(unitId)
-    toast.success('Unit berhasil dihapus.')
-    await reloadAsset()
-  } catch (e) {
-    toast.error(getIndonesianErrorMessage(e, 'Gagal menghapus unit.'))
-  } finally {
-    isUnitSaving.value = false
-  }
+  const removed = await assetService.removeUnit(unitId)
+  isUnitSaving.value = false
+  if (removed) await reloadAsset()
 }
 
 const isUnitEditOpen = ref(false)
@@ -174,22 +144,17 @@ function openEditUnit(u: InventoryAssetUnit) {
 async function saveUnit() {
   if (!editingUnitId.value) return
   isUnitSaving.value = true
-  try {
-    await inventoryApi.updateAssetUnit(editingUnitId.value, {
-      conditionId: unitForm.conditionId,
-      statusId: unitForm.statusId,
-      locationId: unitForm.locationId,
-      barcode: unitForm.barcode || undefined,
-      notes: unitForm.notes || undefined,
-    })
-    toast.success('Unit berhasil diperbarui.')
-    isUnitEditOpen.value = false
-    await reloadAsset()
-  } catch (e) {
-    toast.error(getIndonesianErrorMessage(e, 'Gagal memperbarui unit.'))
-  } finally {
-    isUnitSaving.value = false
-  }
+  const saved = await assetService.updateUnit(editingUnitId.value, {
+    conditionId: unitForm.conditionId,
+    statusId: unitForm.statusId,
+    locationId: unitForm.locationId,
+    barcode: unitForm.barcode || undefined,
+    notes: unitForm.notes || undefined,
+  })
+  isUnitSaving.value = false
+  if (!saved) return
+  isUnitEditOpen.value = false
+  await reloadAsset()
 }
 
 const labelSheetRef = ref<{ print: () => Promise<void> } | null>(null)

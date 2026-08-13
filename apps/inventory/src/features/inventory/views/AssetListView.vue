@@ -25,7 +25,6 @@ import { Plus, Search, Filter } from 'lucide-vue-next'
 import { toast } from 'vue-sonner'
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
 import { useRoleGuard } from '@/features/platform/auth'
-import { inventoryApi } from '../api/inventoryApi'
 import type {
   InventoryAsset,
   InventoryMetadata,
@@ -33,6 +32,7 @@ import type {
 } from '../types'
 import { createColumns } from '../components/columns'
 import { inventoryReferenceService } from '../services/inventoryReferenceService'
+import { assetService } from '../services/assetService'
 
 const { can } = useRoleGuard()
 const router = useRouter()
@@ -95,12 +95,10 @@ const tableColumns = computed(() =>
     onDelete: async (asset, { closeAlert, setLoading }) => {
       setLoading(true)
       try {
-        await inventoryApi.deleteAsset(asset.id)
-        toast.success(`Aset "${asset.name}" berhasil dihapus.`)
-        await fetchAssets()
-        closeAlert()
-      } catch (e: unknown) {
-        toast.error(getIndonesianErrorMessage(e, 'Gagal menghapus data aset.'))
+        if (await assetService.remove(asset.id)) {
+          await fetchAssets()
+          closeAlert()
+        }
       } finally {
         setLoading(false)
       }
@@ -133,11 +131,7 @@ async function fetchAssets() {
           : undefined,
     }
 
-    const response = await inventoryApi.getAssets(params)
-    const envelope = response.data
-    assets.value = envelope.data ?? []
-  } catch (e) {
-    toast.error(getIndonesianErrorMessage(e, 'Gagal memuat data aset.'))
+    assets.value = (await assetService.list(params)).items
   } finally {
     loading.value = false
   }

@@ -15,10 +15,10 @@ import {
 } from '@/ui/dialog'
 import { toast } from 'vue-sonner'
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
-import { inventoryApi } from '../api/inventoryApi'
 import type { ColumnDef } from '@tanstack/vue-table'
 import { h } from 'vue'
 import { Check, X } from 'lucide-vue-next'
+import { approvalService } from '../services/approvalService'
 import type {
   ApprovalInstance,
   ApprovalStep,
@@ -40,8 +40,7 @@ const actionForm = ref({
 async function loadApprovals() {
   loading.value = true
   try {
-    const res = await inventoryApi.getPendingApprovals()
-    pendingApprovals.value = res.data?.data ?? []
+    pendingApprovals.value = await approvalService.listPending()
   } catch (e) {
     toast.error(
       getIndonesianErrorMessage(
@@ -64,17 +63,15 @@ async function processApproval(action: 'APPROVE' | 'REJECT') {
   if (!selectedApproval.value) return
   isSubmitting.value = true
   try {
-    await inventoryApi.processApproval(selectedApproval.value.id, {
+    const ok = await approvalService.process(
+      selectedApproval.value.id,
       action,
-      note: actionForm.value.note,
-    })
-    toast.success(
-      action === 'APPROVE'
-        ? 'Pengajuan berhasil disetujui.'
-        : 'Pengajuan berhasil ditolak.',
+      actionForm.value.note,
     )
-    isActionOpen.value = false
-    await loadApprovals()
+    if (ok) {
+      isActionOpen.value = false
+      await loadApprovals()
+    }
   } catch (e) {
     toast.error(getIndonesianErrorMessage(e, 'Gagal memproses persetujuan.'))
   } finally {

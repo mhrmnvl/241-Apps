@@ -7,15 +7,14 @@ import { Card, CardHeader, CardTitle } from '@/ui/card'
 import { Input } from '@/ui/input'
 import { Plus, Search } from 'lucide-vue-next'
 import { h } from 'vue'
-import { toast } from 'vue-sonner'
-import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
 import { useRoleGuard } from '@/features/platform/auth'
-import { inventoryApi } from '../api/inventoryApi'
+import { inventoryReferenceCrud } from '../services/inventoryReferenceCrudService'
 import LocationFormDialog from '../components/LocationFormDialog.vue'
 import type { ColumnDef } from '@tanstack/vue-table'
 import type { InventoryReferenceItem } from '../types'
 
 const { can } = useRoleGuard()
+const reference = inventoryReferenceCrud('locations')
 
 // State
 const dataItems = ref<InventoryReferenceItem[]>([])
@@ -82,54 +81,25 @@ const columns = computed<ColumnDef<InventoryReferenceItem>[]>(() => {
 // Fetch logic
 async function fetchLocations() {
   loading.value = true
-  try {
-    const response = await inventoryApi.getReferences(
-      'locations',
-      searchQuery.value.trim() ? searchQuery.value.trim() : undefined,
-    )
-    dataItems.value = response.data.data ?? []
-  } catch (e) {
-    toast.error(getIndonesianErrorMessage(e, 'Gagal memuat data lokasi.'))
-  } finally {
-    loading.value = false
-  }
+  dataItems.value = await reference.list(searchQuery.value)
+  loading.value = false
 }
 
 // Save logic
 async function handleSaveLocation(payload: Omit<InventoryReferenceItem, 'id'>) {
   isSaving.value = true
-  try {
-    if (selectedItem.value) {
-      await inventoryApi.updateReference(
-        'locations',
-        selectedItem.value.id,
-        payload,
-      )
-      toast.success('Data lokasi berhasil diperbarui.')
-    } else {
-      await inventoryApi.createReference('locations', payload)
-      toast.success('Lokasi baru berhasil ditambahkan.')
-    }
-    isFormOpen.value = false
-    await fetchLocations()
-  } catch (e) {
-    toast.error(getIndonesianErrorMessage(e, 'Gagal menyimpan data lokasi.'))
-  } finally {
-    isSaving.value = false
-  }
+  const saved = await reference.save(selectedItem.value?.id ?? null, payload)
+  isSaving.value = false
+  if (!saved) return
+  isFormOpen.value = false
+  await fetchLocations()
 }
 
 // Delete logic
 async function handleDeleteItem(id: string) {
   if (!confirm('Apakah Anda yakin ingin menghapus data lokasi ini?')) return
 
-  try {
-    await inventoryApi.deleteReference('locations', id)
-    toast.success('Data lokasi berhasil dihapus.')
-    await fetchLocations()
-  } catch (e) {
-    toast.error(getIndonesianErrorMessage(e, 'Gagal menghapus data lokasi.'))
-  }
+  if (await reference.remove(id)) await fetchLocations()
 }
 
 // Modal Form Triggering

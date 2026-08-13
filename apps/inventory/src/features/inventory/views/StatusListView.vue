@@ -8,15 +8,14 @@ import { Input } from '@/ui/input'
 import { Badge } from '@/ui/badge'
 import { Plus, Search } from 'lucide-vue-next'
 import { h } from 'vue'
-import { toast } from 'vue-sonner'
-import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
 import { useRoleGuard } from '@/features/platform/auth'
-import { inventoryApi } from '../api/inventoryApi'
+import { inventoryReferenceCrud } from '../services/inventoryReferenceCrudService'
 import StatusFormDialog from '../components/StatusFormDialog.vue'
 import type { ColumnDef } from '@tanstack/vue-table'
 import type { InventoryReferenceItem, InventoryStatusKey } from '../types'
 
 const { can } = useRoleGuard()
+const reference = inventoryReferenceCrud('statuses')
 
 const SYSTEM_KEY_LABELS: Record<InventoryStatusKey, string> = {
   AVAILABLE: 'Tersedia',
@@ -98,58 +97,25 @@ const columns = computed<ColumnDef<InventoryReferenceItem>[]>(() => {
 // Fetch logic
 async function fetchStatuses() {
   loading.value = true
-  try {
-    const response = await inventoryApi.getReferences(
-      'statuses',
-      searchQuery.value.trim() ? searchQuery.value.trim() : undefined,
-    )
-    dataItems.value = response.data.data ?? []
-  } catch (e) {
-    toast.error(getIndonesianErrorMessage(e, 'Gagal memuat data status aset.'))
-  } finally {
-    loading.value = false
-  }
+  dataItems.value = await reference.list(searchQuery.value)
+  loading.value = false
 }
 
 // Save logic
 async function handleSaveStatus(payload: Omit<InventoryReferenceItem, 'id'>) {
   isSaving.value = true
-  try {
-    if (selectedItem.value) {
-      await inventoryApi.updateReference(
-        'statuses',
-        selectedItem.value.id,
-        payload,
-      )
-      toast.success('Data status aset berhasil diperbarui.')
-    } else {
-      await inventoryApi.createReference('statuses', payload)
-      toast.success('Status aset baru berhasil ditambahkan.')
-    }
-    isFormOpen.value = false
-    await fetchStatuses()
-  } catch (e) {
-    toast.error(
-      getIndonesianErrorMessage(e, 'Gagal menyimpan data status aset.'),
-    )
-  } finally {
-    isSaving.value = false
-  }
+  const saved = await reference.save(selectedItem.value?.id ?? null, payload)
+  isSaving.value = false
+  if (!saved) return
+  isFormOpen.value = false
+  await fetchStatuses()
 }
 
 // Delete logic
 async function handleDeleteItem(id: string) {
   if (!confirm('Apakah Anda yakin ingin menghapus data status ini?')) return
 
-  try {
-    await inventoryApi.deleteReference('statuses', id)
-    toast.success('Data status berhasil dihapus.')
-    await fetchStatuses()
-  } catch (e) {
-    toast.error(
-      getIndonesianErrorMessage(e, 'Gagal menghapus data status aset.'),
-    )
-  }
+  if (await reference.remove(id)) await fetchStatuses()
 }
 
 // Modal Form Triggering

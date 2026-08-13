@@ -3,13 +3,12 @@ import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/card'
 import { toast } from 'vue-sonner'
-import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
-import { inventoryApi } from '../api/inventoryApi'
 import type { InventoryMetadata, AssetSavePayload } from '../types'
 import AssetForm from '../components/AssetForm.vue'
 import { Button } from '@/ui'
 import { ChevronLeft } from 'lucide-vue-next'
 import { inventoryReferenceService } from '../services/inventoryReferenceService'
+import { assetService } from '../services/assetService'
 
 const router = useRouter()
 const isSaving = ref(false)
@@ -38,15 +37,9 @@ onMounted(() => {
 
 async function handleSave(payload: AssetSavePayload) {
   isSaving.value = true
-  try {
-    await inventoryApi.createAsset(payload)
-    toast.success('Aset baru berhasil ditambahkan.')
-    void router.push({ name: 'inventory-assets' })
-  } catch (e) {
-    toast.error(getIndonesianErrorMessage(e, 'Gagal menambahkan aset baru.'))
-  } finally {
-    isSaving.value = false
-  }
+  const created = await assetService.create(payload)
+  isSaving.value = false
+  if (created) void router.push({ name: 'inventory-assets' })
 }
 
 function handleCancel() {

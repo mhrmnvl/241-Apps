@@ -9,10 +9,11 @@ import { DataTable, Badge, DatePicker } from '@/ui'
 import { ChevronLeft } from 'lucide-vue-next'
 import { toast } from 'vue-sonner'
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
-import { inventoryApi } from '../api/inventoryApi'
 import type { InventoryAssetUnit } from '../types'
 import type { ColumnDef } from '@tanstack/vue-table'
 import { h } from 'vue'
+import { assetService } from '../services/assetService'
+import { loanService } from '../services/loanService'
 
 // A selectable row = one available unit, flattened with its parent asset info.
 type LoanUnitRow = InventoryAssetUnit & {
@@ -99,11 +100,7 @@ const columns: ColumnDef<LoanUnitRow>[] = [
 async function loadAvailableUnits() {
   loadingUnits.value = true
   try {
-    const assetsRes = await inventoryApi.getAssets({
-      limit: 1000,
-      page: 1,
-    })
-    const assets = assetsRes.data?.data ?? []
+    const { items: assets } = await assetService.list({ limit: 1000, page: 1 })
     availableUnits.value = assets.flatMap((asset) =>
       (asset.units ?? [])
         .filter((u) => u.status?.allowTransactions === true)
@@ -138,14 +135,12 @@ async function handleCreateLoan() {
 
   isSubmitting.value = true
   try {
-    const unitIds = selectedUnits.value.map((u) => u.id)
-    await inventoryApi.createLoan({
+    const created = await loanService.create({
       purpose: createForm.value.purpose,
       expectedReturnDate: createForm.value.expectedReturnDate,
-      unitIds,
+      unitIds: selectedUnits.value.map((u) => u.id),
     })
-    toast.success('Pengajuan peminjaman berhasil dikirim.')
-    void router.push({ name: 'inventory-loans' })
+    if (created) void router.push({ name: 'inventory-loans' })
   } catch (error) {
     toast.error(
       getIndonesianErrorMessage(error, 'Gagal membuat pengajuan peminjaman.'),

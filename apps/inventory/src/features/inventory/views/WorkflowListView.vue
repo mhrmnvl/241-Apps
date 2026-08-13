@@ -2,11 +2,9 @@
 import { onMounted, ref } from 'vue'
 import { Badge } from '@/ui'
 import { Card, CardHeader, CardTitle, CardContent } from '@/ui/card'
-import { toast } from 'vue-sonner'
-import { inventoryApi } from '../api/inventoryApi'
 import { Shield, ArrowRight } from 'lucide-vue-next'
 import type { ApprovalWorkflow } from '../types'
-import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
+import { approvalService } from '../services/approvalService'
 
 // State
 const workflows = ref<ApprovalWorkflow[]>([])
@@ -14,16 +12,8 @@ const loading = ref(false)
 
 async function loadWorkflows() {
   loading.value = true
-  try {
-    const res = await inventoryApi.getWorkflows()
-    workflows.value = res.data?.data ?? []
-  } catch (error) {
-    toast.error(
-      getIndonesianErrorMessage(error, 'Gagal memuat alur persetujuan.'),
-    )
-  } finally {
-    loading.value = false
-  }
+  workflows.value = await approvalService.listWorkflows()
+  loading.value = false
 }
 
 onMounted(() => {
