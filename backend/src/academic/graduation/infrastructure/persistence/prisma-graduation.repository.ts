@@ -12,6 +12,12 @@ import type {
   UpdateStudentGraduationRepositoryInput,
 } from '../../domain/interfaces/graduation-repository.interface.js';
 import { IGraduationRepository } from '../../domain/interfaces/graduation-repository.interface.js';
+import type {
+  BulkGraduationInput,
+  BulkGraduationResult,
+  GraduationCandidate,
+} from '../../domain/interfaces/graduation-repository.interface.js';
+import { graduateStudentSteps } from './prisma-graduation.steps.js';
 import { PaginatedResult } from '../../../../shared/domain/interfaces/repository.interface.js';
 import {
   GRADUATION_WITH_DETAILS_INCLUDE,
@@ -100,44 +106,20 @@ export class PrismaGraduationRepository extends IGraduationRepository {
         throw new NotFoundException(`Student ${dto.studentId} not found`);
       }
 
-      const graduation = await tx.studentGraduation.create({
-        data: {
-          studentId: dto.studentId,
-          academicYearId: dto.academicYearId,
-          ...(dto.graduationDate && {
-            graduationDate: new Date(dto.graduationDate),
-          }),
-          ...(dto.certificateNo && { certificateNo: dto.certificateNo }),
-          ...(dto.note && { note: dto.note }),
-        },
+      const id = await graduateStudentSteps(tx, {
+        studentId: dto.studentId,
+        academicYearId: dto.academicYearId,
+        ...(dto.graduationDate && {
+          graduationDate: new Date(dto.graduationDate),
+        }),
+        ...(dto.certificateNo && { certificateNo: dto.certificateNo }),
+        ...(dto.note && { note: dto.note }),
+      });
+
+      return tx.studentGraduation.findUniqueOrThrow({
+        where: { id },
         include: GRADUATION_WITH_DETAILS_INCLUDE,
       });
-
-      await tx.student.update({
-        where: { id: dto.studentId },
-        data: { status: StudentStatus.GRADUATED },
-      });
-
-      // Closing the enrolment is part of graduating, not a separate errand.
-      //
-      // This path used to create the record and mark the student, and leave the
-      // enrolment open — so an alumnus stayed on their old class roster, and in
-      // its attendance and grading lists, indefinitely. The promotion flow's own
-      // graduation step always closed it; the two only differed because nothing
-      // made them agree.
-      await tx.studentEnrollment.updateMany({
-        where: {
-          studentId: dto.studentId,
-          status: EnrollmentStatus.ACTIVE,
-          deletedAt: null,
-        },
-        data: {
-          status: EnrollmentStatus.GRADUATED,
-          endedAt: new Date(),
-        },
-      });
-
-      return graduation;
     });
   }
 
@@ -160,6 +142,104 @@ export class PrismaGraduationRepository extends IGraduationRepository {
 
   async remove(id: string): Promise<StudentGraduation> {
     return this.softDelete(id);
+  }
+
+  /**
+   * Students eligible to graduate from the given semester.
+   *
+   * "Final grade" is the highest level among the classrooms of that semester's
+   * academic year — the same rule the promotion recommendation uses to decide
+   * who it must leave out, so the two cannot disagree about who is in the last
+   * year. Anyone already holding a graduation record is filtered out here so
+   * the screen never offers a student it would then skip.
+   */
+  async findCandidates(semesterId: string): Promise<GraduationCandidate[]> {
+    const semester = await this.prisma.semester.findFirst({
+      where: { id: semesterId, deletedAt: null },
+      select: { academicYearId: true },
+    });
+    if (!semester) return [];
+
+    const levels = await this.prisma.classroom.findMany({
+      where: { academicYearId: semester.academicYearId, deletedAt: null },
+      select: { grade: { select: { level: true } } },
+    });
+    if (levels.length === 0) return [];
+    const finalLevel = Math.max(...levels.map((c) => c.grade.level));
+
+    const enrollments = await this.prisma.studentEnrollment.findMany({
+      where: {
+        semesterId,
+        status: EnrollmentStatus.ACTIVE,
+        deletedAt: null,
+        student: {
+          status: StudentStatus.ACTIVE,
+          deletedAt: null,
+          // A soft-deleted graduation does not count: a record that was
+          // withdrawn must let the student appear as a candidate again.
+          graduations: { none: { deletedAt: null } },
+        },
+        classroom: { grade: { level: finalLevel }, deletedAt: null },
+      },
+      select: {
+        studentId: true,
+        classroom: {
+          select: { id: true, code: true, grade: { select: { name: true } } },
+        },
+        student: {
+          select: {
+            nis: true,
+            user: { select: { profile: { select: { name: true } } } },
+          },
+        },
+      },
+      orderBy: { student: { nis: 'asc' } },
+    });
+
+    return enrollments.map((e) => ({
+      studentId: e.studentId,
+      studentName: e.student.user?.profile?.name ?? '-',
+      nis: e.student.nis,
+      classroomId: e.classroom.id,
+      classroomName: e.classroom.code,
+      gradeName: e.classroom.grade.name,
+    }));
+  }
+
+  /**
+   * One transaction for the whole cohort: a run that half-graduated a year
+   * would leave the school unable to tell which half.
+   */
+  async executeBulk(input: BulkGraduationInput): Promise<BulkGraduationResult> {
+    return this.prisma.$transaction(async (tx) => {
+      const result: BulkGraduationResult = { graduated: 0, skipped: 0 };
+
+      for (const student of input.students) {
+        const existing = await tx.studentGraduation.findFirst({
+          where: { studentId: student.studentId, deletedAt: null },
+          select: { id: true },
+        });
+        if (existing) {
+          result.skipped++;
+          continue;
+        }
+
+        await graduateStudentSteps(tx, {
+          studentId: student.studentId,
+          academicYearId: input.academicYearId,
+          ...(input.graduationDate && {
+            graduationDate: input.graduationDate,
+          }),
+          ...(student.certificateNo && {
+            certificateNo: student.certificateNo,
+          }),
+          ...(student.note && { note: student.note }),
+        });
+        result.graduated++;
+      }
+
+      return result;
+    });
   }
 
   async softDelete(id: string): Promise<StudentGraduation> {

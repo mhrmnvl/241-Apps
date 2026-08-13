@@ -4,6 +4,8 @@ import { StudentGraduationQueryDto } from '../dto/request/student-graduation-que
 import { UpdateStudentGraduationDto } from '../dto/request/update-student-graduation.dto.js';
 import { CreateStudentGraduationUseCase } from '../use-cases/create-student-graduation.use-case.js';
 import { DeleteStudentGraduationUseCase } from '../use-cases/delete-student-graduation.use-case.js';
+import { GetGraduationCandidatesUseCase } from '../use-cases/get-graduation-candidates.use-case.js';
+import { BulkGraduateStudentsUseCase } from '../use-cases/bulk-graduate-students.use-case.js';
 import { GetStudentGraduationByIdUseCase } from '../use-cases/get-student-graduation-by-id.use-case.js';
 import { GetStudentGraduationsUseCase } from '../use-cases/get-student-graduations.use-case.js';
 import { UpdateStudentGraduationUseCase } from '../use-cases/update-student-graduation.use-case.js';
@@ -18,6 +20,8 @@ describe('GraduationController', () => {
   const mockCreate = { execute: jest.fn() };
   const mockUpdate = { execute: jest.fn() };
   const mockDelete = { execute: jest.fn() };
+  const mockCandidates = { execute: jest.fn() };
+  const mockBulk = { execute: jest.fn() };
 
   const mockUser: AuthenticatedUser = {
     id: 'usr-1',
@@ -35,6 +39,8 @@ describe('GraduationController', () => {
         { provide: CreateStudentGraduationUseCase, useValue: mockCreate },
         { provide: UpdateStudentGraduationUseCase, useValue: mockUpdate },
         { provide: DeleteStudentGraduationUseCase, useValue: mockDelete },
+        { provide: GetGraduationCandidatesUseCase, useValue: mockCandidates },
+        { provide: BulkGraduateStudentsUseCase, useValue: mockBulk },
       ],
     }).compile();
 

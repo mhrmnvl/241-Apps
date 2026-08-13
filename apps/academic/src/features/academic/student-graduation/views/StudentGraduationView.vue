@@ -7,6 +7,10 @@ import { DataTable } from '@/ui'
 import { AppCombobox } from '@/ui'
 import type { ComboboxOption } from '@/ui'
 import { Button } from '@/ui/button'
+import { GraduationCap } from 'lucide-vue-next'
+import BulkGraduationDialog from '../components/BulkGraduationDialog.vue'
+import { semesterApi } from '@/features/academic/semester'
+import { PAGINATION } from '@/shared/constants/pagination'
 import { Card, CardHeader, CardTitle } from '@/ui/card'
 import { Label } from '@/ui/label'
 import { useRoleGuard } from '@/features/platform/auth'
@@ -33,6 +37,7 @@ const {
 
 const { can } = useRoleGuard()
 const isAddModalOpen = ref(false)
+const isBulkOpen = ref(false)
 const editingItem = ref<StudentGraduation | null>(null)
 
 const academicYearFilterOptions = computed<ComboboxOption[]>(() => [
@@ -85,10 +90,37 @@ watch(selectedAcademicYearId, () => {
   void fetchStudentGraduations()
 })
 
+/**
+ * Semesters for the bulk dialog's picker. Loaded here rather than inside the
+ * dialog so opening it is instant, and left uncached: this read is filtered to
+ * the active ones, and the shared `semesters` key holds the unfiltered list.
+ */
+const semesters = ref<{ id: string; name: string; academicYearId: string }[]>(
+  [],
+)
+
 onMounted(async () => {
   selectedAcademicYearId.value = ''
   await fetchReferenceData()
   void fetchStudentGraduations()
+
+  if (!can('graduations.create')) return
+  try {
+    const res = await semesterApi.getSemesters({
+      limit: PAGINATION.REFERENCE_LIMIT,
+    })
+    // Labelled with the academic year: without it every "Genap" looks alike,
+    // and picking the wrong year graduates the wrong cohort.
+    semesters.value = (res.data.data ?? []).map((s) => ({
+      id: s.id,
+      name: `${s.type?.name === 'ODD' ? 'Ganjil' : 'Genap'}${
+        s.academicYear?.name ? ` — ${s.academicYear.name}` : ''
+      }`,
+      academicYearId: s.academicYearId,
+    }))
+  } catch {
+    // The dialog says "Semester tidak ditemukan"; the list behind it still works.
+  }
 })
 </script>
 
@@ -101,15 +133,29 @@ onMounted(async () => {
         class="flex flex-row items-center justify-between border-b px-6 py-5"
       >
         <CardTitle class="text-2xl font-bold tracking-tight">
-          Daftar Alumni
+          Kelulusan &amp; Alumni
         </CardTitle>
-        <Button
-          v-if="can('graduations.create')"
-          @click="isAddModalOpen = true"
-        >
-          <Plus class="size-4 mr-2" />
-          Tambah
-        </Button>
+        <div class="flex gap-2">
+          <!--
+            The primary action: a school graduates a year at a time, not a
+            student at a time. "Tambah" stays for the correction case.
+          -->
+          <Button
+            v-if="can('graduations.create')"
+            @click="isBulkOpen = true"
+          >
+            <GraduationCap class="size-4 mr-2" />
+            Luluskan Massal
+          </Button>
+          <Button
+            v-if="can('graduations.create')"
+            variant="outline"
+            @click="isAddModalOpen = true"
+          >
+            <Plus class="size-4 mr-2" />
+            Tambah
+          </Button>
+        </div>
       </CardHeader>
 
       <div class="p-6 space-y-4">
@@ -151,6 +197,13 @@ onMounted(async () => {
           @save="handleSave"
         />
       </div>
+
+      <BulkGraduationDialog
+        v-if="can('graduations.create')"
+        v-model:open="isBulkOpen"
+        :semesters="semesters"
+        @saved="fetchStudentGraduations"
+      />
     </Card>
   </div>
 </template>

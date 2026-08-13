@@ -17,6 +17,7 @@ import {
   ApiBearerAuth,
   ApiOperation,
   ApiParam,
+  ApiQuery,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
@@ -26,6 +27,13 @@ import { CurrentUser } from '../../../core/decorators/current-user.decorator.js'
 import type { AuthenticatedUser } from '../../../core/types/authenticated-user.type.js';
 
 import { CreateStudentGraduationDto } from '../dto/request/create-student-graduation.dto.js';
+import { BulkGraduationDto } from '../dto/request/bulk-graduation.dto.js';
+import {
+  BulkGraduationResultDto,
+  GraduationCandidateDto,
+} from '../dto/response/graduation-candidate.dto.js';
+import { GetGraduationCandidatesUseCase } from '../use-cases/get-graduation-candidates.use-case.js';
+import { BulkGraduateStudentsUseCase } from '../use-cases/bulk-graduate-students.use-case.js';
 import { StudentGraduationQueryDto } from '../dto/request/student-graduation-query.dto.js';
 import { UpdateStudentGraduationDto } from '../dto/request/update-student-graduation.dto.js';
 import { CreateStudentGraduationUseCase } from '../use-cases/create-student-graduation.use-case.js';
@@ -45,7 +53,36 @@ export class GraduationController {
     private readonly createUC: CreateStudentGraduationUseCase,
     private readonly updateUC: UpdateStudentGraduationUseCase,
     private readonly deleteUC: DeleteStudentGraduationUseCase,
+    private readonly getCandidatesUC: GetGraduationCandidatesUseCase,
+    private readonly bulkUC: BulkGraduateStudentsUseCase,
   ) {}
+
+  /**
+   * Declared before `:id` on purpose — Nest matches in order, and `candidates`
+   * would otherwise be read as a graduation id and fail as a malformed UUID.
+   */
+  @Get('candidates')
+  @RequirePermissions('graduations.read')
+  @ApiOperation({
+    summary: 'Students eligible to graduate from a semester',
+  })
+  @ApiQuery({ name: 'semesterId', format: 'uuid' })
+  @ApiResponse({ status: 200, type: [GraduationCandidateDto] })
+  async findCandidates(
+    @Query('semesterId', ParseUUIDPipe) semesterId: string,
+  ): Promise<GraduationCandidateDto[]> {
+    return this.getCandidatesUC.execute(semesterId);
+  }
+
+  @Post('bulk')
+  @RequirePermissions('graduations.create')
+  @ApiOperation({ summary: 'Graduate a cohort in one run' })
+  @ApiResponse({ status: 201, type: BulkGraduationResultDto })
+  async bulkGraduate(
+    @Body() dto: BulkGraduationDto,
+  ): Promise<BulkGraduationResultDto> {
+    return this.bulkUC.execute(dto);
+  }
 
   @Get()
   @RequirePermissions('graduations.read')
