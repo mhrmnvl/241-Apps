@@ -101,38 +101,6 @@ describe('PromoteStudentsUseCase', () => {
     );
   });
 
-  it('should graduate students successfully', async () => {
-    mockRepository.findSemesterWithAcademicYear
-      .mockResolvedValueOnce(sourceSemester)
-      .mockResolvedValueOnce(targetSemester);
-
-    mockRepository.findClassroomById.mockResolvedValueOnce(
-      makeClassroom('cls-9a', 9, 'IX', 'IX-A', 'ay-old'),
-    );
-
-    mockRepository.executePromotion.mockResolvedValue({
-      promoted: 0,
-      repeated: 0,
-      graduated: 1,
-      skipped: 0,
-    });
-
-    const dto: PromotionDto = {
-      sourceSemesterId: 'sem-src',
-      targetSemesterId: 'sem-tgt',
-      students: [
-        {
-          studentId: 'stu-1',
-          sourceClassroomId: 'cls-9a',
-          action: PromotionAction.GRADUATE,
-        },
-      ],
-    };
-
-    const result = await useCase.execute(dto);
-    expect(result.graduated).toBe(1);
-  });
-
   it('should handle repeat with decline reason', async () => {
     mockRepository.findSemesterWithAcademicYear
       .mockResolvedValueOnce(sourceSemester)
@@ -200,7 +168,8 @@ describe('PromoteStudentsUseCase', () => {
         {
           studentId: 'stu-1',
           sourceClassroomId: 'cls-1',
-          action: PromotionAction.GRADUATE,
+          targetClassroomId: 'cls-2',
+          action: PromotionAction.PROMOTE,
         },
       ],
     };
@@ -221,7 +190,8 @@ describe('PromoteStudentsUseCase', () => {
         {
           studentId: 'stu-1',
           sourceClassroomId: 'cls-1',
-          action: PromotionAction.GRADUATE,
+          targetClassroomId: 'cls-2',
+          action: PromotionAction.PROMOTE,
         },
       ],
     };
@@ -288,7 +258,12 @@ describe('PromoteStudentsUseCase', () => {
     await expect(useCase.execute(dto)).rejects.toThrow(BadRequestException);
   });
 
-  it('should throw if GRADUATE has targetClassroomId', async () => {
+  /**
+   * Replaces "GRADUATE must not carry a targetClassroomId". Graduation left
+   * this flow, and with it the one action that had no destination — so a
+   * missing target is now an error for every student in the run.
+   */
+  it('should throw if an action has no targetClassroomId', async () => {
     mockRepository.findSemesterWithAcademicYear
       .mockResolvedValueOnce(sourceSemester)
       .mockResolvedValueOnce(targetSemester);
@@ -304,8 +279,7 @@ describe('PromoteStudentsUseCase', () => {
         {
           studentId: 'stu-1',
           sourceClassroomId: 'cls-9a',
-          targetClassroomId: 'cls-8a',
-          action: PromotionAction.GRADUATE,
+          action: PromotionAction.PROMOTE,
         },
       ],
     };

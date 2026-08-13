@@ -102,39 +102,37 @@ const {
         </div>
       </div>
 
-      <div class="max-h-[60vh] overflow-y-auto">
-        <div class="px-6 py-5">
-          <TeacherProfileStep v-show="activeStep === 1" />
+      <div class="px-6 py-5">
+        <TeacherProfileStep v-show="activeStep === 1" />
 
-          <TeacherEmploymentStep
-            v-show="activeStep === 2"
-            v-model:kategori="kategori"
-            :employment-types="employmentTypes"
-            :category-options="categoryOptions"
-            :filtered-positions="filteredPositions"
-            :set-field-value="setFieldValue"
-          />
+        <TeacherEmploymentStep
+          v-show="activeStep === 2"
+          v-model:kategori="kategori"
+          :employment-types="employmentTypes"
+          :category-options="categoryOptions"
+          :filtered-positions="filteredPositions"
+          :set-field-value="setFieldValue"
+        />
 
-          <div v-if="activeStep === 3">
-            <AddressFields v-model="address" />
-          </div>
-
-          <TeacherPositionStep
-            v-if="activeStep === 4"
-            :extra-positions="extraPositions"
-            :positions="positions"
-            @add-position="addPosition"
-            @remove-position="removePosition"
-          />
-
-          <TeacherReviewStep
-            v-if="activeStep === 5"
-            :values="values"
-            :address="address"
-            :has-address="hasAddress"
-            :extra-positions="extraPositions"
-          />
+        <div v-if="activeStep === 3">
+          <AddressFields v-model="address" />
         </div>
+
+        <TeacherPositionStep
+          v-if="activeStep === 4"
+          :extra-positions="extraPositions"
+          :positions="positions"
+          @add-position="addPosition"
+          @remove-position="removePosition"
+        />
+
+        <TeacherReviewStep
+          v-if="activeStep === 5"
+          :values="values"
+          :address="address"
+          :has-address="hasAddress"
+          :extra-positions="extraPositions"
+        />
       </div>
 
       <div

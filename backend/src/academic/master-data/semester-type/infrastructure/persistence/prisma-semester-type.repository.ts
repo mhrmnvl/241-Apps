@@ -34,7 +34,8 @@ export class PrismaSemesterTypeRepository extends ISemesterTypeRepository {
         where,
         skip,
         take: limit,
-        orderBy: { name: 'asc' },
+        // By the order the terms happen, not by the spelling of their names.
+        orderBy: [{ sequence: 'asc' }, { name: 'asc' }],
       }),
       this.prisma.semesterType.count({ where }),
     ]);
@@ -56,10 +57,17 @@ export class PrismaSemesterTypeRepository extends ISemesterTypeRepository {
 
   async create(data: {
     name: string;
+    sequence?: number;
     isActive?: boolean;
   }): Promise<SemesterType> {
     return this.prisma.semesterType.create({
-      data: { name: data.name, isActive: data.isActive ?? true },
+      data: {
+        name: data.name,
+        // Omitted rather than defaulted here: the column's own default puts a
+        // new term at the end, where an unplaced one belongs.
+        ...(data.sequence !== undefined && { sequence: data.sequence }),
+        isActive: data.isActive ?? true,
+      },
     });
   }
 

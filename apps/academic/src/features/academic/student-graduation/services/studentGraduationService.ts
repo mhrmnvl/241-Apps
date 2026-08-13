@@ -5,9 +5,62 @@ import { PAGINATION } from '@/shared/constants/pagination'
 import { toast } from 'vue-sonner'
 import { studentApi } from '@/features/academic/student'
 import { academicYearApi } from '@/features/academic/academic-year'
-import type { StudentGraduationSavePayload } from '../types'
+import type {
+  BulkGraduationPayload,
+  StudentGraduationSavePayload,
+} from '../types'
 
 export const studentGraduationService = {
+  /**
+   * Students eligible to graduate from the chosen semester.
+   *
+   * The backend decides eligibility — final grade, still enrolled, no record
+   * yet — using the same "final grade" rule the promotion screen uses to decide
+   * who it must leave out, so the two cannot disagree about who is in the last
+   * year.
+   */
+  fetchCandidates: async () => {
+    const store = useStudentGraduationStore()
+    store.isLoadingCandidates = true
+    store.candidates = []
+    try {
+      const res = await studentGraduationApi.getCandidates()
+      const data = res.data.data
+      store.candidates = data?.students ?? []
+      store.graduationTerm = data?.academicYear ?? null
+      store.finalGradeName = data?.finalGradeName ?? null
+    } catch (error: unknown) {
+      toast.error(
+        getIndonesianErrorMessage(error, 'Gagal memuat calon lulusan.'),
+      )
+    } finally {
+      store.isLoadingCandidates = false
+    }
+  },
+
+  bulkGraduate: async (payload: BulkGraduationPayload) => {
+    const store = useStudentGraduationStore()
+    store.isGraduating = true
+    try {
+      const res = await studentGraduationApi.bulkGraduate(payload)
+      const result = res.data.data
+      // The skipped count is named rather than folded into the total: those
+      // students were left alone because they already had a record, and an
+      // operator who does not see that will wonder why the numbers differ.
+      toast.success(
+        result?.skipped
+          ? `${result.graduated} siswa diluluskan. ${result.skipped} dilewati karena sudah punya data kelulusan.`
+          : `${result?.graduated ?? 0} siswa berhasil diluluskan.`,
+      )
+      return { success: true, result }
+    } catch (error: unknown) {
+      toast.error(getIndonesianErrorMessage(error, 'Gagal meluluskan siswa.'))
+      return { success: false }
+    } finally {
+      store.isGraduating = false
+    }
+  },
+
   fetchReferenceData: async () => {
     const store = useStudentGraduationStore()
     try {

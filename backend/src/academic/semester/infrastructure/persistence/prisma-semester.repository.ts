@@ -48,8 +48,12 @@ export class PrismaSemesterRepository extends ISemesterRepository {
         where,
         skip,
         take: limit,
+        // Newest year first, then the terms in the order they happen —
+        // `type.name` sorted the English enum alphabetically, putting EVEN
+        // (Genap) above ODD (Ganjil) in every list.
         orderBy: [
           { academicYear: { name: 'desc' } },
+          { type: { sequence: 'asc' } },
           { type: { name: 'asc' } },
         ],
         include: SEMESTER_WITH_DETAILS_INCLUDE,

@@ -45,6 +45,18 @@ export const menuSections: MenuSection[] = [
         icon: School,
         requiredPermission: 'school-units.read',
       },
+      {
+        title: 'Pengumuman',
+        url: '/announcement',
+        icon: Megaphone,
+        requiredPermission: 'announcements.read',
+      },
+      {
+        title: 'Berkas & Dokumen',
+        url: '/files',
+        icon: FolderOpen,
+        requiredPermission: 'files.read',
+      },
     ],
   },
 
@@ -69,6 +81,35 @@ export const menuSections: MenuSection[] = [
             title: 'Semester',
             url: '/academic/semester',
             requiredPermission: 'semesters.read',
+          },
+          {
+            // `semesters.create`, matching the three endpoints behind this
+            // page. It used to ask for `graduations.read` — promotion does
+            // graduate the final year, so the intent was right, but that is a
+            // read permission on another resource and authorises nothing the
+            // page does. The route agrees with this now; before, the menu, the
+            // route and the API each required something different.
+            title: 'Kenaikan Kelas',
+            url: '/academic/semester/promotion',
+            requiredPermission: 'semesters.create',
+          },
+        ],
+      },
+      {
+        key: 'academic-calendars',
+        title: 'Kalender',
+        url: '#',
+        icon: CalendarRange,
+        items: [
+          {
+            title: 'Kalender Pendidikan',
+            url: '/academic/education-calendar',
+            requiredPermission: 'academic-calendars.read',
+          },
+          {
+            title: 'Kalender Kegiatan',
+            url: '/academic/event-calendar',
+            requiredPermission: 'events.read',
           },
         ],
       },
@@ -177,10 +218,34 @@ export const menuSections: MenuSection[] = [
         requiredPermission: 'students.read',
       },
       {
-        title: 'Daftar Alumni',
+        // Named for the act, not just its result. This is where a student is
+        // graduated now — promotion no longer does it as a side effect.
+        title: 'Kelulusan & Alumni',
         url: '/student/alumni',
         icon: GraduationCap,
         requiredPermission: 'graduations.read',
+      },
+      {
+        title: 'Prestasi Siswa',
+        url: '/achievement',
+        icon: Trophy,
+        requiredPermission: 'achievements.read',
+      },
+      {
+        title: 'Data Orang Tua',
+        url: '/data/parent',
+        icon: UserRound,
+        requiredPermission: 'parents.read',
+      },
+      {
+        // `students.read`: the endpoint behind this screen is
+        // `student-parents`, guarded by `students.*`. The menu asked for
+        // `parents.read`, so someone holding one but not the other either saw
+        // a link that denied them or missed a screen they could use.
+        title: 'Relasi Orang Tua',
+        url: '/data/parent-relation',
+        icon: Link2,
+        requiredPermission: 'students.read',
       },
     ],
   },
@@ -334,63 +399,6 @@ export const menuSections: MenuSection[] = [
             requiredPermission: 'settings.update',
           },
         ],
-      },
-    ],
-  },
-
-  // ──────────────────── COMING SOON ────────────────────
-  {
-    key: 'coming-soon',
-    label: 'Segera Hadir',
-    requiredPermission: 'announcements.read',
-    items: [
-      {
-        title: 'Pengumuman',
-        url: '/announcement',
-        icon: Megaphone,
-        requiredPermission: 'announcements.read',
-      },
-      {
-        title: 'Berkas & Dokumen',
-        url: '/files',
-        icon: FolderOpen,
-        requiredPermission: 'files.read',
-      },
-      {
-        title: 'Kenaikan Kelas',
-        url: '/academic/semester/promotion',
-        icon: GraduationCap,
-        requiredPermission: 'graduations.read',
-      },
-      {
-        title: 'Kalender Pendidikan',
-        url: '/academic/education-calendar',
-        icon: CalendarDays,
-        requiredPermission: 'academic-calendars.read',
-      },
-      {
-        title: 'Kalender Kegiatan',
-        url: '/academic/event-calendar',
-        icon: CalendarRange,
-        requiredPermission: 'events.read',
-      },
-      {
-        title: 'Data Orang Tua',
-        url: '/data/parent',
-        icon: UserRound,
-        requiredPermission: 'parents.read',
-      },
-      {
-        title: 'Relasi Orang Tua',
-        url: '/data/parent-relation',
-        icon: Link2,
-        requiredPermission: 'parents.read',
-      },
-      {
-        title: 'Prestasi Siswa',
-        url: '/achievement',
-        icon: Trophy,
-        requiredPermission: 'achievements.read',
       },
     ],
   },

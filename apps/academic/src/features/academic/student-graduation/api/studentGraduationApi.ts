@@ -4,6 +4,9 @@ import type {
 } from '@/shared/types/api'
 import api from '@/shared/utils/api'
 import type {
+  BulkGraduationPayload,
+  BulkGraduationResult,
+  GraduationCandidateList,
   StudentGraduation,
   StudentGraduationQueryParams,
   StudentGraduationSavePayload,
@@ -42,5 +45,18 @@ export const studentGraduationApi = {
 
   deleteStudentGraduation: (id: string) => {
     return api.delete(`/student-graduations/${id}`)
+  },
+
+  getCandidates: () => {
+    return api.get<ApiSingleResponse<GraduationCandidateList>>(
+      '/student-graduations/candidates',
+    )
+  },
+
+  bulkGraduate: (payload: BulkGraduationPayload) => {
+    return api.post<ApiSingleResponse<BulkGraduationResult>>(
+      '/student-graduations/bulk',
+      payload,
+    )
   },
 }

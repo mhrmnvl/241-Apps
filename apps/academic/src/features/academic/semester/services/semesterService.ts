@@ -158,9 +158,11 @@ export const semesterService = {
     const store = useSemesterStore()
     store.isLoadingRecommendations = true
     store.promotionRecommendations = []
+    store.excludedGraduatingCount = 0
     try {
       const res = await semesterApi.getPromotionRecommendation(payload)
       store.promotionRecommendations = res.data.items ?? []
+      store.excludedGraduatingCount = res.data.excludedGraduatingCount ?? 0
       return { success: true, data: res.data }
     } catch (error: unknown) {
       const msg = getIndonesianErrorMessage(

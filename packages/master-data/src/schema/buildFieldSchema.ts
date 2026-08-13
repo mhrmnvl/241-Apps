@@ -1,5 +1,9 @@
 import * as z from 'zod'
-import type { MasterDataField, MasterDataTextField } from '../types/config'
+import type {
+  MasterDataField,
+  MasterDataNumberField,
+  MasterDataTextField,
+} from '../types/config'
 
 function buildTextSchema(field: MasterDataTextField): z.ZodTypeAny {
   const base = field.maxLength
@@ -16,14 +20,35 @@ function buildTextSchema(field: MasterDataTextField): z.ZodTypeAny {
     : base.optional().default('')
 }
 
+function buildNumberSchema(field: MasterDataNumberField): z.ZodTypeAny {
+  let base = z.coerce
+    .number({ message: `${field.label} harus berupa angka.` })
+    .int(`${field.label} harus bilangan bulat.`)
+
+  if (field.min !== undefined) {
+    base = base.min(field.min, `${field.label} minimal ${field.min}.`)
+  }
+  if (field.max !== undefined) {
+    base = base.max(field.max, `${field.label} maksimal ${field.max}.`)
+  }
+
+  // Coerced, because an `<input type="number">` hands back a string. Without
+  // this the value reaches the API as text and fails validation there instead,
+  // where the message is far less useful.
+  return field.required ? base : base.optional()
+}
+
 export function buildFieldSchema(fields: MasterDataField[]) {
   const shape: Record<string, z.ZodTypeAny> = {}
 
   for (const field of fields) {
-    shape[field.key] =
-      field.kind === 'text'
-        ? buildTextSchema(field)
-        : z.boolean().default(field.default ?? true)
+    if (field.kind === 'text') {
+      shape[field.key] = buildTextSchema(field)
+    } else if (field.kind === 'number') {
+      shape[field.key] = buildNumberSchema(field)
+    } else {
+      shape[field.key] = z.boolean().default(field.default ?? true)
+    }
   }
 
   return z.object(shape)
@@ -35,7 +60,9 @@ export function buildInitialValues(
   const values: Record<string, unknown> = {}
 
   for (const field of fields) {
-    values[field.key] = field.kind === 'text' ? '' : (field.default ?? true)
+    if (field.kind === 'text') values[field.key] = ''
+    else if (field.kind === 'number') values[field.key] = field.default ?? null
+    else values[field.key] = field.default ?? true
   }
 
   return values

@@ -28,8 +28,7 @@ export class PromotionStudentDto {
   sourceClassroomId: string;
 
   @ApiPropertyOptional({
-    description:
-      'Target classroom ID in new AY. Required for PROMOTE/REPEAT, omit for GRADUATE.',
+    description: 'Target classroom ID in the new academic year. Required.',
     format: 'uuid',
   })
   @IsOptional()

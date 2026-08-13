@@ -6,6 +6,8 @@ import { DeleteStudentGraduationUseCase } from './use-cases/delete-student-gradu
 import { GetStudentGraduationByIdUseCase } from './use-cases/get-student-graduation-by-id.use-case.js';
 import { GetStudentGraduationsUseCase } from './use-cases/get-student-graduations.use-case.js';
 import { UpdateStudentGraduationUseCase } from './use-cases/update-student-graduation.use-case.js';
+import { GetGraduationCandidatesUseCase } from './use-cases/get-graduation-candidates.use-case.js';
+import { BulkGraduateStudentsUseCase } from './use-cases/bulk-graduate-students.use-case.js';
 import { IGraduationRepository } from './domain/interfaces/graduation-repository.interface.js';
 
 @Module({
@@ -20,6 +22,8 @@ import { IGraduationRepository } from './domain/interfaces/graduation-repository
     CreateStudentGraduationUseCase,
     UpdateStudentGraduationUseCase,
     DeleteStudentGraduationUseCase,
+    GetGraduationCandidatesUseCase,
+    BulkGraduateStudentsUseCase,
   ],
   exports: [IGraduationRepository],
 })

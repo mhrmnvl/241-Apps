@@ -60,3 +60,38 @@ export interface StudentGraduationColumnActions {
   canUpdate?: boolean
   canDelete?: boolean
 }
+
+/** A student the bulk screen may graduate: final grade, still enrolled. */
+export interface GraduationCandidate {
+  studentId: string
+  studentName: string
+  nis: string
+  classroomId: string
+  classroomName: string
+  gradeName: string
+}
+
+/** The year the server chose, reported so the screen shows it. */
+export interface GraduationTerm {
+  id: string
+  name: string
+}
+
+export interface GraduationCandidateList {
+  academicYear: GraduationTerm | null
+  /** Which grade counts as final this year, e.g. "IX". */
+  finalGradeName: string | null
+  students: GraduationCandidate[]
+}
+
+/** No academic year: the server takes it from the active academic year. */
+export interface BulkGraduationPayload {
+  graduationDate?: string
+  students: { studentId: string; certificateNo?: string; note?: string }[]
+}
+
+export interface BulkGraduationResult {
+  graduated: number
+  /** Already held a record — a re-run is safe and says so. */
+  skipped: number
+}

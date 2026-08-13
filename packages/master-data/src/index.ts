@@ -4,6 +4,7 @@ export type {
   MasterDataEntity,
   MasterDataField,
   MasterDataTextField,
+  MasterDataNumberField,
   MasterDataBooleanField,
   MasterDataDeleteCallbacks,
 } from './types/config'

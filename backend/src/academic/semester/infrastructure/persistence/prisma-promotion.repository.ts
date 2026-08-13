@@ -7,10 +7,7 @@ import {
   PromotionResult,
 } from '../../domain/interfaces/promotion-repository.interface.js';
 import { PromotionAction } from '../../domain/enums/promotion-action.enum.js';
-import {
-  graduateStudent,
-  moveStudentToTargetSemester,
-} from './prisma-promotion.steps.js';
+import { moveStudentToTargetSemester } from './prisma-promotion.steps.js';
 
 /** A promotion walks every student in the year; allow a generous timeout. */
 const PROMOTION_TX_OPTIONS = { maxWait: 10000, timeout: 60000 };
@@ -115,7 +112,6 @@ export class PrismaPromotionRepository implements IPromotionRepository {
       const result: PromotionResult = {
         promoted: 0,
         repeated: 0,
-        graduated: 0,
         skipped: 0,
       };
 
@@ -137,23 +133,16 @@ export class PrismaPromotionRepository implements IPromotionRepository {
           continue;
         }
 
-        if (student.action === PromotionAction.GRADUATE) {
-          await graduateStudent(
-            tx,
-            enrollment,
-            student,
-            targetSemesterId,
-            result,
-          );
-        } else {
-          await moveStudentToTargetSemester(
-            tx,
-            enrollment,
-            student,
-            targetSemesterId,
-            result,
-          );
-        }
+        // PROMOTE and REPEAT differ only in the status stamped on the closed
+        // row and which counter is bumped; both move the student into the new
+        // year. Graduation is not handled here — see Kelulusan.
+        await moveStudentToTargetSemester(
+          tx,
+          enrollment,
+          student,
+          targetSemesterId,
+          result,
+        );
       }
 
       return result;

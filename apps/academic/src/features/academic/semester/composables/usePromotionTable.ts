@@ -85,13 +85,11 @@ export function usePromotionTable(
   const summaryStats = computed(() => {
     let approved = 0
     let declined = 0
-    let graduated = 0
     for (const d of decisions.value.values()) {
-      if (d.action === 'GRADUATE' && d.approved) graduated++
-      else if (d.approved) approved++
+      if (d.approved) approved++
       else declined++
     }
-    return { approved, declined, graduated, total: decisions.value.size }
+    return { approved, declined, total: decisions.value.size }
   })
 
   function toggleSelectAll() {
@@ -169,24 +167,6 @@ export function usePromotionTable(
     emitDecisions()
   }
 
-  function toggleGraduate(studentId: string) {
-    const d = decisions.value.get(studentId)
-    if (!d) return
-
-    if (d.action === 'GRADUATE' && d.approved) {
-      openDeclineDialog(studentId)
-    } else {
-      decisions.value.set(studentId, {
-        ...d,
-        approved: true,
-        action: 'GRADUATE',
-        targetClassroomId: undefined,
-        declineReason: undefined,
-      })
-      emitDecisions()
-    }
-  }
-
   function bulkApprove() {
     for (const id of selectedIds.value) {
       approveStudent(id)
@@ -249,7 +229,6 @@ export function usePromotionTable(
     approveStudent,
     openDeclineDialog,
     confirmDecline,
-    toggleGraduate,
     bulkApprove,
     bulkDecline,
     confirmBulkDecline,

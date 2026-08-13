@@ -15,6 +15,11 @@ export function useStudentGraduation() {
     students,
     academicYears,
     selectedAcademicYearId,
+    candidates,
+    graduationTerm,
+    finalGradeName,
+    isLoadingCandidates,
+    isGraduating,
   } = storeToRefs(store)
 
   const setPage = async (page: number) => {
@@ -39,10 +44,17 @@ export function useStudentGraduation() {
     students,
     academicYears,
     selectedAcademicYearId,
+    candidates,
+    graduationTerm,
+    finalGradeName,
+    isLoadingCandidates,
+    isGraduating,
     fetchReferenceData: studentGraduationService.fetchReferenceData,
     fetchStudentGraduations: studentGraduationService.fetchStudentGraduations,
     saveStudentGraduation: studentGraduationService.saveStudentGraduation,
     deleteStudentGraduation: studentGraduationService.deleteStudentGraduation,
+    fetchCandidates: studentGraduationService.fetchCandidates,
+    bulkGraduate: studentGraduationService.bulkGraduate,
     setPage,
     setPageSize,
   }

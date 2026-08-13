@@ -20,13 +20,7 @@ import {
   SelectValue,
 } from '@/ui/select'
 import { Textarea } from '@/ui/textarea'
-import {
-  CheckCircle2,
-  Filter,
-  GraduationCap,
-  Search,
-  XCircle,
-} from 'lucide-vue-next'
+import { CheckCircle2, Filter, Search, XCircle } from 'lucide-vue-next'
 import type {
   PromotionAction,
   PromotionRecommendationItem,
@@ -65,7 +59,6 @@ const {
   getDecision,
   approveStudent,
   openDeclineDialog,
-  toggleGraduate,
   bulkApprove,
   bulkDecline,
   handleConfirmDeclineModal,
@@ -77,8 +70,6 @@ function getActionLabel(action: PromotionAction) {
       return 'Naik Kelas'
     case 'REPEAT':
       return 'Tinggal Kelas'
-    case 'GRADUATE':
-      return 'Lulus'
     default:
       return action
   }
@@ -88,8 +79,6 @@ function getActionVariant(action: PromotionAction) {
   switch (action) {
     case 'PROMOTE':
       return 'default' as const
-    case 'GRADUATE':
-      return 'secondary' as const
     case 'REPEAT':
       return 'destructive' as const
     default:
@@ -190,15 +179,7 @@ function formatScore(score?: number | null) {
           }}</strong></span
         >
       </div>
-      <div class="flex items-center gap-1.5">
-        <div class="h-2.5 w-2.5 rounded-full bg-blue-500" />
-        <span class="text-muted-foreground"
-          >Lulus:
-          <strong class="text-foreground">{{
-            summaryStats.graduated
-          }}</strong></span
-        >
-      </div>
+
       <div class="ml-auto text-muted-foreground">
         Total:
         <strong class="text-foreground">{{ summaryStats.total }}</strong> siswa
@@ -248,9 +229,6 @@ function formatScore(score?: number | null) {
             :class="{
               'bg-destructive/5':
                 getDecision(row.studentId)?.approved === false,
-              'bg-secondary/5':
-                getDecision(row.studentId)?.action === 'GRADUATE' &&
-                getDecision(row.studentId)?.approved,
             }"
           >
             <td class="p-4">
@@ -310,75 +288,42 @@ function formatScore(score?: number | null) {
               </Badge>
             </td>
             <td class="p-4 text-center">
-              <template
-                v-if="getDecision(row.studentId)?.action === 'GRADUATE'"
+              <span class="font-medium text-foreground">{{
+                row.targetClassName ?? '-'
+              }}</span>
+              <span
+                v-if="row.targetLevel"
+                class="text-muted-foreground font-normal text-xs ml-1.5 bg-muted/50 px-1.5 py-0.5 rounded-full"
+                >{{ row.targetLevel }}</span
               >
-                <div
-                  class="inline-flex items-center gap-1.5 text-muted-foreground/80 px-3 py-1.5 bg-muted/30 rounded-md border border-dashed border-muted"
-                >
-                  <GraduationCap class="h-3.5 w-3.5" />
-                  <span class="italic font-medium text-xs">Lulus</span>
-                </div>
-              </template>
-              <template v-else>
-                <span class="font-medium text-foreground">{{
-                  row.targetClassName ?? '-'
-                }}</span>
-                <span
-                  v-if="row.targetLevel"
-                  class="text-muted-foreground font-normal text-xs ml-1.5 bg-muted/50 px-1.5 py-0.5 rounded-full"
-                  >{{ row.targetLevel }}</span
-                >
-              </template>
             </td>
             <td class="p-4 text-center">
-              <template v-if="row.recommendedAction === 'GRADUATE'">
+              <div class="flex items-center justify-center gap-1.5">
                 <Button
                   size="sm"
                   :variant="
-                    getDecision(row.studentId)?.approved
-                      ? 'default'
-                      : 'destructive'
+                    getDecision(row.studentId)?.approved ? 'default' : 'ghost'
                   "
                   class="text-xs h-8 px-3"
-                  @click="toggleGraduate(row.studentId)"
+                  @click="approveStudent(row.studentId)"
                 >
-                  <GraduationCap class="size-3.5 mr-1" />
-                  {{
-                    getDecision(row.studentId)?.approved
-                      ? 'Luluskan'
-                      : 'Tidak Lulus'
-                  }}
+                  <CheckCircle2 class="size-3.5 mr-1" />
+                  Setuju
                 </Button>
-              </template>
-              <template v-else>
-                <div class="flex items-center justify-center gap-1.5">
-                  <Button
-                    size="sm"
-                    :variant="
-                      getDecision(row.studentId)?.approved ? 'default' : 'ghost'
-                    "
-                    class="text-xs h-8 px-3"
-                    @click="approveStudent(row.studentId)"
-                  >
-                    <CheckCircle2 class="size-3.5 mr-1" />
-                    Setuju
-                  </Button>
-                  <Button
-                    size="sm"
-                    :variant="
-                      getDecision(row.studentId)?.approved === false
-                        ? 'destructive'
-                        : 'ghost'
-                    "
-                    class="text-xs h-8 px-3"
-                    @click="openDeclineDialog(row.studentId)"
-                  >
-                    <XCircle class="size-3.5 mr-1" />
-                    Tolak
-                  </Button>
-                </div>
-              </template>
+                <Button
+                  size="sm"
+                  :variant="
+                    getDecision(row.studentId)?.approved === false
+                      ? 'destructive'
+                      : 'ghost'
+                  "
+                  class="text-xs h-8 px-3"
+                  @click="openDeclineDialog(row.studentId)"
+                >
+                  <XCircle class="size-3.5 mr-1" />
+                  Tolak
+                </Button>
+              </div>
             </td>
           </tr>
           <tr v-if="filteredRows.length === 0">

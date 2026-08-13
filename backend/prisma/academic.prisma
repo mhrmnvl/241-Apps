@@ -83,8 +83,18 @@ model AcademicCalendarType {
 }
 
 model SemesterType {
-  id        String    @id @default(uuid()) @db.Uuid
-  name      String    @unique @db.VarChar(50)
+  id   String @id @default(uuid()) @db.Uuid
+  name String @unique @db.VarChar(50)
+
+  /// Term order within an academic year: Ganjil is 1, Genap is 2.
+  ///
+  /// Recorded rather than derived. Ordering by `name` sorted the English enum
+  /// alphabetically — EVEN before ODD — so every list showed Genap above
+  /// Ganjil. Semester types are editable master data, so a rename or a third
+  /// type would scramble any ordering that reads the name. New types default
+  /// to the end until someone places them.
+  sequence Int @default(99)
+
   isActive  Boolean   @default(true) @map("is_active")
   deletedAt DateTime? @map("deleted_at")
 

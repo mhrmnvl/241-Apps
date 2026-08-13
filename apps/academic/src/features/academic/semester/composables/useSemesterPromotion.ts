@@ -8,6 +8,7 @@ export function useSemesterPromotion() {
     isPromoting,
     promotionPreview,
     promotionRecommendations,
+    excludedGraduatingCount,
     isLoadingRecommendations,
   } = storeToRefs(store)
 
@@ -15,6 +16,7 @@ export function useSemesterPromotion() {
     isPromoting,
     promotionPreview,
     promotionRecommendations,
+    excludedGraduatingCount,
     isLoadingRecommendations,
     fetchPromotionRecommendation: semesterService.fetchPromotionRecommendation,
     previewPromotion: semesterService.previewPromotion,

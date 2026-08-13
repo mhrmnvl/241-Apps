@@ -7,6 +7,8 @@ import { DataTable } from '@/ui'
 import { AppCombobox } from '@/ui'
 import type { ComboboxOption } from '@/ui'
 import { Button } from '@/ui/button'
+import { GraduationCap } from 'lucide-vue-next'
+import BulkGraduationDialog from '../components/BulkGraduationDialog.vue'
 import { Card, CardHeader, CardTitle } from '@/ui/card'
 import { Label } from '@/ui/label'
 import { useRoleGuard } from '@/features/platform/auth'
@@ -33,6 +35,7 @@ const {
 
 const { can } = useRoleGuard()
 const isAddModalOpen = ref(false)
+const isBulkOpen = ref(false)
 const editingItem = ref<StudentGraduation | null>(null)
 
 const academicYearFilterOptions = computed<ComboboxOption[]>(() => [
@@ -101,15 +104,29 @@ onMounted(async () => {
         class="flex flex-row items-center justify-between border-b px-6 py-5"
       >
         <CardTitle class="text-2xl font-bold tracking-tight">
-          Daftar Alumni
+          Kelulusan &amp; Alumni
         </CardTitle>
-        <Button
-          v-if="can('graduations.create')"
-          @click="isAddModalOpen = true"
-        >
-          <Plus class="size-4 mr-2" />
-          Tambah
-        </Button>
+        <div class="flex gap-2">
+          <!--
+            The primary action: a school graduates a year at a time, not a
+            student at a time. "Tambah" stays for the correction case.
+          -->
+          <Button
+            v-if="can('graduations.create')"
+            @click="isBulkOpen = true"
+          >
+            <GraduationCap class="size-4 mr-2" />
+            Luluskan Massal
+          </Button>
+          <Button
+            v-if="can('graduations.create')"
+            variant="outline"
+            @click="isAddModalOpen = true"
+          >
+            <Plus class="size-4 mr-2" />
+            Tambah
+          </Button>
+        </div>
       </CardHeader>
 
       <div class="p-6 space-y-4">
@@ -151,6 +168,12 @@ onMounted(async () => {
           @save="handleSave"
         />
       </div>
+
+      <BulkGraduationDialog
+        v-if="can('graduations.create')"
+        v-model:open="isBulkOpen"
+        @saved="fetchStudentGraduations"
+      />
     </Card>
   </div>
 </template>

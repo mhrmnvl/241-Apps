@@ -102,39 +102,37 @@ const {
         </div>
       </div>
 
-      <div class="max-h-[60vh] overflow-y-auto">
-        <div class="px-6 py-5">
-          <StudentProfileStep v-show="activeStep === 1" />
+      <div class="px-6 py-5">
+        <StudentProfileStep v-show="activeStep === 1" />
 
-          <StudentAcademicStep
-            v-show="activeStep === 2"
-            :grades="grades"
-            :filtered-classrooms="filteredClassrooms"
-            :set-field-value="setFieldValue"
-          />
+        <StudentAcademicStep
+          v-show="activeStep === 2"
+          :grades="grades"
+          :filtered-classrooms="filteredClassrooms"
+          :set-field-value="setFieldValue"
+        />
 
-          <div v-if="activeStep === 3">
-            <AddressFields v-model="address" />
-          </div>
-
-          <StudentParentStep
-            v-if="activeStep === 4"
-            :parents="parents"
-            :occupations="occupations"
-            :relation-options="relationOptions"
-            :income-options="incomeOptions"
-            @add-parent="addParent"
-            @remove-parent="removeParent"
-          />
-
-          <StudentReviewStep
-            v-if="activeStep === 5"
-            :values="values"
-            :address="address"
-            :has-address="hasAddress"
-            :parents="parents"
-          />
+        <div v-if="activeStep === 3">
+          <AddressFields v-model="address" />
         </div>
+
+        <StudentParentStep
+          v-if="activeStep === 4"
+          :parents="parents"
+          :occupations="occupations"
+          :relation-options="relationOptions"
+          :income-options="incomeOptions"
+          @add-parent="addParent"
+          @remove-parent="removeParent"
+        />
+
+        <StudentReviewStep
+          v-if="activeStep === 5"
+          :values="values"
+          :address="address"
+          :has-address="hasAddress"
+          :parents="parents"
+        />
       </div>
 
       <div

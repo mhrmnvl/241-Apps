@@ -21,7 +21,7 @@ export interface PromotionStudentPayload {
   studentId: string
   sourceClassroomId: string
   targetClassroomId?: string
-  action: 'PROMOTE' | 'REPEAT' | 'GRADUATE'
+  action: 'PROMOTE' | 'REPEAT'
   declineReason?: string
 }
 

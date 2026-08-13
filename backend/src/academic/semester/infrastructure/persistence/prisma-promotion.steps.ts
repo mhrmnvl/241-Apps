@@ -6,65 +6,22 @@ import {
 } from '../../domain/interfaces/promotion-repository.interface.js';
 
 /**
- * The two outcomes a student can have at the end of an academic year.
+ * What a promotion run does to a student: move them on, or hold them back.
  *
  * Both close the old enrolment the same way — status + `endedAt` + the decline
- * reason — and differ in what happens next: a graduate leaves the school, while
- * a promoted or repeating student gets a fresh enrolment in the new year.
- * Each step is a no-op (counted as `skipped`) when it has already been applied,
- * so a re-run cannot double-graduate or double-enrol anyone.
+ * reason — and both open a fresh one in the new year, differing only in the
+ * classroom and which counter is bumped. The step is a no-op (counted as
+ * `skipped`) when it has already been applied, so a re-run cannot double-enrol
+ * anyone.
+ *
+ * Graduating a student is no longer one of the outcomes here. It ends their
+ * time at the school rather than moving them within it, and lives under
+ * Kelulusan with its own permissions and its own record.
  */
 
 interface ActiveEnrollment {
   id: string;
   studentId: string;
-}
-
-/** Marks the student as an alumnus and records the graduation. */
-export async function graduateStudent(
-  tx: Prisma.TransactionClient,
-  enrollment: ActiveEnrollment,
-  student: StudentPromotionInput,
-  targetSemesterId: string,
-  result: PromotionResult,
-): Promise<void> {
-  const existingGraduation = await tx.studentGraduation.findUnique({
-    where: { studentId: enrollment.studentId },
-  });
-
-  if (existingGraduation) {
-    result.skipped++;
-    return;
-  }
-
-  await tx.studentEnrollment.update({
-    where: { id: enrollment.id },
-    data: {
-      status: EnrollmentStatus.GRADUATED,
-      endedAt: new Date(),
-      note: student.declineReason ?? null,
-    },
-  });
-
-  await tx.student.update({
-    where: { id: enrollment.studentId },
-    data: { status: StudentStatus.GRADUATED },
-  });
-
-  const targetSemester = await tx.semester.findFirstOrThrow({
-    where: { id: targetSemesterId },
-    select: { academicYearId: true },
-  });
-
-  await tx.studentGraduation.create({
-    data: {
-      studentId: enrollment.studentId,
-      academicYearId: targetSemester.academicYearId,
-      graduationDate: new Date(),
-    },
-  });
-
-  result.graduated++;
 }
 
 /**

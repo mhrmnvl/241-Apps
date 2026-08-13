@@ -187,7 +187,8 @@ describe('Semester Controllers', () => {
           {
             studentId: 'stu-1',
             sourceClassroomId: 'cls-1',
-            action: PromotionAction.GRADUATE,
+            targetClassroomId: 'cls-2',
+            action: PromotionAction.PROMOTE,
           },
         ],
       };
@@ -196,7 +197,6 @@ describe('Semester Controllers', () => {
         totalStudents: 0,
         promotedCount: 0,
         repeatedCount: 0,
-        graduatedCount: 0,
       });
 
       await promotionController.previewPromotion(mockUser, dto);

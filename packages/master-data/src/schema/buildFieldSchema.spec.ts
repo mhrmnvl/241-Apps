@@ -97,3 +97,70 @@ describe('omitReadOnlyOnEditFields', () => {
     expect(payload).toEqual({ code: 'ABC', name: 'ok', isActive: true })
   })
 })
+
+/**
+ * The number kind exists for ordering columns — semester terms, and whatever
+ * else turns out to have an inherent sequence. The coercion is the load-bearing
+ * part: an `<input type="number">` hands back a string, and without it the
+ * value reaches the API as text and fails validation there, where the message
+ * is far less useful.
+ */
+describe('buildFieldSchema — number fields', () => {
+  const numberFields: MasterDataField[] = [
+    {
+      key: 'sequence',
+      kind: 'number',
+      label: 'Urutan',
+      min: 1,
+      required: true,
+    },
+  ]
+
+  it('coerces the string an input element produces', () => {
+    const result = buildFieldSchema(numberFields).safeParse({ sequence: '2' })
+
+    expect(result.success).toBe(true)
+    expect(result.success && result.data.sequence).toBe(2)
+  })
+
+  it('rejects a value below the stated minimum', () => {
+    const result = buildFieldSchema(numberFields).safeParse({ sequence: 0 })
+
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects a fraction, since these are ordinal', () => {
+    const result = buildFieldSchema(numberFields).safeParse({ sequence: 1.5 })
+
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects text that is not a number', () => {
+    const result = buildFieldSchema(numberFields).safeParse({
+      sequence: 'pertama',
+    })
+
+    expect(result.success).toBe(false)
+  })
+
+  it('allows an optional number to be omitted', () => {
+    const optional: MasterDataField[] = [
+      { key: 'sequence', kind: 'number', label: 'Urutan' },
+    ]
+
+    expect(buildFieldSchema(optional).safeParse({}).success).toBe(true)
+  })
+
+  /** Null, not '' — an empty numeric input is absent, not the string nothing. */
+  it('starts a number field empty rather than at zero', () => {
+    expect(buildInitialValues(numberFields)).toEqual({ sequence: null })
+  })
+
+  it('honours a stated default', () => {
+    const withDefault: MasterDataField[] = [
+      { key: 'sequence', kind: 'number', label: 'Urutan', default: 1 },
+    ]
+
+    expect(buildInitialValues(withDefault)).toEqual({ sequence: 1 })
+  })
+})

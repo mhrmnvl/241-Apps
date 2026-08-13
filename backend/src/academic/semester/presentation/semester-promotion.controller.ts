@@ -72,7 +72,7 @@ export class SemesterPromotionController {
   @RequirePermissions('semesters.create')
   @ApiOperation({
     summary:
-      'Execute batch student promotion across academic years (PROMOTE/REPEAT/GRADUATE)',
+      'Execute batch student promotion across academic years (PROMOTE/REPEAT)',
   })
   @ApiResponse({
     status: 200,

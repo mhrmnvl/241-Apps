@@ -72,19 +72,29 @@ export class GeneratePromotionRecommendationUseCase {
     const maxLevel =
       sortedLevels.length > 0 ? sortedLevels[sortedLevels.length - 1] : null;
 
-    const items: PromotionRecommendationItemDto[] = enrollments.map(
+    // Final-year students are not promoted, and are no longer graduated from
+    // here either — that is Kelulusan's job now. They are counted so the screen
+    // can say how many were left out rather than appearing to have covered
+    // everyone.
+    const isFinalYear = (level: number) =>
+      maxLevel !== null && level >= maxLevel;
+    const graduating = enrollments.filter((e) =>
+      isFinalYear(e.classroom.grade.level),
+    );
+    const promotable = enrollments.filter(
+      (e) => !isFinalYear(e.classroom.grade.level),
+    );
+
+    const items: PromotionRecommendationItemDto[] = promotable.map(
       (enrollment) => {
         const sourceLevel = enrollment.classroom.grade.level;
-        const isGraduating = maxLevel !== null && sourceLevel >= maxLevel;
-        const recommendedAction = isGraduating
-          ? PromotionAction.GRADUATE
-          : PromotionAction.PROMOTE;
+        const recommendedAction = PromotionAction.PROMOTE;
 
         let targetClassroomId: string | undefined;
         let targetClassroomName: string | undefined;
         let targetLevel: string | undefined;
 
-        if (!isGraduating) {
+        {
           const nextLevel = getNextLevel(sourceLevel);
           if (nextLevel !== null) {
             const matchingTargets = targetClassrooms.filter(
@@ -122,6 +132,7 @@ export class GeneratePromotionRecommendationUseCase {
     return {
       items,
       totalStudents: items.length,
+      excludedGraduatingCount: graduating.length,
     };
   }
 }
