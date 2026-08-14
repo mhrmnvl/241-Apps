@@ -98,22 +98,34 @@ backend/src/
 apps/academic/src/
 ├── config/menuConfig.ts                            # four entries repointed
 └── features/academic/
-    ├── my-schedule/          # new feature folder, own api/services/views
-    ├── my-attendance/
-    ├── my-score/
-    ├── my-rapor/
+    ├── schedule/views/MyScheduleView.vue           # beside ScheduleView.vue
+    ├── attendance/views/MyAttendanceView.vue       # beside AttendanceView.vue
+    ├── student-score/views/MyScoreView.vue         # beside StudentScoreGradingView.vue
+    ├── rapor/views/MyRaporView.vue                 # beside RaporView.vue
     └── schedule/composables/useSchedule.ts         # role-name branch removed
 
 packages/platform/src/features/auth/
 └── types/session.ts                                # dead student/teacher fields removed
 ```
 
-**Structure Decision**: Each student screen becomes its own feature folder under
-`apps/academic/src/features/academic/`, matching the repository's rule of one
-domain per feature and the shape presence already uses for `MyLeaveView` and
-`MyPayslipView`. They are not added as branches inside the existing management
-features, because a screen that renders one of two audiences by condition is the
-thing this feature is removing.
+**Structure Decision**: Each student screen is a **new view inside the existing
+feature folder** for its domain, not a new feature folder.
+
+This corrects a first draft of this plan, which proposed `my-schedule/`,
+`my-rapor/` and so on. That reading was wrong on the repository's own terms:
+the rule is one *domain* per feature, and "a student's report card" is not a
+different domain from "a report card" — it is a different audience for the same
+one. Splitting by audience would put two features on one domain and duplicate
+its types and API layer.
+
+The precedent settles it. `apps/presence/src/features/presence/leave/` holds
+`LeaveApprovalView.vue` and `MyLeaveView.vue` side by side, with one `api/`,
+one `services/`, one `types/`, and a separate columns file per audience.
+`employee-attendance/` does the same with `EmployeeAttendanceView.vue`,
+`MonthlyRecapView.vue` and `MyAttendanceView.vue`. That is the shape to copy.
+
+What must stay separate is the **view**, not the folder: no screen renders one
+of two audiences by condition, which is the defect being removed.
 
 ## Delivery slices
 
