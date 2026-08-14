@@ -30,6 +30,7 @@ import { StudentScoreQueryDto } from '../dto/request/student-score-query.dto.js'
 import { StudentScoreRosterQueryDto } from '../dto/request/student-score-roster-query.dto.js';
 import { BulkUpsertStudentScoreDto } from '../dto/request/bulk-upsert-student-score.dto.js';
 import { GetStudentScoresUseCase } from '../use-cases/get-student-scores.use-case.js';
+import { GetMyStudentScoresUseCase } from '../use-cases/get-my-student-scores.use-case.js';
 import { GetStudentScoreByIdUseCase } from '../use-cases/get-student-score-by-id.use-case.js';
 import { CreateStudentScoreUseCase } from '../use-cases/create-student-score.use-case.js';
 import { UpdateStudentScoreUseCase } from '../use-cases/update-student-score.use-case.js';
@@ -44,6 +45,7 @@ import { BulkUpsertStudentScoresUseCase } from '../use-cases/bulk-upsert-student
 export class StudentScoreController {
   constructor(
     private readonly getAll: GetStudentScoresUseCase,
+    private readonly getMine: GetMyStudentScoresUseCase,
     private readonly getById: GetStudentScoreByIdUseCase,
     private readonly createUC: CreateStudentScoreUseCase,
     private readonly updateUC: UpdateStudentScoreUseCase,
@@ -60,6 +62,19 @@ export class StudentScoreController {
     @Query() q: StudentScoreQueryDto,
   ) {
     return this.getAll.execute(q);
+  }
+
+  /**
+   * Declared before `:id` so `me` is never parsed as a uuid.
+   */
+  @Get('me')
+  @RequirePermissions('student-scores.read-own')
+  @ApiOperation({ summary: 'Your own marks — no student parameter exists' })
+  async findMine(
+    @CurrentUser() user: AuthenticatedUser,
+    @Query() q: StudentScoreQueryDto,
+  ) {
+    return this.getMine.execute(q, user.id);
   }
 
   @Get('roster')

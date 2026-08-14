@@ -12,6 +12,10 @@ import { IScheduleLookupRepository } from './domain/interfaces/schedule-lookup-r
 import { ITimeSlotRepository } from './domain/interfaces/time-slot-repository.interface.js';
 
 import { GetSchedulesUseCase } from './use-cases/get-schedules.use-case.js';
+import { GetMyScheduleUseCase } from './use-cases/get-my-schedule.use-case.js';
+import { StudentModule } from '../student/student.module.js';
+import { TeacherModule } from '../teacher/teacher.module.js';
+import { EnrollmentModule } from '../enrollment/enrollment.module.js';
 import { GetScheduleByIdUseCase } from './use-cases/get-schedule-by-id.use-case.js';
 import { GetSchedulesByClassroomUseCase } from './use-cases/get-schedules-by-classroom.use-case.js';
 import { CreateScheduleUseCase } from './use-cases/create-schedule.use-case.js';
@@ -30,7 +34,16 @@ import { UpdateTimeSlotTypeUseCase } from './use-cases/update-time-slot-type.use
 import { DeleteTimeSlotTypeUseCase } from './use-cases/delete-time-slot-type.use-case.js';
 
 @Module({
-  imports: [SemesterModule, TeachingAssignmentModule, ClassroomModule],
+  imports: [
+    SemesterModule,
+    TeachingAssignmentModule,
+    ClassroomModule,
+    // The self-service read answers from the caller's own records: their
+    // enrolment for a classroom timetable, their teaching record for lessons.
+    StudentModule,
+    TeacherModule,
+    EnrollmentModule,
+  ],
   controllers: [ScheduleController, TimeSlotController],
   providers: [
     {
@@ -47,6 +60,7 @@ import { DeleteTimeSlotTypeUseCase } from './use-cases/delete-time-slot-type.use
     },
 
     GetSchedulesUseCase,
+    GetMyScheduleUseCase,
     GetScheduleByIdUseCase,
     GetSchedulesByClassroomUseCase,
     CreateScheduleUseCase,

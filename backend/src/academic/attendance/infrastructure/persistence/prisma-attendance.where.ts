@@ -13,11 +13,23 @@ export function buildAttendanceListWhere(
   query: AttendanceQueryInput,
   resolvedSemesterId?: string | null,
 ): Prisma.AttendanceWhereInput {
-  const { enrollmentId, scheduleId, classroomId, status, date } = query;
+  const { enrollmentId, scheduleId, classroomId, status, date, studentId } =
+    query;
 
   return {
     deletedAt: null,
     enrollment: {},
+    // The self-service scope goes in `AND`, not into `enrollment`, and that
+    // placement is the whole guarantee. `enrollment` is rewritten wholesale a
+    // few lines down when the caller supplies `classroomId`, so a scope merged
+    // into it would be silently dropped by a query parameter — the caller
+    // would name a classroom and receive it, in full.
+    //
+    // `AND` cannot be reached by anything the caller sends, and Prisma
+    // combines it with the `OR` below rather than replacing it.
+    ...(studentId && {
+      AND: [{ enrollment: { studentId, deletedAt: null } }],
+    }),
     ...(enrollmentId && { enrollmentId }),
     ...(scheduleId && { scheduleId }),
     ...(status && { status }),

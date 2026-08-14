@@ -6,6 +6,8 @@ import { DailyRecordModule } from '../../presence/daily-record/daily-record.modu
 import { AttendanceController } from './presentation/attendance.controller.js';
 import { PrismaAttendanceRepository } from './infrastructure/persistence/prisma-attendance.repository.js';
 import { GetAttendancesUseCase } from './use-cases/get-attendances.use-case.js';
+import { GetMyAttendancesUseCase } from './use-cases/get-my-attendances.use-case.js';
+import { StudentModule } from '../student/student.module.js';
 import { GetAttendanceByIdUseCase } from './use-cases/get-attendance-by-id.use-case.js';
 import { CreateAttendanceUseCase } from './use-cases/create-attendance.use-case.js';
 import { UpdateAttendanceUseCase } from './use-cases/update-attendance.use-case.js';
@@ -17,7 +19,7 @@ import { GetAttendanceSuggestionsUseCase } from './use-cases/get-attendance-sugg
 import { IAttendanceRepository } from './domain/interfaces/attendance-repository.interface.js';
 
 @Module({
-  imports: [EnrollmentModule, DailyRecordModule],
+  imports: [EnrollmentModule, DailyRecordModule, StudentModule],
   controllers: [AttendanceController],
   providers: [
     {
@@ -25,6 +27,7 @@ import { IAttendanceRepository } from './domain/interfaces/attendance-repository
       useClass: PrismaAttendanceRepository,
     },
     GetAttendancesUseCase,
+    GetMyAttendancesUseCase,
     GetAttendanceByIdUseCase,
     CreateAttendanceUseCase,
     UpdateAttendanceUseCase,

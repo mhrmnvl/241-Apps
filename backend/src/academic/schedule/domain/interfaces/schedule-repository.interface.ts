@@ -14,6 +14,11 @@ export interface ScheduleQueryInput extends PaginationQueryInput {
   teachingAssignmentId?: string;
   timeSlotId?: string;
   day?: DayEnum;
+  /**
+   * Every lesson one teacher gives, across their assignments. Set from the
+   * signed-in account for the self-service read, never from a query field.
+   */
+  teacherId?: string;
 }
 
 export interface CreateScheduleRepositoryInput {

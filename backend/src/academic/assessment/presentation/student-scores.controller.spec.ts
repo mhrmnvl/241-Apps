@@ -4,6 +4,7 @@ import { UpdateStudentScoreDto } from '../dto/request/update-student-score.dto.j
 import { BulkUpsertStudentScoreDto } from '../dto/request/bulk-upsert-student-score.dto.js';
 import { StudentScoreRosterQueryDto } from '../dto/request/student-score-roster-query.dto.js';
 import { GetStudentScoresUseCase } from '../use-cases/get-student-scores.use-case.js';
+import { GetMyStudentScoresUseCase } from '../use-cases/get-my-student-scores.use-case.js';
 import { GetStudentScoreByIdUseCase } from '../use-cases/get-student-score-by-id.use-case.js';
 import { CreateStudentScoreUseCase } from '../use-cases/create-student-score.use-case.js';
 import { UpdateStudentScoreUseCase } from '../use-cases/update-student-score.use-case.js';
@@ -35,6 +36,10 @@ describe('StudentScoreController', () => {
       controllers: [StudentScoreController],
       providers: [
         { provide: GetStudentScoresUseCase, useValue: mockGetAll },
+        {
+          provide: GetMyStudentScoresUseCase,
+          useValue: { execute: jest.fn() },
+        },
         { provide: GetStudentScoreByIdUseCase, useValue: mockGetById },
         { provide: CreateStudentScoreUseCase, useValue: mockCreate },
         { provide: UpdateStudentScoreUseCase, useValue: mockUpdate },

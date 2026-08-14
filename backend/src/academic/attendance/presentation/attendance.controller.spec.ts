@@ -6,6 +6,7 @@ import { UpdateAttendanceDto } from '../dto/request/update-attendance.dto.js';
 import { AttendanceRecapQueryDto } from '../dto/request/attendance-recap-query.dto.js';
 import { AttendanceTrendQueryDto } from '../dto/request/attendance-trend-query.dto.js';
 import { GetAttendancesUseCase } from '../use-cases/get-attendances.use-case.js';
+import { GetMyAttendancesUseCase } from '../use-cases/get-my-attendances.use-case.js';
 import { GetAttendanceByIdUseCase } from '../use-cases/get-attendance-by-id.use-case.js';
 import { CreateAttendanceUseCase } from '../use-cases/create-attendance.use-case.js';
 import { UpdateAttendanceUseCase } from '../use-cases/update-attendance.use-case.js';
@@ -42,6 +43,10 @@ describe('AttendanceController', () => {
       controllers: [AttendanceController],
       providers: [
         { provide: GetAttendancesUseCase, useValue: mockGetAll },
+        {
+          provide: GetMyAttendancesUseCase,
+          useValue: { execute: jest.fn() },
+        },
         { provide: GetAttendanceByIdUseCase, useValue: mockGetById },
         { provide: CreateAttendanceUseCase, useValue: mockCreate },
         { provide: UpdateAttendanceUseCase, useValue: mockUpdate },

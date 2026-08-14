@@ -30,6 +30,7 @@ import { CreateScheduleDto } from '../dto/request/create-schedule.dto.js';
 import { UpdateScheduleDto } from '../dto/request/update-schedule.dto.js';
 import { ScheduleQueryDto } from '../dto/request/schedule-query.dto.js';
 import { GetSchedulesUseCase } from '../use-cases/get-schedules.use-case.js';
+import { GetMyScheduleUseCase } from '../use-cases/get-my-schedule.use-case.js';
 import { GetScheduleByIdUseCase } from '../use-cases/get-schedule-by-id.use-case.js';
 import { GetSchedulesByClassroomUseCase } from '../use-cases/get-schedules-by-classroom.use-case.js';
 import { CreateScheduleUseCase } from '../use-cases/create-schedule.use-case.js';
@@ -44,6 +45,7 @@ import { BatchUpsertScheduleUseCase } from '../use-cases/batch-upsert-schedule.u
 export class ScheduleController {
   constructor(
     private readonly getAll: GetSchedulesUseCase,
+    private readonly getMine: GetMyScheduleUseCase,
     private readonly getById: GetScheduleByIdUseCase,
     private readonly getByClassroom: GetSchedulesByClassroomUseCase,
     private readonly createUC: CreateScheduleUseCase,
@@ -60,6 +62,20 @@ export class ScheduleController {
     @Query() q: ScheduleQueryDto,
   ) {
     return this.getAll.execute(q);
+  }
+
+  /**
+   * Declared before `:id` so `me` is never parsed as a uuid.
+   */
+  @Get('me')
+  @RequirePermissions('schedules.read-own')
+  @ApiOperation({
+    summary:
+      'Your own schedule — your classroom timetable, your teaching, or both',
+  })
+  async findMine(@CurrentUser() user: AuthenticatedUser) {
+    const data = await this.getMine.execute(user.id);
+    return { data };
   }
 
   @Get('classroom/:classroomId')

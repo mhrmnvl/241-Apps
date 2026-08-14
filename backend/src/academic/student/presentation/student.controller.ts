@@ -61,12 +61,24 @@ export class StudentController {
     private readonly toggleStudentActiveService: ToggleStudentActiveUseCase,
   ) {}
 
+  /**
+   * The roster: every student, for whoever holds `students.read`.
+   *
+   * The caller is deliberately not a parameter here, and that is the point of
+   * the permission. This route answers about the school, not about the person
+   * asking, so it is not narrowed for anyone — it is simply not granted to
+   * them. A student holds `students.read-own` and reaches their own record
+   * through `GET :id` below, which does check who is asking.
+   *
+   * It used to take `@CurrentUser() _user` and ignore it, while the student
+   * role held `students.read`. The underscore recorded that ignoring it was
+   * deliberate; what it did in practice was hand a student the whole roster.
+   */
   @Get()
   @RequirePermissions('students.read')
   @ApiOperation({ summary: 'List all students (paginated, searchable)' })
   @ApiResponse({ status: 200, type: StudentListResponseDto })
   async findAll(
-    @CurrentUser() _user: AuthenticatedUser,
     @Query() query: StudentQueryDto,
   ): Promise<PaginatedResponse<StudentWithDetails>> {
     return this.getStudentsService.execute(query);

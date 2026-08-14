@@ -29,12 +29,32 @@ export class PrismaStudentScoreRepository extends IStudentScoreRepository {
   }
 
   async findAll(query: StudentScoreQueryInput) {
-    const { page = 1, limit = 10, enrollmentId, assessmentItemId } = query;
+    const {
+      page = 1,
+      limit = 10,
+      enrollmentId,
+      assessmentItemId,
+      classroomId,
+      semesterId,
+      studentId,
+    } = query;
     const skip = (page - 1) * limit;
+
+    // `classroomId` and `semesterId` were declared on the port and dropped
+    // here, so a caller filtering by either got every score and no error. They
+    // are honoured now, alongside `studentId`, which reaches the person through
+    // the enrolment their scores hang off.
+    const enrollment: Prisma.StudentEnrollmentWhereInput = {
+      ...(classroomId && { classroomId }),
+      ...(semesterId && { semesterId }),
+      ...(studentId && { studentId }),
+    };
+
     const where: Prisma.StudentScoreWhereInput = {
       deletedAt: null,
       ...(enrollmentId && { enrollmentId }),
       ...(assessmentItemId && { assessmentItemId }),
+      ...(Object.keys(enrollment).length > 0 && { enrollment }),
     };
     const [data, total] = await Promise.all([
       this.prisma.studentScore.findMany({

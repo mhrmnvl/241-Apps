@@ -6,6 +6,7 @@ import { CreateScheduleUseCase } from '../use-cases/create-schedule.use-case.js'
 import { DeleteScheduleUseCase } from '../use-cases/delete-schedule.use-case.js';
 import { GetScheduleByIdUseCase } from '../use-cases/get-schedule-by-id.use-case.js';
 import { GetSchedulesUseCase } from '../use-cases/get-schedules.use-case.js';
+import { GetMyScheduleUseCase } from '../use-cases/get-my-schedule.use-case.js';
 import { GetSchedulesByClassroomUseCase } from '../use-cases/get-schedules-by-classroom.use-case.js';
 import { UpdateScheduleUseCase } from '../use-cases/update-schedule.use-case.js';
 import { BatchUpsertScheduleUseCase } from '../use-cases/batch-upsert-schedule.use-case.js';
@@ -35,6 +36,7 @@ describe('ScheduleController', () => {
       controllers: [ScheduleController],
       providers: [
         { provide: GetSchedulesUseCase, useValue: mockGetAll },
+        { provide: GetMyScheduleUseCase, useValue: { execute: jest.fn() } },
         { provide: GetScheduleByIdUseCase, useValue: mockGetById },
         {
           provide: GetSchedulesByClassroomUseCase,

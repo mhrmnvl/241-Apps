@@ -92,7 +92,9 @@ describe('StudentController & StudentImportExportController', () => {
       };
       mockGetStudentsService.execute.mockResolvedValue(expected);
 
-      const result = await controller.findAll(mockUser, query);
+      // No caller argument: the roster is not narrowed for anyone, it is
+      // simply not granted to a student.
+      const result = await controller.findAll(query);
 
       expect(mockGetStudentsService.execute).toHaveBeenCalledWith(query);
       expect(result).toEqual(expected);

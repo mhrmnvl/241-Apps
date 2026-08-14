@@ -21,6 +21,8 @@ import { GetAssessmentWeightsUseCase } from './use-cases/get-assessment-weights.
 import { ReplaceAssessmentWeightsUseCase } from './use-cases/replace-assessment-weights.use-case.js';
 
 import { GetStudentScoresUseCase } from './use-cases/get-student-scores.use-case.js';
+import { GetMyStudentScoresUseCase } from './use-cases/get-my-student-scores.use-case.js';
+import { StudentModule } from '../student/student.module.js';
 import { GetStudentScoreByIdUseCase } from './use-cases/get-student-score-by-id.use-case.js';
 import { CreateStudentScoreUseCase } from './use-cases/create-student-score.use-case.js';
 import { UpdateStudentScoreUseCase } from './use-cases/update-student-score.use-case.js';
@@ -29,7 +31,14 @@ import { GetStudentScoreRosterUseCase } from './use-cases/get-student-score-rost
 import { BulkUpsertStudentScoresUseCase } from './use-cases/bulk-upsert-student-scores.use-case.js';
 
 @Module({
-  imports: [TeachingAssignmentModule, SemesterModule, EnrollmentModule],
+  imports: [
+    TeachingAssignmentModule,
+    SemesterModule,
+    EnrollmentModule,
+    // For IStudentIdentityReadPort — scoping the self-service score read to
+    // the caller's own student record.
+    StudentModule,
+  ],
   controllers: [
     AssessmentItemController,
     AssessmentWeightController,
@@ -59,6 +68,7 @@ import { BulkUpsertStudentScoresUseCase } from './use-cases/bulk-upsert-student-
     ReplaceAssessmentWeightsUseCase,
 
     GetStudentScoresUseCase,
+    GetMyStudentScoresUseCase,
     GetStudentScoreByIdUseCase,
     CreateStudentScoreUseCase,
     UpdateStudentScoreUseCase,
