@@ -9,6 +9,7 @@ import type {
   InventoryMetadata,
   AssetSavePayload,
   AssetQueryParams,
+  AssetUnitQueryParams,
   AddUnitsPayload,
   AssetUnitUpdatePayload,
   InventoryReferenceItem,
@@ -66,6 +67,13 @@ export const inventoryApi = {
     return api.post<ApiSingleResponse<InventoryAssetUnit[]>>(
       `/inventory/assets/${assetId}/units`,
       payload,
+    )
+  },
+
+  getAssetUnits: (params?: AssetUnitQueryParams) => {
+    return api.get<ApiPaginatedResponse<InventoryAssetUnit>>(
+      '/inventory/asset-units',
+      { params },
     )
   },
 

@@ -14,6 +14,7 @@ import type { ColumnDef } from '@tanstack/vue-table'
 import { h } from 'vue'
 import { assetService } from '../services/assetService'
 import { loanService } from '../services/loanService'
+import { PAGINATION } from '@/shared/constants/pagination'
 
 // A selectable row = one available unit, flattened with its parent asset info.
 type LoanUnitRow = InventoryAssetUnit & {
@@ -100,16 +101,20 @@ const columns: ColumnDef<LoanUnitRow>[] = [
 async function loadAvailableUnits() {
   loadingUnits.value = true
   try {
-    const { items: assets } = await assetService.list({ limit: 1000, page: 1 })
-    availableUnits.value = assets.flatMap((asset) =>
-      (asset.units ?? [])
-        .filter((u) => u.status?.allowTransactions === true)
-        .map((u) => ({
-          ...u,
-          assetName: asset.name,
-          categoryName: asset.category?.name ?? '-',
-        })),
-    )
+    // `lendable` is the backend's rule, and the same one it enforces when the
+    // loan is submitted. This used to read a thousand assets with every unit
+    // attached and apply that rule here, which meant the browser held a second
+    // copy of it — and a unit already reserved by a pending loan was excluded
+    // only because its status happened to say so.
+    const { items } = await assetService.listUnits({
+      lendable: true,
+      limit: PAGINATION.REFERENCE_LIMIT,
+    })
+    availableUnits.value = items.map((u) => ({
+      ...u,
+      assetName: u.asset?.name ?? '-',
+      categoryName: u.asset?.category?.name ?? '-',
+    }))
   } catch (error) {
     toast.error(
       getIndonesianErrorMessage(error, 'Gagal memuat daftar unit tersedia.'),

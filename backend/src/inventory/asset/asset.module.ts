@@ -11,6 +11,7 @@ import { GetAssetByIdUseCase } from './use-cases/get-asset-by-id.use-case.js';
 import { GetAssetsUseCase } from './use-cases/get-assets.use-case.js';
 import { UpdateAssetUseCase } from './use-cases/update-asset.use-case.js';
 import { AddUnitsUseCase } from './use-cases/add-units.use-case.js';
+import { GetAssetUnitsUseCase } from './use-cases/get-asset-units.use-case.js';
 import { UpdateUnitUseCase } from './use-cases/update-unit.use-case.js';
 import { DeleteUnitUseCase } from './use-cases/delete-unit.use-case.js';
 
@@ -25,6 +26,7 @@ import { DeleteUnitUseCase } from './use-cases/delete-unit.use-case.js';
     UpdateAssetUseCase,
     DeleteAssetUseCase,
     AddUnitsUseCase,
+    GetAssetUnitsUseCase,
     UpdateUnitUseCase,
     DeleteUnitUseCase,
   ],
