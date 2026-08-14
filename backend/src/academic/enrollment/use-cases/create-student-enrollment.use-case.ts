@@ -1,35 +1,21 @@
-import {
-  BadRequestException,
-  ConflictException,
-  Injectable,
-} from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { CreateStudentEnrollmentDto } from '../dto/request/create-student-enrollment.dto.js';
 import { IEnrollmentRepository } from '../domain/interfaces/enrollment-repository.interface.js';
-import { IClassroomRepository } from '../../classroom/domain/interfaces/classroom-repository.interface.js';
+import { ClassroomCapacityService } from '../services/classroom-capacity.service.js';
 
 @Injectable()
 export class CreateStudentEnrollmentUseCase {
   constructor(
     private readonly enrollmentRepository: IEnrollmentRepository,
-    private readonly classroomRepository: IClassroomRepository,
+    private readonly classroomCapacity: ClassroomCapacityService,
   ) {}
 
   async execute(dto: CreateStudentEnrollmentDto) {
-    const classroom = await this.classroomRepository.findById(dto.classroomId);
-
-    if (classroom && classroom.capacity > 0) {
-      const activeCount =
-        await this.enrollmentRepository.countActiveByClassroomAndSemester(
-          dto.classroomId,
-          dto.semesterId,
-        );
-
-      if (activeCount >= classroom.capacity) {
-        throw new BadRequestException(
-          `Classroom capacity limit of ${classroom.capacity} reached`,
-        );
-      }
-    }
+    await this.classroomCapacity.assertRoomFor({
+      classroomId: dto.classroomId,
+      semesterId: dto.semesterId,
+      incoming: 1,
+    });
 
     const dup = await this.enrollmentRepository.findDuplicate(
       dto.studentId,
