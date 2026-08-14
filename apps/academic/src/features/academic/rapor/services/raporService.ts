@@ -41,6 +41,35 @@ export const raporService = {
     }
   },
 
+  /**
+   * The signed-in student's own report cards.
+   *
+   * Deliberately does not fall back to `fetchRapors` on failure. That call is
+   * the school-wide list, and a student holds no permission for it — but a
+   * fallback written without noticing would turn a refusal into a wider read
+   * the moment someone did hold both.
+   */
+  fetchMine: async () => {
+    const store = useRaporStore()
+    store.loading = true
+    try {
+      const res = await raporApi.getMine({
+        page: store.currentPage,
+        limit: store.pageSize,
+      })
+      store.rapors = res.data?.data ?? []
+      store.totalItems = res.data?.meta?.total ?? 0
+      store.summary = res.data?.meta?.summary ?? null
+    } catch (error: unknown) {
+      store.rapors = []
+      store.totalItems = 0
+      store.summary = null
+      toast.error(getIndonesianErrorMessage(error, 'Gagal memuat rapor Anda.'))
+    } finally {
+      store.loading = false
+    }
+  },
+
   fetchRapors: async () => {
     const store = useRaporStore()
 

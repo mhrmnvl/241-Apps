@@ -20,6 +20,17 @@ export const raporApi = {
       params,
     })
   },
+  /**
+   * The caller's own published report cards. No student parameter exists —
+   * the server resolves whose these are from the signed-in account.
+   */
+  getMine: (params?: RaporQueryParams) => {
+    return api.get<ApiPaginatedResponse<RaporData, RaporListMeta>>(
+      '/rapors/me',
+      { params },
+    )
+  },
+
   getRaporById: (id: string) => {
     return api.get<RaporData>(`/rapors/${id}`)
   },

@@ -16,6 +16,17 @@ export const studentScoreApi = {
     })
   },
 
+  /**
+   * The caller's own marks, across their enrolments. No student parameter
+   * exists — a score belongs to whoever signed in, and the server says which.
+   */
+  getMyScores: (params?: { semesterId?: string; limit?: number }) => {
+    return api.get<ApiPaginatedResponse<StudentScoreItem>>(
+      '/student-scores/me',
+      { params },
+    )
+  },
+
   getRoster: (assessmentItemId: string) => {
     return api.get<ApiSingleResponse<StudentScoreRosterResponse>>(
       '/student-scores/roster',
