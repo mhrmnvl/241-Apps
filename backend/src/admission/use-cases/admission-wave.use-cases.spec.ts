@@ -1,4 +1,8 @@
-import { ConflictException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  NotFoundException,
+} from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { IAdmissionWaveRepository } from '../domain/interfaces/admission-wave-repository.interface.js';
 import { GetAdmissionWavesUseCase } from './get-admission-waves.use-case.js';
@@ -114,6 +118,36 @@ describe('Admission Wave use-cases', () => {
       );
       expect(mockRepository.create).not.toHaveBeenCalled();
     });
+
+    /**
+     * A wave whose end precedes its start matches no date range, so it is never
+     * open and nothing says why — registration simply does not appear. The
+     * semester has always refused this; the wave did not.
+     */
+    it('refuses an end date that is not after the start date', async () => {
+      mockRepository.findByCode.mockResolvedValue(null);
+
+      await expect(
+        create.execute({
+          ...createDto,
+          startDate: '2026-02-01',
+          endDate: '2026-01-01',
+        }),
+      ).rejects.toThrow(BadRequestException);
+      expect(mockRepository.create).not.toHaveBeenCalled();
+    });
+
+    it('refuses a wave that opens and closes on the same day', async () => {
+      mockRepository.findByCode.mockResolvedValue(null);
+
+      await expect(
+        create.execute({
+          ...createDto,
+          startDate: '2026-01-01',
+          endDate: '2026-01-01',
+        }),
+      ).rejects.toThrow(BadRequestException);
+    });
   });
 
   describe('UpdateAdmissionWaveUseCase', () => {
@@ -125,6 +159,40 @@ describe('Admission Wave use-cases', () => {
         ConflictException,
       );
       expect(mockRepository.update).not.toHaveBeenCalled();
+    });
+
+    /**
+     * The case a partial update makes easy to miss: only the end date is sent,
+     * so judging it against the payload alone would find nothing to compare it
+     * with. It has to be compared against the start date already stored.
+     */
+    it('compares a lone end date against the stored start date', async () => {
+      mockRepository.findById.mockResolvedValue({
+        id: 'w1',
+        code: 'G1-2026',
+        startDate: new Date('2026-02-01'),
+        endDate: new Date('2026-03-01'),
+      });
+
+      await expect(
+        update.execute('w1', { endDate: '2026-01-15' }),
+      ).rejects.toThrow(BadRequestException);
+      expect(mockRepository.update).not.toHaveBeenCalled();
+    });
+
+    it('allows a lone end date that stays after the stored start date', async () => {
+      mockRepository.findById.mockResolvedValue({
+        id: 'w1',
+        code: 'G1-2026',
+        startDate: new Date('2026-02-01'),
+        endDate: new Date('2026-03-01'),
+      });
+      mockRepository.update.mockResolvedValue({ id: 'w1', registrationFee: 0 });
+
+      await expect(
+        update.execute('w1', { endDate: '2026-04-01' }),
+      ).resolves.toBeDefined();
+      expect(mockRepository.update).toHaveBeenCalled();
     });
   });
 
