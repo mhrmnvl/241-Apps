@@ -37,6 +37,7 @@ import { BulkGenerateReportCardsUseCase } from '../use-cases/bulk-generate-repor
 import { GenerateReportCardUseCase } from '../use-cases/generate-report-card.use-case.js';
 import { GetReportCardByIdUseCase } from '../use-cases/get-report-card-by-id.use-case.js';
 import { GetReportCardsUseCase } from '../use-cases/get-report-cards.use-case.js';
+import { GetMyReportCardsUseCase } from '../use-cases/get-my-report-cards.use-case.js';
 import { PublishReportCardUseCase } from '../use-cases/publish-report-card.use-case.js';
 import { UpdateReportCardUseCase } from '../use-cases/update-report-card.use-case.js';
 import { ExportReportCardPdfUseCase } from '../use-cases/export-report-card-pdf.use-case.js';
@@ -48,6 +49,7 @@ import { ExportReportCardPdfUseCase } from '../use-cases/export-report-card-pdf.
 export class ReportCardController {
   constructor(
     private readonly getReportCardsService: GetReportCardsUseCase,
+    private readonly getMyReportCardsService: GetMyReportCardsUseCase,
     private readonly getReportCardByIdService: GetReportCardByIdUseCase,
     private readonly generateReportCardService: GenerateReportCardUseCase,
     private readonly bulkGenerateReportCardsService: BulkGenerateReportCardsUseCase,
@@ -65,6 +67,22 @@ export class ReportCardController {
     @Query() query: ReportCardQueryDto,
   ) {
     return this.getReportCardsService.execute(query);
+  }
+
+  /**
+   * Declared before `:id` on purpose — Nest matches in registration order, and
+   * `me` would otherwise be parsed as a uuid and rejected.
+   */
+  @Get('me')
+  @RequirePermissions('report-cards.read-own')
+  @ApiOperation({
+    summary: 'Your own published report cards — no user parameter exists',
+  })
+  findMine(
+    @CurrentUser() user: AuthenticatedUser,
+    @Query() query: ReportCardQueryDto,
+  ) {
+    return this.getMyReportCardsService.execute(query, user.id);
   }
 
   @Get(':id')

@@ -7,6 +7,7 @@ import { BulkGenerateReportCardsUseCase } from '../use-cases/bulk-generate-repor
 import { GenerateReportCardUseCase } from '../use-cases/generate-report-card.use-case.js';
 import { GetReportCardByIdUseCase } from '../use-cases/get-report-card-by-id.use-case.js';
 import { GetReportCardsUseCase } from '../use-cases/get-report-cards.use-case.js';
+import { GetMyReportCardsUseCase } from '../use-cases/get-my-report-cards.use-case.js';
 import { PublishReportCardUseCase } from '../use-cases/publish-report-card.use-case.js';
 import { UpdateReportCardUseCase } from '../use-cases/update-report-card.use-case.js';
 import { ExportReportCardPdfUseCase } from '../use-cases/export-report-card-pdf.use-case.js';
@@ -22,6 +23,7 @@ describe('ReportCardController', () => {
   let controller: ReportCardController;
 
   const mockGetReportCards = { execute: jest.fn() };
+  const mockGetMyReportCards = { execute: jest.fn() };
   const mockGetReportCardById = { execute: jest.fn() };
   const mockGenerateReportCard = { execute: jest.fn() };
   const mockBulkGenerateReportCards = { execute: jest.fn() };
@@ -42,6 +44,7 @@ describe('ReportCardController', () => {
       controllers: [ReportCardController],
       providers: [
         { provide: GetReportCardsUseCase, useValue: mockGetReportCards },
+        { provide: GetMyReportCardsUseCase, useValue: mockGetMyReportCards },
         { provide: GetReportCardByIdUseCase, useValue: mockGetReportCardById },
         {
           provide: GenerateReportCardUseCase,
