@@ -9,13 +9,16 @@ import type {
   GenerateRaporPayload,
   RaporData,
   RaporDetailData,
+  RaporListMeta,
   RaporQueryParams,
   UpdateRaporPayload,
 } from '../types'
 
 export const raporApi = {
   getRapors: (params?: RaporQueryParams) => {
-    return api.get<ApiPaginatedResponse<RaporData>>('/rapors', { params })
+    return api.get<ApiPaginatedResponse<RaporData, RaporListMeta>>('/rapors', {
+      params,
+    })
   },
   getRaporById: (id: string) => {
     return api.get<RaporData>(`/rapors/${id}`)

@@ -3,6 +3,7 @@ import { Prisma, ReportCard } from '@prisma/client';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
 import type {
   ReportCardQueryInput,
+  ReportCardSummary,
   CreateReportCardRepositoryInput,
   ReportCardSubjectInput,
   UpdateReportCardRepositoryInput,
@@ -37,7 +38,7 @@ export class PrismaReportCardRepository extends IReportCardRepository {
 
   async findAll(
     query: ReportCardQueryInput,
-  ): Promise<PaginatedResult<ReportCardWithDetails>> {
+  ): Promise<PaginatedResult<ReportCardWithDetails, ReportCardSummary>> {
     const {
       page = 1,
       limit = 10,
@@ -60,7 +61,7 @@ export class PrismaReportCardRepository extends IReportCardRepository {
       }),
     };
 
-    const [data, total] = await Promise.all([
+    const [data, total, published, averages] = await Promise.all([
       this.prisma.reportCard.findMany({
         where,
         include: REPORT_CARD_WITH_DETAILS_INCLUDE,
@@ -69,9 +70,24 @@ export class PrismaReportCardRepository extends IReportCardRepository {
         orderBy: { createdAt: 'desc' },
       }),
       this.prisma.reportCard.count({ where }),
+      this.prisma.reportCard.count({ where: { ...where, isPublished: true } }),
+      this.prisma.reportCard.aggregate({
+        where,
+        _avg: { totalAverage: true },
+      }),
     ]);
 
-    return { data, total, page, limit };
+    return {
+      data,
+      total,
+      page,
+      limit,
+      summary: {
+        published,
+        draft: total - published,
+        averageScore: averages._avg.totalAverage,
+      },
+    };
   }
 
   async findById(id: string): Promise<ReportCardWithDetails | null> {

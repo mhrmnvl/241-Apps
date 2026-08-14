@@ -1,12 +1,14 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import type { RaporData } from '../types'
+import type { RaporData, RaporSummary } from '../types'
 import type { Classroom } from '@/features/academic/classroom'
 import type { Semester } from '@/features/academic/semester'
 
 export const useRaporStore = defineStore('rapor', () => {
   const rapors = ref<RaporData[]>([])
   const totalItems = ref(0)
+  /** Figures for the whole filtered set; null until a list has been loaded. */
+  const summary = ref<RaporSummary | null>(null)
   const currentPage = ref(1)
   const pageSize = ref(10)
   const loading = ref(false)
@@ -23,6 +25,7 @@ export const useRaporStore = defineStore('rapor', () => {
   return {
     rapors,
     totalItems,
+    summary,
     currentPage,
     pageSize,
     loading,

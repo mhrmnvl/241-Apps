@@ -47,6 +47,7 @@ export const raporService = {
     if (!store.selectedClassroomId || !store.selectedSemesterId) {
       store.rapors = []
       store.totalItems = 0
+      store.summary = null
       return
     }
 
@@ -61,6 +62,7 @@ export const raporService = {
       const res = await raporApi.getRapors(params)
       store.rapors = res.data?.data ?? []
       store.totalItems = res.data?.meta?.total ?? 0
+      store.summary = res.data?.meta?.summary ?? null
     } catch (error: unknown) {
       toast.error(getIndonesianErrorMessage(error, 'Gagal memuat data rapor.'))
     } finally {

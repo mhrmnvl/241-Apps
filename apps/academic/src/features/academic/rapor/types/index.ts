@@ -1,3 +1,5 @@
+import type { PaginationMeta } from '@/shared/types/api'
+
 export interface RaporEnrollment {
   student: {
     id: string
@@ -72,6 +74,27 @@ export interface RaporQueryParams {
   classroomId?: string
   semesterId?: string
   isPublished?: boolean
+}
+
+/**
+ * The summary cards, computed by the backend over the whole filtered set.
+ *
+ * This used to be worked out here, from `rapors` — which holds one page. A
+ * class of 32 shown ten at a time reported "Total Siswa: 10" and averaged those
+ * ten, and both numbers changed as you paged. Neither looks wrong on screen,
+ * which is why it stayed.
+ *
+ * `averageScore` is null when nothing in the set has been generated yet, so the
+ * card can show "-" rather than a zero nobody scored.
+ */
+export interface RaporSummary {
+  published: number
+  draft: number
+  averageScore: number | null
+}
+
+export interface RaporListMeta extends PaginationMeta {
+  summary?: RaporSummary
 }
 
 export interface GenerateRaporPayload {
