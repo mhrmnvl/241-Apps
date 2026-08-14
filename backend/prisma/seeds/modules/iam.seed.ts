@@ -46,17 +46,22 @@ export async function seedIam(prisma: PrismaClient) {
       description: 'Institution Administrator',
       isSystem: true,
     },
+    // System, because the code resolves these two by this exact code and
+    // cannot proceed without them: creating a teacher looks up 'TEACHER',
+    // creating a student — or enrolling an accepted applicant — looks up
+    // 'STUDENT'. `isSystem` is the only thing standing between that and a
+    // delete, so `false` here is a promise the code cannot keep.
     {
       code: 'TEACHER',
       name: 'Teacher',
       description: 'Institution Teacher',
-      isSystem: false,
+      isSystem: true,
     },
     {
       code: 'STUDENT',
       name: 'Student',
       description: 'Institution Student',
-      isSystem: false,
+      isSystem: true,
     },
     {
       code: 'PARENT',

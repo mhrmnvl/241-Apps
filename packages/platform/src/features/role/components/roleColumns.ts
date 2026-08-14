@@ -4,8 +4,6 @@ import { Badge } from '@/ui/badge'
 import { ActionCell } from '@/ui'
 import type { Role } from '../types'
 
-const SYSTEM_ROLES = ['SUPER_ADMIN', 'ADMIN', 'TEACHER', 'STUDENT']
-
 export const getColumns = (
   onEdit: (role: Role) => void,
   onDelete: (
@@ -41,9 +39,7 @@ export const getColumns = (
     accessorKey: 'isSystem',
     header: 'Tipe',
     cell: ({ row }) => {
-      const isSystem = row.getValue<boolean>('isSystem')
-      const isSystemRoleCode = SYSTEM_ROLES.includes(row.original.code)
-      const system = isSystem ? true : isSystemRoleCode
+      const system = row.getValue<boolean>('isSystem')
       return h(Badge, { variant: system ? 'default' : 'secondary' }, () =>
         system ? 'Sistem' : 'Kustom',
       )
@@ -54,11 +50,13 @@ export const getColumns = (
     header: 'Aksi',
     cell: ({ row }) => {
       const role = row.original
-      const isSystemRoleCode = SYSTEM_ROLES.includes(role.code)
-      const isSystem = role.isSystem ? true : isSystemRoleCode
 
       return h(ActionCell, {
-        hideDelete: isSystem,
+        // `isSystem` is exactly what the server refuses to delete. Adding a
+        // list of role codes here made the button disagree with the endpoint:
+        // TEACHER was hidden in the table while `DELETE /roles/:id` still
+        // accepted it, because the seed had left its flag false.
+        hideDelete: role.isSystem,
         deleteTitle: 'Hapus Role?',
         deleteDescription: `Apakah Anda yakin ingin menghapus role ${role.name}? Tindakan ini tidak dapat dibatalkan.`,
         onEdit: () => onEdit(role),
