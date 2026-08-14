@@ -105,10 +105,7 @@ export class StudentController {
   @ApiResponse({ status: 201, type: StudentResponseDto })
   @ApiResponse({ status: 404, description: 'Active semester not found' })
   @ApiResponse({ status: 409, description: 'Duplicate NIS or NISN' })
-  async create(
-    @Body() dto: CreateStudentDto,
-    @CurrentUser() _creator: AuthenticatedUser,
-  ): Promise<StudentResponseDto> {
+  async create(@Body() dto: CreateStudentDto): Promise<StudentResponseDto> {
     return this.createStudentService.execute(dto);
   }
 
@@ -137,7 +134,6 @@ export class StudentController {
   @ApiResponse({ status: 404, description: 'Student not found' })
   @ApiResponse({ status: 409, description: 'Duplicate NIS or NISN' })
   async update(
-    @CurrentUser() _user: AuthenticatedUser,
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateStudentDto,
   ): Promise<StudentWithDetails> {
@@ -151,10 +147,7 @@ export class StudentController {
   @ApiParam({ name: 'id', format: 'uuid' })
   @ApiResponse({ status: 204, description: 'Student deleted' })
   @ApiResponse({ status: 404, description: 'Student not found' })
-  async remove(
-    @CurrentUser() _user: AuthenticatedUser,
-    @Param('id', ParseUUIDPipe) id: string,
-  ): Promise<void> {
+  async remove(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
     await this.deleteStudentService.execute(id);
   }
 
@@ -167,7 +160,6 @@ export class StudentController {
   @ApiResponse({ status: 200, description: 'Account status updated' })
   @ApiResponse({ status: 404, description: 'Student not found' })
   async toggleActive(
-    @CurrentUser() _user: AuthenticatedUser,
     @Param('id', ParseUUIDPipe) id: string,
     @Query('isActive', new ParseBoolPipe()) isActive: boolean,
   ): Promise<UserEntity> {

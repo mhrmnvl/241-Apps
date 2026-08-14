@@ -43,7 +43,6 @@ export class SemesterPromotionController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Semester not found' })
   async recommend(
-    @CurrentUser() _user: AuthenticatedUser,
     @Body() dto: GenerateRecommendationDto,
   ): Promise<PromotionRecommendationDto> {
     return this.generateRecommendationService.execute(dto);
@@ -62,7 +61,6 @@ export class SemesterPromotionController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Semester not found' })
   async previewPromotion(
-    @CurrentUser() _user: AuthenticatedUser,
     @Body() dto: PromotionDto,
   ): Promise<PromotionPreviewDto> {
     return this.previewPromotionService.execute(dto);
@@ -81,10 +79,7 @@ export class SemesterPromotionController {
   @ApiResponse({ status: 400, description: 'Validation error' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Semester or class not found' })
-  async promote(
-    @CurrentUser() _user: AuthenticatedUser,
-    @Body() dto: PromotionDto,
-  ): Promise<PromotionResultDto> {
+  async promote(@Body() dto: PromotionDto): Promise<PromotionResultDto> {
     return this.promoteStudentsService.execute(dto);
   }
 }

@@ -96,7 +96,7 @@ describe('TeacherController & TeacherImportExportController', () => {
       };
       mockGetTeachersUseCase.execute.mockResolvedValue(expected);
 
-      const result = await controller.findAll(mockUser, query);
+      const result = await controller.findAll(query);
 
       expect(mockGetTeachersUseCase.execute).toHaveBeenCalledWith(query);
       expect(result).toEqual(expected);
@@ -109,7 +109,7 @@ describe('TeacherController & TeacherImportExportController', () => {
       const expected = { id: 'emp-1', profile: { name: 'Budi Santoso' } };
       mockGetTeacherByIdUseCase.execute.mockResolvedValue(expected);
 
-      const result = await controller.findOne(mockUser, id);
+      const result = await controller.findOne(id);
 
       expect(mockGetTeacherByIdUseCase.execute).toHaveBeenCalledWith(id);
       expect(result).toEqual(expected);
@@ -125,7 +125,7 @@ describe('TeacherController & TeacherImportExportController', () => {
       const expected = { id: 'emp-new', profile: { name: 'Budi Santoso' } };
       mockCreateTeacherUseCase.execute.mockResolvedValue(expected);
 
-      const result = await controller.create(dto, mockUser);
+      const result = await controller.create(dto);
 
       expect(mockCreateTeacherUseCase.execute).toHaveBeenCalledWith(dto);
       expect(result).toEqual(expected);
@@ -152,10 +152,7 @@ describe('TeacherController & TeacherImportExportController', () => {
       };
       mockBulkImportTeachersUseCase.execute.mockResolvedValue(expected);
 
-      const result = await importExportController.bulkImport(
-        fakeFile,
-        mockUser,
-      );
+      const result = await importExportController.bulkImport(fakeFile);
 
       expect(mockBulkImportTeachersUseCase.execute).toHaveBeenCalledWith(
         fakeFile.buffer,
@@ -170,7 +167,7 @@ describe('TeacherController & TeacherImportExportController', () => {
       mockExportTeachersUseCase.execute.mockResolvedValue(fakeBuffer);
 
       const query: ExportTeacherQueryDto = { search: 'Budi' };
-      const result = await importExportController.export(mockUser, query);
+      const result = await importExportController.export(query);
 
       expect(mockExportTeachersUseCase.execute).toHaveBeenCalledWith(query);
       expect(result).toBeDefined();
@@ -184,7 +181,7 @@ describe('TeacherController & TeacherImportExportController', () => {
       const expected = { id: 'emp-1', nip: '198006152005011001' };
       mockUpdateTeacherUseCase.execute.mockResolvedValue(expected);
 
-      const result = await controller.update(mockUser, id, dto);
+      const result = await controller.update(id, dto);
 
       expect(mockUpdateTeacherUseCase.execute).toHaveBeenCalledWith(id, dto);
       expect(result).toEqual(expected);
@@ -196,7 +193,7 @@ describe('TeacherController & TeacherImportExportController', () => {
       const id = 'emp-1';
       mockDeleteTeacherUseCase.execute.mockResolvedValue(undefined);
 
-      await controller.remove(mockUser, id);
+      await controller.remove(id);
 
       expect(mockDeleteTeacherUseCase.execute).toHaveBeenCalledWith(id);
     });
@@ -209,7 +206,7 @@ describe('TeacherController & TeacherImportExportController', () => {
       const expected = { id: 'p-1', name: 'Budi Revised' };
       mockUpdateProfileUseCase.execute.mockResolvedValue(expected);
 
-      const result = await controller.updateProfile(mockUser, id, dto);
+      const result = await controller.updateProfile(id, dto);
 
       expect(mockUpdateProfileUseCase.execute).toHaveBeenCalledWith(id, dto);
       expect(result).toEqual(expected);

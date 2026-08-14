@@ -57,10 +57,7 @@ export class StudentImportExportController {
       },
     },
   })
-  async export(
-    @CurrentUser() _user: AuthenticatedUser,
-    @Query() query: ExportStudentQueryDto,
-  ): Promise<StreamableFile> {
+  async export(@Query() query: ExportStudentQueryDto): Promise<StreamableFile> {
     const buffer = await this.exportStudentsService.execute(query);
     return new StreamableFile(buffer, {
       type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
@@ -114,7 +111,6 @@ export class StudentImportExportController {
       }),
     )
     file: Express.Multer.File,
-    @CurrentUser() _creator: AuthenticatedUser,
   ): Promise<BulkImportStudentsResponseDto> {
     return this.bulkImportStudentsService.execute(file.buffer);
   }
@@ -128,7 +124,6 @@ export class StudentImportExportController {
   })
   @ApiResponse({ status: 201, type: ResolveBulkImportResponseDto })
   async resolveBulkImportConflicts(
-    @CurrentUser() _user: AuthenticatedUser,
     @Body() dto: ResolveBulkImportConflictsDto,
   ): Promise<ResolveBulkImportResponseDto> {
     return this.resolveBulkImportConflictsService.execute(dto);

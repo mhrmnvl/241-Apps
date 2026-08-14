@@ -58,7 +58,7 @@ Written first: each asserts a refusal or a narrowing that does not exist yet.
 - [ ] T012 [P] [US1] Contract test at `backend/src/academic/attendance/presentation/attendance.self-service.spec.ts` — `/academic/attendances/me` scoping and own totals; `recap` and `recap/trend` refuse a caller holding only `attendances.read-own`.
 - [ ] T013 [P] [US1] Contract test at `backend/src/academic/schedule/presentation/schedule.self-service.spec.ts` — `/schedules/me` answers from the caller's records: classroom timetable for a student, teaching schedule for a teacher, both for someone who is both, empty for neither.
 - [ ] T014 [P] [US1] Test at `backend/src/academic/student/presentation/student.self-service.spec.ts` — a caller holding `students.read-own` cannot reach `GET /students`, and `GET /students/:id` still refuses another student's id.
-- [ ] T015 [P] [US1] Sweep at `backend/src/academic/shared/no-ignored-caller.spec.ts` — no academic controller may inject `@CurrentUser()` and then not pass it to its use case. Strip comments first; assert the sweep fires on the shape it looks for. This is the guard that would have caught the original defect, where the parameter was present and named `_user`.
+- [X] T015 [P] [US1] Sweep at `backend/src/academic/shared/no-ignored-caller.spec.ts` — no academic controller may inject `@CurrentUser()` and then not pass it to its use case. Strip comments first; assert the sweep fires on the shape it looks for. This is the guard that would have caught the original defect, where the parameter was present and named `_user`.
 
 ### Implementation for User Story 1
 

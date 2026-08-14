@@ -66,7 +66,6 @@ export class SemesterController {
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async findAll(
-    @CurrentUser() _user: AuthenticatedUser,
     @Query() query: SemesterQueryDto,
   ): Promise<PaginatedResponse<SemesterWithDetails>> {
     return this.getSemestersService.execute(query);
@@ -84,7 +83,6 @@ export class SemesterController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Semester not found' })
   async findOne(
-    @CurrentUser() _user: AuthenticatedUser,
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<SemesterWithDetails> {
     return this.getSemesterByIdService.execute(id);
@@ -102,7 +100,6 @@ export class SemesterController {
   @ApiResponse({ status: 400, description: 'Academic year not active' })
   @ApiResponse({ status: 404, description: 'Semester not found' })
   async activate(
-    @CurrentUser() _user: AuthenticatedUser,
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<SemesterWithDetails> {
     return this.activateSemesterService.execute(id);
@@ -119,7 +116,6 @@ export class SemesterController {
   })
   @ApiResponse({ status: 404, description: 'Semester not found' })
   async deactivate(
-    @CurrentUser() _user: AuthenticatedUser,
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<SemesterWithDetails> {
     return this.deactivateSemesterService.execute(id);
@@ -142,10 +138,7 @@ export class SemesterController {
     status: 409,
     description: 'Semester type already exists for this academic year',
   })
-  async create(
-    @CurrentUser() _user: AuthenticatedUser,
-    @Body() dto: CreateSemesterDto,
-  ): Promise<SemesterWithDetails> {
+  async create(@Body() dto: CreateSemesterDto): Promise<SemesterWithDetails> {
     return this.createSemesterService.execute(dto);
   }
 
@@ -161,7 +154,6 @@ export class SemesterController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Semester not found' })
   async update(
-    @CurrentUser() _user: AuthenticatedUser,
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateSemesterDto,
   ): Promise<SemesterWithDetails> {
@@ -176,10 +168,7 @@ export class SemesterController {
   @ApiResponse({ status: 204, description: 'Semester deleted' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Semester not found' })
-  async remove(
-    @CurrentUser() _user: AuthenticatedUser,
-    @Param('id', ParseUUIDPipe) id: string,
-  ): Promise<void> {
+  async remove(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
     await this.deleteSemesterService.execute(id);
   }
 }

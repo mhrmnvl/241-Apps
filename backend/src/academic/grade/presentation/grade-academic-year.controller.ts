@@ -55,10 +55,7 @@ export class GradeAcademicYearController {
     status: 200,
     description: 'List of grade academic year assignments',
   })
-  async findAll(
-    @CurrentUser() _user: AuthenticatedUser,
-    @Query('academicYearId') academicYearId?: string,
-  ) {
+  async findAll(@Query('academicYearId') academicYearId?: string) {
     return this.getService.execute(academicYearId);
   }
 
@@ -68,10 +65,7 @@ export class GradeAcademicYearController {
     summary: 'Assign curriculum to grade for academic year (upsert)',
   })
   @ApiResponse({ status: 201, description: 'Assignment created or updated' })
-  async assign(
-    @CurrentUser() _user: AuthenticatedUser,
-    @Body() dto: AssignCurriculumToGradeDto,
-  ) {
+  async assign(@Body() dto: AssignCurriculumToGradeDto) {
     return this.assignService.execute(dto);
   }
 
@@ -80,10 +74,7 @@ export class GradeAcademicYearController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Remove grade-curriculum assignment' })
   @ApiResponse({ status: 204, description: 'Deleted' })
-  async remove(
-    @CurrentUser() _user: AuthenticatedUser,
-    @Param('id', ParseUUIDPipe) id: string,
-  ) {
+  async remove(@Param('id', ParseUUIDPipe) id: string) {
     await this.removeService.execute(id);
   }
 }

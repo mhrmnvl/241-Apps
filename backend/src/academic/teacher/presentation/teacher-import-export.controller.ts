@@ -57,10 +57,7 @@ export class TeacherImportExportController {
       },
     },
   })
-  async export(
-    @CurrentUser() _user: AuthenticatedUser,
-    @Query() query: ExportTeacherQueryDto,
-  ): Promise<StreamableFile> {
+  async export(@Query() query: ExportTeacherQueryDto): Promise<StreamableFile> {
     const buffer = await this.exportTeachersUseCase.execute(query);
     return new StreamableFile(buffer, {
       type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
@@ -108,7 +105,6 @@ export class TeacherImportExportController {
   async bulkImport(
     @UploadedFile(new ParseFilePipe({ fileIsRequired: true }))
     file: Express.Multer.File,
-    @CurrentUser() _creator: AuthenticatedUser,
   ): Promise<BulkImportTeachersResponseDto> {
     return this.bulkImportTeachersUseCase.execute(file.buffer);
   }
@@ -122,7 +118,6 @@ export class TeacherImportExportController {
   })
   @ApiResponse({ status: 201, type: ResolveBulkImportResponseDto })
   async resolveBulkImportConflicts(
-    @CurrentUser() _user: AuthenticatedUser,
     @Body() dto: ResolveBulkImportConflictsDto,
   ): Promise<ResolveBulkImportResponseDto> {
     return this.resolveBulkImportConflictsUseCase.execute(dto);

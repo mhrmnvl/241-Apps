@@ -133,7 +133,7 @@ describe('StudentController & StudentImportExportController', () => {
       const expected = { id: 'stu-new', nis: '2024001' };
       mockCreateStudentService.execute.mockResolvedValue(expected);
 
-      const result = await controller.create(dto, mockUser);
+      const result = await controller.create(dto);
 
       expect(mockCreateStudentService.execute).toHaveBeenCalledWith(dto);
       expect(result).toEqual(expected);
@@ -160,10 +160,7 @@ describe('StudentController & StudentImportExportController', () => {
       };
       mockBulkImportStudentsService.execute.mockResolvedValue(expected);
 
-      const result = await importExportController.bulkImport(
-        fakeFile,
-        mockUser,
-      );
+      const result = await importExportController.bulkImport(fakeFile);
 
       expect(mockBulkImportStudentsService.execute).toHaveBeenCalledWith(
         fakeFile.buffer,
@@ -178,7 +175,7 @@ describe('StudentController & StudentImportExportController', () => {
       mockExportStudentsService.execute.mockResolvedValue(fakeBuffer);
 
       const query: ExportStudentQueryDto = { search: 'Ahmad' };
-      const result = await importExportController.export(mockUser, query);
+      const result = await importExportController.export(query);
 
       expect(mockExportStudentsService.execute).toHaveBeenCalledWith(query);
       expect(result).toBeDefined();
@@ -192,7 +189,7 @@ describe('StudentController & StudentImportExportController', () => {
       const expected = { id: 'stu-1', nis: '2024002' };
       mockUpdateStudentService.execute.mockResolvedValue(expected);
 
-      const result = await controller.update(mockUser, id, dto);
+      const result = await controller.update(id, dto);
 
       expect(mockUpdateStudentService.execute).toHaveBeenCalledWith(id, dto);
       expect(result).toEqual(expected);
@@ -204,7 +201,7 @@ describe('StudentController & StudentImportExportController', () => {
       const id = 'stu-1';
       mockDeleteStudentService.execute.mockResolvedValue(undefined);
 
-      await controller.remove(mockUser, id);
+      await controller.remove(id);
 
       expect(mockDeleteStudentService.execute).toHaveBeenCalledWith(id);
     });
