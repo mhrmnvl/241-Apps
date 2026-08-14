@@ -6,7 +6,6 @@ import {
 } from '@/features/academic/schedule'
 import { eventCalendarApi } from '@/features/academic/event-calendar'
 import { announcementApi } from '@/features/academic/announcement'
-import { useAuthSession } from '@/features/platform/auth'
 import { storeToRefs } from 'pinia'
 import type { EventData } from '@/features/academic/event-calendar'
 import type { Announcement } from '@/features/academic/announcement'
@@ -22,7 +21,6 @@ const DAY_MAP: Record<string, string> = {
 }
 
 export function useAcademicInfo() {
-  const { user } = useAuthSession()
   const store = useScheduleStore()
   const { lessons, timeSlots, isLoadingSchedule } = storeToRefs(store)
 
@@ -53,13 +51,16 @@ export function useAcademicInfo() {
       .filter((row) => row.lesson !== null)
   })
 
+  /**
+   * The caller's own schedule, which the server resolves from their records.
+   *
+   * This read `user.student.classroomId` and returned at the next line, every
+   * time: nothing has ever populated that field. Today's schedule on this
+   * screen has therefore never appeared, and it failed silently, which is why
+   * it lasted.
+   */
   async function fetchTodaySchedule() {
-    const classroomId = user.value?.student?.classroomId
-    if (!classroomId) return
-    await scheduleService.fetchSchedule({
-      isTeacher: false,
-      selectedClassroomId: classroomId,
-    })
+    await scheduleService.fetchMySchedule()
   }
 
   async function fetchUpcomingEvents() {

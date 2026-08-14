@@ -51,11 +51,12 @@ const ROLE_LABELS: Record<string, string> = {
 
 const displayName = computed(() => {
   const currentUser = user.value
+  // The two removed fallbacks read `user.student.name` and `user.teacher.name`,
+  // which the session has never carried, so they could only return undefined
+  // and fall through. The two that remain are the ones that ever answered.
   return (
     currentUser?.profile?.name?.trim() ??
     currentUser?.name?.trim() ??
-    currentUser?.student?.name?.trim() ??
-    currentUser?.teacher?.name?.trim() ??
     'Pengguna'
   )
 })

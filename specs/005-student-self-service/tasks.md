@@ -112,11 +112,11 @@ Each view lands **inside the existing feature folder** for its domain, beside th
 
 **Independent test**: Give a teaching account a school-created role carrying the same permissions, sign in, and see that person's own teaching schedule.
 
-- [ ] T036 [P] [US3] Test at `apps/academic/src/features/academic/schedule/__tests__/useSchedule.spec.ts` — with `schedules.read-own` the personal view is offered; with `schedules.read` the classroom picker; with both, both; and none of it depends on the role array.
-- [ ] T037 [US3] Remove `isStudent` and `isTeacher` from `apps/academic/src/features/academic/schedule/composables/useSchedule.ts:28-29` and drive the affordances from `can('schedules.read-own')` and `can('schedules.read')` instead.
-- [ ] T038 [US3] Delete the `student` and `teacher` fields from `packages/platform/src/features/auth/types/session.ts` — nothing has ever populated them, and their only reader bails out on the `undefined` they always held.
-- [ ] T039 [US3] Fix that reader: `apps/academic/src/features/academic/academic-info/composables/useAcademicInfo.ts:57` reads `user.student.classroomId` and returns early. Point it at `GET /schedules/me`, which resolves the classroom server-side, so today's schedule renders for the first time.
-- [ ] T040 [US3] Add a sweep at `apps/academic/src/__tests__/no-role-name-branching.spec.ts` asserting no file under `apps/academic/src/features` compares a role to a literal. The sanctioned exceptions — the router's SUPER_ADMIN bypass and the menu's `allowedRoles` — are named explicitly rather than pattern-excluded, so adding a new one is a deliberate edit.
+- [X] T036 [P] [US3] Test at `apps/academic/src/features/academic/schedule/__tests__/useSchedule.spec.ts` — with `schedules.read-own` the personal view is offered; with `schedules.read` the classroom picker; with both, both; and none of it depends on the role array.
+- [X] T037 [US3] Remove `isStudent` and `isTeacher` from `apps/academic/src/features/academic/schedule/composables/useSchedule.ts:28-29` and drive the affordances from `can('schedules.read-own')` and `can('schedules.read')` instead.
+- [X] T038 [US3] Delete the `student` and `teacher` fields from `packages/platform/src/features/auth/types/session.ts` — nothing has ever populated them, and their only reader bails out on the `undefined` they always held.
+- [X] T039 [US3] Fix that reader: `apps/academic/src/features/academic/academic-info/composables/useAcademicInfo.ts:57` reads `user.student.classroomId` and returns early. Point it at `GET /schedules/me`, which resolves the classroom server-side, so today's schedule renders for the first time.
+- [X] T040 [US3] Add a sweep at `apps/academic/src/__tests__/no-role-name-branching.spec.ts` asserting no file under `apps/academic/src/features` compares a role to a literal. The sanctioned exceptions — the router's SUPER_ADMIN bypass and the menu's `allowedRoles` — are named explicitly rather than pattern-excluded, so adding a new one is a deliberate edit.
 
 **Checkpoint**: No screen decides what to show from a role's name.
 

@@ -22,13 +22,23 @@ export function useSchedule() {
   } = storeToRefs(store)
 
   const { can } = useRoleGuard()
-  const roles = computed(() => user.value?.roles ?? [])
-  // Identity-based (which schedule view this person naturally sees), not an
-  // authorization gate — kept role-based on purpose.
-  const isStudent = computed(() => roles.value.includes('STUDENT'))
-  const isTeacher = computed(() => roles.value.includes('TEACHER'))
-  // Authorization gate: only those who can edit schedules get the
-  // cross-classroom picker — a teacher only browses their own.
+
+  /**
+   * Which affordance this person gets, decided by what they may do rather than
+   * by what their role is called.
+   *
+   * It used to read `roles.includes('STUDENT')` and `roles.includes('TEACHER')`
+   * — a check `useRoleGuard` deliberately refuses to provide, because a school
+   * that invents its own roles silently fails it, and this school invents them:
+   * SARPRAS exists. A teacher on a school-made role was shown the
+   * administrator's classroom picker instead of their own timetable.
+   *
+   * Holding both is not a conflict. Someone who teaches and also administers
+   * gets their own schedule and the picker, which is what they actually need.
+   */
+  const hasOwnSchedule = computed(() => can('schedules.read-own'))
+  // Only those who can edit schedules get the cross-classroom picker — a
+  // teacher browses their own.
   const isAdmin = computed(() => can('schedules.update'))
 
   const selectedClassroom = computed(() =>
@@ -65,11 +75,10 @@ export function useSchedule() {
           },
         ]
       : []),
-    ...(isTeacher.value ? [{ title: 'Jadwal Mengajar Saya', href: '#' }] : []),
+    ...(hasOwnSchedule.value ? [{ title: 'Jadwal Saya', href: '#' }] : []),
   ])
 
   async function fetchClassrooms() {
-    if (isStudent.value || isTeacher.value) return
     const queryClassroomId = route.query.classroomId as string | undefined
     const res = await scheduleService.fetchClassroomsForAdmin(queryClassroomId)
     if (res.success && selectedClassroomId.value) {
@@ -79,19 +88,26 @@ export function useSchedule() {
 
   async function fetchSchedule() {
     await scheduleService.fetchSchedule({
-      isTeacher: isTeacher.value,
-      teacherId: user.value?.teacher?.id,
+      isTeacher: false,
       selectedClassroomId: selectedClassroomId.value,
     })
   }
 
+  /**
+   * Own schedule first, and the picker only for someone who administers.
+   *
+   * Both were unreachable before. The teacher branch needed `user.teacher.id`
+   * and the student branch needed `user.student.classroomId`; nothing has ever
+   * populated either, so a teacher hit the service's own guard and a student
+   * fell through to a picker that returned immediately. The server resolves
+   * both from the caller's records now.
+   */
   async function init() {
-    if (isStudent.value && user.value?.student?.classroomId) {
-      selectedClassroomId.value = user.value.student.classroomId
-      await fetchSchedule()
-    } else if (isTeacher.value) {
-      await fetchSchedule()
-    } else {
+    if (hasOwnSchedule.value) {
+      await scheduleService.fetchMySchedule()
+      return
+    }
+    if (isAdmin.value || can('schedules.read')) {
       await fetchClassrooms()
     }
   }
@@ -110,8 +126,10 @@ export function useSchedule() {
     selectedClassroomId,
     isLoadingClassrooms,
     isLoadingSchedule,
-    isStudent,
-    isTeacher,
+    hasOwnSchedule,
+    // The same fact under the name the view uses: "this is your schedule, not
+    // a classroom's". It was called `isTeacher` and derived from a role name.
+    isPersonal: hasOwnSchedule,
     isAdmin,
     user,
     DAYS,

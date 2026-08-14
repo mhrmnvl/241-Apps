@@ -23,6 +23,18 @@ export const lessonApi = {
     )
   },
 
+  /**
+   * The caller's own schedule, resolved by the server from their records — the
+   * timetable of the classroom they are enrolled in, the lessons they teach, or
+   * both. There is no parameter, and that is the point: the browser does not
+   * decide which of those the person is.
+   */
+  getMySchedule: () => {
+    return api.get<{
+      data: { classroom: ScheduleResponse[]; teaching: ScheduleResponse[] }
+    }>('/schedules/me')
+  },
+
   updateLessonBatch: (
     classroomId: string,
     day: string,

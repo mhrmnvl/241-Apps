@@ -10,7 +10,7 @@ import type {
 } from '../types'
 
 defineProps<{
-  isTeacher: boolean
+  isPersonal: boolean
   user: { identifier?: string } | null
   selectedClassroom: ScheduleClassroom | undefined
   sortedTimeSlots: ScheduleTimeSlot[]
@@ -47,7 +47,7 @@ function toHHMM(val: string): string {
     >
       <BookOpen class="size-4 text-primary shrink-0" />
       <span class="font-semibold text-sm">
-        <template v-if="isTeacher">
+        <template v-if="isPersonal">
           Jadwal Mengajar - {{ user?.identifier }}
         </template>
         <template v-else>
@@ -138,7 +138,7 @@ function toHHMM(val: string): string {
 
                   <div
                     v-if="
-                      isTeacher &&
+                      isPersonal &&
                       lessonMap[ts.id]?.[day.value]?.classroom?.name
                     "
                     class="text-[11px] text-primary/80 font-medium mt-0.5 truncate max-w-[120px] mx-auto"
@@ -152,7 +152,7 @@ function toHHMM(val: string): string {
 
                   <div
                     v-else-if="
-                      !isTeacher &&
+                      !isPersonal &&
                       lessonMap[ts.id]?.[day.value]?.teacher?.user?.profile
                         ?.name
                     "
