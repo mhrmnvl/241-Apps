@@ -196,8 +196,12 @@ teaching schedule rather than a classroom picker.
 - **FR-014**: What a screen shows MUST NOT depend on comparing a role's name to
   a literal. The one sanctioned exception remains the break-glass bypass, which
   lives in a single place and is not to be copied.
-- **FR-015**: Whether a person is shown their own teaching schedule MUST follow
-  from their having a teaching record.
+- **FR-015**: The teaching schedule a person is shown MUST be the one their
+  teaching record says is theirs, resolved by the system rather than declared by
+  the caller. Whether the screen is *offered* follows from authorization, as
+  every other screen does; what it *contains* follows from the record. A person
+  authorized but without a teaching record sees an empty schedule, not
+  another person's.
 - **FR-016**: A person who both teaches and administers MUST be able to reach
   both their own schedule and any classroom's.
 

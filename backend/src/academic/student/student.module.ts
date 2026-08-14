@@ -9,6 +9,8 @@ import { StudentAddressController } from './presentation/student-address.control
 import { StudentParentController } from './presentation/student-parent.controller.js';
 import { StudentProfileController } from './presentation/student-profile.controller.js';
 import { IStudentRepository } from './domain/interfaces/student-repository.interface.js';
+import { IStudentIdentityReadPort } from './domain/interfaces/student-identity-read.port.js';
+import { PrismaStudentIdentityReadPort } from './infrastructure/persistence/prisma-student-identity.read-port.js';
 import { IStudentAddressRepository } from './domain/interfaces/student-address-repository.interface.js';
 import { IStudentParentRepository } from './domain/interfaces/student-parent-repository.interface.js';
 import { PrismaStudentRepository } from './infrastructure/persistence/prisma-student.repository.js';
@@ -54,6 +56,10 @@ import { UpdateStudentProfileUseCase } from './use-cases/update-student-profile.
   providers: [
     { provide: IStudentRepository, useClass: PrismaStudentRepository },
     {
+      provide: IStudentIdentityReadPort,
+      useClass: PrismaStudentIdentityReadPort,
+    },
+    {
       provide: IStudentAddressRepository,
       useClass: PrismaStudentAddressRepository,
     },
@@ -87,6 +93,9 @@ import { UpdateStudentProfileUseCase } from './use-cases/update-student-profile.
     IStudentRepository,
     IStudentAddressRepository,
     IStudentParentRepository,
+    // Consumed by report-card, assessment, attendance and schedule so each can
+    // scope a self-service read to the caller without resolving it its own way.
+    IStudentIdentityReadPort,
   ],
 })
 export class StudentModule {}

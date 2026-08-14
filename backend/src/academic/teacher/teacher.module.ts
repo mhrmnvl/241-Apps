@@ -5,6 +5,8 @@ import { TeacherImportExportController } from './presentation/teacher-import-exp
 import { TeacherAddressController } from './presentation/teacher-address.controller.js';
 import { TeacherPositionsController } from './presentation/teacher-position.controller.js';
 import { ITeacherRepository } from './domain/interfaces/teacher-repository.interface.js';
+import { ITeacherIdentityReadPort } from './domain/interfaces/teacher-identity-read.port.js';
+import { PrismaTeacherIdentityReadPort } from './infrastructure/persistence/prisma-teacher-identity.read-port.js';
 import { ITeacherAddressRepository } from './domain/interfaces/teacher-address-repository.interface.js';
 import { ITeacherPositionRepository } from './domain/interfaces/teacher-position-repository.interface.js';
 import { PrismaTeacherRepository } from './infrastructure/persistence/prisma-teacher.repository.js';
@@ -36,6 +38,10 @@ import { TeacherPositionUseCase } from './use-cases/teacher-position.use-case.js
   providers: [
     { provide: ITeacherRepository, useClass: PrismaTeacherRepository },
     {
+      provide: ITeacherIdentityReadPort,
+      useClass: PrismaTeacherIdentityReadPort,
+    },
+    {
       provide: ITeacherAddressRepository,
       useClass: PrismaTeacherAddressRepository,
     },
@@ -61,6 +67,9 @@ import { TeacherPositionUseCase } from './use-cases/teacher-position.use-case.js
     ITeacherRepository,
     ITeacherAddressRepository,
     ITeacherPositionRepository,
+    // Consumed by schedule, so `GET /schedules/me` answers from the caller's
+    // teaching record rather than from what their role is called.
+    ITeacherIdentityReadPort,
   ],
 })
 export class TeacherModule {}

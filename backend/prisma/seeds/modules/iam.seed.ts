@@ -173,10 +173,22 @@ export async function seedIam(prisma: PrismaClient) {
   }
 
   // STUDENT permissions
+  //
+  // Self-service only. This role used to hold `students.read`,
+  // `attendances.read` and `report-cards.read` — the same codes the management
+  // screens require, over reads that did not look at who was asking. A student
+  // opening their own menu was served every student's report card and the
+  // school's whole attendance recap.
+  //
+  // The `-own` codes reach endpoints that resolve the caller's student record
+  // and answer about that. `students.read` in particular is a roster read: it
+  // returns every student, and its sibling `students.read-own` does not.
   const studentPermissionCodes = [
-    'students.read',
-    'attendances.read',
-    'report-cards.read',
+    'students.read-own',
+    'attendances.read-own',
+    'report-cards.read-own',
+    'student-scores.read-own',
+    'schedules.read-own',
   ];
   for (const perm of permissions) {
     if (studentPermissionCodes.includes(perm.code)) {
@@ -187,11 +199,18 @@ export async function seedIam(prisma: PrismaClient) {
   }
 
   // PARENT permissions
-  const parentPermissionCodes = [
-    'students.read',
-    'attendances.read',
-    'report-cards.read',
-  ];
+  //
+  // Deliberately empty. This role held the same three wide codes the student
+  // role did, and the same reads answered them the same way — so a guardian
+  // account could read every student's report card.
+  //
+  // It is not moved onto the `-own` codes, because a parent's "own" is their
+  // child's record, and which guardian may see which child is a question this
+  // system has not answered. Granting nothing is the honest state until it
+  // does: there is no parent surface today, so nothing is lost, and the
+  // alternative would be leaving the hole open for one role while closing it
+  // for another.
+  const parentPermissionCodes: string[] = [];
   for (const perm of permissions) {
     if (parentPermissionCodes.includes(perm.code)) {
       await prisma.rolePermission.create({

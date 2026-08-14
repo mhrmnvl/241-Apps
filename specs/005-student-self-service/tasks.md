@@ -18,10 +18,10 @@ Backend imports carry the `.js` extension even on `.ts` sources (NodeNext ESM).
 
 ## Phase 1: Setup (Shared Infrastructure)
 
-- [ ] T001 Add the five self-service codes to `backend/src/platform/access-control/permission/constants/permission-codes.constants.ts`: `students.read-own`, `report-cards.read-own`, `student-scores.read-own`, `attendances.read-own`, `schedules.read-own`. Keep entries in the file's existing module order and give each a description that says *own* explicitly, e.g. "Read your own report cards".
-- [ ] T002 Make the catalogue reach a database nobody seeds: have `backend/src/platform/access-control/permission/permission.module.ts` run `SyncPermissionsUseCase` on application bootstrap (`OnApplicationBootstrap`), keeping `POST /permissions/sync` as it is. Log the count of codes upserted at info level so a deploy leaves evidence.
+- [X] T001 Add the five self-service codes to `backend/src/platform/access-control/permission/constants/permission-codes.constants.ts`: `students.read-own`, `report-cards.read-own`, `student-scores.read-own`, `attendances.read-own`, `schedules.read-own`. Keep entries in the file's existing module order and give each a description that says *own* explicitly, e.g. "Read your own report cards".
+- [X] T002 Make the catalogue reach a database nobody seeds: have `backend/src/platform/access-control/permission/permission.module.ts` run `SyncPermissionsUseCase` on application bootstrap (`OnApplicationBootstrap`), keeping `POST /permissions/sync` as it is. Log the count of codes upserted at info level so a deploy leaves evidence.
 - [ ] T003 [P] Add a spec at `backend/src/platform/access-control/permission/use-cases/sync-permissions.bootstrap.spec.ts` asserting the sync runs on bootstrap and is idempotent — running it twice leaves the same rows.
-- [ ] T004 Move the student role's grants in `backend/prisma/seeds/modules/iam.seed.ts` from `students.read`, `attendances.read`, `report-cards.read` to `students.read-own`, `attendances.read-own`, `report-cards.read-own`, `student-scores.read-own`, `schedules.read-own`. Leave a comment saying why the wide codes are gone, naming the reads they opened.
+- [X] T004 Move the student role's grants in `backend/prisma/seeds/modules/iam.seed.ts` from `students.read`, `attendances.read`, `report-cards.read` to `students.read-own`, `attendances.read-own`, `report-cards.read-own`, `student-scores.read-own`, `schedules.read-own`. Leave a comment saying why the wide codes are gone, naming the reads they opened.
 
 **Checkpoint**: The permission catalogue contains the new codes on any box that has booted the new build, and a freshly seeded database grants a student only self-service.
 
@@ -33,11 +33,11 @@ Backend imports carry the `.js` extension even on `.ts` sources (NodeNext ESM).
 
 **⚠️ Blocks every user story below.**
 
-- [ ] T005 Define the port at `backend/src/academic/student/domain/interfaces/student-identity-read.port.ts`: an abstract class `IStudentIdentityReadPort` with `findStudentIdByUserId(userId: string): Promise<string | null>`. Follow the shape of `src/presence/daily-record/domain/interfaces/daily-presence-read.port.ts`, including a doc comment stating what the consumer sees and nothing more.
-- [ ] T006 Implement it at `backend/src/academic/student/infrastructure/persistence/prisma-student-identity.read-port.ts`, selecting `id` only, scoped `deletedAt: null`. It must return null rather than throw when the account has no student record.
-- [ ] T007 Export the port from `backend/src/academic/student/student.module.ts` so consumers bind the abstraction, never the Prisma class.
-- [ ] T008 [P] Define and implement the teacher counterpart — `ITeacherIdentityReadPort.findTeacherIdByUserId` — in `backend/src/academic/teacher/`, mirroring T005–T007. Needed by User Story 3 and by `GET /schedules/me`.
-- [ ] T009 [P] Add `backend/src/academic/student/domain/interfaces/student-identity-read.port.spec.ts` asserting the implementation returns null for an unknown account and for a soft-deleted student, since "no record" is the case that must never fall through to a wide read.
+- [X] T005 Define the port at `backend/src/academic/student/domain/interfaces/student-identity-read.port.ts`: an abstract class `IStudentIdentityReadPort` with `findStudentIdByUserId(userId: string): Promise<string | null>`. Follow the shape of `src/presence/daily-record/domain/interfaces/daily-presence-read.port.ts`, including a doc comment stating what the consumer sees and nothing more.
+- [X] T006 Implement it at `backend/src/academic/student/infrastructure/persistence/prisma-student-identity.read-port.ts`, selecting `id` only, scoped `deletedAt: null`. It must return null rather than throw when the account has no student record.
+- [X] T007 Export the port from `backend/src/academic/student/student.module.ts` so consumers bind the abstraction, never the Prisma class.
+- [X] T008 [P] Define and implement the teacher counterpart — `ITeacherIdentityReadPort.findTeacherIdByUserId` — in `backend/src/academic/teacher/`, mirroring T005–T007. Needed by User Story 3 and by `GET /schedules/me`.
+- [X] T009 [P] Add `backend/src/academic/student/domain/interfaces/student-identity-read.port.spec.ts` asserting the implementation returns null for an unknown account and for a soft-deleted student, since "no record" is the case that must never fall through to a wide read.
 
 **Checkpoint**: Any academic module can resolve a caller to a student or teacher id through an injected abstraction.
 
@@ -70,6 +70,7 @@ Written first: each asserts a refusal or a narrowing that does not exist yet.
 - [ ] T021 [US1] Add `GET /schedules/me` to `backend/src/academic/schedule/presentation/schedule.controller.ts` guarded by `schedules.read-own`, resolving student and teacher records server-side and returning both when the caller has both.
 - [ ] T022 [US1] Bind the ports in `backend/src/academic/report-card/report-card.module.ts`, `backend/src/academic/assessment/assessment.module.ts`, `backend/src/academic/attendance/attendance.module.ts` and `backend/src/academic/schedule/schedule.module.ts` — importing `StudentModule` for `IStudentIdentityReadPort`, and additionally `TeacherModule` in schedule for `ITeacherIdentityReadPort`. Import the `.module.js` file directly, never through a feature barrel, or the ESM cycle crashes boot.
 - [ ] T023 [US1] In `backend/src/academic/student/presentation/student.controller.ts`, stop the `_user` parameter from being a silent omission: either use it or remove it, and record in a comment that `GET /students` is a roster read reachable only with `students.read`.
+- [ ] T023b [US1] Regression test at `backend/src/academic/report-card/presentation/report-card.management-unchanged.spec.ts` — the same fixtures through `GET /rapors` with `report-cards.read` return what they return today, including `meta.summary`. FR-007 and SC-005 otherwise rest on the gate being green, and a green gate is not evidence that a management response kept its shape.
 - [ ] T024 [US1] Add a data migration `backend/prisma/migrations/<timestamp>_student_role_self_service_grants/migration.sql` that, for any role holding all three of `students.read`, `attendances.read`, `report-cards.read` **and** named by code `STUDENT`, replaces those grants with the five `-own` codes. Guard every statement so it is a no-op where the role does not exist — which is both databases today — and say so in the header.
 
 **Checkpoint**: The exposure is closed and provable. The four student menu entries now fail honestly (FR-008); nothing shows foreign data. Safe to stop here.
@@ -97,8 +98,8 @@ Each view lands **inside the existing feature folder** for its domain, beside th
 - [ ] T030 [P] [US2] Create `apps/academic/src/features/academic/attendance/views/MyAttendanceView.vue` — own days and own totals, no classroom picker.
 - [ ] T031 [P] [US2] Create `apps/academic/src/features/academic/student-score/views/MyScoreView.vue` — own marks per assessment, including assessments with no mark yet, so what is outstanding is visible.
 - [ ] T032 [P] [US2] Create `apps/academic/src/features/academic/schedule/views/MyScheduleView.vue` — the caller's own timetable, no classroom picker.
-- [ ] T033 [US2] Add routes for the four views in each feature's `routes.ts`, each carrying its `-own` permission in `meta.requiredPermission`.
-- [ ] T034 [US2] Repoint the four entries in `apps/academic/src/config/menuConfig.ts` (`key: 'student-view'`) at the new routes, and give each a `requiredPermission` of the matching `-own` code so the section is offered by permission rather than by `allowedRoles: ['STUDENT']`.
+- [ ] T033 [US2] Add routes for the four views in each feature's `routes.ts`, each carrying its `-own` permission in `meta.requiredPermission`. **The four paths must be new**: every URL the student menu points at today is owned by a management route — `/academic/student-score` belongs to the *assessment-item* feature's list, `/academic/attendance` to `AttendanceView`, `/academic/report-card` to `RaporView`, `/schedule` to `ScheduleView`. Use `/academic/my/schedule`, `/academic/my/attendance`, `/academic/my/scores`, `/academic/my/report-card`, and leave the existing paths pointing where they point.
+- [ ] T034 [US2] Repoint the four entries in `apps/academic/src/config/menuConfig.ts` (`key: 'student-view'`) at the four new paths from T033, and give each a `requiredPermission` of the matching `-own` code so the section is offered by permission rather than by `allowedRoles: ['STUDENT']`.
 - [ ] T035 [US2] Write the empty states as separate cases in `MyRaporView.vue`, `MyAttendanceView.vue`, `MyScoreView.vue` and `MyScheduleView.vue`: not enrolled this semester, no marks entered yet, report card exists but is unpublished. Each says which it is; none says "no data".
 
 **Checkpoint**: The student surface is complete and useful. Safe to stop here.

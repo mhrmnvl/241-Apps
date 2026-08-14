@@ -285,6 +285,15 @@ export const SYSTEM_PERMISSIONS: SystemPermission[] = [
     description: 'Read attendances',
   },
   {
+    // Self-service. Holding this grants no sight of anyone else: the read
+    // resolves the caller's own student record and answers about that. A class
+    // recap stays on `attendances.read`, because a recap describes a cohort.
+    module: 'attendances',
+    action: 'read-own',
+    code: 'attendances.read-own',
+    description: 'Read your own attendance',
+  },
+  {
     module: 'attendances',
     action: 'update',
     code: 'attendances.update',
@@ -946,6 +955,14 @@ export const SYSTEM_PERMISSIONS: SystemPermission[] = [
     description: 'Read report cards',
   },
   {
+    // Self-service, and published only — a draft is a report card the school
+    // has not yet stood behind.
+    module: 'report-cards',
+    action: 'read-own',
+    code: 'report-cards.read-own',
+    description: 'Read your own published report cards',
+  },
+  {
     module: 'report-cards',
     action: 'update',
     code: 'report-cards.update',
@@ -1002,6 +1019,15 @@ export const SYSTEM_PERMISSIONS: SystemPermission[] = [
     action: 'read',
     code: 'schedules.read',
     description: 'Read schedules',
+  },
+  {
+    // Self-service. What comes back depends on the caller's records, not on
+    // what they say they are: a classroom timetable for a student, a teaching
+    // schedule for a teacher, both for someone who is both.
+    module: 'schedules',
+    action: 'read-own',
+    code: 'schedules.read-own',
+    description: 'Read your own schedule',
   },
   {
     module: 'schedules',
@@ -1163,6 +1189,14 @@ export const SYSTEM_PERMISSIONS: SystemPermission[] = [
     description: 'Read student scores',
   },
   {
+    // Self-service. Includes assessments the caller has no mark for yet, so a
+    // student can see what is still outstanding rather than an empty page.
+    module: 'student-scores',
+    action: 'read-own',
+    code: 'student-scores.read-own',
+    description: 'Read your own scores',
+  },
+  {
     module: 'student-scores',
     action: 'update',
     code: 'student-scores.update',
@@ -1187,6 +1221,14 @@ export const SYSTEM_PERMISSIONS: SystemPermission[] = [
     action: 'read',
     code: 'students.read',
     description: 'Read students',
+  },
+  {
+    // Self-service. `students.read` is a roster read — it answers with every
+    // student — which is why a student must not hold it.
+    module: 'students',
+    action: 'read-own',
+    code: 'students.read-own',
+    description: 'Read your own student record',
   },
   {
     module: 'students',
