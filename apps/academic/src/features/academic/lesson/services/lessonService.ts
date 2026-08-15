@@ -67,6 +67,8 @@ export const lessonService = {
     classroom: ScheduleResponse[]
     teaching: ScheduleResponse[]
   }> => {
+    // One `.data` for axios, one for the response envelope. The route returns
+    // the object bare, so there is no third.
     const response = await lessonApi.getMySchedule()
     return {
       classroom: response?.data?.data?.classroom ?? [],

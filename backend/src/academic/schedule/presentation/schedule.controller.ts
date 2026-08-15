@@ -74,8 +74,12 @@ export class ScheduleController {
       'Your own schedule — your classroom timetable, your teaching, or both',
   })
   async findMine(@CurrentUser() user: AuthenticatedUser) {
-    const data = await this.getMine.execute(user.id);
-    return { data };
+    // Returned bare, not as `{ data }`. The response interceptor wraps whatever
+    // it is handed, so wrapping here too produced `data.data.classroom` and the
+    // caller read `undefined` — an empty schedule that looked like an empty
+    // week. `findByClassroom` below wraps because its own consumer already
+    // unwraps twice; a new route should not inherit that.
+    return this.getMine.execute(user.id);
   }
 
   @Get('classroom/:classroomId')

@@ -127,7 +127,7 @@ Each view lands **inside the existing feature folder** for its domain, beside th
 - [X] T041 [P] Update `backend/docs/NESTJS-RULES.md` with the self-service rule: a `-own` permission plus a `.../me` route declared before its `:id` sibling, and identity applied after the caller's query, never before.
 - [X] T042 [P] Note in `docs/environments.md` that a deploy now syncs the permission catalogue on boot, so a new code needs no manual step.
 - [X] T043 Run the full gate on both sides — `pnpm --filter backend validate`, then `pnpm lint && pnpm typecheck && pnpm test && pnpm build` — and confirm by exit code, not by reading output.
-- [ ] T044 Work through `quickstart.md` by hand on dev, including the negative checks: the foreign-identifier attempts, and looking for a write control on each student screen.
+- [X] T044 Work through `quickstart.md` by hand on dev, including the negative checks: the foreign-identifier attempts, and looking for a write control on each student screen.
 
 ---
 
