@@ -77,7 +77,17 @@ export const menuSections: MenuSection[] = [
         title: 'Persetujuan',
         url: '#',
         icon: CheckSquare,
-        items: [{ title: 'Daftar Persetujuan', url: '/inventory/approvals' }],
+        items: [
+          { title: 'Daftar Persetujuan', url: '/inventory/approvals' },
+          // The page existed and was in no menu, reachable only by typing the
+          // URL — which is why nobody noticed there was no way to define a
+          // workflow, and therefore no approval step at all.
+          {
+            title: 'Alur Persetujuan',
+            url: '/inventory/workflows',
+            requiredPermission: 'inventory-approvals.create',
+          },
+        ],
       },
     ],
   },

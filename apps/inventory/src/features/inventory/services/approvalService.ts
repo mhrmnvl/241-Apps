@@ -1,7 +1,11 @@
 import { toast } from 'vue-sonner'
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
 import { inventoryApi } from '../api/inventoryApi'
-import type { ApprovalWorkflow, ApprovalInstance } from '../types'
+import type {
+  ApprovalWorkflow,
+  ApprovalInstance,
+  CreateWorkflowPayload,
+} from '../types'
 
 /** The approval queue and the workflow definitions behind it. */
 export const approvalService = {
@@ -29,6 +33,24 @@ export const approvalService = {
         getIndonesianErrorMessage(error, 'Gagal memuat alur persetujuan.'),
       )
       return []
+    }
+  },
+
+  /**
+   * Creating a workflow retires the one it replaces, so a loan can never be
+   * caught between two active definitions. Approvals already in flight keep the
+   * steps they started with — the backend holds that line, not this call.
+   */
+  createWorkflow: async (payload: CreateWorkflowPayload): Promise<boolean> => {
+    try {
+      await inventoryApi.createWorkflow(payload)
+      toast.success('Alur persetujuan berhasil disimpan.')
+      return true
+    } catch (e) {
+      toast.error(
+        getIndonesianErrorMessage(e, 'Gagal menyimpan alur persetujuan.'),
+      )
+      return false
     }
   },
 

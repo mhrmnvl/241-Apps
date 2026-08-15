@@ -48,23 +48,48 @@ export class PrismaApprovalRepository extends IApprovalRepository {
     });
   }
 
+  /**
+   * Creates the workflow and leaves it the only active one for its target.
+   *
+   * A new loan picks its workflow with `findFirst({ targetEntity, isActive })`,
+   * so two active workflows for the same target means whichever the database
+   * happens to return — the school would change who signs, see it apply to some
+   * loans and not others, and have nothing to look at that explains it.
+   *
+   * Superseding rather than editing is deliberate. An approval already in
+   * flight holds its own `workflowId` and keeps the steps it started with, so
+   * changing the rules today cannot rewrite who was supposed to sign a request
+   * made last week.
+   */
   async createWorkflow(
     input: CreateApprovalWorkflowInput,
   ): Promise<ApprovalWorkflow> {
     const { steps, ...scalars } = input;
 
-    const data: Prisma.ApprovalWorkflowCreateInput = {
-      ...scalars,
-      steps: {
-        create: steps.map((step) => ({
-          stepSequence: step.stepSequence,
-          approverRoleCode: step.approverRoleCode,
-          isMandatory: step.isMandatory ?? true,
-        })),
-      },
-    };
+    return this.prisma.$transaction(async (tx) => {
+      if (scalars.isActive !== false) {
+        await tx.approvalWorkflow.updateMany({
+          where: { targetEntity: scalars.targetEntity, isActive: true },
+          data: { isActive: false },
+        });
+      }
 
-    return this.prisma.approvalWorkflow.create({ data });
+      const data: Prisma.ApprovalWorkflowCreateInput = {
+        ...scalars,
+        steps: {
+          create: steps.map((step) => ({
+            stepSequence: step.stepSequence,
+            approverRoleCode: step.approverRoleCode,
+            isMandatory: step.isMandatory ?? true,
+          })),
+        },
+      };
+
+      return tx.approvalWorkflow.create({
+        data,
+        include: { steps: { orderBy: { stepSequence: 'asc' } } },
+      });
+    });
   }
 
   async findInstanceById(
