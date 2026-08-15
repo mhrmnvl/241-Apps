@@ -8,6 +8,7 @@ import {
 } from '@prisma/client';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
 import { InventoryReferenceDataMissingException } from '../../../shared/domain/exceptions/inventory-reference-data-missing.exception.js';
+import { moveUnitsAndRecord } from '../../../shared/infrastructure/inventory-unit-movement.steps.js';
 import {
   CreateApprovalLogInput,
   CreateApprovalWorkflowInput,
@@ -200,24 +201,16 @@ export class PrismaApprovalRepository extends IApprovalRepository {
         const loanItems = await tx.inventoryLoanItem.findMany({
           where: { loanId: params.referenceId },
         });
-        const unitIds = loanItems.map((item) => item.unitId);
-        await tx.inventoryAssetUnit.updateMany({
-          where: { id: { in: unitIds } },
-          data: { statusId: availStatus.id },
+        await moveUnitsAndRecord(tx, {
+          units: loanItems.map((item) => ({
+            unitId: item.unitId,
+            previousStatusId: params.pendingStatusId,
+          })),
+          newStatusId: availStatus.id,
+          transactionTypeId: cancelType.id,
+          note: `Peminjaman ditolak (${params.note ?? 'Tanpa catatan'})`,
+          changedById: params.userId,
         });
-
-        for (const unitId of unitIds) {
-          await tx.inventoryHistory.create({
-            data: {
-              unitId,
-              transactionTypeId: cancelType.id,
-              previousStatusId: params.pendingStatusId,
-              newStatusId: availStatus.id,
-              note: `Peminjaman ditolak (${params.note ?? 'Tanpa catatan'})`,
-              changedById: params.userId,
-            },
-          });
-        }
 
         return { success: true, action: 'REJECT', log };
       } else {
@@ -265,24 +258,16 @@ export class PrismaApprovalRepository extends IApprovalRepository {
           const loanItems = await tx.inventoryLoanItem.findMany({
             where: { loanId: params.referenceId },
           });
-          const unitIds = loanItems.map((item) => item.unitId);
-          await tx.inventoryAssetUnit.updateMany({
-            where: { id: { in: unitIds } },
-            data: { statusId: loanedStatus.id },
+          await moveUnitsAndRecord(tx, {
+            units: loanItems.map((item) => ({
+              unitId: item.unitId,
+              previousStatusId: params.pendingStatusId,
+            })),
+            newStatusId: loanedStatus.id,
+            transactionTypeId: txType.id,
+            note: `Peminjaman disetujui penuh oleh Kepala Sekolah (No. Peminjaman: ${loan.loanNumber})`,
+            changedById: params.userId,
           });
-
-          for (const unitId of unitIds) {
-            await tx.inventoryHistory.create({
-              data: {
-                unitId,
-                transactionTypeId: txType.id,
-                previousStatusId: params.pendingStatusId,
-                newStatusId: loanedStatus.id,
-                note: `Peminjaman disetujui penuh oleh Kepala Sekolah (No. Peminjaman: ${loan.loanNumber})`,
-                changedById: params.userId,
-              },
-            });
-          }
 
           return { success: true, action: 'APPROVE_FINAL', log };
         }
