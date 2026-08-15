@@ -25,6 +25,28 @@ principle exists to prevent. The new bullet names HTTP as the channel and requir
 single anti-corruption feature to hold it, so the boundary stays reviewable now that a
 frontend split has made cross-app reads real for the first time.
 
+Version change: 1.3.0 → 2.0.0 (2026-08-15)
+Bump rationale: MAJOR — Principle III's sanctioned exception is narrowed, and a
+capability that existed is removed. `ADMIN` no longer bypasses the permission check;
+`ROLE_BYPASS_EXEMPT_PREFIXES` is deleted rather than extended. Any role that was
+relying on the bypass loses access until granted explicitly, which is a breaking
+change by definition even though no user held `ADMIN` when it shipped.
+Amendment (a)-(e):
+
+  (a) Edits: Principle III (one bypassing role instead of two, and the removal of the
+      exemption mechanism), this report, the version footer.
+  (b) Version and rationale: stated here.
+  (c) Docs affected: docs/adr/0011-remove-admin-bypass.md added, superseding ADR-0006
+      and ADR-0008 — both kept, since their reasoning is why this amendment exists.
+      CLAUDE.md updated in the same change.
+  (d) Trigger: the school asked for administrators per application. That request is
+      unsatisfiable while one role passes every check, and extending the exemption
+      list would have answered it for today's applications while leaving the next one
+      to be remembered.
+  (e) Cost of delay: nobody held `ADMIN` in either database at the time — zero users in
+      dev, and the role did not exist in production. The same change made after the
+      school had assigned it would have taken access away from working accounts.
+
 Version 1.2.0's report follows.
 
 Version change: 1.1.0 → 1.2.0 (2026-08-10)
@@ -252,16 +274,18 @@ Every query is scoped and every action is permission-controlled.
   segment plural). Role-name and role-code string comparisons are forbidden in
   controllers, use cases, and repositories. The single sanctioned exception is the
   role bypass inside `PermissionGuard` itself — the guard is where role-to-permission
-  resolution belongs, and that check MUST NOT be copied elsewhere. The bypass is not
-  uniform: `SUPER_ADMIN` passes every permission as break-glass, while `ADMIN` passes
-  every permission **except** those whose module segment is listed in
-  `ROLE_BYPASS_EXEMPT_PREFIXES` (currently `portal-` and `payroll-`). An exempt prefix
-  means a boundary the top operational role does not walk through by virtue of its role
-  (ADR-0006 for `portal-`, ADR-0008 for `payroll-`); adding one is an amendment to this
-  principle, not a configuration change. Note what an exemption does and does not do: it
-  removes the free pass, so the permission must be granted explicitly. It is therefore
-  the only mechanism that makes a grant meaningful at all — "simply do not grant it" is
-  no protection against a bypass that runs before grants are read.
+  resolution belongs, and that check MUST NOT be copied elsewhere. Exactly one role
+  bypasses: `SUPER_ADMIN`, as break-glass, so the school can recover when a grant
+  configuration has locked everybody out. Every other role, `ADMIN` included, is
+  authorised by the permissions it holds and by nothing else.
+  `ADMIN` bypassed too until 2026-08-15, everything except an enumerated list of
+  exempt prefixes (`portal-`, `payroll-`). That list was removed rather than extended
+  (ADR-0011, superseding ADR-0006 and ADR-0008): it enumerated what the role may *not*
+  do, so each new area needing separation had to be remembered into it, and forgetting
+  was silent — the permission simply worked, and no grant configuration revealed it.
+  Removing it inverts the default, which is what makes per-application administrators
+  possible at all. Adding any second bypassing role, or any exemption mechanism that
+  restores one, is an amendment to this principle rather than a configuration change.
 
 Rationale: wrong data in a school record looks exactly like correct data to the user
 reading it. Scoping and permission failures are silent by nature, so they must be
@@ -616,4 +640,4 @@ the code or corrected here; it is never left standing as fiction.
 **Runtime development guidance**: root `CLAUDE.md` for the workspace,
 `backend/docs/NESTJS-RULES.md` for backend work.
 
-**Version**: 1.3.0 | **Ratified**: 2026-08-06 | **Last Amended**: 2026-08-12
+**Version**: 2.0.0 | **Ratified**: 2026-08-06 | **Last Amended**: 2026-08-15

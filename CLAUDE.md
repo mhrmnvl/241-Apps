@@ -268,8 +268,10 @@ modules stay here beside the domains they read. Three things there are load-bear
   no file under `presence/` or `payroll/` can name one (FR-055, FR-056).
 
 `payroll/` is the only place holding salary. Every permission is prefixed `payroll-`,
-which is exempt from the `ADMIN` role bypass (ADR-0008) — an administrative role grants
-nothing here. Rounding is per line and then summed, never the reverse; a salary
+and holding an administrative role grants nothing here — nor anywhere else. Only
+`SUPER_ADMIN` bypasses the permission check; `ADMIN` is an ordinary role whose grants
+decide what it can reach, so an "Admin Akademik" stops at academic (ADR-0011,
+superseding the exemption lists of ADR-0006 and ADR-0008). Rounding is per line and then summed, never the reverse; a salary
 assignment is superseded rather than overwritten, which is what lets an earlier month
 recalculate to its original figures; and an `APPROVED` run is terminal, corrected only
 by an adjustment run.
