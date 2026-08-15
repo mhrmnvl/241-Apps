@@ -51,14 +51,28 @@ export class PrismaReportCardRepository extends IReportCardRepository {
 
     const resolvedSemesterId = await resolveSemesterId(this.prisma, semesterId);
 
+    // One `enrollment` object, merged.
+    //
+    // These were three separate spreads onto the same key, so the last one
+    // present replaced the others — and `resolvedSemesterId` is always present,
+    // because it falls back to the active semester. The student scope was
+    // therefore discarded on every call: `GET /rapors/me` returned the whole
+    // school's report cards to a student, which is the exact exposure this
+    // feature exists to close.
+    //
+    // It was found by signing in as one of two seeded students and reading the
+    // response, not by a test: the use-case tests mock this repository, so they
+    // asserted the scope was passed in and never that it survived.
+    const enrollment: Prisma.StudentEnrollmentWhereInput = {
+      ...(studentId && { studentId }),
+      ...(classroomId && { classroomId }),
+      ...(resolvedSemesterId && { semesterId: resolvedSemesterId }),
+    };
+
     const where: Prisma.ReportCardWhereInput = {
       deletedAt: null,
       ...(isPublished !== undefined && { isPublished }),
-      ...(studentId && { enrollment: { studentId } }),
-      ...(classroomId && { enrollment: { classroomId } }),
-      ...(resolvedSemesterId && {
-        enrollment: { semesterId: resolvedSemesterId },
-      }),
+      ...(Object.keys(enrollment).length > 0 && { enrollment }),
     };
 
     const [data, total, published, averages] = await Promise.all([
