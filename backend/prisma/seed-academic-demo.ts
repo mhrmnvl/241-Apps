@@ -301,26 +301,26 @@ async function main() {
 
       // 2. When it is taught. One period a week per subject, spread across the
       //    days so a timetable reads like a timetable.
+      //
+      //    The subject's whole timetable is replaced rather than added to.
+      //    Creating only what is missing is idempotent until the rule that
+      //    picks the slot changes, and then it is not: moving lessons out of
+      //    the break periods left the old rows in place beside the new ones,
+      //    and every subject appeared twice. A fixture has to converge on the
+      //    same timetable however the last version left it.
       const day = TEACHING_DAYS[s % TEACHING_DAYS.length];
       const slot = timeSlots[(classIndex + s) % timeSlots.length];
-      const existingSchedule = await prisma.schedule.findFirst({
-        where: {
+      await prisma.schedule.deleteMany({
+        where: { teachingAssignmentId: assignment.id },
+      });
+      await prisma.schedule.create({
+        data: {
           teachingAssignmentId: assignment.id,
-          day,
           timeSlotId: slot.id,
-          deletedAt: null,
+          day,
+          room: label,
         },
       });
-      if (!existingSchedule) {
-        await prisma.schedule.create({
-          data: {
-            teachingAssignmentId: assignment.id,
-            timeSlotId: slot.id,
-            day,
-            room: label,
-          },
-        });
-      }
 
       // 3. What is assessed.
       for (const spec of ASSESSMENTS) {
