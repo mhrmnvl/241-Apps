@@ -23,9 +23,13 @@ export const addressApi = {
     )
   },
   createAddressForUser: (userId: string, payload: AddressSavePayload) => {
-    return api.post<ApiSingleResponse<AddressRecord>>('/profiles', payload, {
-      params: { userId },
-    })
+    // Was `POST /profiles?userId=`, which the backend stopped serving when the
+    // address routes moved under their parent — and which had been ambiguous
+    // with two other controllers claiming the same path.
+    return api.post<ApiSingleResponse<AddressRecord>>(
+      `/profiles/${userId}/addresses`,
+      payload,
+    )
   },
   updateMyAddress: (addressId: string, payload: AddressSavePayload) => {
     return api.patch<ApiSingleResponse<AddressRecord>>(
