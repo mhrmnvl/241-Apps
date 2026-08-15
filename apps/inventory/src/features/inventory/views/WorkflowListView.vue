@@ -25,7 +25,24 @@ const loading = ref(false)
 const isFormOpen = ref(false)
 const isSubmitting = ref(false)
 
-const { can } = useRoleGuard()
+const { can, userRoles } = useRoleGuard()
+
+/**
+ * The role to offer as the first approver.
+ *
+ * Whoever is composing this holds `inventory-approvals.create`, which makes
+ * them the inventory administrator — and the first signature is almost always
+ * their own. Their own role code is therefore the one honest default available
+ * here: listing every role in the school would need `roles.read`, a platform
+ * grant an application administrator has no business holding.
+ *
+ * A hardcoded 'ADMIN' was the alternative and it was wrong on this deployment,
+ * where the inventory administrator is ADMIN_INVENTARIS and ADMIN holds
+ * nothing — a default that names a role which cannot open the approval screen.
+ */
+const ownRoleCode = computed(
+  () => userRoles.value.find((role) => role !== 'SUPER_ADMIN') ?? '',
+)
 
 /**
  * The only target this app approves. It is a field on the backend model
@@ -54,8 +71,8 @@ function openForm() {
     // signs, and the head teacher signs when the administrator asks. Both are
     // editable — this is a starting point, not a rule.
     steps: [
-      { approverRoleCode: 'ADMIN', isMandatory: true },
-      { approverRoleCode: 'PRINCIPAL', isMandatory: false },
+      { approverRoleCode: ownRoleCode.value, isMandatory: true },
+      { approverRoleCode: '', isMandatory: false },
     ],
   }
   isFormOpen.value = true
@@ -292,6 +309,12 @@ onMounted(() => {
 
         <div class="space-y-2">
           <Label>Tahapan</Label>
+          <p class="text-xs text-muted-foreground">
+            Isi dengan kode role, bukan nama orang — mis.
+            <span class="font-mono">ADMIN_INVENTARIS</span>,
+            <span class="font-mono">KEPALA_SEKOLAH</span>. Role dengan kode itu
+            harus ada di Manajemen Role.
+          </p>
           <div
             v-for="(step, index) in form.steps"
             :key="index"
@@ -305,7 +328,7 @@ onMounted(() => {
               </span>
               <Input
                 v-model="step.approverRoleCode"
-                placeholder="Kode role, mis. ADMIN"
+                placeholder="Kode role penyetuju"
                 class="font-mono"
               />
               <Button

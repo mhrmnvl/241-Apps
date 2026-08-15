@@ -1,5 +1,12 @@
 /**
- * The roles the code resolves by name, and therefore cannot run without.
+ * The roles that must exist for the deployment to work, and must not be
+ * deleted.
+ *
+ * Almost all of them are here because the code resolves them by name — delete
+ * one and the operation that looks it up breaks, far from the role screen where
+ * the deletion happened. `ADMIN` is the exception, and `requiredBy` says so
+ * rather than inventing a file: it is kept because the school's setup is built
+ * on it, not because anything in `src/` names it.
  *
  * This is the one source of truth for that fact. It used to be spread across
  * three places that could disagree — the IAM seed decided which roles were
@@ -23,7 +30,12 @@ export interface StructuralRole {
   code: string;
   name: string;
   description: string;
-  /** Where the code resolves it, so a reader can check the claim. */
+  /**
+   * Why it must exist. Normally the file that resolves it by name, so a reader
+   * can check the claim against the code — and where no file does, that is what
+   * this must say. A reason nobody can verify is worse than none: the entry
+   * looks load-bearing and nothing tells the next reader it is not.
+   */
   requiredBy: string;
 }
 
@@ -38,7 +50,21 @@ export const STRUCTURAL_ROLES: StructuralRole[] = [
     code: 'ADMIN',
     name: 'Administrator',
     description: 'Institution Administrator',
-    requiredBy: 'PermissionGuard — bypass except exempt prefixes',
+    // The one entry no file resolves. It said "PermissionGuard — bypass except
+    // exempt prefixes" until 2026-08-15, which ADR-0011 had already deleted:
+    // an unverifiable claim in the file whose whole job is to be checkable.
+    //
+    // Kept because the school's arrangement is built on it. The per-application
+    // administrators — ADMIN_INVENTARIS, ADMIN_AKADEMIK, and so on — are roles
+    // the school creates and narrows itself; this one is the person who runs
+    // all of them, and it must be there to be granted to.
+    //
+    // Like every entry here, bootstrapping it grants nothing. What it may do is
+    // decided on the role screen, and the platform keys — roles, permissions,
+    // users, sessions — are the grants to think twice about: an administrator
+    // holding those can hand themselves every application, which makes the
+    // separation decorative.
+    requiredBy: 'No code path — the school-wide administrator role',
   },
   {
     code: 'TEACHER',

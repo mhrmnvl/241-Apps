@@ -127,4 +127,66 @@ describe('roles the code resolves by name are protected from deletion', () => {
     expect(protectedByCode()).toContain('APPLICANT');
     expect(protectedByCode()).not.toContain('SARPRAS');
   });
+
+  /**
+   * `requiredBy` is a claim, and an unverifiable one is worse than none — the
+   * entry reads as load-bearing and nothing tells the next reader it is not.
+   *
+   * ADMIN's said "PermissionGuard — bypass except exempt prefixes" for months
+   * after ADR-0011 deleted exactly that. The list stayed correct; only its
+   * reason had rotted, which is the failure this pair of tests catches.
+   */
+  describe('every requiredBy is checkable', () => {
+    /** A filename in the reason, e.g. `prisma-teacher.writer.ts`. */
+    const FILENAME = /[a-z0-9-]+(?:\.[a-z0-9-]+)*\.ts/g;
+
+    it('points at files that exist and name the role', async () => {
+      const broken: string[] = [];
+
+      for (const role of STRUCTURAL_ROLES) {
+        for (const file of role.requiredBy.match(FILENAME) ?? []) {
+          const found: string[] = [];
+          for await (const entry of glob(`**/${file}`, { cwd: SRC })) {
+            found.push(entry);
+          }
+          if (found.length === 0) {
+            broken.push(`${role.code}: ${file} does not exist`);
+            continue;
+          }
+          const texts = await Promise.all(
+            found.map((entry) => readFile(join(SRC, entry), 'utf8')),
+          );
+          if (!texts.some((text) => text.includes(`'${role.code}'`))) {
+            broken.push(`${role.code}: ${file} does not name it`);
+          }
+        }
+      }
+
+      expect(broken).toEqual([]);
+    });
+
+    /**
+     * The other direction. An entry that says no code path must keep being
+     * true: start resolving ADMIN by name and this goes red, so the reason gets
+     * updated with the code rather than months later.
+     */
+    it('finds no code path for a role that claims none', () => {
+      const claimsNone = STRUCTURAL_ROLES.filter((role) =>
+        role.requiredBy.startsWith('No code path'),
+      );
+      expect(claimsNone.map((role) => role.code)).toEqual(['ADMIN']);
+
+      const resolved = new Set([
+        ...matches(source, ROLE_CODE_FIELD),
+        ...matches(source, ROLE_RELATION),
+        ...matches(source, ROLE_QUERY),
+      ]);
+
+      const contradicted = claimsNone
+        .map((role) => role.code)
+        .filter((code) => resolved.has(code));
+
+      expect(contradicted).toEqual([]);
+    });
+  });
 });
