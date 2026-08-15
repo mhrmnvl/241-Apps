@@ -6,6 +6,8 @@ import { DeleteReportCardUseCase } from '../use-cases/delete-report-card.use-cas
 import { BulkGenerateReportCardsUseCase } from '../use-cases/bulk-generate-report-cards.use-case.js';
 import { GenerateReportCardUseCase } from '../use-cases/generate-report-card.use-case.js';
 import { GetReportCardByIdUseCase } from '../use-cases/get-report-card-by-id.use-case.js';
+import { GetReportCardDetailUseCase } from '../use-cases/get-report-card-detail.use-case.js';
+import { GetMyReportCardDetailUseCase } from '../use-cases/get-my-report-card-detail.use-case.js';
 import { GetReportCardsUseCase } from '../use-cases/get-report-cards.use-case.js';
 import { GetMyReportCardsUseCase } from '../use-cases/get-my-report-cards.use-case.js';
 import { PublishReportCardUseCase } from '../use-cases/publish-report-card.use-case.js';
@@ -24,6 +26,8 @@ describe('ReportCardController', () => {
   const mockGetReportCards = { execute: jest.fn() };
   const mockGetMyReportCards = { execute: jest.fn() };
   const mockGetReportCardById = { execute: jest.fn() };
+  const mockGetReportCardDetail = { execute: jest.fn() };
+  const mockGetMyReportCardDetail = { execute: jest.fn() };
   const mockGenerateReportCard = { execute: jest.fn() };
   const mockBulkGenerateReportCards = { execute: jest.fn() };
   const mockUpdateReportCard = { execute: jest.fn() };
@@ -38,6 +42,14 @@ describe('ReportCardController', () => {
         { provide: GetReportCardsUseCase, useValue: mockGetReportCards },
         { provide: GetMyReportCardsUseCase, useValue: mockGetMyReportCards },
         { provide: GetReportCardByIdUseCase, useValue: mockGetReportCardById },
+        {
+          provide: GetReportCardDetailUseCase,
+          useValue: mockGetReportCardDetail,
+        },
+        {
+          provide: GetMyReportCardDetailUseCase,
+          useValue: mockGetMyReportCardDetail,
+        },
         {
           provide: GenerateReportCardUseCase,
           useValue: mockGenerateReportCard,

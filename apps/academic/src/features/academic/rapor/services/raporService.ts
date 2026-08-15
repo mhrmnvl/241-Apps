@@ -163,9 +163,21 @@ export const raporService = {
     }
   },
 
-  fetchRaporDetail: async (id: string) => {
+  /**
+   * `scope` says which screen is asking, not who the caller is.
+   *
+   * The student's own list and the management list are two surfaces, and each
+   * knows which it is. Deciding from the caller's role instead would break the
+   * moment the school creates a custom role — which it does — and the wrong
+   * branch there is a 403 in front of a parent, or a read of somebody else's
+   * card.
+   */
+  fetchRaporDetail: async (id: string, scope: 'own' | 'any' = 'any') => {
     try {
-      const res = await raporApi.getRaporDetail(id)
+      const res =
+        scope === 'own'
+          ? await raporApi.getMyRaporDetail(id)
+          : await raporApi.getRaporDetail(id)
       return res.data
     } catch (error: unknown) {
       toast.error(
@@ -241,12 +253,20 @@ export const raporService = {
 
   fetchScoresForRapor: async (
     enrollmentId: string,
+    scope: 'own' | 'any' = 'any',
   ): Promise<RaporScoreRow[]> => {
     try {
-      const res = await studentScoreApi.getScores({
+      // `/student-scores` reads the whole school and a student does not hold
+      // it, so the self-service screen asked and was refused — the second half
+      // of why this dialog opened empty.
+      const params = {
         enrollmentId,
         limit: PAGINATION.CHILD_ENTITY_LIMIT,
-      })
+      }
+      const res =
+        scope === 'own'
+          ? await studentScoreApi.getMyScores(params)
+          : await studentScoreApi.getScores(params)
       const rawScores = res.data?.data ?? []
       return rawScores.map(
         (s: StudentScoreItem): RaporScoreRow => ({

@@ -38,6 +38,8 @@ import { GenerateReportCardUseCase } from '../use-cases/generate-report-card.use
 import { GetReportCardByIdUseCase } from '../use-cases/get-report-card-by-id.use-case.js';
 import { GetReportCardsUseCase } from '../use-cases/get-report-cards.use-case.js';
 import { GetMyReportCardsUseCase } from '../use-cases/get-my-report-cards.use-case.js';
+import { GetReportCardDetailUseCase } from '../use-cases/get-report-card-detail.use-case.js';
+import { GetMyReportCardDetailUseCase } from '../use-cases/get-my-report-card-detail.use-case.js';
 import { PublishReportCardUseCase } from '../use-cases/publish-report-card.use-case.js';
 import { UpdateReportCardUseCase } from '../use-cases/update-report-card.use-case.js';
 import { ExportReportCardPdfUseCase } from '../use-cases/export-report-card-pdf.use-case.js';
@@ -51,6 +53,8 @@ export class ReportCardController {
     private readonly getReportCardsService: GetReportCardsUseCase,
     private readonly getMyReportCardsService: GetMyReportCardsUseCase,
     private readonly getReportCardByIdService: GetReportCardByIdUseCase,
+    private readonly getReportCardDetailService: GetReportCardDetailUseCase,
+    private readonly getMyReportCardDetailService: GetMyReportCardDetailUseCase,
     private readonly generateReportCardService: GenerateReportCardUseCase,
     private readonly bulkGenerateReportCardsService: BulkGenerateReportCardsUseCase,
     private readonly updateReportCardService: UpdateReportCardUseCase,
@@ -80,6 +84,36 @@ export class ReportCardController {
     @Query() query: ReportCardQueryDto,
   ) {
     return this.getMyReportCardsService.execute(query, user.id);
+  }
+
+  /**
+   * One of the caller's own cards, opened from their own list.
+   *
+   * A separate route from the one below rather than a branch inside it: the
+   * permission is then the boundary, and a role's grants say what its holder
+   * may open without anyone reading a use case.
+   */
+  @Get('me/:id/detail')
+  @RequirePermissions('report-cards.read-own')
+  @ApiOperation({
+    summary: 'Your own published report card, with its attendance',
+  })
+  @ApiParam({ name: 'id', format: 'uuid' })
+  findMyDetail(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id', ParseUUIDPipe) id: string,
+  ) {
+    return this.getMyReportCardDetailService.execute(id, user.id);
+  }
+
+  @Get(':id/detail')
+  @RequirePermissions('report-cards.read')
+  @ApiOperation({
+    summary: "Any student's report card, with its attendance",
+  })
+  @ApiParam({ name: 'id', format: 'uuid' })
+  findDetail(@Param('id', ParseUUIDPipe) id: string) {
+    return this.getReportCardDetailService.execute(id);
   }
 
   @Get(':id')

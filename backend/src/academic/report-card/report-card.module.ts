@@ -12,6 +12,8 @@ import { GenerateReportCardUseCase } from './use-cases/generate-report-card.use-
 import { GetReportCardByIdUseCase } from './use-cases/get-report-card-by-id.use-case.js';
 import { GetReportCardsUseCase } from './use-cases/get-report-cards.use-case.js';
 import { GetMyReportCardsUseCase } from './use-cases/get-my-report-cards.use-case.js';
+import { GetReportCardDetailUseCase } from './use-cases/get-report-card-detail.use-case.js';
+import { GetMyReportCardDetailUseCase } from './use-cases/get-my-report-card-detail.use-case.js';
 import { StudentModule } from '../student/student.module.js';
 import { PublishReportCardUseCase } from './use-cases/publish-report-card.use-case.js';
 import { UpdateReportCardUseCase } from './use-cases/update-report-card.use-case.js';
@@ -39,6 +41,8 @@ import { IReportCardRepository } from './domain/interfaces/report-card-repositor
     GetReportCardsUseCase,
     GetMyReportCardsUseCase,
     GetReportCardByIdUseCase,
+    GetReportCardDetailUseCase,
+    GetMyReportCardDetailUseCase,
     GenerateReportCardUseCase,
     BulkGenerateReportCardsUseCase,
     UpdateReportCardUseCase,

@@ -20,7 +20,14 @@ export const studentScoreApi = {
    * The caller's own marks, across their enrolments. No student parameter
    * exists — a score belongs to whoever signed in, and the server says which.
    */
-  getMyScores: (params?: { semesterId?: string; limit?: number }) => {
+  getMyScores: (params?: {
+    semesterId?: string
+    enrollmentId?: string
+    limit?: number
+  }) => {
+    // `enrollmentId` narrows to one term's marks. It cannot widen: the server
+    // applies the caller's own student after the query, so naming a
+    // classmate's enrolment returns nothing rather than theirs.
     return api.get<ApiPaginatedResponse<StudentScoreItem>>(
       '/student-scores/me',
       { params },

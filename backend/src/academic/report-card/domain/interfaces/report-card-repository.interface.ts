@@ -65,6 +65,17 @@ export abstract class IReportCardRepository {
     query: ReportCardQueryInput,
   ): Promise<PaginatedResult<ReportCardWithDetails, ReportCardSummary>>;
   abstract findById(id: string): Promise<ReportCardWithDetails | null>;
+  /**
+   * Which enrolment, and therefore which student, a card belongs to.
+   *
+   * A projection of its own rather than a read of the whole card:
+   * `ReportCardWithDetails` types every field optional, so the enrolment it
+   * carries can be narrowed away without anything failing to compile — and
+   * whose card this is decides whether a student may open it.
+   */
+  abstract findOwnership(
+    id: string,
+  ): Promise<{ enrollmentId: string; studentId: string } | null>;
   abstract findByEnrollmentId(
     enrollmentId: string,
   ): Promise<ReportCardWithDetails | null>;

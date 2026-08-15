@@ -83,9 +83,11 @@ onMounted(() => void raporService.fetchMine())
       hide-per-page
     />
 
+    <!-- The student's own screen, so it reads through the self-service routes. -->
     <RaporDetailDialog
       v-model:open="detailOpen"
       :rapor="selected"
+      scope="own"
     />
   </div>
 </template>

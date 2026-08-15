@@ -114,6 +114,23 @@ export class PrismaReportCardRepository extends IReportCardRepository {
     });
   }
 
+  async findOwnership(
+    id: string,
+  ): Promise<{ enrollmentId: string; studentId: string } | null> {
+    const row = await this.prisma.reportCard.findFirst({
+      where: { id, deletedAt: null },
+      select: {
+        enrollmentId: true,
+        enrollment: { select: { studentId: true } },
+      },
+    });
+    if (!row) return null;
+    return {
+      enrollmentId: row.enrollmentId,
+      studentId: row.enrollment.studentId,
+    };
+  }
+
   async findByEnrollmentId(
     enrollmentId: string,
   ): Promise<ReportCardWithDetails | null> {
