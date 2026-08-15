@@ -19,12 +19,23 @@ import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
 import type { ColumnDef } from '@tanstack/vue-table'
 import { h } from 'vue'
 import { Check, X } from 'lucide-vue-next'
+import { useRoleGuard } from '@/features/platform/auth'
 import { approvalService } from '../services/approvalService'
 import type {
   ApprovalInstance,
   ApprovalStep,
   InventoryLoanItem,
 } from '../types'
+
+const { can } = useRoleGuard()
+
+/**
+ * Reading the queue and signing it are separate grants, so the buttons follow
+ * the second. The backend refuses either way — and refuses again if the
+ * workflow does not name the caller as this step's approver, which no screen
+ * can know in advance — but a button that always fails is worse than no button.
+ */
+const canProcess = can('inventory-approvals.update')
 
 // State
 const pendingApprovals = ref<ApprovalInstance[]>([])
@@ -315,7 +326,10 @@ onMounted(() => {
             >Batal</Button
           >
 
-          <div class="flex space-x-2">
+          <div
+            v-if="canProcess"
+            class="flex space-x-2"
+          >
             <Button
               type="button"
               variant="destructive"
