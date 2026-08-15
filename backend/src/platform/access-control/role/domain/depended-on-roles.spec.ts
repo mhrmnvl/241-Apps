@@ -1,4 +1,5 @@
 import { readFile } from 'node:fs/promises';
+import { STRUCTURAL_ROLES } from '../constants/structural-roles.constants.js';
 import { join } from 'node:path';
 import { glob } from 'node:fs/promises';
 
@@ -17,12 +18,11 @@ import { glob } from 'node:fs/promises';
  * without touching the endpoint.
  *
  * This is syntactic on purpose: no database, and it fails on the mismatch
- * rather than on the consequence. Resolve a new role by code and the suite
- * stays red until the seed protects it.
+ * rather than on the consequence. Resolve a new role by code and the suite stays
+ * red until `STRUCTURAL_ROLES` names it.
  */
 
 const SRC = join(process.cwd(), 'src');
-const SEED = join(process.cwd(), 'prisma', 'seeds', 'modules', 'iam.seed.ts');
 
 /** `roleCode: 'TEACHER'` — provisioning an account with a role. */
 const ROLE_CODE_FIELD = /roleCode:\s*'([A-Z_]+)'/g;
@@ -46,20 +46,22 @@ function matches(text: string, pattern: RegExp): string[] {
   return [...found];
 }
 
-/** Role codes the seed creates with `isSystem: true`. */
-function protectedBySeed(seed: string): string[] {
-  const found: string[] = [];
-  for (const entry of seed.matchAll(
-    /code:\s*'([A-Z_]+)',[\s\S]{0,200}?isSystem:\s*(true|false)/g,
-  )) {
-    if (entry[2] === 'true') found.push(entry[1]);
-  }
-  return found;
+/**
+ * The codes the application protects, read from the constant rather than the
+ * seed.
+ *
+ * It read the seed until the source of truth moved. That mattered: production
+ * runs no seed, so a check against it was asking a file that never executes
+ * there whether a role would be protected on the box where it matters most.
+ * `STRUCTURAL_ROLES` ships with the code, is ensured at boot, and is what
+ * `DeleteRoleUseCase` consults.
+ */
+function protectedByCode(): string[] {
+  return STRUCTURAL_ROLES.map((role) => role.code);
 }
 
 describe('roles the code resolves by name are protected from deletion', () => {
   let source: string;
-  let seed: string;
 
   beforeAll(async () => {
     const parts: string[] = [];
@@ -69,19 +71,17 @@ describe('roles the code resolves by name are protected from deletion', () => {
       }
     }
     source = code(parts.join('\n'));
-    seed = await readFile(SEED, 'utf8');
     // Reads every source file under `src`, which is slow enough under a full
     // parallel run to exceed jest's 5s default — it passed alone and failed in
     // the suite, which is the worst way for a guard to behave: people learn to
     // re-run instead of to look.
   }, 60_000);
 
-  it('finds the sources and the seed', () => {
+  it('finds the sources', () => {
     expect(source.length).toBeGreaterThan(1000);
-    expect(seed).toContain('isSystem');
   });
 
-  it('seeds every role the code resolves by code as a system role', () => {
+  it('protects every role the code resolves by name', () => {
     const resolved = [
       ...matches(source, ROLE_CODE_FIELD),
       ...matches(source, ROLE_RELATION),
@@ -89,7 +89,7 @@ describe('roles the code resolves by name are protected from deletion', () => {
     ];
     expect(resolved.length).toBeGreaterThan(0);
 
-    const protectedCodes = protectedBySeed(seed);
+    const protectedCodes = protectedByCode();
     const unprotected = [...new Set(resolved)]
       .filter((role) => !protectedCodes.includes(role))
       .sort();
@@ -117,11 +117,14 @@ describe('roles the code resolves by name are protected from deletion', () => {
     ).toEqual(['APPLICANT']);
   });
 
-  it('reads isSystem per role rather than anywhere in the file', () => {
-    const seedish = `
-      { code: 'KEPT', name: 'a', isSystem: true },
-      { code: 'LOOSE', name: 'b', isSystem: false },
-    `;
-    expect(protectedBySeed(seedish)).toEqual(['KEPT']);
+  /**
+   * The constant is what `DeleteRoleUseCase` and the bootstrap hook consult, so
+   * a code listed here is protected everywhere rather than in whichever file
+   * happened to be read.
+   */
+  it('names the roles the application actually protects', () => {
+    expect(protectedByCode()).toContain('TEACHER');
+    expect(protectedByCode()).toContain('APPLICANT');
+    expect(protectedByCode()).not.toContain('SARPRAS');
   });
 });

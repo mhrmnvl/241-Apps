@@ -54,11 +54,21 @@ describe('AccountProvisioningService', () => {
     expect(user).toEqual({ id: 'u-1' });
   });
 
-  it('skips role assignment when the role code is not found', async () => {
+  /**
+   * This test used to assert the opposite — that a missing role was skipped —
+   * and that is how the behaviour survived: the defect was written down as the
+   * intent, so nobody reading the suite would question it.
+   *
+   * What it actually produced was an account with no role. The person could
+   * sign in, hold no permission, see an empty application, and nothing
+   * anywhere said why. Creating a teacher looked like it had worked.
+   */
+  it('refuses rather than creating an account with no role', async () => {
     const tx = makeTx(null);
 
-    await service.provision(tx, input);
-
+    await expect(service.provision(tx, input)).rejects.toThrow(
+      /TEACHER role does not exist/,
+    );
     expect(tx.userRole.create).not.toHaveBeenCalled();
   });
 
