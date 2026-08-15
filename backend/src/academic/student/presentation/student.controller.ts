@@ -67,8 +67,16 @@ export class StudentController {
    * The caller is deliberately not a parameter here, and that is the point of
    * the permission. This route answers about the school, not about the person
    * asking, so it is not narrowed for anyone — it is simply not granted to
-   * them. A student holds `students.read-own` and reaches their own record
-   * through `GET :id` below, which does check who is asking.
+   * them.
+   *
+   * This used to claim that a student reaches their own record through
+   * `GET :id` below, "which does check who is asking". It does not: `:id`
+   * requires `students.read` and takes no caller, so `students.read-own` is
+   * granted to the student role and guards nothing at all. No screen asks for
+   * it either — the student menu gates on the four `-own` codes for schedule,
+   * attendance, scores and rapor. Either a `GET me` route should exist or the
+   * permission should not; what must not stand is a sentence telling the next
+   * reader the check is already there.
    *
    * It used to take `@CurrentUser() _user` and ignore it, while the student
    * role held `students.read`. The underscore recorded that ignoring it was

@@ -215,14 +215,19 @@ async function main() {
     where: { deletedAt: null },
     orderBy: { nip: 'asc' },
   });
+  // Lesson slots only. The list also holds break and prayer periods, and a
+  // timetable that teaches Matematika during Istirahat Pertama is the kind of
+  // thing an audience notices before anything else on the screen.
   const timeSlots = await prisma.timeSlot.findMany({
-    where: { deletedAt: null },
+    where: { deletedAt: null, type: { isLesson: true } },
     orderBy: { order: 'asc' },
   });
   if (subjects.length < SUBJECTS_PER_CLASS || teachers.length === 0) {
     throw new Error('Not enough subjects or teachers to teach anything.');
   }
-  if (timeSlots.length === 0) throw new Error('No time slots to timetable on.');
+  if (timeSlots.length === 0) {
+    throw new Error('No lesson time slots to timetable on.');
+  }
 
   const studentRole = await prisma.role.findFirst({
     where: { code: 'STUDENT' },
