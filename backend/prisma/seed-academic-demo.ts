@@ -241,7 +241,10 @@ async function main() {
   let nikCursor = 0;
 
   for (const [classIndex, classroom] of classrooms.entries()) {
-    const label = `${classroom.grade.name}-${classroom.code}`;
+    // The code already carries the grade — 'VII-A', not 'A' — so prefixing the
+    // grade again gives 'VII-VII-A', and the sign-in names a demo types out
+    // become siswa.vii-vii-a.001.
+    const label = classroom.code;
 
     // 1. Who teaches what here. Subjects are taken in order so two classes of
     //    the same grade share a curriculum, and teachers round-robin across
