@@ -32,17 +32,32 @@ export const approvalService = {
     }
   },
 
+  /**
+   * `forwardToNextApprover` only reaches an optional next step: a mandatory one
+   * is taken regardless, and the backend decides that — the screen never
+   * assumes an approval is final.
+   */
   process: async (
     id: string,
     action: 'APPROVE' | 'REJECT',
     note?: string,
+    forwardToNextApprover?: boolean,
   ): Promise<boolean> => {
     try {
-      await inventoryApi.processApproval(id, { action, note })
+      const res = await inventoryApi.processApproval(id, {
+        action,
+        note,
+        forwardToNextApprover,
+      })
+      // The backend says whether the loan is done or now sits with the next
+      // approver, so the message tells the truth rather than guessing it.
+      const outcome = res.data?.data?.action
       toast.success(
-        action === 'APPROVE'
-          ? 'Pengajuan berhasil disetujui.'
-          : 'Pengajuan berhasil ditolak.',
+        outcome === 'REJECT'
+          ? 'Pengajuan berhasil ditolak.'
+          : outcome === 'APPROVE_STEP'
+            ? 'Disetujui dan diteruskan ke penyetuju berikutnya.'
+            : 'Pengajuan berhasil disetujui.',
       )
       return true
     } catch (e) {

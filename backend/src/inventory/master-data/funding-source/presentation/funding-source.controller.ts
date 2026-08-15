@@ -35,21 +35,21 @@ export class FundingSourceController {
   ) {}
 
   @Get()
-  @RequirePermissions('inventory.read')
+  @RequirePermissions('inventory-master-data.read')
   @ApiOperation({ summary: 'Get funding source list' })
   async getFundingSources(@Query('search') search?: string) {
     return this.getFundingSourcesUseCase.execute(search);
   }
 
   @Post()
-  @RequirePermissions('inventory.create')
+  @RequirePermissions('inventory-master-data.create')
   @ApiOperation({ summary: 'Create funding source item' })
   async createFundingSource(@Body() data: CreateFundingSourceDto) {
     return this.createFundingSourceUseCase.execute(data);
   }
 
   @Patch(':id')
-  @RequirePermissions('inventory.update')
+  @RequirePermissions('inventory-master-data.update')
   @ApiOperation({ summary: 'Update funding source item' })
   async updateFundingSource(
     @Param('id', ParseUUIDPipe) id: string,
@@ -60,7 +60,7 @@ export class FundingSourceController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @RequirePermissions('inventory.delete')
+  @RequirePermissions('inventory-master-data.delete')
   @ApiOperation({ summary: 'Delete funding source item' })
   async deleteFundingSource(@Param('id', ParseUUIDPipe) id: string) {
     await this.deleteFundingSourceUseCase.execute(id);

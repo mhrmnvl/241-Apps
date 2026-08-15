@@ -24,9 +24,14 @@ export class CreateWorkflowStepDto {
   })
   @IsString()
   @IsNotEmpty()
-  approverRoleId: string;
+  approverRoleCode: string;
 
-  @ApiPropertyOptional({ default: true })
+  @ApiPropertyOptional({
+    description:
+      'False leaves this step to the previous approver, who decides per ' +
+      'request whether it is also taken. A mandatory step is always taken.',
+    default: true,
+  })
   @IsBoolean()
   @IsOptional()
   isMandatory?: boolean;

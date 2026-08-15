@@ -570,30 +570,105 @@ export const SYSTEM_PERMISSIONS: SystemPermission[] = [
     description: 'Update graduations',
   },
 
-  // inventory
+  // --- inventory ---
+  //
+  // Four areas, where there used to be one `inventory.*`. That single module
+  // could not express the arrangement the school actually runs: the inventory
+  // administrator keeps the register and signs the loans, while a teacher only
+  // borrows. Under one code, granting a teacher enough to request a projector
+  // also let them edit the asset register, delete a location, and read the
+  // approval queue — the four are genuinely different jobs and now say so.
+
+  // inventory-assets
   {
-    module: 'inventory',
+    module: 'inventory-assets',
     action: 'create',
-    code: 'inventory.create',
-    description: 'Create inventory',
+    code: 'inventory-assets.create',
+    description: 'Add assets and asset units to the register',
   },
   {
-    module: 'inventory',
+    module: 'inventory-assets',
     action: 'delete',
-    code: 'inventory.delete',
-    description: 'Delete inventory',
+    code: 'inventory-assets.delete',
+    description: 'Delete assets and asset units',
   },
   {
-    module: 'inventory',
+    module: 'inventory-assets',
     action: 'read',
-    code: 'inventory.read',
-    description: 'Read inventory',
+    code: 'inventory-assets.read',
+    description: 'Read the asset register',
   },
   {
-    module: 'inventory',
+    module: 'inventory-assets',
     action: 'update',
-    code: 'inventory.update',
-    description: 'Update inventory',
+    code: 'inventory-assets.update',
+    description: 'Update assets and asset units',
+  },
+
+  // inventory-loans
+  {
+    module: 'inventory-loans',
+    action: 'create',
+    code: 'inventory-loans.create',
+    description: 'Request a loan — what a borrower needs, and all they need',
+  },
+  {
+    module: 'inventory-loans',
+    action: 'read',
+    code: 'inventory-loans.read',
+    description: 'Read loan transactions and the circulation history',
+  },
+  {
+    module: 'inventory-loans',
+    action: 'update',
+    code: 'inventory-loans.update',
+    description: 'Record the return of borrowed assets',
+  },
+
+  // inventory-approvals
+  {
+    module: 'inventory-approvals',
+    action: 'create',
+    code: 'inventory-approvals.create',
+    description: 'Define who approves a loan, and in what order',
+  },
+  {
+    module: 'inventory-approvals',
+    action: 'read',
+    code: 'inventory-approvals.read',
+    description: 'Read the approval queue and the workflows behind it',
+  },
+  {
+    module: 'inventory-approvals',
+    action: 'update',
+    code: 'inventory-approvals.update',
+    description: 'Approve or reject a loan request',
+  },
+
+  // inventory-master-data
+  {
+    module: 'inventory-master-data',
+    action: 'create',
+    code: 'inventory-master-data.create',
+    description: 'Create inventory categories, locations, conditions, statuses',
+  },
+  {
+    module: 'inventory-master-data',
+    action: 'delete',
+    code: 'inventory-master-data.delete',
+    description: 'Delete inventory reference data',
+  },
+  {
+    module: 'inventory-master-data',
+    action: 'read',
+    code: 'inventory-master-data.read',
+    description: 'Read inventory reference data',
+  },
+  {
+    module: 'inventory-master-data',
+    action: 'update',
+    code: 'inventory-master-data.update',
+    description: 'Update inventory reference data',
   },
 
   // occupations

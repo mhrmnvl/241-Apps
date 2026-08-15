@@ -45,18 +45,48 @@ export class ProcessApprovalUseCase {
       );
     }
 
-    const approverRoleId = String(activeStep.approverRoleId ?? '');
-    const isAuthorized =
-      roleCodes.includes(approverRoleId) || roleCodes.includes('SUPER_ADMIN');
-    if (!isAuthorized) {
+    // Who approves this step is workflow configuration, not a name written into
+    // the code: the school sets it when defining the workflow, and this compares
+    // the caller's roles against what they set.
+    //
+    // The `|| roleCodes.includes('SUPER_ADMIN')` that used to sit here was a
+    // different thing - a bypass copied out of PermissionGuard, which the
+    // constitution forbids exactly because a second copy drifts from the first.
+    // A super admin who genuinely needs to approve is named as the step's
+    // approver, like anybody else.
+    const approverRoleCode = String(activeStep.approverRoleCode ?? '');
+    if (!roleCodes.includes(approverRoleCode)) {
       throw new ForbiddenException(
-        `You do not have the required role (${approverRoleId}) to process this step.`,
+        `You do not have the required role (${approverRoleCode}) to process this step.`,
       );
     }
 
     const nextStep = steps.find((s) => s.stepSequence === currentSeq + 1);
 
-    // 5. Execute process in a database transaction inside the repository
+    /**
+     * Whether this approval finishes the loan or passes it on.
+     *
+     * A mandatory next step is always taken: the workflow says the loan needs
+     * that signature and an approver cannot waive it. An optional one is the
+     * approver's call - the inventory administrator decides, per loan, whether
+     * it also needs the head teacher.
+     *
+     * Asking to forward when there is nobody to forward to is refused rather
+     * than ignored. Ignoring it would leave the requester told their loan is
+     * with an approver who does not exist, and waiting for a signature that can
+     * never come.
+     */
+    if (dto.forwardToNextApprover && !nextStep) {
+      throw new BadRequestException(
+        'This workflow has no further approver to forward to.',
+      );
+    }
+
+    const forwarding =
+      dto.action === 'APPROVE' &&
+      !!nextStep &&
+      (nextStep.isMandatory || dto.forwardToNextApprover === true);
+
     return this.approvalRepository.processApprovalTransaction({
       instanceId,
       referenceId: instance.referenceId,
@@ -65,8 +95,8 @@ export class ProcessApprovalUseCase {
       userId,
       note: dto.note,
       pendingStatusId: pendingStatus.id,
-      hasNextStep: !!nextStep,
-      nextStepSequence: nextStep?.stepSequence,
+      hasNextStep: forwarding,
+      nextStepSequence: forwarding ? nextStep?.stepSequence : undefined,
     });
   }
 }

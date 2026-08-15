@@ -27,21 +27,21 @@ export class WorkflowController {
   ) {}
 
   @Get()
-  @RequirePermissions('inventory.read')
+  @RequirePermissions('inventory-approvals.read')
   @ApiOperation({ summary: 'List all workflow templates' })
   async findAll() {
     return this.getWorkflowsUseCase.execute();
   }
 
   @Get(':id')
-  @RequirePermissions('inventory.read')
+  @RequirePermissions('inventory-approvals.read')
   @ApiOperation({ summary: 'Get workflow template by ID' })
   async findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.getWorkflowByIdUseCase.execute(id);
   }
 
   @Post()
-  @RequirePermissions('inventory.create')
+  @RequirePermissions('inventory-approvals.create')
   @ApiOperation({ summary: 'Create a new workflow template' })
   async create(@Body() dto: CreateWorkflowDto) {
     return this.createWorkflowUseCase.execute(dto);

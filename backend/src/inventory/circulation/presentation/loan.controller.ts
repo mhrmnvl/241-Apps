@@ -36,21 +36,21 @@ export class LoanController {
   ) {}
 
   @Get()
-  @RequirePermissions('inventory.read')
+  @RequirePermissions('inventory-loans.read')
   @ApiOperation({ summary: 'List all loan transactions' })
   async findAll(@Query() query: LoanQueryDto) {
     return this.getLoansUseCase.execute(query);
   }
 
   @Get(':id')
-  @RequirePermissions('inventory.read')
+  @RequirePermissions('inventory-loans.read')
   @ApiOperation({ summary: 'Get loan transaction by ID' })
   async findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.getLoanByIdUseCase.execute(id);
   }
 
   @Post()
-  @RequirePermissions('inventory.create')
+  @RequirePermissions('inventory-loans.create')
   @ApiOperation({ summary: 'Request a new loan' })
   async create(
     @Body() dto: CreateLoanDto,
@@ -60,7 +60,7 @@ export class LoanController {
   }
 
   @Post(':id/return')
-  @RequirePermissions('inventory.update')
+  @RequirePermissions('inventory-loans.update')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Return borrowed assets' })
   async returnLoan(

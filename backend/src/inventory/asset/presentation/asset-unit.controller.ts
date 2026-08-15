@@ -32,7 +32,7 @@ export class AssetUnitController {
   ) {}
 
   @Get()
-  @RequirePermissions('inventory.read')
+  @RequirePermissions('inventory-assets.read')
   @ApiOperation({
     summary: 'List asset units (paginated, searchable, lendable-only)',
   })
@@ -41,7 +41,7 @@ export class AssetUnitController {
   }
 
   @Patch(':id')
-  @RequirePermissions('inventory.update')
+  @RequirePermissions('inventory-assets.update')
   @ApiOperation({
     summary: 'Update an asset unit (condition/status/location/custodian/etc.)',
   })
@@ -54,7 +54,7 @@ export class AssetUnitController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @RequirePermissions('inventory.delete')
+  @RequirePermissions('inventory-assets.delete')
   @ApiOperation({ summary: 'Soft-delete an asset unit' })
   async remove(@Param('id', ParseUUIDPipe) id: string) {
     await this.deleteUnitUseCase.execute(id);

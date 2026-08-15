@@ -12,7 +12,7 @@ export class MetadataController {
   constructor(private readonly getMetadataUseCase: GetMetadataUseCase) {}
 
   @Get('metadata')
-  @RequirePermissions('inventory.read')
+  @RequirePermissions('inventory-master-data.read')
   @ApiOperation({ summary: 'Get metadata for inventory dropdowns' })
   async getMetadata() {
     return this.getMetadataUseCase.execute();

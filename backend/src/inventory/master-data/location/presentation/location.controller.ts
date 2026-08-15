@@ -35,21 +35,21 @@ export class LocationController {
   ) {}
 
   @Get()
-  @RequirePermissions('inventory.read')
+  @RequirePermissions('inventory-master-data.read')
   @ApiOperation({ summary: 'Get location list' })
   async getLocations(@Query('search') search?: string) {
     return this.getLocationsUseCase.execute(search);
   }
 
   @Post()
-  @RequirePermissions('inventory.create')
+  @RequirePermissions('inventory-master-data.create')
   @ApiOperation({ summary: 'Create location item' })
   async createLocation(@Body() data: CreateLocationDto) {
     return this.createLocationUseCase.execute(data);
   }
 
   @Patch(':id')
-  @RequirePermissions('inventory.update')
+  @RequirePermissions('inventory-master-data.update')
   @ApiOperation({ summary: 'Update location item' })
   async updateLocation(
     @Param('id', ParseUUIDPipe) id: string,
@@ -60,7 +60,7 @@ export class LocationController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @RequirePermissions('inventory.delete')
+  @RequirePermissions('inventory-master-data.delete')
   @ApiOperation({ summary: 'Delete location item' })
   async deleteLocation(@Param('id', ParseUUIDPipe) id: string) {
     await this.deleteLocationUseCase.execute(id);

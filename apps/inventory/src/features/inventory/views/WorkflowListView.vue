@@ -91,7 +91,18 @@ onMounted(() => {
                       class="flex items-center space-x-1.5 border px-3 py-1.5 rounded-lg bg-background text-sm font-medium"
                     >
                       <Shield class="size-4 text-primary" />
-                      <span>{{ step.approverRoleId }}</span>
+                      <span>{{ step.approverRoleCode }}</span>
+                      <!--
+                        An optional step is the difference between "this loan
+                        needs two signatures" and "the first approver may ask
+                        for a second", which is not visible from the role name.
+                      -->
+                      <span
+                        v-if="!step.isMandatory"
+                        class="text-xs font-normal text-muted-foreground"
+                      >
+                        (opsional)
+                      </span>
                     </div>
 
                     <!-- Connector arrow -->

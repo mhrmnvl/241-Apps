@@ -35,21 +35,21 @@ export class StatusController {
   ) {}
 
   @Get()
-  @RequirePermissions('inventory.read')
+  @RequirePermissions('inventory-master-data.read')
   @ApiOperation({ summary: 'Get status list' })
   async getStatuses(@Query('search') search?: string) {
     return this.getStatusesUseCase.execute(search);
   }
 
   @Post()
-  @RequirePermissions('inventory.create')
+  @RequirePermissions('inventory-master-data.create')
   @ApiOperation({ summary: 'Create status item' })
   async createStatus(@Body() data: CreateStatusDto) {
     return this.createStatusUseCase.execute(data);
   }
 
   @Patch(':id')
-  @RequirePermissions('inventory.update')
+  @RequirePermissions('inventory-master-data.update')
   @ApiOperation({ summary: 'Update status item' })
   async updateStatus(
     @Param('id', ParseUUIDPipe) id: string,
@@ -60,7 +60,7 @@ export class StatusController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @RequirePermissions('inventory.delete')
+  @RequirePermissions('inventory-master-data.delete')
   @ApiOperation({ summary: 'Delete status item' })
   async deleteStatus(@Param('id', ParseUUIDPipe) id: string) {
     await this.deleteStatusUseCase.execute(id);

@@ -14,7 +14,7 @@ export class CreateWorkflowUseCase {
       isActive: true,
       steps: dto.steps.map((step) => ({
         stepSequence: step.stepSequence,
-        approverRoleId: step.approverRoleId,
+        approverRoleCode: step.approverRoleCode,
         isMandatory: step.isMandatory ?? true,
       })),
     });

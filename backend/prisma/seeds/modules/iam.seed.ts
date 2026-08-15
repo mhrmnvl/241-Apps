@@ -220,10 +220,22 @@ export async function seedIam(prisma: PrismaClient) {
   }
 
   // PRINCIPAL permissions
+  //
+  // The head teacher is the optional second approver on a loan: the inventory
+  // administrator decides, per request, whether it also needs this signature.
+  // So the grant is the approval queue plus enough of the loan and the asset to
+  // judge it — not the register itself, which is the administrator's to keep.
+  //
+  // Two of the three codes here were `inventory.loans.read` and
+  // `inventory.approvals.process`, neither of which has ever existed. The loop
+  // below matches against real permissions, so they granted nothing and said
+  // nothing about it; the head teacher had `inventory.read` alone and could not
+  // approve anything.
   const principalPermissionCodes = [
-    'inventory.read',
-    'inventory.loans.read',
-    'inventory.approvals.process',
+    'inventory-approvals.read',
+    'inventory-approvals.update',
+    'inventory-loans.read',
+    'inventory-assets.read',
   ];
   for (const perm of permissions) {
     if (principalPermissionCodes.includes(perm.code)) {

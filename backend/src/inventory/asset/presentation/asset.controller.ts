@@ -41,7 +41,7 @@ export class AssetController {
   ) {}
 
   @Get()
-  @RequirePermissions('inventory.read')
+  @RequirePermissions('inventory-assets.read')
   @ApiOperation({
     summary: 'List all inventory assets (paginated, filterable)',
   })
@@ -50,14 +50,14 @@ export class AssetController {
   }
 
   @Get(':id')
-  @RequirePermissions('inventory.read')
+  @RequirePermissions('inventory-assets.read')
   @ApiOperation({ summary: 'Get asset by ID' })
   async findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.getAssetByIdUseCase.execute(id);
   }
 
   @Post()
-  @RequirePermissions('inventory.create')
+  @RequirePermissions('inventory-assets.create')
   @ApiOperation({
     summary: 'Create a new asset (parent) with N numbered units (quantity)',
   })
@@ -66,7 +66,7 @@ export class AssetController {
   }
 
   @Post(':id/units')
-  @RequirePermissions('inventory.create')
+  @RequirePermissions('inventory-assets.create')
   @ApiOperation({ summary: 'Add more physical units to an existing asset' })
   async addUnits(
     @Param('id', ParseUUIDPipe) id: string,
@@ -76,7 +76,7 @@ export class AssetController {
   }
 
   @Patch(':id')
-  @RequirePermissions('inventory.update')
+  @RequirePermissions('inventory-assets.update')
   @ApiOperation({ summary: 'Update an existing asset' })
   async update(
     @Param('id', ParseUUIDPipe) id: string,
@@ -87,7 +87,7 @@ export class AssetController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @RequirePermissions('inventory.delete')
+  @RequirePermissions('inventory-assets.delete')
   @ApiOperation({ summary: 'Soft-delete an asset' })
   async remove(@Param('id', ParseUUIDPipe) id: string) {
     await this.deleteAssetUseCase.execute(id);

@@ -90,7 +90,10 @@ const MODULE_APP: Record<string, PermissionApp> = {
   admissions: 'admission',
 
   // inventory
-  inventory: 'inventory',
+  'inventory-approvals': 'inventory',
+  'inventory-assets': 'inventory',
+  'inventory-loans': 'inventory',
+  'inventory-master-data': 'inventory',
 
   // portal
   'portal-agendas': 'portal',

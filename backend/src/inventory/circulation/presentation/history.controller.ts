@@ -13,7 +13,7 @@ export class HistoryController {
   constructor(private readonly getHistoriesUseCase: GetHistoriesUseCase) {}
 
   @Get()
-  @RequirePermissions('inventory.read')
+  @RequirePermissions('inventory-loans.read')
   @ApiOperation({ summary: 'List all asset circulation history logs' })
   async findAll(@Query() query: HistoryQueryDto) {
     return this.getHistoriesUseCase.execute(query);

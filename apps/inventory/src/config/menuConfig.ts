@@ -33,7 +33,7 @@ export const menuSections: MenuSection[] = [
   {
     key: 'asset-management',
     label: 'Manajemen Aset',
-    requiredPermission: 'inventory.read',
+    requiredPermission: 'inventory-assets.read',
     items: [
       {
         title: 'Daftar Aset',
@@ -50,7 +50,7 @@ export const menuSections: MenuSection[] = [
   {
     key: 'asset-circulation',
     label: 'Sirkulasi Aset',
-    requiredPermission: 'inventory.read',
+    requiredPermission: 'inventory-loans.read',
     items: [
       {
         key: 'asset-circulation-loan',
@@ -67,7 +67,10 @@ export const menuSections: MenuSection[] = [
   {
     key: 'approval',
     label: 'Persetujuan',
-    requiredPermission: 'inventory.update',
+    // Reading the queue, not processing it: the screen shows what is pending,
+    // and `inventory-approvals.update` is what the backend checks when the
+    // administrator actually signs.
+    requiredPermission: 'inventory-approvals.read',
     items: [
       {
         key: 'approval-list',
@@ -83,7 +86,7 @@ export const menuSections: MenuSection[] = [
   {
     key: 'settings',
     label: 'Pengaturan',
-    requiredPermission: 'inventory.read',
+    requiredPermission: 'inventory-master-data.read',
     items: [
       {
         key: 'settings-reference',

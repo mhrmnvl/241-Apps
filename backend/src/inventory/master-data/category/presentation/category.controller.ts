@@ -35,21 +35,21 @@ export class CategoryController {
   ) {}
 
   @Get()
-  @RequirePermissions('inventory.read')
+  @RequirePermissions('inventory-master-data.read')
   @ApiOperation({ summary: 'Get category list' })
   async getCategories(@Query('search') search?: string) {
     return this.getCategoriesUseCase.execute(search);
   }
 
   @Post()
-  @RequirePermissions('inventory.create')
+  @RequirePermissions('inventory-master-data.create')
   @ApiOperation({ summary: 'Create category item' })
   async createCategory(@Body() data: CreateCategoryDto) {
     return this.createCategoryUseCase.execute(data);
   }
 
   @Patch(':id')
-  @RequirePermissions('inventory.update')
+  @RequirePermissions('inventory-master-data.update')
   @ApiOperation({ summary: 'Update category item' })
   async updateCategory(
     @Param('id', ParseUUIDPipe) id: string,
@@ -60,7 +60,7 @@ export class CategoryController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @RequirePermissions('inventory.delete')
+  @RequirePermissions('inventory-master-data.delete')
   @ApiOperation({ summary: 'Delete category item' })
   async deleteCategory(@Param('id', ParseUUIDPipe) id: string) {
     await this.deleteCategoryUseCase.execute(id);

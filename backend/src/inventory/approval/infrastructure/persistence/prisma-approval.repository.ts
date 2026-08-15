@@ -58,7 +58,7 @@ export class PrismaApprovalRepository extends IApprovalRepository {
       steps: {
         create: steps.map((step) => ({
           stepSequence: step.stepSequence,
-          approverRoleId: step.approverRoleId,
+          approverRoleCode: step.approverRoleCode,
           isMandatory: step.isMandatory ?? true,
         })),
       },
@@ -130,7 +130,7 @@ export class PrismaApprovalRepository extends IApprovalRepository {
       const activeStep = inst.workflow.steps.find(
         (s) => s.stepSequence === inst.currentStepSequence,
       );
-      return activeStep && roleCodes.includes(activeStep.approverRoleId);
+      return activeStep && roleCodes.includes(activeStep.approverRoleCode);
     });
   }
 

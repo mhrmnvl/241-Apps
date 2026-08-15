@@ -283,9 +283,13 @@ async function main() {
     },
   });
 
+  // The inventory administrator always signs. The head teacher signs when the
+  // administrator asks for it — a borrowed projector does not need the same
+  // signature as the school minibus, and `isMandatory: false` is what lets the
+  // administrator decide that per request.
   const steps = [
-    { stepSequence: 1, approverRoleId: 'ADMIN', isMandatory: true },
-    { stepSequence: 2, approverRoleId: 'PRINCIPAL', isMandatory: true },
+    { stepSequence: 1, approverRoleCode: 'ADMIN', isMandatory: true },
+    { stepSequence: 2, approverRoleCode: 'PRINCIPAL', isMandatory: false },
   ];
   for (const step of steps) {
     await prisma.approvalStep.upsert({
@@ -296,13 +300,13 @@ async function main() {
         },
       },
       update: {
-        approverRoleId: step.approverRoleId,
+        approverRoleCode: step.approverRoleCode,
         isMandatory: step.isMandatory,
       },
       create: {
         workflowId: workflow.id,
         stepSequence: step.stepSequence,
-        approverRoleId: step.approverRoleId,
+        approverRoleCode: step.approverRoleCode,
         isMandatory: step.isMandatory,
       },
     });

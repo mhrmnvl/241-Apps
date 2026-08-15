@@ -280,7 +280,12 @@ export interface ApprovalStep {
   id: string
   workflowId: string
   stepSequence: number
-  approverRoleId: string
+  /** The approving role's *code* — 'ADMIN', 'PRINCIPAL' — not an id. */
+  approverRoleCode: string
+  /**
+   * False means the previous approver decides, per request, whether this step
+   * is also taken. A mandatory step is always taken.
+   */
   isMandatory: boolean
 }
 
@@ -295,7 +300,7 @@ export interface ApprovalWorkflow {
 
 export interface CreateWorkflowStepPayload {
   stepSequence: number
-  approverRoleId: string
+  approverRoleCode: string
   isMandatory?: boolean
 }
 
@@ -331,6 +336,11 @@ export interface ApprovalInstance {
 export interface ProcessApprovalPayload {
   action: 'APPROVE' | 'REJECT'
   note?: string
+  /**
+   * Ask for the next approver's signature as well. Only meaningful when the
+   * next step is optional — a mandatory one is taken regardless.
+   */
+  forwardToNextApprover?: boolean
 }
 
 export interface ProcessApprovalResult {
