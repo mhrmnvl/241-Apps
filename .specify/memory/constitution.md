@@ -25,6 +25,25 @@ principle exists to prevent. The new bullet names HTTP as the channel and requir
 single anti-corruption feature to hold it, so the boundary stays reviewable now that a
 frontend split has made cross-app reads real for the first time.
 
+Version change: 2.0.0 → 2.0.1 (2026-08-15)
+Bump rationale: PATCH — no rule changes. Principle III's "MUST NOT be copied elsewhere"
+clause gains the sweep that now enforces it, `src/single-role-bypass.spec.ts`, and the
+reason it was written: 2.0.0 removed the ADMIN bypass from `PermissionGuard`, and a
+copy of the same check in `ProcessApprovalUseCase` went on working, granting an
+approval signature the workflow never gave it. The clause was already binding; nothing
+had been checking it. Amendment (a)-(e):
+
+  (a) Edits: Principle III (one sentence naming the sweep), this report, the version
+      footer.
+  (b) Version and rationale: stated here.
+  (c) Docs affected: CLAUDE.md gains the inventory paragraph in the same change.
+  (d) Migration plan: none. The copy was removed with the sweep that finds the next
+      one.
+  (e) Compliance Baseline: unchanged — the survey named no bypass copies because none
+      was known; this is the correction, and it is closed rather than outstanding.
+
+Version 2.0.0's report follows.
+
 Version change: 1.3.0 → 2.0.0 (2026-08-15)
 Bump rationale: MAJOR — Principle III's sanctioned exception is narrowed, and a
 capability that existed is removed. `ADMIN` no longer bypasses the permission check;
@@ -286,6 +305,11 @@ Every query is scoped and every action is permission-controlled.
   Removing it inverts the default, which is what makes per-application administrators
   possible at all. Adding any second bypassing role, or any exemption mechanism that
   restores one, is an amendment to this principle rather than a configuration change.
+  `src/single-role-bypass.spec.ts` enforces the "MUST NOT be copied" clause, with an
+  allowlist naming why each remaining mention of `SUPER_ADMIN` is not a bypass. It was
+  written after finding a copy in `ProcessApprovalUseCase` that survived ADR-0011 and
+  went on granting an approval signature the workflow never gave it — the copy of a
+  rule does not move when the original does, and the disagreement is invisible.
 
 Rationale: wrong data in a school record looks exactly like correct data to the user
 reading it. Scoping and permission failures are silent by nature, so they must be
@@ -640,4 +664,4 @@ the code or corrected here; it is never left standing as fiction.
 **Runtime development guidance**: root `CLAUDE.md` for the workspace,
 `backend/docs/NESTJS-RULES.md` for backend work.
 
-**Version**: 2.0.0 | **Ratified**: 2026-08-06 | **Last Amended**: 2026-08-15
+**Version**: 2.0.1 | **Ratified**: 2026-08-06 | **Last Amended**: 2026-08-15
