@@ -1,5 +1,7 @@
+import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient, AttendanceStatus, AssessmentType } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
+import 'dotenv/config';
 
 /**
  * Two students, so the boundary can be tested.
@@ -21,7 +23,20 @@ import * as bcrypt from 'bcrypt';
  * database is not a place to put them.
  */
 
-const prisma = new PrismaClient();
+// Prisma 7 refuses a bare `new PrismaClient()`; the adapter is how every other
+// seed in this repository connects, and `DIRECT_URL` is the unpooled string —
+// a seed writes, so it should not go through a pooler.
+const connectionString = process.env.DIRECT_URL ?? process.env.DATABASE_URL;
+if (!connectionString) {
+  throw new Error('DIRECT_URL or DATABASE_URL must be set.');
+}
+
+const prisma = new PrismaClient({
+  adapter: new PrismaPg({
+    connectionString,
+    ssl: { rejectUnauthorized: false },
+  }),
+});
 
 const SELF_SERVICE_CODES = [
   'students.read-own',
@@ -65,8 +80,10 @@ const STUDENTS = [
 ];
 
 async function main() {
-  const url = process.env.DATABASE_URL ?? '';
-  if (/apps241_prod|_prod\?|_prod$/.test(url)) {
+  // Both strings, because the client connects through DIRECT_URL: guarding
+  // only DATABASE_URL would check a string the write never travels on.
+  const url = `${process.env.DATABASE_URL ?? ''} ${process.env.DIRECT_URL ?? ''}`;
+  if (/apps241_prod|_prod\?|_prod\b/.test(url)) {
     throw new Error(
       'This seed invents students and marks. It refuses to run against a production database.',
     );
