@@ -1,5 +1,5 @@
 import { type Ref, computed, ref, watch } from 'vue'
-import type { Permission } from '../types'
+import { PERMISSION_APP_LABELS, type Permission } from '../types'
 
 const MODULE_LABELS: Record<string, string> = {
   // akademik
@@ -139,6 +139,18 @@ export function usePermissionMatrix(
     expandedGroups.value[moduleName] = !expandedGroups.value[moduleName]
   }
 
+  /**
+   * Grouped by application first, then by module inside it.
+   *
+   * It used to be a flat list of sixty-odd modules, which is how "give this
+   * person the academic application" became thirty-four separate decisions —
+   * and the mistakes were asymmetric. Missing `enrollments` costs a button;
+   * including `roles` gives someone the power to create roles.
+   *
+   * The application comes from the server. It is not read off the code's name,
+   * because four presence modules carry no `presence-` prefix and would land
+   * under academic.
+   */
   const filteredGroupedPermissions = computed(() => {
     const query = searchQuery.value.toLowerCase().trim()
     const groups: Record<string, Permission[]> = {}
@@ -146,16 +158,22 @@ export function usePermissionMatrix(
     permissions.value.forEach((perm) => {
       const mod = perm.module ?? 'Lainnya'
       const translatedMod = translateModule(mod)
+      const appLabel =
+        PERMISSION_APP_LABELS.find((a) => a.key === perm.app)?.label ?? 'Sistem'
       const matchesQuery =
         !query ||
         (perm.description ?? '').toLowerCase().includes(query) ||
         perm.code.toLowerCase().includes(query) ||
         mod.toLowerCase().includes(query) ||
-        translatedMod.toLowerCase().includes(query)
+        translatedMod.toLowerCase().includes(query) ||
+        appLabel.toLowerCase().includes(query)
 
       if (matchesQuery) {
-        groups[translatedMod] ??= []
-        groups[translatedMod].push(perm)
+        // The heading carries both, so a reader can still see which module a
+        // permission came from without opening anything.
+        const key = `${appLabel} · ${translatedMod}`
+        groups[key] ??= []
+        groups[key].push(perm)
       }
     })
 
@@ -165,8 +183,18 @@ export function usePermissionMatrix(
       )
     }
 
+    // Applications in the declared order — the school's own work above the
+    // system underneath it — and modules alphabetical within each.
+    const appOrder = new Map(
+      PERMISSION_APP_LABELS.map((a, index) => [a.label, index]),
+    )
     return Object.fromEntries(
-      Object.entries(groups).sort(([a], [b]) => a.localeCompare(b, 'id')),
+      Object.entries(groups).sort(([a], [b]) => {
+        const [appA = '', modA = ''] = a.split(' · ')
+        const [appB = '', modB = ''] = b.split(' · ')
+        const byApp = (appOrder.get(appA) ?? 99) - (appOrder.get(appB) ?? 99)
+        return byApp !== 0 ? byApp : modA.localeCompare(modB, 'id')
+      }),
     )
   })
 
