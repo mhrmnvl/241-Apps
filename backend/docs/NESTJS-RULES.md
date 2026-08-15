@@ -399,6 +399,57 @@ Two more habits the same rule implies:
 
 ---
 
+## Reading your own record: a separate permission, a separate route
+
+A read that answers about the person asking is not a narrowed version of the
+read that answers about everyone. It is a different endpoint with a different
+permission, and the difference is what makes a role's grants legible: you can
+tell what a role may see by reading its permissions, without opening a use case
+to look for a conditional.
+
+```
+report-cards.read        GET /rapors        every student's
+report-cards.read-own    GET /rapors/me     the caller's own
+```
+
+Four rules, each of which has already been got wrong here at least once.
+
+**The caller's identity is applied after their query, never before.**
+
+```ts
+// right — a supplied studentId cannot win
+return this.getReportCards.execute(query, { studentId: resolved });
+
+// wrong — `?studentId=<someone else>` overrides the caller
+return this.getReportCards.execute({ studentId: resolved, ...query });
+```
+
+The wrong version returns a correctly formatted list of report cards belonging
+to the wrong person, which is indistinguishable on screen from the right one.
+
+**Where the scope lands matters as much as when.** If a where-builder rewrites
+a relation object wholesale for some other filter, a scope merged into that
+object is erased by a query parameter. Put it in `AND`, which nothing the caller
+sends can reach — `prisma-attendance.where.ts` carries the note.
+
+**No student record means an empty result, returned explicitly.** A null that
+falls through into an unfiltered read widens it to everyone, silently.
+
+**A cohort-shaped read is refused, not narrowed.** A recap or a trend describes
+a group; answering one to a self-service caller hands them a summary of other
+people without disclosing a single row. Their own figures come from their own
+rows instead.
+
+Two mechanics: declare `.../me` **before** its `:id` sibling or Nest parses `me`
+as a uuid, and never put the subject on the DTO — a field on a DTO is a field a
+caller can send. It is a use-case argument.
+
+If a route does not use the caller, it must not ask for them. A parameter named
+`_user` records a decision to ignore identity, and a reader skims past a
+decision; `no-ignored-caller.spec.ts` enforces the absence.
+
+---
+
 ## Language: the backend is written in English
 
 Exception and validation messages, Swagger summaries and descriptions, log

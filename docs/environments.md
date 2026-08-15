@@ -28,6 +28,16 @@ queries the API for that run rather than taking the pull request's word for it.
 `.husky/pre-push` refuses a direct push. Neither can *block* a merge without
 branch protection, so they make a violation loud rather than impossible.
 
+A new permission needs no step after the deploy. The catalogue is defined in
+code and synced into the database on application bootstrap, so a code added in
+this release is grantable through the role screen as soon as the box restarts.
+`POST /permissions/sync` still exists for forcing it without one.
+
+This matters most where it is least visible: production is populated through the
+UI and never runs a seed, so a permission that exists in code but not in the
+database cannot be granted at all — it simply does not appear on the role
+screen, with nothing to explain why.
+
 ---
 
 ## What actually separates them

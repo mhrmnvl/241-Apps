@@ -326,6 +326,19 @@ Core rules from `NESTJS-RULES.md` (enforced by convention, not by lint):
   `{ statusCode, message, data, meta? }` — there is no `success` field. Repositories
   return `{ data, total, page, limit }` and the interceptor folds it into
   `data` + `meta` (see `core/interceptors/response.interceptor.ts`).
+- **Reading your own record is a separate permission and a separate route.**
+  `report-cards.read` answers about every student; `report-cards.read-own`
+  answers about the caller, through `GET /rapors/me`. The permission is then the
+  boundary — a role's grants say what its holder may see without opening a use
+  case. The caller's identity is applied *after* their query
+  (`{ ...query, studentId: resolved }`), or a supplied id overrides it and the
+  response looks entirely ordinary. A caller with no matching record gets an
+  empty result, returned explicitly, never a read with the filter dropped. A
+  cohort-shaped read — a recap, a trend — is refused rather than narrowed.
+  Declare `.../me` before its `:id` sibling. If a route does not use the caller,
+  it must not ask for them: `no-ignored-caller.spec.ts` enforces that, because a
+  `_user` parameter is what made this class of defect invisible. See
+  NESTJS-RULES.md.
 - **Read only the fields the caller shows.** Every Prisma read that reaches a
   `Profile` uses one of the three shapes in `shared/domain/prisma-selects.ts` —
   name, display (name + avatar file), or roster (name + gender + NIK).
