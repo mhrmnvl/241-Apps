@@ -57,10 +57,7 @@ export class StudentScoreController {
   @Get()
   @RequirePermissions('student-scores.read')
   @ApiOperation({ summary: 'List student scores' })
-  async findAll(
-    @CurrentUser() user: AuthenticatedUser,
-    @Query() q: StudentScoreQueryDto,
-  ) {
+  async findAll(@Query() q: StudentScoreQueryDto) {
     return this.getAll.execute(q);
   }
 
@@ -82,10 +79,7 @@ export class StudentScoreController {
   @ApiOperation({
     summary: 'Get the full class roster with scores for one assessment item',
   })
-  async getRoster(
-    @CurrentUser() user: AuthenticatedUser,
-    @Query() q: StudentScoreRosterQueryDto,
-  ) {
+  async getRoster(@Query() q: StudentScoreRosterQueryDto) {
     return this.rosterUC.execute(q);
   }
 
@@ -93,20 +87,14 @@ export class StudentScoreController {
   @RequirePermissions('student-scores.read')
   @ApiOperation({ summary: 'Get student score by ID' })
   @ApiParam({ name: 'id', format: 'uuid' })
-  async findOne(
-    @CurrentUser() user: AuthenticatedUser,
-    @Param('id', ParseUUIDPipe) id: string,
-  ) {
+  async findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.getById.execute(id);
   }
 
   @Post()
   @RequirePermissions('student-scores.create')
   @ApiOperation({ summary: 'Create student score' })
-  async create(
-    @CurrentUser() user: AuthenticatedUser,
-    @Body() dto: CreateStudentScoreDto,
-  ) {
+  async create(@Body() dto: CreateStudentScoreDto) {
     return this.createUC.execute(dto);
   }
 
@@ -115,10 +103,7 @@ export class StudentScoreController {
   @ApiOperation({
     summary: 'Bulk upsert scores for a class on one assessment item',
   })
-  async bulkUpsert(
-    @CurrentUser() user: AuthenticatedUser,
-    @Body() dto: BulkUpsertStudentScoreDto,
-  ) {
+  async bulkUpsert(@Body() dto: BulkUpsertStudentScoreDto) {
     return this.bulkUpsertUC.execute(dto);
   }
 
@@ -127,7 +112,6 @@ export class StudentScoreController {
   @ApiOperation({ summary: 'Update student score' })
   @ApiParam({ name: 'id', format: 'uuid' })
   async update(
-    @CurrentUser() user: AuthenticatedUser,
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateStudentScoreDto,
   ) {
@@ -139,10 +123,7 @@ export class StudentScoreController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete student score' })
   @ApiParam({ name: 'id', format: 'uuid' })
-  async remove(
-    @CurrentUser() user: AuthenticatedUser,
-    @Param('id', ParseUUIDPipe) id: string,
-  ) {
+  async remove(@Param('id', ParseUUIDPipe) id: string) {
     await this.deleteUC.execute(id);
   }
 }

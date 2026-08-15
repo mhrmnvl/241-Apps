@@ -22,8 +22,6 @@ import {
 } from '@nestjs/swagger';
 
 import { JwtAuthGuard } from '../../auth/index.js';
-import { CurrentUser } from '../../../core/decorators/current-user.decorator.js';
-import type { AuthenticatedUser } from '../../../core/types/authenticated-user.type.js';
 import { AnnouncementQueryDto } from '../dto/request/announcement-query.dto.js';
 import {
   AnnouncementListResponseDto,
@@ -59,10 +57,7 @@ export class AnnouncementController {
     type: AnnouncementListResponseDto,
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async findAll(
-    @CurrentUser() user: AuthenticatedUser,
-    @Query() query: AnnouncementQueryDto,
-  ) {
+  async findAll(@Query() query: AnnouncementQueryDto) {
     return this.getAnnouncementsService.execute(query);
   }
 
@@ -77,10 +72,7 @@ export class AnnouncementController {
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Announcement not found' })
-  async findOne(
-    @CurrentUser() user: AuthenticatedUser,
-    @Param('id', ParseUUIDPipe) id: string,
-  ) {
+  async findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.getAnnouncementByIdService.execute(id);
   }
 
@@ -94,10 +86,7 @@ export class AnnouncementController {
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Class not found' })
-  async create(
-    @CurrentUser() user: AuthenticatedUser,
-    @Body() dto: CreateAnnouncementDto,
-  ) {
+  async create(@Body() dto: CreateAnnouncementDto) {
     return this.createAnnouncementService.execute(dto);
   }
 
@@ -113,7 +102,6 @@ export class AnnouncementController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Announcement not found' })
   async update(
-    @CurrentUser() user: AuthenticatedUser,
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateAnnouncementDto,
   ) {
@@ -128,10 +116,7 @@ export class AnnouncementController {
   @ApiResponse({ status: 204, description: 'Announcement deleted' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Announcement not found' })
-  async remove(
-    @CurrentUser() user: AuthenticatedUser,
-    @Param('id', ParseUUIDPipe) id: string,
-  ) {
+  async remove(@Param('id', ParseUUIDPipe) id: string) {
     await this.deleteAnnouncementService.execute(id);
   }
 }

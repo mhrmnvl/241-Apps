@@ -12,7 +12,6 @@ import { PublishReportCardUseCase } from '../use-cases/publish-report-card.use-c
 import { UpdateReportCardUseCase } from '../use-cases/update-report-card.use-case.js';
 import { ExportReportCardPdfUseCase } from '../use-cases/export-report-card-pdf.use-case.js';
 import { ReportCardController } from './report-card.controller.js';
-import type { AuthenticatedUser } from '../../../core/types/authenticated-user.type.js';
 import { Response } from 'express';
 
 jest.mock('../services/pdf.service.js', () => ({
@@ -31,13 +30,6 @@ describe('ReportCardController', () => {
   const mockPublishReportCard = { execute: jest.fn() };
   const mockDeleteReportCard = { execute: jest.fn() };
   const mockExportReportCardPdf = { execute: jest.fn() };
-
-  const mockUser: AuthenticatedUser = {
-    id: 'usr-1',
-    sub: 'usr-1',
-    identifier: 'admin',
-    sessionId: 'sess-1',
-  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -76,7 +68,7 @@ describe('ReportCardController', () => {
     it('should delegate to GetReportCardsUseCase', async () => {
       const query: ReportCardQueryDto = { page: 1, limit: 10 };
       mockGetReportCards.execute.mockResolvedValue({ data: [] });
-      const result = await controller.findAll(mockUser, query);
+      const result = await controller.findAll(query);
       expect(mockGetReportCards.execute).toHaveBeenCalledWith(query);
       expect(result).toEqual({ data: [] });
     });
@@ -85,7 +77,7 @@ describe('ReportCardController', () => {
   describe('findOne', () => {
     it('should delegate to GetReportCardByIdUseCase', async () => {
       mockGetReportCardById.execute.mockResolvedValue({ id: 'rap-1' });
-      const result = await controller.findOne(mockUser, 'rap-1');
+      const result = await controller.findOne('rap-1');
       expect(mockGetReportCardById.execute).toHaveBeenCalledWith('rap-1');
       expect(result).toEqual({ id: 'rap-1' });
     });
@@ -95,7 +87,7 @@ describe('ReportCardController', () => {
     it('should delegate to GenerateReportCardUseCase', async () => {
       const dto: GenerateReportCardDto = { enrollmentId: 'enr-1' };
       mockGenerateReportCard.execute.mockResolvedValue({ id: 'new' });
-      await controller.generate(mockUser, dto);
+      await controller.generate(dto);
       expect(mockGenerateReportCard.execute).toHaveBeenCalledWith(dto);
     });
   });
@@ -104,7 +96,7 @@ describe('ReportCardController', () => {
     it('should delegate to UpdateReportCardUseCase', async () => {
       const dto: UpdateReportCardDto = { teacherNote: 'Good progress' };
       mockUpdateReportCard.execute.mockResolvedValue({ id: 'rap-1' });
-      await controller.update(mockUser, 'rap-1', dto);
+      await controller.update('rap-1', dto);
       expect(mockUpdateReportCard.execute).toHaveBeenCalledWith('rap-1', dto);
     });
   });
@@ -112,7 +104,7 @@ describe('ReportCardController', () => {
   describe('publish', () => {
     it('should delegate to PublishReportCardUseCase', async () => {
       mockPublishReportCard.execute.mockResolvedValue({ id: 'rap-1' });
-      await controller.publish(mockUser, 'rap-1');
+      await controller.publish('rap-1');
       expect(mockPublishReportCard.execute).toHaveBeenCalledWith('rap-1');
     });
   });
@@ -120,7 +112,7 @@ describe('ReportCardController', () => {
   describe('remove', () => {
     it('should delegate to DeleteReportCardUseCase', async () => {
       mockDeleteReportCard.execute.mockResolvedValue(undefined);
-      await controller.remove(mockUser, 'rap-1');
+      await controller.remove('rap-1');
       expect(mockDeleteReportCard.execute).toHaveBeenCalledWith('rap-1');
     });
   });
@@ -135,7 +127,7 @@ describe('ReportCardController', () => {
         end: jest.fn(),
       } as unknown as Response;
 
-      await controller.exportPdf(mockUser, 'rap-1', mockRes);
+      await controller.exportPdf('rap-1', mockRes);
 
       expect(mockExportReportCardPdf.execute).toHaveBeenCalledWith('rap-1');
       expect(mockRes.set).toHaveBeenCalledWith(

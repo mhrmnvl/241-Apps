@@ -81,10 +81,7 @@ export class AttendanceController {
   @Get()
   @RequirePermissions('attendances.read')
   @ApiOperation({ summary: 'List attendances' })
-  async findAll(
-    @CurrentUser() user: AuthenticatedUser,
-    @Query() q: AttendanceQueryDto,
-  ) {
+  async findAll(@Query() q: AttendanceQueryDto) {
     return this.getAll.execute(q);
   }
 
@@ -116,10 +113,7 @@ export class AttendanceController {
   @Get('recap')
   @RequirePermissions('attendances.read')
   @ApiOperation({ summary: 'Get attendance recap per student' })
-  async getRecap(
-    @CurrentUser() user: AuthenticatedUser,
-    @Query() q: AttendanceRecapQueryDto,
-  ) {
+  async getRecap(@Query() q: AttendanceRecapQueryDto) {
     return this.recapUC.execute(q);
   }
 
@@ -129,10 +123,7 @@ export class AttendanceController {
   @ApiOperation({
     summary: 'Get monthly attendance percentage trend for a classroom',
   })
-  async getTrend(
-    @CurrentUser() user: AuthenticatedUser,
-    @Query() q: AttendanceTrendQueryDto,
-  ) {
+  async getTrend(@Query() q: AttendanceTrendQueryDto) {
     return this.trendUC.execute(q);
   }
 
@@ -140,30 +131,21 @@ export class AttendanceController {
   @RequirePermissions('attendances.read')
   @ApiOperation({ summary: 'Get attendance by ID' })
   @ApiParam({ name: 'id', format: 'uuid' })
-  async findOne(
-    @CurrentUser() user: AuthenticatedUser,
-    @Param('id', ParseUUIDPipe) id: string,
-  ) {
+  async findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.getById.execute(id);
   }
 
   @Post()
   @RequirePermissions('attendances.manage')
   @ApiOperation({ summary: 'Create attendance' })
-  async create(
-    @CurrentUser() user: AuthenticatedUser,
-    @Body() dto: CreateAttendanceDto,
-  ) {
+  async create(@Body() dto: CreateAttendanceDto) {
     return this.createUC.execute(dto);
   }
 
   @Post('bulk')
   @RequirePermissions('attendances.manage')
   @ApiOperation({ summary: 'Bulk upsert attendances for a date' })
-  async bulkUpsert(
-    @CurrentUser() user: AuthenticatedUser,
-    @Body() dto: BulkUpsertAttendanceDto,
-  ) {
+  async bulkUpsert(@Body() dto: BulkUpsertAttendanceDto) {
     return this.bulkUpsertUC.execute(dto);
   }
 
@@ -172,7 +154,6 @@ export class AttendanceController {
   @ApiOperation({ summary: 'Update attendance' })
   @ApiParam({ name: 'id', format: 'uuid' })
   async update(
-    @CurrentUser() user: AuthenticatedUser,
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateAttendanceDto,
   ) {
@@ -184,10 +165,7 @@ export class AttendanceController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete attendance' })
   @ApiParam({ name: 'id', format: 'uuid' })
-  async remove(
-    @CurrentUser() user: AuthenticatedUser,
-    @Param('id', ParseUUIDPipe) id: string,
-  ) {
+  async remove(@Param('id', ParseUUIDPipe) id: string) {
     await this.deleteUC.execute(id);
   }
 }

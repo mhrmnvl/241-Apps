@@ -57,10 +57,7 @@ export class ScheduleController {
   @Get()
   @RequirePermissions('schedules.read')
   @ApiOperation({ summary: 'List schedules' })
-  async findAll(
-    @CurrentUser() user: AuthenticatedUser,
-    @Query() q: ScheduleQueryDto,
-  ) {
+  async findAll(@Query() q: ScheduleQueryDto) {
     return this.getAll.execute(q);
   }
 
@@ -87,7 +84,6 @@ export class ScheduleController {
   @ApiOperation({ summary: 'Get all schedules for a classroom' })
   @ApiParam({ name: 'classroomId', format: 'uuid' })
   async findByClassroom(
-    @CurrentUser() user: AuthenticatedUser,
     @Param('classroomId', ParseUUIDPipe) classroomId: string,
   ) {
     const data = await this.getByClassroom.execute(classroomId);
@@ -99,7 +95,6 @@ export class ScheduleController {
   @ApiOperation({ summary: 'Batch upsert schedules for a classroom by day' })
   @ApiParam({ name: 'classroomId', format: 'uuid' })
   async batchUpsert(
-    @CurrentUser() user: AuthenticatedUser,
     @Param('classroomId', ParseUUIDPipe) classroomId: string,
     @Body() dto: BatchUpsertScheduleDto,
   ) {
@@ -110,20 +105,14 @@ export class ScheduleController {
   @RequirePermissions('schedules.read')
   @ApiOperation({ summary: 'Get schedule by ID' })
   @ApiParam({ name: 'id', format: 'uuid' })
-  async findOne(
-    @CurrentUser() user: AuthenticatedUser,
-    @Param('id', ParseUUIDPipe) id: string,
-  ) {
+  async findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.getById.execute(id);
   }
 
   @Post()
   @RequirePermissions('schedules.create')
   @ApiOperation({ summary: 'Create schedule' })
-  async create(
-    @CurrentUser() user: AuthenticatedUser,
-    @Body() dto: CreateScheduleDto,
-  ) {
+  async create(@Body() dto: CreateScheduleDto) {
     return this.createUC.execute(dto);
   }
 
@@ -132,7 +121,6 @@ export class ScheduleController {
   @ApiOperation({ summary: 'Update schedule' })
   @ApiParam({ name: 'id', format: 'uuid' })
   async update(
-    @CurrentUser() user: AuthenticatedUser,
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateScheduleDto,
   ) {
@@ -144,10 +132,7 @@ export class ScheduleController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete schedule' })
   @ApiParam({ name: 'id', format: 'uuid' })
-  async remove(
-    @CurrentUser() user: AuthenticatedUser,
-    @Param('id', ParseUUIDPipe) id: string,
-  ) {
+  async remove(@Param('id', ParseUUIDPipe) id: string) {
     await this.deleteUC.execute(id);
   }
 }

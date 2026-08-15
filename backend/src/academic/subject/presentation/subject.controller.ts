@@ -22,8 +22,6 @@ import {
 } from '@nestjs/swagger';
 
 import { JwtAuthGuard } from '../../../platform/auth/index.js';
-import { CurrentUser } from '../../../core/decorators/current-user.decorator.js';
-import type { AuthenticatedUser } from '../../../core/types/authenticated-user.type.js';
 
 import { SubjectQueryDto } from '../dto/request/subject-query.dto.js';
 import { CreateSubjectDto } from '../dto/request/create-subject.dto.js';
@@ -55,10 +53,7 @@ export class SubjectController {
   @RequirePermissions('subjects.read')
   @ApiOperation({ summary: 'List all subjects (paginated, searchable)' })
   @ApiResponse({ status: 200, type: SubjectListResponseDto })
-  async findAll(
-    @CurrentUser() user: AuthenticatedUser,
-    @Query() query: SubjectQueryDto,
-  ) {
+  async findAll(@Query() query: SubjectQueryDto) {
     return this.getSubjectsService.execute(query);
   }
 
@@ -68,10 +63,7 @@ export class SubjectController {
   @ApiParam({ name: 'id', format: 'uuid' })
   @ApiResponse({ status: 200, type: SubjectResponseDto })
   @ApiResponse({ status: 404, description: 'Subject not found' })
-  async findOne(
-    @CurrentUser() user: AuthenticatedUser,
-    @Param('id', ParseUUIDPipe) id: string,
-  ) {
+  async findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.getSubjectByIdService.execute(id);
   }
 
@@ -80,10 +72,7 @@ export class SubjectController {
   @ApiOperation({ summary: 'Create a subject' })
   @ApiResponse({ status: 201, type: SubjectResponseDto })
   @ApiResponse({ status: 409, description: 'Duplicate subject name' })
-  async create(
-    @CurrentUser() user: AuthenticatedUser,
-    @Body() dto: CreateSubjectDto,
-  ) {
+  async create(@Body() dto: CreateSubjectDto) {
     return this.createSubjectService.execute(dto);
   }
 
@@ -95,7 +84,6 @@ export class SubjectController {
   @ApiResponse({ status: 404, description: 'Subject not found' })
   @ApiResponse({ status: 409, description: 'Duplicate subject name' })
   async update(
-    @CurrentUser() user: AuthenticatedUser,
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateSubjectDto,
   ) {
@@ -109,10 +97,7 @@ export class SubjectController {
   @ApiParam({ name: 'id', format: 'uuid' })
   @ApiResponse({ status: 204, description: 'Subject deleted' })
   @ApiResponse({ status: 404, description: 'Subject not found' })
-  async remove(
-    @CurrentUser() user: AuthenticatedUser,
-    @Param('id', ParseUUIDPipe) id: string,
-  ) {
+  async remove(@Param('id', ParseUUIDPipe) id: string) {
     await this.deleteSubjectService.execute(id);
   }
 }

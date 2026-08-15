@@ -23,8 +23,6 @@ import {
 import { AcademicYearEntity as AcademicYear } from '../domain/entities/academic-year.entity.js';
 
 import { JwtAuthGuard } from '../../../platform/auth/index.js';
-import { CurrentUser } from '../../../core/decorators/current-user.decorator.js';
-import type { AuthenticatedUser } from '../../../core/types/authenticated-user.type.js';
 
 import { AcademicYearQueryDto } from '../dto/request/academic-year-query.dto.js';
 import {
@@ -67,7 +65,6 @@ export class AcademicYearController {
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async findAll(
-    @CurrentUser() user: AuthenticatedUser,
     @Query() query: AcademicYearQueryDto,
   ): Promise<PaginatedResponse<AcademicYear>> {
     return this.getAcademicYearsService.execute(query);
@@ -86,7 +83,6 @@ export class AcademicYearController {
   })
   @ApiResponse({ status: 404, description: 'Academic year not found' })
   async activate(
-    @CurrentUser() user: AuthenticatedUser,
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<AcademicYear> {
     return this.activateAcademicYearService.execute(id);
@@ -103,7 +99,6 @@ export class AcademicYearController {
   })
   @ApiResponse({ status: 404, description: 'Academic year not found' })
   async deactivate(
-    @CurrentUser() user: AuthenticatedUser,
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<AcademicYear> {
     return this.deactivateAcademicYearService.execute(id);
@@ -120,10 +115,7 @@ export class AcademicYearController {
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Academic year not found' })
-  async findOne(
-    @CurrentUser() user: AuthenticatedUser,
-    @Param('id', ParseUUIDPipe) id: string,
-  ): Promise<AcademicYear> {
+  async findOne(@Param('id', ParseUUIDPipe) id: string): Promise<AcademicYear> {
     return this.getAcademicYearByIdService.execute(id);
   }
 
@@ -140,10 +132,7 @@ export class AcademicYearController {
     status: 409,
     description: 'Academic year name already exists',
   })
-  async create(
-    @CurrentUser() user: AuthenticatedUser,
-    @Body() dto: CreateAcademicYearDto,
-  ): Promise<AcademicYear> {
+  async create(@Body() dto: CreateAcademicYearDto): Promise<AcademicYear> {
     return this.createAcademicYearService.execute(dto);
   }
 
@@ -163,7 +152,6 @@ export class AcademicYearController {
     description: 'Academic year name already exists',
   })
   async update(
-    @CurrentUser() user: AuthenticatedUser,
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateAcademicYearDto,
   ): Promise<AcademicYear> {
@@ -178,10 +166,7 @@ export class AcademicYearController {
   @ApiResponse({ status: 204, description: 'Academic year deleted' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Academic year not found' })
-  async remove(
-    @CurrentUser() user: AuthenticatedUser,
-    @Param('id', ParseUUIDPipe) id: string,
-  ): Promise<void> {
+  async remove(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
     await this.deleteAcademicYearService.execute(id);
   }
 }

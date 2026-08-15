@@ -5,7 +5,6 @@ import { GetGradeByIdUseCase } from '../use-cases/get-grade-by-id.use-case.js';
 import { GetGradesUseCase } from '../use-cases/get-grades.use-case.js';
 import { UpdateGradeUseCase } from '../use-cases/update-grade.use-case.js';
 import { GradesController } from './grade.controller.js';
-import type { AuthenticatedUser } from '../../../core/types/authenticated-user.type.js';
 
 describe('GradesController', () => {
   let controller: GradesController;
@@ -32,13 +31,6 @@ describe('GradesController', () => {
     jest.clearAllMocks();
   });
 
-  const mockUser: AuthenticatedUser = {
-    id: 'usr-1',
-    sub: 'usr-1',
-    identifier: 'admin',
-    sessionId: 'sess-1',
-  };
-
   it('should be defined', () => {
     expect(controller).toBeDefined();
   });
@@ -47,7 +39,7 @@ describe('GradesController', () => {
     const query = { page: 1, limit: 10 };
     mockGetAll.execute.mockResolvedValue({ data: [], total: 0 });
 
-    await controller.findAll(mockUser, query);
+    await controller.findAll(query);
 
     expect(mockGetAll.execute).toHaveBeenCalledWith(query);
   });
@@ -56,7 +48,7 @@ describe('GradesController', () => {
     const level = { id: 'lvl-1', level: 7, name: 'VII' };
     mockGetById.execute.mockResolvedValue(level);
 
-    const result = await controller.findById(mockUser, 'lvl-1');
+    const result = await controller.findById('lvl-1');
 
     expect(mockGetById.execute).toHaveBeenCalledWith('lvl-1');
     expect(result).toEqual(level);
@@ -67,7 +59,7 @@ describe('GradesController', () => {
     const created = { id: 'lvl-new', ...dto };
     mockCreate.execute.mockResolvedValue(created);
 
-    const result = await controller.create(mockUser, dto);
+    const result = await controller.create(dto);
 
     expect(mockCreate.execute).toHaveBeenCalledWith(dto);
     expect(result).toEqual(created);
@@ -77,7 +69,7 @@ describe('GradesController', () => {
     const dto = { name: 'X-Updated' };
     mockUpdate.execute.mockResolvedValue({ id: 'lvl-1', ...dto });
 
-    await controller.update(mockUser, 'lvl-1', dto);
+    await controller.update('lvl-1', dto);
 
     expect(mockUpdate.execute).toHaveBeenCalledWith('lvl-1', dto);
   });
@@ -85,7 +77,7 @@ describe('GradesController', () => {
   it('should call delete use case', async () => {
     mockDelete.execute.mockResolvedValue(undefined);
 
-    await controller.remove(mockUser, 'lvl-1');
+    await controller.remove('lvl-1');
 
     expect(mockDelete.execute).toHaveBeenCalledWith('lvl-1');
   });

@@ -22,8 +22,6 @@ import {
 } from '@nestjs/swagger';
 
 import { JwtAuthGuard } from '../../../platform/auth/index.js';
-import { CurrentUser } from '../../../core/decorators/current-user.decorator.js';
-import type { AuthenticatedUser } from '../../../core/types/authenticated-user.type.js';
 import { CreateClassroomDto } from '../dto/request/create-classroom.dto.js';
 import { ClassroomQueryDto } from '../dto/request/classroom-query.dto.js';
 import {
@@ -57,7 +55,6 @@ export class ClassroomController {
   @ApiOperation({ summary: 'List all classrooms (paginated, searchable)' })
   @ApiResponse({ status: 200, type: ClassroomListResponseDto })
   async findAll(
-    @CurrentUser() user: AuthenticatedUser,
     @Query() query: ClassroomQueryDto,
   ): Promise<PaginatedResponse<ClassroomWithDetails>> {
     return this.getClassroomsService.execute(query);
@@ -70,7 +67,6 @@ export class ClassroomController {
   @ApiResponse({ status: 200, type: ClassroomResponseDto })
   @ApiResponse({ status: 404, description: 'Classroom not found' })
   async findOne(
-    @CurrentUser() user: AuthenticatedUser,
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<ClassroomWithDetails> {
     return this.getClassroomByIdService.execute(id);
@@ -81,10 +77,7 @@ export class ClassroomController {
   @ApiOperation({ summary: 'Create a new classroom' })
   @ApiResponse({ status: 201, type: ClassroomResponseDto })
   @ApiResponse({ status: 409, description: 'Classroom code already exists' })
-  async create(
-    @Body() dto: CreateClassroomDto,
-    @CurrentUser() user: AuthenticatedUser,
-  ): Promise<ClassroomWithDetails> {
+  async create(@Body() dto: CreateClassroomDto): Promise<ClassroomWithDetails> {
     return this.createClassroomService.execute(dto);
   }
 
@@ -96,7 +89,6 @@ export class ClassroomController {
   @ApiResponse({ status: 404, description: 'Classroom not found' })
   @ApiResponse({ status: 409, description: 'Classroom code already exists' })
   async update(
-    @CurrentUser() user: AuthenticatedUser,
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateClassroomDto,
   ): Promise<ClassroomWithDetails> {
@@ -110,10 +102,7 @@ export class ClassroomController {
   @ApiParam({ name: 'id', format: 'uuid' })
   @ApiResponse({ status: 204, description: 'Classroom deleted' })
   @ApiResponse({ status: 404, description: 'Classroom not found' })
-  async remove(
-    @CurrentUser() user: AuthenticatedUser,
-    @Param('id', ParseUUIDPipe) id: string,
-  ): Promise<void> {
+  async remove(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
     await this.deleteClassroomService.execute(id);
   }
 }

@@ -23,8 +23,6 @@ import {
 } from '@nestjs/swagger';
 
 import { JwtAuthGuard } from '../../../platform/auth/index.js';
-import { CurrentUser } from '../../../core/decorators/current-user.decorator.js';
-import type { AuthenticatedUser } from '../../../core/types/authenticated-user.type.js';
 import { CreateTeacherPositionDto } from '../dto/request/create-teacher-position.dto.js';
 import { UpdateTeacherPositionDto } from '../dto/request/update-teacher-position.dto.js';
 import { TeacherPositionResponseDto } from '../dto/response/teacher-position-response.dto.js';
@@ -43,10 +41,7 @@ export class TeacherPositionsController {
   @ApiQuery({ name: 'teacherId', required: true, format: 'uuid' })
   @ApiResponse({ status: 200, type: [TeacherPositionResponseDto] })
   @ApiResponse({ status: 404, description: 'Teacher not found' })
-  async findAll(
-    @Query('teacherId', ParseUUIDPipe) teacherId: string,
-    @CurrentUser() user: AuthenticatedUser,
-  ) {
+  async findAll(@Query('teacherId', ParseUUIDPipe) teacherId: string) {
     return this.positionUseCase.findAll(teacherId);
   }
 
@@ -64,7 +59,6 @@ export class TeacherPositionsController {
   async assign(
     @Query('teacherId', ParseUUIDPipe) teacherId: string,
     @Body() dto: CreateTeacherPositionDto,
-    @CurrentUser() user: AuthenticatedUser,
   ) {
     return this.positionUseCase.assign(teacherId, dto);
   }
@@ -86,7 +80,6 @@ export class TeacherPositionsController {
     @Query('teacherId', ParseUUIDPipe) teacherId: string,
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateTeacherPositionDto,
-    @CurrentUser() user: AuthenticatedUser,
   ) {
     return this.positionUseCase.update(teacherId, id, dto);
   }
@@ -106,7 +99,6 @@ export class TeacherPositionsController {
   async remove(
     @Query('teacherId', ParseUUIDPipe) teacherId: string,
     @Param('id', ParseUUIDPipe) id: string,
-    @CurrentUser() user: AuthenticatedUser,
   ) {
     await this.positionUseCase.remove(teacherId, id);
   }

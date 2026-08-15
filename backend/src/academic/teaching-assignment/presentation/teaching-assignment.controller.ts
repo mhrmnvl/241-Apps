@@ -23,8 +23,6 @@ import {
 } from '@nestjs/swagger';
 
 import { JwtAuthGuard } from '../../../platform/auth/index.js';
-import { CurrentUser } from '../../../core/decorators/current-user.decorator.js';
-import type { AuthenticatedUser } from '../../../core/types/authenticated-user.type.js';
 import { CreateTeachingAssignmentDto } from '../dto/request/create-teaching-assignment.dto.js';
 import { TeachingAssignmentQueryDto } from '../dto/request/teaching-assignment-query.dto.js';
 import { UpdateTeachingAssignmentDto } from '../dto/request/update-teaching-assignment.dto.js';
@@ -50,10 +48,7 @@ export class TeachingAssignmentController {
   @Get()
   @RequirePermissions('teaching-assignments.read')
   @ApiOperation({ summary: 'List teaching assignments' })
-  async findAll(
-    @CurrentUser() user: AuthenticatedUser,
-    @Query() q: TeachingAssignmentQueryDto,
-  ) {
+  async findAll(@Query() q: TeachingAssignmentQueryDto) {
     return this.getAll.execute(q);
   }
 
@@ -61,20 +56,14 @@ export class TeachingAssignmentController {
   @RequirePermissions('teaching-assignments.read')
   @ApiOperation({ summary: 'Get teaching assignment by ID' })
   @ApiParam({ name: 'id', format: 'uuid' })
-  async findOne(
-    @CurrentUser() user: AuthenticatedUser,
-    @Param('id', ParseUUIDPipe) id: string,
-  ) {
+  async findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.getById.execute(id);
   }
 
   @Post()
   @RequirePermissions('teaching-assignments.create')
   @ApiOperation({ summary: 'Create teaching assignment' })
-  async create(
-    @CurrentUser() user: AuthenticatedUser,
-    @Body() dto: CreateTeachingAssignmentDto,
-  ) {
+  async create(@Body() dto: CreateTeachingAssignmentDto) {
     return this.createUC.execute(dto);
   }
 
@@ -83,7 +72,6 @@ export class TeachingAssignmentController {
   @ApiOperation({ summary: 'Update teaching assignment' })
   @ApiParam({ name: 'id', format: 'uuid' })
   async update(
-    @CurrentUser() user: AuthenticatedUser,
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateTeachingAssignmentDto,
   ) {
@@ -95,10 +83,7 @@ export class TeachingAssignmentController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete teaching assignment' })
   @ApiParam({ name: 'id', format: 'uuid' })
-  async remove(
-    @CurrentUser() user: AuthenticatedUser,
-    @Param('id', ParseUUIDPipe) id: string,
-  ) {
+  async remove(@Param('id', ParseUUIDPipe) id: string) {
     await this.deleteUC.execute(id);
   }
 }

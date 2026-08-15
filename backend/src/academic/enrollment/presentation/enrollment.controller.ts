@@ -22,8 +22,6 @@ import {
 } from '@nestjs/swagger';
 
 import { JwtAuthGuard } from '../../../platform/auth/index.js';
-import { CurrentUser } from '../../../core/decorators/current-user.decorator.js';
-import type { AuthenticatedUser } from '../../../core/types/authenticated-user.type.js';
 
 import { DropStudentDto } from '../dto/request/drop-student.dto.js';
 import { BulkCreateStudentEnrollmentDto } from '../dto/request/bulk-create-student-enrollment.dto.js';
@@ -62,10 +60,7 @@ export class EnrollmentController {
   @Get()
   @RequirePermissions('enrollments.read')
   @ApiOperation({ summary: 'List student enrollments' })
-  async findAll(
-    @CurrentUser() user: AuthenticatedUser,
-    @Query() q: StudentEnrollmentQueryDto,
-  ) {
+  async findAll(@Query() q: StudentEnrollmentQueryDto) {
     return this.getAll.execute(q);
   }
 
@@ -73,30 +68,21 @@ export class EnrollmentController {
   @RequirePermissions('enrollments.read')
   @ApiOperation({ summary: 'Get enrollment by ID' })
   @ApiParam({ name: 'id', format: 'uuid' })
-  async findOne(
-    @CurrentUser() user: AuthenticatedUser,
-    @Param('id', ParseUUIDPipe) id: string,
-  ) {
+  async findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.getById.execute(id);
   }
 
   @Post()
   @RequirePermissions('enrollments.create')
   @ApiOperation({ summary: 'Create enrollment' })
-  async create(
-    @CurrentUser() user: AuthenticatedUser,
-    @Body() dto: CreateStudentEnrollmentDto,
-  ) {
+  async create(@Body() dto: CreateStudentEnrollmentDto) {
     return this.createUC.execute(dto);
   }
 
   @Post('bulk')
   @RequirePermissions('enrollments.create')
   @ApiOperation({ summary: 'Bulk create enrollments' })
-  async bulkCreate(
-    @CurrentUser() user: AuthenticatedUser,
-    @Body() dto: BulkCreateStudentEnrollmentDto,
-  ) {
+  async bulkCreate(@Body() dto: BulkCreateStudentEnrollmentDto) {
     return this.bulkCreateUC.execute(dto);
   }
 
@@ -105,7 +91,6 @@ export class EnrollmentController {
   @ApiOperation({ summary: 'Update enrollment' })
   @ApiParam({ name: 'id', format: 'uuid' })
   async update(
-    @CurrentUser() user: AuthenticatedUser,
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateStudentEnrollmentDto,
   ) {
@@ -120,7 +105,6 @@ export class EnrollmentController {
   @ApiResponse({ status: 400, description: 'Enrollment is not ACTIVE' })
   @ApiResponse({ status: 404, description: 'Enrollment not found' })
   async transfer(
-    @CurrentUser() user: AuthenticatedUser,
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: TransferStudentDto,
   ) {
@@ -131,10 +115,7 @@ export class EnrollmentController {
   @RequirePermissions('enrollments.create')
   @ApiOperation({ summary: 'Bulk transfer students to a different class' })
   @ApiResponse({ status: 201, description: 'Bulk transfer completed' })
-  async bulkTransfer(
-    @CurrentUser() user: AuthenticatedUser,
-    @Body() dto: BulkTransferStudentDto,
-  ) {
+  async bulkTransfer(@Body() dto: BulkTransferStudentDto) {
     return this.bulkTransferUC.execute(dto);
   }
 
@@ -146,7 +127,6 @@ export class EnrollmentController {
   @ApiResponse({ status: 400, description: 'Enrollment is not ACTIVE' })
   @ApiResponse({ status: 404, description: 'Enrollment not found' })
   async drop(
-    @CurrentUser() user: AuthenticatedUser,
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: DropStudentDto,
   ) {
@@ -158,10 +138,7 @@ export class EnrollmentController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete enrollment' })
   @ApiParam({ name: 'id', format: 'uuid' })
-  async remove(
-    @CurrentUser() user: AuthenticatedUser,
-    @Param('id', ParseUUIDPipe) id: string,
-  ) {
+  async remove(@Param('id', ParseUUIDPipe) id: string) {
     await this.deleteUC.execute(id);
   }
 }

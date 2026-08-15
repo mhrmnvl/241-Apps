@@ -16,7 +16,6 @@ import { GetAttendanceRecapUseCase } from '../use-cases/get-attendance-recap.use
 import { GetAttendanceTrendUseCase } from '../use-cases/get-attendance-trend.use-case.js';
 import { GetAttendanceSuggestionsUseCase } from '../use-cases/get-attendance-suggestions.use-case.js';
 import { AttendanceController } from './attendance.controller.js';
-import type { AuthenticatedUser } from '../../../core/types/authenticated-user.type.js';
 
 describe('AttendanceController', () => {
   let controller: AttendanceController;
@@ -30,13 +29,6 @@ describe('AttendanceController', () => {
   const mockRecap = { execute: jest.fn() };
   const mockSuggestions = { execute: jest.fn() };
   const mockTrend = { execute: jest.fn() };
-
-  const mockUser: AuthenticatedUser = {
-    id: 'user-uuid',
-    sub: 'user-uuid',
-    identifier: 'admin',
-    sessionId: 'session-uuid',
-  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -72,7 +64,7 @@ describe('AttendanceController', () => {
   describe('findAll', () => {
     it('should delegate to GetAttendancesUseCase', async () => {
       mockGetAll.execute.mockResolvedValue({ data: [] });
-      const result = await controller.findAll(mockUser, { page: 1, limit: 10 });
+      const result = await controller.findAll({ page: 1, limit: 10 });
       expect(mockGetAll.execute).toHaveBeenCalledWith({
         page: 1,
         limit: 10,
@@ -84,7 +76,7 @@ describe('AttendanceController', () => {
   describe('findOne', () => {
     it('should delegate to GetAttendanceByIdUseCase', async () => {
       mockGetById.execute.mockResolvedValue({ id: 'att-1' });
-      const result = await controller.findOne(mockUser, 'att-1');
+      const result = await controller.findOne('att-1');
       expect(mockGetById.execute).toHaveBeenCalledWith('att-1');
       expect(result).toEqual({ id: 'att-1' });
     });
@@ -98,7 +90,7 @@ describe('AttendanceController', () => {
         status: AttendanceStatus.PRESENT,
       };
       mockCreate.execute.mockResolvedValue({ id: 'new' });
-      await controller.create(mockUser, dto);
+      await controller.create(dto);
       expect(mockCreate.execute).toHaveBeenCalledWith(dto);
     });
   });
@@ -109,7 +101,7 @@ describe('AttendanceController', () => {
         status: AttendanceStatus.PRESENT,
       };
       mockUpdate.execute.mockResolvedValue({ id: 'att-1' });
-      await controller.update(mockUser, 'att-1', dto);
+      await controller.update('att-1', dto);
       expect(mockUpdate.execute).toHaveBeenCalledWith('att-1', dto);
     });
   });
@@ -117,7 +109,7 @@ describe('AttendanceController', () => {
   describe('remove', () => {
     it('should delegate to DeleteAttendanceUseCase', async () => {
       mockDelete.execute.mockResolvedValue(undefined);
-      await controller.remove(mockUser, 'att-1');
+      await controller.remove('att-1');
       expect(mockDelete.execute).toHaveBeenCalledWith('att-1');
     });
   });
@@ -134,7 +126,7 @@ describe('AttendanceController', () => {
         ],
       };
       mockBulkUpsert.execute.mockResolvedValue({ saved: 1 });
-      const result = await controller.bulkUpsert(mockUser, dto);
+      const result = await controller.bulkUpsert(dto);
       expect(mockBulkUpsert.execute).toHaveBeenCalledWith(dto);
       expect(result).toEqual({ saved: 1 });
     });
@@ -147,7 +139,7 @@ describe('AttendanceController', () => {
         semesterId: 'sem-1',
       };
       mockRecap.execute.mockResolvedValue([]);
-      const result = await controller.getRecap(mockUser, q);
+      const result = await controller.getRecap(q);
       expect(mockRecap.execute).toHaveBeenCalledWith(q);
       expect(result).toEqual([]);
     });
@@ -160,7 +152,7 @@ describe('AttendanceController', () => {
         semesterId: 'sem-1',
       };
       mockTrend.execute.mockResolvedValue([]);
-      const result = await controller.getTrend(mockUser, q);
+      const result = await controller.getTrend(q);
       expect(mockTrend.execute).toHaveBeenCalledWith(q);
       expect(result).toEqual([]);
     });

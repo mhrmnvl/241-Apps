@@ -55,7 +55,7 @@ describe('EventController', () => {
       };
       mockGetEventsService.execute.mockResolvedValue(expected);
 
-      const result = await controller.findAll(query, user);
+      const result = await controller.findAll(query);
 
       expect(mockGetEventsService.execute).toHaveBeenCalledWith(query);
       expect(result).toEqual(expected);
@@ -68,7 +68,7 @@ describe('EventController', () => {
       const expected = { id: 'evt-1', title: 'Pekan Ilmiah' };
       mockGetEventByIdService.execute.mockResolvedValue(expected);
 
-      const result = await controller.findOne(id, user);
+      const result = await controller.findOne(id);
 
       expect(mockGetEventByIdService.execute).toHaveBeenCalledWith(id);
       expect(result).toEqual(expected);
@@ -86,7 +86,7 @@ describe('EventController', () => {
       const expected = { id: 'evt-new', ...dto };
       mockCreateEventService.execute.mockResolvedValue(expected);
 
-      const result = await controller.create(dto, user);
+      const result = await controller.create(dto);
 
       expect(mockCreateEventService.execute).toHaveBeenCalledWith(dto);
       expect(result).toEqual(expected);
@@ -100,7 +100,7 @@ describe('EventController', () => {
       const expected = { id: 'evt-1', title: 'Pekan Ilmiah 2024' };
       mockUpdateEventService.execute.mockResolvedValue(expected);
 
-      const result = await controller.update(id, dto, user);
+      const result = await controller.update(id, dto);
 
       expect(mockUpdateEventService.execute).toHaveBeenCalledWith(id, dto);
       expect(result).toEqual(expected);
@@ -112,7 +112,7 @@ describe('EventController', () => {
       const id = 'evt-1';
       mockDeleteEventService.execute.mockResolvedValue(undefined);
 
-      await controller.remove(id, user);
+      await controller.remove(id);
 
       expect(mockDeleteEventService.execute).toHaveBeenCalledWith(id);
     });

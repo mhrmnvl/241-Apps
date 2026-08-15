@@ -22,8 +22,6 @@ import {
 } from '@nestjs/swagger';
 
 import { JwtAuthGuard } from '../../../platform/auth/index.js';
-import { CurrentUser } from '../../../core/decorators/current-user.decorator.js';
-import type { AuthenticatedUser } from '../../../core/types/authenticated-user.type.js';
 
 import {
   EventListResponseDto,
@@ -56,10 +54,7 @@ export class EventController {
   @ApiOperation({ summary: 'List all events (paginated, filterable)' })
   @ApiResponse({ status: 200, type: EventListResponseDto })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async findAll(
-    @Query() query: EventQueryDto,
-    @CurrentUser() user: AuthenticatedUser,
-  ) {
+  async findAll(@Query() query: EventQueryDto) {
     return this.getEventsService.execute(query);
   }
 
@@ -70,10 +65,7 @@ export class EventController {
   @ApiResponse({ status: 200, type: EventResponseDto })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Event not found' })
-  async findOne(
-    @Param('id', ParseUUIDPipe) id: string,
-    @CurrentUser() user: AuthenticatedUser,
-  ) {
+  async findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.getEventByIdService.execute(id);
   }
 
@@ -83,10 +75,7 @@ export class EventController {
   @ApiResponse({ status: 201, type: EventResponseDto })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Class not found' })
-  async create(
-    @Body() dto: CreateEventDto,
-    @CurrentUser() user: AuthenticatedUser,
-  ) {
+  async create(@Body() dto: CreateEventDto) {
     return this.createEventService.execute(dto);
   }
 
@@ -100,7 +89,6 @@ export class EventController {
   async update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateEventDto,
-    @CurrentUser() user: AuthenticatedUser,
   ) {
     return this.updateEventService.execute(id, dto);
   }
@@ -113,10 +101,7 @@ export class EventController {
   @ApiResponse({ status: 204, description: 'Event deleted' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Event not found' })
-  async remove(
-    @Param('id', ParseUUIDPipe) id: string,
-    @CurrentUser() user: AuthenticatedUser,
-  ) {
+  async remove(@Param('id', ParseUUIDPipe) id: string) {
     await this.deleteEventService.execute(id);
   }
 }

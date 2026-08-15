@@ -62,10 +62,7 @@ export class ReportCardController {
   @Get()
   @RequirePermissions('report-cards.read')
   @ApiOperation({ summary: 'List reportCards (paginated, filterable)' })
-  findAll(
-    @CurrentUser() user: AuthenticatedUser,
-    @Query() query: ReportCardQueryDto,
-  ) {
+  findAll(@Query() query: ReportCardQueryDto) {
     return this.getReportCardsService.execute(query);
   }
 
@@ -89,20 +86,14 @@ export class ReportCardController {
   @RequirePermissions('report-cards.read')
   @ApiOperation({ summary: 'Get reportCard by ID' })
   @ApiParam({ name: 'id', format: 'uuid' })
-  findOne(
-    @CurrentUser() user: AuthenticatedUser,
-    @Param('id', ParseUUIDPipe) id: string,
-  ) {
+  findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.getReportCardByIdService.execute(id);
   }
 
   @Post('generate')
   @RequirePermissions('report-cards.create')
   @ApiOperation({ summary: 'Generate reportCard for a student' })
-  generate(
-    @CurrentUser() user: AuthenticatedUser,
-    @Body() dto: GenerateReportCardDto,
-  ) {
+  generate(@Body() dto: GenerateReportCardDto) {
     return this.generateReportCardService.execute(dto);
   }
 
@@ -114,10 +105,7 @@ export class ReportCardController {
       'Published cards are left untouched and reported as skipped, so one issued report does not block the rest of the class.',
   })
   @ApiResponse({ status: 201, type: BulkGenerateReportCardResponseDto })
-  bulkGenerate(
-    @CurrentUser() user: AuthenticatedUser,
-    @Body() dto: BulkGenerateReportCardDto,
-  ) {
+  bulkGenerate(@Body() dto: BulkGenerateReportCardDto) {
     return this.bulkGenerateReportCardsService.execute(dto);
   }
 
@@ -126,7 +114,6 @@ export class ReportCardController {
   @ApiOperation({ summary: 'Update reportCard details' })
   @ApiParam({ name: 'id', format: 'uuid' })
   update(
-    @CurrentUser() user: AuthenticatedUser,
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateReportCardDto,
   ) {
@@ -137,10 +124,7 @@ export class ReportCardController {
   @RequirePermissions('report-cards.publish')
   @ApiOperation({ summary: 'Publish a reportCard' })
   @ApiParam({ name: 'id', format: 'uuid' })
-  publish(
-    @CurrentUser() user: AuthenticatedUser,
-    @Param('id', ParseUUIDPipe) id: string,
-  ) {
+  publish(@Param('id', ParseUUIDPipe) id: string) {
     return this.publishReportCardService.execute(id);
   }
 
@@ -149,10 +133,7 @@ export class ReportCardController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Soft-delete a reportCard' })
   @ApiParam({ name: 'id', format: 'uuid' })
-  remove(
-    @CurrentUser() user: AuthenticatedUser,
-    @Param('id', ParseUUIDPipe) id: string,
-  ) {
+  remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.deleteReportCardService.execute(id);
   }
 
@@ -161,7 +142,6 @@ export class ReportCardController {
   @ApiOperation({ summary: 'Export reportCard as PDF' })
   @ApiParam({ name: 'id', format: 'uuid' })
   async exportPdf(
-    @CurrentUser() user: AuthenticatedUser,
     @Param('id', ParseUUIDPipe) id: string,
     @Res() res: Response,
   ) {

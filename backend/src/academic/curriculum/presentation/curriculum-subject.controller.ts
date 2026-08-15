@@ -22,8 +22,6 @@ import {
 } from '@nestjs/swagger';
 
 import { JwtAuthGuard } from '../../../platform/auth/index.js';
-import { CurrentUser } from '../../../core/decorators/current-user.decorator.js';
-import type { AuthenticatedUser } from '../../../core/types/authenticated-user.type.js';
 
 import { CurriculumSubjectQueryDto } from '../dto/request/curriculum-subject-query.dto.js';
 import { CreateCurriculumSubjectDto } from '../dto/request/create-curriculum-subject.dto.js';
@@ -54,10 +52,7 @@ export class CurriculumSubjectController {
   @RequirePermissions('curriculum-subjects.read')
   @ApiOperation({ summary: 'List curriculum subjects' })
   @ApiResponse({ status: 200, description: 'Paginated list' })
-  async findAll(
-    @CurrentUser() user: AuthenticatedUser,
-    @Query() query: CurriculumSubjectQueryDto,
-  ) {
+  async findAll(@Query() query: CurriculumSubjectQueryDto) {
     return this.getAll.execute(query);
   }
 
@@ -66,10 +61,7 @@ export class CurriculumSubjectController {
   @ApiOperation({ summary: 'Get curriculum subject by ID' })
   @ApiParam({ name: 'id', format: 'uuid' })
   @ApiResponse({ status: 200, description: 'Curriculum subject details' })
-  async findOne(
-    @CurrentUser() user: AuthenticatedUser,
-    @Param('id', ParseUUIDPipe) id: string,
-  ) {
+  async findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.getById.execute(id);
   }
 
@@ -77,10 +69,7 @@ export class CurriculumSubjectController {
   @RequirePermissions('curriculum-subjects.create')
   @ApiOperation({ summary: 'Create curriculum subject' })
   @ApiResponse({ status: 201, description: 'Created' })
-  async create(
-    @Body() dto: CreateCurriculumSubjectDto,
-    @CurrentUser() user: AuthenticatedUser,
-  ) {
+  async create(@Body() dto: CreateCurriculumSubjectDto) {
     return this.createService.execute(dto);
   }
 
@@ -90,10 +79,7 @@ export class CurriculumSubjectController {
     summary: 'Bulk create curriculum subjects (skips duplicates)',
   })
   @ApiResponse({ status: 201, description: 'Created count and skipped count' })
-  async bulkCreate(
-    @Body() dto: BulkCreateCurriculumSubjectDto,
-    @CurrentUser() user: AuthenticatedUser,
-  ) {
+  async bulkCreate(@Body() dto: BulkCreateCurriculumSubjectDto) {
     return this.bulkCreateService.execute(dto);
   }
 
@@ -102,7 +88,6 @@ export class CurriculumSubjectController {
   @ApiOperation({ summary: 'Update curriculum subject' })
   @ApiParam({ name: 'id', format: 'uuid' })
   async update(
-    @CurrentUser() user: AuthenticatedUser,
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateCurriculumSubjectDto,
   ) {
@@ -114,10 +99,7 @@ export class CurriculumSubjectController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete curriculum subject' })
   @ApiParam({ name: 'id', format: 'uuid' })
-  async remove(
-    @CurrentUser() user: AuthenticatedUser,
-    @Param('id', ParseUUIDPipe) id: string,
-  ) {
+  async remove(@Param('id', ParseUUIDPipe) id: string) {
     await this.deleteService.execute(id);
   }
 }

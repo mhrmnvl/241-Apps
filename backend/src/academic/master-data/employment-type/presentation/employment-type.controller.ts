@@ -22,8 +22,6 @@ import {
 } from '@nestjs/swagger';
 
 import { JwtAuthGuard } from '../../../../platform/auth/index.js';
-import { CurrentUser } from '../../../../core/decorators/current-user.decorator.js';
-import type { AuthenticatedUser } from '../../../../core/types/authenticated-user.type.js';
 
 import { EmploymentTypeQueryDto } from '../dto/request/employment-type-query.dto.js';
 import {
@@ -56,10 +54,7 @@ export class EmploymentTypeController {
   @RequirePermissions('teachers.read')
   @ApiOperation({ summary: 'List all employment types for the school unit' })
   @ApiResponse({ status: 200, type: EmploymentTypeListResponseDto })
-  async findAll(
-    @CurrentUser() user: AuthenticatedUser,
-    @Query() query: EmploymentTypeQueryDto,
-  ) {
+  async findAll(@Query() query: EmploymentTypeQueryDto) {
     return this.listUseCase.execute(query);
   }
 
@@ -69,10 +64,7 @@ export class EmploymentTypeController {
   @ApiParam({ name: 'id', format: 'uuid' })
   @ApiResponse({ status: 200, type: EmploymentTypeResponseDto })
   @ApiResponse({ status: 404, description: 'Employment type not found' })
-  async findOne(
-    @CurrentUser() user: AuthenticatedUser,
-    @Param('id', ParseUUIDPipe) id: string,
-  ) {
+  async findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.getByIdUseCase.execute(id);
   }
 
@@ -81,10 +73,7 @@ export class EmploymentTypeController {
   @ApiOperation({ summary: 'Create a new employment type' })
   @ApiResponse({ status: 201, type: EmploymentTypeResponseDto })
   @ApiResponse({ status: 409, description: 'Duplicate code' })
-  async create(
-    @CurrentUser() user: AuthenticatedUser,
-    @Body() dto: CreateEmploymentTypeDto,
-  ) {
+  async create(@Body() dto: CreateEmploymentTypeDto) {
     return this.createUseCase.execute(dto);
   }
 
@@ -95,7 +84,6 @@ export class EmploymentTypeController {
   @ApiResponse({ status: 200, type: EmploymentTypeResponseDto })
   @ApiResponse({ status: 404, description: 'Employment type not found' })
   async update(
-    @CurrentUser() user: AuthenticatedUser,
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateEmploymentTypeDto,
   ) {
@@ -109,10 +97,7 @@ export class EmploymentTypeController {
   @ApiParam({ name: 'id', format: 'uuid' })
   @ApiResponse({ status: 204, description: 'Deleted' })
   @ApiResponse({ status: 409, description: 'Still in use' })
-  async remove(
-    @CurrentUser() user: AuthenticatedUser,
-    @Param('id', ParseUUIDPipe) id: string,
-  ) {
+  async remove(@Param('id', ParseUUIDPipe) id: string) {
     await this.deleteUseCase.execute(id);
   }
 }

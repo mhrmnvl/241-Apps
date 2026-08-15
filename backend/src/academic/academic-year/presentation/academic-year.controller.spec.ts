@@ -10,17 +10,9 @@ import { UpdateAcademicYearUseCase } from '../use-cases/update-academic-year.use
 import { ActivateAcademicYearUseCase } from '../use-cases/activate-academic-year.use-case.js';
 import { DeactivateAcademicYearUseCase } from '../use-cases/deactivate-academic-year.use-case.js';
 import { AcademicYearController } from './academic-year.controller.js';
-import type { AuthenticatedUser } from '../../../core/types/authenticated-user.type.js';
 
 describe('AcademicYearController', () => {
   let controller: AcademicYearController;
-
-  const mockUser: AuthenticatedUser = {
-    id: 'user-uuid',
-    sub: 'user-uuid',
-    identifier: 'admin',
-    sessionId: 'session-uuid-1',
-  };
 
   const mockGetAcademicYearsService = { execute: jest.fn() };
   const mockGetAcademicYearByIdService = { execute: jest.fn() };
@@ -82,7 +74,7 @@ describe('AcademicYearController', () => {
       };
       mockGetAcademicYearsService.execute.mockResolvedValue(expected);
 
-      const result = await controller.findAll(mockUser, query);
+      const result = await controller.findAll(query);
 
       expect(mockGetAcademicYearsService.execute).toHaveBeenCalledWith(query);
       expect(result).toEqual(expected);
@@ -95,7 +87,7 @@ describe('AcademicYearController', () => {
       const expected = { id: 'ay-1', name: '2024/2025', isActive: true };
       mockGetAcademicYearByIdService.execute.mockResolvedValue(expected);
 
-      const result = await controller.findOne(mockUser, id);
+      const result = await controller.findOne(id);
 
       expect(mockGetAcademicYearByIdService.execute).toHaveBeenCalledWith(id);
       expect(result).toEqual(expected);
@@ -108,7 +100,7 @@ describe('AcademicYearController', () => {
       const expected = { id: 'ay-new', name: '2025/2026', isActive: false };
       mockCreateAcademicYearService.execute.mockResolvedValue(expected);
 
-      const result = await controller.create(mockUser, dto);
+      const result = await controller.create(dto);
 
       expect(mockCreateAcademicYearService.execute).toHaveBeenCalledWith(dto);
       expect(result).toEqual(expected);
@@ -126,7 +118,7 @@ describe('AcademicYearController', () => {
       };
       mockUpdateAcademicYearService.execute.mockResolvedValue(expected);
 
-      const result = await controller.update(mockUser, id, dto);
+      const result = await controller.update(id, dto);
 
       expect(mockUpdateAcademicYearService.execute).toHaveBeenCalledWith(
         id,
@@ -141,7 +133,7 @@ describe('AcademicYearController', () => {
       const id = 'ay-1';
       mockDeleteAcademicYearService.execute.mockResolvedValue(undefined);
 
-      await controller.remove(mockUser, id);
+      await controller.remove(id);
 
       expect(mockDeleteAcademicYearService.execute).toHaveBeenCalledWith(id);
     });
@@ -153,7 +145,7 @@ describe('AcademicYearController', () => {
       const expected = { id: 'ay-1', name: '2024/2025', isActive: true };
       mockActivateAcademicYearService.execute.mockResolvedValue(expected);
 
-      const result = await controller.activate(mockUser, id);
+      const result = await controller.activate(id);
 
       expect(mockActivateAcademicYearService.execute).toHaveBeenCalledWith(id);
       expect(result).toEqual(expected);
@@ -166,7 +158,7 @@ describe('AcademicYearController', () => {
       const expected = { id: 'ay-1', name: '2024/2025', isActive: false };
       mockDeactivateAcademicYearService.execute.mockResolvedValue(expected);
 
-      const result = await controller.deactivate(mockUser, id);
+      const result = await controller.deactivate(id);
 
       expect(mockDeactivateAcademicYearService.execute).toHaveBeenCalledWith(
         id,

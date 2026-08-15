@@ -23,8 +23,6 @@ import {
 } from '@nestjs/swagger';
 
 import { JwtAuthGuard } from '../../../platform/auth/index.js';
-import { CurrentUser } from '../../../core/decorators/current-user.decorator.js';
-import type { AuthenticatedUser } from '../../../core/types/authenticated-user.type.js';
 
 import { CreateStudentGraduationDto } from '../dto/request/create-student-graduation.dto.js';
 import { BulkGraduationDto } from '../dto/request/bulk-graduation.dto.js';
@@ -84,10 +82,7 @@ export class GraduationController {
   @Get()
   @RequirePermissions('graduations.read')
   @ApiOperation({ summary: 'List student graduations' })
-  async findAll(
-    @CurrentUser() user: AuthenticatedUser,
-    @Query() query: StudentGraduationQueryDto,
-  ) {
+  async findAll(@Query() query: StudentGraduationQueryDto) {
     return this.getAllUC.execute(query);
   }
 
@@ -96,10 +91,7 @@ export class GraduationController {
   @ApiOperation({ summary: 'Get graduation by ID' })
   @ApiParam({ name: 'id', format: 'uuid' })
   @ApiResponse({ status: 404, description: 'Graduation not found' })
-  async findOne(
-    @CurrentUser() user: AuthenticatedUser,
-    @Param('id', ParseUUIDPipe) id: string,
-  ) {
+  async findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.getByIdUC.execute(id);
   }
 
@@ -111,10 +103,7 @@ export class GraduationController {
     status: 409,
     description: 'Student already has a graduation record',
   })
-  async create(
-    @CurrentUser() user: AuthenticatedUser,
-    @Body() dto: CreateStudentGraduationDto,
-  ) {
+  async create(@Body() dto: CreateStudentGraduationDto) {
     return this.createUC.execute(dto);
   }
 
@@ -124,7 +113,6 @@ export class GraduationController {
   @ApiParam({ name: 'id', format: 'uuid' })
   @ApiResponse({ status: 404, description: 'Graduation not found' })
   async update(
-    @CurrentUser() user: AuthenticatedUser,
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateStudentGraduationDto,
   ) {
@@ -138,10 +126,7 @@ export class GraduationController {
   @ApiParam({ name: 'id', format: 'uuid' })
   @ApiResponse({ status: 204, description: 'Graduation deleted' })
   @ApiResponse({ status: 404, description: 'Graduation not found' })
-  async remove(
-    @CurrentUser() user: AuthenticatedUser,
-    @Param('id', ParseUUIDPipe) id: string,
-  ) {
+  async remove(@Param('id', ParseUUIDPipe) id: string) {
     await this.deleteUC.execute(id);
   }
 }

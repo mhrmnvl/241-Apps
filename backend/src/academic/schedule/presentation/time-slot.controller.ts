@@ -21,8 +21,6 @@ import {
 } from '@nestjs/swagger';
 
 import { JwtAuthGuard } from '../../../platform/auth/index.js';
-import { CurrentUser } from '../../../core/decorators/current-user.decorator.js';
-import type { AuthenticatedUser } from '../../../core/types/authenticated-user.type.js';
 
 import {
   TimeSlotResponseDto,
@@ -63,7 +61,7 @@ export class TimeSlotController {
   @RequirePermissions('time-slots.read')
   @ApiOperation({ summary: 'List all time slots (ordered by slot order)' })
   @ApiResponse({ status: 200, type: [TimeSlotResponseDto] })
-  async findAll(@CurrentUser() user: AuthenticatedUser) {
+  async findAll() {
     return this.getTimeSlotsService.execute();
   }
 
@@ -114,10 +112,7 @@ export class TimeSlotController {
   @ApiParam({ name: 'id', format: 'uuid' })
   @ApiResponse({ status: 200, type: TimeSlotResponseDto })
   @ApiResponse({ status: 404, description: 'TimeSlot not found' })
-  async findOne(
-    @Param('id', ParseUUIDPipe) id: string,
-    @CurrentUser() user: AuthenticatedUser,
-  ) {
+  async findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.getTimeSlotByIdService.execute(id);
   }
 
@@ -125,10 +120,7 @@ export class TimeSlotController {
   @RequirePermissions('time-slots.create')
   @ApiOperation({ summary: 'Create a new time slot' })
   @ApiResponse({ status: 201, type: TimeSlotResponseDto })
-  async create(
-    @Body() dto: CreateTimeSlotDto,
-    @CurrentUser() user: AuthenticatedUser,
-  ) {
+  async create(@Body() dto: CreateTimeSlotDto) {
     return this.createTimeSlotService.execute(dto);
   }
 
@@ -141,7 +133,6 @@ export class TimeSlotController {
   async update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateTimeSlotDto,
-    @CurrentUser() user: AuthenticatedUser,
   ) {
     return this.updateTimeSlotService.execute(id, dto);
   }
@@ -156,10 +147,7 @@ export class TimeSlotController {
   @ApiResponse({ status: 204, description: 'TimeSlot deleted' })
   @ApiResponse({ status: 404, description: 'TimeSlot not found' })
   @ApiResponse({ status: 409, description: 'TimeSlot still in use' })
-  async remove(
-    @Param('id', ParseUUIDPipe) id: string,
-    @CurrentUser() user: AuthenticatedUser,
-  ) {
+  async remove(@Param('id', ParseUUIDPipe) id: string) {
     await this.deleteTimeSlotService.execute(id);
   }
 }

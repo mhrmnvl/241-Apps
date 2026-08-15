@@ -5,7 +5,6 @@ import { GetClassroomByIdUseCase } from '../use-cases/get-classroom-by-id.use-ca
 import { GetClassroomsUseCase } from '../use-cases/get-classrooms.use-case.js';
 import { UpdateClassroomUseCase } from '../use-cases/update-classroom.use-case.js';
 import { ClassroomController } from './classroom.controller.js';
-import type { AuthenticatedUser } from '../../../core/types/authenticated-user.type.js';
 
 describe('ClassroomController', () => {
   let controller: ClassroomController;
@@ -15,13 +14,6 @@ describe('ClassroomController', () => {
   const mockCreateClassroomUC = { execute: jest.fn() };
   const mockUpdateClassroomUC = { execute: jest.fn() };
   const mockDeleteClassroomUC = { execute: jest.fn() };
-
-  const mockUser: AuthenticatedUser = {
-    id: 'usr-1',
-    sub: 'usr-1',
-    identifier: 'admin',
-    sessionId: 'sess-1',
-  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -52,7 +44,7 @@ describe('ClassroomController', () => {
       };
       mockGetClassesUC.execute.mockResolvedValue(expected);
 
-      const result = await controller.findAll(mockUser, query);
+      const result = await controller.findAll(query);
 
       expect(mockGetClassesUC.execute).toHaveBeenCalledWith(query);
       expect(result).toEqual(expected);
@@ -63,7 +55,7 @@ describe('ClassroomController', () => {
     it('should delegate to GetClassroomByIdUseCase', async () => {
       mockGetClassroomByIdUC.execute.mockResolvedValue({ id: 'cls-1' });
 
-      const result = await controller.findOne(mockUser, 'cls-1');
+      const result = await controller.findOne('cls-1');
 
       expect(mockGetClassroomByIdUC.execute).toHaveBeenCalledWith('cls-1');
       expect(result).toEqual({ id: 'cls-1' });
@@ -82,7 +74,7 @@ describe('ClassroomController', () => {
       };
       mockCreateClassroomUC.execute.mockResolvedValue({ id: 'new', ...dto });
 
-      await controller.create(dto, mockUser);
+      await controller.create(dto);
 
       expect(mockCreateClassroomUC.execute).toHaveBeenCalledWith(dto);
     });
@@ -96,7 +88,7 @@ describe('ClassroomController', () => {
         name: 'B',
       });
 
-      await controller.update(mockUser, 'cls-1', dto);
+      await controller.update('cls-1', dto);
 
       expect(mockUpdateClassroomUC.execute).toHaveBeenCalledWith('cls-1', dto);
     });
@@ -106,7 +98,7 @@ describe('ClassroomController', () => {
     it('should delegate to DeleteClassroomUseCase', async () => {
       mockDeleteClassroomUC.execute.mockResolvedValue(undefined);
 
-      await controller.remove(mockUser, 'cls-1');
+      await controller.remove('cls-1');
 
       expect(mockDeleteClassroomUC.execute).toHaveBeenCalledWith('cls-1');
     });

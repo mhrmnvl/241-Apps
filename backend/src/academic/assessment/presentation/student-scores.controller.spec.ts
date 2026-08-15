@@ -12,7 +12,6 @@ import { DeleteStudentScoreUseCase } from '../use-cases/delete-student-score.use
 import { GetStudentScoreRosterUseCase } from '../use-cases/get-student-score-roster.use-case.js';
 import { BulkUpsertStudentScoresUseCase } from '../use-cases/bulk-upsert-student-scores.use-case.js';
 import { StudentScoreController } from './student-score.controller.js';
-import type { AuthenticatedUser } from '../../../core/types/authenticated-user.type.js';
 
 describe('StudentScoreController', () => {
   let controller: StudentScoreController;
@@ -23,13 +22,6 @@ describe('StudentScoreController', () => {
   const mockDelete = { execute: jest.fn() };
   const mockRoster = { execute: jest.fn() };
   const mockBulkUpsert = { execute: jest.fn() };
-
-  const mockUser: AuthenticatedUser = {
-    id: 'user-uuid',
-    sub: 'user-uuid',
-    identifier: 'admin',
-    sessionId: 'session-uuid',
-  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -59,7 +51,7 @@ describe('StudentScoreController', () => {
   describe('findAll', () => {
     it('should delegate', async () => {
       mockGetAll.execute.mockResolvedValue({ data: [] });
-      const result = await controller.findAll(mockUser, { page: 1, limit: 10 });
+      const result = await controller.findAll({ page: 1, limit: 10 });
       expect(mockGetAll.execute).toHaveBeenCalledWith({
         page: 1,
         limit: 10,
@@ -71,7 +63,7 @@ describe('StudentScoreController', () => {
   describe('findOne', () => {
     it('should delegate', async () => {
       mockGetById.execute.mockResolvedValue({ id: 'ss-1' });
-      const result = await controller.findOne(mockUser, 'ss-1');
+      const result = await controller.findOne('ss-1');
       expect(mockGetById.execute).toHaveBeenCalledWith('ss-1');
       expect(result).toEqual({ id: 'ss-1' });
     });
@@ -85,7 +77,7 @@ describe('StudentScoreController', () => {
         score: 85,
       };
       mockCreate.execute.mockResolvedValue({ id: 'new' });
-      await controller.create(mockUser, dto);
+      await controller.create(dto);
       expect(mockCreate.execute).toHaveBeenCalledWith(dto);
     });
   });
@@ -94,7 +86,7 @@ describe('StudentScoreController', () => {
     it('should delegate', async () => {
       const dto: UpdateStudentScoreDto = { score: 90 };
       mockUpdate.execute.mockResolvedValue({ id: 'ss-1' });
-      await controller.update(mockUser, 'ss-1', dto);
+      await controller.update('ss-1', dto);
       expect(mockUpdate.execute).toHaveBeenCalledWith('ss-1', dto);
     });
   });
@@ -102,7 +94,7 @@ describe('StudentScoreController', () => {
   describe('remove', () => {
     it('should delegate', async () => {
       mockDelete.execute.mockResolvedValue(undefined);
-      await controller.remove(mockUser, 'ss-1');
+      await controller.remove('ss-1');
       expect(mockDelete.execute).toHaveBeenCalledWith('ss-1');
     });
   });
@@ -111,7 +103,7 @@ describe('StudentScoreController', () => {
     it('should delegate', async () => {
       const query: StudentScoreRosterQueryDto = { assessmentItemId: 'ai-1' };
       mockRoster.execute.mockResolvedValue({ assessmentItem: {}, items: [] });
-      const result = await controller.getRoster(mockUser, query);
+      const result = await controller.getRoster(query);
       expect(mockRoster.execute).toHaveBeenCalledWith(query);
       expect(result).toEqual({ assessmentItem: {}, items: [] });
     });
@@ -124,7 +116,7 @@ describe('StudentScoreController', () => {
         records: [{ enrollmentId: 'e1', score: 85 }],
       };
       mockBulkUpsert.execute.mockResolvedValue({ saved: 1 });
-      const result = await controller.bulkUpsert(mockUser, dto);
+      const result = await controller.bulkUpsert(dto);
       expect(mockBulkUpsert.execute).toHaveBeenCalledWith(dto);
       expect(result).toEqual({ saved: 1 });
     });
