@@ -2,7 +2,6 @@ import { NotFoundException } from '@nestjs/common';
 import { GetMyReportCardDetailUseCase } from './get-my-report-card-detail.use-case.js';
 import { GetReportCardDetailUseCase } from './get-report-card-detail.use-case.js';
 import { IReportCardRepository } from '../domain/interfaces/report-card-repository.interface.js';
-import { IStudentIdentityReadPort } from '../../student/domain/interfaces/student-identity-read.port.js';
 
 /**
  * Opening one's own report card, and nobody else's.
@@ -44,7 +43,7 @@ describe('GetMyReportCardDetailUseCase', () => {
       { findOwnership } as unknown as IReportCardRepository,
       {
         findStudentIdByUserId: jest.fn().mockResolvedValue(options.studentId),
-      } as unknown as IStudentIdentityReadPort,
+      },
     );
 
     return { useCase, detail, findOwnership };

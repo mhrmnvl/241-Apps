@@ -36,7 +36,9 @@ export class GetMyReportCardDetailUseCase {
     // Ownership is settled before the card is read, so a card belonging to
     // somebody else is never loaded, let alone returned.
     const ownership = await this.reportCardRepository.findOwnership(id);
-    if (!ownership || ownership.studentId !== studentId) throw notFound();
+    // A card that does not exist and a card belonging to someone else are the
+    // same answer here, which is why one comparison covers both.
+    if (ownership?.studentId !== studentId) throw notFound();
 
     const detail = await this.getReportCardDetail.execute(id);
     if (!detail.isPublished) throw notFound();
