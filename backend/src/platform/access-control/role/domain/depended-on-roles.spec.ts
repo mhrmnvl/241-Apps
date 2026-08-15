@@ -70,7 +70,11 @@ describe('roles the code resolves by name are protected from deletion', () => {
     }
     source = code(parts.join('\n'));
     seed = await readFile(SEED, 'utf8');
-  });
+    // Reads every source file under `src`, which is slow enough under a full
+    // parallel run to exceed jest's 5s default — it passed alone and failed in
+    // the suite, which is the worst way for a guard to behave: people learn to
+    // re-run instead of to look.
+  }, 60_000);
 
   it('finds the sources and the seed', () => {
     expect(source.length).toBeGreaterThan(1000);

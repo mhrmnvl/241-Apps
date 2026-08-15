@@ -79,7 +79,7 @@ describe('inventory reference data exists for every code the source asks for', (
   beforeAll(async () => {
     source = code(await read(SRC, '**/*.ts'));
     migrations = withoutEnumDeclarations(await read(MIGRATIONS, '**/*.sql'));
-  });
+  }, 60_000);
 
   it('finds the sources and the migrations', () => {
     expect(source.length).toBeGreaterThan(1000);

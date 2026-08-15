@@ -85,22 +85,22 @@ Written first: each asserts a refusal or a narrowing that does not exist yet.
 
 ### Tests for User Story 2
 
-- [ ] T025 [P] [US2] Service test at `apps/academic/src/features/academic/rapor/__tests__/myRaporService.spec.ts` — the self-service read stores what the endpoint returns and does not fall back to the management list on failure.
-- [ ] T026 [P] [US2] Service test at `apps/academic/src/features/academic/attendance/__tests__/myAttendanceService.spec.ts` — own totals come from the response, never recomputed from a page.
+- [X] T025 [P] [US2] Service test at `apps/academic/src/features/academic/rapor/__tests__/myRaporService.spec.ts` — the self-service read stores what the endpoint returns and does not fall back to the management list on failure.
+- [X] T026 [P] [US2] Service test at `apps/academic/src/features/academic/attendance/__tests__/myAttendanceService.spec.ts` — own totals come from the response, never recomputed from a page.
 
 ### Implementation for User Story 2
 
 Each view lands **inside the existing feature folder** for its domain, beside the management view, as `presence/leave` holds `LeaveApprovalView.vue` and `MyLeaveView.vue`.
 
-- [ ] T027 [P] [US2] Add `getMine` to `apps/academic/src/features/academic/rapor/api/raporApi.ts` and a `fetchMine` to its service; type the response with the existing `RaporListMeta` so the summary keeps its meaning.
-- [ ] T028 [P] [US2] Add the equivalent to `apps/academic/src/features/academic/attendance/`, `.../student-score/` and `.../schedule/` api and service layers.
-- [ ] T029 [US2] Create `apps/academic/src/features/academic/rapor/views/MyRaporView.vue` — the caller's published report card with its subject lines. No generate, publish, delete or export-for-others control is present, not merely disabled (FR-010).
-- [ ] T030 [P] [US2] Create `apps/academic/src/features/academic/attendance/views/MyAttendanceView.vue` — own days and own totals, no classroom picker.
-- [ ] T031 [P] [US2] Create `apps/academic/src/features/academic/student-score/views/MyScoreView.vue` — own marks per assessment, including assessments with no mark yet, so what is outstanding is visible.
-- [ ] T032 [P] [US2] Create `apps/academic/src/features/academic/schedule/views/MyScheduleView.vue` — the caller's own timetable, no classroom picker.
-- [ ] T033 [US2] Add routes for the four views in each feature's `routes.ts`, each carrying its `-own` permission in `meta.requiredPermission`. **The four paths must be new**: every URL the student menu points at today is owned by a management route — `/academic/student-score` belongs to the *assessment-item* feature's list, `/academic/attendance` to `AttendanceView`, `/academic/report-card` to `RaporView`, `/schedule` to `ScheduleView`. Use `/academic/my/schedule`, `/academic/my/attendance`, `/academic/my/scores`, `/academic/my/report-card`, and leave the existing paths pointing where they point.
-- [ ] T034 [US2] Repoint the four entries in `apps/academic/src/config/menuConfig.ts` (`key: 'student-view'`) at the four new paths from T033, and give each a `requiredPermission` of the matching `-own` code so the section is offered by permission rather than by `allowedRoles: ['STUDENT']`.
-- [ ] T035 [US2] Write the empty states as separate cases in `MyRaporView.vue`, `MyAttendanceView.vue`, `MyScoreView.vue` and `MyScheduleView.vue`: not enrolled this semester, no marks entered yet, report card exists but is unpublished. Each says which it is; none says "no data".
+- [X] T027 [P] [US2] Add `getMine` to `apps/academic/src/features/academic/rapor/api/raporApi.ts` and a `fetchMine` to its service; type the response with the existing `RaporListMeta` so the summary keeps its meaning.
+- [X] T028 [P] [US2] Add the equivalent to `apps/academic/src/features/academic/attendance/`, `.../student-score/` and `.../schedule/` api and service layers.
+- [X] T029 [US2] Create `apps/academic/src/features/academic/rapor/views/MyRaporView.vue` — the caller's published report card with its subject lines. No generate, publish, delete or export-for-others control is present, not merely disabled (FR-010).
+- [X] T030 [P] [US2] Create `apps/academic/src/features/academic/attendance/views/MyAttendanceView.vue` — own days and own totals, no classroom picker.
+- [X] T031 [P] [US2] Create `apps/academic/src/features/academic/student-score/views/MyScoreView.vue` — own marks per assessment, including assessments with no mark yet, so what is outstanding is visible.
+- [X] T032 [P] [US2] Create `apps/academic/src/features/academic/schedule/views/MyScheduleView.vue` — the caller's own timetable, no classroom picker.
+- [X] T033 [US2] Add routes for the four views in each feature's `routes.ts`, each carrying its `-own` permission in `meta.requiredPermission`. **The four paths must be new**: every URL the student menu points at today is owned by a management route — `/academic/student-score` belongs to the *assessment-item* feature's list, `/academic/attendance` to `AttendanceView`, `/academic/report-card` to `RaporView`, `/schedule` to `ScheduleView`. Use `/academic/my/schedule`, `/academic/my/attendance`, `/academic/my/scores`, `/academic/my/report-card`, and leave the existing paths pointing where they point.
+- [X] T034 [US2] Repoint the four entries in `apps/academic/src/config/menuConfig.ts` (`key: 'student-view'`) at the four new paths from T033, and give each a `requiredPermission` of the matching `-own` code so the section is offered by permission rather than by `allowedRoles: ['STUDENT']`.
+- [X] T035 [US2] Write the empty states as separate cases in `MyRaporView.vue`, `MyAttendanceView.vue`, `MyScoreView.vue` and `MyScheduleView.vue`: not enrolled this semester, no marks entered yet, report card exists but is unpublished. Each says which it is; none says "no data".
 
 **Checkpoint**: The student surface is complete and useful. Safe to stop here.
 

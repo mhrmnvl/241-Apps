@@ -50,7 +50,7 @@ describe('no academic controller asks for a caller it ignores', () => {
       });
     }
     controllers = found;
-  });
+  }, 60_000);
 
   it('finds the academic controllers', () => {
     expect(controllers.length).toBeGreaterThan(20);
