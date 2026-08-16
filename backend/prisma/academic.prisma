@@ -46,6 +46,19 @@ model AcademicCalendar {
   typeId         String    @map("type_id") @db.Uuid
   startDate      DateTime  @map("start_date") @db.Date
   endDate        DateTime  @map("end_date") @db.Date
+  /// The clock hours the entry runs, when it has any.
+  ///
+  /// Days are the calendar's unit — a term is July to December, a holiday is
+  /// the 17th — and most entries have no time at all. An activity does: a
+  /// parents' meeting is the 8th, 08:00 to 12:00. So the hours are optional,
+  /// and stored as time-of-day rather than folded into the dates: on a
+  /// multi-day activity they read as "these hours, each day", which is how a
+  /// school describes it.
+  ///
+  /// Both or neither. A start with no end is half a statement, and the use case
+  /// refuses it rather than printing "08:00 – " on a screen.
+  startTime      DateTime? @map("start_time") @db.Time(0)
+  endTime        DateTime? @map("end_time") @db.Time(0)
   description    String?   @db.Text
   deletedAt      DateTime? @map("deleted_at")
 

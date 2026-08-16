@@ -21,6 +21,14 @@ export interface CalendarEventData {
   type?: { id: string; name: string } | null
   startDate: string
   endDate: string
+  /**
+   * Clock hours, when the entry has any — `'08:00'`.
+   *
+   * Most entries have none: a term and a holiday are measured in days. Both
+   * present or both absent; the server refuses half a span.
+   */
+  startTime?: string | null
+  endTime?: string | null
   academicYearId?: string
   semesterId?: string
 }

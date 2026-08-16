@@ -5,6 +5,9 @@ export interface CalendarCreatePayload {
   typeId: string
   startDate: string
   endDate: string
+  /** Optional clock hours, `'08:00'`. Both or neither. */
+  startTime?: string
+  endTime?: string
   description?: string
 }
 
@@ -14,6 +17,8 @@ export interface CalendarUpdatePayload {
   typeId?: string
   startDate?: string
   endDate?: string
+  startTime?: string
+  endTime?: string
   description?: string
 }
 
@@ -23,6 +28,9 @@ export interface CalendarSavePayload {
   typeId: string
   startDate: string
   endDate: string
+  /** Optional clock hours, `'08:00'`. Both or neither. */
+  startTime?: string
+  endTime?: string
   academicYearId?: string
   semesterId?: string
 }

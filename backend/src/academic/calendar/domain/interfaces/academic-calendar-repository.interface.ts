@@ -22,6 +22,9 @@ export interface CreateAcademicCalendarRepositoryInput {
   startDate: Date;
   endDate: Date;
   description?: string | null;
+  /** Clock hours, when the entry has any. Both or neither. */
+  startTime?: Date | null;
+  endTime?: Date | null;
   /**
    * Classrooms the entry is for. Absent or empty means the whole school.
    *

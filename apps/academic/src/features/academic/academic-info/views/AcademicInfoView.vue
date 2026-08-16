@@ -156,12 +156,18 @@ onMounted(init)
                 every entry claimed to start at midnight.
               -->
               <div
-                v-if="event.endDate !== event.startDate"
+                v-if="event.endDate !== event.startDate || event.startTime"
                 class="flex items-center gap-1 mt-1.5 text-xs text-muted-foreground"
               >
                 <CalendarDays class="size-3" />
-                {{ formatDate(event.startDate) }} –
-                {{ formatDate(event.endDate) }}
+                <span v-if="event.endDate !== event.startDate">
+                  {{ formatDate(event.startDate) }} –
+                  {{ formatDate(event.endDate) }}
+                </span>
+                <span v-if="event.startTime && event.endTime">
+                  {{ event.startTime.slice(11, 16) }} –
+                  {{ event.endTime.slice(11, 16) }}
+                </span>
               </div>
             </div>
           </div>

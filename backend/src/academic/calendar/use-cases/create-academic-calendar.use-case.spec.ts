@@ -72,10 +72,14 @@ describe('CreateAcademicCalendarUseCase', () => {
       );
       expect(mockSemesterRepository.findById).not.toHaveBeenCalled();
       // The port takes real Dates; the use case converts the ISO strings.
+      // Hours come through as nulls: this entry names none, which is the
+      // ordinary case for anything measured in days.
       expect(mockRepo.create).toHaveBeenCalledWith({
         ...dto,
         startDate: new Date(dto.startDate),
         endDate: new Date(dto.endDate),
+        startTime: null,
+        endTime: null,
       });
       expect(result).toEqual({ id: 'cal-1', ...dto });
     });

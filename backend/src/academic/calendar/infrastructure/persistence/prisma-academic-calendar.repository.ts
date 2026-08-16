@@ -59,6 +59,8 @@ export class PrismaAcademicCalendarRepository extends IAcademicCalendarRepositor
         startDate: dto.startDate,
         endDate: dto.endDate,
         description: dto.description,
+        startTime: dto.startTime,
+        endTime: dto.endTime,
         ...(dto.classroomIds?.length && {
           classrooms: {
             create: dto.classroomIds.map((classroomId) => ({ classroomId })),
@@ -79,6 +81,8 @@ export class PrismaAcademicCalendarRepository extends IAcademicCalendarRepositor
         ...(dto.startDate && { startDate: dto.startDate }),
         ...(dto.endDate && { endDate: dto.endDate }),
         ...(dto.description !== undefined && { description: dto.description }),
+        ...(dto.startTime !== undefined && { startTime: dto.startTime }),
+        ...(dto.endTime !== undefined && { endTime: dto.endTime }),
         // Replaced wholesale, not merged: a class removed from an entry has to
         // be expressible, and merging makes removal impossible. `undefined`
         // leaves the targeting alone, so an edit that touches only the title
