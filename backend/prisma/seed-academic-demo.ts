@@ -238,7 +238,58 @@ async function main() {
     );
   }
 
+  // The teacher role could not teach.
+  //
+  // `iam.seed.ts` grants it twelve codes including `student-scores.manage`,
+  // `assessment-items.*`, `attendances.manage` and `report-cards.publish`. Dev
+  // was configured by hand instead and held none of them — a teacher could read
+  // a classroom and a timetable and do nothing else, so the marking that fills
+  // every screen downstream was impossible for the role that does it.
+  //
+  // Only added here, never removed: what dev holds *beyond* this — including
+  // `teachers.create` and `teachers.delete`, which let a teacher remove a
+  // colleague — is the school's to decide on the role screen, not a fixture's
+  // to quietly revoke.
+  const teacherRole = await prisma.role.findFirst({
+    where: { code: 'TEACHER' },
+  });
+  if (teacherRole) {
+    const teacherCodes = [
+      'attendances.read',
+      'attendances.manage',
+      'report-cards.read',
+      'report-cards.publish',
+      'report-cards.create',
+      'assessment-items.read',
+      'assessment-items.create',
+      'assessment-items.update',
+      'assessment-items.delete',
+      'student-scores.read',
+      'student-scores.manage',
+      'student-scores.create',
+      'student-scores.update',
+      'parents.read',
+    ];
+    const teacherPermissions = await prisma.permission.findMany({
+      where: { code: { in: teacherCodes } },
+    });
+    for (const permission of teacherPermissions) {
+      await prisma.rolePermission.upsert({
+        where: {
+          roleId_permissionId: {
+            roleId: teacherRole.id,
+            permissionId: permission.id,
+          },
+        },
+        update: {},
+        create: { roleId: teacherRole.id, permissionId: permission.id },
+      });
+    }
+    console.log(`  teacher role: ${teacherPermissions.length} teaching grants`);
+  }
+
   const password = await bcrypt.hash('siswa123', 10);
+  const teacherPassword = await bcrypt.hash('guru123', 10);
   const days = schoolDays(24);
   const enrollmentIds: { id: string; classroomId: string }[] = [];
 
@@ -260,6 +311,15 @@ async function main() {
         subjects[(classIndex * SUBJECTS_PER_CLASS + s) % subjects.length];
       const teacher =
         teachers[(classIndex * SUBJECTS_PER_CLASS + s) % teachers.length];
+
+      // A teacher who cannot sign in cannot be demonstrated. Only the ones
+      // this fixture puts in front of a class get a known password — the rest
+      // of the staff list is left alone, since these are real people's
+      // accounts and a fixture has no business resetting all of them.
+      await prisma.user.update({
+        where: { id: teacher.userId },
+        data: { passwordHash: teacherPassword, isActive: true },
+      });
 
       const assignment = await prisma.teachingAssignment.upsert({
         where: {
@@ -654,7 +714,9 @@ async function main() {
   console.log(
     `  ${published} report cards published, ${lines} subject lines frozen`,
   );
-  console.log('\n  every student signs in with the password: siswa123\n');
+  console.log(
+    '\n  students sign in with siswa123, teaching staff with guru123\n',
+  );
 }
 
 main()
