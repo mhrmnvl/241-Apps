@@ -43,7 +43,17 @@ export interface TeachingAssignmentAcademicYear {
 
 export interface TeachingAssignmentSemester {
   id: string
-  type: 'ODD' | 'EVEN'
+  /**
+   * The term, as a relation — `{ name: 'ODD' | 'EVEN' }`.
+   *
+   * Declared `'ODD' | 'EVEN'` until 2026-08-16, which compiled and was never
+   * true: the backend did not include the relation at all, so `type` arrived
+   * undefined and `sem.type === 'ODD'` was false for every row. The Semester
+   * column read "Genap" all year, in Ganjil as much as in Genap.
+   */
+  type?: {
+    name: string
+  }
   academicYear?: TeachingAssignmentAcademicYear
 }
 

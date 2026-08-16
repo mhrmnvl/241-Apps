@@ -33,7 +33,12 @@ export const createTeachingAssignmentColumns = (
     cell: ({ row }) => {
       const sem = row.original.semester
       if (!sem) return '-'
-      const type = sem.type === 'ODD' ? 'Ganjil' : 'Genap'
+      const type =
+        sem.type?.name === 'ODD'
+          ? 'Ganjil'
+          : sem.type?.name === 'EVEN'
+            ? 'Genap'
+            : ''
       const year = sem.academicYear?.name ?? ''
       return `${type} ${year}`.trim()
     },

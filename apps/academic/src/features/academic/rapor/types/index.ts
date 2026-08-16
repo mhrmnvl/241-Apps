@@ -20,7 +20,18 @@ export interface RaporEnrollment {
   }
   semester: {
     id: string
-    type: string
+    /**
+     * The term, as a relation — `{ name: 'ODD' | 'EVEN' }`.
+     *
+     * Declared `string` until 2026-08-16, which compiled and rendered
+     * `[object Object]` in the Semester column of a student's own rapor: the
+     * backend includes the relation (`semester: { include: { type: true } }`)
+     * and a wrong type annotation cannot be caught by a compiler that believes
+     * it. The name is the English enum; the screen translates it.
+     */
+    type?: {
+      name: string
+    }
     academicYear?: {
       name: string
     }

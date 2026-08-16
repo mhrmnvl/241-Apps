@@ -23,7 +23,17 @@ export const createMyRaporColumns = (
     cell: ({ row }) => {
       const semester = row.original.enrollment?.semester
       const year = semester?.academicYear?.name
-      return [semester?.type, year].filter(Boolean).join(' — ') || '-'
+      // `type` is a relation, and its `name` is the English enum the backend
+      // stores — ODD / EVEN. Joining the relation itself printed
+      // `[object Object] — 2024/2025`; showing its raw name would put "ODD" in
+      // front of a student. Presentation belongs to the frontend.
+      const term =
+        semester?.type?.name === 'ODD'
+          ? 'Ganjil'
+          : semester?.type?.name === 'EVEN'
+            ? 'Genap'
+            : null
+      return [term, year].filter(Boolean).join(' — ') || '-'
     },
   },
   {
