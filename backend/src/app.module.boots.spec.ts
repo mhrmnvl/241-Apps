@@ -1,3 +1,23 @@
+/**
+ * A hermetic environment, set before AppModule is imported.
+ *
+ * `ConfigModule` validates the environment with Zod and throws when a required
+ * variable is missing, so this test passed on a machine with `backend/.env` and
+ * failed in CI, where there is none — which is the same mistake in miniature as
+ * the one it exists to catch: verified where the conditions happened to be
+ * right rather than where they are guaranteed.
+ *
+ * The values are obviously fake and never used: `compile()` builds the injector
+ * without `onModuleInit`, so nothing connects to a database or an object store.
+ * Only their presence is required.
+ */
+process.env.DATABASE_URL ??= 'postgresql://boots:boots@localhost:5432/boots';
+process.env.JWT_SECRET ??= 'boots-test-secret-not-a-real-key';
+process.env.S3_ENDPOINT ??= 'http://localhost:9000';
+process.env.S3_BUCKET ??= 'boots';
+process.env.S3_ACCESS_KEY_ID ??= 'boots';
+process.env.S3_SECRET_ACCESS_KEY ??= 'boots';
+
 import { Test } from '@nestjs/testing';
 import { AppModule } from './app.module.js';
 
