@@ -168,8 +168,11 @@ export function useCalendarDialogForm(props: {
     // Always sent, even when cleared: an edit that empties the hours has to
     // reach the server as empty, or the activity keeps times the form no
     // longer shows.
-    payload.startTime = vals.startTime || undefined
-    payload.endTime = vals.endTime || undefined
+    // An emptied input means "no hours", which `??` cannot express: the value
+    // is `''`, not null, so it would be sent through as an empty string and
+    // fail the server's HH:mm check. The comparison says what is meant.
+    payload.startTime = vals.startTime === '' ? undefined : vals.startTime
+    payload.endTime = vals.endTime === '' ? undefined : vals.endTime
 
     payload.academicYearId = vals.academicYearId ?? activeAcademicYear.value?.id
 
