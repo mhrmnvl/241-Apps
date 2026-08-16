@@ -39,6 +39,7 @@ import { CreateStudentUseCase } from '../use-cases/create-student.use-case.js';
 import { CreateStudentWithRelationsUseCase } from '../use-cases/create-student-with-relations.use-case.js';
 import { DeleteStudentUseCase } from '../use-cases/delete-student.use-case.js';
 import { GetStudentByIdUseCase } from '../use-cases/get-student-by-id.use-case.js';
+import { GetMyStudentUseCase } from '../use-cases/get-my-student.use-case.js';
 import { GetStudentsUseCase } from '../use-cases/get-students.use-case.js';
 import { ToggleStudentActiveUseCase } from '../use-cases/toggle-student-active.use-case.js';
 import { UpdateStudentUseCase } from '../use-cases/update-student.use-case.js';
@@ -54,6 +55,7 @@ export class StudentController {
   constructor(
     private readonly getStudentsService: GetStudentsUseCase,
     private readonly getStudentByIdService: GetStudentByIdUseCase,
+    private readonly getMyStudentService: GetMyStudentUseCase,
     private readonly createStudentService: CreateStudentUseCase,
     private readonly createStudentWithRelationsService: CreateStudentWithRelationsUseCase,
     private readonly updateStudentService: UpdateStudentUseCase,
@@ -69,14 +71,14 @@ export class StudentController {
    * asking, so it is not narrowed for anyone — it is simply not granted to
    * them.
    *
-   * This used to claim that a student reaches their own record through
-   * `GET :id` below, "which does check who is asking". It does not: `:id`
-   * requires `students.read` and takes no caller, so `students.read-own` is
-   * granted to the student role and guards nothing at all. No screen asks for
-   * it either — the student menu gates on the four `-own` codes for schedule,
-   * attendance, scores and rapor. Either a `GET me` route should exist or the
-   * permission should not; what must not stand is a sentence telling the next
-   * reader the check is already there.
+   * A student reaches their own record through `GET me` below, on
+   * `students.read-own`. That route did not exist until 2026-08-16, and this
+   * comment claimed `:id` served the purpose instead. It half did: the
+   * narrowing lives in `GetStudentByIdUseCase`, which refuses a student any id
+   * but their own — but `:id` is guarded by `students.read`, which a student
+   * does not hold, so the guard refused them before the narrowing could run.
+   * The permission was granted, the check was written, and between them nothing
+   * connected the two.
    *
    * It used to take `@CurrentUser() _user` and ignore it, while the student
    * role held `students.read`. The underscore recorded that ignoring it was
@@ -90,6 +92,23 @@ export class StudentController {
     @Query() query: StudentQueryDto,
   ): Promise<PaginatedResponse<StudentWithDetails>> {
     return this.getStudentsService.execute(query);
+  }
+
+  /**
+   * Declared before `:id` on purpose — Nest matches in registration order, and
+   * `me` would otherwise be parsed as a uuid and rejected.
+   */
+  @Get('me')
+  @RequirePermissions('students.read-own')
+  @ApiOperation({
+    summary: 'Your own student record — no id parameter exists',
+  })
+  @ApiResponse({ status: 200, type: StudentResponseDto })
+  @ApiResponse({ status: 404, description: 'Not linked to a student record' })
+  async findMine(
+    @CurrentUser() user: AuthenticatedUser,
+  ): Promise<StudentWithDetails> {
+    return this.getMyStudentService.execute(user.id);
   }
 
   @Get(':id')

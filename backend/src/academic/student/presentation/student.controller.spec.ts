@@ -10,6 +10,7 @@ import { CreateStudentWithRelationsUseCase } from '../use-cases/create-student-w
 import { DeleteStudentUseCase } from '../use-cases/delete-student.use-case.js';
 import { ExportStudentsUseCase } from '../use-cases/export-student.use-case.js';
 import { GetStudentByIdUseCase } from '../use-cases/get-student-by-id.use-case.js';
+import { GetMyStudentUseCase } from '../use-cases/get-my-student.use-case.js';
 import { GetStudentsUseCase } from '../use-cases/get-students.use-case.js';
 import { ResolveBulkImportConflictsUseCase } from '../use-cases/resolve-bulk-import-conflicts.use-case.js';
 import { ToggleStudentActiveUseCase } from '../use-cases/toggle-student-active.use-case.js';
@@ -24,6 +25,7 @@ describe('StudentController & StudentImportExportController', () => {
 
   const mockGetStudentsService = { execute: jest.fn() };
   const mockGetStudentByIdService = { execute: jest.fn() };
+  const mockGetMyStudentService = { execute: jest.fn() };
   const mockCreateStudentService = { execute: jest.fn() };
   const mockUpdateStudentService = { execute: jest.fn() };
   const mockDeleteStudentService = { execute: jest.fn() };
@@ -45,6 +47,7 @@ describe('StudentController & StudentImportExportController', () => {
       providers: [
         { provide: GetStudentsUseCase, useValue: mockGetStudentsService },
         { provide: GetStudentByIdUseCase, useValue: mockGetStudentByIdService },
+        { provide: GetMyStudentUseCase, useValue: mockGetMyStudentService },
         { provide: CreateStudentUseCase, useValue: mockCreateStudentService },
         {
           provide: CreateStudentWithRelationsUseCase,

@@ -18,6 +18,7 @@ import { CreateStudentUseCase } from './use-cases/create-student.use-case.js';
 import { CreateStudentWithRelationsUseCase } from './use-cases/create-student-with-relations.use-case.js';
 import { DeleteStudentUseCase } from './use-cases/delete-student.use-case.js';
 import { GetStudentByIdUseCase } from './use-cases/get-student-by-id.use-case.js';
+import { GetMyStudentUseCase } from './use-cases/get-my-student.use-case.js';
 import { GetStudentsUseCase } from './use-cases/get-students.use-case.js';
 import { UpdateStudentUseCase } from './use-cases/update-student.use-case.js';
 import { ToggleStudentActiveUseCase } from './use-cases/toggle-student-active.use-case.js';
@@ -58,6 +59,7 @@ import { UpdateStudentProfileUseCase } from './use-cases/update-student-profile.
     CreateStudentWithRelationsUseCase,
     DeleteStudentUseCase,
     GetStudentByIdUseCase,
+    GetMyStudentUseCase,
     GetStudentsUseCase,
     UpdateStudentUseCase,
     ToggleStudentActiveUseCase,
