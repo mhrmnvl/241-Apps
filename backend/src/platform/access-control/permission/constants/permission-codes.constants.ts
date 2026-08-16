@@ -498,32 +498,6 @@ export const SYSTEM_PERMISSIONS: SystemPermission[] = [
     description: 'Update enrollments',
   },
 
-  // events
-  {
-    module: 'events',
-    action: 'create',
-    code: 'events.create',
-    description: 'Create events',
-  },
-  {
-    module: 'events',
-    action: 'delete',
-    code: 'events.delete',
-    description: 'Delete events',
-  },
-  {
-    module: 'events',
-    action: 'read',
-    code: 'events.read',
-    description: 'Read events',
-  },
-  {
-    module: 'events',
-    action: 'update',
-    code: 'events.update',
-    description: 'Update events',
-  },
-
   // files
   {
     module: 'files',

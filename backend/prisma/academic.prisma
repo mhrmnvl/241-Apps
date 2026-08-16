@@ -52,8 +52,33 @@ model AcademicCalendar {
   academicYear AcademicYear         @relation(fields: [academicYearId], references: [id])
   semester     Semester?            @relation(fields: [semesterId], references: [id])
   type         AcademicCalendarType @relation(fields: [typeId], references: [id])
+  classrooms   AcademicCalendarClassroom[]
 
   @@map("academic_calendars")
+}
+
+/// Which classes an entry is for. No rows means the whole school.
+///
+/// The school keeps one calendar, and entries nest in time: a term is one wide
+/// entry, and inside it sit the things that happen — some for everyone, some
+/// for one class. Absence is the school-wide case on purpose, because that is
+/// the common one and it should not need to be spelled out for every holiday.
+///
+/// This replaces `EventClassroom`, which belonged to a second calendar entity
+/// with its own screen, its own permissions and no idea what an academic year
+/// was. Two calendars answering the same question is one more than a school can
+/// keep straight.
+model AcademicCalendarClassroom {
+  id                 String @id @default(uuid()) @db.Uuid
+  academicCalendarId String @map("academic_calendar_id") @db.Uuid
+  classroomId        String @map("classroom_id") @db.Uuid
+
+  academicCalendar AcademicCalendar @relation(fields: [academicCalendarId], references: [id], onDelete: Cascade)
+  classroom        Classroom        @relation(fields: [classroomId], references: [id])
+
+  @@unique([academicCalendarId, classroomId])
+  @@index([classroomId])
+  @@map("academic_calendar_classrooms")
 }
 
 model Curricula {

@@ -1,4 +1,5 @@
 import {
+  IsArray,
   IsDateString,
   IsNotEmpty,
   IsOptional,
@@ -52,4 +53,16 @@ export class CreateAcademicCalendarDto {
   @IsOptional()
   @IsString()
   description?: string;
+
+  @ApiPropertyOptional({
+    description:
+      'Classrooms this entry is for. Omit or leave empty for the whole ' +
+      'school, which is the ordinary case — a holiday needs no list.',
+    type: [String],
+    format: 'uuid',
+  })
+  @IsOptional()
+  @IsArray()
+  @IsUUID('4', { each: true })
+  classroomIds?: string[];
 }

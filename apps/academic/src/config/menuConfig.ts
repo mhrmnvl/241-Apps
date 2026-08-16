@@ -101,15 +101,15 @@ export const menuSections: MenuSection[] = [
         url: '#',
         icon: CalendarRange,
         items: [
+          // One calendar, not two. The school keeps a single one whose
+          // entries nest: a term is a wide entry, and inside it sit the things
+          // that happen — some for every class, some for one. Two menu entries
+          // over two entities answering the same question left nothing to tell
+          // a person which to open.
           {
-            title: 'Kalender Pendidikan',
+            title: 'Kalender',
             url: '/academic/education-calendar',
             requiredPermission: 'academic-calendars.read',
-          },
-          {
-            title: 'Kalender Kegiatan',
-            url: '/academic/event-calendar',
-            requiredPermission: 'events.read',
           },
         ],
       },
@@ -454,11 +454,7 @@ export const menuSections: MenuSection[] = [
         icon: Megaphone,
         items: [
           { title: 'Pengumuman', url: '/announcement' },
-          {
-            title: 'Kalender Pendidikan',
-            url: '/academic/education-calendar',
-          },
-          { title: 'Kalender Kegiatan', url: '/academic/event-calendar' },
+          { title: 'Kalender', url: '/academic/education-calendar' },
         ],
       },
     ],

@@ -3,7 +3,7 @@ import { onMounted } from 'vue'
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/card'
 import { Badge } from '@/ui/badge'
 import { Skeleton } from '@/ui/skeleton'
-import { CalendarDays, BookOpen, Megaphone, Clock } from 'lucide-vue-next'
+import { CalendarDays, BookOpen, Megaphone } from 'lucide-vue-next'
 import { useAcademicInfo } from '../composables/useAcademicInfo'
 
 const {
@@ -22,14 +22,6 @@ function formatDate(dateStr: string) {
     weekday: 'long',
     day: 'numeric',
     month: 'long',
-  })
-}
-
-function formatTime(dateStr: string) {
-  return new Date(dateStr).toLocaleTimeString('id-ID', {
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false,
   })
 }
 
@@ -149,7 +141,7 @@ onMounted(init)
                   variant="secondary"
                   class="shrink-0 text-xs"
                 >
-                  {{ formatDate(event.startTime) }}
+                  {{ formatDate(event.startDate) }}
                 </Badge>
               </div>
               <p
@@ -158,12 +150,18 @@ onMounted(init)
               >
                 {{ event.description }}
               </p>
+              <!--
+                A calendar entry spans days, not hours: a holiday is the 17th,
+                a term is July to December. Printing a clock time here meant
+                every entry claimed to start at midnight.
+              -->
               <div
+                v-if="event.endDate !== event.startDate"
                 class="flex items-center gap-1 mt-1.5 text-xs text-muted-foreground"
               >
-                <Clock class="size-3" />
-                {{ formatTime(event.startTime) }} –
-                {{ formatTime(event.endTime) }}
+                <CalendarDays class="size-3" />
+                {{ formatDate(event.startDate) }} –
+                {{ formatDate(event.endDate) }}
               </div>
             </div>
           </div>

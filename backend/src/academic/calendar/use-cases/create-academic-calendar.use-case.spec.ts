@@ -1,6 +1,7 @@
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { IAcademicYearRepository } from '../../academic-year/index.js';
+import { IClassroomRepository } from '../../classroom/domain/interfaces/classroom-repository.interface.js';
 import { ISemesterRepository } from '../../semester/index.js';
 import { CreateAcademicCalendarDto } from '../dto/request/create-academic-calendar.dto.js';
 import { IAcademicCalendarRepository } from '../domain/interfaces/academic-calendar-repository.interface.js';
@@ -21,6 +22,9 @@ describe('CreateAcademicCalendarUseCase', () => {
     findById: jest.fn(),
   };
 
+  // Every entry in these cases is school-wide, so no classroom is named.
+  const mockClassroomRepository = { findById: jest.fn() };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -31,6 +35,10 @@ describe('CreateAcademicCalendarUseCase', () => {
           useValue: mockAcademicYearRepository,
         },
         { provide: ISemesterRepository, useValue: mockSemesterRepository },
+        {
+          provide: IClassroomRepository,
+          useValue: mockClassroomRepository,
+        },
       ],
     }).compile();
 

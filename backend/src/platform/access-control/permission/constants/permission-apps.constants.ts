@@ -52,7 +52,6 @@ const MODULE_APP: Record<string, PermissionApp> = {
   curricula: 'academic',
   'curriculum-subjects': 'academic',
   enrollments: 'academic',
-  events: 'academic',
   graduations: 'academic',
   occupations: 'academic',
   parents: 'academic',
