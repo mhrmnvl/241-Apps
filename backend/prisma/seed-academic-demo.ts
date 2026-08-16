@@ -269,6 +269,11 @@ async function main() {
       'student-scores.create',
       'student-scores.update',
       'parents.read',
+      // A teacher's own teaching schedule comes through the same self-service
+      // route a student's timetable does — feature 005 defined the code as
+      // covering both — and the role held only the wide `schedules.read`, so
+      // `/schedules/me` refused the person whose schedule it is.
+      'schedules.read-own',
     ];
     const teacherPermissions = await prisma.permission.findMany({
       where: { code: { in: teacherCodes } },
@@ -286,6 +291,28 @@ async function main() {
       });
     }
     console.log(`  teacher role: ${teacherPermissions.length} teaching grants`);
+
+    // Teachers holding no role at all.
+    //
+    // 24 of the 28 on this box had none: they could sign in, hold no
+    // permission, and see an empty application with nothing saying why. That
+    // is the exact failure `AccountProvisioningService` was changed to refuse —
+    // it now throws when the role is missing rather than skipping — so these
+    // are rows created before that fix, and a teacher imported today gets the
+    // role properly. Repairing the old ones is left to a fixture because they
+    // are dev data; production has no teachers yet.
+    const roleless = await prisma.teacher.findMany({
+      where: { deletedAt: null, user: { userRoles: { none: {} } } },
+      select: { userId: true },
+    });
+    for (const row of roleless) {
+      await prisma.userRole.create({
+        data: { userId: row.userId, roleId: teacherRole.id },
+      });
+    }
+    if (roleless.length > 0) {
+      console.log(`  ${roleless.length} teachers given the TEACHER role`);
+    }
   }
 
   const password = await bcrypt.hash('siswa123', 10);
