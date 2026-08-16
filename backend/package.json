@@ -118,7 +118,8 @@
       "/\\.pnpm/(?!(htmlparser2|domhandler|domutils|dom-serializer|entities|domelementtype)@)"
     ],
     "moduleNameMapper": {
-      "^(\\.{1,2}/.*)\\.js$": "$1"
+      "^(\\.{1,2}/.*)\\.js$": "$1",
+      "^file-type$": "<rootDir>/../test/stubs/file-type.stub.ts"
     },
     "collectCoverageFrom": [
       "**/*.(t|j)s"
