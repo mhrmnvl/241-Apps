@@ -8,7 +8,7 @@ describe('DeleteSemesterUseCase', () => {
 
   const mockRepository = {
     findById: jest.fn(),
-    hasRelatedData: jest.fn(),
+    findFirstDependent: jest.fn(),
     softDelete: jest.fn(),
   };
 
@@ -37,13 +37,13 @@ describe('DeleteSemesterUseCase', () => {
         isActive: false,
         academicYear: { id: 'ay-1', name: '2024/2025' },
       });
-      mockRepository.hasRelatedData.mockResolvedValue(false);
+      mockRepository.findFirstDependent.mockResolvedValue(null);
       mockRepository.softDelete.mockResolvedValue(undefined);
 
       await useCase.execute('sem-1');
 
       expect(mockRepository.findById).toHaveBeenCalledWith('sem-1');
-      expect(mockRepository.hasRelatedData).toHaveBeenCalledWith('sem-1');
+      expect(mockRepository.findFirstDependent).toHaveBeenCalledWith('sem-1');
       expect(mockRepository.softDelete).toHaveBeenCalledWith('sem-1');
     });
 
@@ -68,11 +68,11 @@ describe('DeleteSemesterUseCase', () => {
       await expect(useCase.execute('sem-1')).rejects.toThrow(
         BadRequestException,
       );
-      expect(mockRepository.hasRelatedData).not.toHaveBeenCalled();
+      expect(mockRepository.findFirstDependent).not.toHaveBeenCalled();
       expect(mockRepository.softDelete).not.toHaveBeenCalled();
     });
 
-    it('should throw BadRequestException when semester has enrollment data', async () => {
+    it('should refuse to delete a semester that is in use, naming what holds it', async () => {
       mockRepository.findById.mockResolvedValue({
         id: 'sem-1',
         typeId: 'type-odd',
@@ -80,7 +80,7 @@ describe('DeleteSemesterUseCase', () => {
         isActive: false,
         academicYear: { id: 'ay-1', name: '2024/2025' },
       });
-      mockRepository.hasRelatedData.mockResolvedValue(true);
+      mockRepository.findFirstDependent.mockResolvedValue('student enrolments');
 
       await expect(useCase.execute('sem-1')).rejects.toThrow(
         BadRequestException,

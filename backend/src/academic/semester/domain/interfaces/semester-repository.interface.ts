@@ -59,7 +59,6 @@ export abstract class ISemesterRepository {
   abstract deactivateAllActive(excludeId?: string): Promise<{ count: number }>;
   abstract activateById(id: string): Promise<SemesterWithDetails>;
   abstract deactivateAll(): Promise<{ count: number }>;
-  abstract hasRelatedData(id: string): Promise<boolean>;
   /**
    * What is hanging off this semester, named, or null when nothing is.
    *

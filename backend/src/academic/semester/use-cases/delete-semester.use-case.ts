@@ -24,10 +24,25 @@ export class DeleteSemesterUseCase {
       );
     }
 
-    const hasData = await this.semesterRepository.hasRelatedData(id);
-    if (hasData) {
+    /**
+     * Everything filed under the term, not just its enrolments.
+     *
+     * This asked `hasRelatedData`, which counts enrolments alone, so a term
+     * holding a full timetable — teaching assignments, homeroom teachers, class
+     * structures, calendar entries — was deletable as long as no student had
+     * been enrolled yet. That is exactly the state a term is in while it is
+     * being prepared, and deleting it there is the most expensive moment to do
+     * it: the work is done and the soft delete hides it without touching a
+     * single one of those rows, which keep pointing at a semester no screen
+     * lists any more.
+     *
+     * Same question the move guard asks, so the two cannot disagree about what
+     * "in use" means.
+     */
+    const dependent = await this.semesterRepository.findFirstDependent(id);
+    if (dependent) {
       throw new BadRequestException(
-        'Cannot delete semester that has enrollment data',
+        `Cannot delete a semester that has ${dependent}.`,
       );
     }
 

@@ -154,14 +154,6 @@ export class PrismaSemesterRepository extends ISemesterRepository {
     });
   }
 
-  async hasRelatedData(id: string): Promise<boolean> {
-    const count = await this.prisma.studentEnrollment.count({
-      where: { semesterId: id, deletedAt: null },
-      take: 1,
-    });
-    return count > 0;
-  }
-
   /**
    * Everything that keys on a semester, in the order a person would recognise
    * it. Five separate counts rather than one query with joins: each is an
