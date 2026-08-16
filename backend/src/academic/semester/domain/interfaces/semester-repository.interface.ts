@@ -60,5 +60,13 @@ export abstract class ISemesterRepository {
   abstract activateById(id: string): Promise<SemesterWithDetails>;
   abstract deactivateAll(): Promise<{ count: number }>;
   abstract hasRelatedData(id: string): Promise<boolean>;
+  /**
+   * What is hanging off this semester, named, or null when nothing is.
+   *
+   * Named rather than counted so a refusal can say what is in the way. "This
+   * semester already has enrolments" sends someone to the right screen;
+   * "cannot update" sends them to us.
+   */
+  abstract findFirstDependent(id: string): Promise<string | null>;
   abstract softDelete(id: string): Promise<SemesterEntity>;
 }

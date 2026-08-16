@@ -20,6 +20,41 @@ export class UpdateClassroomUseCase {
       throw new NotFoundException(`Classroom with ID ${id} not found`);
     }
 
+    /**
+     * A classroom belongs to one academic year and one grade level, and its
+     * enrolments and teaching assignments are filed under it. Re-pointing a
+     * classroom that already holds them carries a whole class into another year
+     * — or another grade — without a single row of theirs changing, which is
+     * exactly what makes it invisible afterwards.
+     *
+     * A new year gets new classrooms; rollover copies them within a year and
+     * promotion creates them across years (ADR-0004). Neither moves one.
+     *
+     * The code, name, capacity and active flag stay editable. Only the two that
+     * decide whose class this is are locked once there is a class in it.
+     */
+    const movingYear =
+      dto.academicYearId !== undefined &&
+      dto.academicYearId !== current.academicYearId;
+    const movingGrade =
+      dto.gradeId !== undefined && dto.gradeId !== current.gradeId;
+
+    if (movingYear || movingGrade) {
+      const [enrollments, assignments] = await Promise.all([
+        this.classroomRepository.countEnrollments(id),
+        this.classroomRepository.countTeachingAssignments(id),
+      ]);
+
+      if (enrollments > 0 || assignments > 0) {
+        throw new ConflictException(
+          `This classroom already has ${enrollments} enrolment(s) and ` +
+            `${assignments} teaching assignment(s), so its academic year and ` +
+            'grade can no longer be changed. Create a classroom in the target ' +
+            'academic year instead.',
+        );
+      }
+    }
+
     const academicYearId = dto.academicYearId ?? current.academicYearId;
     const code = dto.code ?? current.code;
 
