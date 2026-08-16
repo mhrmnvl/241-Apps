@@ -37,6 +37,7 @@ import { UpdateStudentScoreUseCase } from '../use-cases/update-student-score.use
 import { DeleteStudentScoreUseCase } from '../use-cases/delete-student-score.use-case.js';
 import { GetStudentScoreRosterUseCase } from '../use-cases/get-student-score-roster.use-case.js';
 import { BulkUpsertStudentScoresUseCase } from '../use-cases/bulk-upsert-student-scores.use-case.js';
+import { GradeAssignedStudentScoresUseCase } from '../use-cases/grade-assigned-student-scores.use-case.js';
 
 @ApiTags('Student Scores')
 @ApiBearerAuth()
@@ -52,6 +53,7 @@ export class StudentScoreController {
     private readonly deleteUC: DeleteStudentScoreUseCase,
     private readonly rosterUC: GetStudentScoreRosterUseCase,
     private readonly bulkUpsertUC: BulkUpsertStudentScoresUseCase,
+    private readonly gradeAssignedUC: GradeAssignedStudentScoresUseCase,
   ) {}
 
   @Get()
@@ -101,10 +103,31 @@ export class StudentScoreController {
   @Post('bulk')
   @RequirePermissions('student-scores.manage')
   @ApiOperation({
-    summary: 'Bulk upsert scores for a class on one assessment item',
+    summary: 'Bulk upsert scores for any class on one assessment item',
   })
   async bulkUpsert(@Body() dto: BulkUpsertStudentScoreDto) {
     return this.bulkUpsertUC.execute(dto);
+  }
+
+  /**
+   * The same save, narrowed to what the caller is responsible for: the subject
+   * they are assigned to teach, or the classroom they supervise.
+   *
+   * A route of its own rather than a branch inside the one above, so the
+   * permission stays the boundary — a role's grants say whether its holder
+   * grades the school or their own classes, without anyone opening a use case
+   * to find out.
+   */
+  @Post('assigned/bulk')
+  @RequirePermissions('student-scores.manage-assigned')
+  @ApiOperation({
+    summary: 'Bulk upsert scores for a class you teach or supervise',
+  })
+  async bulkUpsertAssigned(
+    @Body() dto: BulkUpsertStudentScoreDto,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    return this.gradeAssignedUC.execute(dto, user.id);
   }
 
   @Patch(':id')

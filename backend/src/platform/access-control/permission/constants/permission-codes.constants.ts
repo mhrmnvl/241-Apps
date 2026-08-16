@@ -1255,7 +1255,27 @@ export const SYSTEM_PERMISSIONS: SystemPermission[] = [
     action: 'manage',
     code: 'student-scores.manage',
     description:
-      'Manage student scores (bulk grade a class for one assessment item)',
+      'Manage student scores for any class (bulk grade one assessment item)',
+  },
+  {
+    // What a teacher does: grade the subjects they are assigned to teach, in
+    // whichever classrooms they teach them, and correct marks in a classroom
+    // they supervise as its homeroom teacher.
+    //
+    // One code rather than two, because `@RequirePermissions` requires *all*
+    // the codes it names and cannot express "either". Two codes would mean two
+    // routes, and the grading screen would have to choose between them by
+    // guessing what the caller is — which is a role-name check wearing a
+    // different hat, and the exact thing that once showed a teacher whose role
+    // the school had named 'Wali Kelas' the administrator's screen.
+    //
+    // The reach comes from records — a teaching assignment, a supervisor row —
+    // so a person who is neither reaches nothing, whatever their role is called.
+    module: 'student-scores',
+    action: 'manage-assigned',
+    code: 'student-scores.manage-assigned',
+    description:
+      'Grade the classes you teach, and correct marks in the class you supervise',
   },
   {
     module: 'student-scores',
@@ -1381,7 +1401,16 @@ export const SYSTEM_PERMISSIONS: SystemPermission[] = [
     module: 'teaching-assignments',
     action: 'read',
     code: 'teaching-assignments.read',
-    description: 'Read teaching assignments',
+    description: 'Read every teaching assignment in the school',
+  },
+  {
+    // The picker on a teacher's grading screen. Without it the screen lists
+    // every class in the school, the teacher chooses one they do not teach, and
+    // the save is refused — a correct refusal that reads as a broken screen.
+    module: 'teaching-assignments',
+    action: 'read-own',
+    code: 'teaching-assignments.read-own',
+    description: 'Read the classes you are assigned to teach',
   },
   {
     module: 'teaching-assignments',

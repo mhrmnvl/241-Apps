@@ -61,12 +61,22 @@ model StudentScore {
   assessmentItemId String    @map("assessment_item_id") @db.Uuid
   score            Float?
   note             String?   @db.Text
+  /// Set when the mark was last written by someone other than the teacher
+  /// assigned to teach it — a homeroom teacher correcting a mark in their own
+  /// class, or an administrator. Null means the subject teacher entered it.
+  ///
+  /// A mark that changed and a mark that was corrected look identical in
+  /// `updatedAt` alone, and "who changed my child's grade" is a question a
+  /// school has to be able to answer.
+  correctedById    String?   @map("corrected_by_id") @db.Uuid
+  correctedAt      DateTime? @map("corrected_at")
   createdAt        DateTime  @default(now()) @map("created_at")
   updatedAt        DateTime  @updatedAt @map("updated_at")
   deletedAt        DateTime? @map("deleted_at")
 
   enrollment     StudentEnrollment @relation(fields: [enrollmentId], references: [id])
   assessmentItem AssessmentItem    @relation(fields: [assessmentItemId], references: [id])
+  correctedBy    User?             @relation("StudentScoreCorrectedBy", fields: [correctedById], references: [id])
 
   @@unique([enrollmentId, assessmentItemId])
   @@index([enrollmentId])

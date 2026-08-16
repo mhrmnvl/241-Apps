@@ -177,7 +177,8 @@ export class PrismaStudentScoreRepository extends IStudentScoreRepository {
   async bulkUpsert(
     assessmentItemId: string,
     records: BulkStudentScoreRecord[],
+    correctedById: string | null = null,
   ) {
-    return upsertScores(this.prisma, assessmentItemId, records);
+    return upsertScores(this.prisma, assessmentItemId, records, correctedById);
   }
 }

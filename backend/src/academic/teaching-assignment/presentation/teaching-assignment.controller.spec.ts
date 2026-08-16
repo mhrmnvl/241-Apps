@@ -5,6 +5,7 @@ import { CreateTeachingAssignmentUseCase } from '../use-cases/create-teaching-as
 import { DeleteTeachingAssignmentUseCase } from '../use-cases/delete-teaching-assignment.use-case.js';
 import { GetTeachingAssignmentByIdUseCase } from '../use-cases/get-teaching-assignment-by-id.use-case.js';
 import { GetTeachingAssignmentsUseCase } from '../use-cases/get-teaching-assignments.use-case.js';
+import { GetMyTeachingAssignmentsUseCase } from '../use-cases/get-my-teaching-assignments.use-case.js';
 import { UpdateTeachingAssignmentUseCase } from '../use-cases/update-teaching-assignment.use-case.js';
 import { TeachingAssignmentController } from './teaching-assignment.controller.js';
 import { AuthenticatedUser } from '../../../core/types/authenticated-user.type.js';
@@ -12,6 +13,7 @@ import { AuthenticatedUser } from '../../../core/types/authenticated-user.type.j
 describe('TeachingAssignmentController', () => {
   let controller: TeachingAssignmentController;
   const mockGetAll = { execute: jest.fn() };
+  const mockGetMine = { execute: jest.fn() };
   const mockGetById = { execute: jest.fn() };
   const mockCreate = { execute: jest.fn() };
   const mockUpdate = { execute: jest.fn() };
@@ -22,6 +24,10 @@ describe('TeachingAssignmentController', () => {
       controllers: [TeachingAssignmentController],
       providers: [
         { provide: GetTeachingAssignmentsUseCase, useValue: mockGetAll },
+        {
+          provide: GetMyTeachingAssignmentsUseCase,
+          useValue: mockGetMine,
+        },
         { provide: GetTeachingAssignmentByIdUseCase, useValue: mockGetById },
         { provide: CreateTeachingAssignmentUseCase, useValue: mockCreate },
         { provide: UpdateTeachingAssignmentUseCase, useValue: mockUpdate },

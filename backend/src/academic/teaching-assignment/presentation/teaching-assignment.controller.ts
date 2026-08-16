@@ -22,11 +22,14 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 
+import { CurrentUser } from '../../../core/decorators/current-user.decorator.js';
+import type { AuthenticatedUser } from '../../../core/types/authenticated-user.type.js';
 import { JwtAuthGuard } from '../../../platform/auth/index.js';
 import { CreateTeachingAssignmentDto } from '../dto/request/create-teaching-assignment.dto.js';
 import { TeachingAssignmentQueryDto } from '../dto/request/teaching-assignment-query.dto.js';
 import { UpdateTeachingAssignmentDto } from '../dto/request/update-teaching-assignment.dto.js';
 import { GetTeachingAssignmentsUseCase } from '../use-cases/get-teaching-assignments.use-case.js';
+import { GetMyTeachingAssignmentsUseCase } from '../use-cases/get-my-teaching-assignments.use-case.js';
 import { GetTeachingAssignmentByIdUseCase } from '../use-cases/get-teaching-assignment-by-id.use-case.js';
 import { CreateTeachingAssignmentUseCase } from '../use-cases/create-teaching-assignment.use-case.js';
 import { UpdateTeachingAssignmentUseCase } from '../use-cases/update-teaching-assignment.use-case.js';
@@ -39,6 +42,7 @@ import { DeleteTeachingAssignmentUseCase } from '../use-cases/delete-teaching-as
 export class TeachingAssignmentController {
   constructor(
     private readonly getAll: GetTeachingAssignmentsUseCase,
+    private readonly getMine: GetMyTeachingAssignmentsUseCase,
     private readonly getById: GetTeachingAssignmentByIdUseCase,
     private readonly createUC: CreateTeachingAssignmentUseCase,
     private readonly updateUC: UpdateTeachingAssignmentUseCase,
@@ -50,6 +54,19 @@ export class TeachingAssignmentController {
   @ApiOperation({ summary: 'List teaching assignments' })
   async findAll(@Query() q: TeachingAssignmentQueryDto) {
     return this.getAll.execute(q);
+  }
+
+  /**
+   * Declared before `:id` so `me` is never parsed as a uuid.
+   */
+  @Get('me')
+  @RequirePermissions('teaching-assignments.read-own')
+  @ApiOperation({ summary: 'The classes you are assigned to teach' })
+  async findMine(
+    @CurrentUser() user: AuthenticatedUser,
+    @Query() q: TeachingAssignmentQueryDto,
+  ) {
+    return this.getMine.execute(q, user.id);
   }
 
   @Get(':id')

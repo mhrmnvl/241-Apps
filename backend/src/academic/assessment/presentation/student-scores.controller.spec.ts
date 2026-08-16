@@ -11,6 +11,7 @@ import { UpdateStudentScoreUseCase } from '../use-cases/update-student-score.use
 import { DeleteStudentScoreUseCase } from '../use-cases/delete-student-score.use-case.js';
 import { GetStudentScoreRosterUseCase } from '../use-cases/get-student-score-roster.use-case.js';
 import { BulkUpsertStudentScoresUseCase } from '../use-cases/bulk-upsert-student-scores.use-case.js';
+import { GradeAssignedStudentScoresUseCase } from '../use-cases/grade-assigned-student-scores.use-case.js';
 import { StudentScoreController } from './student-score.controller.js';
 
 describe('StudentScoreController', () => {
@@ -22,6 +23,7 @@ describe('StudentScoreController', () => {
   const mockDelete = { execute: jest.fn() };
   const mockRoster = { execute: jest.fn() };
   const mockBulkUpsert = { execute: jest.fn() };
+  const mockGradeAssigned = { execute: jest.fn() };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -38,6 +40,10 @@ describe('StudentScoreController', () => {
         { provide: DeleteStudentScoreUseCase, useValue: mockDelete },
         { provide: GetStudentScoreRosterUseCase, useValue: mockRoster },
         { provide: BulkUpsertStudentScoresUseCase, useValue: mockBulkUpsert },
+        {
+          provide: GradeAssignedStudentScoresUseCase,
+          useValue: mockGradeAssigned,
+        },
       ],
     }).compile();
     controller = module.get<StudentScoreController>(StudentScoreController);

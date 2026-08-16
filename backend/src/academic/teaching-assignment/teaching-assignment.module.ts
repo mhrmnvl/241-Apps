@@ -5,6 +5,7 @@ import { CreateTeachingAssignmentUseCase } from './use-cases/create-teaching-ass
 import { DeleteTeachingAssignmentUseCase } from './use-cases/delete-teaching-assignment.use-case.js';
 import { GetTeachingAssignmentByIdUseCase } from './use-cases/get-teaching-assignment-by-id.use-case.js';
 import { GetTeachingAssignmentsUseCase } from './use-cases/get-teaching-assignments.use-case.js';
+import { GetMyTeachingAssignmentsUseCase } from './use-cases/get-my-teaching-assignments.use-case.js';
 import { UpdateTeachingAssignmentUseCase } from './use-cases/update-teaching-assignment.use-case.js';
 import { ITeachingAssignmentRepository } from './domain/interfaces/teaching-assignment-repository.interface.js';
 
@@ -16,6 +17,7 @@ import { ITeachingAssignmentRepository } from './domain/interfaces/teaching-assi
       useClass: PrismaTeachingAssignmentRepository,
     },
     GetTeachingAssignmentsUseCase,
+    GetMyTeachingAssignmentsUseCase,
     GetTeachingAssignmentByIdUseCase,
     CreateTeachingAssignmentUseCase,
     UpdateTeachingAssignmentUseCase,

@@ -265,9 +265,17 @@ async function main() {
       'assessment-items.update',
       'assessment-items.delete',
       'student-scores.read',
-      'student-scores.manage',
+      // Scoped grading, not `student-scores.manage`: that one grades any class
+      // in the school, and every teacher held it. This reaches the subjects
+      // they are assigned to teach and the classroom they supervise, resolved
+      // from those records rather than from what their role is called.
+      'student-scores.manage-assigned',
       'student-scores.create',
       'student-scores.update',
+      // The picker on the grading screen. Without it the dropdowns list every
+      // class in the school, the teacher picks one they do not teach, and the
+      // save is refused — a correct refusal that reads as a broken screen.
+      'teaching-assignments.read-own',
       'parents.read',
       // A teacher's own teaching schedule comes through the same self-service
       // route a student's timetable does — feature 005 defined the code as

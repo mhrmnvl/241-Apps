@@ -47,4 +47,19 @@ export const studentScoreApi = {
       payload,
     )
   },
+
+  /**
+   * The same save, for a class the caller teaches or supervises.
+   *
+   * Which of the two routes to call is decided by the permission the caller
+   * holds, never by their role — `student-scores.manage` grades the school,
+   * `student-scores.manage-assigned` grades your own classes, and a role named
+   * `Wali Kelas` tells you nothing about either.
+   */
+  bulkUpsertAssignedScores: (payload: BulkUpsertStudentScorePayload) => {
+    return api.post<ApiSingleResponse<{ saved: number }>>(
+      '/student-scores/assigned/bulk',
+      payload,
+    )
+  },
 }

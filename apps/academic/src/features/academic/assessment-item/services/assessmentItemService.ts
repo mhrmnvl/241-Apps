@@ -6,6 +6,7 @@ import { semesterApi } from '@/features/academic/semester'
 import { subjectApi } from '@/features/academic/subject'
 import { teachingAssignmentApi } from '@/features/academic/teaching-assignment'
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
+import { useRoleGuard } from '@/features/platform/auth'
 import { PAGINATION } from '@/shared/constants/pagination'
 import { toast } from 'vue-sonner'
 
@@ -43,12 +44,20 @@ export const assessmentItemService = {
 
     store.loading = true
     try {
-      const taRes = await teachingAssignmentApi.getTeachingAssignments({
+      // A teacher asks about their own assignments; whoever grades the whole
+      // school asks about all of them. Decided by permission, because a role
+      // name says nothing — the school has named a role `Wali Kelas` and that
+      // person is a teacher like any other.
+      const { can } = useRoleGuard()
+      const query = {
         classroomId: store.selectedClassroomId,
         subjectId: store.selectedSubjectId,
         semesterId: store.selectedSemesterId,
         limit: 1,
-      })
+      }
+      const taRes = can('teaching-assignments.read')
+        ? await teachingAssignmentApi.getTeachingAssignments(query)
+        : await teachingAssignmentApi.getMyTeachingAssignments(query)
       const assignments = taRes.data?.data ?? []
 
       if (assignments.length === 0) {

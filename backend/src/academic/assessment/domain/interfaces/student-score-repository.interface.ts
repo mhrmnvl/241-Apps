@@ -133,6 +133,8 @@ export abstract class IStudentScoreRepository {
   abstract bulkUpsert(
     assessmentItemId: string,
     records: BulkStudentScoreRecord[],
+    /** Set when the writer is not the assigned subject teacher. */
+    correctedById?: string | null,
   ): Promise<BulkUpsertResult>;
   abstract getRoster(
     assessmentItemId: string,

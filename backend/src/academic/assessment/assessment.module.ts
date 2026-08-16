@@ -29,6 +29,10 @@ import { UpdateStudentScoreUseCase } from './use-cases/update-student-score.use-
 import { DeleteStudentScoreUseCase } from './use-cases/delete-student-score.use-case.js';
 import { GetStudentScoreRosterUseCase } from './use-cases/get-student-score-roster.use-case.js';
 import { BulkUpsertStudentScoresUseCase } from './use-cases/bulk-upsert-student-scores.use-case.js';
+import { GradeAssignedStudentScoresUseCase } from './use-cases/grade-assigned-student-scores.use-case.js';
+import { IGradingScopeReadPort } from './domain/interfaces/grading-scope-read.port.js';
+import { PrismaGradingScopeReadPort } from './infrastructure/persistence/prisma-grading-scope.read-port.js';
+import { TeacherModule } from '../teacher/teacher.module.js';
 
 @Module({
   imports: [
@@ -38,6 +42,9 @@ import { BulkUpsertStudentScoresUseCase } from './use-cases/bulk-upsert-student-
     // For IStudentIdentityReadPort — scoping the self-service score read to
     // the caller's own student record.
     StudentModule,
+    // For ITeacherIdentityReadPort — resolving who is grading from their
+    // teaching record rather than from the name of their role.
+    TeacherModule,
   ],
   controllers: [
     AssessmentItemController,
@@ -75,6 +82,11 @@ import { BulkUpsertStudentScoresUseCase } from './use-cases/bulk-upsert-student-
     DeleteStudentScoreUseCase,
     GetStudentScoreRosterUseCase,
     BulkUpsertStudentScoresUseCase,
+    GradeAssignedStudentScoresUseCase,
+    {
+      provide: IGradingScopeReadPort,
+      useClass: PrismaGradingScopeReadPort,
+    },
   ],
   exports: [
     IAssessmentItemRepository,
