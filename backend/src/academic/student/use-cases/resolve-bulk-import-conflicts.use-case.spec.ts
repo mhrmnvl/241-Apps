@@ -89,7 +89,13 @@ describe('ResolveBulkImportConflictsUseCase', () => {
 
       const result = await useCase.execute(dto);
 
-      expect(result).toEqual({ total: 1, updated: 0, skipped: 1, errors: [] });
+      expect(result).toEqual({
+        total: 1,
+        updated: 0,
+        skipped: 1,
+        failed: 0,
+        errors: [],
+      });
       expect(mockUpdateStudent.execute).not.toHaveBeenCalled();
       expect(mockCreateStudent.execute).not.toHaveBeenCalled();
     });
@@ -113,7 +119,13 @@ describe('ResolveBulkImportConflictsUseCase', () => {
         expect.objectContaining({ classroomId: 'cls-1' }),
       );
       expect(mockEnsureStudentEnrollment.execute).not.toHaveBeenCalled();
-      expect(result).toEqual({ total: 1, updated: 1, skipped: 0, errors: [] });
+      expect(result).toEqual({
+        total: 1,
+        updated: 1,
+        skipped: 0,
+        failed: 0,
+        errors: [],
+      });
     });
 
     it('updates an existing student and ensures enrollment when classroomCode resolves', async () => {
@@ -143,7 +155,13 @@ describe('ResolveBulkImportConflictsUseCase', () => {
         'stu-1',
         'cls-2',
       );
-      expect(result).toEqual({ total: 1, updated: 1, skipped: 0, errors: [] });
+      expect(result).toEqual({
+        total: 1,
+        updated: 1,
+        skipped: 0,
+        failed: 0,
+        errors: [],
+      });
     });
 
     it('updates an existing student without touching enrollment when there is no classroomCode', async () => {
@@ -161,7 +179,13 @@ describe('ResolveBulkImportConflictsUseCase', () => {
 
       expect(mockClassroomRepository.findByCode).not.toHaveBeenCalled();
       expect(mockEnsureStudentEnrollment.execute).not.toHaveBeenCalled();
-      expect(result).toEqual({ total: 1, updated: 1, skipped: 0, errors: [] });
+      expect(result).toEqual({
+        total: 1,
+        updated: 1,
+        skipped: 0,
+        failed: 0,
+        errors: [],
+      });
     });
 
     it('looks up a repeated classroom code only once across conflicts', async () => {
@@ -210,7 +234,8 @@ describe('ResolveBulkImportConflictsUseCase', () => {
       const result = await useCase.execute(dto);
 
       expect(result.updated).toBe(0);
-      expect(result.skipped).toBe(1);
+      expect(result.failed).toBe(1);
+      expect(result.skipped).toBe(0);
       expect(result.errors).toEqual([
         {
           existingId: 'stu-1',

@@ -92,7 +92,12 @@ export class StudentImportExportController {
   @RequirePermissions('students.create')
   @UseInterceptors(FileInterceptor('file'))
   @ApiConsumes('multipart/form-data')
-  @ApiOperation({ summary: 'Bulk import students from Excel file (.xlsx)' })
+  @ApiOperation({
+    summary:
+      'Preview a student import file (.xlsx): reports per row what would ' +
+      'happen, and writes nothing. Post the result to bulk-import/resolve ' +
+      'to apply it',
+  })
   @ApiBody({
     schema: {
       type: 'object',
@@ -115,12 +120,14 @@ export class StudentImportExportController {
     return this.bulkImportStudentsService.execute(file.buffer);
   }
 
+  // This is where the import is actually written — new rows are created here
+  // and conflicting ones updated — so it asks for both permissions.
   @Post('bulk-import/resolve')
-  @RequirePermissions('students.update')
+  @RequirePermissions('students.create', 'students.update')
   @ApiOperation({
     summary:
-      'Resolve CONFLICT rows from a bulk import: update the matching ' +
-      'student or skip it',
+      'Apply a previewed bulk import: create the new rows, and update or ' +
+      'skip each conflicting one as the caller decided',
   })
   @ApiResponse({ status: 201, type: ResolveBulkImportResponseDto })
   async resolveBulkImportConflicts(

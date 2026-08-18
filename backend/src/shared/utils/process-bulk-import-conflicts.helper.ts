@@ -9,6 +9,12 @@ export interface BulkImportConflictsResult {
   total: number;
   updated: number;
   skipped: number;
+  /**
+   * Rows the caller asked to process that threw. Counted apart from `skipped`,
+   * which is a choice the caller made — reporting a failure as a skip tells
+   * someone their import went to plan when a row of it did not land.
+   */
+  failed: number;
   errors: { existingId: string; error: string }[];
 }
 
@@ -22,6 +28,7 @@ export async function processBulkImportConflicts<
 ): Promise<BulkImportConflictsResult> {
   let updated = 0;
   let skipped = 0;
+  let failed = 0;
   const errors: { existingId: string; error: string }[] = [];
 
   for (const item of items) {
@@ -34,7 +41,7 @@ export async function processBulkImportConflicts<
       await process(item);
       updated++;
     } catch (err) {
-      skipped++;
+      failed++;
       const message = err instanceof Error ? err.message : 'Unexpected error';
       errors.push({
         existingId: item.existingId ?? 'NEW_ROW',
@@ -46,5 +53,5 @@ export async function processBulkImportConflicts<
     }
   }
 
-  return { total: items.length, updated, skipped, errors };
+  return { total: items.length, updated, skipped, failed, errors };
 }

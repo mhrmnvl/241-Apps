@@ -6,6 +6,7 @@ import { DataTable } from '@/ui'
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -102,6 +103,11 @@ const tableColumns = computed<ColumnDef<ImportPreviewRow<TData>>[]>(() =>
     >
       <DialogHeader class="px-6 py-4 bg-muted/20 border-b shrink-0">
         <DialogTitle>Pratinjau Impor</DialogTitle>
+        <DialogDescription>
+          Belum ada data yang disimpan. Periksa dulu, lalu klik
+          <span class="font-medium text-foreground">Proses Impor</span> untuk
+          menyimpannya.
+        </DialogDescription>
       </DialogHeader>
 
       <div class="px-6 py-4 flex-1 min-h-0 overflow-y-auto space-y-4">
@@ -127,13 +133,13 @@ const tableColumns = computed<ColumnDef<ImportPreviewRow<TData>>[]>(() =>
             class="flex items-center gap-1.5 px-3 h-9 bg-emerald-50/30 border border-emerald-200 rounded-md text-foreground font-medium select-none"
           >
             <CheckCircle2 class="h-4 w-4 text-emerald-600 shrink-0" />
-            <span>{{ summary.willProcess }} diproses</span>
+            <span>{{ summary.willProcess }} akan diproses</span>
           </div>
           <div
             class="flex items-center gap-1.5 px-3 h-9 bg-amber-50/30 border border-amber-200 rounded-md text-foreground font-medium select-none"
           >
             <AlertTriangle class="h-4 w-4 text-amber-500 shrink-0" />
-            <span>{{ summary.skipConflicts }} dilewati</span>
+            <span>{{ summary.skipConflicts }} akan dilewati</span>
           </div>
           <div
             class="flex items-center gap-1.5 px-3 h-9 bg-red-50/30 border border-red-200 rounded-md text-foreground font-medium select-none"
@@ -188,7 +194,7 @@ const tableColumns = computed<ColumnDef<ImportPreviewRow<TData>>[]>(() =>
                 v-if="loading"
                 class="size-4 mr-2 animate-spin"
               />
-              {{ loading ? 'Memproses...' : 'Terapkan' }}
+              {{ loading ? 'Memproses...' : 'Proses Impor' }}
             </Button>
           </div>
         </div>

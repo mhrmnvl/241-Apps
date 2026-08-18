@@ -3,7 +3,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import ExcelJS from 'exceljs';
 import { ITeacherRepository } from '../domain/interfaces/teacher-repository.interface.js';
 import { BulkImportTeachersUseCase } from './bulk-import-teacher.use-case.js';
-import { CreateTeacherUseCase } from './create-teacher.use-case.js';
 
 async function makeExcelBuffer(
   rows: Record<string, ExcelJS.CellValue>[],
@@ -49,10 +48,8 @@ describe('BulkImportTeachersUseCase', () => {
     findByNip: jest.fn(),
     findByNuptk: jest.fn(),
     resolveEmploymentTypeId: jest.fn().mockResolvedValue('employment-type-id'),
-  };
-
-  const mockCreateTeacher = {
-    execute: jest.fn(),
+    create: jest.fn(),
+    update: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -61,12 +58,14 @@ describe('BulkImportTeachersUseCase', () => {
         BulkImportTeachersUseCase,
         { provide: ExcelTeacherParser, useClass: ConcreteExcelTeacherParser },
         { provide: ITeacherRepository, useValue: mockRepo },
-        { provide: CreateTeacherUseCase, useValue: mockCreateTeacher },
       ],
     }).compile();
 
     useCase = module.get<BulkImportTeachersUseCase>(BulkImportTeachersUseCase);
     jest.clearAllMocks();
+    // clearAllMocks wipes call records, not implementations — restore the
+    // default here so a test that overrides it cannot leak into the next one.
+    mockRepo.resolveEmploymentTypeId.mockResolvedValue('employment-type-id');
   });
 
   it('should be defined', () => {
@@ -82,12 +81,30 @@ describe('BulkImportTeachersUseCase', () => {
       );
     });
 
-    it('should import a valid row successfully', async () => {
+    // The point of the whole use case: it reports, it does not write. The
+    // preview dialog is only worth showing if the caller can still say no,
+    // and this used to create every valid row as it walked the sheet.
+    it('writes nothing, whatever the sheet says', async () => {
       mockRepo.findUserByIdentifier.mockResolvedValue(null);
       mockRepo.findProfileByNik.mockResolvedValue(null);
       mockRepo.findByNip.mockResolvedValue(null);
       mockRepo.findByNuptk.mockResolvedValue(null);
-      mockCreateTeacher.execute.mockResolvedValue({ id: 'emp-1' });
+
+      const buffer = await makeExcelBuffer([
+        validRow,
+        { ...validRow, identifier: 'guru002', nip: '222', name: '' },
+      ]);
+      await useCase.execute(buffer);
+
+      expect(mockRepo.create).not.toHaveBeenCalled();
+      expect(mockRepo.update).not.toHaveBeenCalled();
+    });
+
+    it('marks a valid new row SUCCESS, meaning it would be created', async () => {
+      mockRepo.findUserByIdentifier.mockResolvedValue(null);
+      mockRepo.findProfileByNik.mockResolvedValue(null);
+      mockRepo.findByNip.mockResolvedValue(null);
+      mockRepo.findByNuptk.mockResolvedValue(null);
 
       const buffer = await makeExcelBuffer([validRow]);
       const result = await useCase.execute(buffer);
@@ -98,9 +115,68 @@ describe('BulkImportTeachersUseCase', () => {
       expect(result.results[0].status).toBe('SUCCESS');
       expect(result.results[0].row).toBe(2);
       expect(mockRepo.findUserByIdentifier).toHaveBeenCalledWith('guru001');
-      expect(mockCreateTeacher.execute).toHaveBeenCalledWith(
-        expect.objectContaining({ employmentTypeId: 'employment-type-id' }),
-      );
+    });
+
+    it('fails the row when its employment type code does not resolve', async () => {
+      mockRepo.findUserByIdentifier.mockResolvedValue(null);
+      mockRepo.findProfileByNik.mockResolvedValue(null);
+      mockRepo.findByNip.mockResolvedValue(null);
+      mockRepo.findByNuptk.mockResolvedValue(null);
+      mockRepo.resolveEmploymentTypeId.mockResolvedValue(null);
+
+      const buffer = await makeExcelBuffer([validRow]);
+      const result = await useCase.execute(buffer);
+
+      expect(result.failed).toBe(1);
+      expect(result.results[0].status).toBe('FAILED');
+      expect(result.results[0].error).toContain('Employment type');
+    });
+
+    // Nothing is written while the sheet is walked, so the second of two rows
+    // claiming one identity looks as new as the first. Undetected here it
+    // passes the preview and only blows up at apply time, after the caller
+    // has already confirmed.
+    it('fails the second of two rows sharing a NIP, naming the first row', async () => {
+      mockRepo.findUserByIdentifier.mockResolvedValue(null);
+      mockRepo.findProfileByNik.mockResolvedValue(null);
+      mockRepo.findByNip.mockResolvedValue(null);
+      mockRepo.findByNuptk.mockResolvedValue(null);
+
+      const twin = {
+        ...validRow,
+        identifier: 'guru002',
+        nik: '9999000000000002',
+        nuptk: '9999999999999999',
+      };
+      const buffer = await makeExcelBuffer([validRow, twin]);
+      const result = await useCase.execute(buffer);
+
+      expect(result.success).toBe(1);
+      expect(result.failed).toBe(1);
+      expect(result.results[1].status).toBe('FAILED');
+      expect(result.results[1].error).toContain('NIP');
+      expect(result.results[1].error).toContain('duplicated in this file');
+      expect(result.results[1].error).toContain('row 2');
+    });
+
+    it('fails the second of two rows sharing a username', async () => {
+      mockRepo.findUserByIdentifier.mockResolvedValue(null);
+      mockRepo.findProfileByNik.mockResolvedValue(null);
+      mockRepo.findByNip.mockResolvedValue(null);
+      mockRepo.findByNuptk.mockResolvedValue(null);
+
+      const twin = {
+        ...validRow,
+        nik: '9999000000000002',
+        nip: '999',
+        nuptk: '9999999999999999',
+      };
+      const buffer = await makeExcelBuffer([validRow, twin]);
+      const result = await useCase.execute(buffer);
+
+      expect(result.failed).toBe(1);
+      expect(result.results[1].error).toContain('Username');
+      expect(result.results[1].error).toContain('duplicated in this file');
     });
 
     it('should fail row when identifier is duplicated', async () => {
@@ -114,7 +190,6 @@ describe('BulkImportTeachersUseCase', () => {
 
       expect(result.failed).toBe(1);
       expect(result.results[0].error).toContain('Identifier');
-      expect(mockCreateTeacher.execute).not.toHaveBeenCalled();
     });
 
     it('should flag row as CONFLICT when NIK is duplicated', async () => {
@@ -174,7 +249,6 @@ describe('BulkImportTeachersUseCase', () => {
 
       expect(result.failed).toBe(1);
       expect(result.results[0].error).toContain('Validation failed');
-      expect(mockCreateTeacher.execute).not.toHaveBeenCalled();
     });
 
     it('should skip NIP/NUPTK duplicate check when fields are absent', async () => {
@@ -185,7 +259,6 @@ describe('BulkImportTeachersUseCase', () => {
       };
       mockRepo.findUserByIdentifier.mockResolvedValue(null);
       mockRepo.findProfileByNik.mockResolvedValue(null);
-      mockCreateTeacher.execute.mockResolvedValue({ id: 'emp-1' });
 
       const buffer = await makeExcelBuffer([rowWithoutNipNuptk]);
       const result = await useCase.execute(buffer);
@@ -196,11 +269,14 @@ describe('BulkImportTeachersUseCase', () => {
     });
 
     it('should process multiple rows and report partial success', async () => {
+      // Every identity distinct from row 1's, so the failure below is the
+      // database duplicate this test is about and not an in-file collision.
       const row2 = {
         ...validRow,
         identifier: 'guru002',
         nik: '9999000000000002',
         nip: '111',
+        nuptk: '9999999999999999',
       };
 
       mockRepo.findUserByIdentifier
@@ -215,7 +291,6 @@ describe('BulkImportTeachersUseCase', () => {
       mockRepo.findByNuptk
         .mockResolvedValueOnce(null)
         .mockResolvedValueOnce(null);
-      mockCreateTeacher.execute.mockResolvedValue({ id: 'emp-1' });
 
       const buffer = await makeExcelBuffer([validRow, row2]);
       const result = await useCase.execute(buffer);
@@ -239,7 +314,6 @@ describe('BulkImportTeachersUseCase', () => {
       mockRepo.findProfileByNik.mockResolvedValue(null);
       mockRepo.findByNip.mockResolvedValue(null);
       mockRepo.findByNuptk.mockResolvedValue(null);
-      mockCreateTeacher.execute.mockResolvedValue({ id: 'emp-1' });
 
       const buffer = await makeExcelBuffer([validRow, row2]);
       const result = await useCase.execute(buffer);
@@ -253,29 +327,11 @@ describe('BulkImportTeachersUseCase', () => {
       mockRepo.findProfileByNik.mockResolvedValue(null);
       mockRepo.findByNip.mockResolvedValue(null);
       mockRepo.findByNuptk.mockResolvedValue(null);
-      mockCreateTeacher.execute.mockResolvedValue({ id: 'emp-1' });
 
       const buffer = await makeExcelBuffer([validRow]);
       const result = await useCase.execute(buffer);
 
       expect(result.results[0].row).toBe(2);
-    });
-
-    it('should fail the row with the specific error message when creation throws', async () => {
-      mockRepo.findUserByIdentifier.mockResolvedValue(null);
-      mockRepo.findProfileByNik.mockResolvedValue(null);
-      mockRepo.findByNip.mockResolvedValue(null);
-      mockRepo.findByNuptk.mockResolvedValue(null);
-      mockCreateTeacher.execute.mockRejectedValue(
-        new Error('Database connection lost'),
-      );
-
-      const buffer = await makeExcelBuffer([validRow]);
-      const result = await useCase.execute(buffer);
-
-      expect(result.failed).toBe(1);
-      expect(result.results[0].status).toBe('FAILED');
-      expect(result.results[0].error).toBe('Database connection lost');
     });
   });
 });

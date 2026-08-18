@@ -41,6 +41,13 @@ import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
 import { useRoleGuard } from '@/features/platform/auth'
 
 const { can } = useRoleGuard()
+
+// Applying an import creates the new rows and updates the conflicting ones, so
+// the entry point asks for both — offering it on `create` alone would walk the
+// user through the whole preview and refuse at the last click.
+const canImport = computed(
+  () => can('students.create') && can('students.update'),
+)
 const router = useRouter()
 
 const isFilterDialogOpen = ref(false)
@@ -173,7 +180,7 @@ onMounted(async () => {
           <!-- Desktop Action Buttons -->
           <div class="hidden sm:flex items-center gap-2">
             <Button
-              v-if="can('students.create')"
+              v-if="canImport"
               variant="outline"
               size="sm"
               class="h-10 px-4 bg-white"
@@ -216,7 +223,10 @@ onMounted(async () => {
                   <Plus class="size-4 mr-2 text-muted-foreground" />
                   Tambah Siswa
                 </DropdownMenuItem>
-                <DropdownMenuItem @click="isImportExportOpen = true">
+                <DropdownMenuItem
+                  v-if="canImport"
+                  @click="isImportExportOpen = true"
+                >
                   <ArrowLeftRight class="size-4 mr-2 text-muted-foreground" />
                   Import / Export
                 </DropdownMenuItem>
@@ -405,7 +415,7 @@ onMounted(async () => {
   </Dialog>
 
   <ImportExportDialog
-    v-if="can('students.create')"
+    v-if="canImport"
     v-model:open="isImportExportOpen"
     :is-processing="isImporting"
     :labels="studentImportExportLabels"

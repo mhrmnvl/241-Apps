@@ -50,6 +50,15 @@ export function useTeacherImportExport(options: {
     }
   }
 
+  /**
+   * Uploads the file for inspection only — the backend writes nothing here.
+   * The preview dialog opens on the result, and the import is not applied
+   * until the user confirms it in `handleResolveConflicts`.
+   *
+   * So there is deliberately no refetch of the list at this point: nothing has
+   * changed yet, and refreshing here is what used to make the import look
+   * already done while the user was still deciding.
+   */
   async function handleFileUpload(file: File) {
     isImporting.value = true
     try {
@@ -57,20 +66,13 @@ export function useTeacherImportExport(options: {
       const result = response.data.data
 
       if (typeof result?.total === 'undefined') {
-        toast.success('File berhasil diunggah.')
-        isImportExportOpen.value = false
-        options.onImportSuccess()
+        toast.error('Berkas tidak dapat dibaca. Periksa formatnya.')
         return
       }
 
       conflictRows.value = result.results
       isImportExportOpen.value = false
       isConflictDialogOpen.value = true
-
-      const hasSuccess = result.results.some((r) => r.status === 'SUCCESS')
-      if (result.success > 0 || hasSuccess) {
-        options.onImportSuccess()
-      }
     } catch (err) {
       const errorMessage = getIndonesianErrorMessage(
         err,
@@ -96,9 +98,20 @@ export function useTeacherImportExport(options: {
       const result = response.data.data
 
       const parts: string[] = []
-      if (result.updated > 0) parts.push(`${result.updated} diperbarui`)
+      if (result.updated > 0) parts.push(`${result.updated} diproses`)
       if (result.skipped > 0) parts.push(`${result.skipped} dilewati`)
-      toast.success(`Selesai: ${parts.join(', ') || 'tidak ada perubahan'}.`)
+      if (result.failed > 0) parts.push(`${result.failed} gagal`)
+      const summary = `Selesai: ${parts.join(', ') || 'tidak ada perubahan'}.`
+
+      // A row that threw is not a row that went to plan — say so, and name the
+      // first reason rather than leaving it only in the server log.
+      if (result.failed > 0) {
+        toast.warning(summary, {
+          description: result.errors[0]?.error,
+        })
+      } else {
+        toast.success(summary)
+      }
 
       isConflictDialogOpen.value = false
       isImportExportOpen.value = false
