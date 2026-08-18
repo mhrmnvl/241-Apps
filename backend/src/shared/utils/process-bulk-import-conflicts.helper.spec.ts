@@ -20,7 +20,13 @@ describe('processBulkImportConflicts', () => {
     );
 
     expect(process).not.toHaveBeenCalled();
-    expect(result).toEqual({ total: 1, updated: 0, skipped: 1, errors: [] });
+    expect(result).toEqual({
+      total: 1,
+      updated: 0,
+      skipped: 1,
+      failed: 0,
+      errors: [],
+    });
   });
 
   it('counts a successful process call as updated', async () => {
@@ -35,7 +41,13 @@ describe('processBulkImportConflicts', () => {
     );
 
     expect(process).toHaveBeenCalledWith(items[0]);
-    expect(result).toEqual({ total: 1, updated: 1, skipped: 0, errors: [] });
+    expect(result).toEqual({
+      total: 1,
+      updated: 1,
+      skipped: 0,
+      failed: 0,
+      errors: [],
+    });
   });
 
   it('records the error and continues when process throws, instead of swallowing it', async () => {
@@ -50,7 +62,11 @@ describe('processBulkImportConflicts', () => {
     );
 
     expect(result.updated).toBe(0);
-    expect(result.skipped).toBe(1);
+    // A row that threw is reported as failed, not skipped: skipped is a choice
+    // the caller made, and folding the two together tells someone their import
+    // went to plan when part of it did not land.
+    expect(result.failed).toBe(1);
+    expect(result.skipped).toBe(0);
     expect(result.errors).toEqual([{ existingId: 'id-1', error: 'boom' }]);
     expect(logger.warn).toHaveBeenCalledWith(
       expect.stringContaining(
@@ -92,7 +108,8 @@ describe('processBulkImportConflicts', () => {
 
     expect(result.total).toBe(2);
     expect(result.updated).toBe(1);
-    expect(result.skipped).toBe(1);
+    expect(result.failed).toBe(1);
+    expect(result.skipped).toBe(0);
     expect(result.errors).toEqual([{ existingId: 'id-2', error: 'boom' }]);
   });
 });

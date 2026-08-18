@@ -205,8 +205,12 @@ export interface ResolveBulkImportConflict {
 
 export interface ResolveBulkImportResult {
   total: number
+  /** Rows created or updated. */
   updated: number
+  /** Rows the user chose to skip. */
   skipped: number
+  /** Rows that threw while being written — distinct from a deliberate skip. */
+  failed: number
   errors: { existingId: string; error: string }[]
 }
 
