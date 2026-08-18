@@ -1,0 +1,69 @@
+version: 2
+
+# Dependabot opens its pull requests against `dev`, never `main`.
+#
+# The default target is the repository's default branch, which here is `main` —
+# and `main` deploys to the school within minutes of a merge. A bot opening
+# dependency PRs straight at production contradicts the one rule this repo does
+# not bend: work reaches `main` only after it has run on `dev`.
+#
+# One caveat this cannot cover. `target-branch` governs *version* updates, the
+# scheduled ones configured below. Dependabot *security* updates — the automatic
+# PRs raised in response to an advisory, enabled by a toggle in repository
+# settings rather than by this file — target the default branch regardless.
+# Treat those as needing the same dev-first trip: retarget the PR to `dev`, or
+# cherry-pick the bump, rather than merging one into `main` directly.
+#
+# What this file cannot do at all is fix a transitive advisory whose parent has
+# not published a release moving its own floor. Dependabot will not update an
+# indirect dependency when doing so requires overruling its parent, and that
+# describes every entry in `pnpm-workspace.yaml`'s `overrides` block. The two
+# mechanisms are complementary: Dependabot watches what we depend on directly,
+# the overrides handle what we reach through somebody else.
+
+updates:
+  # pnpm is handled by the `npm` ecosystem. The workspace has one lockfile, at
+  # the root, so a single entry covers backend, the five apps, and packages/*.
+  - package-ecosystem: npm
+    directory: /
+    target-branch: dev
+    schedule:
+      interval: weekly
+      day: monday
+      time: '03:00'
+      timezone: Asia/Jakarta
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: chore(deps)
+      prefix-development: chore(deps-dev)
+    groups:
+      # One PR for the safe bumps, so a quiet week is one review and not
+      # fifteen. Majors stay individual — they are the ones that need reading.
+      minor-and-patch:
+        applies-to: version-updates
+        update-types:
+          - minor
+          - patch
+    ignore:
+      # TypeScript is pinned to one version across the workspace on purpose:
+      # two TS versions make pnpm build two peer-flavored copies of
+      # vue/pinia/vue-router, and duplicate runtime instances follow. The pin
+      # lives in `pnpm-workspace.yaml`, so a PR bumping only the package.json
+      # entries would leave the two disagreeing. Move this one by hand, in both
+      # places, when you mean to.
+      - dependency-name: typescript
+
+  - package-ecosystem: github-actions
+    directory: /
+    target-branch: dev
+    schedule:
+      interval: monthly
+      timezone: Asia/Jakarta
+    open-pull-requests-limit: 3
+    commit-message:
+      prefix: ci(deps)
+    groups:
+      actions:
+        applies-to: version-updates
+        patterns:
+          - '*'
