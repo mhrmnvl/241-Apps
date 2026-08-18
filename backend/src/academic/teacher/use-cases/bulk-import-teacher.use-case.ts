@@ -57,24 +57,33 @@ export class BulkImportTeachersUseCase {
 
       let duplicate: { label: string; value: string; firstRow: number } | null =
         null;
+      let duplicateUsername: { value: string; firstRow: number } | null = null;
       for (const [label, field, value] of identities) {
         if (!value) continue;
         const key = `${field}:${value}`;
         const firstRow = seen.get(key);
-        if (firstRow !== undefined) {
-          duplicate ??= { label, value, firstRow };
-        } else {
+        if (firstRow === undefined) {
           seen.set(key, rowNumber);
+          continue;
+        }
+        // A repeated username is fatal rather than a choice: applying an
+        // update never reassigns an identifier, so the second row could not
+        // be written under any answer the user gives. The other three are
+        // re-resolvable at apply time, so they become a conflict.
+        if (field === 'identifier') {
+          duplicateUsername ??= { value, firstRow };
+        } else {
+          duplicate ??= { label, value, firstRow };
         }
       }
 
-      if (duplicate) {
+      if (duplicateUsername) {
         results.push({
           row: rowNumber,
           status: 'FAILED',
           identifier: dto.identifier,
           data: dto,
-          error: `${duplicate.label} "${duplicate.value}" is duplicated in this file (row ${duplicate.firstRow})`,
+          error: `Username "${duplicateUsername.value}" is duplicated in this file (row ${duplicateUsername.firstRow})`,
         });
         continue;
       }
@@ -167,6 +176,22 @@ export class BulkImportTeachersUseCase {
           identifier: dto.identifier,
           data: dto,
           error: `Employment type with code "${dto.employmentTypeCode}" not found`,
+        });
+        continue;
+      }
+
+      // Duplicating an earlier row of the same file is a conflict too, and it
+      // carries no `existingId` because the row it collides with is created by
+      // this same apply run, moments before this one is processed. The apply
+      // step resolves the id then, which is what lets the same update/skip
+      // choice be offered here as for a teacher already in the database.
+      if (duplicate) {
+        results.push({
+          row: rowNumber,
+          status: 'CONFLICT',
+          identifier: dto.identifier,
+          data: dto,
+          error: `${duplicate.label} "${duplicate.value}" is duplicated in this file (row ${duplicate.firstRow})`,
         });
         continue;
       }
