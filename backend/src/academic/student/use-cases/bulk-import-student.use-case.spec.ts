@@ -205,7 +205,11 @@ describe('BulkImportStudentsUseCase', () => {
     // claiming one NIS looks as new as the first. Undetected here it passes
     // the preview and only blows up at apply time, after the caller has
     // already confirmed.
-    it('fails the second of two rows sharing a NIS, naming the first row', async () => {
+    // The second row is a CONFLICT, not a failure: the user gets the same
+    // update/skip choice as for a student already in the database. It carries
+    // no existingId because the row it collides with does not exist yet — the
+    // apply step resolves that id after creating the first row.
+    it('flags the second of two rows sharing a NIS as CONFLICT, naming the first row', async () => {
       mockClassroomRepository.findByCode.mockResolvedValue({
         id: 'cls-1',
         code: 'VII-A',
@@ -219,14 +223,16 @@ describe('BulkImportStudentsUseCase', () => {
       const result = await useCase.execute(buffer);
 
       expect(result.success).toBe(1);
-      expect(result.failed).toBe(1);
+      expect(result.conflict).toBe(1);
+      expect(result.failed).toBe(0);
       expect(result.results[0].status).toBe('SUCCESS');
-      expect(result.results[1].status).toBe('FAILED');
+      expect(result.results[1].status).toBe('CONFLICT');
+      expect(result.results[1].existingId).toBeUndefined();
       expect(result.results[1].error).toContain('duplicated in this file');
       expect(result.results[1].error).toContain('row 2');
     });
 
-    it('fails the second of two rows sharing a NISN', async () => {
+    it('flags the second of two rows sharing a NISN as CONFLICT', async () => {
       mockStudentRepository.findByNis.mockResolvedValue(null);
       mockStudentRepository.findByNisn.mockResolvedValue(null);
 
@@ -236,9 +242,25 @@ describe('BulkImportStudentsUseCase', () => {
       const result = await useCase.execute(buffer);
 
       expect(result.success).toBe(1);
-      expect(result.failed).toBe(1);
+      expect(result.conflict).toBe(1);
+      expect(result.results[1].status).toBe('CONFLICT');
       expect(result.results[1].error).toContain('NISN');
       expect(result.results[1].error).toContain('duplicated in this file');
+    });
+
+    // A duplicate row that is also invalid stays FAILED: offering to apply it
+    // would only produce an error at write time.
+    it('keeps an invalid duplicate row FAILED rather than offering a choice', async () => {
+      mockStudentRepository.findByNis.mockResolvedValue(null);
+      mockStudentRepository.findByNisn.mockResolvedValue(null);
+
+      const first = { ...validRow, Kelas: '' };
+      const twin = { ...first, NISN: '0012345679', Nama: '' };
+      const buffer = await makeExcelBuffer([first, twin]);
+      const result = await useCase.execute(buffer);
+
+      expect(result.results[1].status).toBe('FAILED');
+      expect(result.results[1].error).toContain('Validation failed');
     });
 
     it('should look up a repeated classroom code only once across rows', async () => {

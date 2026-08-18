@@ -27,6 +27,10 @@ describe('ResolveBulkImportConflictsUseCase (teacher)', () => {
 
   const mockRepo = {
     resolveEmploymentTypeId: jest.fn().mockResolvedValue('employment-type-id'),
+    findByNip: jest.fn(),
+    findByNuptk: jest.fn(),
+    findProfileByNik: jest.fn(),
+    findByUserId: jest.fn(),
   };
 
   const mockUpdateTeacher = {

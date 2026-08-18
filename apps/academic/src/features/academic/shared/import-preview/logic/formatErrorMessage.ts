@@ -54,6 +54,10 @@ export function formatErrorMessage(
     'minimal $1 karakter',
   )
   msg = msg.replace(/should not be empty/gi, 'tidak boleh kosong')
+  msg = msg.replace(
+    /is duplicated in this file \(row (\d+)\)/gi,
+    'ganda di berkas ini (baris $1)',
+  )
   msg = msg.replace(/is already registered/gi, 'sudah terdaftar di sistem')
   msg = msg.replace(/is already taken/gi, 'sudah digunakan')
   msg = msg.replace(/is required/gi, 'wajib diisi')

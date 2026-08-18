@@ -55,11 +55,27 @@ describe('buildResolveDecisions', () => {
     expect(buildResolveDecisions(rows, {})).toEqual([])
   })
 
-  it('drops CONFLICT rows without an existingId (never resolvable)', () => {
+  // A row duplicating an earlier row of the same file arrives in this shape:
+  // CONFLICT, but with no existingId, because the record it collides with is
+  // created by the very run that will process this decision. Dropping it here
+  // is what made the user's update/skip choice do nothing.
+  it('keeps a CONFLICT row without an existingId and honours its action', () => {
     const rows: ImportPreviewRow<Row>[] = [
       { row: 1, status: 'CONFLICT', data: { name: 'A' } },
     ]
 
-    expect(buildResolveDecisions(rows, { 1: 'update' })).toEqual([])
+    expect(buildResolveDecisions(rows, { 1: 'update' })).toEqual([
+      { existingId: undefined, action: 'update', data: { name: 'A' } },
+    ])
+  })
+
+  it('skips a duplicate-of-earlier-row when the user chose skip', () => {
+    const rows: ImportPreviewRow<Row>[] = [
+      { row: 1, status: 'CONFLICT', data: { name: 'A' } },
+    ]
+
+    expect(buildResolveDecisions(rows, { 1: 'skip' })).toEqual([
+      { existingId: undefined, action: 'skip', data: { name: 'A' } },
+    ])
   })
 })

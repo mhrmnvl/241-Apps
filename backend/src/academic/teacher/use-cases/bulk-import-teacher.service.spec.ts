@@ -136,7 +136,9 @@ describe('BulkImportTeachersUseCase', () => {
     // claiming one identity looks as new as the first. Undetected here it
     // passes the preview and only blows up at apply time, after the caller
     // has already confirmed.
-    it('fails the second of two rows sharing a NIP, naming the first row', async () => {
+    // NIP, NUPTK and NIK are re-resolvable at apply time, so a repeat within
+    // the file becomes a choice rather than a failure.
+    it('flags the second of two rows sharing a NIP as CONFLICT, naming the first row', async () => {
       mockRepo.findUserByIdentifier.mockResolvedValue(null);
       mockRepo.findProfileByNik.mockResolvedValue(null);
       mockRepo.findByNip.mockResolvedValue(null);
@@ -152,8 +154,10 @@ describe('BulkImportTeachersUseCase', () => {
       const result = await useCase.execute(buffer);
 
       expect(result.success).toBe(1);
-      expect(result.failed).toBe(1);
-      expect(result.results[1].status).toBe('FAILED');
+      expect(result.conflict).toBe(1);
+      expect(result.failed).toBe(0);
+      expect(result.results[1].status).toBe('CONFLICT');
+      expect(result.results[1].existingId).toBeUndefined();
       expect(result.results[1].error).toContain('NIP');
       expect(result.results[1].error).toContain('duplicated in this file');
       expect(result.results[1].error).toContain('row 2');

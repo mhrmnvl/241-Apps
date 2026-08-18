@@ -82,17 +82,6 @@ export class BulkImportStudentsUseCase {
         }
       }
 
-      if (duplicate) {
-        results.push({
-          row: rowNumber,
-          status: 'FAILED',
-          identifier: dto.identifier,
-          data: dto,
-          error: `${duplicate.label} "${duplicate.value}" is duplicated in this file (row ${duplicate.firstRow})`,
-        });
-        continue;
-      }
-
       const [dupNis, dupNisn] = await Promise.all([
         dto.nis ? this.studentRepository.findByNis(dto.nis) : null,
         dto.nisn ? this.studentRepository.findByNisn(dto.nisn) : null,
@@ -159,6 +148,23 @@ export class BulkImportStudentsUseCase {
           error: dupNis
             ? `NIS "${dto.nis}" is already registered`
             : `NISN "${dto.nisn}" is already registered`,
+        });
+        continue;
+      }
+
+      // A row duplicating an earlier row of the same file is a conflict too,
+      // and it carries no `existingId` because the row it collides with has
+      // not been created yet — it is created by this same apply run, moments
+      // before this one is processed. The apply step resolves the id then,
+      // which is why it can offer the same update/skip choice here as it does
+      // for a row already in the database.
+      if (duplicate) {
+        results.push({
+          row: rowNumber,
+          status: 'CONFLICT',
+          identifier: dto.identifier,
+          data: dto,
+          error: `${duplicate.label} "${duplicate.value}" is duplicated in this file (row ${duplicate.firstRow})`,
         });
         continue;
       }

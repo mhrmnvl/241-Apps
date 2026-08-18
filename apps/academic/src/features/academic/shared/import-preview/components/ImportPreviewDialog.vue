@@ -1,7 +1,8 @@
 <script setup lang="ts" generic="TData">
-import { ref, watch, computed } from 'vue'
+import { ref, watch, computed, onBeforeUnmount } from 'vue'
 import type { ColumnDef } from '@tanstack/vue-table'
 import { Button } from '@/ui/button'
+import { Progress } from '@/ui/progress'
 import { DataTable } from '@/ui'
 import {
   Dialog,
@@ -58,6 +59,46 @@ function setAll(action: 'update' | 'skip') {
   actions.value = newActions
 }
 
+/**
+ * Progress while the import is being written.
+ *
+ * The apply endpoint answers once, at the end — it does not report per-row
+ * progress — so this bar cannot know how far along the server is. It advances
+ * on a curve that slows as it goes and stops at 90%, then completes only when
+ * the request actually returns. That way the bar never sits at 100% while work
+ * is still happening, which is the one thing a progress bar must not do.
+ */
+const progress = ref(0)
+let progressTimer: ReturnType<typeof setInterval> | undefined
+
+function stopProgressTimer() {
+  if (progressTimer) {
+    clearInterval(progressTimer)
+    progressTimer = undefined
+  }
+}
+
+watch(
+  () => props.loading,
+  (isLoading) => {
+    stopProgressTimer()
+    if (isLoading) {
+      progress.value = 0
+      progressTimer = setInterval(() => {
+        // Approach 90% asymptotically: each tick closes a tenth of the gap.
+        progress.value = Math.min(
+          90,
+          progress.value + (90 - progress.value) / 10,
+        )
+      }, 200)
+    } else {
+      progress.value = 0
+    }
+  },
+)
+
+onBeforeUnmount(stopProgressTimer)
+
 const summary = computed(() => {
   const successRows = props.rows.filter((r) => r.status === 'SUCCESS').length
   const updateConflicts = props.rows.filter(
@@ -78,6 +119,9 @@ function handleApply() {
 }
 
 function handleOpenChange(val: boolean) {
+  // Closing mid-save would hide a write that is still running — the request
+  // carries on regardless, and the user would be left guessing what landed.
+  if (props.loading && !val) return
   open.value = val
 }
 
@@ -121,6 +165,22 @@ const tableColumns = computed<ColumnDef<ImportPreviewRow<TData>>[]>(() =>
           hide-pagination
           hide-per-page
         />
+      </div>
+
+      <div
+        v-if="loading"
+        class="px-6 pb-4 space-y-2 shrink-0"
+        role="status"
+        aria-live="polite"
+      >
+        <div class="flex items-center justify-between text-xs">
+          <span class="flex items-center gap-2 font-medium">
+            <Loader2 class="size-4 animate-spin" />
+            Menyimpan {{ summary.willProcess }} baris...
+          </span>
+          <span class="text-muted-foreground">Jangan tutup jendela ini</span>
+        </div>
+        <Progress :model-value="progress" />
       </div>
 
       <DialogFooter
