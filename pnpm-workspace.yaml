@@ -40,12 +40,28 @@ overrides:
   hono: ^4.12.34 # ReDoS in CORS middleware, and three more
   '@hono/node-server': ^1.19.15 # path traversal in serve-static
   valibot: ^1.4.2 # record() paths can make flatten() throw
-  # The one major bump here, and the only entry that could plausibly break
-  # something: exceljs declares uuid ^8 and this forces 11. Verified rather than
-  # assumed — a workbook writes and reads back, and the student export suite
-  # passes. That export has been broken once before by a change that compiled
-  # cleanly, so it is checked by running it, not by reading it.
+  # The two major bumps here, and the only entries that could plausibly break
+  # something. Both are verified by running the thing they could break, not by
+  # reading the diff.
+  #
+  # exceljs declares uuid ^8 and this forces 11. A workbook writes and reads
+  # back, and the student export suite passes. That export has been broken once
+  # before by a change that compiled cleanly, which is why it is checked by
+  # running it.
   uuid: ^11.1.1 # missing buffer bounds check in v3/v5/v6 (exceljs)
+
+  # `@prisma/config` does not declare a range for this — it pins the exact
+  # 7.1.5 — so the override overrules a deliberate pin rather than widening a
+  # floor. It is reached by every Prisma CLI command, because loading
+  # prisma.config.ts is what @prisma/config is for, so `generate` and `migrate`
+  # are the things at risk and the things that get run to check it.
+  #
+  # v8 is not a pure security patch: Map values are deep-merged where they were
+  # replaced, and `deepmergeInto` stopped leak-mutating its inputs. Prisma
+  # merges plain config objects, so neither reaches it — verified by generating
+  # the client and diffing a migration against the schema, both of which load
+  # the config through this package.
+  deepmerge-ts: ^8.0.0 # stack exhaustion on recursive graphs (prisma → @prisma/config)
 
 allowBuilds:
   esbuild: true
