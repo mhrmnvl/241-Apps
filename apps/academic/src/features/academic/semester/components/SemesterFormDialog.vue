@@ -41,7 +41,7 @@ const props = defineProps<{
  * Academic years are loaded here rather than by the semester list page.
  *
  * The list shows semesters, not years — it fetched them on mount only to fill
- * this sheet's dropdown. Loaded once per visit; a school adds one a year.
+ * this dialog's dropdown. Loaded once per visit; a school adds one a year.
  */
 const { academicYears, fetchAcademicYears } = useSemesterList()
 
