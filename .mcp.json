@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "shadcnVue": {
+      "command": "pnpm",
+      "args": ["exec", "shadcn-vue", "mcp", "--cwd", "packages/ui"]
+    }
+  }
+}
