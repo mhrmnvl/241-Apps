@@ -81,7 +81,12 @@ jobs:
     # unpublished content is actually absent rather than merely filtered for.
     # So this job now runs a throwaway Postgres, and the URL below points at it.
     env:
-      DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
+      # `sslmode=disable` is load-bearing, not decoration. The adapters in this
+      # repository ask for TLS by default because the school's Postgres
+      # requires it, and asking a server that has none answers `P1011
+      # TlsConnectionError` — which reads like a certificate problem and is
+      # really "there is no TLS here". A container has none.
+      DATABASE_URL: postgresql://ci:ci@localhost:5432/ci?sslmode=disable
       # `ConfigModule` resolves this in specs that boot a module graph
       # reaching auth. The value is a fixture, not a credential.
       JWT_SECRET: ci-jwt-secret-for-e2e-testing-minimum-32-characters

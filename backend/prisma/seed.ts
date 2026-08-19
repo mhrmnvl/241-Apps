@@ -1,5 +1,6 @@
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '@prisma/client';
+import { pgSslOptions } from '../src/core/database/pg-ssl.js';
 
 import { seedEducations } from './seeds/modules/education.seed.js';
 import { seedOccupations } from './seeds/modules/occupation.seed.js';
@@ -68,9 +69,7 @@ if (!connectionString) {
 }
 const adapter = new PrismaPg({
   connectionString,
-  ssl: {
-    rejectUnauthorized: false,
-  },
+  ...pgSslOptions(connectionString),
 });
 const prisma = new PrismaClient({ adapter });
 
