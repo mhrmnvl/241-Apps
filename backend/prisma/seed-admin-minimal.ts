@@ -2,6 +2,7 @@ import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient, UserGender } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import 'dotenv/config';
+import { pgSslOptions } from '../src/core/database/pg-ssl.js';
 
 /**
  * Minimal, admin-only seed. Creates ONLY the admin user (+ profile) and the
@@ -52,9 +53,7 @@ if (!connectionString) {
 }
 const adapter = new PrismaPg({
   connectionString,
-  ssl: {
-    rejectUnauthorized: false,
-  },
+  ...pgSslOptions(connectionString),
 });
 const prisma = new PrismaClient({ adapter });
 

@@ -1,4 +1,5 @@
 import { PrismaPg } from '@prisma/adapter-pg';
+import { pgSslOptions } from '../src/core/database/pg-ssl.js';
 import {
   AssessmentType,
   AttendanceStatus,
@@ -65,7 +66,7 @@ if (!connectionString) {
 const prisma = new PrismaClient({
   adapter: new PrismaPg({
     connectionString,
-    ssl: { rejectUnauthorized: false },
+    ...pgSslOptions(connectionString),
   }),
 });
 

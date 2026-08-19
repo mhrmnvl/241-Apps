@@ -2,6 +2,7 @@ import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient, AttendanceStatus, AssessmentType } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import 'dotenv/config';
+import { pgSslOptions } from '../src/core/database/pg-ssl.js';
 
 /**
  * Two students, so the boundary can be tested.
@@ -34,7 +35,7 @@ if (!connectionString) {
 const prisma = new PrismaClient({
   adapter: new PrismaPg({
     connectionString,
-    ssl: { rejectUnauthorized: false },
+    ...pgSslOptions(connectionString),
   }),
 });
 
