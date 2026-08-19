@@ -201,8 +201,18 @@ reached again. Three rules follow:
 ### Tech stack
 
 Vue 3 (Composition API, `<script setup>`) · TypeScript · Vite · Tailwind CSS v4 ·
-shadcn-vue + Reka UI · Pinia · Vue Router · vee-validate + Zod · TanStack Vue Table ·
-Lucide · Axios · FullCalendar.
+shadcn-vue + Reka UI · Pinia · Vue Router 5 · vee-validate + Zod ·
+TanStack Vue Table · TanStack Vue Query · Lucide · Axios · FullCalendar.
+
+**Reference lists belong to Vue Query; everything else belongs to Pinia.** The
+single `QueryClient` is created in `@241/platform`'s `reference-data` feature
+rather than left to `VueQueryPlugin`'s default, because `useQueryClient()`
+resolves through Vue's `inject` and the reference lists are read from services —
+plain objects called imperatively. Handing the plugin a client we own means both
+work: services call `fetchQuery` on it, components `useQuery` against the same
+instance. Its keys are namespaced `['reference', key]` so that adopting
+`useQuery` for anything else — a paginated table, a detail record — cannot
+collide. Never mirror a reference list into a Pinia store.
 
 ## Backend architecture
 
@@ -469,6 +479,17 @@ already described above — prefer them over general knowledge when they overlap
   assuming Neon-specific tooling (branching, Management API, etc.) applies.
 
 ## Agent skills
+
+### Engineering rules
+
+`docs/agents/rules.md` is the consolidated ruleset distilled from the installed
+skills — universal, backend, and frontend rules, each with an ID (`BE-06`,
+`FE-24`) so it can be cited directly in review. It also carries two registers
+worth reading before reaching for a skill: **Adopted decisions**, recording every
+point where a skill contradicted this repo and what was adopted instead, and
+**Skill errata**, listing code samples in the skills that are factually wrong and
+must not be copied. It is operational, not authoritative — this file,
+`NESTJS-RULES.md`, `IAM.md`, and `docs/adr/` still decide.
 
 ### Issue tracker
 
