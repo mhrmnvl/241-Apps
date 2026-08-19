@@ -78,7 +78,19 @@ describe('presence & payroll self-service (FR-061, FR-051)', () => {
   beforeAll(async () => {
     const moduleRef: TestingModule = await Test.createTestingModule({
       imports: [
-        ConfigModule.forRoot({ isGlobal: true }),
+        // Supplied inline rather than read from the environment — see the note
+        // in `payroll-authorization.e2e-spec.ts`. Without it this suite fails
+        // on any checkout that has no `backend/.env`.
+        ConfigModule.forRoot({
+          isGlobal: true,
+          ignoreEnvFile: true,
+          load: [
+            () => ({
+              JWT_SECRET: 'test-jwt-secret-for-e2e-testing-minimum-32-chars',
+              NODE_ENV: 'test',
+            }),
+          ],
+        }),
         LoggerModule.forRoot({ pinoHttp: { enabled: false } }),
         PrismaModule,
         PresenceModule,

@@ -119,6 +119,17 @@ jobs:
       - name: Test
         run: pnpm --filter backend test
 
+      # The end-to-end specs that need no database — everything except
+      # `portal-public-visibility`, which seeds real rows and is left to a
+      # local run until this job gets a Postgres service.
+      #
+      # They ran nowhere before this step existed, and it showed: three of the
+      # four suites had been failing on any checkout without a `backend/.env`,
+      # including the ADR-0008 authorization net, and nothing reported it. They
+      # take about twenty seconds together.
+      - name: Test (e2e, no database)
+        run: pnpm --filter backend test:e2e:nodb
+
       - name: Build
         run: pnpm --filter backend build
 

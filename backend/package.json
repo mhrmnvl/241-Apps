@@ -26,6 +26,7 @@
     "test:ci": "jest --runInBand --coverage --passWithNoTests",
     "test:debug": "node --inspect-brk -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json --runInBand",
+    "test:e2e:nodb": "jest --config ./test/jest-e2e.json --runInBand --testPathIgnorePatterns portal-public-visibility",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:deploy": "prisma migrate deploy",
