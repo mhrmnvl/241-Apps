@@ -27,7 +27,12 @@ export interface ApprovalLoanDetailRow {
 
 export interface CreateApprovalWorkflowStepInput {
   stepSequence: number;
-  approverRoleId: string;
+  /** The approving role's *code* — 'ADMIN', 'PRINCIPAL' — not an id. */
+  approverRoleCode: string;
+  /**
+   * False leaves the step to the previous approver's judgement: they decide,
+   * per request, whether it is also taken. A mandatory step is always taken.
+   */
   isMandatory?: boolean;
 }
 

@@ -22,7 +22,21 @@ export const socialMediaApi = {
   deleteSocialMedia: (id: string) => {
     return api.delete(`/social-medias/${id}`)
   },
-  deleteBulkSocialMedias: (ids: string[]) => {
-    return api.post('/social-medias/bulk-delete', { ids })
+  /**
+   * One request per row, because the backend has no bulk route.
+   *
+   * This called `POST /social-medias/bulk-delete` until 2026-08-15, which no
+   * controller has ever served — the button answered "Gagal menghapus beberapa
+   * socialMedia" every time. `allSettled` rather than `all` so one refusal does
+   * not hide the rows that were deleted, and the caller is told how many.
+   */
+  deleteBulkSocialMedias: async (ids: string[]) => {
+    const results = await Promise.allSettled(
+      ids.map((id) => api.delete(`/social-medias/${id}`)),
+    )
+    return {
+      deleted: results.filter((r) => r.status === 'fulfilled').length,
+      failed: results.filter((r) => r.status === 'rejected').length,
+    }
   },
 }

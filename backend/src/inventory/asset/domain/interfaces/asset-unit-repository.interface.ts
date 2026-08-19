@@ -8,7 +8,21 @@ import { AssetUnitWithDetails } from '../entities/asset-unit.entity.js';
 
 export type { AssetUnitWithDetails };
 
-export type AssetUnitQueryInput = PaginationQueryInput;
+export interface AssetUnitQueryInput extends PaginationQueryInput {
+  /**
+   * Restrict to units that may take part in a transaction — what a loan form
+   * is asking for when it asks for "available units".
+   *
+   * The rule is the status's `allowTransactions`, and it is complete on its
+   * own: raising a loan moves its units to LOAN_PENDING and approving it moves
+   * them to LOANED, both of which forbid transactions. So a unit already
+   * spoken for is excluded by the same condition, without a second query
+   * against open loans.
+   */
+  lendable?: boolean;
+  /** Matches the unit number or the asset's name. */
+  search?: string;
+}
 
 /**
  * Foreign keys are passed flat; translating them into the ORM's nested-write

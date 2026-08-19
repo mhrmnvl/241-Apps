@@ -22,8 +22,6 @@ import {
 } from '@nestjs/swagger';
 
 import { JwtAuthGuard } from '../../../platform/auth/index.js';
-import { CurrentUser } from '../../../core/decorators/current-user.decorator.js';
-import type { AuthenticatedUser } from '../../../core/types/authenticated-user.type.js';
 
 import { ParentQueryDto } from '../dto/request/parent-query.dto.js';
 import { CreateParentDto } from '../dto/request/create-parent.dto.js';
@@ -55,10 +53,7 @@ export class ParentController {
   @RequirePermissions('parents.read')
   @ApiOperation({ summary: 'List all parents (paginated, filterable)' })
   @ApiResponse({ status: 200, type: ParentListResponseDto })
-  async findAll(
-    @CurrentUser() user: AuthenticatedUser,
-    @Query() query: ParentQueryDto,
-  ) {
+  async findAll(@Query() query: ParentQueryDto) {
     return this.getParentsService.execute(query);
   }
 
@@ -68,10 +63,7 @@ export class ParentController {
   @ApiParam({ name: 'id', format: 'uuid' })
   @ApiResponse({ status: 200, type: ParentResponseDto })
   @ApiResponse({ status: 404, description: 'Parent not found' })
-  async findOne(
-    @CurrentUser() user: AuthenticatedUser,
-    @Param('id', ParseUUIDPipe) id: string,
-  ) {
+  async findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.getParentByIdService.execute(id);
   }
 
@@ -99,7 +91,6 @@ export class ParentController {
     description: 'Duplicate NIK / inactive occupation',
   })
   async update(
-    @CurrentUser() user: AuthenticatedUser,
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateParentDto,
   ) {
@@ -113,10 +104,7 @@ export class ParentController {
   @ApiParam({ name: 'id', format: 'uuid' })
   @ApiResponse({ status: 204, description: 'Parent deleted' })
   @ApiResponse({ status: 404, description: 'Parent not found' })
-  async remove(
-    @CurrentUser() user: AuthenticatedUser,
-    @Param('id', ParseUUIDPipe) id: string,
-  ) {
+  async remove(@Param('id', ParseUUIDPipe) id: string) {
     await this.deleteParentService.execute(id);
   }
 }

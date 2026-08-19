@@ -5,7 +5,7 @@ import type { ComboboxOption } from '@/ui'
 
 defineProps<{
   isAdmin: boolean
-  isTeacher: boolean
+  isPersonal: boolean
   selectedClassroomId: string
   options: ComboboxOption[]
 }>()
@@ -30,11 +30,11 @@ function onClassroomChange(val: string | null) {
     >
       <div>
         <CardTitle class="text-2xl font-bold tracking-tight">
-          {{ isTeacher ? 'Jadwal Mengajar' : 'Jadwal Pelajaran' }}
+          {{ isPersonal ? 'Jadwal Mengajar' : 'Jadwal Pelajaran' }}
         </CardTitle>
         <p class="text-sm text-muted-foreground mt-0.5">
           {{
-            isTeacher
+            isPersonal
               ? 'Jadwal mengajar Anda selama seminggu'
               : 'Jadwal pelajaran per kelas selama seminggu'
           }}

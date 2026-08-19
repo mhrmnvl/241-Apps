@@ -75,14 +75,17 @@ const columns = computed<ColumnDef<InventoryReferenceItem>[]>(() => {
     },
   ]
 
-  if (can('inventory.update') || can('inventory.delete')) {
+  if (
+    can('inventory-master-data.update') ||
+    can('inventory-master-data.delete')
+  ) {
     baseColumns.push({
       id: 'actions',
       header: 'Aksi',
       cell: ({ row }) =>
         h(ActionCell, {
-          hideEdit: !can('inventory.update'),
-          hideDelete: !can('inventory.delete'),
+          hideEdit: !can('inventory-master-data.update'),
+          hideDelete: !can('inventory-master-data.delete'),
           onEdit: () => handleOpenEditForm(row.original),
           onDelete: () => handleDeleteItem(row.original.id),
         }),
@@ -154,7 +157,7 @@ onMounted(() => {
           >Status Aset</CardTitle
         >
         <Button
-          v-if="can('inventory.create')"
+          v-if="can('inventory-master-data.create')"
           size="sm"
           @click="handleOpenCreateForm"
         >

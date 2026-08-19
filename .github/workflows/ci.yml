@@ -75,11 +75,38 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
-    # Nothing here connects to a database. `prisma.config.ts` throws without a
-    # URL, and the CLI needs one to parse the datasource, so a placeholder is
-    # enough — the unit tests mock every repository, and no step runs a query.
+    # Most steps here never open a connection — the unit tests mock every
+    # repository — but the end-to-end suite does. `portal-public-visibility`
+    # seeds rows and reads them back, which is the only way to assert that
+    # unpublished content is actually absent rather than merely filtered for.
+    # So this job now runs a throwaway Postgres, and the URL below points at it.
     env:
-      DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
+      # `sslmode=disable` is load-bearing, not decoration. The adapters in this
+      # repository ask for TLS by default because the school's Postgres
+      # requires it, and asking a server that has none answers `P1011
+      # TlsConnectionError` — which reads like a certificate problem and is
+      # really "there is no TLS here". A container has none.
+      DATABASE_URL: postgresql://ci:ci@localhost:5432/ci?sslmode=disable
+      # `ConfigModule` resolves this in specs that boot a module graph
+      # reaching auth. The value is a fixture, not a credential.
+      JWT_SECRET: ci-jwt-secret-for-e2e-testing-minimum-32-characters
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: ci
+          POSTGRES_PASSWORD: ci
+          POSTGRES_DB: ci
+        ports:
+          - 5432:5432
+        # Without the health check the first migration races the server's
+        # startup and fails on connection rather than on anything real.
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
       - name: Checkout repository
@@ -99,8 +126,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # Every backend step needs the generated client; nothing here touches a
-      # database, so no DATABASE_URL is required.
+      # Every backend step needs the generated client.
       - name: Generate Prisma client
         run: pnpm --filter backend prisma:generate
 
@@ -118,6 +144,24 @@ jobs:
 
       - name: Test
         run: pnpm --filter backend test
+
+      # `portal-public-visibility` needs a schema to seed into, and one user to
+      # author its fixtures with — it fails fast rather than inventing one.
+      # `seed:admin-minimal` is the smallest seed that satisfies that: one
+      # account and the SUPER_ADMIN role, nothing else.
+      - name: Apply migrations
+        run: pnpm --filter backend prisma:deploy
+
+      - name: Seed the minimum the e2e suite needs
+        run: pnpm --filter backend seed:admin-minimal
+
+      # The whole end-to-end suite, including the database-backed sweep.
+      #
+      # It ran nowhere before, and it showed: three suites had been failing on
+      # any checkout without a `backend/.env`, one of them the ADR-0008
+      # authorization net, and nothing reported it.
+      - name: Test (e2e)
+        run: pnpm --filter backend test:e2e
 
       - name: Build
         run: pnpm --filter backend build

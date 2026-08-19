@@ -88,6 +88,13 @@ const isModalOpen = ref(false)
 const editingItem = ref<Teacher | null>(null)
 const { can } = useRoleGuard()
 
+// Applying an import creates the new rows and updates the conflicting ones, so
+// the entry point asks for both — offering it on `create` alone would walk the
+// user through the whole preview and refuse at the last click.
+const canImport = computed(
+  () => can('teachers.create') && can('teachers.update'),
+)
+
 async function handleSaveTeacher(
   payload: TeacherSavePayload | TeacherUpdatePayload,
 ) {
@@ -234,7 +241,7 @@ onMounted(() => {
           <!-- Desktop Action Buttons -->
           <div class="hidden sm:flex items-center gap-2">
             <Button
-              v-if="can('teachers.create')"
+              v-if="canImport"
               variant="outline"
               size="sm"
               class="h-10 px-4 bg-white"
@@ -277,7 +284,10 @@ onMounted(() => {
                   <Plus class="size-4 mr-2 text-muted-foreground" />
                   Tambah Guru
                 </DropdownMenuItem>
-                <DropdownMenuItem @click="isImportExportOpen = true">
+                <DropdownMenuItem
+                  v-if="canImport"
+                  @click="isImportExportOpen = true"
+                >
                   <ArrowLeftRight class="size-4 mr-2 text-muted-foreground" />
                   Import / Export
                 </DropdownMenuItem>
@@ -473,7 +483,7 @@ onMounted(() => {
   />
 
   <ImportExportDialog
-    v-if="can('teachers.create')"
+    v-if="canImport"
     v-model:open="isImportExportOpen"
     :is-processing="isImporting"
     :labels="teacherImportExportLabels"

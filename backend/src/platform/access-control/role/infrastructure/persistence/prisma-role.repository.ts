@@ -5,6 +5,7 @@ import {
   IRoleRepository,
   RoleWithPermissions,
 } from '../../domain/interfaces/role-repository.interface.js';
+import { isStructuralRole } from '../../constants/structural-roles.constants.js';
 
 const ROLE_INCLUDE = {
   rolePermissions: { include: { permission: true } },
@@ -63,7 +64,11 @@ export class PrismaRoleRepository extends IRoleRepository {
     const role = await this.prisma.role.create({
       data: {
         ...roleData,
-        isSystem: false,
+        // A role the code resolves by name is created protected, whoever makes
+        // it. This path forced `false` unconditionally, so a TEACHER role made
+        // through the role screen — which is how production will be filled —
+        // came out deletable, and deleting it stops teacher creation working.
+        isSystem: isStructuralRole(data.code),
         ...(permissionIds?.length
           ? {
               rolePermissions: {
@@ -108,6 +113,23 @@ export class PrismaRoleRepository extends IRoleRepository {
 
   async delete(id: string) {
     return this.prisma.role.delete({ where: { id } });
+  }
+
+  async createStructural(input: {
+    code: string;
+    name: string;
+    description: string;
+  }) {
+    // No `rolePermissions`. The role must exist for provisioning to work; what
+    // it may do is the school's decision on the role screen.
+    return this.prisma.role.create({ data: { ...input, isSystem: true } });
+  }
+
+  async markSystem(id: string) {
+    return this.prisma.role.update({
+      where: { id },
+      data: { isSystem: true },
+    });
   }
 
   async assignRoleToUser(userId: string, roleId: string) {

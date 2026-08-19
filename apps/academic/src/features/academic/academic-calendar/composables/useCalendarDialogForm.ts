@@ -12,14 +12,29 @@ import { useAcademicYearList } from '@/features/academic/academic-year'
 import type { AcademicYear } from '@/features/academic/academic-year'
 
 const calendarFormSchema = toTypedSchema(
-  z.object({
-    title: z.string().min(1, 'Nama agenda harus diisi'),
-    description: z.string().optional(),
-    typeId: z.string().min(1, 'Kategori harus dipilih'),
-    startDate: z.string().min(1, 'Tanggal mulai harus diisi'),
-    endDate: z.string().min(1, 'Tanggal selesai harus diisi'),
-    academicYearId: z.string().optional(),
-  }),
+  z
+    .object({
+      title: z.string().min(1, 'Nama agenda harus diisi'),
+      description: z.string().optional(),
+      typeId: z.string().min(1, 'Kategori harus dipilih'),
+      startDate: z.string().min(1, 'Tanggal mulai harus diisi'),
+      endDate: z.string().min(1, 'Tanggal selesai harus diisi'),
+      // Optional, and both or neither. Most entries are measured in days — a
+      // term, a holiday — and only an activity names hours. Caught here as well
+      // as on the server so the person is told at the field rather than after
+      // pressing save.
+      startTime: z.string().optional(),
+      endTime: z.string().optional(),
+      academicYearId: z.string().optional(),
+    })
+    .refine((v) => !!v.startTime === !!v.endTime, {
+      message: 'Isi jam mulai dan jam selesai, atau kosongkan keduanya',
+      path: ['endTime'],
+    })
+    .refine((v) => !v.startTime || !v.endTime || v.endTime > v.startTime, {
+      message: 'Jam selesai harus setelah jam mulai',
+      path: ['endTime'],
+    }),
 )
 
 export function useCalendarDialogForm(props: {
@@ -41,6 +56,8 @@ export function useCalendarDialogForm(props: {
         typeId: '',
         startDate: '',
         endDate: '',
+        startTime: '',
+        endTime: '',
         academicYearId: '',
       },
     },
@@ -108,6 +125,9 @@ export function useCalendarDialogForm(props: {
             typeId: props.eventData.typeId,
             startDate: props.eventData.startDate.slice(0, 10),
             endDate: props.eventData.endDate.slice(0, 10),
+            // The server sends time-of-day; the input wants HH:mm.
+            startTime: props.eventData.startTime?.slice(11, 16) ?? '',
+            endTime: props.eventData.endTime?.slice(11, 16) ?? '',
             academicYearId: props.eventData.academicYearId ?? activeYearId,
           })
         } else {
@@ -144,6 +164,16 @@ export function useCalendarDialogForm(props: {
     if (vals.description) {
       payload.description = vals.description
     }
+
+    // Always sent, even when cleared: an edit that empties the hours has to
+    // reach the server as empty, or the activity keeps times the form no
+    // longer shows.
+    //
+    // `||` rather than `??`, and the lint config allows it on strings for this
+    // reason: a cleared input is `''`, not null, so `??` would keep it and post
+    // an empty string into a field validated as HH:mm.
+    payload.startTime = vals.startTime || undefined
+    payload.endTime = vals.endTime || undefined
 
     payload.academicYearId = vals.academicYearId ?? activeAcademicYear.value?.id
 

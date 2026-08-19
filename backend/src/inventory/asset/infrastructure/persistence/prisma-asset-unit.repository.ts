@@ -20,6 +20,26 @@ const UNIT_INCLUDE = {
   location: true,
 } satisfies Prisma.InventoryAssetUnitInclude;
 
+/**
+ * The list adds the asset the unit belongs to, narrowed to what a picker
+ * shows: its name, and its category's name.
+ *
+ * It is a `select` rather than `true` because the asset row carries
+ * acquisition values and book values that no picker needs, and the list is the
+ * one read that returns many of them.
+ */
+const UNIT_LIST_INCLUDE = {
+  ...UNIT_INCLUDE,
+  asset: {
+    select: {
+      id: true,
+      name: true,
+      assetNumber: true,
+      category: { select: { id: true, code: true, name: true } },
+    },
+  },
+} satisfies Prisma.InventoryAssetUnitInclude;
+
 @Injectable()
 export class PrismaAssetUnitRepository extends IAssetUnitRepository {
   constructor(private readonly prisma: PrismaService) {
@@ -33,14 +53,26 @@ export class PrismaAssetUnitRepository extends IAssetUnitRepository {
     const limit = Number(query.limit ?? 10);
     const skip = (page - 1) * limit;
 
+    const where: Prisma.InventoryAssetUnitWhereInput = {
+      deletedAt: null,
+      ...(query.lendable && { status: { allowTransactions: true } }),
+      ...(query.search && {
+        OR: [
+          { unitNumber: { contains: query.search, mode: 'insensitive' } },
+          { asset: { name: { contains: query.search, mode: 'insensitive' } } },
+        ],
+      }),
+    };
+
     const [data, total] = await Promise.all([
       this.prisma.inventoryAssetUnit.findMany({
-        where: { deletedAt: null },
+        where,
         skip,
         take: limit,
-        include: UNIT_INCLUDE,
+        include: UNIT_LIST_INCLUDE,
+        orderBy: [{ asset: { name: 'asc' } }, { unitNumber: 'asc' }],
       }),
-      this.prisma.inventoryAssetUnit.count({ where: { deletedAt: null } }),
+      this.prisma.inventoryAssetUnit.count({ where }),
     ]);
 
     return { data, total, page, limit };

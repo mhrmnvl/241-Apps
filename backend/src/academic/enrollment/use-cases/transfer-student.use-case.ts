@@ -9,12 +9,16 @@ import {
   IEnrollmentRepository,
 } from '../domain/interfaces/enrollment-repository.interface.js';
 import { TransferStudentDto } from '../dto/request/transfer-student.dto.js';
+import { ClassroomCapacityService } from '../services/classroom-capacity.service.js';
 
 @Injectable()
 export class TransferStudentUseCase {
   private readonly logger = new Logger(TransferStudentUseCase.name);
 
-  constructor(private readonly enrollmentRepository: IEnrollmentRepository) {}
+  constructor(
+    private readonly enrollmentRepository: IEnrollmentRepository,
+    private readonly classroomCapacity: ClassroomCapacityService,
+  ) {}
 
   async execute(enrollmentId: string, dto: TransferStudentDto) {
     const enrollment = await this.enrollmentRepository.findById(enrollmentId);
@@ -29,6 +33,14 @@ export class TransferStudentUseCase {
         `Cannot transfer: enrollment status is ${enrollment.status}`,
       );
     }
+
+    // Nobody arrives when the target is where they already are, so that case
+    // must not be refused by a classroom that is legitimately full of them.
+    await this.classroomCapacity.assertRoomFor({
+      classroomId: dto.targetClassroomId,
+      semesterId: enrollment.semesterId,
+      incoming: enrollment.classroomId === dto.targetClassroomId ? 0 : 1,
+    });
 
     const updated = await this.enrollmentRepository.update(enrollmentId, {
       classroomId: dto.targetClassroomId,

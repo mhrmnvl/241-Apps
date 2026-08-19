@@ -33,7 +33,7 @@ export const menuSections: MenuSection[] = [
   {
     key: 'asset-management',
     label: 'Manajemen Aset',
-    requiredPermission: 'inventory.read',
+    requiredPermission: 'inventory-assets.read',
     items: [
       {
         title: 'Daftar Aset',
@@ -50,7 +50,7 @@ export const menuSections: MenuSection[] = [
   {
     key: 'asset-circulation',
     label: 'Sirkulasi Aset',
-    requiredPermission: 'inventory.read',
+    requiredPermission: 'inventory-loans.read',
     items: [
       {
         key: 'asset-circulation-loan',
@@ -67,14 +67,27 @@ export const menuSections: MenuSection[] = [
   {
     key: 'approval',
     label: 'Persetujuan',
-    requiredPermission: 'inventory.update',
+    // Reading the queue, not processing it: the screen shows what is pending,
+    // and `inventory-approvals.update` is what the backend checks when the
+    // administrator actually signs.
+    requiredPermission: 'inventory-approvals.read',
     items: [
       {
         key: 'approval-list',
         title: 'Persetujuan',
         url: '#',
         icon: CheckSquare,
-        items: [{ title: 'Daftar Persetujuan', url: '/inventory/approvals' }],
+        items: [
+          { title: 'Daftar Persetujuan', url: '/inventory/approvals' },
+          // The page existed and was in no menu, reachable only by typing the
+          // URL — which is why nobody noticed there was no way to define a
+          // workflow, and therefore no approval step at all.
+          {
+            title: 'Alur Persetujuan',
+            url: '/inventory/workflows',
+            requiredPermission: 'inventory-approvals.create',
+          },
+        ],
       },
     ],
   },
@@ -83,7 +96,7 @@ export const menuSections: MenuSection[] = [
   {
     key: 'settings',
     label: 'Pengaturan',
-    requiredPermission: 'inventory.read',
+    requiredPermission: 'inventory-master-data.read',
     items: [
       {
         key: 'settings-reference',

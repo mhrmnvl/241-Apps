@@ -31,6 +31,7 @@ import { BulkUpsertAttendanceDto } from '../dto/request/bulk-upsert-attendance.d
 import { AttendanceRecapQueryDto } from '../dto/request/attendance-recap-query.dto.js';
 import { AttendanceTrendQueryDto } from '../dto/request/attendance-trend-query.dto.js';
 import { GetAttendancesUseCase } from '../use-cases/get-attendances.use-case.js';
+import { GetMyAttendancesUseCase } from '../use-cases/get-my-attendances.use-case.js';
 import { GetAttendanceByIdUseCase } from '../use-cases/get-attendance-by-id.use-case.js';
 import { CreateAttendanceUseCase } from '../use-cases/create-attendance.use-case.js';
 import { UpdateAttendanceUseCase } from '../use-cases/update-attendance.use-case.js';
@@ -51,6 +52,7 @@ import { AttendanceSuggestionQueryDto } from '../dto/request/attendance-suggesti
 export class AttendanceController {
   constructor(
     private readonly getAll: GetAttendancesUseCase,
+    private readonly getMine: GetMyAttendancesUseCase,
     private readonly getById: GetAttendanceByIdUseCase,
     private readonly createUC: CreateAttendanceUseCase,
     private readonly updateUC: UpdateAttendanceUseCase,
@@ -79,32 +81,49 @@ export class AttendanceController {
   @Get()
   @RequirePermissions('attendances.read')
   @ApiOperation({ summary: 'List attendances' })
-  async findAll(
-    @CurrentUser() user: AuthenticatedUser,
-    @Query() q: AttendanceQueryDto,
-  ) {
+  async findAll(@Query() q: AttendanceQueryDto) {
     return this.getAll.execute(q);
   }
 
+  /**
+   * Declared before `:id` so `me` is never parsed as a uuid.
+   */
+  @Get('me')
+  @RequirePermissions('attendances.read-own')
+  @ApiOperation({
+    summary: 'Your own attendance — no student parameter exists',
+  })
+  async findMine(
+    @CurrentUser() user: AuthenticatedUser,
+    @Query() q: AttendanceQueryDto,
+  ) {
+    return this.getMine.execute(q, user.id);
+  }
+
+  /**
+   * Stays on `attendances.read`, and must. A recap describes a cohort — how a
+   * class did — so answering one to a caller holding only `attendances.read-own`
+   * would hand them a summary of other people without disclosing a single row
+   * of theirs. A student's own figures come from their own rows, through
+   * `GET me` above.
+   *
+   * If this ever looks like an oversight, it is not: adding the `-own` code
+   * here reopens what this feature closed.
+   */
   @Get('recap')
   @RequirePermissions('attendances.read')
   @ApiOperation({ summary: 'Get attendance recap per student' })
-  async getRecap(
-    @CurrentUser() user: AuthenticatedUser,
-    @Query() q: AttendanceRecapQueryDto,
-  ) {
+  async getRecap(@Query() q: AttendanceRecapQueryDto) {
     return this.recapUC.execute(q);
   }
 
+  /** Cohort-shaped like `recap`, and management-only for the same reason. */
   @Get('recap/trend')
   @RequirePermissions('attendances.read')
   @ApiOperation({
     summary: 'Get monthly attendance percentage trend for a classroom',
   })
-  async getTrend(
-    @CurrentUser() user: AuthenticatedUser,
-    @Query() q: AttendanceTrendQueryDto,
-  ) {
+  async getTrend(@Query() q: AttendanceTrendQueryDto) {
     return this.trendUC.execute(q);
   }
 
@@ -112,30 +131,21 @@ export class AttendanceController {
   @RequirePermissions('attendances.read')
   @ApiOperation({ summary: 'Get attendance by ID' })
   @ApiParam({ name: 'id', format: 'uuid' })
-  async findOne(
-    @CurrentUser() user: AuthenticatedUser,
-    @Param('id', ParseUUIDPipe) id: string,
-  ) {
+  async findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.getById.execute(id);
   }
 
   @Post()
   @RequirePermissions('attendances.manage')
   @ApiOperation({ summary: 'Create attendance' })
-  async create(
-    @CurrentUser() user: AuthenticatedUser,
-    @Body() dto: CreateAttendanceDto,
-  ) {
+  async create(@Body() dto: CreateAttendanceDto) {
     return this.createUC.execute(dto);
   }
 
   @Post('bulk')
   @RequirePermissions('attendances.manage')
   @ApiOperation({ summary: 'Bulk upsert attendances for a date' })
-  async bulkUpsert(
-    @CurrentUser() user: AuthenticatedUser,
-    @Body() dto: BulkUpsertAttendanceDto,
-  ) {
+  async bulkUpsert(@Body() dto: BulkUpsertAttendanceDto) {
     return this.bulkUpsertUC.execute(dto);
   }
 
@@ -144,7 +154,6 @@ export class AttendanceController {
   @ApiOperation({ summary: 'Update attendance' })
   @ApiParam({ name: 'id', format: 'uuid' })
   async update(
-    @CurrentUser() user: AuthenticatedUser,
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateAttendanceDto,
   ) {
@@ -156,10 +165,7 @@ export class AttendanceController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete attendance' })
   @ApiParam({ name: 'id', format: 'uuid' })
-  async remove(
-    @CurrentUser() user: AuthenticatedUser,
-    @Param('id', ParseUUIDPipe) id: string,
-  ) {
+  async remove(@Param('id', ParseUUIDPipe) id: string) {
     await this.deleteUC.execute(id);
   }
 }

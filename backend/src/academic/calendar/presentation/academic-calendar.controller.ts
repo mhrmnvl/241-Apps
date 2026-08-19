@@ -22,8 +22,6 @@ import {
 } from '@nestjs/swagger';
 
 import { JwtAuthGuard } from '../../../platform/auth/index.js';
-import { CurrentUser } from '../../../core/decorators/current-user.decorator.js';
-import type { AuthenticatedUser } from '../../../core/types/authenticated-user.type.js';
 
 import { AcademicCalendarQueryDto } from '../dto/request/academic-calendar-query.dto.js';
 import { CreateAcademicCalendarDto } from '../dto/request/create-academic-calendar.dto.js';
@@ -53,10 +51,7 @@ export class AcademicCalendarController {
     summary: 'List academic calendar entries (paginated, filterable)',
   })
   @ApiResponse({ status: 200, description: 'Paginated academic calendar list' })
-  async findAll(
-    @CurrentUser() user: AuthenticatedUser,
-    @Query() query: AcademicCalendarQueryDto,
-  ) {
+  async findAll(@Query() query: AcademicCalendarQueryDto) {
     return this.getAcademicCalendarsService.execute(query);
   }
 
@@ -66,10 +61,7 @@ export class AcademicCalendarController {
   @ApiParam({ name: 'id', format: 'uuid' })
   @ApiResponse({ status: 200, description: 'Academic calendar entry' })
   @ApiResponse({ status: 404, description: 'Not found' })
-  async findOne(
-    @CurrentUser() user: AuthenticatedUser,
-    @Param('id', ParseUUIDPipe) id: string,
-  ) {
+  async findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.getAcademicCalendarByIdService.execute(id);
   }
 
@@ -81,10 +73,7 @@ export class AcademicCalendarController {
     status: 404,
     description: 'Academic year or semester not found',
   })
-  async create(
-    @CurrentUser() user: AuthenticatedUser,
-    @Body() dto: CreateAcademicCalendarDto,
-  ) {
+  async create(@Body() dto: CreateAcademicCalendarDto) {
     return this.createAcademicCalendarService.execute(dto);
   }
 
@@ -95,7 +84,6 @@ export class AcademicCalendarController {
   @ApiResponse({ status: 200, description: 'Updated' })
   @ApiResponse({ status: 404, description: 'Not found' })
   async update(
-    @CurrentUser() user: AuthenticatedUser,
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateAcademicCalendarDto,
   ) {
@@ -109,10 +97,7 @@ export class AcademicCalendarController {
   @ApiParam({ name: 'id', format: 'uuid' })
   @ApiResponse({ status: 204, description: 'Deleted' })
   @ApiResponse({ status: 404, description: 'Not found' })
-  async remove(
-    @CurrentUser() user: AuthenticatedUser,
-    @Param('id', ParseUUIDPipe) id: string,
-  ) {
+  async remove(@Param('id', ParseUUIDPipe) id: string) {
     await this.deleteAcademicCalendarService.execute(id);
   }
 }

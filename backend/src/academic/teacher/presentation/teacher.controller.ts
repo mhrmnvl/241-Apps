@@ -70,7 +70,6 @@ export class TeacherController {
   @ApiResponse({ status: 200, type: TeacherListResponseDto })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async findAll(
-    @CurrentUser() _user: AuthenticatedUser,
     @Query() query: TeacherQueryDto,
   ): Promise<PaginatedResponse<TeacherListWithDetails>> {
     return this.getTeachersUseCase.execute(query);
@@ -84,7 +83,6 @@ export class TeacherController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Teacher not found' })
   async findOne(
-    @CurrentUser() _user: AuthenticatedUser,
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<TeacherWithDetails> {
     return this.getTeacherByIdUseCase.execute(id);
@@ -101,10 +99,7 @@ export class TeacherController {
     status: 409,
     description: 'Duplicate identifier / NIK / NIP / NUPTK',
   })
-  async create(
-    @Body() dto: CreateTeacherDto,
-    @CurrentUser() _creator: AuthenticatedUser,
-  ): Promise<TeacherWithDetails> {
+  async create(@Body() dto: CreateTeacherDto): Promise<TeacherWithDetails> {
     return this.createTeacherUseCase.execute(dto);
   }
 
@@ -118,7 +113,6 @@ export class TeacherController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Teacher not found' })
   async update(
-    @CurrentUser() _user: AuthenticatedUser,
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateTeacherDto,
   ): Promise<TeacherWithDetails> {
@@ -133,10 +127,7 @@ export class TeacherController {
   @ApiResponse({ status: 204, description: 'Teacher deleted' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Teacher not found' })
-  async remove(
-    @CurrentUser() _user: AuthenticatedUser,
-    @Param('id', ParseUUIDPipe) id: string,
-  ): Promise<void> {
+  async remove(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
     await this.deleteTeacherUseCase.execute(id);
   }
 
@@ -149,7 +140,6 @@ export class TeacherController {
   @ApiResponse({ status: 404, description: 'Teacher not found' })
   @ApiResponse({ status: 409, description: 'Duplicate NIK' })
   async updateProfile(
-    @CurrentUser() _user: AuthenticatedUser,
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateProfileDto,
   ): Promise<ProfileEntity> {
@@ -165,7 +155,6 @@ export class TeacherController {
   @ApiResponse({ status: 200, description: 'Account status updated' })
   @ApiResponse({ status: 404, description: 'Teacher not found' })
   async toggleActive(
-    @CurrentUser() _user: AuthenticatedUser,
     @Param('id', ParseUUIDPipe) id: string,
     @Query('isActive', new ParseBoolPipe()) isActive: boolean,
   ): Promise<UserEntity> {

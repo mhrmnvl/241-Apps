@@ -15,7 +15,6 @@ import { GetStudentEnrollmentsUseCase } from '../use-cases/get-student-enrollmen
 import { TransferStudentUseCase } from '../use-cases/transfer-student.use-case.js';
 import { UpdateStudentEnrollmentUseCase } from '../use-cases/update-student-enrollment.use-case.js';
 import { EnrollmentController } from './enrollment.controller.js';
-import type { AuthenticatedUser } from '../../../core/types/authenticated-user.type.js';
 
 describe('EnrollmentController', () => {
   let controller: EnrollmentController;
@@ -29,13 +28,6 @@ describe('EnrollmentController', () => {
   const mockTransfer = { execute: jest.fn() };
   const mockBulkTransfer = { execute: jest.fn() };
   const mockDrop = { execute: jest.fn() };
-
-  const mockUser: AuthenticatedUser = {
-    id: 'usr-1',
-    sub: 'usr-1',
-    identifier: 'admin',
-    sessionId: 'sess-1',
-  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -68,7 +60,7 @@ describe('EnrollmentController', () => {
     it('should delegate to GetStudentEnrollmentsUseCase', async () => {
       const query: StudentEnrollmentQueryDto = { page: 1, limit: 10 };
       mockGetAll.execute.mockResolvedValue({ data: [] });
-      const result = await controller.findAll(mockUser, query);
+      const result = await controller.findAll(query);
       expect(mockGetAll.execute).toHaveBeenCalledWith(query);
       expect(result).toEqual({ data: [] });
     });
@@ -77,7 +69,7 @@ describe('EnrollmentController', () => {
   describe('findOne', () => {
     it('should delegate to GetStudentEnrollmentByIdUseCase', async () => {
       mockGetById.execute.mockResolvedValue({ id: 'se-1' });
-      const result = await controller.findOne(mockUser, 'se-1');
+      const result = await controller.findOne('se-1');
       expect(mockGetById.execute).toHaveBeenCalledWith('se-1');
       expect(result).toEqual({ id: 'se-1' });
     });
@@ -91,7 +83,7 @@ describe('EnrollmentController', () => {
         semesterId: 'sem-1',
       };
       mockCreate.execute.mockResolvedValue({ id: 'new' });
-      await controller.create(mockUser, dto);
+      await controller.create(dto);
       expect(mockCreate.execute).toHaveBeenCalledWith(dto);
     });
   });
@@ -108,7 +100,7 @@ describe('EnrollmentController', () => {
         ],
       };
       mockBulkCreate.execute.mockResolvedValue({ created: 1 });
-      await controller.bulkCreate(mockUser, dto);
+      await controller.bulkCreate(dto);
       expect(mockBulkCreate.execute).toHaveBeenCalledWith(dto);
     });
   });
@@ -117,7 +109,7 @@ describe('EnrollmentController', () => {
     it('should delegate to UpdateStudentEnrollmentUseCase', async () => {
       const dto: UpdateStudentEnrollmentDto = { classroomId: 'cls-2' };
       mockUpdate.execute.mockResolvedValue({ id: 'se-1' });
-      await controller.update(mockUser, 'se-1', dto);
+      await controller.update('se-1', dto);
       expect(mockUpdate.execute).toHaveBeenCalledWith('se-1', dto);
     });
   });
@@ -126,7 +118,7 @@ describe('EnrollmentController', () => {
     it('should delegate to TransferStudentUseCase', async () => {
       const dto: TransferStudentDto = { targetClassroomId: 'cls-new' };
       mockTransfer.execute.mockResolvedValue({ id: 'se-1' });
-      await controller.transfer(mockUser, 'se-1', dto);
+      await controller.transfer('se-1', dto);
       expect(mockTransfer.execute).toHaveBeenCalledWith('se-1', dto);
     });
   });
@@ -135,7 +127,7 @@ describe('EnrollmentController', () => {
     it('should delegate to DropStudentUseCase', async () => {
       const dto: DropStudentDto = { note: 'Dropped out' };
       mockDrop.execute.mockResolvedValue({ id: 'se-1' });
-      await controller.drop(mockUser, 'se-1', dto);
+      await controller.drop('se-1', dto);
       expect(mockDrop.execute).toHaveBeenCalledWith('se-1', dto);
     });
   });
@@ -143,7 +135,7 @@ describe('EnrollmentController', () => {
   describe('remove', () => {
     it('should delegate to DeleteStudentEnrollmentUseCase', async () => {
       mockDelete.execute.mockResolvedValue(undefined);
-      await controller.remove(mockUser, 'se-1');
+      await controller.remove('se-1');
       expect(mockDelete.execute).toHaveBeenCalledWith('se-1');
     });
   });

@@ -93,7 +93,7 @@ describe('Semester Controllers', () => {
       const query = { page: 1, limit: 10 };
       mockGetSemesters.execute.mockResolvedValue({ data: [] });
 
-      await controller.findAll(mockUser, query);
+      await controller.findAll(query);
 
       expect(mockGetSemesters.execute).toHaveBeenCalledWith(query);
     });
@@ -103,7 +103,7 @@ describe('Semester Controllers', () => {
     it('should delegate to GetSemesterByIdUseCase', async () => {
       mockGetSemesterById.execute.mockResolvedValue({ id: 'sem-1' });
 
-      const result = await controller.findOne(mockUser, 'sem-1');
+      const result = await controller.findOne('sem-1');
 
       expect(mockGetSemesterById.execute).toHaveBeenCalledWith('sem-1');
       expect(result).toEqual({ id: 'sem-1' });
@@ -118,7 +118,7 @@ describe('Semester Controllers', () => {
       };
       mockCreateSemester.execute.mockResolvedValue({ id: 'new' });
 
-      await controller.create(mockUser, dto);
+      await controller.create(dto);
 
       expect(mockCreateSemester.execute).toHaveBeenCalledWith(dto);
     });
@@ -128,7 +128,7 @@ describe('Semester Controllers', () => {
     it('should delegate to UpdateSemesterUseCase', async () => {
       mockUpdateSemester.execute.mockResolvedValue({ id: 'sem-1' });
 
-      await controller.update(mockUser, 'sem-1', {
+      await controller.update('sem-1', {
         startDate: '2026-01-01',
       });
 
@@ -145,7 +145,7 @@ describe('Semester Controllers', () => {
         classrooms: { created: 5, skipped: 0 },
       });
 
-      await rolloverController.rollover(mockUser, dto);
+      await rolloverController.rollover(dto);
 
       expect(mockRolloverSemester.execute).toHaveBeenCalledWith(dto);
     });
@@ -172,7 +172,7 @@ describe('Semester Controllers', () => {
         skipped: 0,
       });
 
-      await promotionController.promote(mockUser, dto);
+      await promotionController.promote(dto);
 
       expect(mockPromoteStudents.execute).toHaveBeenCalledWith(dto);
     });
@@ -199,7 +199,7 @@ describe('Semester Controllers', () => {
         repeatedCount: 0,
       });
 
-      await promotionController.previewPromotion(mockUser, dto);
+      await promotionController.previewPromotion(dto);
 
       expect(mockPreviewPromotion.execute).toHaveBeenCalledWith(dto);
     });
@@ -216,7 +216,7 @@ describe('Semester Controllers', () => {
         totalStudents: 0,
       });
 
-      await promotionController.recommend(mockUser, dto);
+      await promotionController.recommend(dto);
 
       expect(mockGenerateRecommendation.execute).toHaveBeenCalledWith(dto);
     });
@@ -226,7 +226,7 @@ describe('Semester Controllers', () => {
     it('should delegate to DeleteSemesterUseCase', async () => {
       mockDeleteSemester.execute.mockResolvedValue(undefined);
 
-      await controller.remove(mockUser, 'sem-1');
+      await controller.remove('sem-1');
 
       expect(mockDeleteSemester.execute).toHaveBeenCalledWith('sem-1');
     });
@@ -237,7 +237,7 @@ describe('Semester Controllers', () => {
       const expected = { id: 'sem-1', isActive: true };
       mockActivateSemester.execute.mockResolvedValue(expected);
 
-      const result = await controller.activate(mockUser, 'sem-1');
+      const result = await controller.activate('sem-1');
 
       expect(mockActivateSemester.execute).toHaveBeenCalledWith('sem-1');
       expect(result).toEqual(expected);
@@ -249,7 +249,7 @@ describe('Semester Controllers', () => {
       const expected = { id: 'sem-1', isActive: false };
       mockDeactivateSemester.execute.mockResolvedValue(expected);
 
-      const result = await controller.deactivate(mockUser, 'sem-1');
+      const result = await controller.deactivate('sem-1');
 
       expect(mockDeactivateSemester.execute).toHaveBeenCalledWith('sem-1');
       expect(result).toEqual(expected);

@@ -7,6 +7,8 @@ import {
   Prisma,
 } from '@prisma/client';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
+import { InventoryReferenceDataMissingException } from '../../../shared/domain/exceptions/inventory-reference-data-missing.exception.js';
+import { moveUnitsAndRecord } from '../../../shared/infrastructure/inventory-unit-movement.steps.js';
 import {
   CreateApprovalLogInput,
   CreateApprovalWorkflowInput,
@@ -46,23 +48,48 @@ export class PrismaApprovalRepository extends IApprovalRepository {
     });
   }
 
+  /**
+   * Creates the workflow and leaves it the only active one for its target.
+   *
+   * A new loan picks its workflow with `findFirst({ targetEntity, isActive })`,
+   * so two active workflows for the same target means whichever the database
+   * happens to return — the school would change who signs, see it apply to some
+   * loans and not others, and have nothing to look at that explains it.
+   *
+   * Superseding rather than editing is deliberate. An approval already in
+   * flight holds its own `workflowId` and keeps the steps it started with, so
+   * changing the rules today cannot rewrite who was supposed to sign a request
+   * made last week.
+   */
   async createWorkflow(
     input: CreateApprovalWorkflowInput,
   ): Promise<ApprovalWorkflow> {
     const { steps, ...scalars } = input;
 
-    const data: Prisma.ApprovalWorkflowCreateInput = {
-      ...scalars,
-      steps: {
-        create: steps.map((step) => ({
-          stepSequence: step.stepSequence,
-          approverRoleId: step.approverRoleId,
-          isMandatory: step.isMandatory ?? true,
-        })),
-      },
-    };
+    return this.prisma.$transaction(async (tx) => {
+      if (scalars.isActive !== false) {
+        await tx.approvalWorkflow.updateMany({
+          where: { targetEntity: scalars.targetEntity, isActive: true },
+          data: { isActive: false },
+        });
+      }
 
-    return this.prisma.approvalWorkflow.create({ data });
+      const data: Prisma.ApprovalWorkflowCreateInput = {
+        ...scalars,
+        steps: {
+          create: steps.map((step) => ({
+            stepSequence: step.stepSequence,
+            approverRoleCode: step.approverRoleCode,
+            isMandatory: step.isMandatory ?? true,
+          })),
+        },
+      };
+
+      return tx.approvalWorkflow.create({
+        data,
+        include: { steps: { orderBy: { stepSequence: 'asc' } } },
+      });
+    });
   }
 
   async findInstanceById(
@@ -128,7 +155,7 @@ export class PrismaApprovalRepository extends IApprovalRepository {
       const activeStep = inst.workflow.steps.find(
         (s) => s.stepSequence === inst.currentStepSequence,
       );
-      return activeStep && roleCodes.includes(activeStep.approverRoleId);
+      return activeStep && roleCodes.includes(activeStep.approverRoleCode);
     });
   }
 
@@ -174,10 +201,16 @@ export class PrismaApprovalRepository extends IApprovalRepository {
         const availStatus = await tx.inventoryStatus.findUnique({
           where: { systemKey: 'AVAILABLE' },
         });
-        if (!rejectedStatus || !availStatus) {
-          throw new Error(
-            'The LOAN_REJECTED/AVAILABLE status roles are not configured under Reference > Asset Status',
-          );
+        const cancelType = await tx.inventoryTransactionType.findUnique({
+          where: { code: 'TX-LOAN-CANCEL' },
+        });
+
+        const missing: string[] = [];
+        if (!rejectedStatus) missing.push('status role LOAN_REJECTED');
+        if (!availStatus) missing.push('status role AVAILABLE');
+        if (!cancelType) missing.push('transaction type TX-LOAN-CANCEL');
+        if (!rejectedStatus || !availStatus || !cancelType) {
+          throw new InventoryReferenceDataMissingException(missing);
         }
 
         await tx.approvalInstance.update({
@@ -193,26 +226,16 @@ export class PrismaApprovalRepository extends IApprovalRepository {
         const loanItems = await tx.inventoryLoanItem.findMany({
           where: { loanId: params.referenceId },
         });
-        const unitIds = loanItems.map((item) => item.unitId);
-        await tx.inventoryAssetUnit.updateMany({
-          where: { id: { in: unitIds } },
-          data: { statusId: availStatus.id },
+        await moveUnitsAndRecord(tx, {
+          units: loanItems.map((item) => ({
+            unitId: item.unitId,
+            previousStatusId: params.pendingStatusId,
+          })),
+          newStatusId: availStatus.id,
+          transactionTypeId: cancelType.id,
+          note: `Peminjaman ditolak (${params.note ?? 'Tanpa catatan'})`,
+          changedById: params.userId,
         });
-
-        const txType = await tx.inventoryTransactionType.findFirst();
-
-        for (const unitId of unitIds) {
-          await tx.inventoryHistory.create({
-            data: {
-              unitId,
-              transactionTypeId: txType?.id ?? '',
-              previousStatusId: params.pendingStatusId,
-              newStatusId: availStatus.id,
-              note: `Peminjaman ditolak (${params.note ?? 'Tanpa catatan'})`,
-              changedById: params.userId,
-            },
-          });
-        }
 
         return { success: true, action: 'REJECT', log };
       } else {
@@ -239,10 +262,12 @@ export class PrismaApprovalRepository extends IApprovalRepository {
             where: { code: 'TX-LOAN-OUT' },
           });
 
+          const missing: string[] = [];
+          if (!approvedStatus) missing.push('status role LOAN_APPROVED');
+          if (!loanedStatus) missing.push('status role LOANED');
+          if (!txType) missing.push('transaction type TX-LOAN-OUT');
           if (!approvedStatus || !loanedStatus || !txType) {
-            throw new Error(
-              'The LOAN_APPROVED/ON_LOAN status roles are not configured, or the TX-LOAN-OUT transaction type is missing',
-            );
+            throw new InventoryReferenceDataMissingException(missing);
           }
 
           await tx.approvalInstance.update({
@@ -258,24 +283,16 @@ export class PrismaApprovalRepository extends IApprovalRepository {
           const loanItems = await tx.inventoryLoanItem.findMany({
             where: { loanId: params.referenceId },
           });
-          const unitIds = loanItems.map((item) => item.unitId);
-          await tx.inventoryAssetUnit.updateMany({
-            where: { id: { in: unitIds } },
-            data: { statusId: loanedStatus.id },
+          await moveUnitsAndRecord(tx, {
+            units: loanItems.map((item) => ({
+              unitId: item.unitId,
+              previousStatusId: params.pendingStatusId,
+            })),
+            newStatusId: loanedStatus.id,
+            transactionTypeId: txType.id,
+            note: `Peminjaman disetujui penuh oleh Kepala Sekolah (No. Peminjaman: ${loan.loanNumber})`,
+            changedById: params.userId,
           });
-
-          for (const unitId of unitIds) {
-            await tx.inventoryHistory.create({
-              data: {
-                unitId,
-                transactionTypeId: txType.id,
-                previousStatusId: params.pendingStatusId,
-                newStatusId: loanedStatus.id,
-                note: `Peminjaman disetujui penuh oleh Kepala Sekolah (No. Peminjaman: ${loan.loanNumber})`,
-                changedById: params.userId,
-              },
-            });
-          }
 
           return { success: true, action: 'APPROVE_FINAL', log };
         }

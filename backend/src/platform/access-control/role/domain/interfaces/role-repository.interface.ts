@@ -38,6 +38,21 @@ export abstract class IRoleRepository {
     data: UpdateRoleRepositoryInput,
   ): Promise<RoleWithPermissions>;
   abstract delete(id: string): Promise<RoleEntity>;
+  /**
+   * Creates a role the code depends on, protected and with no permissions.
+   *
+   * Separate from `create` because the two answer different questions. `create`
+   * serves the role screen, where a person is inventing a role and choosing its
+   * permissions; this serves the application ensuring its own prerequisites,
+   * where granting anything would be seeding by another name.
+   */
+  abstract createStructural(input: {
+    code: string;
+    name: string;
+    description: string;
+  }): Promise<RoleEntity>;
+  /** Raises `isSystem` on a role that should never have been deletable. */
+  abstract markSystem(id: string): Promise<RoleEntity>;
   abstract assignRoleToUser(
     userId: string,
     roleId: string,

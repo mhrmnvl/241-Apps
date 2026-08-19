@@ -46,14 +46,52 @@ model AcademicCalendar {
   typeId         String    @map("type_id") @db.Uuid
   startDate      DateTime  @map("start_date") @db.Date
   endDate        DateTime  @map("end_date") @db.Date
+  /// The clock hours the entry runs, when it has any.
+  ///
+  /// Days are the calendar's unit — a term is July to December, a holiday is
+  /// the 17th — and most entries have no time at all. An activity does: a
+  /// parents' meeting is the 8th, 08:00 to 12:00. So the hours are optional,
+  /// and stored as time-of-day rather than folded into the dates: on a
+  /// multi-day activity they read as "these hours, each day", which is how a
+  /// school describes it.
+  ///
+  /// Both or neither. A start with no end is half a statement, and the use case
+  /// refuses it rather than printing "08:00 – " on a screen.
+  startTime      DateTime? @map("start_time") @db.Time(0)
+  endTime        DateTime? @map("end_time") @db.Time(0)
   description    String?   @db.Text
   deletedAt      DateTime? @map("deleted_at")
 
   academicYear AcademicYear         @relation(fields: [academicYearId], references: [id])
   semester     Semester?            @relation(fields: [semesterId], references: [id])
   type         AcademicCalendarType @relation(fields: [typeId], references: [id])
+  classrooms   AcademicCalendarClassroom[]
 
   @@map("academic_calendars")
+}
+
+/// Which classes an entry is for. No rows means the whole school.
+///
+/// The school keeps one calendar, and entries nest in time: a term is one wide
+/// entry, and inside it sit the things that happen — some for everyone, some
+/// for one class. Absence is the school-wide case on purpose, because that is
+/// the common one and it should not need to be spelled out for every holiday.
+///
+/// This replaces `EventClassroom`, which belonged to a second calendar entity
+/// with its own screen, its own permissions and no idea what an academic year
+/// was. Two calendars answering the same question is one more than a school can
+/// keep straight.
+model AcademicCalendarClassroom {
+  id                 String @id @default(uuid()) @db.Uuid
+  academicCalendarId String @map("academic_calendar_id") @db.Uuid
+  classroomId        String @map("classroom_id") @db.Uuid
+
+  academicCalendar AcademicCalendar @relation(fields: [academicCalendarId], references: [id], onDelete: Cascade)
+  classroom        Classroom        @relation(fields: [classroomId], references: [id])
+
+  @@unique([academicCalendarId, classroomId])
+  @@index([classroomId])
+  @@map("academic_calendar_classrooms")
 }
 
 model Curricula {

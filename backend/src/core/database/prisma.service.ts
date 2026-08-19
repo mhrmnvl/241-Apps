@@ -9,6 +9,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '@prisma/client';
+import { pgSslOptions } from './pg-ssl.js';
 
 const ADDRESS_OWNER_FIELDS = [
   'studentId',
@@ -42,9 +43,7 @@ export class PrismaService
       configService.get<string>('DIRECT_URL');
     const adapter = new PrismaPg({
       connectionString,
-      ssl: {
-        rejectUnauthorized: false,
-      },
+      ...pgSslOptions(connectionString),
     });
     super({ adapter });
 

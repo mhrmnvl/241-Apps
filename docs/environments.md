@@ -4,7 +4,7 @@ Three tiers: local, dev, production.
 
 | | Local | Development | Production |
 |---|---|---|---|
-| Where | Your machine | The existing VPS | **Not built yet** |
+| Where | Your machine | VPS, `/var/www/241-Apps-dev` | VPS, `/var/www/241-Apps` |
 | Branch | any | `dev` | `main` |
 | Workflow | — | `deploy-dev.yml` | `deploy.yml` |
 | GitHub environment | — | `development` | `production` |
@@ -28,6 +28,16 @@ queries the API for that run rather than taking the pull request's word for it.
 `.husky/pre-push` refuses a direct push. Neither can *block* a merge without
 branch protection, so they make a violation loud rather than impossible.
 
+A new permission needs no step after the deploy. The catalogue is defined in
+code and synced into the database on application bootstrap, so a code added in
+this release is grantable through the role screen as soon as the box restarts.
+`POST /permissions/sync` still exists for forcing it without one.
+
+This matters most where it is least visible: production is populated through the
+UI and never runs a seed, so a permission that exists in code but not in the
+database cannot be granted at all — it simply does not appear on the role
+screen, with nothing to explain why.
+
 ---
 
 ## What actually separates them
@@ -43,16 +53,30 @@ environments** — it is one database with two deployers racing to migrate it.
 
 ---
 
-## Production cannot deploy by accident
+## Production deploys for real now
 
 The production workflow reads `PROD_HOST` / `PROD_USERNAME` / `PROD_SSH_KEY`,
 not the bare `HOST` / `USERNAME` / `SSH_KEY` it used to. Those older secrets
-still point at the box that is becoming dev, and a production job able to read
-them would deploy production onto dev the moment anything merged to `main`.
+point at the dev box, and a production job able to read them would deploy
+production onto dev the moment anything merged to `main`.
 
-While `PROD_HOST` is unset the job **skips with a notice and goes green**, rather
-than failing. A red cross on every merge is noise, and noise on every merge is
-how a real failure gets scrolled past.
+`deploy.yml` still skips when `PROD_HOST` is unset — a red cross on every merge
+is noise, and noise on every merge is how a real failure gets scrolled past.
+**That skip no longer applies.** The `production` environment has held
+`PROD_HOST`, `PROD_USERNAME`, `PROD_SSH_KEY`, `PROD_PORT` and `PROD_APP_PATH`
+since 2026-08-13, so a merge to `main` deploys.
+
+Two things follow, and both are easy to get wrong while reading an older
+version of this page:
+
+- **A merge to `main` is a deployment to the school, not a rehearsal.** This
+  document used to say production was not built yet. It was accurate when
+  written and stopped being so the day the secrets were added; if you are
+  planning a promotion on the strength of that sentence, stop.
+- **The old repository-wide `HOST` / `USERNAME` / `SSH_KEY` / `PORT` still
+  exist.** Nothing reads them; item 7 below is the outstanding cleanup.
+  Credentials for the dev box, under names that read like production, are
+  exactly the shape of the accident this section is about.
 
 ---
 
@@ -62,97 +86,64 @@ how a real failure gets scrolled past.
 
 ## Turning the existing VPS into the dev box
 
-Do these in order. Step 1 is the one that matters.
+**Done.** The runbook that lived here — repoint the database, switch the
+checkout to `dev`, rename the pm2 process, point the frontends at this box's
+API, move the secrets, run the workflow — was carried out, and the result is
+the two-checkout layout described above.
 
-### 1. Point it at a database that is not production's
+It is removed rather than archived, for the reason this file exists to serve:
+a completed runbook that still reads as instructions is a page telling you to
+do work that is already done. `git log -- docs/environments.md` has it if a
+second box is ever built.
 
-The box currently has `DATABASE_URL` for `apps241` at `localhost:5432`, and
-those credentials are rejected — `P1000`, every deploy since 12 August. Decide
-what this box's database is *supposed* to be, and set it:
-
-```bash
-cd /var/www/241-Apps/backend
-nano .env      # DATABASE_URL → the dev database
-```
-
-Whatever you choose, it must not be the database production will use. If the
-Neon instance is the real data, give dev its own Neon **branch** rather than the
-same connection string.
-
-### 2. Switch the checkout to `dev`
-
-```bash
-cd /var/www/241-Apps
-git fetch --all --prune
-git checkout dev
-git reset --hard origin/dev
-```
-
-The workflow resets to `origin/dev` on every run, so this is only needed once —
-but do it before the first dev deploy, so the tree and the branch agree.
-
-### 3. Rename the pm2 process
-
-The dev workflow manages `backend-241-dev`. The box is currently running
-`backend-241`. Leaving both would put two processes on one port:
-
-```bash
-pm2 delete backend-241     # the dev deploy starts backend-241-dev itself
-pm2 save
-```
-
-### 4. Point the frontends at this box's API
-
-```bash
-cd /var/www/241-Apps
-for app in academic inventory admission portal presence; do
-  nano apps/$app/.env       # VITE_API_BASE_URL → this box's API
-done
-```
-
-This matters more than it looks. The refresh cookie is `sameSite: 'strict'`
-(ADR-0010), so a frontend must share a registrable domain with its API or it
+One point from it is load-bearing enough to keep here rather than in history.
+**A frontend must share a registrable domain with its API.** The refresh
+cookie is `sameSite: 'strict'` (ADR-0010), so a frontend on a foreign domain
 gets no cookie and therefore **no login at all** — and that cannot reproduce
-locally, where everything is `localhost`.
-
-### 5. Move the secrets
-
-Settings → Environments → **development** → add `DEV_HOST`, `DEV_USERNAME`,
-`DEV_SSH_KEY` with the values the old `HOST` / `USERNAME` / `SSH_KEY` hold.
-Add `DEV_PORT` / `DEV_APP_PATH` only if they differ from `22` and
-`/var/www/241-Apps`.
-
-Then **delete the old repository-wide `HOST` / `USERNAME` / `SSH_KEY`**. Nothing
-reads them any more, and leaving credentials for a box under a name that sounds
-like production is how the wrong thing gets deployed later.
-
-### 6. Run it
-
-Actions → *Deploy to Development* → *Run workflow*. It checks its secrets before
-connecting, so a missing one is reported by name rather than as a connection
-error.
+locally, where everything is `localhost` and the port is not part of the site.
 
 ---
 
-## Building production later
+## Production: what is done, and what is not
 
-1. New box, or a second checkout with its own `backend/.env`, pm2 process and
-   Nginx site.
-2. Its own database — a separate Neon project, not a branch of dev's.
-3. `apps/*/.env` pointing at the production API, sharing its registrable domain.
-4. Settings → Environments → **production** → `PROD_HOST`, `PROD_USERNAME`,
-   `PROD_SSH_KEY`. The skip in `deploy.yml` turns itself off once `PROD_HOST`
-   exists.
-5. Add required reviewers on the `production` environment, so a merge to `main`
+Production was built as a **second checkout on the same VPS** rather than a
+second box — `/var/www/241-Apps`, pm2 `backend-241`, port 3000, its own Nginx
+site and its own `backend/.env`. Dev is `/var/www/241-Apps-dev`, `backend-241-dev`,
+port 3001. Their `DATABASE_URL`s differ, which is the separation that actually
+matters.
+
+Done:
+
+1. ~~New box, or a second checkout with its own `backend/.env`, pm2 process and
+   Nginx site.~~ Second checkout, as above.
+2. ~~Its own database.~~ The two connection strings are not the same.
+3. ~~`apps/*/.env` pointing at the production API, sharing its registrable
+   domain.~~
+4. ~~Settings → Environments → **production** → `PROD_HOST`, `PROD_USERNAME`,
+   `PROD_SSH_KEY`.~~ Added 2026-08-13, alongside `PROD_PORT` and
+   `PROD_APP_PATH`.
+
+Still open:
+
+5. **Required reviewers on the `production` environment**, so a merge to `main`
    waits for a person.
-6. Protect `main`: require a pull request and the CI checks. `dev` stays open.
+6. **Protect `main`: require a pull request and the CI checks.** `dev` stays
+   open.
 
-   **Not currently possible.** Both branch protection and rulesets return
-   `403 — Upgrade to GitHub Pro or make this repository public` on a private
-   repository under a free account, and so do environment reviewers. Until the
-   plan changes, `.husky/pre-push` refuses a direct push to `main` — which is a
-   guard on one machine, bypassable with `--no-verify`, and no substitute for
-   the server-side rule. It catches the slip, not the intent.
+   Both of these used to return `403 — Upgrade to GitHub Pro or make this
+   repository public`. **Making the repository public removes that wall** —
+   branch protection, rulesets and environment reviewers are all free on a
+   public repository, which is the larger half of why going public was worth
+   doing. The Actions quota was the smaller half.
+
+   So this is now a task rather than a limitation, and it is the one that
+   matters most here. Everything guarding `main` today is advisory:
+   `Promotion Guard` reports rather than blocks, and `.husky/pre-push` is a
+   guard on one machine that `--no-verify` walks past. Both catch the slip,
+   neither catches the intent. A required check does.
+
+7. **Delete the repository-wide `HOST` / `USERNAME` / `SSH_KEY` / `PORT`.**
+   They still exist. Nothing reads them.
 
 ---
 

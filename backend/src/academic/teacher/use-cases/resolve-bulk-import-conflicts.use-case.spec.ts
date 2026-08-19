@@ -27,6 +27,10 @@ describe('ResolveBulkImportConflictsUseCase (teacher)', () => {
 
   const mockRepo = {
     resolveEmploymentTypeId: jest.fn().mockResolvedValue('employment-type-id'),
+    findByNip: jest.fn(),
+    findByNuptk: jest.fn(),
+    findProfileByNik: jest.fn(),
+    findByUserId: jest.fn(),
   };
 
   const mockUpdateTeacher = {
@@ -76,7 +80,13 @@ describe('ResolveBulkImportConflictsUseCase (teacher)', () => {
 
       const result = await useCase.execute(dto);
 
-      expect(result).toEqual({ total: 1, updated: 0, skipped: 1, errors: [] });
+      expect(result).toEqual({
+        total: 1,
+        updated: 0,
+        skipped: 1,
+        failed: 0,
+        errors: [],
+      });
       expect(mockUpdateTeacher.execute).not.toHaveBeenCalled();
       expect(mockCreateTeacher.execute).not.toHaveBeenCalled();
     });
@@ -93,7 +103,13 @@ describe('ResolveBulkImportConflictsUseCase (teacher)', () => {
       expect(mockCreateTeacher.execute).toHaveBeenCalledWith(
         expect.objectContaining({ employmentTypeId: 'employment-type-id' }),
       );
-      expect(result).toEqual({ total: 1, updated: 1, skipped: 0, errors: [] });
+      expect(result).toEqual({
+        total: 1,
+        updated: 1,
+        skipped: 0,
+        failed: 0,
+        errors: [],
+      });
     });
 
     it('updates an existing teacher', async () => {
@@ -117,7 +133,13 @@ describe('ResolveBulkImportConflictsUseCase (teacher)', () => {
         'gru-1',
         expect.objectContaining({ name: 'Budi Santoso' }),
       );
-      expect(result).toEqual({ total: 1, updated: 1, skipped: 0, errors: [] });
+      expect(result).toEqual({
+        total: 1,
+        updated: 1,
+        skipped: 0,
+        failed: 0,
+        errors: [],
+      });
     });
 
     it('records the error and continues when update fails, instead of swallowing it', async () => {
@@ -138,7 +160,8 @@ describe('ResolveBulkImportConflictsUseCase (teacher)', () => {
       const result = await useCase.execute(dto);
 
       expect(result.updated).toBe(0);
-      expect(result.skipped).toBe(1);
+      expect(result.failed).toBe(1);
+      expect(result.skipped).toBe(0);
       expect(result.errors).toEqual([
         { existingId: 'gru-1', error: 'Unexpected failure' },
       ]);

@@ -32,8 +32,6 @@ import type {
   UpdateRolePayload,
 } from '../types'
 
-const SYSTEM_ROLES = ['SUPER_ADMIN', 'ADMIN', 'TEACHER', 'STUDENT']
-
 const props = defineProps<{
   editData?: Role | null
   isSaving: boolean
@@ -48,12 +46,10 @@ const emit = defineEmits<{
 }>()
 
 const isEditing = computed(() => !!props.editData)
-const isSystemRole = computed(() => {
-  if (!props.editData) return false
-  return props.editData.isSystem
-    ? true
-    : SYSTEM_ROLES.includes(props.editData.code)
-})
+// The server's own flag, not a list of codes kept here. A second opinion in
+// the browser is how the table came to hide a delete button for a role the
+// endpoint would happily have deleted.
+const isSystemRole = computed(() => props.editData?.isSystem ?? false)
 
 const permissionIds = ref<string[]>([])
 

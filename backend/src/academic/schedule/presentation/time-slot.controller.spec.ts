@@ -80,7 +80,7 @@ describe('TimeSlotController', () => {
       ];
       mockGetTimeSlotsService.execute.mockResolvedValue(expected);
 
-      const result = await controller.findAll(user);
+      const result = await controller.findAll();
 
       expect(mockGetTimeSlotsService.execute).toHaveBeenCalledWith();
       expect(result).toEqual(expected);
@@ -105,7 +105,7 @@ describe('TimeSlotController', () => {
       const expected = { id: 'ts-1', name: 'Jam ke-1' };
       mockGetTimeSlotByIdService.execute.mockResolvedValue(expected);
 
-      const result = await controller.findOne(id, user);
+      const result = await controller.findOne(id);
 
       expect(mockGetTimeSlotByIdService.execute).toHaveBeenCalledWith(id);
       expect(result).toEqual(expected);
@@ -124,7 +124,7 @@ describe('TimeSlotController', () => {
       const expected = { id: 'ts-new', ...dto };
       mockCreateTimeSlotService.execute.mockResolvedValue(expected);
 
-      const result = await controller.create(dto, user);
+      const result = await controller.create(dto);
 
       expect(mockCreateTimeSlotService.execute).toHaveBeenCalledWith(dto);
       expect(result).toEqual(expected);
@@ -138,7 +138,7 @@ describe('TimeSlotController', () => {
       const expected = { id: 'ts-1', startTime: '2024-01-01T07:15:00Z' };
       mockUpdateTimeSlotService.execute.mockResolvedValue(expected);
 
-      const result = await controller.update(id, dto, user);
+      const result = await controller.update(id, dto);
 
       expect(mockUpdateTimeSlotService.execute).toHaveBeenCalledWith(id, dto);
       expect(result).toEqual(expected);
@@ -150,7 +150,7 @@ describe('TimeSlotController', () => {
       const id = 'ts-1';
       mockDeleteTimeSlotService.execute.mockResolvedValue(undefined);
 
-      await controller.remove(id, user);
+      await controller.remove(id);
 
       expect(mockDeleteTimeSlotService.execute).toHaveBeenCalledWith(id);
     });

@@ -21,6 +21,8 @@ interface PaginatedPayload<T> {
   total: number;
   page: number;
   limit: number;
+  /** Optional figures about the whole filtered set — see `PaginatedResult`. */
+  summary?: unknown;
 }
 
 function isPaginatedPayload(body: unknown): body is PaginatedPayload<unknown> {
@@ -57,12 +59,17 @@ export class ResponseInterceptor<T> implements NestInterceptor<
 
         // Paginated repo shape: { data[], total, page, limit } → { data, meta }
         if (isPaginatedPayload(body)) {
-          const { data, total, page, limit } = body;
+          const { data, total, page, limit, summary } = body;
           return {
             statusCode,
             message: 'Success',
             data: data as T,
-            meta: { total, page, limit },
+            meta: {
+              total,
+              page,
+              limit,
+              ...(summary !== undefined && { summary }),
+            },
           };
         }
 

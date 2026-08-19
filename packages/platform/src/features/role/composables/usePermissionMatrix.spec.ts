@@ -53,12 +53,13 @@ function makePermission(overrides: Partial<Permission> = {}): Permission {
     code: 'students.read',
     module: 'students',
     description: null,
+    app: 'academic',
     ...overrides,
   }
 }
 
 describe('usePermissionMatrix', () => {
-  it('groups permissions by translated module name', () => {
+  it('groups by application first, then by module', () => {
     const permissions = ref<Permission[]>([
       makePermission({ id: 'p1', code: 'students.read', module: 'students' }),
       makePermission({ id: 'p2', code: 'teachers.read', module: 'teachers' }),
@@ -69,8 +70,8 @@ describe('usePermissionMatrix', () => {
     )
 
     expect(Object.keys(filteredGroupedPermissions.value)).toEqual([
-      'Guru',
-      'Siswa',
+      'Akademik · Guru',
+      'Akademik · Siswa',
     ])
   })
 
@@ -85,11 +86,63 @@ describe('usePermissionMatrix', () => {
       ref([]),
     )
 
-    expect(filteredGroupedPermissions.value.Siswa?.map((p) => p.id)).toEqual([
-      'p2',
-      'p3',
-      'p1',
+    expect(
+      filteredGroupedPermissions.value['Akademik · Siswa']?.map((p) => p.id),
+    ).toEqual(['p2', 'p3', 'p1'])
+  })
+
+  /**
+   * The reason the application is decided by the server rather than read off
+   * the code's name. `leave-requests` belongs to presence and carries no
+   * `presence-` prefix, so a name-based grouping puts the leave system under
+   * Akademik — and an operator building "Admin Akademik" grants it without
+   * ever seeing what they granted.
+   */
+  it('keeps an unprefixed presence module out of the academic group', () => {
+    const permissions = ref<Permission[]>([
+      makePermission({
+        id: 'p1',
+        code: 'leave-requests.read',
+        module: 'leave-requests',
+        app: 'presence',
+      }),
+      makePermission({ id: 'p2', code: 'students.read', module: 'students' }),
     ])
+    const { filteredGroupedPermissions } = usePermissionMatrix(
+      permissions,
+      ref([]),
+    )
+
+    const keys = Object.keys(filteredGroupedPermissions.value)
+    expect(keys.some((k) => k.startsWith('Presensi · '))).toBe(true)
+    expect(
+      keys.some((k) => k.startsWith('Akademik · ') && k.includes('Cuti')),
+    ).toBe(false)
+  })
+
+  /**
+   * Ordering is not cosmetic here: the group an operator should hand out
+   * sparingly sits last, after the school's own work, so it is not the first
+   * thing skimmed past.
+   */
+  it('puts the system group last', () => {
+    const permissions = ref<Permission[]>([
+      makePermission({
+        id: 'p1',
+        code: 'roles.read',
+        module: 'roles',
+        app: 'platform',
+      }),
+      makePermission({ id: 'p2', code: 'students.read', module: 'students' }),
+    ])
+    const { filteredGroupedPermissions } = usePermissionMatrix(
+      permissions,
+      ref([]),
+    )
+
+    const keys = Object.keys(filteredGroupedPermissions.value)
+    expect(keys[0]?.startsWith('Akademik')).toBe(true)
+    expect(keys[keys.length - 1]?.startsWith('Sistem')).toBe(true)
   })
 
   it('filters by permission code, description, or module', () => {

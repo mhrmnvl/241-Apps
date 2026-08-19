@@ -8,7 +8,6 @@ import { GetSubjectByIdUseCase } from '../use-cases/get-subject-by-id.use-case.j
 import { GetSubjectsUseCase } from '../use-cases/get-subjects.use-case.js';
 import { UpdateSubjectUseCase } from '../use-cases/update-subject.use-case.js';
 import { SubjectController } from './subject.controller.js';
-import type { AuthenticatedUser } from '../../../core/types/authenticated-user.type.js';
 
 describe('SubjectController', () => {
   let controller: SubjectController;
@@ -18,13 +17,6 @@ describe('SubjectController', () => {
   const mockCreateSubjectService = { execute: jest.fn() };
   const mockUpdateSubjectService = { execute: jest.fn() };
   const mockDeleteSubjectService = { execute: jest.fn() };
-
-  const mockUser: AuthenticatedUser = {
-    id: 'user-1',
-    sub: 'user-1',
-    identifier: 'admin',
-    sessionId: 'session-1',
-  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -55,7 +47,7 @@ describe('SubjectController', () => {
       };
       mockGetSubjectsService.execute.mockResolvedValue(expected);
 
-      const result = await controller.findAll(mockUser, query);
+      const result = await controller.findAll(query);
 
       expect(mockGetSubjectsService.execute).toHaveBeenCalledWith(query);
       expect(result).toEqual(expected);
@@ -68,7 +60,7 @@ describe('SubjectController', () => {
       const expected = { id: 'sub-1', name: 'Mathematics' };
       mockGetSubjectByIdService.execute.mockResolvedValue(expected);
 
-      const result = await controller.findOne(mockUser, id);
+      const result = await controller.findOne(id);
 
       expect(mockGetSubjectByIdService.execute).toHaveBeenCalledWith(id);
       expect(result).toEqual(expected);
@@ -84,7 +76,7 @@ describe('SubjectController', () => {
       const expected = { id: 'sub-new', name: 'Chemistry' };
       mockCreateSubjectService.execute.mockResolvedValue(expected);
 
-      const result = await controller.create(mockUser, dto);
+      const result = await controller.create(dto);
 
       expect(mockCreateSubjectService.execute).toHaveBeenCalledWith(dto);
       expect(result).toEqual(expected);
@@ -98,7 +90,7 @@ describe('SubjectController', () => {
       const expected = { id: 'sub-1', name: 'Advanced Mathematics' };
       mockUpdateSubjectService.execute.mockResolvedValue(expected);
 
-      const result = await controller.update(mockUser, id, dto);
+      const result = await controller.update(id, dto);
 
       expect(mockUpdateSubjectService.execute).toHaveBeenCalledWith(id, dto);
       expect(result).toEqual(expected);
@@ -110,7 +102,7 @@ describe('SubjectController', () => {
       const id = 'sub-1';
       mockDeleteSubjectService.execute.mockResolvedValue(undefined);
 
-      await controller.remove(mockUser, id);
+      await controller.remove(id);
 
       expect(mockDeleteSubjectService.execute).toHaveBeenCalledWith(id);
     });

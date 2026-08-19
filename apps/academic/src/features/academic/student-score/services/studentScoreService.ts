@@ -2,6 +2,7 @@ import { studentScoreApi } from '../api/studentScoreApi'
 import { useStudentScoreStore } from '../stores/studentScoreStore'
 import type { StudentScoreRosterItem } from '../types'
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
+import { useRoleGuard } from '@/features/platform/auth'
 import { toast } from 'vue-sonner'
 
 export const studentScoreService = {
@@ -45,7 +46,20 @@ export const studentScoreService = {
         return { success: true }
       }
 
-      await studentScoreApi.bulkUpsertScores({ assessmentItemId, records })
+      // Which route the caller may use is a question about their permissions,
+      // not their role. `student-scores.manage` grades any class in the school;
+      // `student-scores.manage-assigned` grades the subjects they teach and the
+      // classroom they supervise, and the server settles which is which from
+      // their teaching records.
+      const { can } = useRoleGuard()
+      if (can('student-scores.manage')) {
+        await studentScoreApi.bulkUpsertScores({ assessmentItemId, records })
+      } else {
+        await studentScoreApi.bulkUpsertAssignedScores({
+          assessmentItemId,
+          records,
+        })
+      }
       await studentScoreService.fetchRoster(assessmentItemId)
       return { success: true }
     } catch (error: unknown) {

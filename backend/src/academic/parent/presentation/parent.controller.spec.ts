@@ -8,7 +8,6 @@ import { GetParentByIdUseCase } from '../use-cases/get-parent-by-id.use-case.js'
 import { GetParentsUseCase } from '../use-cases/get-parents.use-case.js';
 import { UpdateParentUseCase } from '../use-cases/update-parent.use-case.js';
 import { ParentController } from './parent.controller.js';
-import type { AuthenticatedUser } from '../../../core/types/authenticated-user.type.js';
 
 describe('ParentController', () => {
   let controller: ParentController;
@@ -18,13 +17,6 @@ describe('ParentController', () => {
   const mockCreateParentService = { execute: jest.fn() };
   const mockUpdateParentService = { execute: jest.fn() };
   const mockDeleteParentService = { execute: jest.fn() };
-
-  const mockUser: AuthenticatedUser = {
-    id: 'usr-1',
-    sub: 'usr-1',
-    identifier: 'admin',
-    sessionId: 'sess-1',
-  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -55,7 +47,7 @@ describe('ParentController', () => {
       };
       mockGetParentsService.execute.mockResolvedValue(expected);
 
-      const result = await controller.findAll(mockUser, query);
+      const result = await controller.findAll(query);
 
       expect(mockGetParentsService.execute).toHaveBeenCalledWith(query);
       expect(result).toEqual(expected);
@@ -68,7 +60,7 @@ describe('ParentController', () => {
       const expected = { id: 'par-1', name: 'Budi Santoso' };
       mockGetParentByIdService.execute.mockResolvedValue(expected);
 
-      const result = await controller.findOne(mockUser, id);
+      const result = await controller.findOne(id);
 
       expect(mockGetParentByIdService.execute).toHaveBeenCalledWith(id);
       expect(result).toEqual(expected);
@@ -101,7 +93,7 @@ describe('ParentController', () => {
       const expected = { id: 'par-1', name: 'Budi Updated' };
       mockUpdateParentService.execute.mockResolvedValue(expected);
 
-      const result = await controller.update(mockUser, id, dto);
+      const result = await controller.update(id, dto);
 
       expect(mockUpdateParentService.execute).toHaveBeenCalledWith(id, dto);
       expect(result).toEqual(expected);
@@ -113,7 +105,7 @@ describe('ParentController', () => {
       const id = 'par-1';
       mockDeleteParentService.execute.mockResolvedValue(undefined);
 
-      await controller.remove(mockUser, id);
+      await controller.remove(id);
 
       expect(mockDeleteParentService.execute).toHaveBeenCalledWith(id);
     });

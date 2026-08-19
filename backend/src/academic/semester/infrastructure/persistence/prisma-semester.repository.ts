@@ -154,12 +154,59 @@ export class PrismaSemesterRepository extends ISemesterRepository {
     });
   }
 
-  async hasRelatedData(id: string): Promise<boolean> {
-    const count = await this.prisma.studentEnrollment.count({
-      where: { semesterId: id, deletedAt: null },
-      take: 1,
-    });
-    return count > 0;
+  /**
+   * Everything that keys on a semester, in the order a person would recognise
+   * it. Five separate counts rather than one query with joins: each is an
+   * indexed lookup on `semester_id`, and the first hit is enough.
+   */
+  async findFirstDependent(id: string): Promise<string | null> {
+    const checks: [string, () => Promise<number>][] = [
+      [
+        'student enrolments',
+        () =>
+          this.prisma.studentEnrollment.count({
+            where: { semesterId: id, deletedAt: null },
+            take: 1,
+          }),
+      ],
+      [
+        'teaching assignments',
+        () =>
+          this.prisma.teachingAssignment.count({
+            where: { semesterId: id, deletedAt: null },
+            take: 1,
+          }),
+      ],
+      [
+        'homeroom teachers',
+        () =>
+          this.prisma.classroomSupervisor.count({
+            where: { semesterId: id, deletedAt: null },
+            take: 1,
+          }),
+      ],
+      [
+        'class structures',
+        () =>
+          this.prisma.classroomStructure.count({
+            where: { semesterId: id, deletedAt: null },
+            take: 1,
+          }),
+      ],
+      [
+        'academic calendar entries',
+        () =>
+          this.prisma.academicCalendar.count({
+            where: { semesterId: id, deletedAt: null },
+            take: 1,
+          }),
+      ],
+    ];
+
+    for (const [name, count] of checks) {
+      if ((await count()) > 0) return name;
+    }
+    return null;
   }
 
   async remove(id: string): Promise<Semester> {

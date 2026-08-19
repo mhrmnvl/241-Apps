@@ -37,6 +37,9 @@ import { BulkGenerateReportCardsUseCase } from '../use-cases/bulk-generate-repor
 import { GenerateReportCardUseCase } from '../use-cases/generate-report-card.use-case.js';
 import { GetReportCardByIdUseCase } from '../use-cases/get-report-card-by-id.use-case.js';
 import { GetReportCardsUseCase } from '../use-cases/get-report-cards.use-case.js';
+import { GetMyReportCardsUseCase } from '../use-cases/get-my-report-cards.use-case.js';
+import { GetReportCardDetailUseCase } from '../use-cases/get-report-card-detail.use-case.js';
+import { GetMyReportCardDetailUseCase } from '../use-cases/get-my-report-card-detail.use-case.js';
 import { PublishReportCardUseCase } from '../use-cases/publish-report-card.use-case.js';
 import { UpdateReportCardUseCase } from '../use-cases/update-report-card.use-case.js';
 import { ExportReportCardPdfUseCase } from '../use-cases/export-report-card-pdf.use-case.js';
@@ -48,7 +51,10 @@ import { ExportReportCardPdfUseCase } from '../use-cases/export-report-card-pdf.
 export class ReportCardController {
   constructor(
     private readonly getReportCardsService: GetReportCardsUseCase,
+    private readonly getMyReportCardsService: GetMyReportCardsUseCase,
     private readonly getReportCardByIdService: GetReportCardByIdUseCase,
+    private readonly getReportCardDetailService: GetReportCardDetailUseCase,
+    private readonly getMyReportCardDetailService: GetMyReportCardDetailUseCase,
     private readonly generateReportCardService: GenerateReportCardUseCase,
     private readonly bulkGenerateReportCardsService: BulkGenerateReportCardsUseCase,
     private readonly updateReportCardService: UpdateReportCardUseCase,
@@ -60,31 +66,68 @@ export class ReportCardController {
   @Get()
   @RequirePermissions('report-cards.read')
   @ApiOperation({ summary: 'List reportCards (paginated, filterable)' })
-  findAll(
+  findAll(@Query() query: ReportCardQueryDto) {
+    return this.getReportCardsService.execute(query);
+  }
+
+  /**
+   * Declared before `:id` on purpose — Nest matches in registration order, and
+   * `me` would otherwise be parsed as a uuid and rejected.
+   */
+  @Get('me')
+  @RequirePermissions('report-cards.read-own')
+  @ApiOperation({
+    summary: 'Your own published report cards — no user parameter exists',
+  })
+  findMine(
     @CurrentUser() user: AuthenticatedUser,
     @Query() query: ReportCardQueryDto,
   ) {
-    return this.getReportCardsService.execute(query);
+    return this.getMyReportCardsService.execute(query, user.id);
+  }
+
+  /**
+   * One of the caller's own cards, opened from their own list.
+   *
+   * A separate route from the one below rather than a branch inside it: the
+   * permission is then the boundary, and a role's grants say what its holder
+   * may open without anyone reading a use case.
+   */
+  @Get('me/:id/detail')
+  @RequirePermissions('report-cards.read-own')
+  @ApiOperation({
+    summary: 'Your own published report card, with its attendance',
+  })
+  @ApiParam({ name: 'id', format: 'uuid' })
+  findMyDetail(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id', ParseUUIDPipe) id: string,
+  ) {
+    return this.getMyReportCardDetailService.execute(id, user.id);
+  }
+
+  @Get(':id/detail')
+  @RequirePermissions('report-cards.read')
+  @ApiOperation({
+    summary: "Any student's report card, with its attendance",
+  })
+  @ApiParam({ name: 'id', format: 'uuid' })
+  findDetail(@Param('id', ParseUUIDPipe) id: string) {
+    return this.getReportCardDetailService.execute(id);
   }
 
   @Get(':id')
   @RequirePermissions('report-cards.read')
   @ApiOperation({ summary: 'Get reportCard by ID' })
   @ApiParam({ name: 'id', format: 'uuid' })
-  findOne(
-    @CurrentUser() user: AuthenticatedUser,
-    @Param('id', ParseUUIDPipe) id: string,
-  ) {
+  findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.getReportCardByIdService.execute(id);
   }
 
   @Post('generate')
   @RequirePermissions('report-cards.create')
   @ApiOperation({ summary: 'Generate reportCard for a student' })
-  generate(
-    @CurrentUser() user: AuthenticatedUser,
-    @Body() dto: GenerateReportCardDto,
-  ) {
+  generate(@Body() dto: GenerateReportCardDto) {
     return this.generateReportCardService.execute(dto);
   }
 
@@ -96,10 +139,7 @@ export class ReportCardController {
       'Published cards are left untouched and reported as skipped, so one issued report does not block the rest of the class.',
   })
   @ApiResponse({ status: 201, type: BulkGenerateReportCardResponseDto })
-  bulkGenerate(
-    @CurrentUser() user: AuthenticatedUser,
-    @Body() dto: BulkGenerateReportCardDto,
-  ) {
+  bulkGenerate(@Body() dto: BulkGenerateReportCardDto) {
     return this.bulkGenerateReportCardsService.execute(dto);
   }
 
@@ -108,7 +148,6 @@ export class ReportCardController {
   @ApiOperation({ summary: 'Update reportCard details' })
   @ApiParam({ name: 'id', format: 'uuid' })
   update(
-    @CurrentUser() user: AuthenticatedUser,
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateReportCardDto,
   ) {
@@ -119,10 +158,7 @@ export class ReportCardController {
   @RequirePermissions('report-cards.publish')
   @ApiOperation({ summary: 'Publish a reportCard' })
   @ApiParam({ name: 'id', format: 'uuid' })
-  publish(
-    @CurrentUser() user: AuthenticatedUser,
-    @Param('id', ParseUUIDPipe) id: string,
-  ) {
+  publish(@Param('id', ParseUUIDPipe) id: string) {
     return this.publishReportCardService.execute(id);
   }
 
@@ -131,10 +167,7 @@ export class ReportCardController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Soft-delete a reportCard' })
   @ApiParam({ name: 'id', format: 'uuid' })
-  remove(
-    @CurrentUser() user: AuthenticatedUser,
-    @Param('id', ParseUUIDPipe) id: string,
-  ) {
+  remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.deleteReportCardService.execute(id);
   }
 
@@ -143,7 +176,6 @@ export class ReportCardController {
   @ApiOperation({ summary: 'Export reportCard as PDF' })
   @ApiParam({ name: 'id', format: 'uuid' })
   async exportPdf(
-    @CurrentUser() user: AuthenticatedUser,
     @Param('id', ParseUUIDPipe) id: string,
     @Res() res: Response,
   ) {

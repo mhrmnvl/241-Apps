@@ -7,7 +7,6 @@ import { GetAcademicCalendarByIdUseCase } from '../use-cases/get-academic-calend
 import { GetAcademicCalendarsUseCase } from '../use-cases/get-academic-calendars.use-case.js';
 import { UpdateAcademicCalendarUseCase } from '../use-cases/update-academic-calendar.use-case.js';
 import { AcademicCalendarController } from './academic-calendar.controller.js';
-import type { AuthenticatedUser } from '../../../core/types/authenticated-user.type.js';
 
 describe('AcademicCalendarController', () => {
   let controller: AcademicCalendarController;
@@ -17,13 +16,6 @@ describe('AcademicCalendarController', () => {
   const mockCreate = { execute: jest.fn() };
   const mockUpdate = { execute: jest.fn() };
   const mockDelete = { execute: jest.fn() };
-
-  const mockUser: AuthenticatedUser = {
-    id: 'user-uuid',
-    sub: 'user-uuid',
-    identifier: 'admin',
-    sessionId: 'session-uuid',
-  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -51,7 +43,7 @@ describe('AcademicCalendarController', () => {
     it('should delegate to GetAcademicCalendarsUseCase', async () => {
       const query = { page: 1, limit: 10 };
       mockGetAll.execute.mockResolvedValue({ data: [] });
-      const result = await controller.findAll(mockUser, query);
+      const result = await controller.findAll(query);
       expect(mockGetAll.execute).toHaveBeenCalledWith(query);
       expect(result).toEqual({ data: [] });
     });
@@ -60,7 +52,7 @@ describe('AcademicCalendarController', () => {
   describe('findOne', () => {
     it('should delegate to GetAcademicCalendarByIdUseCase', async () => {
       mockGetById.execute.mockResolvedValue({ id: 'ac-1' });
-      const result = await controller.findOne(mockUser, 'ac-1');
+      const result = await controller.findOne('ac-1');
       expect(mockGetById.execute).toHaveBeenCalledWith('ac-1');
       expect(result).toEqual({ id: 'ac-1' });
     });
@@ -76,7 +68,7 @@ describe('AcademicCalendarController', () => {
         endDate: '2024-12-20',
       };
       mockCreate.execute.mockResolvedValue({ id: 'new' });
-      await controller.create(mockUser, dto);
+      await controller.create(dto);
       expect(mockCreate.execute).toHaveBeenCalledWith(dto);
     });
   });
@@ -85,7 +77,7 @@ describe('AcademicCalendarController', () => {
     it('should delegate to UpdateAcademicCalendarUseCase', async () => {
       const dto: UpdateAcademicCalendarDto = { title: 'Updated' };
       mockUpdate.execute.mockResolvedValue({ id: 'ac-1' });
-      await controller.update(mockUser, 'ac-1', dto);
+      await controller.update('ac-1', dto);
       expect(mockUpdate.execute).toHaveBeenCalledWith('ac-1', dto);
     });
   });
@@ -93,7 +85,7 @@ describe('AcademicCalendarController', () => {
   describe('remove', () => {
     it('should delegate to DeleteAcademicCalendarUseCase', async () => {
       mockDelete.execute.mockResolvedValue(undefined);
-      await controller.remove(mockUser, 'ac-1');
+      await controller.remove('ac-1');
       expect(mockDelete.execute).toHaveBeenCalledWith('ac-1');
     });
   });

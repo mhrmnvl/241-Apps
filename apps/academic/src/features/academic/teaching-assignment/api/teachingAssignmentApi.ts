@@ -19,6 +19,20 @@ export const teachingAssignmentApi = {
     )
   },
 
+  /**
+   * The classes the signed-in teacher is assigned to.
+   *
+   * The server applies their teacher record after the query, so a `teacherId`
+   * sent from here cannot widen it — naming a colleague returns nothing rather
+   * than their classes.
+   */
+  getMyTeachingAssignments: (params?: TeachingAssignmentQueryParams) => {
+    return api.get<ApiPaginatedResponse<TeachingAssignment>>(
+      '/teaching-assignments/me',
+      { params },
+    )
+  },
+
   createTeachingAssignment: (payload: TeachingAssignmentCreatePayload) => {
     return api.post<ApiSingleResponse<TeachingAssignmentCreateResult>>(
       '/teaching-assignments',

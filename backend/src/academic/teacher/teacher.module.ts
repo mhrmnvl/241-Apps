@@ -2,9 +2,10 @@ import { Module } from '@nestjs/common';
 import { UserModule } from '../../platform/user/user.module.js';
 import { TeacherController } from './presentation/teacher.controller.js';
 import { TeacherImportExportController } from './presentation/teacher-import-export.controller.js';
-import { TeacherAddressController } from './presentation/teacher-address.controller.js';
 import { TeacherPositionsController } from './presentation/teacher-position.controller.js';
 import { ITeacherRepository } from './domain/interfaces/teacher-repository.interface.js';
+import { ITeacherIdentityReadPort } from './domain/interfaces/teacher-identity-read.port.js';
+import { PrismaTeacherIdentityReadPort } from './infrastructure/persistence/prisma-teacher-identity.read-port.js';
 import { ITeacherAddressRepository } from './domain/interfaces/teacher-address-repository.interface.js';
 import { ITeacherPositionRepository } from './domain/interfaces/teacher-position-repository.interface.js';
 import { PrismaTeacherRepository } from './infrastructure/persistence/prisma-teacher.repository.js';
@@ -22,7 +23,6 @@ import { ToggleTeacherActiveUseCase } from './use-cases/toggle-teacher-active.us
 import { BulkImportTeachersUseCase } from './use-cases/bulk-import-teacher.use-case.js';
 import { ResolveBulkImportConflictsUseCase } from './use-cases/resolve-bulk-import-conflicts.use-case.js';
 import { ExportTeachersUseCase } from './use-cases/export-teacher.use-case.js';
-import { TeacherAddressUseCase } from './use-cases/teacher-address.use-case.js';
 import { TeacherPositionUseCase } from './use-cases/teacher-position.use-case.js';
 
 @Module({
@@ -30,11 +30,14 @@ import { TeacherPositionUseCase } from './use-cases/teacher-position.use-case.js
   controllers: [
     TeacherImportExportController,
     TeacherController,
-    TeacherAddressController,
     TeacherPositionsController,
   ],
   providers: [
     { provide: ITeacherRepository, useClass: PrismaTeacherRepository },
+    {
+      provide: ITeacherIdentityReadPort,
+      useClass: PrismaTeacherIdentityReadPort,
+    },
     {
       provide: ITeacherAddressRepository,
       useClass: PrismaTeacherAddressRepository,
@@ -54,13 +57,15 @@ import { TeacherPositionUseCase } from './use-cases/teacher-position.use-case.js
     BulkImportTeachersUseCase,
     ResolveBulkImportConflictsUseCase,
     ExportTeachersUseCase,
-    TeacherAddressUseCase,
     TeacherPositionUseCase,
   ],
   exports: [
     ITeacherRepository,
     ITeacherAddressRepository,
     ITeacherPositionRepository,
+    // Consumed by schedule, so `GET /schedules/me` answers from the caller's
+    // teaching record rather than from what their role is called.
+    ITeacherIdentityReadPort,
   ],
 })
 export class TeacherModule {}

@@ -4,6 +4,7 @@ import { ClassroomModule } from '../classroom/classroom.module.js';
 import { StudentModule } from '../student/student.module.js';
 import { EnrollmentController } from './presentation/enrollment.controller.js';
 import { PrismaEnrollmentRepository } from './infrastructure/persistence/prisma-enrollment.repository.js';
+import { ClassroomCapacityService } from './services/classroom-capacity.service.js';
 import { BulkCreateStudentEnrollmentUseCase } from './use-cases/bulk-create-student-enrollment.use-case.js';
 import { CreateStudentEnrollmentUseCase } from './use-cases/create-student-enrollment.use-case.js';
 import { DeleteStudentEnrollmentUseCase } from './use-cases/delete-student-enrollment.use-case.js';
@@ -24,6 +25,7 @@ import { IEnrollmentRepository } from './domain/interfaces/enrollment-repository
       provide: IEnrollmentRepository,
       useClass: PrismaEnrollmentRepository,
     },
+    ClassroomCapacityService,
     GetStudentEnrollmentsUseCase,
     GetStudentEnrollmentByIdUseCase,
     CreateStudentEnrollmentUseCase,

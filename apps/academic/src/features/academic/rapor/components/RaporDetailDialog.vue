@@ -11,10 +11,22 @@ import { Loader2 } from 'lucide-vue-next'
 import { useRapor } from '../composables/useRapor'
 import type { RaporData, RaporDetailData, RaporScoreRow } from '../types'
 
-const props = defineProps<{
-  open: boolean
-  rapor: RaporData | null
-}>()
+const props = withDefaults(
+  defineProps<{
+    open: boolean
+    rapor: RaporData | null
+    /**
+     * Which surface this dialog is on. `own` reads through the self-service
+     * routes, which answer about the caller and refuse everyone else's card.
+     *
+     * A property rather than a role check: the view knows which screen it is,
+     * and `useRoleGuard` deliberately offers no isStudent — a custom role would
+     * silently take the wrong branch.
+     */
+    scope?: 'own' | 'any'
+  }>(),
+  { scope: 'any' },
+)
 
 const emit = defineEmits<{
   'update:open': [value: boolean]
@@ -33,8 +45,8 @@ watch(
       loadingDetail.value = true
       try {
         const [detail, scoreRows] = await Promise.all([
-          fetchRaporDetail(props.rapor.id),
-          fetchScoresForRapor(props.rapor.enrollmentId),
+          fetchRaporDetail(props.rapor.id, props.scope),
+          fetchScoresForRapor(props.rapor.enrollmentId, props.scope),
         ])
 
         detailData.value = detail

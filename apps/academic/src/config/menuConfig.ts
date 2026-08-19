@@ -101,15 +101,15 @@ export const menuSections: MenuSection[] = [
         url: '#',
         icon: CalendarRange,
         items: [
+          // One calendar, not two. The school keeps a single one whose
+          // entries nest: a term is a wide entry, and inside it sit the things
+          // that happen — some for every class, some for one. Two menu entries
+          // over two entities answering the same question left nothing to tell
+          // a person which to open.
           {
-            title: 'Kalender Pendidikan',
+            title: 'Kalender',
             url: '/academic/education-calendar',
             requiredPermission: 'academic-calendars.read',
-          },
-          {
-            title: 'Kalender Kegiatan',
-            url: '/academic/event-calendar',
-            requiredPermission: 'events.read',
           },
         ],
       },
@@ -404,6 +404,16 @@ export const menuSections: MenuSection[] = [
   },
 
   // ──────────────────── STUDENT VIEW ────────────────────
+  //
+  // These four entries pointed at the management screens — the attendance
+  // register, the marking list, the report-card console — and the student role
+  // held the permissions those screens require, over reads that ignored who
+  // was asking. A student opening this menu was served every student's report
+  // card.
+  //
+  // Each now points at a screen built for them and asks for the matching
+  // `-own` permission, so the entry appears because the person may read their
+  // own record, not because their role is spelled STUDENT.
   {
     key: 'student-view',
     label: 'Siswa',
@@ -415,10 +425,26 @@ export const menuSections: MenuSection[] = [
         url: '#',
         icon: BookText,
         items: [
-          { title: 'Jadwal Pelajaran', url: '/schedule' },
-          { title: 'Kehadiran', url: '/academic/attendance' },
-          { title: 'Nilai', url: '/academic/student-score' },
-          { title: 'Rapor', url: '/academic/report-card' },
+          {
+            title: 'Jadwal Pelajaran',
+            url: '/academic/my/schedule',
+            requiredPermission: 'schedules.read-own',
+          },
+          {
+            title: 'Kehadiran',
+            url: '/academic/my/attendance',
+            requiredPermission: 'attendances.read-own',
+          },
+          {
+            title: 'Nilai',
+            url: '/academic/my/scores',
+            requiredPermission: 'student-scores.read-own',
+          },
+          {
+            title: 'Rapor',
+            url: '/academic/my/report-card',
+            requiredPermission: 'report-cards.read-own',
+          },
         ],
       },
       {
@@ -428,11 +454,7 @@ export const menuSections: MenuSection[] = [
         icon: Megaphone,
         items: [
           { title: 'Pengumuman', url: '/announcement' },
-          {
-            title: 'Kalender Pendidikan',
-            url: '/academic/education-calendar',
-          },
-          { title: 'Kalender Kegiatan', url: '/academic/event-calendar' },
+          { title: 'Kalender', url: '/academic/education-calendar' },
         ],
       },
     ],

@@ -36,6 +36,7 @@ import { toast } from 'vue-sonner'
 const {
   rapors,
   totalItems,
+  summary,
   currentPage,
   pageSize,
   loading,
@@ -82,16 +83,20 @@ const raporClassroomOptions = computed<ComboboxOption[]>(() =>
   })),
 )
 
-const stats = computed(() => {
-  const total = rapors.value.length
-  const published = rapors.value.filter((r) => r.isPublished).length
-  const draft = total - published
-  const avgAll =
-    total > 0
-      ? rapors.value.reduce((sum, r) => sum + (r.totalAverage ?? 0), 0) / total
-      : 0
-  return { total, published, draft, avgAll }
-})
+/**
+ * Straight from `meta.summary`, which describes the whole filtered class.
+ *
+ * Deriving these from `rapors` is what this used to do, and it cannot work:
+ * that array is one page. "Total Siswa" reported the page size and the average
+ * covered whoever was on screen, so both moved when you turned the page —
+ * plausible numbers, silently wrong.
+ */
+const stats = computed(() => ({
+  total: totalItems.value,
+  published: summary.value?.published ?? 0,
+  draft: summary.value?.draft ?? 0,
+  avgAll: summary.value?.averageScore ?? null,
+}))
 
 const tableColumns = [
   ...columns,
@@ -275,7 +280,7 @@ onMounted(async () => {
           </div>
           <div class="rounded-lg border p-4 text-center">
             <p class="text-2xl font-bold">
-              {{ stats.avgAll > 0 ? stats.avgAll.toFixed(2) : '-' }}
+              {{ stats.avgAll !== null ? stats.avgAll.toFixed(2) : '-' }}
             </p>
             <p class="text-xs text-muted-foreground">Rata-rata Kelas</p>
           </div>

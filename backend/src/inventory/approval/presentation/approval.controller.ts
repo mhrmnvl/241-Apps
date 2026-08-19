@@ -29,7 +29,7 @@ export class ApprovalController {
   ) {}
 
   @Get()
-  @RequirePermissions('inventory.read')
+  @RequirePermissions('inventory-approvals.read')
   @ApiOperation({
     summary: 'Get pending approvals assigned to the current user roles',
   })
@@ -38,7 +38,7 @@ export class ApprovalController {
   }
 
   @Post(':id/action')
-  @RequirePermissions('inventory.update')
+  @RequirePermissions('inventory-approvals.update')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Approve or reject a pending workflow step' })
   async process(

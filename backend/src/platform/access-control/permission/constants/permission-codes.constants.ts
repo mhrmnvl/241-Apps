@@ -285,6 +285,15 @@ export const SYSTEM_PERMISSIONS: SystemPermission[] = [
     description: 'Read attendances',
   },
   {
+    // Self-service. Holding this grants no sight of anyone else: the read
+    // resolves the caller's own student record and answers about that. A class
+    // recap stays on `attendances.read`, because a recap describes a cohort.
+    module: 'attendances',
+    action: 'read-own',
+    code: 'attendances.read-own',
+    description: 'Read your own attendance',
+  },
+  {
     module: 'attendances',
     action: 'update',
     code: 'attendances.update',
@@ -489,32 +498,6 @@ export const SYSTEM_PERMISSIONS: SystemPermission[] = [
     description: 'Update enrollments',
   },
 
-  // events
-  {
-    module: 'events',
-    action: 'create',
-    code: 'events.create',
-    description: 'Create events',
-  },
-  {
-    module: 'events',
-    action: 'delete',
-    code: 'events.delete',
-    description: 'Delete events',
-  },
-  {
-    module: 'events',
-    action: 'read',
-    code: 'events.read',
-    description: 'Read events',
-  },
-  {
-    module: 'events',
-    action: 'update',
-    code: 'events.update',
-    description: 'Update events',
-  },
-
   // files
   {
     module: 'files',
@@ -561,30 +544,105 @@ export const SYSTEM_PERMISSIONS: SystemPermission[] = [
     description: 'Update graduations',
   },
 
-  // inventory
+  // --- inventory ---
+  //
+  // Four areas, where there used to be one `inventory.*`. That single module
+  // could not express the arrangement the school actually runs: the inventory
+  // administrator keeps the register and signs the loans, while a teacher only
+  // borrows. Under one code, granting a teacher enough to request a projector
+  // also let them edit the asset register, delete a location, and read the
+  // approval queue — the four are genuinely different jobs and now say so.
+
+  // inventory-assets
   {
-    module: 'inventory',
+    module: 'inventory-assets',
     action: 'create',
-    code: 'inventory.create',
-    description: 'Create inventory',
+    code: 'inventory-assets.create',
+    description: 'Add assets and asset units to the register',
   },
   {
-    module: 'inventory',
+    module: 'inventory-assets',
     action: 'delete',
-    code: 'inventory.delete',
-    description: 'Delete inventory',
+    code: 'inventory-assets.delete',
+    description: 'Delete assets and asset units',
   },
   {
-    module: 'inventory',
+    module: 'inventory-assets',
     action: 'read',
-    code: 'inventory.read',
-    description: 'Read inventory',
+    code: 'inventory-assets.read',
+    description: 'Read the asset register',
   },
   {
-    module: 'inventory',
+    module: 'inventory-assets',
     action: 'update',
-    code: 'inventory.update',
-    description: 'Update inventory',
+    code: 'inventory-assets.update',
+    description: 'Update assets and asset units',
+  },
+
+  // inventory-loans
+  {
+    module: 'inventory-loans',
+    action: 'create',
+    code: 'inventory-loans.create',
+    description: 'Request a loan — what a borrower needs, and all they need',
+  },
+  {
+    module: 'inventory-loans',
+    action: 'read',
+    code: 'inventory-loans.read',
+    description: 'Read loan transactions and the circulation history',
+  },
+  {
+    module: 'inventory-loans',
+    action: 'update',
+    code: 'inventory-loans.update',
+    description: 'Record the return of borrowed assets',
+  },
+
+  // inventory-approvals
+  {
+    module: 'inventory-approvals',
+    action: 'create',
+    code: 'inventory-approvals.create',
+    description: 'Define who approves a loan, and in what order',
+  },
+  {
+    module: 'inventory-approvals',
+    action: 'read',
+    code: 'inventory-approvals.read',
+    description: 'Read the approval queue and the workflows behind it',
+  },
+  {
+    module: 'inventory-approvals',
+    action: 'update',
+    code: 'inventory-approvals.update',
+    description: 'Approve or reject a loan request',
+  },
+
+  // inventory-master-data
+  {
+    module: 'inventory-master-data',
+    action: 'create',
+    code: 'inventory-master-data.create',
+    description: 'Create inventory categories, locations, conditions, statuses',
+  },
+  {
+    module: 'inventory-master-data',
+    action: 'delete',
+    code: 'inventory-master-data.delete',
+    description: 'Delete inventory reference data',
+  },
+  {
+    module: 'inventory-master-data',
+    action: 'read',
+    code: 'inventory-master-data.read',
+    description: 'Read inventory reference data',
+  },
+  {
+    module: 'inventory-master-data',
+    action: 'update',
+    code: 'inventory-master-data.update',
+    description: 'Update inventory reference data',
   },
 
   // occupations
@@ -946,6 +1004,14 @@ export const SYSTEM_PERMISSIONS: SystemPermission[] = [
     description: 'Read report cards',
   },
   {
+    // Self-service, and published only — a draft is a report card the school
+    // has not yet stood behind.
+    module: 'report-cards',
+    action: 'read-own',
+    code: 'report-cards.read-own',
+    description: 'Read your own published report cards',
+  },
+  {
     module: 'report-cards',
     action: 'update',
     code: 'report-cards.update',
@@ -1002,6 +1068,15 @@ export const SYSTEM_PERMISSIONS: SystemPermission[] = [
     action: 'read',
     code: 'schedules.read',
     description: 'Read schedules',
+  },
+  {
+    // Self-service. What comes back depends on the caller's records, not on
+    // what they say they are: a classroom timetable for a student, a teaching
+    // schedule for a teacher, both for someone who is both.
+    module: 'schedules',
+    action: 'read-own',
+    code: 'schedules.read-own',
+    description: 'Read your own schedule',
   },
   {
     module: 'schedules',
@@ -1154,13 +1229,41 @@ export const SYSTEM_PERMISSIONS: SystemPermission[] = [
     action: 'manage',
     code: 'student-scores.manage',
     description:
-      'Manage student scores (bulk grade a class for one assessment item)',
+      'Manage student scores for any class (bulk grade one assessment item)',
+  },
+  {
+    // What a teacher does: grade the subjects they are assigned to teach, in
+    // whichever classrooms they teach them, and correct marks in a classroom
+    // they supervise as its homeroom teacher.
+    //
+    // One code rather than two, because `@RequirePermissions` requires *all*
+    // the codes it names and cannot express "either". Two codes would mean two
+    // routes, and the grading screen would have to choose between them by
+    // guessing what the caller is — which is a role-name check wearing a
+    // different hat, and the exact thing that once showed a teacher whose role
+    // the school had named 'Wali Kelas' the administrator's screen.
+    //
+    // The reach comes from records — a teaching assignment, a supervisor row —
+    // so a person who is neither reaches nothing, whatever their role is called.
+    module: 'student-scores',
+    action: 'manage-assigned',
+    code: 'student-scores.manage-assigned',
+    description:
+      'Grade the classes you teach, and correct marks in the class you supervise',
   },
   {
     module: 'student-scores',
     action: 'read',
     code: 'student-scores.read',
     description: 'Read student scores',
+  },
+  {
+    // Self-service. Includes assessments the caller has no mark for yet, so a
+    // student can see what is still outstanding rather than an empty page.
+    module: 'student-scores',
+    action: 'read-own',
+    code: 'student-scores.read-own',
+    description: 'Read your own scores',
   },
   {
     module: 'student-scores',
@@ -1187,6 +1290,14 @@ export const SYSTEM_PERMISSIONS: SystemPermission[] = [
     action: 'read',
     code: 'students.read',
     description: 'Read students',
+  },
+  {
+    // Self-service. `students.read` is a roster read — it answers with every
+    // student — which is why a student must not hold it.
+    module: 'students',
+    action: 'read-own',
+    code: 'students.read-own',
+    description: 'Read your own student record',
   },
   {
     module: 'students',
@@ -1264,7 +1375,16 @@ export const SYSTEM_PERMISSIONS: SystemPermission[] = [
     module: 'teaching-assignments',
     action: 'read',
     code: 'teaching-assignments.read',
-    description: 'Read teaching assignments',
+    description: 'Read every teaching assignment in the school',
+  },
+  {
+    // The picker on a teacher's grading screen. Without it the screen lists
+    // every class in the school, the teacher chooses one they do not teach, and
+    // the save is refused — a correct refusal that reads as a broken screen.
+    module: 'teaching-assignments',
+    action: 'read-own',
+    code: 'teaching-assignments.read-own',
+    description: 'Read the classes you are assigned to teach',
   },
   {
     module: 'teaching-assignments',

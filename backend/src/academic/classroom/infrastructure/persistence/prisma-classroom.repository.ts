@@ -1,13 +1,19 @@
 import { Injectable } from '@nestjs/common';
 import { Classroom, Prisma } from '@prisma/client';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
-import { resolveAcademicYearId } from '../../../../shared/utils/active-academic-year.helper.js';
+import {
+  resolveAcademicYearId,
+  resolveSemesterId,
+} from '../../../../shared/utils/active-academic-year.helper.js';
 import {
   IClassroomRepository,
   ClassroomWithDetails,
   ClassroomEntity,
 } from '../../domain/interfaces/classroom-repository.interface.js';
-import { CLASSROOM_WITH_DETAILS_INCLUDE as CLASS_INCLUDE } from './prisma-classroom.includes.js';
+import {
+  CLASSROOM_WITH_DETAILS_INCLUDE as CLASS_INCLUDE,
+  classroomWithDetailsInclude,
+} from './prisma-classroom.includes.js';
 import type {
   ClassroomQueryInput,
   CreateClassroomRepositoryInput,
@@ -37,6 +43,10 @@ export class PrismaClassroomRepository extends IClassroomRepository {
       academicYearId,
     );
 
+    // Which homeroom teacher counts as current is a period question, so it is
+    // resolved here rather than left to whoever renders the column.
+    const resolvedSemesterId = await resolveSemesterId(this.prisma, undefined);
+
     const where: Prisma.ClassroomWhereInput = {
       deletedAt: null,
       ...(resolvedAcademicYearId && { academicYearId: resolvedAcademicYearId }),
@@ -53,7 +63,7 @@ export class PrismaClassroomRepository extends IClassroomRepository {
     const [data, total] = await Promise.all([
       this.prisma.classroom.findMany({
         where,
-        include: CLASS_INCLUDE,
+        include: classroomWithDetailsInclude(resolvedSemesterId),
         skip,
         take: limit,
         orderBy: [{ grade: { level: 'asc' } }, { code: 'asc' }],

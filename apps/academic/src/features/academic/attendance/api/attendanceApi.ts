@@ -23,6 +23,16 @@ export const attendanceApi = {
     })
   },
 
+  /**
+   * The caller's own attendance. No student parameter exists; the server
+   * resolves whose rows these are from the signed-in account.
+   */
+  getMyAttendances: (params?: AttendanceQueryParams) => {
+    return api.get<ApiPaginatedResponse<Attendance>>('/attendances/me', {
+      params,
+    })
+  },
+
   createAttendance: (payload: AttendanceSavePayload) => {
     return api.post<ApiSingleResponse<Attendance>>('/attendances', payload)
   },

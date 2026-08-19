@@ -63,6 +63,14 @@ export interface StudentScoreQueryInput extends PaginationQueryInput {
   enrollmentId?: string;
   classroomId?: string;
   semesterId?: string;
+  /**
+   * Every score belonging to one student, across their enrolments.
+   *
+   * A score hangs off an enrolment, and a student has one per semester, so
+   * `enrollmentId` can only ever answer for a single term. Self-service needs
+   * the person: "my marks", whichever enrolment they were recorded against.
+   */
+  studentId?: string;
 }
 
 export interface CreateStudentScoreRepositoryInput {
@@ -125,6 +133,8 @@ export abstract class IStudentScoreRepository {
   abstract bulkUpsert(
     assessmentItemId: string,
     records: BulkStudentScoreRecord[],
+    /** Set when the writer is not the assigned subject teacher. */
+    correctedById?: string | null,
   ): Promise<BulkUpsertResult>;
   abstract getRoster(
     assessmentItemId: string,

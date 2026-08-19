@@ -74,17 +74,23 @@ describe('PermissionGuard', () => {
     );
   });
 
-  // The four cases from contracts/permissions.md. These are the whole of
-  // ADR-0006: an ADMIN's blanket bypass stops at the portal boundary, and
-  // nothing else about the guard changes.
-  describe('the ADMIN bypass and its portal exemption (ADR-0006)', () => {
+  // ADR-0006 and ADR-0008 carved `portal-` and `payroll-` out of an ADMIN
+  // bypass that covered everything else. The bypass itself is gone now: the
+  // school asked for per-application administrators, and a role that passes
+  // every check contradicts that at the root. Each new area needing separation
+  // would have had to be remembered into the exemption list, and forgetting
+  // was silent.
+  //
+  // What those ADRs protected is protected more simply — ADMIN holds what its
+  // grants say, like every other role.
+  describe('ADMIN is an ordinary role, with no bypass (supersedes ADR-0006, ADR-0008)', () => {
     it('(a) refuses an ADMIN a portal code they do not hold', async () => {
       await expect(
         attempt(['portal-posts.publish'], ['ADMIN']),
       ).rejects.toThrow(ForbiddenException);
     });
 
-    it('(b) still passes an ADMIN every non-portal code, unchanged', async () => {
+    it('(b) refuses an ADMIN any code they do not hold, in any area', async () => {
       for (const code of [
         'students.read',
         'grades.update',
@@ -92,10 +98,40 @@ describe('PermissionGuard', () => {
         'applications.read',
         'settings.update',
       ]) {
-        await expect(attempt([code], ['ADMIN'])).resolves.toBe(true);
+        await expect(attempt([code], ['ADMIN'])).rejects.toThrow(
+          ForbiddenException,
+        );
       }
-      // The bypass answered every one of them without a permission lookup.
-      expect(repository.findUserPermissions).not.toHaveBeenCalled();
+      // And it asked, rather than answering from the role name.
+      expect(repository.findUserPermissions).toHaveBeenCalled();
+    });
+
+    it('passes an ADMIN exactly what its grants carry', async () => {
+      await expect(
+        attempt(['students.read'], ['ADMIN'], ['students.read']),
+      ).resolves.toBe(true);
+
+      await expect(
+        attempt(['students.delete'], ['ADMIN'], ['students.read']),
+      ).rejects.toThrow(ForbiddenException);
+    });
+
+    /**
+     * The point of the change, stated as the school stated it: an academic
+     * administrator administers academic things and nothing else.
+     */
+    it('keeps a per-application administrator inside their application', async () => {
+      const academic = ['students.read', 'classrooms.update'];
+
+      await expect(
+        attempt(['students.read'], ['ADMIN_AKADEMIK'], academic),
+      ).resolves.toBe(true);
+      await expect(
+        attempt(['portal-posts.publish'], ['ADMIN_AKADEMIK'], academic),
+      ).rejects.toThrow(ForbiddenException);
+      await expect(
+        attempt(['presence-records.read'], ['ADMIN_AKADEMIK'], academic),
+      ).rejects.toThrow(ForbiddenException);
     });
 
     it('(c) passes a SUPER_ADMIN on both portal and non-portal codes', async () => {
@@ -159,15 +195,15 @@ describe('PermissionGuard', () => {
       ).rejects.toThrow(ForbiddenException);
     });
 
-    // The exemption must stay narrow. An ADMIN administers attendance; only the
-    // money is fenced off.
-    it('still passes an ADMIN every presence code by role alone', async () => {
+    /**
+     * Presence used to pass for an ADMIN by role alone, since only money and
+     * the public website were fenced off. It is asked for now like everything
+     * else — which is what "an admin per application" means when it is real.
+     */
+    it('refuses an ADMIN a presence code they do not hold', async () => {
       await expect(
         attempt(['presence-records.update'], ['ADMIN']),
-      ).resolves.toBe(true);
-      await expect(
-        attempt(['presence-credentials.create'], ['ADMIN']),
-      ).resolves.toBe(true);
+      ).rejects.toThrow(ForbiddenException);
     });
 
     it('passes an ADMIN who actually holds the payroll permission', async () => {

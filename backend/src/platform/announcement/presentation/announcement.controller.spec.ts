@@ -8,7 +8,6 @@ import { GetAnnouncementByIdUseCase } from '../use-cases/get-announcement-by-id.
 import { GetAnnouncementsUseCase } from '../use-cases/get-announcements.use-case.js';
 import { UpdateAnnouncementUseCase } from '../use-cases/update-announcement.use-case.js';
 import { AnnouncementController } from './announcement.controller.js';
-import type { AuthenticatedUser } from '../../../core/types/authenticated-user.type.js';
 
 describe('AnnouncementController', () => {
   let controller: AnnouncementController;
@@ -18,13 +17,6 @@ describe('AnnouncementController', () => {
   const mockCreateAnnouncementService = { execute: jest.fn() };
   const mockUpdateAnnouncementService = { execute: jest.fn() };
   const mockDeleteAnnouncementService = { execute: jest.fn() };
-
-  const mockUser: AuthenticatedUser = {
-    id: 'user-uuid',
-    sub: 'user-uuid',
-    identifier: 'admin',
-    sessionId: 'session-uuid',
-  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -70,7 +62,7 @@ describe('AnnouncementController', () => {
       };
       mockGetAnnouncementsService.execute.mockResolvedValue(expected);
 
-      const result = await controller.findAll(mockUser, query);
+      const result = await controller.findAll(query);
 
       expect(mockGetAnnouncementsService.execute).toHaveBeenCalledWith(query);
       expect(result).toEqual(expected);
@@ -83,7 +75,7 @@ describe('AnnouncementController', () => {
       const expected = { id: 'ann-1', title: 'Jadwal Ujian', classrooms: [] };
       mockGetAnnouncementByIdService.execute.mockResolvedValue(expected);
 
-      const result = await controller.findOne(mockUser, id);
+      const result = await controller.findOne(id);
 
       expect(mockGetAnnouncementByIdService.execute).toHaveBeenCalledWith(id);
       expect(result).toEqual(expected);
@@ -100,7 +92,7 @@ describe('AnnouncementController', () => {
       const expected = { id: 'ann-new', ...dto };
       mockCreateAnnouncementService.execute.mockResolvedValue(expected);
 
-      const result = await controller.create(mockUser, dto);
+      const result = await controller.create(dto);
 
       expect(mockCreateAnnouncementService.execute).toHaveBeenCalledWith(dto);
       expect(result).toEqual(expected);
@@ -114,7 +106,7 @@ describe('AnnouncementController', () => {
       const expected = { id: 'ann-1', title: 'Updated Announcement' };
       mockUpdateAnnouncementService.execute.mockResolvedValue(expected);
 
-      const result = await controller.update(mockUser, id, dto);
+      const result = await controller.update(id, dto);
 
       expect(mockUpdateAnnouncementService.execute).toHaveBeenCalledWith(
         id,
@@ -129,7 +121,7 @@ describe('AnnouncementController', () => {
       const id = 'ann-1';
       mockDeleteAnnouncementService.execute.mockResolvedValue(undefined);
 
-      await controller.remove(mockUser, id);
+      await controller.remove(id);
 
       expect(mockDeleteAnnouncementService.execute).toHaveBeenCalledWith(id);
     });

@@ -268,11 +268,30 @@ modules stay here beside the domains they read. Three things there are load-bear
   no file under `presence/` or `payroll/` can name one (FR-055, FR-056).
 
 `payroll/` is the only place holding salary. Every permission is prefixed `payroll-`,
-which is exempt from the `ADMIN` role bypass (ADR-0008) — an administrative role grants
-nothing here. Rounding is per line and then summed, never the reverse; a salary
+and holding an administrative role grants nothing here — nor anywhere else. Only
+`SUPER_ADMIN` bypasses the permission check; `ADMIN` is an ordinary role whose grants
+decide what it can reach, so an "Admin Akademik" stops at academic (ADR-0011,
+superseding the exemption lists of ADR-0006 and ADR-0008). Rounding is per line and then summed, never the reverse; a salary
 assignment is superseded rather than overwritten, which is what lets an earlier month
 recalculate to its original figures; and an `APPROVED` run is terminal, corrected only
 by an adjustment run.
+
+`inventory/` splits its permissions four ways — `inventory-assets`,
+`inventory-loans`, `inventory-approvals`, `inventory-master-data` — because
+keeping the register, borrowing, and signing off a loan are three different jobs.
+A borrower needs `inventory-loans.create` and nothing else that writes. Two things
+there are load-bearing:
+
+- **`ApprovalStep.approverRoleCode` holds a role code, not an id.** It is compared
+  against the caller's role codes. It was named `approverRoleId` until 2026-08-15,
+  which is exactly the kind of name that invites a "fix" to a uuid foreign key —
+  after which every approval fails, and a refused approval reads like a permissions
+  problem.
+- **`ApprovalStep.isMandatory` decides whether an approval ends or travels.** A
+  mandatory step is always taken; an optional one is the previous approver's call,
+  which is how the inventory administrator chooses per loan whether the head
+  teacher also signs. Nothing read this field for the first year it existed, so
+  every workflow behaved as though every step were required.
 
 Within a module (e.g. `academic/student/`), the established layering is:
 
@@ -326,6 +345,19 @@ Core rules from `NESTJS-RULES.md` (enforced by convention, not by lint):
   `{ statusCode, message, data, meta? }` — there is no `success` field. Repositories
   return `{ data, total, page, limit }` and the interceptor folds it into
   `data` + `meta` (see `core/interceptors/response.interceptor.ts`).
+- **Reading your own record is a separate permission and a separate route.**
+  `report-cards.read` answers about every student; `report-cards.read-own`
+  answers about the caller, through `GET /rapors/me`. The permission is then the
+  boundary — a role's grants say what its holder may see without opening a use
+  case. The caller's identity is applied *after* their query
+  (`{ ...query, studentId: resolved }`), or a supplied id overrides it and the
+  response looks entirely ordinary. A caller with no matching record gets an
+  empty result, returned explicitly, never a read with the filter dropped. A
+  cohort-shaped read — a recap, a trend — is refused rather than narrowed.
+  Declare `.../me` before its `:id` sibling. If a route does not use the caller,
+  it must not ask for them: `no-ignored-caller.spec.ts` enforces that, because a
+  `_user` parameter is what made this class of defect invisible. See
+  NESTJS-RULES.md.
 - **Read only the fields the caller shows.** Every Prisma read that reaches a
   `Profile` uses one of the three shapes in `shared/domain/prisma-selects.ts` —
   name, display (name + avatar file), or roster (name + gender + NIK).

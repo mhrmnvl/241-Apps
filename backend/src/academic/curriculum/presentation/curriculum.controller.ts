@@ -22,8 +22,6 @@ import {
 } from '@nestjs/swagger';
 
 import { JwtAuthGuard } from '../../../platform/auth/index.js';
-import { CurrentUser } from '../../../core/decorators/current-user.decorator.js';
-import type { AuthenticatedUser } from '../../../core/types/authenticated-user.type.js';
 
 import { CurriculaQueryDto } from '../dto/request/curriculum-query.dto.js';
 import {
@@ -60,10 +58,7 @@ export class CurriculumController {
     type: CurriculaListResponseDto,
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async findAll(
-    @CurrentUser() user: AuthenticatedUser,
-    @Query() query: CurriculaQueryDto,
-  ) {
+  async findAll(@Query() query: CurriculaQueryDto) {
     return this.getCurriculaService.execute(query);
   }
 
@@ -78,10 +73,7 @@ export class CurriculumController {
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Curriculum not found' })
-  async findOne(
-    @CurrentUser() user: AuthenticatedUser,
-    @Param('id', ParseUUIDPipe) id: string,
-  ) {
+  async findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.getCurriculaByIdService.execute(id);
   }
 
@@ -102,10 +94,7 @@ export class CurriculumController {
     status: 409,
     description: 'Curriculum name already exists in this academic year',
   })
-  async create(
-    @Body() dto: CreateCurriculaDto,
-    @CurrentUser() user: AuthenticatedUser,
-  ) {
+  async create(@Body() dto: CreateCurriculaDto) {
     return this.createCurriculaService.execute(dto);
   }
 
@@ -128,7 +117,6 @@ export class CurriculumController {
     description: 'Curriculum name already exists in this academic year',
   })
   async update(
-    @CurrentUser() user: AuthenticatedUser,
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateCurriculaDto,
   ) {
@@ -143,10 +131,7 @@ export class CurriculumController {
   @ApiResponse({ status: 204, description: 'Curriculum deleted' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Curriculum not found' })
-  async remove(
-    @CurrentUser() user: AuthenticatedUser,
-    @Param('id', ParseUUIDPipe) id: string,
-  ) {
+  async remove(@Param('id', ParseUUIDPipe) id: string) {
     await this.deleteCurriculaService.execute(id);
   }
 }

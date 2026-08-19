@@ -8,6 +8,8 @@ import {
   Prisma,
 } from '@prisma/client';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
+import { InventoryReferenceDataMissingException } from '../../../shared/domain/exceptions/inventory-reference-data-missing.exception.js';
+import { moveUnitsAndRecord } from '../../../shared/infrastructure/inventory-unit-movement.steps.js';
 import {
   CreateInventoryHistoryInput,
   CreateLoanRepositoryInput,
@@ -249,10 +251,12 @@ export class PrismaCirculationRepository extends ICirculationRepository {
           where: { code: 'TX-LOAN-OUT' },
         });
 
+        const missing: string[] = [];
+        if (!approvedStatus) missing.push('status role LOAN_APPROVED');
+        if (!loanedStatus) missing.push('status role LOANED');
+        if (!txType) missing.push('transaction type TX-LOAN-OUT');
         if (!approvedStatus || !loanedStatus || !txType) {
-          throw new Error(
-            'The LOAN_APPROVED/ON_LOAN status roles are not configured, or the TX-LOAN-OUT transaction type is missing',
-          );
+          throw new InventoryReferenceDataMissingException(missing);
         }
 
         const approvedLoan = await tx.inventoryLoan.update({
@@ -260,23 +264,18 @@ export class PrismaCirculationRepository extends ICirculationRepository {
           data: { statusId: approvedStatus.id },
         });
 
-        await tx.inventoryAssetUnit.updateMany({
-          where: { id: { in: params.unitIds } },
-          data: { statusId: loanedStatus.id },
+        // Each unit's own status, not one shared value: nothing has moved them
+        // yet on this path, so they are wherever they were sitting.
+        await moveUnitsAndRecord(tx, {
+          units: params.units.map((unit) => ({
+            unitId: unit.id,
+            previousStatusId: unit.statusId,
+          })),
+          newStatusId: loanedStatus.id,
+          transactionTypeId: txType.id,
+          note: `Peminjaman otomatis disetujui (No. ${params.loanNumber})`,
+          changedById: params.requesterId,
         });
-
-        for (const unit of params.units) {
-          await tx.inventoryHistory.create({
-            data: {
-              unitId: unit.id,
-              transactionTypeId: txType.id,
-              previousStatusId: unit.statusId,
-              newStatusId: loanedStatus.id,
-              note: `Peminjaman otomatis disetujui (No. ${params.loanNumber})`,
-              changedById: params.requesterId,
-            },
-          });
-        }
 
         return approvedLoan;
       }
@@ -295,27 +294,20 @@ export class PrismaCirculationRepository extends ICirculationRepository {
         },
       });
 
-      for (const itemDto of params.items) {
-        await tx.inventoryAssetUnit.update({
-          where: { id: itemDto.unitId },
-          data: {
-            statusId: params.availStatusId,
-            conditionId: itemDto.conditionId,
-          },
-        });
-
-        await tx.inventoryHistory.create({
-          data: {
-            unitId: itemDto.unitId,
-            transactionTypeId: params.txTypeId,
-            newStatusId: params.availStatusId,
-            note:
-              itemDto.note ??
-              `Pengembalian pinjaman (No. ${params.loanNumber})`,
-            changedById: params.changedById,
-          },
-        });
-      }
+      // The one path that also re-assesses condition — a unit comes back in
+      // whatever state it comes back in — and the one that records no previous
+      // status, since a return is about where the unit arrives.
+      await moveUnitsAndRecord(tx, {
+        units: params.items.map((item) => ({
+          unitId: item.unitId,
+          conditionId: item.conditionId,
+          note: item.note ?? undefined,
+        })),
+        newStatusId: params.availStatusId,
+        transactionTypeId: params.txTypeId,
+        note: `Pengembalian pinjaman (No. ${params.loanNumber})`,
+        changedById: params.changedById,
+      });
 
       return updatedLoan;
     });

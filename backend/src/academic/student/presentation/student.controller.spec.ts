@@ -10,6 +10,7 @@ import { CreateStudentWithRelationsUseCase } from '../use-cases/create-student-w
 import { DeleteStudentUseCase } from '../use-cases/delete-student.use-case.js';
 import { ExportStudentsUseCase } from '../use-cases/export-student.use-case.js';
 import { GetStudentByIdUseCase } from '../use-cases/get-student-by-id.use-case.js';
+import { GetMyStudentUseCase } from '../use-cases/get-my-student.use-case.js';
 import { GetStudentsUseCase } from '../use-cases/get-students.use-case.js';
 import { ResolveBulkImportConflictsUseCase } from '../use-cases/resolve-bulk-import-conflicts.use-case.js';
 import { ToggleStudentActiveUseCase } from '../use-cases/toggle-student-active.use-case.js';
@@ -24,6 +25,7 @@ describe('StudentController & StudentImportExportController', () => {
 
   const mockGetStudentsService = { execute: jest.fn() };
   const mockGetStudentByIdService = { execute: jest.fn() };
+  const mockGetMyStudentService = { execute: jest.fn() };
   const mockCreateStudentService = { execute: jest.fn() };
   const mockUpdateStudentService = { execute: jest.fn() };
   const mockDeleteStudentService = { execute: jest.fn() };
@@ -45,6 +47,7 @@ describe('StudentController & StudentImportExportController', () => {
       providers: [
         { provide: GetStudentsUseCase, useValue: mockGetStudentsService },
         { provide: GetStudentByIdUseCase, useValue: mockGetStudentByIdService },
+        { provide: GetMyStudentUseCase, useValue: mockGetMyStudentService },
         { provide: CreateStudentUseCase, useValue: mockCreateStudentService },
         {
           provide: CreateStudentWithRelationsUseCase,
@@ -92,7 +95,9 @@ describe('StudentController & StudentImportExportController', () => {
       };
       mockGetStudentsService.execute.mockResolvedValue(expected);
 
-      const result = await controller.findAll(mockUser, query);
+      // No caller argument: the roster is not narrowed for anyone, it is
+      // simply not granted to a student.
+      const result = await controller.findAll(query);
 
       expect(mockGetStudentsService.execute).toHaveBeenCalledWith(query);
       expect(result).toEqual(expected);
@@ -131,7 +136,7 @@ describe('StudentController & StudentImportExportController', () => {
       const expected = { id: 'stu-new', nis: '2024001' };
       mockCreateStudentService.execute.mockResolvedValue(expected);
 
-      const result = await controller.create(dto, mockUser);
+      const result = await controller.create(dto);
 
       expect(mockCreateStudentService.execute).toHaveBeenCalledWith(dto);
       expect(result).toEqual(expected);
@@ -158,10 +163,7 @@ describe('StudentController & StudentImportExportController', () => {
       };
       mockBulkImportStudentsService.execute.mockResolvedValue(expected);
 
-      const result = await importExportController.bulkImport(
-        fakeFile,
-        mockUser,
-      );
+      const result = await importExportController.bulkImport(fakeFile);
 
       expect(mockBulkImportStudentsService.execute).toHaveBeenCalledWith(
         fakeFile.buffer,
@@ -176,7 +178,7 @@ describe('StudentController & StudentImportExportController', () => {
       mockExportStudentsService.execute.mockResolvedValue(fakeBuffer);
 
       const query: ExportStudentQueryDto = { search: 'Ahmad' };
-      const result = await importExportController.export(mockUser, query);
+      const result = await importExportController.export(query);
 
       expect(mockExportStudentsService.execute).toHaveBeenCalledWith(query);
       expect(result).toBeDefined();
@@ -190,7 +192,7 @@ describe('StudentController & StudentImportExportController', () => {
       const expected = { id: 'stu-1', nis: '2024002' };
       mockUpdateStudentService.execute.mockResolvedValue(expected);
 
-      const result = await controller.update(mockUser, id, dto);
+      const result = await controller.update(id, dto);
 
       expect(mockUpdateStudentService.execute).toHaveBeenCalledWith(id, dto);
       expect(result).toEqual(expected);
@@ -202,7 +204,7 @@ describe('StudentController & StudentImportExportController', () => {
       const id = 'stu-1';
       mockDeleteStudentService.execute.mockResolvedValue(undefined);
 
-      await controller.remove(mockUser, id);
+      await controller.remove(id);
 
       expect(mockDeleteStudentService.execute).toHaveBeenCalledWith(id);
     });

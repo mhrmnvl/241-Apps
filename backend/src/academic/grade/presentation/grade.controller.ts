@@ -20,8 +20,6 @@ import {
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../../platform/auth/index.js';
 import { RequirePermissions } from '../../../platform/access-control/permission/decorators/require-permissions.decorator.js';
-import { CurrentUser } from '../../../core/decorators/current-user.decorator.js';
-import type { AuthenticatedUser } from '../../../core/types/authenticated-user.type.js';
 import { GradeQueryDto } from '../dto/request/grade-query.dto.js';
 import { GradeResponseDto } from '../dto/response/grade-response.dto.js';
 import { CreateGradeDto } from '../dto/request/create-grade.dto.js';
@@ -58,10 +56,7 @@ export class GradesController {
   @RequirePermissions('classrooms.read')
   @ApiOperation({ summary: 'Get all classroom levels' })
   @ApiResponse({ status: 200, type: [GradeResponseDto] })
-  async findAll(
-    @CurrentUser() user: AuthenticatedUser,
-    @Query() query: GradeQueryDto,
-  ) {
+  async findAll(@Query() query: GradeQueryDto) {
     return this.getGradesService.execute(query);
   }
 
@@ -70,10 +65,7 @@ export class GradesController {
   @ApiOperation({ summary: 'Get classroom level by ID' })
   @ApiResponse({ status: 200, type: GradeResponseDto })
   @ApiResponse({ status: 404, description: 'Classroom level not found' })
-  async findById(
-    @CurrentUser() user: AuthenticatedUser,
-    @Param('id', ParseUUIDPipe) id: string,
-  ) {
+  async findById(@Param('id', ParseUUIDPipe) id: string) {
     return this.getGradeByIdService.execute(id);
   }
 
@@ -82,10 +74,7 @@ export class GradesController {
   @ApiOperation({ summary: 'Create a new classroom level' })
   @ApiResponse({ status: 201, type: GradeResponseDto })
   @ApiResponse({ status: 409, description: 'Duplicate level or name' })
-  async create(
-    @CurrentUser() user: AuthenticatedUser,
-    @Body() dto: CreateGradeDto,
-  ) {
+  async create(@Body() dto: CreateGradeDto) {
     return this.createGradeService.execute(dto);
   }
 
@@ -96,7 +85,6 @@ export class GradesController {
   @ApiResponse({ status: 404, description: 'Classroom level not found' })
   @ApiResponse({ status: 409, description: 'Duplicate level or name' })
   async update(
-    @CurrentUser() user: AuthenticatedUser,
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateGradeDto,
   ) {
@@ -109,10 +97,7 @@ export class GradesController {
   @ApiOperation({ summary: 'Delete a classroom level (soft delete)' })
   @ApiResponse({ status: 204, description: 'Classroom level deleted' })
   @ApiResponse({ status: 404, description: 'Classroom level not found' })
-  async remove(
-    @CurrentUser() user: AuthenticatedUser,
-    @Param('id', ParseUUIDPipe) id: string,
-  ) {
+  async remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.deleteGradeService.execute(id);
   }
 }

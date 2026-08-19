@@ -3,7 +3,6 @@ import { CreateTeacherPositionDto } from '../dto/request/create-teacher-position
 import { UpdateTeacherPositionDto } from '../dto/request/update-teacher-position.dto.js';
 import { TeacherPositionUseCase } from '../use-cases/teacher-position.use-case.js';
 import { TeacherPositionsController } from './teacher-position.controller.js';
-import type { AuthenticatedUser } from '../../../core/types/authenticated-user.type.js';
 
 describe('TeacherPositionsController', () => {
   let controller: TeacherPositionsController;
@@ -13,13 +12,6 @@ describe('TeacherPositionsController', () => {
     assign: jest.fn(),
     update: jest.fn(),
     remove: jest.fn(),
-  };
-
-  const mockUser: AuthenticatedUser = {
-    id: 'user-uuid',
-    sub: 'user-uuid',
-    identifier: 'admin',
-    sessionId: 'session-uuid',
   };
 
   beforeEach(async () => {
@@ -46,7 +38,7 @@ describe('TeacherPositionsController', () => {
       const expected = [{ id: 'link-1', position: { name: 'Guru Kelas' } }];
       mockPositionUseCase.findAll.mockResolvedValue(expected);
 
-      const result = await controller.findAll(id, mockUser);
+      const result = await controller.findAll(id);
 
       expect(mockPositionUseCase.findAll).toHaveBeenCalledWith(id);
       expect(result).toEqual(expected);
@@ -63,7 +55,7 @@ describe('TeacherPositionsController', () => {
       const expected = { id: 'link-new', positionId: dto.positionId };
       mockPositionUseCase.assign.mockResolvedValue(expected);
 
-      const result = await controller.assign(id, dto, mockUser);
+      const result = await controller.assign(id, dto);
 
       expect(mockPositionUseCase.assign).toHaveBeenCalledWith(id, dto);
       expect(result).toEqual(expected);
@@ -78,7 +70,7 @@ describe('TeacherPositionsController', () => {
       const expected = { id: 'link-1', isPrimary: true };
       mockPositionUseCase.update.mockResolvedValue(expected);
 
-      const result = await controller.update(id, positionId, dto, mockUser);
+      const result = await controller.update(id, positionId, dto);
 
       expect(mockPositionUseCase.update).toHaveBeenCalledWith(
         id,
@@ -95,7 +87,7 @@ describe('TeacherPositionsController', () => {
       const positionId = 'link-1';
       mockPositionUseCase.remove.mockResolvedValue(undefined);
 
-      await controller.remove(id, positionId, mockUser);
+      await controller.remove(id, positionId);
 
       expect(mockPositionUseCase.remove).toHaveBeenCalledWith(id, positionId);
     });

@@ -4,7 +4,9 @@ import { inventoryApi } from '../api/inventoryApi'
 import type {
   AssetQueryParams,
   AssetSavePayload,
+  AssetUnitQueryParams,
   InventoryAsset,
+  InventoryAssetUnit,
 } from '../types'
 
 /**
@@ -29,6 +31,27 @@ export const assetService = {
       return { items, total: response.data?.meta?.total ?? items.length }
     } catch (e) {
       toast.error(getIndonesianErrorMessage(e, 'Gagal memuat data aset.'))
+      return { items: [], total: 0 }
+    }
+  },
+
+  /**
+   * Units, already narrowed by the backend.
+   *
+   * `lendable` is a question for the database, not for the browser: the loan
+   * form used to read a thousand assets with every unit attached and keep the
+   * ones whose status allowed transactions — the same rule the backend applies
+   * when the loan is submitted, kept in two places.
+   */
+  listUnits: async (
+    params?: AssetUnitQueryParams,
+  ): Promise<{ items: InventoryAssetUnit[]; total: number }> => {
+    try {
+      const response = await inventoryApi.getAssetUnits(params)
+      const items = response.data?.data ?? []
+      return { items, total: response.data?.meta?.total ?? items.length }
+    } catch (e) {
+      toast.error(getIndonesianErrorMessage(e, 'Gagal memuat daftar unit.'))
       return { items: [], total: 0 }
     }
   },

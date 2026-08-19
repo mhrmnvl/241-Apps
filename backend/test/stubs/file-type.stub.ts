@@ -1,15 +1,13 @@
 /**
- * Stands in for the ESM-only `file-type` package under ts-jest.
+ * Stands in for `file-type` under Jest.
  *
- * `upload-file.use-case.ts` imports it for magic-byte validation, and it is
- * reached transitively by anything that pulls in `FileModule`. Jest's CJS
- * resolver cannot load the real package, and transforming it is a fight not
- * worth having for tests that never upload anything.
+ * The package is ESM-only and Jest cannot transform it, so every spec touching
+ * an upload has had to mock the use case that imports it — which meant the
+ * wiring around those use cases was never exercised at all. Mapping the package
+ * here lets a test import the real module graph and stub only the leaf.
  *
- * Returning `undefined` mirrors "unrecognised bytes", which the upload use case
- * treats as a rejected file. Nothing in the e2e suite uploads, so this is never
- * called — and if a future e2e does upload, it will fail loudly rather than
- * silently accepting whatever it was given.
+ * Nothing asserts on file-type's behaviour today. If something ever needs to,
+ * it should mock this stub explicitly rather than rely on the return below.
  */
 export function fileTypeFromBuffer(): Promise<undefined> {
   return Promise.resolve(undefined);

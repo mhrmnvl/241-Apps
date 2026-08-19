@@ -13,6 +13,15 @@ export class PermissionResponseDto {
   })
   module!: string;
 
+  @ApiProperty({
+    description:
+      'Which application this permission belongs to. Computed from the module, ' +
+      'not stored: it is a fact about where the code lives. Not derivable from ' +
+      'the code name — four presence modules carry no `presence-` prefix.',
+    example: 'academic',
+  })
+  app!: string;
+
   @ApiProperty({ description: 'The action permitted', example: 'create' })
   action!: string;
 

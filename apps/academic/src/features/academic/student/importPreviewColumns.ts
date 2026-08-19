@@ -41,7 +41,15 @@ export const studentImportColumns: ImportColumnDescriptor[] = [
     errorAliases: ['phone', 'telepon', 'nomor telepon'],
     messageLabel: 'nomor telepon',
   },
-  { key: 'grade', header: 'Tingkat', align: 'center' },
+  {
+    // The backend says `Tingkat 7 not found`, so matching on the field name
+    // alone never marks this column — the alias has to carry the word the
+    // message actually uses.
+    key: 'grade',
+    header: 'Tingkat',
+    align: 'center',
+    errorAliases: ['grade', 'tingkat'],
+  },
   {
     key: 'classroomCode',
     header: 'Kelas',

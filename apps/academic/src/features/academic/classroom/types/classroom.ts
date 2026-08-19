@@ -38,6 +38,12 @@ export interface Classroom {
   academicYear?: AcademicYear
   grade?: Grade
   classroomLevel?: Grade
+  /**
+   * The homeroom teacher for the current semester, as the list endpoint
+   * resolved it. At most one element: the database allows a single supervisor
+   * per classroom per semester, and the query is scoped to one semester.
+   */
+  classroomSupervisors?: { teacher?: ClassroomSupervisor | null }[]
   supervisor?: ClassroomSupervisor
   supervisorAssignment?: ClassroomSupervisorAssignment
 }

@@ -79,6 +79,13 @@ export interface InventoryAsset {
 }
 
 // Child = individual physical unit (each numbered/labelled and loanable).
+export interface AssetUnitAssetRef {
+  id: string
+  assetNumber: string
+  name: string
+  category: InventoryCategory | null
+}
+
 export interface InventoryAssetUnit {
   id: string
   assetId: string
@@ -97,7 +104,12 @@ export interface InventoryAssetUnit {
   condition?: InventoryCondition
   status?: InventoryStatus
   location?: InventoryLocation
-  asset?: InventoryAsset
+  /**
+   * The asset this unit belongs to, as the list endpoint returns it — name and
+   * category, not the whole asset. Purchase price and book value are not sent
+   * for every row of a picker, and typing them here would claim otherwise.
+   */
+  asset?: AssetUnitAssetRef
 }
 
 // Flattened unit for label printing — carries its own asset name so a single
@@ -157,6 +169,20 @@ export interface AssetQueryParams {
   locationId?: string
   statusId?: string
   conditionId?: string
+}
+
+export interface AssetUnitQueryParams {
+  page?: number
+  limit?: number
+  /**
+   * Only units whose status permits a transaction.
+   *
+   * The loan form used to work this out for itself, from every asset and every
+   * unit the API would give it. The rule lives in one place now — the same one
+   * that enforces it when the loan is submitted.
+   */
+  lendable?: boolean
+  search?: string
 }
 
 export interface InventoryReferenceItem {
@@ -254,7 +280,12 @@ export interface ApprovalStep {
   id: string
   workflowId: string
   stepSequence: number
-  approverRoleId: string
+  /** The approving role's *code* — 'ADMIN', 'PRINCIPAL' — not an id. */
+  approverRoleCode: string
+  /**
+   * False means the previous approver decides, per request, whether this step
+   * is also taken. A mandatory step is always taken.
+   */
   isMandatory: boolean
 }
 
@@ -269,7 +300,7 @@ export interface ApprovalWorkflow {
 
 export interface CreateWorkflowStepPayload {
   stepSequence: number
-  approverRoleId: string
+  approverRoleCode: string
   isMandatory?: boolean
 }
 
@@ -305,6 +336,11 @@ export interface ApprovalInstance {
 export interface ProcessApprovalPayload {
   action: 'APPROVE' | 'REJECT'
   note?: string
+  /**
+   * Ask for the next approver's signature as well. Only meaningful when the
+   * next step is optional — a mandatory one is taken regardless.
+   */
+  forwardToNextApprover?: boolean
 }
 
 export interface ProcessApprovalResult {

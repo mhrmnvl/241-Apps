@@ -14,7 +14,7 @@ const {
   selectedClassroomId,
   isLoadingSchedule,
   isAdmin,
-  isTeacher,
+  isPersonal,
   user,
   DAYS,
   selectedClassroom,
@@ -43,7 +43,7 @@ onMounted(init)
   <div class="p-2 pt-0 md:p-6 md:pt-4 lg:p-8 space-y-5">
     <ScheduleHeader
       :is-admin="isAdmin"
-      :is-teacher="isTeacher"
+      :is-personal="isPersonal"
       :selected-classroom-id="selectedClassroomId"
       :options="scheduleClassroomOptions"
       @classroom-change="onClassroomChange"
@@ -52,18 +52,18 @@ onMounted(init)
     <ScheduleSkeleton v-if="isLoadingSchedule" />
 
     <ScheduleEmptyState
-      v-else-if="!isTeacher && !selectedClassroomId"
+      v-else-if="!isPersonal && !selectedClassroomId"
       message="Pilih kelas untuk melihat jadwal pelajaran."
     />
 
     <ScheduleEmptyState
       v-else-if="lessons.length === 0"
-      :message="`Jadwal ${isTeacher ? 'mengajar Anda' : 'untuk kelas ini'} belum diatur atau kosong.`"
+      :message="`Jadwal ${isPersonal ? 'mengajar Anda' : 'untuk kelas ini'} belum diatur atau kosong.`"
     />
 
     <ScheduleTable
       v-else
-      :is-teacher="isTeacher"
+      :is-personal="isPersonal"
       :user="user"
       :selected-classroom="selectedClassroom"
       :sorted-time-slots="sortedTimeSlots"

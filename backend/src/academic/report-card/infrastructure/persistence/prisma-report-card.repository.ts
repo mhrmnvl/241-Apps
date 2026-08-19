@@ -3,6 +3,7 @@ import { Prisma, ReportCard } from '@prisma/client';
 import { PrismaService } from '../../../../core/database/prisma.service.js';
 import type {
   ReportCardQueryInput,
+  ReportCardSummary,
   CreateReportCardRepositoryInput,
   ReportCardSubjectInput,
   UpdateReportCardRepositoryInput,
@@ -37,7 +38,7 @@ export class PrismaReportCardRepository extends IReportCardRepository {
 
   async findAll(
     query: ReportCardQueryInput,
-  ): Promise<PaginatedResult<ReportCardWithDetails>> {
+  ): Promise<PaginatedResult<ReportCardWithDetails, ReportCardSummary>> {
     const {
       page = 1,
       limit = 10,
@@ -50,17 +51,31 @@ export class PrismaReportCardRepository extends IReportCardRepository {
 
     const resolvedSemesterId = await resolveSemesterId(this.prisma, semesterId);
 
+    // One `enrollment` object, merged.
+    //
+    // These were three separate spreads onto the same key, so the last one
+    // present replaced the others — and `resolvedSemesterId` is always present,
+    // because it falls back to the active semester. The student scope was
+    // therefore discarded on every call: `GET /rapors/me` returned the whole
+    // school's report cards to a student, which is the exact exposure this
+    // feature exists to close.
+    //
+    // It was found by signing in as one of two seeded students and reading the
+    // response, not by a test: the use-case tests mock this repository, so they
+    // asserted the scope was passed in and never that it survived.
+    const enrollment: Prisma.StudentEnrollmentWhereInput = {
+      ...(studentId && { studentId }),
+      ...(classroomId && { classroomId }),
+      ...(resolvedSemesterId && { semesterId: resolvedSemesterId }),
+    };
+
     const where: Prisma.ReportCardWhereInput = {
       deletedAt: null,
       ...(isPublished !== undefined && { isPublished }),
-      ...(studentId && { enrollment: { studentId } }),
-      ...(classroomId && { enrollment: { classroomId } }),
-      ...(resolvedSemesterId && {
-        enrollment: { semesterId: resolvedSemesterId },
-      }),
+      ...(Object.keys(enrollment).length > 0 && { enrollment }),
     };
 
-    const [data, total] = await Promise.all([
+    const [data, total, published, averages] = await Promise.all([
       this.prisma.reportCard.findMany({
         where,
         include: REPORT_CARD_WITH_DETAILS_INCLUDE,
@@ -69,9 +84,24 @@ export class PrismaReportCardRepository extends IReportCardRepository {
         orderBy: { createdAt: 'desc' },
       }),
       this.prisma.reportCard.count({ where }),
+      this.prisma.reportCard.count({ where: { ...where, isPublished: true } }),
+      this.prisma.reportCard.aggregate({
+        where,
+        _avg: { totalAverage: true },
+      }),
     ]);
 
-    return { data, total, page, limit };
+    return {
+      data,
+      total,
+      page,
+      limit,
+      summary: {
+        published,
+        draft: total - published,
+        averageScore: averages._avg.totalAverage,
+      },
+    };
   }
 
   async findById(id: string): Promise<ReportCardWithDetails | null> {
@@ -82,6 +112,23 @@ export class PrismaReportCardRepository extends IReportCardRepository {
       },
       include: REPORT_CARD_WITH_DETAILS_INCLUDE,
     });
+  }
+
+  async findOwnership(
+    id: string,
+  ): Promise<{ enrollmentId: string; studentId: string } | null> {
+    const row = await this.prisma.reportCard.findFirst({
+      where: { id, deletedAt: null },
+      select: {
+        enrollmentId: true,
+        enrollment: { select: { studentId: true } },
+      },
+    });
+    if (!row) return null;
+    return {
+      enrollmentId: row.enrollmentId,
+      studentId: row.enrollment.studentId,
+    };
   }
 
   async findByEnrollmentId(

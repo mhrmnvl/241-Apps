@@ -39,6 +39,7 @@ import { CreateStudentUseCase } from '../use-cases/create-student.use-case.js';
 import { CreateStudentWithRelationsUseCase } from '../use-cases/create-student-with-relations.use-case.js';
 import { DeleteStudentUseCase } from '../use-cases/delete-student.use-case.js';
 import { GetStudentByIdUseCase } from '../use-cases/get-student-by-id.use-case.js';
+import { GetMyStudentUseCase } from '../use-cases/get-my-student.use-case.js';
 import { GetStudentsUseCase } from '../use-cases/get-students.use-case.js';
 import { ToggleStudentActiveUseCase } from '../use-cases/toggle-student-active.use-case.js';
 import { UpdateStudentUseCase } from '../use-cases/update-student.use-case.js';
@@ -54,6 +55,7 @@ export class StudentController {
   constructor(
     private readonly getStudentsService: GetStudentsUseCase,
     private readonly getStudentByIdService: GetStudentByIdUseCase,
+    private readonly getMyStudentService: GetMyStudentUseCase,
     private readonly createStudentService: CreateStudentUseCase,
     private readonly createStudentWithRelationsService: CreateStudentWithRelationsUseCase,
     private readonly updateStudentService: UpdateStudentUseCase,
@@ -61,15 +63,52 @@ export class StudentController {
     private readonly toggleStudentActiveService: ToggleStudentActiveUseCase,
   ) {}
 
+  /**
+   * The roster: every student, for whoever holds `students.read`.
+   *
+   * The caller is deliberately not a parameter here, and that is the point of
+   * the permission. This route answers about the school, not about the person
+   * asking, so it is not narrowed for anyone — it is simply not granted to
+   * them.
+   *
+   * A student reaches their own record through `GET me` below, on
+   * `students.read-own`. That route did not exist until 2026-08-16, and this
+   * comment claimed `:id` served the purpose instead. It half did: the
+   * narrowing lives in `GetStudentByIdUseCase`, which refuses a student any id
+   * but their own — but `:id` is guarded by `students.read`, which a student
+   * does not hold, so the guard refused them before the narrowing could run.
+   * The permission was granted, the check was written, and between them nothing
+   * connected the two.
+   *
+   * It used to take `@CurrentUser() _user` and ignore it, while the student
+   * role held `students.read`. The underscore recorded that ignoring it was
+   * deliberate; what it did in practice was hand a student the whole roster.
+   */
   @Get()
   @RequirePermissions('students.read')
   @ApiOperation({ summary: 'List all students (paginated, searchable)' })
   @ApiResponse({ status: 200, type: StudentListResponseDto })
   async findAll(
-    @CurrentUser() _user: AuthenticatedUser,
     @Query() query: StudentQueryDto,
   ): Promise<PaginatedResponse<StudentWithDetails>> {
     return this.getStudentsService.execute(query);
+  }
+
+  /**
+   * Declared before `:id` on purpose — Nest matches in registration order, and
+   * `me` would otherwise be parsed as a uuid and rejected.
+   */
+  @Get('me')
+  @RequirePermissions('students.read-own')
+  @ApiOperation({
+    summary: 'Your own student record — no id parameter exists',
+  })
+  @ApiResponse({ status: 200, type: StudentResponseDto })
+  @ApiResponse({ status: 404, description: 'Not linked to a student record' })
+  async findMine(
+    @CurrentUser() user: AuthenticatedUser,
+  ): Promise<StudentWithDetails> {
+    return this.getMyStudentService.execute(user.id);
   }
 
   @Get(':id')
@@ -93,10 +132,7 @@ export class StudentController {
   @ApiResponse({ status: 201, type: StudentResponseDto })
   @ApiResponse({ status: 404, description: 'Active semester not found' })
   @ApiResponse({ status: 409, description: 'Duplicate NIS or NISN' })
-  async create(
-    @Body() dto: CreateStudentDto,
-    @CurrentUser() _creator: AuthenticatedUser,
-  ): Promise<StudentResponseDto> {
+  async create(@Body() dto: CreateStudentDto): Promise<StudentResponseDto> {
     return this.createStudentService.execute(dto);
   }
 
@@ -125,7 +161,6 @@ export class StudentController {
   @ApiResponse({ status: 404, description: 'Student not found' })
   @ApiResponse({ status: 409, description: 'Duplicate NIS or NISN' })
   async update(
-    @CurrentUser() _user: AuthenticatedUser,
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateStudentDto,
   ): Promise<StudentWithDetails> {
@@ -139,10 +174,7 @@ export class StudentController {
   @ApiParam({ name: 'id', format: 'uuid' })
   @ApiResponse({ status: 204, description: 'Student deleted' })
   @ApiResponse({ status: 404, description: 'Student not found' })
-  async remove(
-    @CurrentUser() _user: AuthenticatedUser,
-    @Param('id', ParseUUIDPipe) id: string,
-  ): Promise<void> {
+  async remove(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
     await this.deleteStudentService.execute(id);
   }
 
@@ -155,7 +187,6 @@ export class StudentController {
   @ApiResponse({ status: 200, description: 'Account status updated' })
   @ApiResponse({ status: 404, description: 'Student not found' })
   async toggleActive(
-    @CurrentUser() _user: AuthenticatedUser,
     @Param('id', ParseUUIDPipe) id: string,
     @Query('isActive', new ParseBoolPipe()) isActive: boolean,
   ): Promise<UserEntity> {

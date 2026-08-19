@@ -61,11 +61,18 @@ export async function buildScoreRoster(
  * Saves a whole roster in one transaction. Upsert keyed on the
  * (enrollment, assessmentItem) unique pair, and clearing `deletedAt` so a
  * previously removed score is revived rather than duplicated.
+ *
+ * `correctedById` is set when the writer is not the teacher assigned to teach
+ * the subject — a homeroom teacher correcting a mark in their class, or an
+ * administrator. Passing null clears it, which is right: the subject teacher
+ * writing the mark again makes it theirs once more, and leaving a stale
+ * corrector on it would blame someone for a figure they did not enter.
  */
 export async function upsertScores(
   prisma: PrismaService,
   assessmentItemId: string,
   records: BulkStudentScoreRecord[],
+  correctedById: string | null = null,
 ): Promise<{ saved: number }> {
   const results = await prisma.$transaction(
     records.map((record) =>
@@ -80,12 +87,16 @@ export async function upsertScores(
           score: record.score,
           note: record.note,
           deletedAt: null,
+          correctedById,
+          correctedAt: correctedById ? new Date() : null,
         },
         create: {
           enrollmentId: record.enrollmentId,
           assessmentItemId,
           score: record.score,
           note: record.note,
+          correctedById,
+          correctedAt: correctedById ? new Date() : null,
         },
       }),
     ),

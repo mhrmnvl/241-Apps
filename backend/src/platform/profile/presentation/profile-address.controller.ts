@@ -10,14 +10,12 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
-  Query,
   UseGuards,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOperation,
   ApiParam,
-  ApiQuery,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
@@ -36,6 +34,29 @@ import { GetProfileAddressesUseCase } from '../use-cases/get-profile-addresses.u
 import { RemoveProfileAddressUseCase } from '../use-cases/remove-profile-address.use-case.js';
 import { UpdateProfileAddressUseCase } from '../use-cases/update-profile-address.use-case.js';
 
+/**
+ * Addresses, under the profile they belong to.
+ *
+ * This controller was mounted at `profiles` alongside `ProfileController` and
+ * `ProfileSocialMediaController`, and all three declared `me`. Nest registers
+ * controllers in the module's array order and Express answers with the first
+ * match, so `GET /profiles/me` was mapped three times and only the first — the
+ * profile itself — ever ran. Worse, `PATCH /profiles/me/:id` matched this
+ * controller's `:addressId` before the social-media controller's
+ * `:socialMediaId`, so editing your own social media link ran the address use
+ * case against a social media id and answered "address not found".
+ *
+ * The frontend had already been written against the paths used here
+ * (`addressApi.ts` calls `/profiles/me/addresses`), so those calls had been
+ * 404ing rather than reaching the shadowed routes. Nesting the resource under
+ * its parent is what removes the collision and repairs both at once.
+ *
+ * Self-service takes no permission, deliberately. Each `me` route resolves the
+ * caller through `@CurrentUser` and the use case looks the address up *for that
+ * user*, so it cannot answer about anybody else. Requiring `profiles.read`
+ * here — as it did — meant a person could only reach their own address by
+ * holding the permission that reads everyone's.
+ */
 @ApiTags('Profile Addresses')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -48,16 +69,16 @@ export class ProfileAddressController {
     private readonly removeProfileAddressUseCase: RemoveProfileAddressUseCase,
   ) {}
 
-  @Get('me')
-  @RequirePermissions('profiles.read')
+  // `me` before `:userId`, or the literal is swallowed by the parameter.
+
+  @Get('me/addresses')
   @ApiOperation({ summary: "List current user's addresses" })
   @ApiResponse({ status: 200, type: [AddressResponseDto] })
   async getOwnAddresses(@CurrentUser('id') userId: string) {
     return this.getProfileAddressesUseCase.execute(userId);
   }
 
-  @Post('me')
-  @RequirePermissions('profiles.create')
+  @Post('me/addresses')
   @ApiOperation({ summary: "Add address to current user's profile" })
   @ApiResponse({ status: 201, type: AddressResponseDto })
   async addOwnAddress(
@@ -67,8 +88,7 @@ export class ProfileAddressController {
     return this.addProfileAddressUseCase.execute(userId, dto);
   }
 
-  @Patch('me/:addressId')
-  @RequirePermissions('profiles.update')
+  @Patch('me/addresses/:addressId')
   @ApiOperation({ summary: "Update current user's address" })
   @ApiParam({ name: 'addressId', format: 'uuid' })
   @ApiResponse({ status: 200, type: AddressResponseDto })
@@ -81,8 +101,7 @@ export class ProfileAddressController {
     return this.updateProfileAddressUseCase.execute(userId, addressId, dto);
   }
 
-  @Delete('me/:addressId')
-  @RequirePermissions('profiles.delete')
+  @Delete('me/addresses/:addressId')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: "Remove current user's address" })
   @ApiParam({ name: 'addressId', format: 'uuid' })
@@ -95,52 +114,56 @@ export class ProfileAddressController {
     await this.removeProfileAddressUseCase.execute(userId, addressId);
   }
 
-  @Get()
+  // Anyone's address. The user is named in the path rather than in a query
+  // string, so the route reads as what it is and cannot be mistaken for the
+  // self-service one above.
+
+  @Get(':userId/addresses')
   @RequirePermissions('profiles.read')
-  @ApiOperation({ summary: "Get any user's addresses (Admin only)" })
-  @ApiQuery({ name: 'userId', required: true, format: 'uuid' })
+  @ApiOperation({ summary: "Get any user's addresses" })
+  @ApiParam({ name: 'userId', format: 'uuid' })
   @ApiResponse({ status: 200, type: [AddressResponseDto] })
-  async findAddressesByAdmin(@Query('userId', ParseUUIDPipe) userId: string) {
+  async findAddressesByAdmin(@Param('userId', ParseUUIDPipe) userId: string) {
     return this.getProfileAddressesUseCase.execute(userId);
   }
 
-  @Post()
+  @Post(':userId/addresses')
   @RequirePermissions('profiles.create')
-  @ApiOperation({ summary: "Add address to any user's profile (Admin only)" })
-  @ApiQuery({ name: 'userId', required: true, format: 'uuid' })
+  @ApiOperation({ summary: "Add address to any user's profile" })
+  @ApiParam({ name: 'userId', format: 'uuid' })
   @ApiResponse({ status: 201, type: AddressResponseDto })
   async addAddressByAdmin(
-    @Query('userId', ParseUUIDPipe) userId: string,
+    @Param('userId', ParseUUIDPipe) userId: string,
     @Body() dto: CreateAddressDto,
   ) {
     return this.addProfileAddressUseCase.execute(userId, dto);
   }
 
-  @Patch(':addressId')
+  @Patch(':userId/addresses/:addressId')
   @RequirePermissions('profiles.update')
-  @ApiOperation({ summary: "Update any user's address (Admin only)" })
-  @ApiQuery({ name: 'userId', required: true, format: 'uuid' })
+  @ApiOperation({ summary: "Update any user's address" })
+  @ApiParam({ name: 'userId', format: 'uuid' })
   @ApiParam({ name: 'addressId', format: 'uuid' })
   @ApiResponse({ status: 200, type: AddressResponseDto })
   @ApiResponse({ status: 404, description: 'Address not found' })
   async updateAddressByAdmin(
-    @Query('userId', ParseUUIDPipe) userId: string,
+    @Param('userId', ParseUUIDPipe) userId: string,
     @Param('addressId', ParseUUIDPipe) addressId: string,
     @Body() dto: UpdateAddressDto,
   ) {
     return this.updateProfileAddressUseCase.execute(userId, addressId, dto);
   }
 
-  @Delete(':addressId')
+  @Delete(':userId/addresses/:addressId')
   @RequirePermissions('profiles.delete')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: "Remove any user's address (Admin only)" })
-  @ApiQuery({ name: 'userId', required: true, format: 'uuid' })
+  @ApiOperation({ summary: "Remove any user's address" })
+  @ApiParam({ name: 'userId', format: 'uuid' })
   @ApiParam({ name: 'addressId', format: 'uuid' })
   @ApiResponse({ status: 204, description: 'Address removed' })
   @ApiResponse({ status: 404, description: 'Address not found' })
   async removeAddressByAdmin(
-    @Query('userId', ParseUUIDPipe) userId: string,
+    @Param('userId', ParseUUIDPipe) userId: string,
     @Param('addressId', ParseUUIDPipe) addressId: string,
   ) {
     await this.removeProfileAddressUseCase.execute(userId, addressId);

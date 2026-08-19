@@ -16,6 +16,21 @@ export interface ReportCardQueryInput extends PaginationQueryInput {
   isPublished?: boolean;
 }
 
+/**
+ * What the summary cards above the list state, for the whole filtered set.
+ *
+ * `averageScore` is the average across report cards that have one; cards still
+ * awaiting generation carry no `totalAverage` and are left out rather than
+ * counted as zero, which would drag a class average down for no reason. It is
+ * null when nothing in the set has a score yet, so the screen can say "-"
+ * instead of "0".
+ */
+export interface ReportCardSummary {
+  published: number;
+  draft: number;
+  averageScore: number | null;
+}
+
 /** One subject's frozen line, as generation resolved it. */
 export interface ReportCardSubjectInput {
   subjectId: string;
@@ -48,8 +63,19 @@ export interface UpdateReportCardRepositoryInput {
 export abstract class IReportCardRepository {
   abstract findAll(
     query: ReportCardQueryInput,
-  ): Promise<PaginatedResult<ReportCardWithDetails>>;
+  ): Promise<PaginatedResult<ReportCardWithDetails, ReportCardSummary>>;
   abstract findById(id: string): Promise<ReportCardWithDetails | null>;
+  /**
+   * Which enrolment, and therefore which student, a card belongs to.
+   *
+   * A projection of its own rather than a read of the whole card:
+   * `ReportCardWithDetails` types every field optional, so the enrolment it
+   * carries can be narrowed away without anything failing to compile — and
+   * whose card this is decides whether a student may open it.
+   */
+  abstract findOwnership(
+    id: string,
+  ): Promise<{ enrollmentId: string; studentId: string } | null>;
   abstract findByEnrollmentId(
     enrollmentId: string,
   ): Promise<ReportCardWithDetails | null>;

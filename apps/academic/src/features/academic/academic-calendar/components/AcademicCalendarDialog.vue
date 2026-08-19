@@ -198,6 +198,55 @@ onMounted(async () => {
               </FormItem>
             </FormField>
 
+            <!--
+              Hours, for the entries that have them. A term and a holiday are
+              measured in days and leave these empty; an activity fills them.
+              Both or neither — the server refuses half a span.
+            -->
+            <div class="grid grid-cols-2 gap-3">
+              <FormField
+                v-slot="{ componentField }"
+                name="startTime"
+              >
+                <FormItem>
+                  <FormLabel
+                    >Jam mulai
+                    <span class="text-muted-foreground font-normal"
+                      >(Opsional)</span
+                    ></FormLabel
+                  >
+                  <FormControl>
+                    <Input
+                      v-bind="componentField"
+                      type="time"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              </FormField>
+
+              <FormField
+                v-slot="{ componentField }"
+                name="endTime"
+              >
+                <FormItem>
+                  <FormLabel
+                    >Jam selesai
+                    <span class="text-muted-foreground font-normal"
+                      >(Opsional)</span
+                    ></FormLabel
+                  >
+                  <FormControl>
+                    <Input
+                      v-bind="componentField"
+                      type="time"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              </FormField>
+            </div>
+
             <FormField
               v-slot="{ componentField }"
               name="description"

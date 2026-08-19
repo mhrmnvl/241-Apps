@@ -13,6 +13,10 @@ describe('UpdateSemesterUseCase', () => {
     findByAcademicYearAndType: jest.fn(),
     update: jest.fn(),
     findTypeById: jest.fn(),
+    // Empty term: these cases are about validation, not about the refusal to
+    // move a term that already holds data — that lives in
+    // update-semester.scope.spec.ts.
+    findFirstDependent: jest.fn().mockResolvedValue(null),
   };
 
   const mockAcademicYearsRepository = {

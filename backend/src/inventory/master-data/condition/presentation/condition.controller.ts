@@ -35,21 +35,21 @@ export class ConditionController {
   ) {}
 
   @Get()
-  @RequirePermissions('inventory.read')
+  @RequirePermissions('inventory-master-data.read')
   @ApiOperation({ summary: 'Get condition list' })
   async getConditions(@Query('search') search?: string) {
     return this.getConditionsUseCase.execute(search);
   }
 
   @Post()
-  @RequirePermissions('inventory.create')
+  @RequirePermissions('inventory-master-data.create')
   @ApiOperation({ summary: 'Create condition item' })
   async createCondition(@Body() data: CreateConditionDto) {
     return this.createConditionUseCase.execute(data);
   }
 
   @Patch(':id')
-  @RequirePermissions('inventory.update')
+  @RequirePermissions('inventory-master-data.update')
   @ApiOperation({ summary: 'Update condition item' })
   async updateCondition(
     @Param('id', ParseUUIDPipe) id: string,
@@ -60,7 +60,7 @@ export class ConditionController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @RequirePermissions('inventory.delete')
+  @RequirePermissions('inventory-master-data.delete')
   @ApiOperation({ summary: 'Delete condition item' })
   async deleteCondition(@Param('id', ParseUUIDPipe) id: string) {
     await this.deleteConditionUseCase.execute(id);

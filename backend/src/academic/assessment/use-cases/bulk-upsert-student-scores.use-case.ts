@@ -12,7 +12,15 @@ export class BulkUpsertStudentScoresUseCase {
     private readonly assessmentItemRepository: IAssessmentItemRepository,
     private readonly enrollmentRepository: IEnrollmentRepository,
   ) {}
-  async execute(dto: BulkUpsertStudentScoreDto) {
+  /**
+   * `correctedById` marks the write as somebody else's correction — a homeroom
+   * teacher fixing a mark in the class they supervise, or an administrator.
+   * Absent means the subject teacher entered it, which is the ordinary case.
+   */
+  async execute(
+    dto: BulkUpsertStudentScoreDto,
+    correctedById: string | null = null,
+  ) {
     const assessmentItem = await this.assessmentItemRepository.findById(
       dto.assessmentItemId,
     );
@@ -49,6 +57,7 @@ export class BulkUpsertStudentScoresUseCase {
     return this.studentScoreRepository.bulkUpsert(
       dto.assessmentItemId,
       dto.records,
+      correctedById,
     );
   }
 }

@@ -1,3 +1,5 @@
+import type { PaginationMeta } from '@/shared/types/api'
+
 export interface RaporEnrollment {
   student: {
     id: string
@@ -18,7 +20,18 @@ export interface RaporEnrollment {
   }
   semester: {
     id: string
-    type: string
+    /**
+     * The term, as a relation — `{ name: 'ODD' | 'EVEN' }`.
+     *
+     * Declared `string` until 2026-08-16, which compiled and rendered
+     * `[object Object]` in the Semester column of a student's own rapor: the
+     * backend includes the relation (`semester: { include: { type: true } }`)
+     * and a wrong type annotation cannot be caught by a compiler that believes
+     * it. The name is the English enum; the screen translates it.
+     */
+    type?: {
+      name: string
+    }
     academicYear?: {
       name: string
     }
@@ -72,6 +85,27 @@ export interface RaporQueryParams {
   classroomId?: string
   semesterId?: string
   isPublished?: boolean
+}
+
+/**
+ * The summary cards, computed by the backend over the whole filtered set.
+ *
+ * This used to be worked out here, from `rapors` — which holds one page. A
+ * class of 32 shown ten at a time reported "Total Siswa: 10" and averaged those
+ * ten, and both numbers changed as you paged. Neither looks wrong on screen,
+ * which is why it stayed.
+ *
+ * `averageScore` is null when nothing in the set has been generated yet, so the
+ * card can show "-" rather than a zero nobody scored.
+ */
+export interface RaporSummary {
+  published: number
+  draft: number
+  averageScore: number | null
+}
+
+export interface RaporListMeta extends PaginationMeta {
+  summary?: RaporSummary
 }
 
 export interface GenerateRaporPayload {

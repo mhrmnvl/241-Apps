@@ -30,12 +30,14 @@ import { StudentScoreQueryDto } from '../dto/request/student-score-query.dto.js'
 import { StudentScoreRosterQueryDto } from '../dto/request/student-score-roster-query.dto.js';
 import { BulkUpsertStudentScoreDto } from '../dto/request/bulk-upsert-student-score.dto.js';
 import { GetStudentScoresUseCase } from '../use-cases/get-student-scores.use-case.js';
+import { GetMyStudentScoresUseCase } from '../use-cases/get-my-student-scores.use-case.js';
 import { GetStudentScoreByIdUseCase } from '../use-cases/get-student-score-by-id.use-case.js';
 import { CreateStudentScoreUseCase } from '../use-cases/create-student-score.use-case.js';
 import { UpdateStudentScoreUseCase } from '../use-cases/update-student-score.use-case.js';
 import { DeleteStudentScoreUseCase } from '../use-cases/delete-student-score.use-case.js';
 import { GetStudentScoreRosterUseCase } from '../use-cases/get-student-score-roster.use-case.js';
 import { BulkUpsertStudentScoresUseCase } from '../use-cases/bulk-upsert-student-scores.use-case.js';
+import { GradeAssignedStudentScoresUseCase } from '../use-cases/grade-assigned-student-scores.use-case.js';
 
 @ApiTags('Student Scores')
 @ApiBearerAuth()
@@ -44,22 +46,34 @@ import { BulkUpsertStudentScoresUseCase } from '../use-cases/bulk-upsert-student
 export class StudentScoreController {
   constructor(
     private readonly getAll: GetStudentScoresUseCase,
+    private readonly getMine: GetMyStudentScoresUseCase,
     private readonly getById: GetStudentScoreByIdUseCase,
     private readonly createUC: CreateStudentScoreUseCase,
     private readonly updateUC: UpdateStudentScoreUseCase,
     private readonly deleteUC: DeleteStudentScoreUseCase,
     private readonly rosterUC: GetStudentScoreRosterUseCase,
     private readonly bulkUpsertUC: BulkUpsertStudentScoresUseCase,
+    private readonly gradeAssignedUC: GradeAssignedStudentScoresUseCase,
   ) {}
 
   @Get()
   @RequirePermissions('student-scores.read')
   @ApiOperation({ summary: 'List student scores' })
-  async findAll(
+  async findAll(@Query() q: StudentScoreQueryDto) {
+    return this.getAll.execute(q);
+  }
+
+  /**
+   * Declared before `:id` so `me` is never parsed as a uuid.
+   */
+  @Get('me')
+  @RequirePermissions('student-scores.read-own')
+  @ApiOperation({ summary: 'Your own marks — no student parameter exists' })
+  async findMine(
     @CurrentUser() user: AuthenticatedUser,
     @Query() q: StudentScoreQueryDto,
   ) {
-    return this.getAll.execute(q);
+    return this.getMine.execute(q, user.id);
   }
 
   @Get('roster')
@@ -67,10 +81,7 @@ export class StudentScoreController {
   @ApiOperation({
     summary: 'Get the full class roster with scores for one assessment item',
   })
-  async getRoster(
-    @CurrentUser() user: AuthenticatedUser,
-    @Query() q: StudentScoreRosterQueryDto,
-  ) {
+  async getRoster(@Query() q: StudentScoreRosterQueryDto) {
     return this.rosterUC.execute(q);
   }
 
@@ -78,33 +89,45 @@ export class StudentScoreController {
   @RequirePermissions('student-scores.read')
   @ApiOperation({ summary: 'Get student score by ID' })
   @ApiParam({ name: 'id', format: 'uuid' })
-  async findOne(
-    @CurrentUser() user: AuthenticatedUser,
-    @Param('id', ParseUUIDPipe) id: string,
-  ) {
+  async findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.getById.execute(id);
   }
 
   @Post()
   @RequirePermissions('student-scores.create')
   @ApiOperation({ summary: 'Create student score' })
-  async create(
-    @CurrentUser() user: AuthenticatedUser,
-    @Body() dto: CreateStudentScoreDto,
-  ) {
+  async create(@Body() dto: CreateStudentScoreDto) {
     return this.createUC.execute(dto);
   }
 
   @Post('bulk')
   @RequirePermissions('student-scores.manage')
   @ApiOperation({
-    summary: 'Bulk upsert scores for a class on one assessment item',
+    summary: 'Bulk upsert scores for any class on one assessment item',
   })
-  async bulkUpsert(
-    @CurrentUser() user: AuthenticatedUser,
-    @Body() dto: BulkUpsertStudentScoreDto,
-  ) {
+  async bulkUpsert(@Body() dto: BulkUpsertStudentScoreDto) {
     return this.bulkUpsertUC.execute(dto);
+  }
+
+  /**
+   * The same save, narrowed to what the caller is responsible for: the subject
+   * they are assigned to teach, or the classroom they supervise.
+   *
+   * A route of its own rather than a branch inside the one above, so the
+   * permission stays the boundary — a role's grants say whether its holder
+   * grades the school or their own classes, without anyone opening a use case
+   * to find out.
+   */
+  @Post('assigned/bulk')
+  @RequirePermissions('student-scores.manage-assigned')
+  @ApiOperation({
+    summary: 'Bulk upsert scores for a class you teach or supervise',
+  })
+  async bulkUpsertAssigned(
+    @Body() dto: BulkUpsertStudentScoreDto,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    return this.gradeAssignedUC.execute(dto, user.id);
   }
 
   @Patch(':id')
@@ -112,7 +135,6 @@ export class StudentScoreController {
   @ApiOperation({ summary: 'Update student score' })
   @ApiParam({ name: 'id', format: 'uuid' })
   async update(
-    @CurrentUser() user: AuthenticatedUser,
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateStudentScoreDto,
   ) {
@@ -124,10 +146,7 @@ export class StudentScoreController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete student score' })
   @ApiParam({ name: 'id', format: 'uuid' })
-  async remove(
-    @CurrentUser() user: AuthenticatedUser,
-    @Param('id', ParseUUIDPipe) id: string,
-  ) {
+  async remove(@Param('id', ParseUUIDPipe) id: string) {
     await this.deleteUC.execute(id);
   }
 }

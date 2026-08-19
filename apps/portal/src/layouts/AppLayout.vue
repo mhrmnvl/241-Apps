@@ -73,8 +73,6 @@ const displayName = computed(() => {
   return (
     currentUser?.profile?.name?.trim() ??
     currentUser?.name?.trim() ??
-    currentUser?.student?.name?.trim() ??
-    currentUser?.teacher?.name?.trim() ??
     'Pengguna'
   )
 })

@@ -50,17 +50,30 @@ const emit = defineEmits<{
 const isEdit = computed(() => !!props.wave)
 
 const formSchema = toTypedSchema(
-  z.object({
-    name: z.string().min(1, 'Nama gelombang wajib diisi'),
-    code: z.string().min(1, 'Kode wajib diisi'),
-    academicYearId: z.string().min(1, 'Tahun ajaran wajib dipilih'),
-    startDate: z.string().min(1, 'Tanggal mulai wajib diisi'),
-    endDate: z.string().min(1, 'Tanggal selesai wajib diisi'),
-    quota: z.coerce.number().min(1, 'Kuota minimal 1'),
-    registrationFee: z.coerce.number().min(0, 'Biaya tidak boleh negatif'),
-    description: z.string().optional().default(''),
-    isActive: z.boolean().default(true),
-  }),
+  z
+    .object({
+      name: z.string().min(1, 'Nama gelombang wajib diisi'),
+      code: z.string().min(1, 'Kode wajib diisi'),
+      academicYearId: z.string().min(1, 'Tahun ajaran wajib dipilih'),
+      startDate: z.string().min(1, 'Tanggal mulai wajib diisi'),
+      endDate: z.string().min(1, 'Tanggal selesai wajib diisi'),
+      quota: z.coerce.number().min(1, 'Kuota minimal 1'),
+      registrationFee: z.coerce.number().min(0, 'Biaya tidak boleh negatif'),
+      description: z.string().optional().default(''),
+      isActive: z.boolean().default(true),
+    })
+    // Says so here as well as on the server, and says the same thing: strictly
+    // after, so a wave that opens and closes on one day is refused in the form
+    // rather than accepted here and rejected on save. Dates are YYYY-MM-DD, so
+    // comparing the strings orders them correctly.
+    .refine(
+      (data) =>
+        !data.startDate || !data.endDate || data.endDate > data.startDate,
+      {
+        message: 'Tanggal selesai harus setelah tanggal mulai.',
+        path: ['endDate'],
+      },
+    ),
 )
 
 interface WaveFormValues {

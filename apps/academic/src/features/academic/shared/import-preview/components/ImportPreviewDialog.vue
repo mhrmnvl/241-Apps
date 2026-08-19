@@ -1,11 +1,13 @@
 <script setup lang="ts" generic="TData">
-import { ref, watch, computed } from 'vue'
+import { ref, watch, computed, onBeforeUnmount } from 'vue'
 import type { ColumnDef } from '@tanstack/vue-table'
 import { Button } from '@/ui/button'
+import { Progress } from '@/ui/progress'
 import { DataTable } from '@/ui'
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -57,6 +59,46 @@ function setAll(action: 'update' | 'skip') {
   actions.value = newActions
 }
 
+/**
+ * Progress while the import is being written.
+ *
+ * The apply endpoint answers once, at the end — it does not report per-row
+ * progress — so this bar cannot know how far along the server is. It advances
+ * on a curve that slows as it goes and stops at 90%, then completes only when
+ * the request actually returns. That way the bar never sits at 100% while work
+ * is still happening, which is the one thing a progress bar must not do.
+ */
+const progress = ref(0)
+let progressTimer: ReturnType<typeof setInterval> | undefined
+
+function stopProgressTimer() {
+  if (progressTimer) {
+    clearInterval(progressTimer)
+    progressTimer = undefined
+  }
+}
+
+watch(
+  () => props.loading,
+  (isLoading) => {
+    stopProgressTimer()
+    if (isLoading) {
+      progress.value = 0
+      progressTimer = setInterval(() => {
+        // Approach 90% asymptotically: each tick closes a tenth of the gap.
+        progress.value = Math.min(
+          90,
+          progress.value + (90 - progress.value) / 10,
+        )
+      }, 200)
+    } else {
+      progress.value = 0
+    }
+  },
+)
+
+onBeforeUnmount(stopProgressTimer)
+
 const summary = computed(() => {
   const successRows = props.rows.filter((r) => r.status === 'SUCCESS').length
   const updateConflicts = props.rows.filter(
@@ -77,6 +119,9 @@ function handleApply() {
 }
 
 function handleOpenChange(val: boolean) {
+  // Closing mid-save would hide a write that is still running — the request
+  // carries on regardless, and the user would be left guessing what landed.
+  if (props.loading && !val) return
   open.value = val
 }
 
@@ -102,6 +147,11 @@ const tableColumns = computed<ColumnDef<ImportPreviewRow<TData>>[]>(() =>
     >
       <DialogHeader class="px-6 py-4 bg-muted/20 border-b shrink-0">
         <DialogTitle>Pratinjau Impor</DialogTitle>
+        <DialogDescription>
+          Belum ada data yang disimpan. Periksa dulu, lalu klik
+          <span class="font-medium text-foreground">Proses Impor</span> untuk
+          menyimpannya.
+        </DialogDescription>
       </DialogHeader>
 
       <div class="px-6 py-4 flex-1 min-h-0 overflow-y-auto space-y-4">
@@ -117,6 +167,22 @@ const tableColumns = computed<ColumnDef<ImportPreviewRow<TData>>[]>(() =>
         />
       </div>
 
+      <div
+        v-if="loading"
+        class="px-6 pb-4 space-y-2 shrink-0"
+        role="status"
+        aria-live="polite"
+      >
+        <div class="flex items-center justify-between text-xs">
+          <span class="flex items-center gap-2 font-medium">
+            <Loader2 class="size-4 animate-spin" />
+            Menyimpan {{ summary.willProcess }} baris...
+          </span>
+          <span class="text-muted-foreground">Jangan tutup jendela ini</span>
+        </div>
+        <Progress :model-value="progress" />
+      </div>
+
       <DialogFooter
         class="px-6 py-4 bg-muted/30 border-t flex flex-col sm:flex-row sm:items-center justify-between gap-4 shrink-0"
       >
@@ -127,13 +193,13 @@ const tableColumns = computed<ColumnDef<ImportPreviewRow<TData>>[]>(() =>
             class="flex items-center gap-1.5 px-3 h-9 bg-emerald-50/30 border border-emerald-200 rounded-md text-foreground font-medium select-none"
           >
             <CheckCircle2 class="h-4 w-4 text-emerald-600 shrink-0" />
-            <span>{{ summary.willProcess }} diproses</span>
+            <span>{{ summary.willProcess }} akan diproses</span>
           </div>
           <div
             class="flex items-center gap-1.5 px-3 h-9 bg-amber-50/30 border border-amber-200 rounded-md text-foreground font-medium select-none"
           >
             <AlertTriangle class="h-4 w-4 text-amber-500 shrink-0" />
-            <span>{{ summary.skipConflicts }} dilewati</span>
+            <span>{{ summary.skipConflicts }} akan dilewati</span>
           </div>
           <div
             class="flex items-center gap-1.5 px-3 h-9 bg-red-50/30 border border-red-200 rounded-md text-foreground font-medium select-none"
@@ -188,7 +254,7 @@ const tableColumns = computed<ColumnDef<ImportPreviewRow<TData>>[]>(() =>
                 v-if="loading"
                 class="size-4 mr-2 animate-spin"
               />
-              {{ loading ? 'Memproses...' : 'Terapkan' }}
+              {{ loading ? 'Memproses...' : 'Proses Impor' }}
             </Button>
           </div>
         </div>

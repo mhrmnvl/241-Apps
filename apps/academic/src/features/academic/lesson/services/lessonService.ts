@@ -9,6 +9,7 @@ import type {
   LessonBatchRow,
   LessonQueryParams,
   LessonServiceResult,
+  ScheduleResponse,
 } from '../types'
 
 const DAY_LABELS: Record<string, string> = {
@@ -54,6 +55,24 @@ export const lessonService = {
       return { success: false, error: err }
     } finally {
       store.loading = false
+    }
+  },
+
+  /**
+   * The caller's own schedule. Throws rather than swallowing, because the one
+   * caller loads it beside the time slots and reports the pair jointly — a
+   * silent empty here would be indistinguishable from a genuinely empty week.
+   */
+  getMySchedule: async (): Promise<{
+    classroom: ScheduleResponse[]
+    teaching: ScheduleResponse[]
+  }> => {
+    // One `.data` for axios, one for the response envelope. The route returns
+    // the object bare, so there is no third.
+    const response = await lessonApi.getMySchedule()
+    return {
+      classroom: response?.data?.data?.classroom ?? [],
+      teaching: response?.data?.data?.teaching ?? [],
     }
   },
 

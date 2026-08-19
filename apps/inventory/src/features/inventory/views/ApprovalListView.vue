@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { DataTable } from '@/ui'
 import { Button } from '@/ui/button'
+import { Checkbox } from '@/ui/checkbox'
 import { Card, CardHeader, CardTitle, CardContent } from '@/ui/card'
 import { Input } from '@/ui/input'
 import { Label } from '@/ui/label'
@@ -18,12 +19,23 @@ import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
 import type { ColumnDef } from '@tanstack/vue-table'
 import { h } from 'vue'
 import { Check, X } from 'lucide-vue-next'
+import { useRoleGuard } from '@/features/platform/auth'
 import { approvalService } from '../services/approvalService'
 import type {
   ApprovalInstance,
   ApprovalStep,
   InventoryLoanItem,
 } from '../types'
+
+const { can } = useRoleGuard()
+
+/**
+ * Reading the queue and signing it are separate grants, so the buttons follow
+ * the second. The backend refuses either way — and refuses again if the
+ * workflow does not name the caller as this step's approver, which no screen
+ * can know in advance — but a button that always fails is worse than no button.
+ */
+const canProcess = can('inventory-approvals.update')
 
 // State
 const pendingApprovals = ref<ApprovalInstance[]>([])
@@ -35,7 +47,26 @@ const isActionOpen = ref(false)
 const selectedApproval = ref<ApprovalInstance | null>(null)
 const actionForm = ref({
   note: '',
+  forwardToNextApprover: false,
 })
+
+/**
+ * The step after the one being decided, when the workflow has one.
+ *
+ * A mandatory next step is not a choice — the loan goes there whatever this
+ * screen shows — so only an optional one becomes a question for the approver.
+ */
+const nextStep = computed<ApprovalStep | undefined>(() => {
+  const approval = selectedApproval.value
+  if (!approval) return undefined
+  return approval.workflow?.steps.find(
+    (s) => s.stepSequence === approval.currentStepSequence + 1,
+  )
+})
+
+const canChooseToForward = computed(
+  () => nextStep.value !== undefined && !nextStep.value.isMandatory,
+)
 
 async function loadApprovals() {
   loading.value = true
@@ -56,6 +87,7 @@ async function loadApprovals() {
 function openActionDialog(approval: ApprovalInstance) {
   selectedApproval.value = approval
   actionForm.value.note = ''
+  actionForm.value.forwardToNextApprover = false
   isActionOpen.value = true
 }
 
@@ -67,6 +99,11 @@ async function processApproval(action: 'APPROVE' | 'REJECT') {
       selectedApproval.value.id,
       action,
       actionForm.value.note,
+      // A rejection ends the request; forwarding it would be meaningless, and
+      // the backend refuses the flag where there is nobody to forward to.
+      action === 'APPROVE' && canChooseToForward.value
+        ? actionForm.value.forwardToNextApprover
+        : undefined,
     )
     if (ok) {
       isActionOpen.value = false
@@ -124,7 +161,7 @@ const columns: ColumnDef<ApprovalInstance>[] = [
       const step = row.original.workflow?.steps.find(
         (s: ApprovalStep) => s.stepSequence === seq,
       )
-      return step ? `Step ${seq}: ${step.approverRoleId}` : `Step ${seq}`
+      return step ? `Step ${seq}: ${step.approverRoleCode}` : `Step ${seq}`
     },
   },
   {
@@ -236,6 +273,50 @@ onMounted(() => {
           />
         </div>
 
+        <!--
+          Only for an optional next step. A mandatory one is taken whatever is
+          shown here, so offering the choice would be a lie; nothing is shown
+          when there is no next approver at all.
+        -->
+        <div
+          v-if="canChooseToForward"
+          class="flex items-start gap-3 rounded-lg border border-dashed p-3"
+        >
+          <Checkbox
+            id="forward"
+            class="mt-0.5"
+            :model-value="actionForm.forwardToNextApprover"
+            @update:model-value="
+              actionForm.forwardToNextApprover = $event === true
+            "
+          />
+          <div class="space-y-1">
+            <Label
+              for="forward"
+              class="cursor-pointer"
+            >
+              Teruskan ke penyetuju berikutnya
+            </Label>
+            <p class="text-xs text-muted-foreground">
+              Persetujuan Anda diteruskan ke
+              {{ nextStep?.approverRoleCode }} untuk diperiksa lagi. Biarkan
+              kosong bila peminjaman ini cukup disetujui oleh Anda.
+            </p>
+          </div>
+        </div>
+
+        <!--
+          The approver should not have to remember which of the two buttons
+          they are about to press means "done".
+        -->
+        <p
+          v-else-if="nextStep"
+          class="text-xs text-muted-foreground"
+        >
+          Peminjaman ini wajib diteruskan ke
+          {{ nextStep.approverRoleCode }} setelah Anda setujui.
+        </p>
+
         <DialogFooter class="pt-4 flex sm:justify-between">
           <Button
             class="mr-auto sm:mr-0"
@@ -245,7 +326,10 @@ onMounted(() => {
             >Batal</Button
           >
 
-          <div class="flex space-x-2">
+          <div
+            v-if="canProcess"
+            class="flex space-x-2"
+          >
             <Button
               type="button"
               variant="destructive"

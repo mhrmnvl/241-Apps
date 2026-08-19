@@ -36,7 +36,6 @@ export class SemesterRolloverController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Semester not found' })
   async rollover(
-    @CurrentUser() _user: AuthenticatedUser,
     @Body() dto: RolloverSemesterDto,
   ): Promise<RolloverSummaryDto> {
     return this.rolloverSemesterService.execute(dto);

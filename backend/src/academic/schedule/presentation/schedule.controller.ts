@@ -30,6 +30,7 @@ import { CreateScheduleDto } from '../dto/request/create-schedule.dto.js';
 import { UpdateScheduleDto } from '../dto/request/update-schedule.dto.js';
 import { ScheduleQueryDto } from '../dto/request/schedule-query.dto.js';
 import { GetSchedulesUseCase } from '../use-cases/get-schedules.use-case.js';
+import { GetMyScheduleUseCase } from '../use-cases/get-my-schedule.use-case.js';
 import { GetScheduleByIdUseCase } from '../use-cases/get-schedule-by-id.use-case.js';
 import { GetSchedulesByClassroomUseCase } from '../use-cases/get-schedules-by-classroom.use-case.js';
 import { CreateScheduleUseCase } from '../use-cases/create-schedule.use-case.js';
@@ -44,6 +45,7 @@ import { BatchUpsertScheduleUseCase } from '../use-cases/batch-upsert-schedule.u
 export class ScheduleController {
   constructor(
     private readonly getAll: GetSchedulesUseCase,
+    private readonly getMine: GetMyScheduleUseCase,
     private readonly getById: GetScheduleByIdUseCase,
     private readonly getByClassroom: GetSchedulesByClassroomUseCase,
     private readonly createUC: CreateScheduleUseCase,
@@ -55,11 +57,26 @@ export class ScheduleController {
   @Get()
   @RequirePermissions('schedules.read')
   @ApiOperation({ summary: 'List schedules' })
-  async findAll(
-    @CurrentUser() user: AuthenticatedUser,
-    @Query() q: ScheduleQueryDto,
-  ) {
+  async findAll(@Query() q: ScheduleQueryDto) {
     return this.getAll.execute(q);
+  }
+
+  /**
+   * Declared before `:id` so `me` is never parsed as a uuid.
+   */
+  @Get('me')
+  @RequirePermissions('schedules.read-own')
+  @ApiOperation({
+    summary:
+      'Your own schedule — your classroom timetable, your teaching, or both',
+  })
+  async findMine(@CurrentUser() user: AuthenticatedUser) {
+    // Returned bare, not as `{ data }`. The response interceptor wraps whatever
+    // it is handed, so wrapping here too produced `data.data.classroom` and the
+    // caller read `undefined` — an empty schedule that looked like an empty
+    // week. `findByClassroom` below wraps because its own consumer already
+    // unwraps twice; a new route should not inherit that.
+    return this.getMine.execute(user.id);
   }
 
   @Get('classroom/:classroomId')
@@ -67,7 +84,6 @@ export class ScheduleController {
   @ApiOperation({ summary: 'Get all schedules for a classroom' })
   @ApiParam({ name: 'classroomId', format: 'uuid' })
   async findByClassroom(
-    @CurrentUser() user: AuthenticatedUser,
     @Param('classroomId', ParseUUIDPipe) classroomId: string,
   ) {
     const data = await this.getByClassroom.execute(classroomId);
@@ -79,7 +95,6 @@ export class ScheduleController {
   @ApiOperation({ summary: 'Batch upsert schedules for a classroom by day' })
   @ApiParam({ name: 'classroomId', format: 'uuid' })
   async batchUpsert(
-    @CurrentUser() user: AuthenticatedUser,
     @Param('classroomId', ParseUUIDPipe) classroomId: string,
     @Body() dto: BatchUpsertScheduleDto,
   ) {
@@ -90,20 +105,14 @@ export class ScheduleController {
   @RequirePermissions('schedules.read')
   @ApiOperation({ summary: 'Get schedule by ID' })
   @ApiParam({ name: 'id', format: 'uuid' })
-  async findOne(
-    @CurrentUser() user: AuthenticatedUser,
-    @Param('id', ParseUUIDPipe) id: string,
-  ) {
+  async findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.getById.execute(id);
   }
 
   @Post()
   @RequirePermissions('schedules.create')
   @ApiOperation({ summary: 'Create schedule' })
-  async create(
-    @CurrentUser() user: AuthenticatedUser,
-    @Body() dto: CreateScheduleDto,
-  ) {
+  async create(@Body() dto: CreateScheduleDto) {
     return this.createUC.execute(dto);
   }
 
@@ -112,7 +121,6 @@ export class ScheduleController {
   @ApiOperation({ summary: 'Update schedule' })
   @ApiParam({ name: 'id', format: 'uuid' })
   async update(
-    @CurrentUser() user: AuthenticatedUser,
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateScheduleDto,
   ) {
@@ -124,10 +132,7 @@ export class ScheduleController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete schedule' })
   @ApiParam({ name: 'id', format: 'uuid' })
-  async remove(
-    @CurrentUser() user: AuthenticatedUser,
-    @Param('id', ParseUUIDPipe) id: string,
-  ) {
+  async remove(@Param('id', ParseUUIDPipe) id: string) {
     await this.deleteUC.execute(id);
   }
 }

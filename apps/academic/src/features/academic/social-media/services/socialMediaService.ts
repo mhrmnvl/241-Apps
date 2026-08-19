@@ -87,15 +87,30 @@ export const socialMediaService = {
   deleteBulk: async (ids: string[]) => {
     if (!ids.length) return false
     try {
-      await socialMediaApi.deleteBulkSocialMedias(ids)
-      toast.success(`${ids.length} socialMedia berhasil dihapus.`)
+      const { deleted, failed } =
+        await socialMediaApi.deleteBulkSocialMedias(ids)
       void socialMediaService.fetchTableData()
+
+      // Say what happened rather than what was asked for. Reporting all of
+      // them deleted when some were refused is how a row nobody meant to keep
+      // survives unnoticed.
+      if (failed === 0) {
+        toast.success(`${deleted} media sosial berhasil dihapus.`)
+        return true
+      }
+      if (deleted === 0) {
+        toast.error('Gagal menghapus media sosial yang dipilih.')
+        return false
+      }
+      toast.warning(
+        `${deleted} media sosial dihapus, ${failed} gagal dan masih ada.`,
+      )
       return true
     } catch (error: unknown) {
       toast.error(
         getIndonesianErrorMessage(
           error,
-          'Gagal menghapus beberapa socialMedia.',
+          'Gagal menghapus beberapa media sosial.',
         ),
       )
       return false

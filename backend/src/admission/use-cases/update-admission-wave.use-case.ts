@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -25,6 +26,17 @@ export class UpdateAdmissionWaveUseCase {
         throw new ConflictException(
           `Admission wave code '${dto.code}' is already in use`,
         );
+      }
+    }
+
+    // Compared against what is stored, not only against what was sent: an edit
+    // that moves the end date alone would otherwise be judged on its own and
+    // could land before a start date it never mentioned.
+    const checkStartDate = dto.startDate ?? wave.startDate;
+    const checkEndDate = dto.endDate ?? wave.endDate;
+    if (checkStartDate && checkEndDate) {
+      if (new Date(checkEndDate) <= new Date(checkStartDate)) {
+        throw new BadRequestException('End date must be after start date');
       }
     }
 

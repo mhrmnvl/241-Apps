@@ -86,9 +86,10 @@ function handleFilterChange(
 // Columns configuration
 const tableColumns = computed(() =>
   createColumns({
-    showActions: can('inventory.update') || can('inventory.delete'),
-    canUpdate: can('inventory.update'),
-    canDelete: can('inventory.delete'),
+    showActions:
+      can('inventory-assets.update') || can('inventory-assets.delete'),
+    canUpdate: can('inventory-assets.update'),
+    canDelete: can('inventory-assets.delete'),
     onEdit: (asset) => {
       void router.push(`/inventory/assets/${asset.id}/edit`)
     },
@@ -195,7 +196,7 @@ onMounted(async () => {
         </div>
         <div class="flex items-center gap-2">
           <Button
-            v-if="can('inventory.create')"
+            v-if="can('inventory-assets.create')"
             size="sm"
             class="sm:h-10 sm:px-4 text-xs sm:text-sm"
             @click="openAddForm"

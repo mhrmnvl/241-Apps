@@ -12,7 +12,7 @@ model Classroom {
   enrollments            StudentEnrollment[]
   classroomSupervisors   ClassroomSupervisor[]
   classroomStructures    ClassroomStructure[]
-  eventClassrooms        EventClassroom[]
+  academicCalendars      AcademicCalendarClassroom[]
   teachingAssignments    TeachingAssignment[]
 
   academicYear AcademicYear @relation(fields: [academicYearId], references: [id])

@@ -21,7 +21,14 @@ export async function findSchedulePage(
   prisma: PrismaService,
   query: ScheduleQueryInput,
 ): Promise<PaginatedResult<ScheduleWithDetails>> {
-  const { page = 1, limit = 10, teachingAssignmentId, day, timeSlotId } = query;
+  const {
+    page = 1,
+    limit = 10,
+    teachingAssignmentId,
+    day,
+    timeSlotId,
+    teacherId,
+  } = query;
 
   const where: Prisma.ScheduleWhereInput = {
     deletedAt: null,
@@ -29,6 +36,10 @@ export async function findSchedulePage(
     ...(teachingAssignmentId ? { teachingAssignmentId } : {}),
     ...(day ? { day } : {}),
     ...(timeSlotId ? { timeSlotId } : {}),
+    // In `AND` rather than merged into `teachingAssignment`, which is already
+    // occupied by the live-academic-year filter above. Merging would mean one
+    // of the two silently replacing the other.
+    ...(teacherId ? { AND: [{ teachingAssignment: { teacherId } }] } : {}),
   };
 
   const [data, total] = await Promise.all([

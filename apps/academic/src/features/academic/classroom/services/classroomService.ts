@@ -1,13 +1,11 @@
 import type {
   Classroom,
-  ClassroomSupervisorAssignment,
   ClassroomSavePayload,
   ClassroomQueryParams,
 } from '../types'
 import { classroomApi } from '../api/classroomApi'
 import { useClassroomStore } from '../stores/classroomStore'
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
-import { PAGINATION } from '@/shared/constants/pagination'
 import { toast } from 'vue-sonner'
 import { useReferenceList } from '@/features/platform/reference-data'
 
@@ -29,40 +27,18 @@ export const classroomService = {
 
       const res = await classroomApi.getClassrooms(mergedParams)
       const classrooms: Classroom[] = res.data.data ?? []
-      store.classrooms = classrooms
+
+      // The backend already scoped this to the current semester, and the
+      // database allows only one row per classroom per semester, so this is a
+      // rename rather than a choice. It used to be a choice: every assignment
+      // ever made was fetched and a winner picked here, which broke quietly
+      // once a classroom had no row for the current semester.
+      store.classrooms = classrooms.map((classroom) => ({
+        ...classroom,
+        supervisor:
+          classroom.classroomSupervisors?.[0]?.teacher ?? classroom.supervisor,
+      }))
       store.totalClassrooms = res.data.meta?.total ?? classrooms.length
-
-      try {
-        const supervisorRes = await classroomApi.getClassroomSupervisors({
-          limit: PAGINATION.REFERENCE_LIMIT,
-        })
-        const assignments = supervisorRes.data.data ?? []
-        const supervisorByClassroomId = new Map<
-          string,
-          ClassroomSupervisorAssignment
-        >()
-        const activeSemesterId = store.semesters.find(
-          (semester) => semester.isActive,
-        )?.id
-
-        store.classroomSupervisorAssignments = assignments
-
-        for (const supervisor of assignments) {
-          const current = supervisorByClassroomId.get(supervisor.classroomId)
-          if (!current || supervisor.semesterId === activeSemesterId) {
-            supervisorByClassroomId.set(supervisor.classroomId, supervisor)
-          }
-        }
-
-        store.classrooms = classrooms.map((classroom) => ({
-          ...classroom,
-          supervisor:
-            supervisorByClassroomId.get(classroom.id)?.teacher ??
-            classroom.supervisor,
-        }))
-      } catch (error: unknown) {
-        void error
-      }
     } catch (error: unknown) {
       toast.error(getIndonesianErrorMessage(error, 'Gagal memuat data kelas.'))
     } finally {

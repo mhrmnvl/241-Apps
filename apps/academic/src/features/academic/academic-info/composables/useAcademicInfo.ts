@@ -4,11 +4,10 @@ import {
   scheduleService,
   DAYS,
 } from '@/features/academic/schedule'
-import { eventCalendarApi } from '@/features/academic/event-calendar'
+import { academicCalendarApi } from '@/features/academic/academic-calendar'
 import { announcementApi } from '@/features/academic/announcement'
-import { useAuthSession } from '@/features/platform/auth'
 import { storeToRefs } from 'pinia'
-import type { EventData } from '@/features/academic/event-calendar'
+import type { CalendarEventData } from '@/features/academic/academic-calendar'
 import type { Announcement } from '@/features/academic/announcement'
 
 const DAY_MAP: Record<string, string> = {
@@ -22,11 +21,10 @@ const DAY_MAP: Record<string, string> = {
 }
 
 export function useAcademicInfo() {
-  const { user } = useAuthSession()
   const store = useScheduleStore()
   const { lessons, timeSlots, isLoadingSchedule } = storeToRefs(store)
 
-  const upcomingEvents = ref<EventData[]>([])
+  const upcomingEvents = ref<CalendarEventData[]>([])
   const recentAnnouncements = ref<Announcement[]>([])
   const isLoadingEvents = ref(false)
   const isLoadingAnnouncements = ref(false)
@@ -53,13 +51,16 @@ export function useAcademicInfo() {
       .filter((row) => row.lesson !== null)
   })
 
+  /**
+   * The caller's own schedule, which the server resolves from their records.
+   *
+   * This read `user.student.classroomId` and returned at the next line, every
+   * time: nothing has ever populated that field. Today's schedule on this
+   * screen has therefore never appeared, and it failed silently, which is why
+   * it lasted.
+   */
   async function fetchTodaySchedule() {
-    const classroomId = user.value?.student?.classroomId
-    if (!classroomId) return
-    await scheduleService.fetchSchedule({
-      isTeacher: false,
-      selectedClassroomId: classroomId,
-    })
+    await scheduleService.fetchMySchedule()
   }
 
   async function fetchUpcomingEvents() {
@@ -69,13 +70,16 @@ export function useAcademicInfo() {
       const end = new Date(now)
       end.setDate(end.getDate() + 30)
 
-      const res = await eventCalendarApi.getEvents({ limit: 5 })
+      // One calendar now: the term, the holidays and the class activities are
+      // all entries in it, so "what is coming up" is one question with one
+      // answer instead of two lists a person had to reconcile.
+      const res = await academicCalendarApi.getCalendars({ limit: 50 })
       const all = res.data?.data ?? []
       upcomingEvents.value = all
-        .filter((e) => new Date(e.startTime) >= now)
+        .filter((e) => new Date(e.endDate) >= now)
         .sort(
           (a, b) =>
-            new Date(a.startTime).getTime() - new Date(b.startTime).getTime(),
+            new Date(a.startDate).getTime() - new Date(b.startDate).getTime(),
         )
         .slice(0, 5)
     } catch {

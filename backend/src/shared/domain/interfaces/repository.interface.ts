@@ -1,8 +1,18 @@
-export interface PaginatedResult<T> {
+export interface PaginatedResult<T, TSummary = never> {
   data: T[];
   total: number;
   page: number;
   limit: number;
+  /**
+   * Figures describing the whole filtered set rather than the page in `data`.
+   *
+   * A caller cannot derive these: it holds one page, so summing what it has
+   * gives the page's total and calls it the set's. That is a defect the screen
+   * cannot show you — the number looks plausible and moves when you paginate.
+   * Anything a header or a summary card states about "all of them" is computed
+   * here, next to the query it describes, and travels in `meta`.
+   */
+  summary?: TSummary;
 }
 
 /**

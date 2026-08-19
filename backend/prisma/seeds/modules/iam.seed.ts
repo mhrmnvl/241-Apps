@@ -46,17 +46,22 @@ export async function seedIam(prisma: PrismaClient) {
       description: 'Institution Administrator',
       isSystem: true,
     },
+    // System, because the code resolves these two by this exact code and
+    // cannot proceed without them: creating a teacher looks up 'TEACHER',
+    // creating a student — or enrolling an accepted applicant — looks up
+    // 'STUDENT'. `isSystem` is the only thing standing between that and a
+    // delete, so `false` here is a promise the code cannot keep.
     {
       code: 'TEACHER',
       name: 'Teacher',
       description: 'Institution Teacher',
-      isSystem: false,
+      isSystem: true,
     },
     {
       code: 'STUDENT',
       name: 'Student',
       description: 'Institution Student',
-      isSystem: false,
+      isSystem: true,
     },
     {
       code: 'PARENT',
@@ -168,10 +173,22 @@ export async function seedIam(prisma: PrismaClient) {
   }
 
   // STUDENT permissions
+  //
+  // Self-service only. This role used to hold `students.read`,
+  // `attendances.read` and `report-cards.read` — the same codes the management
+  // screens require, over reads that did not look at who was asking. A student
+  // opening their own menu was served every student's report card and the
+  // school's whole attendance recap.
+  //
+  // The `-own` codes reach endpoints that resolve the caller's student record
+  // and answer about that. `students.read` in particular is a roster read: it
+  // returns every student, and its sibling `students.read-own` does not.
   const studentPermissionCodes = [
-    'students.read',
-    'attendances.read',
-    'report-cards.read',
+    'students.read-own',
+    'attendances.read-own',
+    'report-cards.read-own',
+    'student-scores.read-own',
+    'schedules.read-own',
   ];
   for (const perm of permissions) {
     if (studentPermissionCodes.includes(perm.code)) {
@@ -182,11 +199,18 @@ export async function seedIam(prisma: PrismaClient) {
   }
 
   // PARENT permissions
-  const parentPermissionCodes = [
-    'students.read',
-    'attendances.read',
-    'report-cards.read',
-  ];
+  //
+  // Deliberately empty. This role held the same three wide codes the student
+  // role did, and the same reads answered them the same way — so a guardian
+  // account could read every student's report card.
+  //
+  // It is not moved onto the `-own` codes, because a parent's "own" is their
+  // child's record, and which guardian may see which child is a question this
+  // system has not answered. Granting nothing is the honest state until it
+  // does: there is no parent surface today, so nothing is lost, and the
+  // alternative would be leaving the hole open for one role while closing it
+  // for another.
+  const parentPermissionCodes: string[] = [];
   for (const perm of permissions) {
     if (parentPermissionCodes.includes(perm.code)) {
       await prisma.rolePermission.create({
@@ -196,10 +220,22 @@ export async function seedIam(prisma: PrismaClient) {
   }
 
   // PRINCIPAL permissions
+  //
+  // The head teacher is the optional second approver on a loan: the inventory
+  // administrator decides, per request, whether it also needs this signature.
+  // So the grant is the approval queue plus enough of the loan and the asset to
+  // judge it — not the register itself, which is the administrator's to keep.
+  //
+  // Two of the three codes here were `inventory.loans.read` and
+  // `inventory.approvals.process`, neither of which has ever existed. The loop
+  // below matches against real permissions, so they granted nothing and said
+  // nothing about it; the head teacher had `inventory.read` alone and could not
+  // approve anything.
   const principalPermissionCodes = [
-    'inventory.read',
-    'inventory.loans.read',
-    'inventory.approvals.process',
+    'inventory-approvals.read',
+    'inventory-approvals.update',
+    'inventory-loans.read',
+    'inventory-assets.read',
   ];
   for (const perm of permissions) {
     if (principalPermissionCodes.includes(perm.code)) {

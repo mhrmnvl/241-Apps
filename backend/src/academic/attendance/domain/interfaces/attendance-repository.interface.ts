@@ -17,6 +17,11 @@ export interface AttendanceQueryInput extends PaginationQueryInput {
   classroomId?: string;
   semesterId?: string;
   date?: string;
+  /**
+   * One student's own rows, across their enrolments. Set by the self-service
+   * read from the signed-in account, never from anything the caller sends.
+   */
+  studentId?: string;
 }
 
 export interface CreateAttendanceRepositoryInput {

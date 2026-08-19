@@ -24,7 +24,44 @@ export class UpdateSemesterUseCase {
       throw new NotFoundException(`Semester with ID ${id} not found`);
     }
 
-    if (dto.academicYearId && dto.academicYearId !== current.academicYearId) {
+    /**
+     * Which academic year a semester belongs to, and which term it is, are the
+     * two facts everything inside it is filed under. Enrolments, teaching
+     * assignments, homeroom teachers, class structures and calendar entries all
+     * key on `semesterId` — and report cards follow through the enrolment — so
+     * re-pointing a semester that already holds any of them moves a whole term
+     * into another year at once, silently and with nothing on any screen to
+     * show it happened.
+     *
+     * A new academic year gets new semesters: `@@unique([academicYearId,
+     * typeId])` allows exactly one Ganjil and one Genap per year, and ADR-0004
+     * defines the two transitions — rollover within a year, promotion across
+     * them. Neither moves a semester.
+     *
+     * Dates, and the semester's own fields, stay editable. Only the two that
+     * decide whose data this is are locked once there is data.
+     *
+     * Same principle as ADR-0004's refusal to deactivate an academic year that
+     * still has active enrolments: a period with something in it is not a field.
+     */
+    const movingYear =
+      dto.academicYearId !== undefined &&
+      dto.academicYearId !== current.academicYearId;
+    const movingType =
+      dto.typeId !== undefined && dto.typeId !== current.typeId;
+
+    if (movingYear || movingType) {
+      const dependent = await this.semesterRepository.findFirstDependent(id);
+      if (dependent) {
+        throw new ConflictException(
+          `This semester already has ${dependent}, so its academic year and ` +
+            'type can no longer be changed. Create a new semester in the ' +
+            'target academic year instead.',
+        );
+      }
+    }
+
+    if (movingYear && dto.academicYearId) {
       const academicYear = await this.academicYearRepository.findById(
         dto.academicYearId,
       );

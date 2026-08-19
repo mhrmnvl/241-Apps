@@ -9,34 +9,33 @@ import { PERMISSIONS_KEY } from '../decorators/require-permissions.decorator.js'
 import { IPermissionRepository } from '../domain/interfaces/permission-repository.interface.js';
 
 /**
- * Codes the ADMIN blanket bypass does not cover.
+ * One role bypasses the permission check, and only one.
  *
- * `portal-`: holding an administrative role in SIAKAD must not by itself confer
- * the right to publish to the school's public website — its operators may be
- * different people, and a boundary the top delegated role walks straight through
- * is not a boundary (FR-062, ADR-0006).
+ * SUPER_ADMIN is the break-glass path: it exists so the school can recover when
+ * a grant configuration has locked everybody out, and it is the single place
+ * where a role name decides an authorization outcome.
  *
- * `payroll-`: the same argument with money. Without the exemption every ADMIN
- * reads every salary in the school by virtue of the role, and — the part that
- * matters — no grant configuration can prevent it, because the bypass runs
- * before permissions are consulted (ADR-0008).
+ * ADMIN used to bypass too — everything except codes prefixed `portal-` and
+ * `payroll-`, which were carved out one at a time (ADR-0006, ADR-0008) because
+ * a boundary the top delegated role walks straight through is not a boundary.
  *
- * SUPER_ADMIN keeps the full bypass on purpose: it is the break-glass path that
- * keeps both recoverable if every operator is locked out.
+ * That exemption list is gone because it was the wrong shape. Each new area
+ * needing separation had to be *remembered* into it, and forgetting was silent:
+ * the permission simply worked for every ADMIN, and no configuration could
+ * prevent it, because the bypass ran before grants were read. The school asked
+ * for per-application administrators — academic, portal, admission, inventory —
+ * and a role that passes everything contradicts that at the root.
  *
- * This is data, not new branching. Blast radius is zero for everything outside
- * the prefixes.
+ * So ADMIN is now an ordinary role: whatever its grants say, and nothing more.
+ * "Admin Akademik" and "Admin Portal" are roles like any other, and the
+ * difference between them is the permissions they hold rather than a name the
+ * guard recognises.
+ *
+ * Nobody held ADMIN in either database when this changed — zero users in dev,
+ * and the role did not exist in production — so the change cost nothing to make
+ * and would have grown more expensive every week.
  */
-const ROLE_BYPASS_EXEMPT_PREFIXES = ['portal-', 'payroll-'] as const;
-
 const SUPER_ADMIN_ROLE = 'SUPER_ADMIN';
-const ADMIN_ROLE = 'ADMIN';
-
-function isExemptFromRoleBypass(permission: string): boolean {
-  return ROLE_BYPASS_EXEMPT_PREFIXES.some((prefix) =>
-    permission.startsWith(prefix),
-  );
-}
 
 @Injectable()
 export class PermissionGuard implements CanActivate {
@@ -67,18 +66,9 @@ export class PermissionGuard implements CanActivate {
     const userRoles = await this.permissionRepository.findUserRoles(user.id);
     const roleCodes = userRoles.map((ur) => ur.role.code);
 
-    // Super Admin bypasses everything — the one break-glass account type.
+    // Super Admin bypasses everything — the one break-glass account type, and
+    // the only role name this guard knows.
     if (roleCodes.includes(SUPER_ADMIN_ROLE)) {
-      return true;
-    }
-
-    // Admin bypasses everything except the exempt prefixes. An Admin asking for
-    // a portal code falls through to the ordinary permission check below and is
-    // granted only if the role actually holds it.
-    if (
-      roleCodes.includes(ADMIN_ROLE) &&
-      !requiredPermissions.some(isExemptFromRoleBypass)
-    ) {
       return true;
     }
 

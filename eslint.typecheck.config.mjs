@@ -92,8 +92,31 @@ export default tseslint.config(
           caughtErrorsIgnorePattern: '^_',
         },
       ],
-      '@typescript-eslint/consistent-type-imports': ['error', { prefer: 'type-imports' }],
+      '@typescript-eslint/consistent-type-imports': [
+        'error',
+        { prefer: 'type-imports' },
+      ],
       '@typescript-eslint/no-empty-object-type': 'error',
+
+      /**
+       * `||` stays allowed on strings, and only on strings.
+       *
+       * The rule is right about the general case and wrong about this one. An
+       * empty string is a value a form actually produces — a cleared input is
+       * `''`, not null — so `??` keeps it and sends the empty string onward.
+       * That is what happened to the calendar's optional hours: taking the
+       * autofix would have posted `""` into a field validated as `HH:mm`.
+       *
+       * Numbers and booleans are deliberately left under the rule, because
+       * there `||` usually *is* the bug: `score || 100` silently rewrites a
+       * mark of zero, and a report card is exactly the place that must not
+       * happen. `ignorePrimitives` is typescript-eslint's own option for
+       * drawing that line.
+       */
+      '@typescript-eslint/prefer-nullish-coalescing': [
+        'error',
+        { ignorePrimitives: { string: true } },
+      ],
 
       '@typescript-eslint/no-floating-promises': 'error',
       '@typescript-eslint/no-misused-promises': 'error',

@@ -22,6 +22,17 @@ export interface CreateAcademicCalendarRepositoryInput {
   startDate: Date;
   endDate: Date;
   description?: string | null;
+  /** Clock hours, when the entry has any. Both or neither. */
+  startTime?: Date | null;
+  endTime?: Date | null;
+  /**
+   * Classrooms the entry is for. Absent or empty means the whole school.
+   *
+   * On update the list is replaced wholesale, never merged: dropping a class
+   * from an entry has to be expressible, and a merge makes removal impossible
+   * without a second call nobody would think to make.
+   */
+  classroomIds?: string[];
 }
 
 export type UpdateAcademicCalendarRepositoryInput =

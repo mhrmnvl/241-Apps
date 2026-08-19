@@ -10,6 +10,7 @@
   ],
   "moduleNameMapper": {
     "^file-type$": "<rootDir>/test/stubs/file-type.stub.ts",
+    "^puppeteer$": "<rootDir>/test/stubs/puppeteer.stub.ts",
     "^(\\.{1,2}/.*)\\.js$": "$1"
   },
   "testEnvironment": "node"
