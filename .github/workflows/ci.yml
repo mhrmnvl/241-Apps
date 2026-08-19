@@ -1,44 +1,70 @@
-name: Continuous Integration (Backend)
+name: Continuous Integration
 
 # `dev` is where work lands and `main` is production, so both are checked —
 # `develop` was listed here and has never existed, so half of this ran nowhere.
-#
-# The frontend half lives in `ci-frontend.yml`, because `paths` filters a
-# workflow rather than a job and the two halves have different reasons to run.
-# The shared entries below appear in both files on purpose: a lockfile change
-# can break either side, and an unnecessary run costs minutes while a missing
-# one ships something unchecked.
-#
-# `docs/**` is deliberately absent. A documentation-only commit now runs no
-# checks at all — which is the intent, and is safe only while no check is
-# *required*. See the note in `ci-frontend.yml` before enabling branch
-# protection.
 on:
   push:
     branches: [main, dev]
-    paths:
-      - 'backend/**'
-      - 'package.json'
-      - 'pnpm-lock.yaml'
-      - 'pnpm-workspace.yaml'
-      - '.github/workflows/ci.yml'
   pull_request:
     branches: [main, dev]
-    paths:
-      - 'backend/**'
-      - 'package.json'
-      - 'pnpm-lock.yaml'
-      - 'pnpm-workspace.yaml'
-      - '.github/workflows/ci.yml'
 
 concurrency:
-  group: continuous-integration-backend-${{ github.ref }}
+  group: continuous-integration-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
   contents: read
 
 jobs:
+  ci:
+    name: Frontend · lint, types, tests, build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm via Corepack
+        run: |
+          corepack enable
+          # Match the version that wrote the lockfile (see package.json
+          # "packageManager"). pnpm 10+ reads `overrides` from pnpm-workspace.yaml;
+          # pnpm 9 reads it from package.json, which mismatches the lockfile.
+          corepack prepare pnpm@11.11.0 --activate
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check formatting
+        run: pnpm run format:check
+
+      - name: Lint
+        run: pnpm run lint
+
+      # Type-aware lint, which catches a different class of defect from the
+      # syntactic pass above and was not running here at all.
+      - name: Lint (type-aware)
+        run: pnpm run lint:strict
+
+      - name: Type check
+        run: pnpm run typecheck
+
+      # `pnpm test` covers the five apps and @241/{shared,platform,master-data}.
+      # These existed and ran only on developers' machines, which is the same as
+      # not having them: nothing stopped a merge that broke one.
+      - name: Test
+        run: pnpm run test
+
+      - name: Build
+        run: pnpm run build
+
   # The backend was absent from CI entirely — not linted, not type-checked, not
   # tested, not built. Its 1,900+ tests ran only locally, and a change that broke
   # it reached the deploy script before anything noticed. It has its own tooling
