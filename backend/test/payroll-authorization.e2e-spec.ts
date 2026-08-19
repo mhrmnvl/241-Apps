@@ -166,7 +166,21 @@ describe('payroll authorization (ADR-0008)', () => {
   beforeAll(async () => {
     const moduleRef: TestingModule = await Test.createTestingModule({
       imports: [
-        ConfigModule.forRoot({ isGlobal: true }),
+        // Supplied inline rather than read from the environment: without a
+        // `backend/.env` this suite dies with `Configuration key "JWT_SECRET"
+        // does not exist` on every test, which is what a fresh clone, a git
+        // worktree and CI all look like. A regression net that only runs on
+        // one machine is not protecting anything.
+        ConfigModule.forRoot({
+          isGlobal: true,
+          ignoreEnvFile: true,
+          load: [
+            () => ({
+              JWT_SECRET: 'test-jwt-secret-for-e2e-testing-minimum-32-chars',
+              NODE_ENV: 'test',
+            }),
+          ],
+        }),
         LoggerModule.forRoot({ pinoHttp: { enabled: false } }),
         PrismaModule,
         PayrollModule,
