@@ -16,6 +16,8 @@ export const EMPTY_SCHOOL_UNIT: SchoolUnitProfile = {
   phone: '',
   email: '',
   website: '',
+  latitude: null,
+  longitude: null,
 }
 
 export const EMPTY_ADDRESS: SchoolUnitAddress = {

@@ -39,6 +39,20 @@ export class SchoolUnitResponseDto {
   @ApiProperty({ example: 'https://mtsn1malang.sch.id' })
   website!: string;
 
+  @ApiPropertyOptional({
+    example: -6.914744,
+    nullable: true,
+    description: 'WGS84 latitude. Null when no pin has been recorded.',
+  })
+  latitude!: number | null;
+
+  @ApiPropertyOptional({
+    example: 107.60981,
+    nullable: true,
+    description: 'WGS84 longitude. Null when no pin has been recorded.',
+  })
+  longitude!: number | null;
+
   @ApiPropertyOptional({ type: () => [SchoolUnitSocialMediaResponseDto] })
   socialMedias!: SchoolUnitSocialMediaResponseDto[];
 }

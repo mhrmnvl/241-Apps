@@ -24,6 +24,8 @@ export interface SchoolUnitRepositoryInput {
   email?: string;
   website?: string;
   isActive?: boolean;
+  latitude?: number | null;
+  longitude?: number | null;
 }
 
 export abstract class ISchoolUnitRepository {

@@ -821,6 +821,9 @@ importers:
       axios:
         specifier: ^1.16.1
         version: 1.18.1
+      leaflet:
+        specifier: ^1.9.4
+        version: 1.9.4
       lucide-vue-next:
         specifier: ^0.577.0
         version: 0.577.0(vue@3.5.40(typescript@5.8.3))
@@ -843,6 +846,9 @@ importers:
         specifier: ^3.25.76
         version: 3.25.76
     devDependencies:
+      '@types/leaflet':
+        specifier: ^1.9.22
+        version: 1.9.22
       '@vitejs/plugin-vue':
         specifier: ^6.0.7
         version: 6.0.8(vite@7.3.6(@types/node@25.9.5)(jiti@2.7.0)(lightningcss@1.32.0)(stylus@0.57.0)(terser@5.49.0)(tsx@4.23.1)(yaml@2.9.0))(vue@3.5.40(typescript@5.8.3))
@@ -3188,6 +3194,9 @@ packages:
 
   '@types/leaflet@1.7.6':
     resolution: {integrity: sha512-Emkz3V08QnlelSbpT46OEAx+TBZYTOX2r1yM7W+hWg5+djHtQ1GbEXBDRLaqQDOYcDI51Ss0ayoqoKD4CtLUDA==}
+
+  '@types/leaflet@1.9.22':
+    resolution: {integrity: sha512-h3lhECYEKDasG7LFHu+GiHqAvsgLuQvlJvVZzJDGONo3sEL+wUOqSFLnwkZlK0qVxnxbuGFW8iBlJNYs5wgndA==}
 
   '@types/luxon@3.7.2':
     resolution: {integrity: sha512-gW+Oib+vUtGJBtNC8V9Reww0oIpusw+4m81uncg9REGZAJfqOQHfo/nkabnc7w0QReXyPqjrbWMJk6NuAkiX3Q==}
@@ -5733,6 +5742,9 @@ packages:
 
   leaflet@1.7.1:
     resolution: {integrity: sha512-/xwPEBidtg69Q3HlqPdU3DnrXQOvQU/CCHA1tcDQVzOwm91YMYaILjNp7L4Eaw5Z4sOYdbBz6koWyibppd8Zqw==}
+
+  leaflet@1.9.4:
+    resolution: {integrity: sha512-nxS1ynzJOmOlHp+iL3FyWqK89GtNL8U8rvlMOsQdTTssxZwCXh8N2NB3GDQOL+YR3XnWyZAxwQixURb+FA74PA==}
 
   leven@3.1.0:
     resolution: {integrity: sha512-qsda+H8jTaUaN/x5vzW2rzc+8Rw4TAQ/4KjB46IwK5VH+IlVeeeje/EoZRpiXvIqjFgK84QffqPztGI3VBLG1A==}
@@ -10363,6 +10375,10 @@ snapshots:
     dependencies:
       '@types/geojson': 7946.0.16
 
+  '@types/leaflet@1.9.22':
+    dependencies:
+      '@types/geojson': 7946.0.16
+
   '@types/luxon@3.7.2': {}
 
   '@types/mapbox__point-geometry@0.1.4': {}
@@ -13333,6 +13349,8 @@ snapshots:
       readable-stream: 2.3.8
 
   leaflet@1.7.1: {}
+
+  leaflet@1.9.4: {}
 
   leven@3.1.0: {}
 

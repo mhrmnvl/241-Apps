@@ -1,8 +1,11 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { SchoolUnitStatus } from '../../../../shared/domain/enums/school-unit-status.enum.js';
+import { Type } from 'class-transformer';
 import {
   IsEmail,
   IsEnum,
+  IsLatitude,
+  IsLongitude,
   IsNotEmpty,
   IsOptional,
   IsString,
@@ -68,4 +71,24 @@ export class CreateSchoolUnitDto {
   @IsNotEmpty()
   @MaxLength(255)
   website: string;
+
+  @ApiPropertyOptional({
+    example: -6.914744,
+    description:
+      'WGS84 latitude of the school, -90 to 90. Null clears the pin.',
+  })
+  @IsOptional()
+  @IsLatitude()
+  @Type(() => Number)
+  latitude?: number | null;
+
+  @ApiPropertyOptional({
+    example: 107.60981,
+    description:
+      'WGS84 longitude of the school, -180 to 180. Null clears the pin.',
+  })
+  @IsOptional()
+  @IsLongitude()
+  @Type(() => Number)
+  longitude?: number | null;
 }

@@ -29,6 +29,21 @@ model SchoolUnit {
   isActive  Boolean          @default(true) @map("is_active")
   deletedAt DateTime?        @map("deleted_at")
 
+  // Where the school sits, for the map on its profile. Nullable because the
+  // school existed here long before anyone recorded a coordinate, and a
+  // profile with no pin is a normal state, not a broken one.
+  //
+  // Float, not Decimal. Decimal is the right answer for money, where a binary
+  // fraction eventually loses a cent; a coordinate has no such duty, and double
+  // precision carries far more digits than the ~9 a WGS84 pin needs. It also
+  // reaches the client as a JSON number — `Prisma.Decimal` serialises to a
+  // string, which every caller would then have to remember to coerce.
+  //
+  // On SchoolUnit rather than Address: that table is shared with students,
+  // teachers and parents, none of whom need a coordinate.
+  latitude  Float?
+  longitude Float?
+
   type         SchoolUnitType?         @relation(fields: [typeId], references: [id])
   socialMedias SchoolUnitSocialMedia[]
   addresses    Address[]

@@ -25,7 +25,26 @@ export function toSchoolUnitProfile(
     phone: data?.phone ?? EMPTY_SCHOOL_UNIT.phone,
     email: data?.email ?? EMPTY_SCHOOL_UNIT.email,
     website: data?.website ?? EMPTY_SCHOOL_UNIT.website,
+    // `??` rather than `||`: 0 is a real coordinate — the equator and the
+    // prime meridian — and would otherwise be read as "no pin".
+    latitude: data?.latitude ?? null,
+    longitude: data?.longitude ?? null,
   }
+}
+
+/** A pin exists only when both halves of it do. */
+export function hasCoordinates(
+  schoolUnit: Pick<SchoolUnitProfile, 'latitude' | 'longitude'>,
+): boolean {
+  return (
+    typeof schoolUnit.latitude === 'number' &&
+    typeof schoolUnit.longitude === 'number'
+  )
+}
+
+/** Six decimals is about 10 cm — past that the digits are noise on a map. */
+export function formatCoordinate(value: number | null): string {
+  return typeof value === 'number' ? value.toFixed(6) : '-'
 }
 
 export function toSchoolUnitAddress(
@@ -79,6 +98,8 @@ const schoolUnitProfileKeys: (keyof SchoolUnitProfile)[] = [
   'phone',
   'email',
   'website',
+  'latitude',
+  'longitude',
 ]
 
 const schoolUnitAddressKeys: (keyof SchoolUnitAddress)[] = [

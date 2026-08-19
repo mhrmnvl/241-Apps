@@ -23,6 +23,8 @@ export interface SchoolUnitProfile {
   phone: string
   email: string
   website: string
+  latitude?: number | null
+  longitude?: number | null
 }
 
 export interface SchoolUnitAddress {
