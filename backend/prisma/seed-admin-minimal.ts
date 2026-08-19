@@ -14,13 +14,19 @@ import 'dotenv/config';
  * deliberate trade-off for a bootstrap script: it has to work on an empty
  * database with nothing configured. But a password committed to a repository is
  * a password everyone with the repository knows, so SEED_ADMIN_PASSWORD
- * overrides it — set that on the production box and the real credential never
- * touches git.
+ * overrides it — set that on any box that is reachable and the real credential
+ * never touches git.
  *
  *   SEED_ADMIN_PASSWORD='...' pnpm seed:admin-minimal
  *
- * Either way, change it after first login. This account is SUPER_ADMIN, which
- * bypasses every permission check.
+ * **This repository is public, and the fallback below is `admin123`.** Treat it
+ * as a value that is already known to everyone, because it is. Seeding without
+ * SEED_ADMIN_PASSWORD is safe only on a database nobody else can reach — not
+ * the dev box, which answers on the same VPS as production.
+ *
+ * Either way, change it after first login. This account is SUPER_ADMIN, the one
+ * role that bypasses every permission check, so an unchanged default here is
+ * not a small exposure — it is the whole system.
  *
  * Only the DB connection is otherwise read from the environment
  * (DATABASE_URL / DIRECT_URL).
@@ -30,7 +36,7 @@ import 'dotenv/config';
 const ADMIN = {
   username: 'admin',
   // Overridable, so a real password need not be committed. See the note above.
-  password: process.env.SEED_ADMIN_PASSWORD ?? '241MTsS!',
+  password: process.env.SEED_ADMIN_PASSWORD ?? 'admin123',
   name: 'Administrator',
   nik: '0000000000000001',
   gender: UserGender.MALE,

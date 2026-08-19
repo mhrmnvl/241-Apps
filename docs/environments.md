@@ -125,17 +125,22 @@ Done:
 
 Still open:
 
-5. **Required reviewers on the `production` environment.** Not possible — see
-   the note under 6.
+5. **Required reviewers on the `production` environment**, so a merge to `main`
+   waits for a person.
 6. **Protect `main`: require a pull request and the CI checks.** `dev` stays
    open.
 
-   **Not currently possible.** Both branch protection and rulesets return
-   `403 — Upgrade to GitHub Pro or make this repository public` on a private
-   repository under a free account, and so do environment reviewers. Until the
-   plan changes, `.husky/pre-push` refuses a direct push to `main` — which is a
-   guard on one machine, bypassable with `--no-verify`, and no substitute for
-   the server-side rule. It catches the slip, not the intent.
+   Both of these used to return `403 — Upgrade to GitHub Pro or make this
+   repository public`. **Making the repository public removes that wall** —
+   branch protection, rulesets and environment reviewers are all free on a
+   public repository, which is the larger half of why going public was worth
+   doing. The Actions quota was the smaller half.
+
+   So this is now a task rather than a limitation, and it is the one that
+   matters most here. Everything guarding `main` today is advisory:
+   `Promotion Guard` reports rather than blocks, and `.husky/pre-push` is a
+   guard on one machine that `--no-verify` walks past. Both catch the slip,
+   neither catches the intent. A required check does.
 
 7. **Delete the repository-wide `HOST` / `USERNAME` / `SSH_KEY` / `PORT`.**
    They still exist. Nothing reads them.
