@@ -41,7 +41,7 @@ const props = defineProps<{
  * Academic years are loaded here rather than by the semester list page.
  *
  * The list shows semesters, not years — it fetched them on mount only to fill
- * this sheet's dropdown. Loaded once per visit; a school adds one a year.
+ * this dialog's dropdown. Loaded once per visit; a school adds one a year.
  */
 const { academicYears, fetchAcademicYears } = useSemesterList()
 
@@ -50,6 +50,10 @@ watch(
   (isOpen) => {
     if (isOpen && academicYears.value.length === 0) void fetchAcademicYears()
   },
+  // The list page renders this behind `v-if="isAddModalOpen"`, so it mounts
+  // with `open` already true and that prop never changes afterwards. Without
+  // `immediate` the callback never runs and the Tahun Ajaran select stays empty.
+  { immediate: true },
 )
 
 const emit = defineEmits<{
