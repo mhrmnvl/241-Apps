@@ -2,53 +2,99 @@ import { computed, ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import { academicSettingService } from '../services/academicSettingService'
 import { useAcademicSettingStore } from '../stores/academicSettingStore'
+import {
+  PASSING_SCORE_MAX,
+  PASSING_SCORE_MIN,
+} from '../constants/passing-score'
+
+/** Order carries no meaning in the rule, so compare them as sets. */
+function sameHolidays(a: readonly number[], b: readonly number[]): boolean {
+  const x = [...a].sort((m, n) => m - n)
+  const y = [...b].sort((m, n) => m - n)
+  return x.length === y.length && x.every((day, i) => day === y[i])
+}
 
 export function useAcademicSetting() {
   const store = useAcademicSettingStore()
-  const { weeklyHolidays, loading, isSaving, loadError, formError } =
-    storeToRefs(store)
+  const {
+    weeklyHolidays,
+    defaultPassingScore,
+    loading,
+    isSaving,
+    loadError,
+    formError,
+  } = storeToRefs(store)
 
   /**
-   * The toggles edit a draft, not the store.
+   * The controls edit a draft, not the store.
    *
-   * Editing the saved value directly would leave the screen claiming a rule
+   * Editing the saved values directly would leave the screen claiming settings
    * the server never accepted the moment a save failed.
    */
-  const draft = ref<number[]>([...weeklyHolidays.value])
+  const draftHolidays = ref<number[]>([...weeklyHolidays.value])
+  const draftPassingScore = ref<number>(defaultPassingScore.value)
 
   watch(weeklyHolidays, (saved) => {
-    draft.value = [...saved]
+    draftHolidays.value = [...saved]
   })
 
-  const isDirty = computed(() => {
-    const a = [...draft.value].sort((x, y) => x - y)
-    const b = [...weeklyHolidays.value].sort((x, y) => x - y)
-    return a.length !== b.length || a.some((day, i) => day !== b[i])
+  watch(defaultPassingScore, (saved) => {
+    draftPassingScore.value = saved
   })
 
-  function toggle(weekday: number) {
-    draft.value = draft.value.includes(weekday)
-      ? draft.value.filter((day) => day !== weekday)
-      : [...draft.value, weekday]
+  const isDirty = computed(
+    () =>
+      !sameHolidays(draftHolidays.value, weeklyHolidays.value) ||
+      draftPassingScore.value !== defaultPassingScore.value,
+  )
+
+  /**
+   * Checked here rather than only in the field, so the Save button cannot send
+   * a value the API is going to refuse.
+   */
+  const isValid = computed(
+    () =>
+      Number.isInteger(draftPassingScore.value) &&
+      draftPassingScore.value >= PASSING_SCORE_MIN &&
+      draftPassingScore.value <= PASSING_SCORE_MAX,
+  )
+
+  function toggleHoliday(weekday: number) {
+    draftHolidays.value = draftHolidays.value.includes(weekday)
+      ? draftHolidays.value.filter((day) => day !== weekday)
+      : [...draftHolidays.value, weekday]
+  }
+
+  function setPassingScore(score: number) {
+    draftPassingScore.value = score
   }
 
   function reset() {
-    draft.value = [...weeklyHolidays.value]
+    draftHolidays.value = [...weeklyHolidays.value]
+    draftPassingScore.value = defaultPassingScore.value
   }
 
+  /** One record, one save — half a change reaching the server is worse than none. */
   async function save() {
-    await academicSettingService.saveWeeklyHolidays(draft.value)
+    await academicSettingService.saveAcademicSetting({
+      weeklyHolidays: draftHolidays.value,
+      defaultPassingScore: draftPassingScore.value,
+    })
   }
 
   return {
-    draft,
+    draftHolidays,
+    draftPassingScore,
     weeklyHolidays,
+    defaultPassingScore,
     loading,
     isSaving,
     loadError,
     formError,
     isDirty,
-    toggle,
+    isValid,
+    toggleHoliday,
+    setPassingScore,
     reset,
     save,
     fetch: academicSettingService.fetchAcademicSetting,

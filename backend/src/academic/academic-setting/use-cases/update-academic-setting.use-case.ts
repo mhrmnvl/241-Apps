@@ -19,10 +19,12 @@ export class UpdateAcademicSettingUseCase {
     // future DTO field reach persistence without anyone deciding it should.
     const updated = await this.repository.update(existing.id, {
       weeklyHolidays: dto.weeklyHolidays,
+      defaultPassingScore: dto.defaultPassingScore,
     });
 
     this.logger.log(
-      `Academic settings updated: weekly holidays [${updated.weeklyHolidays.join(', ')}]`,
+      `Academic settings updated: weekly holidays [${updated.weeklyHolidays.join(', ')}], ` +
+        `default passing score ${updated.defaultPassingScore}`,
     );
     return updated;
   }

@@ -9,6 +9,7 @@ import { AcademicSettingEntity } from '../entities/academic-setting.entity.js';
  */
 export interface AcademicSettingRepositoryInput {
   weeklyHolidays?: number[];
+  defaultPassingScore?: number;
 }
 
 export abstract class IAcademicSettingRepository {

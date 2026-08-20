@@ -7,8 +7,15 @@ export interface AcademicSetting {
    * than holding an entry for every Sunday of the year.
    */
   weeklyHolidays: number[]
+  /**
+   * The pass mark used when neither the teaching assignment nor the curriculum
+   * sets one for a subject — a data gap the report card grades through rather
+   * than refusing to print.
+   */
+  defaultPassingScore: number
 }
 
 export interface AcademicSettingSavePayload {
   weeklyHolidays: number[]
+  defaultPassingScore: number
 }

@@ -28,6 +28,9 @@ export class PrismaAcademicSettingRepository extends IAcademicSettingRepository 
         ...(input.weeklyHolidays !== undefined && {
           weeklyHolidays: input.weeklyHolidays,
         }),
+        ...(input.defaultPassingScore !== undefined && {
+          defaultPassingScore: input.defaultPassingScore,
+        }),
       },
     });
   }
