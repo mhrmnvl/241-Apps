@@ -35,7 +35,12 @@ export const academicYearService = {
     store.formError = null
     try {
       if (id) {
-        await academicYearApi.updateAcademicYear(id, payload)
+        // Named field by field rather than forwarded whole. `isActive` is not
+        // part of `UpdateAcademicYearDto` — activation is a separate endpoint,
+        // called just below — and the API validates with `forbidNonWhitelisted`,
+        // so passing it along failed the entire edit with "property isActive
+        // should not exist" while the name change never reached the server.
+        await academicYearApi.updateAcademicYear(id, { name: payload.name })
         if (
           payload.isActive !== undefined &&
           payload.isActive !== originalIsActive
