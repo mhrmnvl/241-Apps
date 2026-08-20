@@ -27,9 +27,9 @@ const emit = defineEmits<{
 
 <template>
   <div
-    class="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6"
+    class="flex flex-wrap items-center justify-center sm:justify-between gap-3 sm:gap-4 mb-6"
   >
-    <div class="flex items-center gap-2">
+    <div class="flex items-center gap-1.5 sm:gap-2">
       <Button
         variant="outline"
         size="icon"
@@ -53,12 +53,12 @@ const emit = defineEmits<{
       >
     </div>
 
-    <div class="flex items-center gap-2">
+    <div class="flex items-center gap-1.5 sm:gap-2">
       <Select
         :model-value="currentMonth"
         @update:model-value="(val) => emit('month-change', String(val))"
       >
-        <SelectTrigger class="w-[140px]">
+        <SelectTrigger class="w-[120px] sm:w-[140px]">
           <SelectValue placeholder="Pilih Bulan" />
         </SelectTrigger>
         <SelectContent>
@@ -90,7 +90,5 @@ const emit = defineEmits<{
         </SelectContent>
       </Select>
     </div>
-
-    <div class="hidden sm:block w-[120px]"></div>
   </div>
 </template>

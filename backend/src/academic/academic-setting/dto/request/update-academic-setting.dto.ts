@@ -9,11 +9,16 @@ import {
   Max,
   Min,
 } from 'class-validator';
+
 import {
   WEEKDAY_COUNT,
   WEEKDAY_MAX,
   WEEKDAY_MIN,
 } from '../../constants/weekday.constants.js';
+import {
+  PASSING_SCORE_MAX,
+  PASSING_SCORE_MIN,
+} from '../../constants/passing-score.constants.js';
 
 export class UpdateAcademicSettingDto {
   @ApiPropertyOptional({
@@ -33,4 +38,19 @@ export class UpdateAcademicSettingDto {
   @Max(WEEKDAY_MAX, { each: true })
   @Type(() => Number)
   weeklyHolidays?: number[];
+
+  @ApiPropertyOptional({
+    description:
+      'Pass mark used when neither the teaching assignment nor the curriculum ' +
+      'sets one for a subject.',
+    example: 75,
+    minimum: PASSING_SCORE_MIN,
+    maximum: PASSING_SCORE_MAX,
+  })
+  @IsOptional()
+  @IsInt()
+  @Min(PASSING_SCORE_MIN)
+  @Max(PASSING_SCORE_MAX)
+  @Type(() => Number)
+  defaultPassingScore?: number;
 }

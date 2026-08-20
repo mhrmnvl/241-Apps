@@ -26,6 +26,18 @@ model AcademicSetting {
   /// pattern: the office can be open on a Saturday that runs no classes.
   weeklyHolidays Int[] @default([0]) @map("weekly_holidays")
 
+  /// The pass mark used when nothing more specific says otherwise.
+  ///
+  /// A subject's pass mark is normally read off the teaching assignment, and
+  /// failing that the curriculum. This is the last resort: a subject taught and
+  /// graded but never listed in the curriculum for that grade and year, which
+  /// is a data gap rather than a normal state. Grading through it beats
+  /// refusing to produce the report card.
+  ///
+  /// Held here because 75 is a school's choice, not a constant of arithmetic —
+  /// plenty of madrasah set 70 — and it was hard-coded until now.
+  defaultPassingScore Int @default(75) @map("default_passing_score")
+
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 

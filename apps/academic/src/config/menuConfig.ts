@@ -97,7 +97,7 @@ export const menuSections: MenuSection[] = [
       },
       {
         key: 'academic-calendars',
-        title: 'Kalender',
+        title: 'Kalender Pendidikan',
         url: '#',
         icon: CalendarRange,
         items: [
@@ -110,6 +110,11 @@ export const menuSections: MenuSection[] = [
             title: 'Kalender',
             url: '/academic/education-calendar',
             requiredPermission: 'academic-calendars.read',
+          },
+          {
+            title: 'Manajemen Kalender',
+            url: '/academic/education-calendar/manage',
+            requiredPermission: 'academic-calendars.create',
           },
         ],
       },
@@ -130,6 +135,12 @@ export const menuSections: MenuSection[] = [
             requiredPermission: 'classrooms.read',
           },
         ],
+      },
+      {
+        title: 'Pengaturan Akademik',
+        url: '/academic/setting',
+        icon: Settings,
+        requiredPermission: 'academic-settings.read',
       },
     ],
   },

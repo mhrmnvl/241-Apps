@@ -12,4 +12,12 @@ export class AcademicSettingResponseDto {
     type: [Number],
   })
   weeklyHolidays!: number[];
+
+  @ApiProperty({
+    description:
+      'Pass mark used when neither the teaching assignment nor the curriculum ' +
+      'sets one for a subject.',
+    example: 75,
+  })
+  defaultPassingScore!: number;
 }

@@ -9,6 +9,8 @@ export interface AcademicSettingEntity {
   id: string;
   /** Weekdays school does not run, 0 (Sunday) to 6 (Saturday). */
   weeklyHolidays: number[];
+  /** Pass mark used when neither the teaching assignment nor the curriculum sets one. */
+  defaultPassingScore: number;
   createdAt: Date;
   updatedAt: Date;
 }
