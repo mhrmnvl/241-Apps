@@ -8,7 +8,12 @@ import type {
 } from '../types'
 import '../styles/academic-calendar.css'
 import CalendarToolbar from './CalendarToolbar.vue'
-import type { DatesSetArg, EventClickArg } from '@fullcalendar/core'
+import type {
+  DatesSetArg,
+  DayCellContentArg,
+  DayHeaderContentArg,
+  EventClickArg,
+} from '@fullcalendar/core'
 import idLocale from '@fullcalendar/core/locales/id'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import type { DateClickArg } from '@fullcalendar/interaction'
@@ -20,6 +25,12 @@ import { useMediaQuery } from '@vueuse/core'
 const props = defineProps<{
   events?: BaseCalendarEvent[]
   isLoading?: boolean
+  /**
+   * Weekdays school does not run, 0 (Sunday) to 6 (Saturday), from Pengaturan
+   * Akademik. Applied when a cell is rendered — no entry is stored for any of
+   * these days, and changing the rule redraws the whole calendar at once.
+   */
+  weeklyHolidays?: number[]
 }>()
 const emit = defineEmits<{
   'date-click': [info: DateClickInfo]
@@ -83,6 +94,9 @@ const getColorForEvent = (id?: string) => {
   return colorPalette[index]!
 }
 
+const isHolidayWeekday = (date: Date) =>
+  (props.weeklyHolidays ?? []).includes(date.getDay())
+
 const calendarEvents = computed(() => {
   const events: MappedCalendarEvent[] = (props.events ?? []).map((e) => {
     const startStr = getLocalDateString(e.startDate)
@@ -108,48 +122,6 @@ const calendarEvents = computed(() => {
     }
   })
 
-  const m = Number(currentMonth.value)
-  const y = Number(currentYear.value)
-
-  if (!isNaN(m) && !isNaN(y)) {
-    const generateSundays = (year: number, month: number) => {
-      const date = new Date(year, month, 1)
-      const actualMonth = date.getMonth()
-      const actualYear = date.getFullYear()
-
-      while (date.getMonth() === actualMonth) {
-        if (date.getDay() === 0) {
-          const pad = (n: number) => n.toString().padStart(2, '0')
-          const startStr = `${actualYear}-${pad(actualMonth + 1)}-${pad(date.getDate())}`
-
-          const endD = new Date(date)
-          endD.setDate(endD.getDate() + 1)
-          const endStr = `${endD.getFullYear()}-${pad(endD.getMonth() + 1)}-${pad(endD.getDate())}`
-
-          events.push({
-            id: `sunday-${startStr}`,
-            title: 'Libur Akhir Pekan',
-            startDate: startStr,
-            endDate: startStr,
-            start: startStr,
-            end: endStr,
-            allDay: true,
-            display: 'block',
-            backgroundColor: 'hsl(var(--destructive))',
-            borderColor: 'transparent',
-            textColor: 'white',
-            classNames: ['fc-cal-custom'],
-          })
-        }
-        date.setDate(date.getDate() + 1)
-      }
-    }
-
-    generateSundays(y, m - 1)
-    generateSundays(y, m)
-    generateSundays(y, m + 1)
-  }
-
   return events
 })
 
@@ -163,6 +135,10 @@ const calendarOptions = computed(() => ({
   },
   events: calendarEvents.value,
   height: 'auto',
+  dayCellClassNames: (arg: DayCellContentArg) =>
+    isHolidayWeekday(arg.date) ? ['fc-day-holiday'] : [],
+  dayHeaderClassNames: (arg: DayHeaderContentArg) =>
+    isHolidayWeekday(arg.date) ? ['fc-day-holiday'] : [],
   selectable: true,
   dateClick: (info: DateClickArg) => {
     emit('date-click', { dateStr: info.dateStr })

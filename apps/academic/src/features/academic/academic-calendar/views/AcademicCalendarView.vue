@@ -7,6 +7,7 @@ import { useAcademicCalendarView } from '../composables/useAcademicCalendarView'
 import { Card, CardHeader, CardTitle } from '@/ui/card'
 import '../styles/calendar.css'
 import type { DateClickInfo, EventClickInfo } from '../types'
+import { useAcademicSetting } from '@/features/academic/academic-setting'
 
 const router = useRouter()
 
@@ -19,6 +20,16 @@ const {
   todayEvents,
   upcomingEvents,
 } = useAcademicCalendarView()
+
+/**
+ * The teaching week, so the grid can shade the days school does not run.
+ *
+ * Read through the settings feature's own composable rather than duplicated
+ * here. A reader without `academic-settings.read` simply gets no shading —
+ * the calendar itself is unaffected, and nothing is surfaced as an error on a
+ * page that is not about settings.
+ */
+const { weeklyHolidays, fetch: fetchAcademicSetting } = useAcademicSetting()
 
 function handleDateClick(info: DateClickInfo) {
   if (!canManageCalendar.value) return
@@ -53,6 +64,7 @@ onMounted(() => {
   if (currentRange.value.start && currentRange.value.end) {
     void fetchEvents(currentRange.value)
   }
+  void fetchAcademicSetting()
 })
 </script>
 
@@ -86,6 +98,7 @@ onMounted(() => {
           <AcademicCalendarGridView
             :events="events"
             :is-loading="isLoading"
+            :weekly-holidays="weeklyHolidays"
             @date-click="handleDateClick"
             @event-click="handleEventClick"
             @fetch-events="fetchEvents"
