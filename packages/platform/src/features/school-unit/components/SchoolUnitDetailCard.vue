@@ -1,8 +1,15 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { statusOptions } from '../constants'
 import type { SchoolUnitAddress, SchoolUnitProfile } from '../types'
-import { buildFullAddress, formatValue } from '../utils'
+import {
+  buildFullAddress,
+  formatCoordinate,
+  formatValue,
+  hasCoordinates,
+} from '../utils'
+import SchoolLocationDialog from './SchoolLocationDialog.vue'
+import SchoolLocationMap from './SchoolLocationMap.vue'
 import { Card, CardHeader, CardTitle, CardContent } from '@/ui/card'
 import { Badge } from '@/ui/badge'
 import { toast } from 'vue-sonner'
@@ -13,6 +20,8 @@ import {
   Mail,
   Globe,
   MapPin,
+  MapPinned,
+  Maximize2,
   ExternalLink,
   Copy,
   AlertCircle,
@@ -44,6 +53,14 @@ const typeLabel = computed(
 )
 
 const fullAddress = computed(() => buildFullAddress(props.address))
+
+const isLocationDialogOpen = ref(false)
+
+const hasPin = computed(() => hasCoordinates(props.schoolUnit))
+
+const mapTitle = computed(
+  () => props.schoolUnit.surname || props.schoolUnit.name,
+)
 
 const hasValidAddress = computed(() => {
   const a = props.address
@@ -327,107 +344,193 @@ async function copyToClipboard(text: string, label: string) {
         </Card>
       </div>
 
-      <!-- Row 2: Card Lokasi & Alamat Lembaga -->
-      <Card class="rounded-xl shadow-xs py-0">
-        <CardHeader
-          class="flex flex-row items-center gap-2.5 border-b px-5 py-3.5"
-        >
-          <MapPin class="size-4 text-primary shrink-0" />
-          <CardTitle class="text-sm font-semibold tracking-normal">
-            Lokasi & Alamat Lembaga
-          </CardTitle>
-        </CardHeader>
-
-        <CardContent class="p-5 space-y-4">
-          <div>
-            <p class="text-xs font-medium text-muted-foreground">
-              Alamat Lengkap
-            </p>
-            <p
-              class="text-sm font-semibold text-foreground leading-relaxed mt-0.5"
-            >
-              {{ fullAddress }}
-            </p>
-          </div>
-
-          <dl
-            v-if="hasValidAddress"
-            class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-y-3.5 gap-x-6 pt-2 border-t text-sm"
+      <!-- Row 2: alamat tertulis di kiri, titik di peta di kanan -->
+      <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <Card class="rounded-xl shadow-xs py-0 lg:col-span-2">
+          <CardHeader
+            class="flex flex-row items-center gap-2.5 border-b px-5 py-3.5"
           >
+            <MapPin class="size-4 text-primary shrink-0" />
+            <CardTitle class="text-sm font-semibold tracking-normal">
+              Alamat Lembaga
+            </CardTitle>
+          </CardHeader>
+
+          <CardContent class="p-5 space-y-4">
             <div>
-              <dt class="text-xs font-medium text-muted-foreground">
-                Jalan / Gedung
-              </dt>
-              <dd class="font-medium text-foreground mt-0.5">
-                {{ formatValue(address.street) }}
-              </dd>
+              <p class="text-xs font-medium text-muted-foreground">
+                Alamat Lengkap
+              </p>
+              <p
+                class="text-sm font-semibold text-foreground leading-relaxed mt-0.5"
+              >
+                {{ fullAddress }}
+              </p>
             </div>
 
-            <div>
-              <dt class="text-xs font-medium text-muted-foreground">RT / RW</dt>
-              <dd class="font-medium text-foreground mt-0.5">
-                {{
-                  address.rt || address.rw
-                    ? `${address.rt || '-'} / ${address.rw || '-'}`
-                    : '-'
-                }}
-              </dd>
+            <dl
+              v-if="hasValidAddress"
+              class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-y-3.5 gap-x-6 pt-2 border-t text-sm"
+            >
+              <div>
+                <dt class="text-xs font-medium text-muted-foreground">
+                  Jalan / Gedung
+                </dt>
+                <dd class="font-medium text-foreground mt-0.5">
+                  {{ formatValue(address.street) }}
+                </dd>
+              </div>
+
+              <div>
+                <dt class="text-xs font-medium text-muted-foreground">
+                  RT / RW
+                </dt>
+                <dd class="font-medium text-foreground mt-0.5">
+                  {{
+                    address.rt || address.rw
+                      ? `${address.rt || '-'} / ${address.rw || '-'}`
+                      : '-'
+                  }}
+                </dd>
+              </div>
+
+              <div>
+                <dt class="text-xs font-medium text-muted-foreground">
+                  Kelurahan / Desa
+                </dt>
+                <dd class="font-medium text-foreground mt-0.5">
+                  {{ formatValue(address.village) }}
+                </dd>
+              </div>
+
+              <div>
+                <dt class="text-xs font-medium text-muted-foreground">
+                  Kecamatan
+                </dt>
+                <dd class="font-medium text-foreground mt-0.5">
+                  {{ formatValue(address.district) }}
+                </dd>
+              </div>
+
+              <div>
+                <dt class="text-xs font-medium text-muted-foreground">
+                  Kabupaten / Kota
+                </dt>
+                <dd class="font-medium text-foreground mt-0.5">
+                  {{ formatValue(address.city) }}
+                </dd>
+              </div>
+
+              <div>
+                <dt class="text-xs font-medium text-muted-foreground">
+                  Provinsi
+                </dt>
+                <dd class="font-medium text-foreground mt-0.5">
+                  {{ formatValue(address.province) }}
+                </dd>
+              </div>
+
+              <div>
+                <dt class="text-xs font-medium text-muted-foreground">
+                  Kode Pos
+                </dt>
+                <dd class="font-mono font-medium text-foreground mt-0.5">
+                  {{ formatValue(address.postalCode) }}
+                </dd>
+              </div>
+
+              <div>
+                <dt class="text-xs font-medium text-muted-foreground">
+                  Negara
+                </dt>
+                <dd class="font-medium text-foreground mt-0.5">
+                  {{ formatValue(address.country || 'Indonesia') }}
+                </dd>
+              </div>
+            </dl>
+          </CardContent>
+        </Card>
+
+        <Card class="rounded-xl shadow-xs py-0">
+          <CardHeader
+            class="flex flex-row items-center gap-2.5 border-b px-5 py-3.5"
+          >
+            <MapPinned class="size-4 text-primary shrink-0" />
+            <CardTitle class="text-sm font-semibold tracking-normal">
+              Titik Lokasi
+            </CardTitle>
+          </CardHeader>
+
+          <CardContent class="p-5 space-y-4">
+            <!-- The preview is a button: the map inside it is scenery, so clicks
+               pass through to the control that opens the real map. -->
+            <button
+              v-if="hasPin"
+              type="button"
+              class="group relative block h-44 w-full overflow-hidden rounded-lg border transition-colors hover:border-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+              :aria-label="`Perbesar peta lokasi ${mapTitle}`"
+              @click="isLocationDialogOpen = true"
+            >
+              <div class="pointer-events-none absolute inset-0">
+                <SchoolLocationMap
+                  :latitude="schoolUnit.latitude as number"
+                  :longitude="schoolUnit.longitude as number"
+                  :title="mapTitle"
+                  :zoom="15"
+                  :interactive="false"
+                />
+              </div>
+              <span
+                class="pointer-events-none absolute inset-0 flex items-center justify-center bg-background/0 opacity-0 transition group-hover:bg-background/55 group-hover:opacity-100 group-focus-visible:bg-background/55 group-focus-visible:opacity-100"
+              >
+                <span
+                  class="inline-flex items-center gap-1.5 rounded-md bg-background px-2.5 py-1.5 text-xs font-medium shadow-sm"
+                >
+                  <Maximize2 class="size-3.5" />
+                  Lihat detail
+                </span>
+              </span>
+            </button>
+
+            <div
+              v-else
+              class="flex h-44 w-full flex-col items-center justify-center gap-1.5 rounded-lg border border-dashed px-4 text-center"
+            >
+              <MapPinned class="size-6 text-muted-foreground" />
+              <p class="text-sm font-medium text-foreground">Belum diatur</p>
+              <p class="text-xs text-muted-foreground">
+                Isi koordinat pada form Informasi Lembaga.
+              </p>
             </div>
 
-            <div>
-              <dt class="text-xs font-medium text-muted-foreground">
-                Kelurahan / Desa
-              </dt>
-              <dd class="font-medium text-foreground mt-0.5">
-                {{ formatValue(address.village) }}
-              </dd>
-            </div>
+            <dl class="grid grid-cols-2 gap-3 text-sm">
+              <div>
+                <dt class="text-xs font-medium text-muted-foreground">
+                  Latitude
+                </dt>
+                <dd class="font-mono font-medium text-foreground mt-0.5">
+                  {{ formatCoordinate(schoolUnit.latitude ?? null) }}
+                </dd>
+              </div>
 
-            <div>
-              <dt class="text-xs font-medium text-muted-foreground">
-                Kecamatan
-              </dt>
-              <dd class="font-medium text-foreground mt-0.5">
-                {{ formatValue(address.district) }}
-              </dd>
-            </div>
-
-            <div>
-              <dt class="text-xs font-medium text-muted-foreground">
-                Kabupaten / Kota
-              </dt>
-              <dd class="font-medium text-foreground mt-0.5">
-                {{ formatValue(address.city) }}
-              </dd>
-            </div>
-
-            <div>
-              <dt class="text-xs font-medium text-muted-foreground">
-                Provinsi
-              </dt>
-              <dd class="font-medium text-foreground mt-0.5">
-                {{ formatValue(address.province) }}
-              </dd>
-            </div>
-
-            <div>
-              <dt class="text-xs font-medium text-muted-foreground">
-                Kode Pos
-              </dt>
-              <dd class="font-mono font-medium text-foreground mt-0.5">
-                {{ formatValue(address.postalCode) }}
-              </dd>
-            </div>
-
-            <div>
-              <dt class="text-xs font-medium text-muted-foreground">Negara</dt>
-              <dd class="font-medium text-foreground mt-0.5">
-                {{ formatValue(address.country || 'Indonesia') }}
-              </dd>
-            </div>
-          </dl>
-        </CardContent>
-      </Card>
+              <div>
+                <dt class="text-xs font-medium text-muted-foreground">
+                  Longitude
+                </dt>
+                <dd class="font-mono font-medium text-foreground mt-0.5">
+                  {{ formatCoordinate(schoolUnit.longitude ?? null) }}
+                </dd>
+              </div>
+            </dl>
+          </CardContent>
+        </Card>
+      </div>
     </div>
+
+    <SchoolLocationDialog
+      v-model:open="isLocationDialogOpen"
+      :school-unit="schoolUnit"
+      :address="address"
+    />
   </div>
 </template>

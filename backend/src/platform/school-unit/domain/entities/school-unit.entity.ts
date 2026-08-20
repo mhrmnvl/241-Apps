@@ -23,6 +23,8 @@ export interface SchoolUnitEntity {
   email?: string;
   website?: string;
   isActive?: boolean;
+  latitude?: number | null;
+  longitude?: number | null;
   deletedAt?: Date | null;
 }
 
