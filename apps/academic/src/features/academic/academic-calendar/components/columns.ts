@@ -3,6 +3,9 @@ import type { ColumnDef } from '@tanstack/vue-table'
 import type { CalendarEventData, CalendarColumnActions } from '../types'
 import { Checkbox } from '@/ui/checkbox'
 import { createActionColumn } from './calendarActionColumn'
+import { useCalendarFormat } from '../composables/useCalendarFormat'
+
+const { formatHourRange } = useCalendarFormat()
 
 export const createCalendarColumns = (
   actions: CalendarColumnActions,
@@ -88,6 +91,23 @@ export const createCalendarColumns = (
           month: 'long',
           day: 'numeric',
         }),
+      )
+    },
+  },
+  {
+    id: 'hours',
+    header: 'Jam',
+    // Most entries have none — a term runs July to December, a holiday is the
+    // 17th — so the column reads "Sepanjang hari" rather than sitting empty.
+    cell: ({ row }) => {
+      const range = formatHourRange(
+        row.original.startTime,
+        row.original.endTime,
+      )
+      return h(
+        'div',
+        range ? {} : { class: 'text-muted-foreground' },
+        range ?? 'Sepanjang hari',
       )
     },
   },

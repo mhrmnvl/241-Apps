@@ -11,15 +11,15 @@ defineProps<{
 
 const emit = defineEmits<{ toggle: [weekday: number] }>()
 
-const DISPLAY_WEEKDAYS = [
-  { value: 1, short: 'Sen', label: 'Senin' },
-  { value: 2, short: 'Sel', label: 'Selasa' },
-  { value: 3, short: 'Rab', label: 'Rabu' },
-  { value: 4, short: 'Kam', label: 'Kamis' },
-  { value: 5, short: 'Jum', label: "Jum'at" },
-  { value: 6, short: 'Sab', label: 'Sabtu' },
-  { value: 0, short: 'Min', label: 'Minggu' },
-]
+/**
+ * The same seven days, read starting at Monday because that is how a school
+ * week is read — derived from `WEEKDAYS` rather than copied, so renaming a day
+ * or correcting the numbering cannot leave two lists disagreeing.
+ */
+const DISPLAY_ORDER = [1, 2, 3, 4, 5, 6, 0]
+const DISPLAY_WEEKDAYS = DISPLAY_ORDER.map(
+  (value) => WEEKDAYS.find((day) => day.value === value)!,
+)
 </script>
 
 <template>
