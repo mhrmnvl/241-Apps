@@ -1,13 +1,22 @@
-.calendar-override .fc-day-sun {
-  background-color: hsl(var(--destructive) / 0.05);
+/* Weekly holidays, marked from the rule in Pengaturan Akademik rather than from
+   a hardcoded Sunday. The class is applied per day cell and per column header
+   by `dayCellClassNames` / `dayHeaderClassNames`.
+
+   `color-mix` rather than `hsl(var(--destructive) / …)`: the token is an oklch
+   value, so wrapping it in `hsl()` produced invalid CSS that every browser
+   dropped — which is why no holiday marking was visible at all. */
+.calendar-override .fc-day-holiday {
+  background-color: color-mix(in oklab, var(--destructive) 7%, transparent);
 }
 
-.calendar-override .fc-col-header-cell.fc-day-sun .fc-col-header-cell-cushion {
-  color: hsl(var(--destructive));
+.calendar-override
+  .fc-col-header-cell.fc-day-holiday
+  .fc-col-header-cell-cushion {
+  color: var(--destructive);
 }
 
-.calendar-override .fc-day-sun .fc-daygrid-day-number {
-  color: hsl(var(--destructive));
+.calendar-override .fc-day-holiday .fc-daygrid-day-number {
+  color: var(--destructive);
   font-weight: 600;
 }
 
