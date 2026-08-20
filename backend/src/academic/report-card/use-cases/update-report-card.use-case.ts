@@ -13,10 +13,12 @@ export class UpdateReportCardUseCase {
     if (!existing)
       throw new NotFoundException(`ReportCard with ID ${id} not found`);
 
+    // Named field by field, and `isPublished` is not among them: publishing
+    // goes through PublishReportCardUseCase, which holds the guard and the
+    // separate permission.
     const updated = await this.reportCardRepository.update(id, {
       teacherNote: dto.teacherNote,
       rank: dto.rank,
-      isPublished: dto.isPublished,
     });
 
     this.logger.log(`ReportCard updated: ${id}`);
