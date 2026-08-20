@@ -42,6 +42,7 @@ const MODULE_APP: Record<string, PermissionApp> = {
   // academic
   'academic-calendar-types': 'academic',
   'academic-calendars': 'academic',
+  'academic-settings': 'academic',
   'academic-years': 'academic',
   'assessment-items': 'academic',
   // Borrowed by presence's wali-kelas absence route, which changes an academic

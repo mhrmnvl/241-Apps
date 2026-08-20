@@ -39,14 +39,6 @@ import {
   FormMessage,
 } from '@/ui/form'
 import type { AcademicYear } from '../types'
-import { WEEKDAYS, formatWeeklyHolidays } from '../constants/weekdays'
-
-/** Returns the rule with this weekday added or removed, never mutated in place. */
-function toggleWeekday(current: number[], weekday: number): number[] {
-  return current.includes(weekday)
-    ? current.filter((day) => day !== weekday)
-    : [...current, weekday]
-}
 
 const props = defineProps<{
   open: boolean
@@ -112,46 +104,6 @@ const academicYearForm = useAcademicYearForm({
                   v-bind="componentField"
                 />
               </FormControl>
-              <FormMessage />
-            </FormItem>
-          </FormField>
-
-          <FormField
-            v-slot="{ value, handleChange }"
-            name="weeklyHolidays"
-          >
-            <FormItem>
-              <FormLabel>Hari Libur Mingguan</FormLabel>
-              <FormControl>
-                <div class="flex flex-wrap gap-1.5">
-                  <Button
-                    v-for="day in WEEKDAYS"
-                    :key="day.value"
-                    type="button"
-                    size="sm"
-                    :variant="
-                      (value as number[]).includes(day.value)
-                        ? 'default'
-                        : 'outline'
-                    "
-                    :disabled="academicYearForm.isSaving.value"
-                    :aria-pressed="(value as number[]).includes(day.value)"
-                    :aria-label="`${day.label} libur`"
-                    class="w-12"
-                    @click="
-                      handleChange(toggleWeekday(value as number[], day.value))
-                    "
-                  >
-                    {{ day.short }}
-                  </Button>
-                </div>
-              </FormControl>
-              <p class="text-xs text-muted-foreground">
-                Libur:
-                {{ formatWeeklyHolidays(value as number[]) }}. Hari yang dipilih
-                ditandai libur di kalender pendidikan, tanpa perlu dicatat satu
-                per satu.
-              </p>
               <FormMessage />
             </FormItem>
           </FormField>

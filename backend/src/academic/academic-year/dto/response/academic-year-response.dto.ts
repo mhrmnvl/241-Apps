@@ -10,15 +10,6 @@ export class AcademicYearResponseDto {
 
   @ApiProperty({ example: true })
   isActive!: boolean;
-
-  @ApiProperty({
-    description:
-      'Weekdays school does not run, 0 (Sunday) to 6 (Saturday). ' +
-      'Applied when the calendar is read; no entries are stored for them.',
-    example: [0],
-    type: [Number],
-  })
-  weeklyHolidays!: number[];
 }
 
 export class AcademicYearListResponseDto {

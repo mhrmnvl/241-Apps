@@ -1,8 +1,14 @@
-model AcademicYear {
-  id        String    @id @default(uuid()) @db.Uuid
-  name      String    @unique @db.VarChar(50)
-  isActive  Boolean   @default(false) @map("is_active")
-  deletedAt DateTime? @map("deleted_at")
+/// School-wide academic policy — the settings that describe how this school
+/// runs, rather than what happens on any particular date.
+///
+/// One row, enforced by the database rather than by convention.
+model AcademicSetting {
+  id String @id @default(uuid()) @db.Uuid
+
+  /// Carries the constraint and nothing else. A unique index on a column that
+  /// only ever holds `true` is what makes "exactly one row" a rule Postgres
+  /// keeps, instead of something every writer has to remember.
+  singleton Boolean @unique @default(true)
 
   /// The weekdays school does not run, as a rule rather than as dates.
   ///
@@ -11,14 +17,26 @@ model AcademicYear {
   /// need translating. A six-day week with Sunday off is `[0]`; a five-day
   /// week is `[0, 6]`; a madrasah closing on Friday is `[5]`.
   ///
-  /// Stored once and applied when the calendar is read, not materialised into
-  /// ~52 entries a year. Written out, changing the rule would mean deleting
-  /// and regenerating every one of them, and any row missed would go on
-  /// claiming a holiday that no longer exists.
+  /// Applied when the calendar is read, not materialised into ~52 entries a
+  /// year. Written out, changing the rule would mean deleting and regenerating
+  /// every one of them, and any row missed would go on claiming a holiday that
+  /// no longer exists.
   ///
   /// This is the teaching week, which is not the same statement as a work
   /// pattern: the office can be open on a Saturday that runs no classes.
   weeklyHolidays Int[] @default([0]) @map("weekly_holidays")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("academic_settings")
+}
+
+model AcademicYear {
+  id        String    @id @default(uuid()) @db.Uuid
+  name      String    @unique @db.VarChar(50)
+  isActive  Boolean   @default(false) @map("is_active")
+  deletedAt DateTime? @map("deleted_at")
 
   classrooms         Classroom[]
   curricula          Curricula[]

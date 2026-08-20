@@ -57,6 +57,20 @@ export const SYSTEM_PERMISSIONS: SystemPermission[] = [
     description: 'Update academic calendars',
   },
 
+  // academic-settings
+  {
+    module: 'academic-settings',
+    action: 'read',
+    code: 'academic-settings.read',
+    description: 'Read school-wide academic settings',
+  },
+  {
+    module: 'academic-settings',
+    action: 'update',
+    code: 'academic-settings.update',
+    description: 'Update school-wide academic settings',
+  },
+
   // academic-years
   {
     module: 'academic-years',
