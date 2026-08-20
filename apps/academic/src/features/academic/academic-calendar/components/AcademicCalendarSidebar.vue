@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/ui/card'
 import { Badge } from '@/ui/badge'
 import { Calendar as CalendarIcon, Clock } from 'lucide-vue-next'
 import type { CalendarEventData, EventClickInfo } from '../types'
+import { useCalendarFormat } from '../composables/useCalendarFormat'
 
 defineProps<{
   todayEvents: CalendarEventData[]
@@ -13,12 +14,7 @@ const emit = defineEmits<{
   eventClick: [info: EventClickInfo]
 }>()
 
-const padZero = (num: number) => num.toString().padStart(2, '0')
-
-const formatTime = (dateStr: string) => {
-  const d = new Date(dateStr)
-  return `${padZero(d.getHours())}:${padZero(d.getMinutes())}`
-}
+const { formatHourRange } = useCalendarFormat()
 
 const formatDateStr = (dateStr: string) => {
   const d = new Date(dateStr)
@@ -73,14 +69,22 @@ const formatDateStr = (dateStr: string) => {
             <div class="font-medium text-sm mb-1 line-clamp-1">
               {{ event.title }}
             </div>
+            <!-- The hours, when the entry has any. This read the start and end
+                 *dates* before, which are plain dates, so every entry showed
+                 the same meaningless 00:00 - 00:00. -->
             <div
+              v-if="formatHourRange(event.startTime, event.endTime)"
+              class="text-xs text-muted-foreground flex items-center gap-1.5 mb-2"
+            >
+              <Clock class="size-3" />
+              <span>{{ formatHourRange(event.startTime, event.endTime) }}</span>
+            </div>
+            <div
+              v-else
               class="text-xs text-muted-foreground flex items-center gap-1.5 mb-2"
             >
               <CalendarIcon class="size-3" />
-              <span
-                >{{ formatTime(event.startDate) }} -
-                {{ formatTime(event.endDate) }}</span
-              >
+              <span>Sepanjang hari</span>
             </div>
             <Badge
               variant="secondary"
@@ -133,6 +137,14 @@ const formatDateStr = (dateStr: string) => {
             >
               <CalendarIcon class="size-3" />
               <span>{{ formatDateStr(event.startDate) }}</span>
+              <!-- Knowing an activity starts at 08:00 is most of the point of
+                   looking at what is coming. -->
+              <template v-if="formatHourRange(event.startTime, event.endTime)">
+                <Clock class="size-3 shrink-0" />
+                <span>{{
+                  formatHourRange(event.startTime, event.endTime)
+                }}</span>
+              </template>
             </div>
             <Badge
               variant="outline"
