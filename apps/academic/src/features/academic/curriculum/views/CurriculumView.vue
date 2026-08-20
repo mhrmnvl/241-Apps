@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { Curriculum } from '../types'
-import CurriculumFormSheet from '../components/CurriculumFormSheet.vue'
+import CurriculumFormDialog from '../components/CurriculumFormDialog.vue'
 import { createCurriculumColumns } from '../components/columns'
 import { useCurriculumList } from '../composables/useCurriculumList'
 import { DataTable } from '@/ui'
@@ -134,7 +134,7 @@ onMounted(async () => {
           </template>
         </DataTable>
 
-        <CurriculumFormSheet
+        <CurriculumFormDialog
           v-if="isAddModalOpen"
           v-model:open="isAddModalOpen"
           :academic-years="academicYears"

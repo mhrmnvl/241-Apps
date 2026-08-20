@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { RolloverSemesterPayload, Semester } from '../types'
 import RolloverSemesterDialog from '../components/RolloverSemesterDialog.vue'
-import SemesterFormSheet from '../components/SemesterFormSheet.vue'
+import SemesterFormDialog from '../components/SemesterFormDialog.vue'
 import { createSemesterColumns } from '../components/columns'
 import { useSemesterList } from '../composables/useSemesterList'
 import { useSemesterRollover } from '../composables/useSemesterRollover'
@@ -152,7 +152,7 @@ onMounted(() => {
           filter-placeholder="Cari semester (Ganjil/Genap)..."
         />
 
-        <SemesterFormSheet
+        <SemesterFormDialog
           v-if="isAddModalOpen"
           v-model:open="isAddModalOpen"
           :edit-data="editingItem"
