@@ -1,5 +1,6 @@
 import '@/shared/types/router'
 import { academicCalendarRoutes } from '@/features/academic/academic-calendar'
+import { academicSettingRoutes } from '@/features/academic/academic-setting'
 import { academicYearRoutes } from '@/features/academic/academic-year'
 import { authRoutes } from '@/features/platform/auth'
 import { classroomRoutes } from '@/features/academic/classroom'
@@ -76,6 +77,7 @@ const router = createRouter({
         ...lessonRoutes,
         ...scheduleRoutes,
         ...academicCalendarRoutes,
+        ...academicSettingRoutes,
         ...academicYearRoutes,
         ...semesterRoutes,
         ...curriculumRoutes,
