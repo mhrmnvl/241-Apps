@@ -1,0 +1,22 @@
+-- The weekdays school does not run, as a rule rather than as dates.
+--
+-- The calendar could hold every Sunday of a year as its own entry, and that is
+-- the version that rots: ~52 rows per year, regenerated whenever the rule
+-- changes, and any row missed goes on claiming a holiday that no longer
+-- exists. The rule is one fact, so it is stored once and applied when the
+-- calendar is read.
+--
+-- 0 is Sunday through 6 is Saturday — the same numbering as
+-- work_pattern_days.weekday and JavaScript's getDay(), so nothing has to
+-- translate between them. A six-day week with Sunday off is {0}; a five-day
+-- week is {0,6}; a madrasah closing on Friday is {5}.
+--
+-- Defaults to {0} rather than {}. Every existing year at this school already
+-- runs Monday to Saturday with Sunday closed — that is what work_pattern_days
+-- has said since it was seeded — so an empty default would have the calendar
+-- claim the school teaches seven days a week until someone corrected it.
+--
+-- This is the teaching week, and it is deliberately not the same column as a
+-- work pattern: the office can be open on a Saturday that runs no classes.
+ALTER TABLE "academic_years"
+  ADD COLUMN "weekly_holidays" INTEGER[] NOT NULL DEFAULT ARRAY[0];

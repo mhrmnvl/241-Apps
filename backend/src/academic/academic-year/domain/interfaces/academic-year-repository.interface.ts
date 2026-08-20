@@ -14,6 +14,7 @@ export interface AcademicYearQueryInput extends PaginationQueryInput {
 export interface CreateAcademicYearRepositoryInput {
   name: string;
   isActive?: boolean;
+  weeklyHolidays?: number[];
 }
 
 export type UpdateAcademicYearRepositoryInput =

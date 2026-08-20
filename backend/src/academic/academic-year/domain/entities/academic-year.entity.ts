@@ -12,6 +12,8 @@ export interface AcademicYearEntity {
   id: string;
   name: string;
   isActive: boolean;
+  /** Weekdays school does not run, 0 (Sunday) to 6 (Saturday). */
+  weeklyHolidays: number[];
   deletedAt: Date | null;
 }
 

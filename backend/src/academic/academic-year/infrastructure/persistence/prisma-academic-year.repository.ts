@@ -78,6 +78,12 @@ export class PrismaAcademicYearRepository extends IAcademicYearRepository {
       data: {
         name: data.name,
         isActive: data.isActive,
+        // Left to the column default when unset, so a year created without an
+        // opinion inherits the school's six-day week rather than claiming it
+        // teaches every day.
+        ...(data.weeklyHolidays !== undefined && {
+          weeklyHolidays: data.weeklyHolidays,
+        }),
       },
       include: ACADEMIC_YEAR_WITH_DETAILS_INCLUDE,
     });

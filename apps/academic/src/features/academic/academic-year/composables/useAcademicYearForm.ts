@@ -4,8 +4,15 @@ import { toTypedSchema } from '@vee-validate/zod'
 import { useForm } from 'vee-validate'
 import * as z from 'zod'
 import { academicYearService } from '../services/academicYearService'
+import { DEFAULT_WEEKLY_HOLIDAY } from '../constants/weekdays'
 import { useAcademicYearStore } from '../stores/academicYearStore'
 import type { AcademicYear, AcademicYearSavePayload } from '../types'
+
+interface AcademicYearFormValues {
+  name: string
+  isActive: boolean
+  weeklyHolidays: number[]
+}
 
 export function useAcademicYearForm(options?: {
   editData?: () => AcademicYear | null
@@ -23,6 +30,11 @@ export function useAcademicYearForm(options?: {
         .min(1, 'Nama tahun ajaran wajib diisi.')
         .min(3, 'Nama tahun ajaran minimal 3 karakter.'),
       isActive: z.boolean().default(true),
+      // Every value comes from the seven toggles, so the range is already
+      // closed; the rule here only keeps a hand-built payload honest.
+      weeklyHolidays: z
+        .array(z.number().int().min(0).max(6))
+        .default([DEFAULT_WEEKLY_HOLIDAY]),
     }),
   )
 
@@ -31,6 +43,7 @@ export function useAcademicYearForm(options?: {
     initialValues: {
       name: '',
       isActive: true,
+      weeklyHolidays: [DEFAULT_WEEKLY_HOLIDAY],
     },
   })
 
@@ -45,6 +58,9 @@ export function useAcademicYearForm(options?: {
         form.setValues({
           name: data.name ?? '',
           isActive: data.isActive ?? true,
+          // `??` rather than `||`: an empty array is a real answer — school
+          // runs every day — and must not fall back to Sunday.
+          weeklyHolidays: data.weeklyHolidays ?? [DEFAULT_WEEKLY_HOLIDAY],
         })
       } else {
         form.resetForm()
@@ -55,13 +71,13 @@ export function useAcademicYearForm(options?: {
 
   const isEditing = computed(() => !!options?.editData?.())
 
-  function buildPayload(values: {
-    name: string
-    isActive: boolean
-  }): AcademicYearSavePayload {
+  function buildPayload(
+    values: AcademicYearFormValues,
+  ): AcademicYearSavePayload {
     return {
       name: values.name,
       isActive: values.isActive,
+      weeklyHolidays: values.weeklyHolidays,
     }
   }
 
@@ -73,7 +89,7 @@ export function useAcademicYearForm(options?: {
     }
   })
 
-  async function executeSubmit(values: { name: string; isActive: boolean }) {
+  async function executeSubmit(values: AcademicYearFormValues) {
     const editItem = options?.editData?.()
     const payload = buildPayload(values)
     const result = await academicYearService.saveAcademicYear(

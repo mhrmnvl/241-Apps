@@ -4,6 +4,22 @@ model AcademicYear {
   isActive  Boolean   @default(false) @map("is_active")
   deletedAt DateTime? @map("deleted_at")
 
+  /// The weekdays school does not run, as a rule rather than as dates.
+  ///
+  /// 0 is Sunday through 6 is Saturday — the same numbering as
+  /// `WorkPatternDay.weekday` and JavaScript's `getDay()`, so the two never
+  /// need translating. A six-day week with Sunday off is `[0]`; a five-day
+  /// week is `[0, 6]`; a madrasah closing on Friday is `[5]`.
+  ///
+  /// Stored once and applied when the calendar is read, not materialised into
+  /// ~52 entries a year. Written out, changing the rule would mean deleting
+  /// and regenerating every one of them, and any row missed would go on
+  /// claiming a holiday that no longer exists.
+  ///
+  /// This is the teaching week, which is not the same statement as a work
+  /// pattern: the office can be open on a Saturday that runs no classes.
+  weeklyHolidays Int[] @default([0]) @map("weekly_holidays")
+
   classrooms         Classroom[]
   curricula          Curricula[]
   semesters          Semester[]
