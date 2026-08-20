@@ -73,6 +73,10 @@ watch(
   (isOpen) => {
     if (isOpen && grades.value.length === 0) void fetchGrades()
   },
+  // Both hosts render this dialog behind `v-if="… && isOpen"`, so it mounts
+  // with `open` already true and that prop never changes afterwards. Without
+  // `immediate` the callback never runs and the Tingkat select stays empty.
+  { immediate: true },
 )
 
 const classroomForm = useClassroomForm({

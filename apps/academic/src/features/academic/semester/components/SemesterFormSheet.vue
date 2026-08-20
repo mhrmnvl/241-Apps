@@ -50,6 +50,10 @@ watch(
   (isOpen) => {
     if (isOpen && academicYears.value.length === 0) void fetchAcademicYears()
   },
+  // The list page renders this behind `v-if="isAddModalOpen"`, so it mounts
+  // with `open` already true and that prop never changes afterwards. Without
+  // `immediate` the callback never runs and the Tahun Ajaran select stays empty.
+  { immediate: true },
 )
 
 const emit = defineEmits<{
