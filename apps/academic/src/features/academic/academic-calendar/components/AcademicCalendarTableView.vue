@@ -52,7 +52,7 @@ const deleteSelected = () => {
 </script>
 
 <template>
-  <div class="space-y-4 p-6 bg-background rounded-b-2xl">
+  <div class="space-y-4 p-6">
     <div
       class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"
     >

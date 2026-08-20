@@ -1,47 +1,55 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
-import AcademicCalendarDialog from '../components/AcademicCalendarDialog.vue'
+import { useRouter } from 'vue-router'
 import AcademicCalendarGridView from '../components/AcademicCalendarGridView.vue'
-import AcademicCalendarTableView from '../components/AcademicCalendarTableView.vue'
 import AcademicCalendarSidebar from '../components/AcademicCalendarSidebar.vue'
 import { useAcademicCalendarView } from '../composables/useAcademicCalendarView'
-import { Button } from '@/ui/button'
 import { Card, CardHeader, CardTitle } from '@/ui/card'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/tabs'
-import { Plus } from 'lucide-vue-next'
 import '../styles/calendar.css'
+import type { DateClickInfo, EventClickInfo } from '../types'
+
+const router = useRouter()
 
 const {
   events,
   isLoading,
-  tableEvents,
-  tableLoading,
-  isDeletingBulk,
   currentRange,
   fetchEvents,
-  handleUpdateFilters,
-  activeTab,
   canManageCalendar,
-  sheetOpen,
-  sheetEventData,
-  selectedDate,
-  tableViewRef,
   todayEvents,
   upcomingEvents,
-  isSavingEvent,
-  openCreateDialog,
-  handleDateClick,
-  handleEventClick,
-  openEditSheet,
-  handleDeleteBulk,
-  handleSaveEvent,
-  handleDeleteEvent,
-  handleSavedOrDeleted,
 } = useAcademicCalendarView()
 
+function handleDateClick(info: DateClickInfo) {
+  if (!canManageCalendar.value) return
+  void router.push({
+    name: 'academic-calendar-create',
+    query: { date: info.dateStr },
+  })
+}
+
+function handleEventClick(info: EventClickInfo) {
+  if (!canManageCalendar.value) return
+  const ep = info.event.extendedProps
+  void router.push({
+    name: 'academic-calendar-edit',
+    params: { id: info.event.id },
+    state: {
+      eventData: {
+        id: info.event.id,
+        title: info.event.title,
+        description: ep.description,
+        typeId: ep.type?.id ?? '',
+        type: ep.type,
+        startDate: ep.startDate!,
+        endDate: ep.endDate!,
+        academicYearId: ep.academicYearId,
+      },
+    },
+  })
+}
+
 onMounted(() => {
-  void tableViewRef
-  void canManageCalendar
   if (currentRange.value.start && currentRange.value.end) {
     void fetchEvents(currentRange.value)
   }
@@ -61,95 +69,29 @@ onMounted(() => {
             Kalender Akademik
           </CardTitle>
         </div>
-        <div class="flex flex-col sm:flex-row w-full sm:w-auto gap-2">
-          <Button
-            v-if="canManageCalendar"
-            class="w-full sm:w-auto"
-            @click="openCreateDialog"
-          >
-            <Plus class="size-4 mr-2" />
-            Tambah Agenda
-          </Button>
-        </div>
       </CardHeader>
 
-      <Tabs
-        v-model="activeTab"
-        class="w-full"
-      >
-        <div class="px-6 pt-2 border-b bg-muted/10">
-          <TabsList class="h-auto rounded-none bg-transparent p-0">
-            <TabsTrigger
-              value="calendar"
-              class="rounded-b-none border border-transparent border-b-0 px-4 py-2 data-[state=active]:-mb-px data-[state=active]:z-10 data-[state=active]:border-border data-[state=active]:bg-background data-[state=active]:shadow-none"
-            >
-              Tampilan Kalender
-            </TabsTrigger>
-            <TabsTrigger
-              v-if="canManageCalendar"
-              value="tabel"
-              class="rounded-b-none border border-transparent border-b-0 px-4 py-2 data-[state=active]:-mb-px data-[state=active]:z-10 data-[state=active]:border-border data-[state=active]:bg-background data-[state=active]:shadow-none"
-            >
-              Manajemen Data
-            </TabsTrigger>
-          </TabsList>
+      <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 p-6">
+        <div class="lg:col-span-1">
+          <AcademicCalendarSidebar
+            :today-events="todayEvents"
+            :upcoming-events="upcomingEvents"
+            @event-click="handleEventClick"
+          />
         </div>
 
-        <TabsContent
-          value="calendar"
-          class="m-0 border-none outline-none focus-visible:ring-0 w-full"
+        <div
+          class="lg:col-span-3 bg-background rounded-2xl border shadow-sm p-4 md:p-6"
         >
-          <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 p-6">
-            <div class="lg:col-span-1">
-              <AcademicCalendarSidebar
-                :today-events="todayEvents"
-                :upcoming-events="upcomingEvents"
-                @event-click="handleEventClick"
-              />
-            </div>
-
-            <div
-              class="lg:col-span-3 bg-background rounded-2xl border shadow-sm p-4 md:p-6"
-            >
-              <AcademicCalendarGridView
-                :events="events"
-                :is-loading="isLoading"
-                @date-click="handleDateClick"
-                @event-click="handleEventClick"
-                @fetch-events="fetchEvents"
-              />
-            </div>
-          </div>
-        </TabsContent>
-
-        <TabsContent
-          value="tabel"
-          class="m-0 border-none outline-none focus-visible:ring-0 w-full bg-background rounded-b-2xl"
-        >
-          <AcademicCalendarTableView
-            ref="tableViewRef"
-            :table-events="tableEvents"
-            :is-loading="tableLoading"
-            :is-deleting-bulk="isDeletingBulk"
-            :show-actions="canManageCalendar"
-            @update-filters="handleUpdateFilters"
-            @delete-bulk="handleDeleteBulk"
-            @edit="openEditSheet"
-            @deleted="handleSavedOrDeleted"
+          <AcademicCalendarGridView
+            :events="events"
+            :is-loading="isLoading"
+            @date-click="handleDateClick"
+            @event-click="handleEventClick"
+            @fetch-events="fetchEvents"
           />
-        </TabsContent>
-      </Tabs>
+        </div>
+      </div>
     </Card>
   </div>
-
-  <AcademicCalendarDialog
-    v-if="canManageCalendar"
-    :open="sheetOpen"
-    :event-data="sheetEventData"
-    :selected-date="selectedDate"
-    :is-saving="isSavingEvent"
-    @update:open="sheetOpen = $event"
-    @saved="handleSaveEvent"
-    @deleted="handleDeleteEvent"
-  />
 </template>
