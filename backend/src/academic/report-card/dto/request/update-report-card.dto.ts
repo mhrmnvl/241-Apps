@@ -1,10 +1,4 @@
-﻿import {
-  IsBoolean,
-  IsNumber,
-  IsOptional,
-  IsString,
-  Min,
-} from 'class-validator';
+﻿import { IsNumber, IsOptional, IsString, Min } from 'class-validator';
 
 export class UpdateReportCardDto {
   @IsOptional()
@@ -16,7 +10,12 @@ export class UpdateReportCardDto {
   @Min(1)
   rank?: number;
 
-  @IsOptional()
-  @IsBoolean()
-  isPublished?: boolean;
+  /**
+   * `isPublished` is deliberately absent.
+   *
+   * Publishing is `PATCH :id/publish`, which refuses a report card with no
+   * calculated average and asks for `report-cards.publish`. Accepting the flag
+   * here let a caller holding only `report-cards.update` skip both — and a
+   * published report card is what a parent sees through `GET /rapors/me`.
+   */
 }
