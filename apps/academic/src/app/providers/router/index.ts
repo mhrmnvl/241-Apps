@@ -7,7 +7,7 @@ import { classroomRoutes } from '@/features/academic/classroom'
 import { gradeRoutes } from '@/features/academic/grade'
 import { curriculumRoutes } from '@/features/academic/curriculum'
 import { curriculumSubjectRoutes } from '@/features/academic/curriculum-subject'
-import { dashboardRoutes } from '@/features/platform/dashboard'
+import { myDashboardRoutes } from '@/features/academic/my-dashboard'
 import { teacherRoutes } from '@/features/academic/teacher'
 import { schoolUnitRoutes } from '@/features/platform/school-unit'
 import { organizationRoutes } from '@/features/platform/organization'
@@ -66,7 +66,7 @@ const router = createRouter({
       // starting with '/' as a root path, which is what lets the shell wrap
       // these routes without changing a single URL.
       children: [
-        ...dashboardRoutes,
+        ...myDashboardRoutes,
         ...studentRoutes,
         ...studentGraduationRoutes,
         ...teacherRoutes,
