@@ -433,6 +433,12 @@ export const SYSTEM_PERMISSIONS: SystemPermission[] = [
     code: 'dashboards.read',
     description: 'Read dashboards',
   },
+  {
+    module: 'dashboards',
+    action: 'read-own',
+    code: 'dashboards.read-own',
+    description: 'Read your own dashboard as a student or teacher',
+  },
 
   // educational-histories
   {

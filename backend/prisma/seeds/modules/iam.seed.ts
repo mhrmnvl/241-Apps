@@ -151,6 +151,10 @@ export async function seedIam(prisma: PrismaClient) {
 
   // TEACHER permissions
   const teacherPermissionCodes = [
+    // Their own dashboard: today's lessons, the classes they hold, and the
+    // marking still outstanding. Not `dashboards.read`, which is the school's
+    // totals and belongs to whoever runs the school rather than to every teacher.
+    'dashboards.read-own',
     'students.read',
     'parents.read',
     'attendances.read',
@@ -184,6 +188,7 @@ export async function seedIam(prisma: PrismaClient) {
   // and answer about that. `students.read` in particular is a roster read: it
   // returns every student, and its sibling `students.read-own` does not.
   const studentPermissionCodes = [
+    'dashboards.read-own',
     'students.read-own',
     'attendances.read-own',
     'report-cards.read-own',
