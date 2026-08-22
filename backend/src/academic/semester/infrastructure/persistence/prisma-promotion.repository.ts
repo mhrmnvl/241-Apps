@@ -51,6 +51,27 @@ export class PrismaPromotionRepository implements IPromotionRepository {
     });
   }
 
+  async findLatestEnrolledSemesterOfAcademicYear(academicYearId: string) {
+    return this.prisma.semester.findFirst({
+      where: {
+        academicYearId,
+        deletedAt: null,
+        // The roster is the point. A term nobody is enrolled in has nothing to
+        // promote out of, whatever the calendar says about its order.
+        enrollments: {
+          some: { status: EnrollmentStatus.ACTIVE, deletedAt: null },
+        },
+      },
+      select: {
+        id: true,
+        type: true,
+        academicYearId: true,
+        academicYear: { select: { id: true, name: true } },
+      },
+      orderBy: [{ type: { sequence: 'desc' } }, { id: 'asc' }],
+    });
+  }
+
   async findAcademicYearName(id: string) {
     const year = await this.prisma.academicYear.findFirst({
       where: { id, deletedAt: null },

@@ -53,12 +53,18 @@ export class PromotionSemesterResolver {
   }
 
   /**
-   * The term a promotion reads from.
+   * The term a promotion reads its roster from.
    *
-   * Required wherever enrolments are actually read: there is no roster to
-   * recommend from if the year being left never had a term. The target year is
-   * taken but only checked against this one — building a recommendation needs
-   * the target's *classrooms*, which hang off the year, not off a term.
+   * The latest term of the year that anybody is enrolled in — not simply its
+   * last. A school planning next year while still in its first term has every
+   * student enrolled there, and the second term sits empty on the calendar
+   * until the rollover runs. Reading the last term regardless found nobody,
+   * and an empty recommendation looks exactly like a screen still waiting for
+   * a choice to be made.
+   *
+   * The target year is taken but only checked against this one: a
+   * recommendation needs the target's *classrooms*, and those hang off the
+   * year rather than off a term.
    */
   async resolveSource(
     sourceAcademicYearId: string,
@@ -67,22 +73,28 @@ export class PromotionSemesterResolver {
     this.assertDifferentYears(sourceAcademicYearId, targetAcademicYearId);
 
     const source =
+      await this.promotionRepository.findLatestEnrolledSemesterOfAcademicYear(
+        sourceAcademicYearId,
+      );
+    if (source) return source;
+
+    // Two different problems with two different fixes, so two messages. A year
+    // with no terms wants a term; a year with terms and nobody in them wants
+    // students enrolled first. Named rather than numbered, because "2026/2027"
+    // says what to go and look at while a uuid does not.
+    const anyTerm =
       await this.promotionRepository.findEdgeSemesterOfAcademicYear(
         sourceAcademicYearId,
         'last',
       );
+    const year = await this.nameOf(sourceAcademicYearId);
 
-    // Named rather than numbered. A year with no terms is something the
-    // operator can fix, and "2026/2027 has no semester" says what to do while
-    // a uuid does not.
-    if (!source) {
-      throw new BadRequestException(
-        `Academic year ${await this.nameOf(sourceAcademicYearId)} has no ` +
-          'semester to promote students from.',
-      );
-    }
-
-    return source;
+    throw new BadRequestException(
+      anyTerm
+        ? `Academic year ${year} has no students enrolled in any of its ` +
+            'semesters, so there is nobody to promote.'
+        : `Academic year ${year} has no semester to promote students from.`,
+    );
   }
 
   /**

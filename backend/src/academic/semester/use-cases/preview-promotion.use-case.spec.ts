@@ -12,6 +12,7 @@ describe('PreviewPromotionUseCase', () => {
   const mockRepository: Record<string, jest.Mock> = {
     findSemesterWithAcademicYear: jest.fn(),
     findEdgeSemesterOfAcademicYear: jest.fn(),
+    findLatestEnrolledSemesterOfAcademicYear: jest.fn(),
     findAcademicYearName: jest.fn(),
   };
 
@@ -47,9 +48,12 @@ describe('PreviewPromotionUseCase', () => {
   });
 
   it('should return preview with student counts', () => {
-    mockRepository.findEdgeSemesterOfAcademicYear
-      .mockResolvedValueOnce(sourceSemester)
-      .mockResolvedValueOnce(targetSemester);
+    mockRepository.findLatestEnrolledSemesterOfAcademicYear.mockResolvedValue(
+      sourceSemester,
+    );
+    mockRepository.findEdgeSemesterOfAcademicYear.mockResolvedValue(
+      targetSemester,
+    );
 
     const dto: PromotionDto = {
       sourceAcademicYearId: 'ay-old',
