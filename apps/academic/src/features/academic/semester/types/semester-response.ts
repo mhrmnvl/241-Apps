@@ -19,11 +19,11 @@ export interface PromotionRecommendationItem {
   studentName: string
   nis: string
   sourceClassroomId: string
-  sourceClassName: string
+  sourceClassroomName: string
   sourceLevel: string
   recommendedAction: PromotionAction
   targetClassroomId?: string
-  targetClassName?: string
+  targetClassroomName?: string
   targetLevel?: string
   averageScore?: number | null
 }

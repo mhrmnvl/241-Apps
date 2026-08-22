@@ -20,7 +20,7 @@ import {
   SelectValue,
 } from '@/ui/select'
 import { Textarea } from '@/ui/textarea'
-import { CheckCircle2, Filter, Search, XCircle } from 'lucide-vue-next'
+import { CheckCircle2, Filter, Search, Users, XCircle } from 'lucide-vue-next'
 import type {
   PromotionAction,
   PromotionRecommendationItem,
@@ -94,171 +94,175 @@ function formatScore(score?: number | null) {
 
 <template>
   <div class="space-y-4">
-    <div
-      class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between px-1"
-    >
-      <div class="flex items-center gap-3">
-        <div class="relative">
+    <!-- Header & Action Row -->
+    <div class="flex flex-col gap-3">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <Users class="size-4 text-primary" />
+          <h3 class="font-semibold text-base text-foreground">
+            Daftar Siswa Asal
+          </h3>
+          <Badge
+            variant="secondary"
+            class="font-medium text-xs"
+          >
+            {{ filteredRows.length }} / {{ summaryStats.total }} Siswa
+          </Badge>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            class="h-8 text-xs font-medium"
+            :disabled="selectedIds.size === 0"
+            @click="bulkApprove"
+          >
+            <CheckCircle2 class="size-3.5 mr-1 text-green-600" />
+            Setujui ({{ selectedIds.size }})
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            class="h-8 text-xs font-medium text-destructive hover:text-destructive"
+            :disabled="selectedIds.size === 0"
+            @click="bulkDecline"
+          >
+            <XCircle class="size-3.5 mr-1" />
+            Tolak ({{ selectedIds.size }})
+          </Button>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+        <div class="relative sm:col-span-1">
           <Search
-            class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"
+            class="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground"
           />
           <Input
             v-model="searchQuery"
-            placeholder="Cari nama atau NIS..."
-            class="pl-9 w-[240px]"
+            placeholder="Cari nama / NIS..."
+            class="pl-8 h-9 text-xs"
           />
         </div>
+
         <Select v-model="filterClass">
-          <SelectTrigger class="w-[160px]">
-            <Filter class="h-3.5 w-3.5 mr-1.5 text-muted-foreground" />
+          <SelectTrigger class="h-9 text-xs">
+            <Filter class="size-3 mr-1 text-muted-foreground" />
             <SelectValue placeholder="Semua Kelas" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all"> Semua Kelas </SelectItem>
+            <SelectItem
+              value="all"
+              class="text-xs"
+              >Semua Kelas</SelectItem
+            >
             <SelectItem
               v-for="cls in uniqueClasses"
               :key="cls"
               :value="cls"
+              class="text-xs"
             >
               {{ cls }}
             </SelectItem>
           </SelectContent>
         </Select>
+
         <Select v-model="filterStatus">
-          <SelectTrigger class="w-[160px]">
+          <SelectTrigger class="h-9 text-xs">
             <SelectValue placeholder="Semua Status" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all"> Semua Status </SelectItem>
-            <SelectItem value="approved"> Disetujui </SelectItem>
-            <SelectItem value="declined"> Ditolak </SelectItem>
+            <SelectItem
+              value="all"
+              class="text-xs"
+              >Semua Status</SelectItem
+            >
+            <SelectItem
+              value="approved"
+              class="text-xs"
+              >Disetujui</SelectItem
+            >
+            <SelectItem
+              value="declined"
+              class="text-xs"
+              >Ditolak</SelectItem
+            >
           </SelectContent>
         </Select>
       </div>
-      <div class="flex items-center gap-2">
-        <Button
-          size="sm"
-          variant="outline"
-          :disabled="selectedIds.size === 0"
-          @click="bulkApprove"
-        >
-          <CheckCircle2 class="size-3.5 mr-1.5" />
-          Setujui ({{ selectedIds.size }})
-        </Button>
-        <Button
-          size="sm"
-          variant="outline"
-          class="text-destructive hover:text-destructive"
-          :disabled="selectedIds.size === 0"
-          @click="bulkDecline"
-        >
-          <XCircle class="size-3.5 mr-1.5" />
-          Tolak ({{ selectedIds.size }})
-        </Button>
-      </div>
     </div>
 
-    <div
-      class="flex items-center gap-4 px-4 py-3 bg-muted/30 rounded-lg text-sm"
-    >
-      <div class="flex items-center gap-1.5">
-        <div class="h-2.5 w-2.5 rounded-full bg-green-500" />
-        <span class="text-muted-foreground"
-          >Naik:
-          <strong class="text-foreground">{{
-            summaryStats.approved
-          }}</strong></span
-        >
-      </div>
-      <div class="flex items-center gap-1.5">
-        <div class="h-2.5 w-2.5 rounded-full bg-amber-500" />
-        <span class="text-muted-foreground"
-          >Tinggal:
-          <strong class="text-foreground">{{
-            summaryStats.declined
-          }}</strong></span
-        >
-      </div>
-
-      <div class="ml-auto text-muted-foreground">
-        Total:
-        <strong class="text-foreground">{{ summaryStats.total }}</strong> siswa
-      </div>
-    </div>
-
-    <div class="overflow-x-auto rounded-xl border shadow-sm bg-background">
-      <table class="w-full text-sm">
-        <thead class="bg-muted/40 sticky top-0 backdrop-blur-sm z-10">
-          <tr class="border-b shadow-sm">
-            <th class="p-4 w-[40px]">
+    <!-- Table -->
+    <div class="overflow-x-auto rounded-xl border bg-background shadow-xs">
+      <table class="w-full text-xs">
+        <thead class="bg-muted/50 sticky top-0 backdrop-blur-xs z-10">
+          <tr class="border-b">
+            <th class="p-3 w-[36px]">
               <Checkbox
                 :model-value="allVisibleSelected"
                 @update:model-value="toggleSelectAll"
               />
             </th>
-            <th class="p-4 text-left font-semibold text-muted-foreground">
+            <th class="p-3 text-left font-semibold text-muted-foreground">
               Nama Siswa
             </th>
-            <th class="p-4 text-center font-semibold text-muted-foreground">
-              NIS
-            </th>
-            <th class="p-4 text-center font-semibold text-muted-foreground">
+            <th class="p-3 text-center font-semibold text-muted-foreground">
               Kelas
             </th>
-            <th class="p-4 text-center font-semibold text-muted-foreground">
+            <th class="p-3 text-center font-semibold text-muted-foreground">
               Nilai
             </th>
-            <th class="p-4 text-center font-semibold text-muted-foreground">
+            <th class="p-3 text-center font-semibold text-muted-foreground">
               Rekomendasi
             </th>
-            <th class="p-4 text-center font-semibold text-muted-foreground">
-              Kelas Tujuan
-            </th>
             <th
-              class="p-4 text-center font-semibold text-muted-foreground w-[180px]"
+              class="p-3 text-center font-semibold text-muted-foreground w-[130px]"
             >
               Keputusan
             </th>
           </tr>
         </thead>
-        <tbody>
+        <tbody class="divide-y">
           <tr
             v-for="row in filteredRows"
             :key="row.studentId"
-            class="border-b transition-all duration-200 hover:bg-muted/20"
+            class="transition-colors hover:bg-muted/30"
             :class="{
               'bg-destructive/5':
                 getDecision(row.studentId)?.approved === false,
             }"
           >
-            <td class="p-4">
+            <td class="p-3">
               <Checkbox
                 :model-value="selectedIds.has(row.studentId)"
                 @update:model-value="toggleSelect(row.studentId)"
               />
             </td>
-            <td class="p-4">
+            <td class="p-3">
               <div class="font-semibold text-foreground">
                 {{ row.studentName }}
               </div>
+              <div class="text-[11px] text-muted-foreground mt-0.5">
+                NIS: {{ row.nis }}
+              </div>
               <div
                 v-if="getDecision(row.studentId)?.declineReason"
-                class="text-xs text-destructive mt-0.5 italic"
+                class="text-[11px] text-destructive mt-0.5 italic"
               >
                 Alasan: {{ getDecision(row.studentId)?.declineReason }}
               </div>
             </td>
-            <td class="p-4 text-center text-muted-foreground font-mono text-xs">
-              {{ row.nis }}
-            </td>
-            <td class="p-4 text-center">
+            <td class="p-3 text-center">
               <Badge
                 variant="outline"
-                class="font-medium bg-background shadow-sm"
-                >{{ row.sourceClassName }}</Badge
+                class="font-medium bg-background text-[11px] px-2 py-0.5"
               >
+                {{ row.sourceClassroomName }}
+              </Badge>
             </td>
-            <td class="p-4 text-center">
+            <td class="p-3 text-center">
               <span
                 class="font-semibold tabular-nums"
                 :class="
@@ -268,17 +272,18 @@ function formatScore(score?: number | null) {
                       : 'text-amber-600'
                     : 'text-muted-foreground'
                 "
-                >{{ formatScore(row.averageScore) }}</span
               >
+                {{ formatScore(row.averageScore) }}
+              </span>
             </td>
-            <td class="p-4 text-center">
+            <td class="p-3 text-center">
               <Badge
                 :variant="
                   getActionVariant(
                     getDecision(row.studentId)?.action ?? row.recommendedAction,
                   )
                 "
-                class="shadow-sm font-medium"
+                class="font-medium text-[10px] px-2 py-0.5 shadow-none"
               >
                 {{
                   getActionLabel(
@@ -287,28 +292,19 @@ function formatScore(score?: number | null) {
                 }}
               </Badge>
             </td>
-            <td class="p-4 text-center">
-              <span class="font-medium text-foreground">{{
-                row.targetClassName ?? '-'
-              }}</span>
-              <span
-                v-if="row.targetLevel"
-                class="text-muted-foreground font-normal text-xs ml-1.5 bg-muted/50 px-1.5 py-0.5 rounded-full"
-                >{{ row.targetLevel }}</span
-              >
-            </td>
-            <td class="p-4 text-center">
-              <div class="flex items-center justify-center gap-1.5">
+            <td class="p-3 text-center">
+              <div class="flex items-center justify-center gap-1">
                 <Button
                   size="sm"
                   :variant="
                     getDecision(row.studentId)?.approved ? 'default' : 'ghost'
                   "
-                  class="text-xs h-8 px-3"
+                  class="text-xs h-7 px-2"
+                  title="Setujui Kenaikan"
                   @click="approveStudent(row.studentId)"
                 >
-                  <CheckCircle2 class="size-3.5 mr-1" />
-                  Setuju
+                  <CheckCircle2 class="size-3.5" />
+                  <span class="ml-1 text-[11px]">Setuju</span>
                 </Button>
                 <Button
                   size="sm"
@@ -317,30 +313,27 @@ function formatScore(score?: number | null) {
                       ? 'destructive'
                       : 'ghost'
                   "
-                  class="text-xs h-8 px-3"
+                  class="text-xs h-7 px-2"
+                  title="Tolak Kenaikan"
                   @click="openDeclineDialog(row.studentId)"
                 >
-                  <XCircle class="size-3.5 mr-1" />
-                  Tolak
+                  <XCircle class="size-3.5" />
+                  <span class="ml-1 text-[11px]">Tolak</span>
                 </Button>
               </div>
             </td>
           </tr>
           <tr v-if="filteredRows.length === 0">
             <td
-              colspan="8"
-              class="p-12 text-center"
+              colspan="6"
+              class="p-8 text-center"
             >
               <div
-                class="flex flex-col items-center justify-center gap-2 text-muted-foreground"
+                class="flex flex-col items-center justify-center gap-1.5 text-muted-foreground"
               >
-                <div
-                  class="h-12 w-12 rounded-full bg-muted flex items-center justify-center mb-2"
-                >
-                  <Search class="h-5 w-5 opacity-50" />
-                </div>
-                <p class="font-medium">Tidak ada siswa ditemukan</p>
-                <p class="text-sm">Coba ubah filter atau kata pencarian.</p>
+                <Search class="size-5 opacity-40" />
+                <p class="font-medium text-xs">Tidak ada siswa ditemukan</p>
+                <p class="text-[11px]">Coba ubah filter atau kata pencarian.</p>
               </div>
             </td>
           </tr>
@@ -348,19 +341,20 @@ function formatScore(score?: number | null) {
       </table>
     </div>
 
+    <!-- Decline Reason Dialog -->
     <Dialog v-model:open="showDeclineDialog">
       <DialogScrollContent class="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Alasan Penolakan</DialogTitle>
           <DialogDescription>
             Masukkan alasan mengapa siswa ini tidak naik kelas. Alasan ini akan
-            tersimpan di catatan enrollment.
+            tersimpan pada riwayat akademik siswa.
           </DialogDescription>
         </DialogHeader>
         <div class="py-4">
           <Textarea
             v-model="declineReason"
-            placeholder="Contoh: Nilai di bawah rata-rata, kehadiran kurang, dll."
+            placeholder="Contoh: Nilai di bawah KKM, kehadiran kurang, dll."
             class="min-h-[100px]"
           />
         </div>

@@ -30,6 +30,22 @@ export abstract class IPromotionRepository {
     id: string,
   ): Promise<SemesterWithAcademicYear | null>;
 
+  /**
+   * The term a promotion reads from and the term it writes into.
+   *
+   * `edge` is 'last' for the year being left and 'first' for the year being
+   * entered. Ordered by `SemesterType.sequence`, never by name: semester types
+   * are master data the school edits, and the sequence column exists precisely
+   * because ordering by name sorted the English enum alphabetically — EVEN
+   * before ODD — and a rename or a third term would scramble it again.
+   */
+  abstract findEdgeSemesterOfAcademicYear(
+    academicYearId: string,
+    edge: 'first' | 'last',
+  ): Promise<SemesterWithAcademicYear | null>;
+
+  abstract findAcademicYearName(id: string): Promise<string | null>;
+
   abstract findClassroomById(id: string): Promise<ClassroomWithGrade | null>;
 
   abstract findActiveEnrollmentsWithDetails(

@@ -154,8 +154,8 @@ describe('Semester Controllers', () => {
   describe('promote', () => {
     it('should delegate to PromoteStudentsUseCase', async () => {
       const dto = {
-        sourceSemesterId: 'sem-1',
-        targetSemesterId: 'sem-2',
+        sourceAcademicYearId: 'ay-2025',
+        targetAcademicYearId: 'ay-2026',
         students: [
           {
             studentId: 'stu-1',
@@ -181,8 +181,8 @@ describe('Semester Controllers', () => {
   describe('previewPromotion', () => {
     it('should delegate to PreviewPromotionUseCase', async () => {
       const dto = {
-        sourceSemesterId: 'sem-1',
-        targetSemesterId: 'sem-2',
+        sourceAcademicYearId: 'ay-2025',
+        targetAcademicYearId: 'ay-2026',
         students: [
           {
             studentId: 'stu-1',
@@ -208,8 +208,8 @@ describe('Semester Controllers', () => {
   describe('recommend', () => {
     it('should delegate to GeneratePromotionRecommendationUseCase', async () => {
       const dto = {
-        sourceSemesterId: 'sem-1',
-        targetSemesterId: 'sem-2',
+        sourceAcademicYearId: 'ay-2025',
+        targetAcademicYearId: 'ay-2026',
       };
       mockGenerateRecommendation.execute.mockResolvedValue({
         items: [],

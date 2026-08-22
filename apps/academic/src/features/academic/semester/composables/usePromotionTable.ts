@@ -44,7 +44,7 @@ export function usePromotionTable(
   const uniqueClasses = computed(() => {
     const set = new Set<string>()
     for (const r of recommendations.value) {
-      set.add(r.sourceClassName)
+      set.add(r.sourceClassroomName)
     }
     return Array.from(set).sort()
   })
@@ -62,7 +62,7 @@ export function usePromotionTable(
     }
 
     if (filterClass.value !== 'all') {
-      items = items.filter((r) => r.sourceClassName === filterClass.value)
+      items = items.filter((r) => r.sourceClassroomName === filterClass.value)
     }
 
     if (filterStatus.value !== 'all') {
@@ -150,7 +150,7 @@ export function usePromotionTable(
     if (!d || !rec) return
 
     const sameLevel = recommendations.value.find(
-      (r) => r.sourceClassName === rec.sourceClassName,
+      (r) => r.sourceClassroomName === rec.sourceClassroomName,
     )
 
     decisions.value.set(declineTarget.value, {

@@ -27,13 +27,17 @@ export class PromotionStudentDto {
   @IsNotEmpty()
   sourceClassroomId: string;
 
-  @ApiPropertyOptional({
-    description: 'Target classroom ID in the new academic year. Required.',
+  @ApiProperty({
+    description:
+      'Classroom in the new academic year. Required for both actions: a ' +
+      'student held back still enrols somewhere, in the same grade they were ' +
+      'in. The write path has always assumed this — it was optional here, and ' +
+      'a decision without it passed validation and then failed mid-transaction.',
     format: 'uuid',
   })
-  @IsOptional()
   @IsUUID()
-  targetClassroomId?: string;
+  @IsNotEmpty()
+  targetClassroomId: string;
 
   @ApiProperty({
     description: 'Promotion action',
@@ -51,22 +55,23 @@ export class PromotionStudentDto {
   declineReason?: string;
 }
 
+/** Addressed by academic year — see `GenerateRecommendationDto` for why. */
 export class PromotionDto {
   @ApiProperty({
-    description: 'Source semester ID (e.g., Genap 2024/2025)',
+    description: 'Academic year the students are leaving, e.g. 2025/2026',
     format: 'uuid',
   })
   @IsUUID()
   @IsNotEmpty()
-  sourceSemesterId: string;
+  sourceAcademicYearId: string;
 
   @ApiProperty({
-    description: 'Target semester ID (e.g., Ganjil 2025/2026)',
+    description: 'Academic year the students are entering, e.g. 2026/2027',
     format: 'uuid',
   })
   @IsUUID()
   @IsNotEmpty()
-  targetSemesterId: string;
+  targetAcademicYearId: string;
 
   @ApiProperty({
     description: 'Per-student promotion decisions',
