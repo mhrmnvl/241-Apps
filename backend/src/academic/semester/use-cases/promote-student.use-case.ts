@@ -22,9 +22,11 @@ export class PromoteStudentsUseCase {
   async execute(dto: PromotionDto): Promise<PromotionResultDto> {
     const { sourceAcademicYearId, targetAcademicYearId, students } = dto;
 
-    // Which terms those years mean is the resolver's call, not the caller's.
+    // Both terms, because this is the step that writes: an enrolment row
+    // carries a `semesterId`, so the target term has to exist before anyone
+    // can be put in it.
     const { source: sourceSemester, target: targetSemester } =
-      await this.semesterResolver.resolve(
+      await this.semesterResolver.resolveBoth(
         sourceAcademicYearId,
         targetAcademicYearId,
       );

@@ -20,20 +20,21 @@ export class GeneratePromotionRecommendationUseCase {
   ): Promise<PromotionRecommendationDto> {
     const { sourceAcademicYearId, targetAcademicYearId } = dto;
 
-    // Which terms those years mean is the resolver's call, not the caller's.
-    const { source: sourceSemester, target: targetSemester } =
-      await this.semesterResolver.resolve(
-        sourceAcademicYearId,
-        targetAcademicYearId,
-      );
+    // Only the source term is needed. Which one that is remains the resolver's
+    // call, not the caller's — but the target side of a recommendation is a
+    // set of classrooms, and those hang off the academic year rather than off
+    // a term. Asking for the target term here would refuse to plan a promotion
+    // into a year still being set up, which is exactly when you plan one.
+    const sourceSemester = await this.semesterResolver.resolveSource(
+      sourceAcademicYearId,
+      targetAcademicYearId,
+    );
 
     const [enrollments, targetClassrooms] = await Promise.all([
       this.promotionRepository.findActiveEnrollmentsWithDetails(
         sourceSemester.id,
       ),
-      this.promotionRepository.findClassesByAcademicYear(
-        targetSemester.academicYearId,
-      ),
+      this.promotionRepository.findClassesByAcademicYear(targetAcademicYearId),
     ]);
 
     // Build a map of level (int) → next level's classrooms

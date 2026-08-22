@@ -34,7 +34,10 @@ describe('PromotionSemesterResolver', () => {
     }).compile();
 
     resolver = module.get(PromotionSemesterResolver);
-    jest.clearAllMocks();
+    // `reset`, not `clear`: clearAllMocks leaves queued mockResolvedValueOnce
+    // values in place, so an unconsumed one leaks into the next test and
+    // resolves a call that case never made.
+    jest.resetAllMocks();
     repository.findAcademicYearName.mockResolvedValue(null);
   });
 
@@ -43,7 +46,7 @@ describe('PromotionSemesterResolver', () => {
       .mockResolvedValueOnce(semester('genap-2025', 'ay-2025'))
       .mockResolvedValueOnce(semester('ganjil-2026', 'ay-2026'));
 
-    const result = await resolver.resolve('ay-2025', 'ay-2026');
+    const result = await resolver.resolveBoth('ay-2025', 'ay-2026');
 
     expect(result.source.id).toBe('genap-2025');
     expect(result.target.id).toBe('ganjil-2026');
@@ -64,14 +67,50 @@ describe('PromotionSemesterResolver', () => {
    * twice is a rollover, and saying so is more use than a validation error
    * about semesters the caller never mentioned.
    */
-  it('refuses one year twice, and points at rollover', async () => {
-    await expect(resolver.resolve('ay-2025', 'ay-2025')).rejects.toThrow(
+  it('refuses one year twice, and points at rollover', () => {
+    expect(() => resolver.assertDifferentYears('ay-2025', 'ay-2025')).toThrow(
       BadRequestException,
     );
-    await expect(resolver.resolve('ay-2025', 'ay-2025')).rejects.toThrow(
+    expect(() => resolver.assertDifferentYears('ay-2025', 'ay-2025')).toThrow(
       /rollover/i,
     );
     expect(repository.findEdgeSemesterOfAcademicYear).not.toHaveBeenCalled();
+  });
+
+  /**
+   * The regression this split exists for.
+   *
+   * A promotion is planned *while* the next year is still being set up — that
+   * is when you plan one. Requiring the target term on every call refused the
+   * recommendation with "2027/2028 has no semester", which is true and
+   * irrelevant: a recommendation reads the old year's roster and the new
+   * year's classrooms, and classrooms hang off the year.
+   */
+  it('resolves the source alone even when the target year has no term yet', async () => {
+    repository.findEdgeSemesterOfAcademicYear.mockResolvedValueOnce(
+      semester('genap-2026', 'ay-2026'),
+    );
+
+    const source = await resolver.resolveSource('ay-2026', 'ay-2027');
+
+    expect(source.id).toBe('genap-2026');
+    expect(repository.findEdgeSemesterOfAcademicYear).toHaveBeenCalledTimes(1);
+    expect(repository.findEdgeSemesterOfAcademicYear).toHaveBeenCalledWith(
+      'ay-2026',
+      'last',
+    );
+  });
+
+  /** The write still demands one: an enrolment row carries a semesterId. */
+  it('still refuses to write into a year with no term', async () => {
+    repository.findEdgeSemesterOfAcademicYear
+      .mockResolvedValueOnce(semester('genap-2026', 'ay-2026'))
+      .mockResolvedValueOnce(null);
+    repository.findAcademicYearName.mockResolvedValue('2027/2028');
+
+    await expect(resolver.resolveBoth('ay-2026', 'ay-2027')).rejects.toThrow(
+      /2027\/2028/,
+    );
   });
 
   it('names the year when it has no term to read from', async () => {
@@ -80,7 +119,7 @@ describe('PromotionSemesterResolver', () => {
       .mockResolvedValueOnce(semester('ganjil-2026', 'ay-2026'));
     repository.findAcademicYearName.mockResolvedValue('2025/2026');
 
-    await expect(resolver.resolve('ay-2025', 'ay-2026')).rejects.toThrow(
+    await expect(resolver.resolveSource('ay-2025', 'ay-2026')).rejects.toThrow(
       /2025\/2026/,
     );
   });
@@ -91,7 +130,7 @@ describe('PromotionSemesterResolver', () => {
       .mockResolvedValueOnce(null);
     repository.findAcademicYearName.mockResolvedValue('2026/2027');
 
-    await expect(resolver.resolve('ay-2025', 'ay-2026')).rejects.toThrow(
+    await expect(resolver.resolveBoth('ay-2025', 'ay-2026')).rejects.toThrow(
       /2026\/2027/,
     );
   });
@@ -106,7 +145,7 @@ describe('PromotionSemesterResolver', () => {
       .mockResolvedValueOnce(null);
     repository.findAcademicYearName.mockResolvedValue(null);
 
-    await expect(resolver.resolve('ay-2025', 'ay-2026')).rejects.toThrow(
+    await expect(resolver.resolveBoth('ay-2025', 'ay-2026')).rejects.toThrow(
       /ay-2026/,
     );
   });

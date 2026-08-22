@@ -137,12 +137,6 @@ export class PrismaAcademicYearRepository extends IAcademicYearRepository {
     return count > 0;
   }
 
-  async countSemesters(academicYearId: string): Promise<number> {
-    return this.prisma.semester.count({
-      where: { academicYearId, deletedAt: null },
-    });
-  }
-
   async countActive(): Promise<number> {
     return this.prisma.academicYear.count({
       where: { isActive: true, deletedAt: null },
