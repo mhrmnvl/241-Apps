@@ -14,6 +14,9 @@ export interface AddressEntity {
   country: string;
   postalCode: string;
   isPrimary: boolean;
+  /** WGS84. Null on every address nobody has pinned, which is most of them. */
+  latitude?: number | null;
+  longitude?: number | null;
   deletedAt?: Date | null;
 }
 
@@ -29,6 +32,12 @@ export interface CreateAddressRepositoryInput {
   country?: string;
   postalCode: string;
   isPrimary?: boolean;
+  /**
+   * Both or neither. Half a coordinate is not a place, so the use case rejects
+   * one without the other rather than storing a row that can never be mapped.
+   */
+  latitude?: number | null;
+  longitude?: number | null;
 }
 
 export type UpdateAddressRepositoryInput =

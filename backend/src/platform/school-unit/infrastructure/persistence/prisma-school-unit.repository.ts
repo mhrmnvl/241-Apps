@@ -44,8 +44,6 @@ export class PrismaSchoolUnitRepository extends ISchoolUnitRepository {
         phone: rest.phone ?? '',
         email: rest.email ?? '',
         website: rest.website ?? '',
-        latitude: rest.latitude ?? null,
-        longitude: rest.longitude ?? null,
         type: typeId ? { connect: { id: typeId } } : undefined,
       },
       include: SCHOOL_UNIT_INCLUDE,
@@ -68,10 +66,6 @@ export class PrismaSchoolUnitRepository extends ISchoolUnitRepository {
       ...(rest.email && { email: rest.email }),
       ...(rest.website && { website: rest.website }),
       ...(rest.isActive !== undefined && { isActive: rest.isActive }),
-      // Compared against undefined, not truthiness: 0 is a real coordinate —
-      // the equator and the prime meridian — and null is how a pin is cleared.
-      ...(rest.latitude !== undefined && { latitude: rest.latitude }),
-      ...(rest.longitude !== undefined && { longitude: rest.longitude }),
       type:
         typeId === null
           ? { disconnect: true }

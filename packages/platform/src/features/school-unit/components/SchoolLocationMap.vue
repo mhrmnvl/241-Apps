@@ -30,6 +30,7 @@ const containerRef = useTemplateRef<HTMLDivElement>('container')
 
 let map: L.Map | null = null
 let marker: L.Marker | null = null
+let observer: IntersectionObserver | null = null
 
 /**
  * A `divIcon` rather than Leaflet's default marker image.
@@ -88,7 +89,23 @@ function createMap() {
 
 onMounted(createMap)
 
+onMounted(() => {
+  if (!containerRef.value) return
+  observer = new IntersectionObserver(
+    (entries) => {
+      if (entries[0]?.isIntersecting) {
+        // Container came back into view — refresh tile layout and redraw.
+        requestAnimationFrame(() => map?.invalidateSize())
+      }
+    },
+    { threshold: 0 },
+  )
+  observer.observe(containerRef.value)
+})
+
 onBeforeUnmount(() => {
+  observer?.disconnect()
+  observer = null
   map?.remove()
   map = null
   marker = null
@@ -144,5 +161,29 @@ watch(
 
 .school-map .leaflet-control-attribution a {
   color: var(--primary);
+}
+
+/**
+ * When used as a non-interactive preview inside a card, Leaflet's default
+ * pane z-indexes (400+) bleed through the dialog overlay that opens on top.
+ * Isolating the stacking context keeps those z-indexes scoped to the map
+ * container and prevents the "double map" visual glitch.
+ */
+.school-map {
+  isolation: isolate;
+}
+
+.school-map .leaflet-map-pane,
+.school-map .leaflet-tile-pane,
+.school-map .leaflet-overlay-pane,
+.school-map .leaflet-shadow-pane,
+.school-map .leaflet-marker-pane,
+.school-map .leaflet-tooltip-pane,
+.school-map .leaflet-popup-pane {
+  z-index: auto;
+}
+
+.school-map .leaflet-control-container {
+  z-index: auto;
 }
 </style>

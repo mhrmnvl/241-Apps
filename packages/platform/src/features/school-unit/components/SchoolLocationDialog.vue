@@ -4,15 +4,8 @@ import SchoolLocationMap from './SchoolLocationMap.vue'
 import type { SchoolUnitAddress, SchoolUnitProfile } from '../types'
 import { buildFullAddress, formatCoordinate, hasCoordinates } from '../utils'
 import { Button } from '@/ui/button'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/ui/dialog'
-import { Copy, ExternalLink, MapPin, Navigation } from 'lucide-vue-next'
-import { toast } from 'vue-sonner'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/ui/dialog'
+import { ExternalLink, MapPin, Navigation } from 'lucide-vue-next'
 
 const props = defineProps<{
   open: boolean
@@ -27,61 +20,41 @@ const open = computed({
   set: (value: boolean) => emit('update:open', value),
 })
 
-const hasPin = computed(() => hasCoordinates(props.schoolUnit))
+// The pin belongs to the address, not to the institution.
+const hasPin = computed(() => hasCoordinates(props.address))
 const fullAddress = computed(() => buildFullAddress(props.address))
-
-/** Both halves, in the order every mapping service reads them. */
-const pairText = computed(() =>
-  hasPin.value
-    ? `${formatCoordinate(props.schoolUnit.latitude ?? null)}, ${formatCoordinate(
-        props.schoolUnit.longitude ?? null,
-      )}`
-    : '-',
-)
 
 const googleMapsUrl = computed(() =>
   hasPin.value
-    ? `https://www.google.com/maps/search/?api=1&query=${props.schoolUnit.latitude},${props.schoolUnit.longitude}`
+    ? `https://www.google.com/maps/search/?api=1&query=${props.address.latitude},${props.address.longitude}`
     : '',
 )
 
 const openStreetMapUrl = computed(() =>
   hasPin.value
-    ? `https://www.openstreetmap.org/?mlat=${props.schoolUnit.latitude}&mlon=${props.schoolUnit.longitude}#map=17/${props.schoolUnit.latitude}/${props.schoolUnit.longitude}`
+    ? `https://www.openstreetmap.org/?mlat=${props.address.latitude}&mlon=${props.address.longitude}#map=17/${props.address.latitude}/${props.address.longitude}`
     : '',
 )
-
-async function copyPair() {
-  try {
-    await navigator.clipboard.writeText(pairText.value)
-    toast.success('Koordinat berhasil disalin ke clipboard')
-  } catch {
-    toast.error('Gagal menyalin koordinat')
-  }
-}
 </script>
 
 <template>
   <Dialog v-model:open="open">
     <DialogContent class="sm:max-w-3xl flex flex-col gap-0 p-0 overflow-hidden">
-      <DialogHeader class="px-6 py-5 border-b shrink-0 bg-muted/20">
+      <DialogHeader class="px-6 py-4 border-b shrink-0">
         <DialogTitle class="flex items-center gap-2">
           <MapPin class="size-4 text-primary shrink-0" />
-          Lokasi {{ schoolUnit.surname || schoolUnit.name }}
+          Lokasi
         </DialogTitle>
-        <DialogDescription>
-          {{ fullAddress }}
-        </DialogDescription>
       </DialogHeader>
 
       <div class="px-6 py-5 space-y-4">
         <div
           v-if="hasPin"
-          class="h-[380px] w-full overflow-hidden rounded-xl border"
+          class="h-[360px] w-full overflow-hidden rounded-xl border"
         >
           <SchoolLocationMap
-            :latitude="schoolUnit.latitude as number"
-            :longitude="schoolUnit.longitude as number"
+            :latitude="address.latitude as number"
+            :longitude="address.longitude as number"
             :title="schoolUnit.surname || schoolUnit.name"
             :zoom="17"
           />
@@ -89,50 +62,55 @@ async function copyPair() {
 
         <div
           v-else
-          class="flex h-[380px] w-full flex-col items-center justify-center gap-2 rounded-xl border border-dashed text-center"
+          class="flex h-[360px] w-full flex-col items-center justify-center gap-2 rounded-xl border border-dashed text-center"
         >
           <MapPin class="size-8 text-muted-foreground" />
           <p class="text-sm font-medium text-foreground">
             Titik lokasi belum diatur
           </p>
           <p class="max-w-sm text-sm text-muted-foreground">
-            Isi Latitude dan Longitude pada form Informasi Lembaga untuk
-            menampilkan peta di sini.
+            Isi Latitude dan Longitude pada form Alamat untuk menampilkan peta
+            di sini.
           </p>
         </div>
 
-        <dl class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <dl class="grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
           <div>
-            <dt class="text-xs font-medium text-muted-foreground">Latitude</dt>
-            <dd class="mt-0.5 font-mono font-semibold text-foreground">
-              {{ formatCoordinate(schoolUnit.latitude ?? null) }}
-            </dd>
-          </div>
-
-          <div>
-            <dt class="text-xs font-medium text-muted-foreground">Longitude</dt>
-            <dd class="mt-0.5 font-mono font-semibold text-foreground">
-              {{ formatCoordinate(schoolUnit.longitude ?? null) }}
+            <dt class="text-xs font-medium text-muted-foreground">
+              Nama Resmi
+            </dt>
+            <dd class="mt-0.5 font-semibold text-foreground">
+              {{ schoolUnit.name || '-' }}
             </dd>
           </div>
 
           <div>
             <dt class="text-xs font-medium text-muted-foreground">
-              Koordinat lengkap
+              Nama Singkat
             </dt>
-            <dd
-              class="mt-0.5 flex items-center gap-2 font-mono font-semibold text-foreground"
-            >
-              <span class="truncate">{{ pairText }}</span>
-              <button
-                v-if="hasPin"
-                type="button"
-                class="text-muted-foreground transition-colors hover:text-primary"
-                aria-label="Salin koordinat"
-                @click="copyPair"
-              >
-                <Copy class="size-3.5" />
-              </button>
+            <dd class="mt-0.5 font-semibold text-foreground">
+              {{ schoolUnit.surname || '-' }}
+            </dd>
+          </div>
+
+          <div class="col-span-2">
+            <dt class="text-xs font-medium text-muted-foreground">Alamat</dt>
+            <dd class="mt-0.5 font-medium text-foreground leading-relaxed">
+              {{ fullAddress || '-' }}
+            </dd>
+          </div>
+
+          <div>
+            <dt class="text-xs font-medium text-muted-foreground">Latitude</dt>
+            <dd class="mt-0.5 font-semibold text-foreground">
+              {{ formatCoordinate(address.latitude ?? null) }}
+            </dd>
+          </div>
+
+          <div>
+            <dt class="text-xs font-medium text-muted-foreground">Longitude</dt>
+            <dd class="mt-0.5 font-semibold text-foreground">
+              {{ formatCoordinate(address.longitude ?? null) }}
             </dd>
           </div>
         </dl>

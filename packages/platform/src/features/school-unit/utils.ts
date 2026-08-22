@@ -25,20 +25,22 @@ export function toSchoolUnitProfile(
     phone: data?.phone ?? EMPTY_SCHOOL_UNIT.phone,
     email: data?.email ?? EMPTY_SCHOOL_UNIT.email,
     website: data?.website ?? EMPTY_SCHOOL_UNIT.website,
-    // `??` rather than `||`: 0 is a real coordinate — the equator and the
-    // prime meridian — and would otherwise be read as "no pin".
-    latitude: data?.latitude ?? null,
-    longitude: data?.longitude ?? null,
   }
 }
 
-/** A pin exists only when both halves of it do. */
+/**
+ * A pin exists only when both halves of it do.
+ *
+ * Asked of an address, which is what holds the coordinate. The profile map
+ * asks it of the primary address and draws nothing when the answer is no —
+ * it never looks for a pin on some other address the school may have.
+ */
 export function hasCoordinates(
-  schoolUnit: Pick<SchoolUnitProfile, 'latitude' | 'longitude'>,
+  address: Pick<SchoolUnitAddress, 'latitude' | 'longitude'>,
 ): boolean {
   return (
-    typeof schoolUnit.latitude === 'number' &&
-    typeof schoolUnit.longitude === 'number'
+    typeof address.latitude === 'number' &&
+    typeof address.longitude === 'number'
   )
 }
 
@@ -60,6 +62,10 @@ export function toSchoolUnitAddress(
     province: data?.province ?? EMPTY_ADDRESS.province,
     country: data?.country ?? EMPTY_ADDRESS.country,
     postalCode: data?.postalCode ?? EMPTY_ADDRESS.postalCode,
+    // `??` rather than `||`: 0 is a real coordinate — the equator and the
+    // prime meridian — and would otherwise be read as "no pin".
+    latitude: data?.latitude ?? null,
+    longitude: data?.longitude ?? null,
   }
 }
 
@@ -98,8 +104,6 @@ const schoolUnitProfileKeys: (keyof SchoolUnitProfile)[] = [
   'phone',
   'email',
   'website',
-  'latitude',
-  'longitude',
 ]
 
 const schoolUnitAddressKeys: (keyof SchoolUnitAddress)[] = [
@@ -112,6 +116,8 @@ const schoolUnitAddressKeys: (keyof SchoolUnitAddress)[] = [
   'province',
   'country',
   'postalCode',
+  'latitude',
+  'longitude',
 ]
 
 export function hasSchoolUnitProfileChanges(
