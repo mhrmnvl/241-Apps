@@ -16,10 +16,10 @@ import { IAcademicYearRepository } from '../domain/interfaces/academic-year-repo
  * its terms" reach the same place; only the second was refused, and only after
  * the operator had clicked.
  *
- * The hazard worth naming is a different one this never addressed: activating
- * a year deactivates whichever was active, so the school can be left with no
- * active *semester*. A year holding one inactive term passed the old check and
- * left exactly that state.
+ * The hazard that check never addressed is handled where it belongs, in the
+ * one transaction that does the switching: activating a year now activates its
+ * first term too, so the year and the term the school is in cannot disagree.
+ * See `activateById`.
  */
 @Injectable()
 export class ActivateAcademicYearUseCase {
