@@ -10,7 +10,7 @@ export function usePromotionTable(
 ) {
   const decisions = ref<Map<string, PromotionStudentDecision>>(new Map())
   const searchQuery = ref('')
-  const filterClass = ref('all')
+  const filterClass = ref('')
   const filterStatus = ref('all')
   const selectedIds = ref<Set<string>>(new Set())
   const showDeclineDialog = ref(false)
@@ -36,6 +36,15 @@ export function usePromotionTable(
         })
       }
       decisions.value = map
+
+      // Anything that names a student or a class from the previous roster goes
+      // with it. Changing the academic year fetches a different cohort, and a
+      // class filter left pointing at "VII-A" from the year before matches
+      // nothing — both this table and the preview beside it would go blank
+      // with nothing on screen to say why.
+      filterClass.value = ''
+      selectedIds.value = new Set()
+
       emitDecisions()
     },
     { immediate: true },
@@ -50,6 +59,11 @@ export function usePromotionTable(
   })
 
   const filteredRows = computed(() => {
+    // Require a class to be chosen before showing any rows — the list spans
+    // multiple grades and hundreds of students; an unprompted full dump is more
+    // noise than signal.
+    if (!filterClass.value) return []
+
     let items = recommendations.value
 
     if (searchQuery.value) {
