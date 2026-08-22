@@ -12,6 +12,7 @@ describe('PromoteStudentsUseCase', () => {
   const mockRepository: Record<string, jest.Mock> = {
     findSemesterWithAcademicYear: jest.fn(),
     findEdgeSemesterOfAcademicYear: jest.fn(),
+    findLatestEnrolledSemesterOfAcademicYear: jest.fn(),
     findAcademicYearName: jest.fn(),
     findClassroomById: jest.fn(),
     executePromotion: jest.fn(),
@@ -64,9 +65,12 @@ describe('PromoteStudentsUseCase', () => {
   });
 
   it('should promote students successfully', async () => {
-    mockRepository.findEdgeSemesterOfAcademicYear
-      .mockResolvedValueOnce(sourceSemester)
-      .mockResolvedValueOnce(targetSemester);
+    mockRepository.findLatestEnrolledSemesterOfAcademicYear.mockResolvedValue(
+      sourceSemester,
+    );
+    mockRepository.findEdgeSemesterOfAcademicYear.mockResolvedValue(
+      targetSemester,
+    );
 
     mockRepository.findClassroomById
       .mockResolvedValueOnce(
@@ -106,9 +110,12 @@ describe('PromoteStudentsUseCase', () => {
   });
 
   it('should handle repeat with decline reason', async () => {
-    mockRepository.findEdgeSemesterOfAcademicYear
-      .mockResolvedValueOnce(sourceSemester)
-      .mockResolvedValueOnce(targetSemester);
+    mockRepository.findLatestEnrolledSemesterOfAcademicYear.mockResolvedValue(
+      sourceSemester,
+    );
+    mockRepository.findEdgeSemesterOfAcademicYear.mockResolvedValue(
+      targetSemester,
+    );
 
     mockRepository.findClassroomById
       .mockResolvedValueOnce(
@@ -143,7 +150,20 @@ describe('PromoteStudentsUseCase', () => {
     expect(result.repeated).toBe(1);
   });
 
-  it('should throw if source = target semester', async () => {
+  /**
+   * The state this school was actually in: a second term on the calendar with
+   * nobody in it yet, because the rollover had not run. Refusing with "no
+   * semester" would have been a lie — it has two.
+   */
+  it('refuses a source year whose terms are all empty, and says so', async () => {
+    mockRepository.findLatestEnrolledSemesterOfAcademicYear.mockResolvedValue(
+      null,
+    );
+    mockRepository.findEdgeSemesterOfAcademicYear.mockResolvedValue(
+      sourceSemester,
+    );
+    mockRepository.findAcademicYearName.mockResolvedValue('2026/2027');
+
     const dto: PromotionDto = {
       sourceAcademicYearId: 'ay-old',
       targetAcademicYearId: 'ay-new',
@@ -157,13 +177,15 @@ describe('PromoteStudentsUseCase', () => {
       ],
     };
 
-    await expect(useCase.execute(dto)).rejects.toThrow(BadRequestException);
+    await expect(useCase.execute(dto)).rejects.toThrow(/no students enrolled/i);
+    await expect(useCase.execute(dto)).rejects.toThrow(/2026\/2027/);
   });
 
   it('refuses a source academic year that has no term to read from', async () => {
-    mockRepository.findEdgeSemesterOfAcademicYear
-      .mockResolvedValueOnce(null)
-      .mockResolvedValueOnce(targetSemester);
+    mockRepository.findLatestEnrolledSemesterOfAcademicYear.mockResolvedValue(
+      null,
+    );
+    mockRepository.findEdgeSemesterOfAcademicYear.mockResolvedValue(null);
     mockRepository.findAcademicYearName.mockResolvedValue('2024/2025');
 
     const dto: PromotionDto = {
@@ -207,9 +229,12 @@ describe('PromoteStudentsUseCase', () => {
   });
 
   it('should throw if target classroom is in wrong AY', async () => {
-    mockRepository.findEdgeSemesterOfAcademicYear
-      .mockResolvedValueOnce(sourceSemester)
-      .mockResolvedValueOnce(targetSemester);
+    mockRepository.findLatestEnrolledSemesterOfAcademicYear.mockResolvedValue(
+      sourceSemester,
+    );
+    mockRepository.findEdgeSemesterOfAcademicYear.mockResolvedValue(
+      targetSemester,
+    );
 
     mockRepository.findClassroomById
       .mockResolvedValueOnce(
@@ -236,9 +261,12 @@ describe('PromoteStudentsUseCase', () => {
   });
 
   it('should throw if REPEAT with level mismatch', async () => {
-    mockRepository.findEdgeSemesterOfAcademicYear
-      .mockResolvedValueOnce(sourceSemester)
-      .mockResolvedValueOnce(targetSemester);
+    mockRepository.findLatestEnrolledSemesterOfAcademicYear.mockResolvedValue(
+      sourceSemester,
+    );
+    mockRepository.findEdgeSemesterOfAcademicYear.mockResolvedValue(
+      targetSemester,
+    );
 
     mockRepository.findClassroomById
       .mockResolvedValueOnce(
@@ -271,9 +299,12 @@ describe('PromoteStudentsUseCase', () => {
    * missing target is now an error for every student in the run.
    */
   it('should throw if an action has no targetClassroomId', async () => {
-    mockRepository.findEdgeSemesterOfAcademicYear
-      .mockResolvedValueOnce(sourceSemester)
-      .mockResolvedValueOnce(targetSemester);
+    mockRepository.findLatestEnrolledSemesterOfAcademicYear.mockResolvedValue(
+      sourceSemester,
+    );
+    mockRepository.findEdgeSemesterOfAcademicYear.mockResolvedValue(
+      targetSemester,
+    );
 
     mockRepository.findClassroomById.mockResolvedValueOnce(
       makeClassroom('cls-9a', 9, 'IX', 'IX-A', 'ay-old'),
@@ -299,9 +330,12 @@ describe('PromoteStudentsUseCase', () => {
   });
 
   it('should throw if REPEAT without declineReason', async () => {
-    mockRepository.findEdgeSemesterOfAcademicYear
-      .mockResolvedValueOnce(sourceSemester)
-      .mockResolvedValueOnce(targetSemester);
+    mockRepository.findLatestEnrolledSemesterOfAcademicYear.mockResolvedValue(
+      sourceSemester,
+    );
+    mockRepository.findEdgeSemesterOfAcademicYear.mockResolvedValue(
+      targetSemester,
+    );
 
     mockRepository.findClassroomById.mockResolvedValueOnce(
       makeClassroom('cls-7a', 7, 'VII', 'VII-A', 'ay-old'),

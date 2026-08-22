@@ -16,6 +16,7 @@ describe('PromotionSemesterResolver', () => {
 
   const repository = {
     findEdgeSemesterOfAcademicYear: jest.fn(),
+    findLatestEnrolledSemesterOfAcademicYear: jest.fn(),
     findAcademicYearName: jest.fn(),
   };
 
@@ -41,24 +42,54 @@ describe('PromotionSemesterResolver', () => {
     repository.findAcademicYearName.mockResolvedValue(null);
   });
 
-  it('reads from the last term of the old year and writes into the first of the new', async () => {
-    repository.findEdgeSemesterOfAcademicYear
-      .mockResolvedValueOnce(semester('genap-2025', 'ay-2025'))
-      .mockResolvedValueOnce(semester('ganjil-2026', 'ay-2026'));
+  it('reads where the roster is, and writes into the first term of the new year', async () => {
+    repository.findLatestEnrolledSemesterOfAcademicYear.mockResolvedValue(
+      semester('genap-2025', 'ay-2025'),
+    );
+    repository.findEdgeSemesterOfAcademicYear.mockResolvedValue(
+      semester('ganjil-2026', 'ay-2026'),
+    );
 
     const result = await resolver.resolveBoth('ay-2025', 'ay-2026');
 
     expect(result.source.id).toBe('genap-2025');
     expect(result.target.id).toBe('ganjil-2026');
-    expect(repository.findEdgeSemesterOfAcademicYear).toHaveBeenNthCalledWith(
-      1,
-      'ay-2025',
-      'last',
-    );
-    expect(repository.findEdgeSemesterOfAcademicYear).toHaveBeenNthCalledWith(
-      2,
+    expect(
+      repository.findLatestEnrolledSemesterOfAcademicYear,
+    ).toHaveBeenCalledWith('ay-2025');
+    expect(repository.findEdgeSemesterOfAcademicYear).toHaveBeenCalledWith(
       'ay-2026',
       'first',
+    );
+  });
+
+  /**
+   * The state this school was in when the screen came up empty: still in
+   * Ganjil, Genap on the calendar and unenrolled because the rollover had not
+   * run. Taking the last term regardless read Genap, found nobody, and left
+   * no classes to filter by.
+   */
+  it('takes the first term when the second exists but nobody is in it', async () => {
+    repository.findLatestEnrolledSemesterOfAcademicYear.mockResolvedValue(
+      semester('ganjil-2026', 'ay-2026'),
+    );
+
+    const source = await resolver.resolveSource('ay-2026', 'ay-2027');
+
+    expect(source.id).toBe('ganjil-2026');
+    // The edge lookup is for the error path only; a roster was found.
+    expect(repository.findEdgeSemesterOfAcademicYear).not.toHaveBeenCalled();
+  });
+
+  it('says nobody is enrolled when the year has terms but no students', async () => {
+    repository.findLatestEnrolledSemesterOfAcademicYear.mockResolvedValue(null);
+    repository.findEdgeSemesterOfAcademicYear.mockResolvedValue(
+      semester('genap-2026', 'ay-2026'),
+    );
+    repository.findAcademicYearName.mockResolvedValue('2026/2027');
+
+    await expect(resolver.resolveSource('ay-2026', 'ay-2027')).rejects.toThrow(
+      /no students enrolled/i,
     );
   });
 
@@ -87,25 +118,21 @@ describe('PromotionSemesterResolver', () => {
    * year's classrooms, and classrooms hang off the year.
    */
   it('resolves the source alone even when the target year has no term yet', async () => {
-    repository.findEdgeSemesterOfAcademicYear.mockResolvedValueOnce(
+    repository.findLatestEnrolledSemesterOfAcademicYear.mockResolvedValue(
       semester('genap-2026', 'ay-2026'),
     );
 
     const source = await resolver.resolveSource('ay-2026', 'ay-2027');
 
     expect(source.id).toBe('genap-2026');
-    expect(repository.findEdgeSemesterOfAcademicYear).toHaveBeenCalledTimes(1);
-    expect(repository.findEdgeSemesterOfAcademicYear).toHaveBeenCalledWith(
-      'ay-2026',
-      'last',
-    );
   });
 
   /** The write still demands one: an enrolment row carries a semesterId. */
   it('still refuses to write into a year with no term', async () => {
-    repository.findEdgeSemesterOfAcademicYear
-      .mockResolvedValueOnce(semester('genap-2026', 'ay-2026'))
-      .mockResolvedValueOnce(null);
+    repository.findLatestEnrolledSemesterOfAcademicYear.mockResolvedValue(
+      semester('genap-2026', 'ay-2026'),
+    );
+    repository.findEdgeSemesterOfAcademicYear.mockResolvedValue(null);
     repository.findAcademicYearName.mockResolvedValue('2027/2028');
 
     await expect(resolver.resolveBoth('ay-2026', 'ay-2027')).rejects.toThrow(
@@ -114,9 +141,8 @@ describe('PromotionSemesterResolver', () => {
   });
 
   it('names the year when it has no term to read from', async () => {
-    repository.findEdgeSemesterOfAcademicYear
-      .mockResolvedValueOnce(null)
-      .mockResolvedValueOnce(semester('ganjil-2026', 'ay-2026'));
+    repository.findLatestEnrolledSemesterOfAcademicYear.mockResolvedValue(null);
+    repository.findEdgeSemesterOfAcademicYear.mockResolvedValue(null);
     repository.findAcademicYearName.mockResolvedValue('2025/2026');
 
     await expect(resolver.resolveSource('ay-2025', 'ay-2026')).rejects.toThrow(
@@ -140,9 +166,10 @@ describe('PromotionSemesterResolver', () => {
    * `undefined` — the id is poor, but it is something to search for.
    */
   it('falls back to the id when the year has no readable name', async () => {
-    repository.findEdgeSemesterOfAcademicYear
-      .mockResolvedValueOnce(semester('genap-2025', 'ay-2025'))
-      .mockResolvedValueOnce(null);
+    repository.findLatestEnrolledSemesterOfAcademicYear.mockResolvedValue(
+      semester('genap-2025', 'ay-2025'),
+    );
+    repository.findEdgeSemesterOfAcademicYear.mockResolvedValue(null);
     repository.findAcademicYearName.mockResolvedValue(null);
 
     await expect(resolver.resolveBoth('ay-2025', 'ay-2026')).rejects.toThrow(
