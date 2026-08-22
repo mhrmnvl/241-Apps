@@ -15,9 +15,16 @@ export interface DashboardPanel {
  * renaming a role changes nothing here. `src/__tests__/no-role-name-branching.spec.ts`
  * is the sweep that holds that line across every feature.
  *
- * It returns a list rather than a choice because holding more than one is
- * ordinary: a wali kelas who also operates the system, a head teacher whose own
- * teaching sits beside the school view.
+ * `dashboards.read` settles it on its own: whoever may read the school's
+ * figures came here for the school's figures, and gets that one screen with no
+ * tab strip over it. Administrator accounts are routinely attached to a staff
+ * record, so without this rule an operator who also teaches would meet two tabs
+ * on every sign-in and have to pick the same one every time. The cost is that a
+ * head teacher holding `dashboards.read` no longer sees their own teaching
+ * here; their timetable and marking stay on the screens that own them.
+ *
+ * It still returns a list rather than a single panel, because being both a
+ * student and a teacher is possible and costs nothing to carry.
  *
  * @param dashboard the personal payload, or null when it was never fetched
  *   (no `dashboards.read-own`) or failed to load
@@ -27,12 +34,10 @@ export function selectDashboardPanels(
   dashboard: MyDashboard | null,
   canReadInstitution: boolean,
 ): DashboardPanel[] {
+  if (canReadInstitution) return [{ value: 'institution', label: 'Sekolah' }]
+
   const panels: DashboardPanel[] = []
-  // Own first. Someone who is both a student and staff is here to see their own
-  // day; the school view is the wider context, not the headline.
   if (dashboard?.student) panels.push({ value: 'student', label: 'Siswa' })
   if (dashboard?.teacher) panels.push({ value: 'teacher', label: 'Guru' })
-  if (canReadInstitution)
-    panels.push({ value: 'institution', label: 'Sekolah' })
   return panels
 }
