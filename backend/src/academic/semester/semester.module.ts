@@ -15,6 +15,7 @@ import { GetSemesterByIdUseCase } from './use-cases/get-semester-by-id.use-case.
 import { GetSemestersUseCase } from './use-cases/get-semesters.use-case.js';
 import { PreviewPromotionUseCase } from './use-cases/preview-promotion.use-case.js';
 import { PromoteStudentsUseCase } from './use-cases/promote-student.use-case.js';
+import { PromotionSemesterResolver } from './services/promotion-semester-resolver.service.js';
 import { RolloverSemesterUseCase } from './use-cases/rollover-semester.use-case.js';
 import { UpdateSemesterUseCase } from './use-cases/update-semester.use-case.js';
 import { ISemesterRepository } from './domain/interfaces/semester-repository.interface.js';
@@ -38,6 +39,7 @@ import { IPromotionRepository } from './domain/interfaces/promotion-repository.i
     UpdateSemesterUseCase,
     DeleteSemesterUseCase,
     RolloverSemesterUseCase,
+    PromotionSemesterResolver,
     PromoteStudentsUseCase,
     PreviewPromotionUseCase,
     GeneratePromotionRecommendationUseCase,

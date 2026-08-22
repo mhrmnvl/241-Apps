@@ -3,6 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { PromotionAction } from '../domain/enums/promotion-action.enum.js';
 import { PromotionDto } from '../dto/request/promotion.dto.js';
 import { IPromotionRepository } from '../domain/interfaces/promotion-repository.interface.js';
+import { PromotionSemesterResolver } from '../services/promotion-semester-resolver.service.js';
 import { PromoteStudentsUseCase } from './promote-student.use-case.js';
 
 describe('PromoteStudentsUseCase', () => {
@@ -10,6 +11,8 @@ describe('PromoteStudentsUseCase', () => {
 
   const mockRepository: Record<string, jest.Mock> = {
     findSemesterWithAcademicYear: jest.fn(),
+    findEdgeSemesterOfAcademicYear: jest.fn(),
+    findAcademicYearName: jest.fn(),
     findClassroomById: jest.fn(),
     executePromotion: jest.fn(),
   };
@@ -48,6 +51,7 @@ describe('PromoteStudentsUseCase', () => {
       providers: [
         PromoteStudentsUseCase,
         { provide: IPromotionRepository, useValue: mockRepository },
+        PromotionSemesterResolver,
       ],
     }).compile();
 
@@ -60,7 +64,7 @@ describe('PromoteStudentsUseCase', () => {
   });
 
   it('should promote students successfully', async () => {
-    mockRepository.findSemesterWithAcademicYear
+    mockRepository.findEdgeSemesterOfAcademicYear
       .mockResolvedValueOnce(sourceSemester)
       .mockResolvedValueOnce(targetSemester);
 
@@ -80,8 +84,8 @@ describe('PromoteStudentsUseCase', () => {
     });
 
     const dto: PromotionDto = {
-      sourceSemesterId: 'sem-src',
-      targetSemesterId: 'sem-tgt',
+      sourceAcademicYearId: 'ay-old',
+      targetAcademicYearId: 'ay-new',
       students: [
         {
           studentId: 'stu-1',
@@ -102,7 +106,7 @@ describe('PromoteStudentsUseCase', () => {
   });
 
   it('should handle repeat with decline reason', async () => {
-    mockRepository.findSemesterWithAcademicYear
+    mockRepository.findEdgeSemesterOfAcademicYear
       .mockResolvedValueOnce(sourceSemester)
       .mockResolvedValueOnce(targetSemester);
 
@@ -122,8 +126,8 @@ describe('PromoteStudentsUseCase', () => {
     });
 
     const dto: PromotionDto = {
-      sourceSemesterId: 'sem-src',
-      targetSemesterId: 'sem-tgt',
+      sourceAcademicYearId: 'ay-old',
+      targetAcademicYearId: 'ay-new',
       students: [
         {
           studentId: 'stu-1',
@@ -141,8 +145,8 @@ describe('PromoteStudentsUseCase', () => {
 
   it('should throw if source = target semester', async () => {
     const dto: PromotionDto = {
-      sourceSemesterId: 'sem-1',
-      targetSemesterId: 'sem-1',
+      sourceAcademicYearId: 'ay-old',
+      targetAcademicYearId: 'ay-new',
       students: [
         {
           studentId: 'stu-1',
@@ -156,14 +160,15 @@ describe('PromoteStudentsUseCase', () => {
     await expect(useCase.execute(dto)).rejects.toThrow(BadRequestException);
   });
 
-  it('should throw if source semester not found', async () => {
-    mockRepository.findSemesterWithAcademicYear
+  it('refuses a source academic year that has no term to read from', async () => {
+    mockRepository.findEdgeSemesterOfAcademicYear
       .mockResolvedValueOnce(null)
       .mockResolvedValueOnce(targetSemester);
+    mockRepository.findAcademicYearName.mockResolvedValue('2024/2025');
 
     const dto: PromotionDto = {
-      sourceSemesterId: 'not-found',
-      targetSemesterId: 'sem-tgt',
+      sourceAcademicYearId: 'ay-old',
+      targetAcademicYearId: 'ay-new',
       students: [
         {
           studentId: 'stu-1',
@@ -174,18 +179,15 @@ describe('PromoteStudentsUseCase', () => {
       ],
     };
 
-    await expect(useCase.execute(dto)).rejects.toThrow(NotFoundException);
+    // A year without semesters is something the operator can fix, so it is a
+    // bad request naming the year rather than a 404 on an id they never typed.
+    await expect(useCase.execute(dto)).rejects.toThrow(BadRequestException);
   });
 
-  it('should throw if same academic year (use rollover instead)', async () => {
-    const sameAySemester = { ...targetSemester, academicYearId: 'ay-old' };
-    mockRepository.findSemesterWithAcademicYear
-      .mockResolvedValueOnce(sourceSemester)
-      .mockResolvedValueOnce(sameAySemester);
-
+  it('refuses both years being the same, and points at rollover', async () => {
     const dto: PromotionDto = {
-      sourceSemesterId: 'sem-src',
-      targetSemesterId: 'sem-tgt',
+      sourceAcademicYearId: 'ay-old',
+      targetAcademicYearId: 'ay-old',
       students: [
         {
           studentId: 'stu-1',
@@ -197,10 +199,15 @@ describe('PromoteStudentsUseCase', () => {
     };
 
     await expect(useCase.execute(dto)).rejects.toThrow(BadRequestException);
+    // Settled before anything is read: naming one year twice is not a
+    // question about semesters, so no semester is looked up to answer it.
+    expect(
+      mockRepository.findEdgeSemesterOfAcademicYear,
+    ).not.toHaveBeenCalled();
   });
 
   it('should throw if target classroom is in wrong AY', async () => {
-    mockRepository.findSemesterWithAcademicYear
+    mockRepository.findEdgeSemesterOfAcademicYear
       .mockResolvedValueOnce(sourceSemester)
       .mockResolvedValueOnce(targetSemester);
 
@@ -213,8 +220,8 @@ describe('PromoteStudentsUseCase', () => {
       );
 
     const dto: PromotionDto = {
-      sourceSemesterId: 'sem-src',
-      targetSemesterId: 'sem-tgt',
+      sourceAcademicYearId: 'ay-old',
+      targetAcademicYearId: 'ay-new',
       students: [
         {
           studentId: 'stu-1',
@@ -229,7 +236,7 @@ describe('PromoteStudentsUseCase', () => {
   });
 
   it('should throw if REPEAT with level mismatch', async () => {
-    mockRepository.findSemesterWithAcademicYear
+    mockRepository.findEdgeSemesterOfAcademicYear
       .mockResolvedValueOnce(sourceSemester)
       .mockResolvedValueOnce(targetSemester);
 
@@ -242,8 +249,8 @@ describe('PromoteStudentsUseCase', () => {
       );
 
     const dto: PromotionDto = {
-      sourceSemesterId: 'sem-src',
-      targetSemesterId: 'sem-tgt',
+      sourceAcademicYearId: 'ay-old',
+      targetAcademicYearId: 'ay-new',
       students: [
         {
           studentId: 'stu-1',
@@ -264,7 +271,7 @@ describe('PromoteStudentsUseCase', () => {
    * missing target is now an error for every student in the run.
    */
   it('should throw if an action has no targetClassroomId', async () => {
-    mockRepository.findSemesterWithAcademicYear
+    mockRepository.findEdgeSemesterOfAcademicYear
       .mockResolvedValueOnce(sourceSemester)
       .mockResolvedValueOnce(targetSemester);
 
@@ -272,9 +279,13 @@ describe('PromoteStudentsUseCase', () => {
       makeClassroom('cls-9a', 9, 'IX', 'IX-A', 'ay-old'),
     );
 
-    const dto: PromotionDto = {
-      sourceSemesterId: 'sem-src',
-      targetSemesterId: 'sem-tgt',
+    // The DTO now requires a target classroom, so class-validator rejects
+    // this shape before the use case ever sees it. The guard inside stays and
+    // is asserted here anyway: the DTO is one caller's spelling of the rule,
+    // and the write path dereferences the field without asking again.
+    const dto = {
+      sourceAcademicYearId: 'ay-old',
+      targetAcademicYearId: 'ay-new',
       students: [
         {
           studentId: 'stu-1',
@@ -282,13 +293,13 @@ describe('PromoteStudentsUseCase', () => {
           action: PromotionAction.PROMOTE,
         },
       ],
-    };
+    } as unknown as PromotionDto;
 
     await expect(useCase.execute(dto)).rejects.toThrow(BadRequestException);
   });
 
   it('should throw if REPEAT without declineReason', async () => {
-    mockRepository.findSemesterWithAcademicYear
+    mockRepository.findEdgeSemesterOfAcademicYear
       .mockResolvedValueOnce(sourceSemester)
       .mockResolvedValueOnce(targetSemester);
 
@@ -297,8 +308,8 @@ describe('PromoteStudentsUseCase', () => {
     );
 
     const dto: PromotionDto = {
-      sourceSemesterId: 'sem-src',
-      targetSemesterId: 'sem-tgt',
+      sourceAcademicYearId: 'ay-old',
+      targetAcademicYearId: 'ay-new',
       students: [
         {
           studentId: 'stu-1',
