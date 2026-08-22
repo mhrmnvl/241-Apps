@@ -47,10 +47,13 @@ const router = useRouter()
 const { academicYears, fetchAcademicYears } = useSemesterList()
 const {
   isPromoting,
+  isPreviewing,
+  promotionPreview,
   isLoadingRecommendations,
   promotionRecommendations,
   excludedGraduatingCount,
   fetchPromotionRecommendation,
+  previewPromotion,
   executePromotion,
 } = useSemesterPromotion()
 
@@ -123,6 +126,19 @@ function buildPayload(): PromotionPayload {
   }
 }
 
+/**
+ * Opens the confirmation, and asks the server what it makes of the payload.
+ *
+ * The numbers in the dialog then come from the same request that is about to
+ * be sent, counted by the side that will act on it — rather than from the
+ * screen agreeing with itself. `summaryStats` still stands behind it, so a
+ * preview that fails to load costs the reassurance and not the operation.
+ */
+function openConfirmDialog() {
+  showConfirmDialog.value = true
+  void previewPromotion(buildPayload())
+}
+
 async function handleExecute() {
   showConfirmDialog.value = false
   const result = await executePromotion(buildPayload())
@@ -184,7 +200,7 @@ onMounted(() => {
         <div class="flex w-full items-center justify-end gap-2 sm:w-auto">
           <Button
             :disabled="!canExecute"
-            @click="showConfirmDialog = true"
+            @click="openConfirmDialog"
           >
             <Loader2
               v-if="isPromoting"
@@ -365,7 +381,7 @@ onMounted(() => {
             size="default"
             class="w-full sm:w-auto font-semibold px-6"
             :disabled="!canExecute"
-            @click="showConfirmDialog = true"
+            @click="openConfirmDialog"
           >
             <Loader2
               v-if="isPromoting"
@@ -388,18 +404,30 @@ onMounted(() => {
       <AlertDialogHeader>
         <AlertDialogTitle>Proses Kenaikan Kelas?</AlertDialogTitle>
         <AlertDialogDescription>
-          Tindakan ini akan memproses data kenaikan kelas untuk
-          <strong>{{ summaryStats.total }} siswa</strong> ({{
-            summaryStats.approved
-          }}
-          naik kelas, {{ summaryStats.declined }} tinggal kelas). Siswa akan
-          langsung didaftarkan ke kelas tujuan pada tahun ajaran target.
+          <span
+            v-if="isPreviewing"
+            class="flex items-center gap-2"
+          >
+            <Loader2 class="size-4 animate-spin" />
+            Memeriksa data yang akan diproses...
+          </span>
+          <template v-else>
+            Tindakan ini akan memproses data kenaikan kelas untuk
+            <strong>
+              {{ promotionPreview?.totalStudents ?? summaryStats.total }} siswa
+            </strong>
+            ({{ promotionPreview?.promotedCount ?? summaryStats.approved }} naik
+            kelas,
+            {{ promotionPreview?.repeatedCount ?? summaryStats.declined }}
+            tinggal kelas). Siswa akan langsung didaftarkan ke kelas tujuan pada
+            tahun ajaran target.
+          </template>
         </AlertDialogDescription>
       </AlertDialogHeader>
       <AlertDialogFooter>
         <AlertDialogCancel :disabled="isPromoting"> Batal </AlertDialogCancel>
         <AlertDialogAction
-          :disabled="isPromoting"
+          :disabled="isPromoting || isPreviewing"
           @click="handleExecute"
         >
           <Loader2

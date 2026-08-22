@@ -21,6 +21,12 @@ export const useSemesterStore = defineStore('semester', () => {
   const rolloverSummary = ref<RolloverSummary | null>(null)
   const isPromoting = ref(false)
   const promotionPreview = ref<PromotionPreviewResponse | null>(null)
+  /**
+   * Separate from `isPromoting`. The preview runs while the confirmation is
+   * open and the execution runs when it is accepted; sharing one flag put the
+   * spinner on the button that had not been pressed yet.
+   */
+  const isPreviewing = ref(false)
   const promotionRecommendations = ref<PromotionRecommendationItem[]>([])
   /**
    * Final-year students the run left out. Held so the screen can say so — a
@@ -42,6 +48,7 @@ export const useSemesterStore = defineStore('semester', () => {
     rolloverSummary,
     isPromoting,
     promotionPreview,
+    isPreviewing,
     promotionRecommendations,
     excludedGraduatingCount,
     isLoadingRecommendations,
