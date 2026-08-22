@@ -50,24 +50,6 @@ onMounted(async () => {
   }
 })
 
-/**
- * A coordinate is optional, and an emptied field means "no pin" rather than 0 —
- * which is a real place in the Atlantic. The preprocess turns the input's empty
- * string into null before the number rules ever see it.
- */
-const coordinate = (label: string, bound: number) =>
-  z.preprocess(
-    (value) =>
-      value === '' || value === null || value === undefined
-        ? null
-        : Number(value),
-    z
-      .number({ invalid_type_error: `${label} harus berupa angka.` })
-      .min(-bound, `${label} minimal -${bound}.`)
-      .max(bound, `${label} maksimal ${bound}.`)
-      .nullable(),
-  )
-
 const formSchema = toTypedSchema(
   z.object({
     name: z.string().min(1, 'Nama lembaga wajib diisi.'),
@@ -85,8 +67,6 @@ const formSchema = toTypedSchema(
       .email('Format email tidak valid.')
       .min(1, 'Email wajib diisi.'),
     website: z.string().min(1, 'Website wajib diisi.'),
-    latitude: coordinate('Latitude', 90),
-    longitude: coordinate('Longitude', 180),
   }),
 )
 
@@ -103,8 +83,6 @@ const form = useForm({
     phone: '',
     email: '',
     website: '',
-    latitude: null,
-    longitude: null,
   },
 })
 
@@ -123,8 +101,6 @@ watch(
         phone: newVal.phone ?? '',
         email: newVal.email ?? '',
         website: newVal.website ?? '',
-        latitude: newVal.latitude ?? null,
-        longitude: newVal.longitude ?? null,
       },
     })
   },
@@ -330,48 +306,6 @@ const onSave = form.handleSubmit((values) => {
                 v-bind="componentField"
               />
             </FormControl>
-            <FormMessage />
-          </FormItem>
-        </FormField>
-
-        <FormField
-          v-slot="{ componentField }"
-          name="latitude"
-        >
-          <FormItem class="content-start">
-            <FormLabel>Latitude</FormLabel>
-            <FormControl>
-              <Input
-                type="text"
-                inputmode="decimal"
-                placeholder="-6.914744"
-                v-bind="componentField"
-              />
-            </FormControl>
-            <p class="text-xs text-muted-foreground">
-              Opsional. Titik ini yang ditampilkan pada peta di profil sekolah.
-            </p>
-            <FormMessage />
-          </FormItem>
-        </FormField>
-
-        <FormField
-          v-slot="{ componentField }"
-          name="longitude"
-        >
-          <FormItem class="content-start">
-            <FormLabel>Longitude</FormLabel>
-            <FormControl>
-              <Input
-                type="text"
-                inputmode="decimal"
-                placeholder="107.609810"
-                v-bind="componentField"
-              />
-            </FormControl>
-            <p class="text-xs text-muted-foreground">
-              Kosongkan keduanya untuk menghapus titik lokasi.
-            </p>
             <FormMessage />
           </FormItem>
         </FormField>

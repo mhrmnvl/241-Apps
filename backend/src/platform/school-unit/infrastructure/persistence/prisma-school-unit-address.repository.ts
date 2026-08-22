@@ -19,6 +19,12 @@ export class PrismaSchoolUnitAddressRepository extends ISchoolUnitAddressReposit
   ): Promise<AddressEntity | null> {
     return this.prisma.address.findFirst({
       where: { schoolUnitId, deletedAt: null },
+      // `create` below marks every school address primary, so today this only
+      // makes explicit what was already true. It matters because the profile
+      // map reads the coordinate off whatever this returns: were a second
+      // address ever to appear, "first row the database felt like" would move
+      // the pin, and ordering makes that a decision rather than an accident.
+      orderBy: [{ isPrimary: 'desc' }, { id: 'asc' }],
       omit: ADDRESS_OMIT,
     });
   }
@@ -39,6 +45,8 @@ export class PrismaSchoolUnitAddressRepository extends ISchoolUnitAddressReposit
         postalCode: input.postalCode,
         // Undefined leaves the column default in place.
         country: input.country,
+        latitude: input.latitude,
+        longitude: input.longitude,
         // A school unit has exactly one address, so it is always the primary.
         isPrimary: true,
         schoolUnitId,
@@ -65,6 +73,8 @@ export class PrismaSchoolUnitAddressRepository extends ISchoolUnitAddressReposit
         province: input.province,
         postalCode: input.postalCode,
         country: input.country,
+        latitude: input.latitude,
+        longitude: input.longitude,
       },
       omit: ADDRESS_OMIT,
     });

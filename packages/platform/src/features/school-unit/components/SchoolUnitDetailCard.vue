@@ -2,28 +2,17 @@
 import { computed, ref } from 'vue'
 import { statusOptions } from '../constants'
 import type { SchoolUnitAddress, SchoolUnitProfile } from '../types'
-import {
-  buildFullAddress,
-  formatCoordinate,
-  formatValue,
-  hasCoordinates,
-} from '../utils'
+import { formatCoordinate, formatValue, hasCoordinates } from '../utils'
 import SchoolLocationDialog from './SchoolLocationDialog.vue'
 import SchoolLocationMap from './SchoolLocationMap.vue'
 import { Card, CardHeader, CardTitle, CardContent } from '@/ui/card'
-import { Badge } from '@/ui/badge'
-import { toast } from 'vue-sonner'
 import {
   Building2,
-  ShieldCheck,
   Phone,
-  Mail,
-  Globe,
   MapPin,
   MapPinned,
   Maximize2,
   ExternalLink,
-  Copy,
   AlertCircle,
 } from 'lucide-vue-next'
 
@@ -52,11 +41,11 @@ const typeLabel = computed(
   () => props.schoolUnit.type?.name ?? props.schoolUnit.type?.code ?? '-',
 )
 
-const fullAddress = computed(() => buildFullAddress(props.address))
-
 const isLocationDialogOpen = ref(false)
 
-const hasPin = computed(() => hasCoordinates(props.schoolUnit))
+// The pin belongs to the address, not to the institution. A school with no
+// address has no pin, and the card renders its empty state for that.
+const hasPin = computed(() => hasCoordinates(props.address))
 
 const mapTitle = computed(
   () => props.schoolUnit.surname || props.schoolUnit.name,
@@ -68,16 +57,6 @@ const hasValidAddress = computed(() => {
     a.street || a.village || a.district || a.city || a.province || a.postalCode,
   )
 })
-
-async function copyToClipboard(text: string, label: string) {
-  if (!text || text === '-') return
-  try {
-    await navigator.clipboard.writeText(text)
-    toast.success(`${label} berhasil disalin ke clipboard`)
-  } catch {
-    toast.error('Gagal menyalin ke clipboard')
-  }
-}
 </script>
 
 <template>
@@ -114,21 +93,21 @@ async function copyToClipboard(text: string, label: string) {
       v-else
       class="space-y-6"
     >
-      <!-- Row 1: 3 Category Cards -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <!-- 1. Identitas Lembaga -->
-        <Card class="rounded-xl shadow-xs py-0">
+      <!-- Row 1: Identitas & Legalitas | Kontak -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- 1. Identitas Lembaga & Legalitas -->
+        <Card class="rounded-xl shadow-xs py-0 gap-0">
           <CardHeader
-            class="flex flex-row items-center gap-2.5 border-b px-5 py-3.5"
+            class="flex flex-row items-center gap-2.5 border-b px-5 py-3.5 pb-3.5!"
           >
             <Building2 class="size-4 text-primary shrink-0" />
             <CardTitle class="text-sm font-semibold tracking-normal">
-              Identitas Lembaga
+              Identitas & Legalitas
             </CardTitle>
           </CardHeader>
 
-          <CardContent class="p-5">
-            <dl class="space-y-4 text-sm">
+          <CardContent class="px-5 pt-3.5 pb-5">
+            <dl class="grid grid-cols-2 gap-x-6 gap-y-4 text-sm">
               <div>
                 <dt class="text-xs font-medium text-muted-foreground">
                   Nama Resmi
@@ -148,24 +127,25 @@ async function copyToClipboard(text: string, label: string) {
               </div>
 
               <div>
+                <dt class="text-xs font-medium text-muted-foreground">NPSN</dt>
+                <dd class="font-semibold text-foreground mt-0.5">
+                  {{ formatValue(schoolUnit.npsn) }}
+                </dd>
+              </div>
+
+              <div>
+                <dt class="text-xs font-medium text-muted-foreground">NSM</dt>
+                <dd class="font-semibold text-foreground mt-0.5">
+                  {{ formatValue(schoolUnit.nsm) }}
+                </dd>
+              </div>
+
+              <div>
                 <dt class="text-xs font-medium text-muted-foreground">
                   Status Lembaga
                 </dt>
-                <dd class="font-medium text-foreground mt-0.5">
-                  <Badge
-                    v-if="schoolUnit.status"
-                    :variant="
-                      schoolUnit.status === 'PUBLIC' ? 'default' : 'secondary'
-                    "
-                    class="font-medium text-xs px-2 py-0.5"
-                  >
-                    {{ statusLabel }}
-                  </Badge>
-                  <span
-                    v-else
-                    class="text-muted-foreground"
-                    >-</span
-                  >
+                <dd class="font-semibold text-foreground mt-0.5">
+                  {{ formatValue(statusLabel) }}
                 </dd>
               </div>
 
@@ -177,90 +157,23 @@ async function copyToClipboard(text: string, label: string) {
                   {{ formatValue(typeLabel) }}
                 </dd>
               </div>
-            </dl>
-          </CardContent>
-        </Card>
 
-        <!-- 2. Legalitas & Nomor Pokok -->
-        <Card class="rounded-xl shadow-xs py-0">
-          <CardHeader
-            class="flex flex-row items-center gap-2.5 border-b px-5 py-3.5"
-          >
-            <ShieldCheck class="size-4 text-primary shrink-0" />
-            <CardTitle class="text-sm font-semibold tracking-normal">
-              Legalitas & Nomor Identifikasi
-            </CardTitle>
-          </CardHeader>
-
-          <CardContent class="p-5">
-            <dl class="space-y-4 text-sm">
-              <div>
-                <dt class="text-xs font-medium text-muted-foreground">
-                  NPSN (Nomor Pokok Sekolah Nasional)
-                </dt>
-                <dd
-                  class="flex items-center gap-2 font-mono font-semibold text-foreground mt-0.5"
-                >
-                  <span>{{ formatValue(schoolUnit.npsn) }}</span>
-                  <button
-                    v-if="schoolUnit.npsn"
-                    type="button"
-                    class="text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
-                    title="Salin NPSN"
-                    @click="copyToClipboard(schoolUnit.npsn, 'NPSN')"
-                  >
-                    <Copy class="size-3.5" />
-                  </button>
-                </dd>
-              </div>
-
-              <div>
-                <dt class="text-xs font-medium text-muted-foreground">
-                  NSM (Nomor Statistik Madrasah/Sekolah)
-                </dt>
-                <dd
-                  class="flex items-center gap-2 font-mono font-semibold text-foreground mt-0.5"
-                >
-                  <span>{{ formatValue(schoolUnit.nsm) }}</span>
-                  <button
-                    v-if="schoolUnit.nsm"
-                    type="button"
-                    class="text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
-                    title="Salin NSM"
-                    @click="copyToClipboard(schoolUnit.nsm, 'NSM')"
-                  >
-                    <Copy class="size-3.5" />
-                  </button>
-                </dd>
-              </div>
-
-              <div>
+              <div class="col-span-2">
                 <dt class="text-xs font-medium text-muted-foreground">
                   NPWP Lembaga
                 </dt>
-                <dd
-                  class="flex items-center gap-2 font-mono font-semibold text-foreground mt-0.5"
-                >
-                  <span>{{ formatValue(schoolUnit.npwp) }}</span>
-                  <button
-                    v-if="schoolUnit.npwp"
-                    type="button"
-                    class="text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
-                    title="Salin NPWP"
-                    @click="copyToClipboard(schoolUnit.npwp, 'NPWP')"
-                  >
-                    <Copy class="size-3.5" />
-                  </button>
+                <dd class="font-semibold text-foreground mt-0.5">
+                  {{ formatValue(schoolUnit.npwp) }}
                 </dd>
               </div>
             </dl>
           </CardContent>
         </Card>
 
-        <!-- 3. Kontak & Komunikasi -->
-        <Card class="rounded-xl shadow-xs py-0">
+        <!-- 2. Kontak & Komunikasi -->
+        <Card class="rounded-xl shadow-xs py-0 gap-0">
           <CardHeader
-            class="flex flex-row items-center gap-2.5 border-b px-5 py-3.5"
+            class="flex flex-row items-center gap-2.5 border-b px-5 py-3.5 pb-3.5!"
           >
             <Phone class="size-4 text-primary shrink-0" />
             <CardTitle class="text-sm font-semibold tracking-normal">
@@ -268,26 +181,14 @@ async function copyToClipboard(text: string, label: string) {
             </CardTitle>
           </CardHeader>
 
-          <CardContent class="p-5">
+          <CardContent class="px-5 pt-3.5 pb-5">
             <dl class="space-y-4 text-sm">
               <div>
                 <dt class="text-xs font-medium text-muted-foreground">
                   Nomor Telepon
                 </dt>
-                <dd class="mt-0.5">
-                  <a
-                    v-if="schoolUnit.phone"
-                    :href="`tel:${schoolUnit.phone}`"
-                    class="inline-flex items-center gap-1.5 font-medium text-primary hover:underline"
-                  >
-                    <Phone class="size-3.5 shrink-0" />
-                    {{ schoolUnit.phone }}
-                  </a>
-                  <span
-                    v-else
-                    class="text-muted-foreground font-medium"
-                    >-</span
-                  >
+                <dd class="font-semibold text-foreground mt-0.5">
+                  {{ formatValue(schoolUnit.phone) }}
                 </dd>
               </div>
 
@@ -295,20 +196,8 @@ async function copyToClipboard(text: string, label: string) {
                 <dt class="text-xs font-medium text-muted-foreground">
                   Email Resmi
                 </dt>
-                <dd class="mt-0.5">
-                  <a
-                    v-if="schoolUnit.email"
-                    :href="`mailto:${schoolUnit.email}`"
-                    class="inline-flex items-center gap-1.5 font-medium text-primary hover:underline break-all"
-                  >
-                    <Mail class="size-3.5 shrink-0" />
-                    {{ schoolUnit.email }}
-                  </a>
-                  <span
-                    v-else
-                    class="text-muted-foreground font-medium"
-                    >-</span
-                  >
+                <dd class="font-semibold text-foreground mt-0.5">
+                  {{ formatValue(schoolUnit.email) }}
                 </dd>
               </div>
 
@@ -328,13 +217,12 @@ async function copyToClipboard(text: string, label: string) {
                     rel="noreferrer"
                     class="inline-flex items-center gap-1.5 font-medium text-primary hover:underline break-all"
                   >
-                    <Globe class="size-3.5 shrink-0" />
                     {{ schoolUnit.website }}
                     <ExternalLink class="size-3 shrink-0 opacity-70" />
                   </a>
                   <span
                     v-else
-                    class="text-muted-foreground font-medium"
+                    class="font-semibold text-foreground"
                     >-</span
                   >
                 </dd>
@@ -344,11 +232,12 @@ async function copyToClipboard(text: string, label: string) {
         </Card>
       </div>
 
-      <!-- Row 2: alamat tertulis di kiri, titik di peta di kanan -->
-      <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <Card class="rounded-xl shadow-xs py-0 lg:col-span-2">
+      <!-- Row 2: Alamat & Titik Lokasi -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- 4. Alamat Lembaga -->
+        <Card class="rounded-xl shadow-xs py-0 gap-0">
           <CardHeader
-            class="flex flex-row items-center gap-2.5 border-b px-5 py-3.5"
+            class="flex flex-row items-center gap-2.5 border-b px-5 py-3.5 pb-3.5!"
           >
             <MapPin class="size-4 text-primary shrink-0" />
             <CardTitle class="text-sm font-semibold tracking-normal">
@@ -356,21 +245,10 @@ async function copyToClipboard(text: string, label: string) {
             </CardTitle>
           </CardHeader>
 
-          <CardContent class="p-5 space-y-4">
-            <div>
-              <p class="text-xs font-medium text-muted-foreground">
-                Alamat Lengkap
-              </p>
-              <p
-                class="text-sm font-semibold text-foreground leading-relaxed mt-0.5"
-              >
-                {{ fullAddress }}
-              </p>
-            </div>
-
+          <CardContent class="px-5 pt-3.5 pb-5">
             <dl
               v-if="hasValidAddress"
-              class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-y-3.5 gap-x-6 pt-2 border-t text-sm"
+              class="grid grid-cols-2 gap-y-3.5 gap-x-6 text-sm"
             >
               <div>
                 <dt class="text-xs font-medium text-muted-foreground">
@@ -434,7 +312,7 @@ async function copyToClipboard(text: string, label: string) {
                 <dt class="text-xs font-medium text-muted-foreground">
                   Kode Pos
                 </dt>
-                <dd class="font-mono font-medium text-foreground mt-0.5">
+                <dd class="font-medium text-foreground mt-0.5">
                   {{ formatValue(address.postalCode) }}
                 </dd>
               </div>
@@ -451,9 +329,9 @@ async function copyToClipboard(text: string, label: string) {
           </CardContent>
         </Card>
 
-        <Card class="rounded-xl shadow-xs py-0">
+        <Card class="rounded-xl shadow-xs py-0 gap-0">
           <CardHeader
-            class="flex flex-row items-center gap-2.5 border-b px-5 py-3.5"
+            class="flex flex-row items-center gap-2.5 border-b px-5 py-3.5 pb-3.5!"
           >
             <MapPinned class="size-4 text-primary shrink-0" />
             <CardTitle class="text-sm font-semibold tracking-normal">
@@ -461,7 +339,7 @@ async function copyToClipboard(text: string, label: string) {
             </CardTitle>
           </CardHeader>
 
-          <CardContent class="p-5 space-y-4">
+          <CardContent class="px-5 pt-3.5 pb-5 space-y-4">
             <!-- The preview is a button: the map inside it is scenery, so clicks
                pass through to the control that opens the real map. -->
             <button
@@ -473,8 +351,8 @@ async function copyToClipboard(text: string, label: string) {
             >
               <div class="pointer-events-none absolute inset-0">
                 <SchoolLocationMap
-                  :latitude="schoolUnit.latitude as number"
-                  :longitude="schoolUnit.longitude as number"
+                  :latitude="address.latitude as number"
+                  :longitude="address.longitude as number"
                   :title="mapTitle"
                   :zoom="15"
                   :interactive="false"
@@ -508,8 +386,8 @@ async function copyToClipboard(text: string, label: string) {
                 <dt class="text-xs font-medium text-muted-foreground">
                   Latitude
                 </dt>
-                <dd class="font-mono font-medium text-foreground mt-0.5">
-                  {{ formatCoordinate(schoolUnit.latitude ?? null) }}
+                <dd class="font-medium text-foreground mt-0.5">
+                  {{ formatCoordinate(address.latitude ?? null) }}
                 </dd>
               </div>
 
@@ -517,8 +395,8 @@ async function copyToClipboard(text: string, label: string) {
                 <dt class="text-xs font-medium text-muted-foreground">
                   Longitude
                 </dt>
-                <dd class="font-mono font-medium text-foreground mt-0.5">
-                  {{ formatCoordinate(schoolUnit.longitude ?? null) }}
+                <dd class="font-medium text-foreground mt-0.5">
+                  {{ formatCoordinate(address.longitude ?? null) }}
                 </dd>
               </div>
             </dl>

@@ -21,38 +21,6 @@ export class SchoolUnitResponseDto {
   @ApiProperty({ enum: SchoolUnitStatus, example: 'PUBLIC' })
   status!: SchoolUnitStatus;
 
-  @ApiPropertyOptional({
-    format: 'uuid',
-    example: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
-  })
-  typeId!: string | null;
-
-  @ApiProperty({ example: '01.234.567.8-901.000' })
-  npwp!: string;
-
-  @ApiProperty({ example: '0341123456' })
-  phone!: string;
-
-  @ApiProperty({ example: 'info@mtsn1malang.sch.id' })
-  email!: string;
-
-  @ApiProperty({ example: 'https://mtsn1malang.sch.id' })
-  website!: string;
-
-  @ApiPropertyOptional({
-    example: -6.914744,
-    nullable: true,
-    description: 'WGS84 latitude. Null when no pin has been recorded.',
-  })
-  latitude!: number | null;
-
-  @ApiPropertyOptional({
-    example: 107.60981,
-    nullable: true,
-    description: 'WGS84 longitude. Null when no pin has been recorded.',
-  })
-  longitude!: number | null;
-
   @ApiPropertyOptional({ type: () => [SchoolUnitSocialMediaResponseDto] })
   socialMedias!: SchoolUnitSocialMediaResponseDto[];
 }
