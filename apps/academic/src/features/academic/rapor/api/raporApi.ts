@@ -32,7 +32,7 @@ export const raporApi = {
   },
 
   getRaporById: (id: string) => {
-    return api.get<RaporData>(`/rapors/${id}`)
+    return api.get<ApiSingleResponse<RaporData>>(`/rapors/${id}`)
   },
   /**
    * One card in full, with its attendance.
@@ -45,13 +45,15 @@ export const raporApi = {
    * behind an error toast on both views.
    */
   getRaporDetail: (id: string) => {
-    return api.get<RaporDetailData>(`/rapors/${id}/detail`)
+    return api.get<ApiSingleResponse<RaporDetailData>>(`/rapors/${id}/detail`)
   },
   getMyRaporDetail: (id: string) => {
-    return api.get<RaporDetailData>(`/rapors/me/${id}/detail`)
+    return api.get<ApiSingleResponse<RaporDetailData>>(
+      `/rapors/me/${id}/detail`,
+    )
   },
   generateRapor: (payload: GenerateRaporPayload) => {
-    return api.post<RaporData>('/rapors/generate', payload)
+    return api.post<ApiSingleResponse<RaporData>>('/rapors/generate', payload)
   },
   bulkGenerateRapor: (payload: BulkGeneratePayload) => {
     return api.post<ApiSingleResponse<BulkGenerateResult>>(
@@ -60,10 +62,10 @@ export const raporApi = {
     )
   },
   updateRapor: (id: string, payload: UpdateRaporPayload) => {
-    return api.patch<RaporData>(`/rapors/${id}`, payload)
+    return api.patch<ApiSingleResponse<RaporData>>(`/rapors/${id}`, payload)
   },
   publishRapor: (id: string) => {
-    return api.patch<RaporData>(`/rapors/${id}/publish`)
+    return api.patch<ApiSingleResponse<RaporData>>(`/rapors/${id}/publish`)
   },
   deleteRapor: (id: string) => {
     return api.delete(`/rapors/${id}`)
