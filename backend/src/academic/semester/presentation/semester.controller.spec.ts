@@ -179,7 +179,7 @@ describe('Semester Controllers', () => {
   });
 
   describe('previewPromotion', () => {
-    it('should delegate to PreviewPromotionUseCase', async () => {
+    it('should delegate to PreviewPromotionUseCase', () => {
       const dto = {
         sourceAcademicYearId: 'ay-2025',
         targetAcademicYearId: 'ay-2026',
@@ -199,7 +199,7 @@ describe('Semester Controllers', () => {
         repeatedCount: 0,
       });
 
-      await promotionController.previewPromotion(dto);
+      promotionController.previewPromotion(dto);
 
       expect(mockPreviewPromotion.execute).toHaveBeenCalledWith(dto);
     });

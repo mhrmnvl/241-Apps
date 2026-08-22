@@ -9,25 +9,27 @@ import {
   PromotionPreviewDto,
   PromotionPreviewItemDto,
 } from '../dto/response/promotion-preview.dto.js';
-import { IPromotionRepository } from '../domain/interfaces/promotion-repository.interface.js';
 import { PromotionSemesterResolver } from '../services/promotion-semester-resolver.service.js';
 
 @Injectable()
 export class PreviewPromotionUseCase {
-  constructor(
-    private readonly promotionRepository: IPromotionRepository,
-    private readonly semesterResolver: PromotionSemesterResolver,
-  ) {}
+  constructor(private readonly semesterResolver: PromotionSemesterResolver) {}
 
-  async execute(dto: PromotionDto): Promise<PromotionPreviewDto> {
+  /**
+   * Synchronous, because it is. A preview counts up the decisions it was
+   * handed — it reads no semester, no classroom and no enrolment — so there is
+   * nothing to await. The controller returning it into a promise is unchanged.
+   */
+  execute(dto: PromotionDto): PromotionPreviewDto {
     const { sourceAcademicYearId, targetAcademicYearId, students } = dto;
 
-    // Which terms those years mean is the resolver's call, not the caller's.
-    const { source: sourceSemester, target: targetSemester } =
-      await this.semesterResolver.resolve(
-        sourceAcademicYearId,
-        targetAcademicYearId,
-      );
+    // Nothing here reads a term. A preview counts up the decisions it was
+    // handed, so the only thing worth refusing is a pair of years that is not
+    // a promotion at all.
+    this.semesterResolver.assertDifferentYears(
+      sourceAcademicYearId,
+      targetAcademicYearId,
+    );
 
     let promotedCount = 0;
     let repeatedCount = 0;

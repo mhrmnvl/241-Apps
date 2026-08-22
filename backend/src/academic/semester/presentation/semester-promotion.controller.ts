@@ -60,9 +60,9 @@ export class SemesterPromotionController {
   @ApiResponse({ status: 400, description: 'Validation error' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Semester not found' })
-  async previewPromotion(
-    @Body() dto: PromotionDto,
-  ): Promise<PromotionPreviewDto> {
+  // Not async: a preview counts up the decisions in the request and reads
+  // nothing, so there is nothing to await. Nest serialises the value the same.
+  previewPromotion(@Body() dto: PromotionDto): PromotionPreviewDto {
     return this.previewPromotionService.execute(dto);
   }
 

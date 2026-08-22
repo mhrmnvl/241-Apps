@@ -47,7 +47,6 @@ export abstract class IAcademicYearRepository {
   abstract deactivateAll(excludeId?: string): Promise<AffectedCount>;
   abstract activateById(id: string): Promise<AcademicYearEntity>;
   abstract countActive(): Promise<number>;
-  abstract countSemesters(academicYearId: string): Promise<number>;
   abstract deactivateSemestersByAcademicYearId(
     id: string,
   ): Promise<AffectedCount>;

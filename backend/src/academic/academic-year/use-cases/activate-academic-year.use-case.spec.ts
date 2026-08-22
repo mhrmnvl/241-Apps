@@ -9,7 +9,6 @@ describe('ActivateAcademicYearUseCase', () => {
   const mockRepository = {
     findById: jest.fn(),
     activateById: jest.fn(),
-    countSemesters: jest.fn(),
   };
 
   const inactiveYear = {
@@ -53,20 +52,26 @@ describe('ActivateAcademicYearUseCase', () => {
       expect(mockRepository.activateById).not.toHaveBeenCalled();
     });
 
-    it('should throw BadRequestException if academic year has no semesters', async () => {
+    /**
+     * A year is activated before its terms exist as readily as after. The
+     * refusal that used to live here forced an order nothing needed: a
+     * semester is created against a year that *exists*, not one that is
+     * active.
+     */
+    it('activates a year that has no semesters yet', async () => {
+      const activatedYear = { ...inactiveYear, isActive: true };
       mockRepository.findById.mockResolvedValue(inactiveYear);
-      mockRepository.countSemesters.mockResolvedValue(0);
+      mockRepository.activateById.mockResolvedValue(activatedYear);
 
-      await expect(useCase.execute('ay-1')).rejects.toThrow(
-        BadRequestException,
-      );
-      expect(mockRepository.activateById).not.toHaveBeenCalled();
+      const result = await useCase.execute('ay-1');
+
+      expect(mockRepository.activateById).toHaveBeenCalledWith('ay-1');
+      expect(result.isActive).toBe(true);
     });
 
     it('should activate using atomic activateById when it has semesters', async () => {
       const activatedYear = { ...inactiveYear, isActive: true };
       mockRepository.findById.mockResolvedValue(inactiveYear);
-      mockRepository.countSemesters.mockResolvedValue(2);
       mockRepository.activateById.mockResolvedValue(activatedYear);
 
       const result = await useCase.execute('ay-1');

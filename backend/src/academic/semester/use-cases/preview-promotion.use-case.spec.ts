@@ -46,7 +46,7 @@ describe('PreviewPromotionUseCase', () => {
     expect(useCase).toBeDefined();
   });
 
-  it('should return preview with student counts', async () => {
+  it('should return preview with student counts', () => {
     mockRepository.findEdgeSemesterOfAcademicYear
       .mockResolvedValueOnce(sourceSemester)
       .mockResolvedValueOnce(targetSemester);
@@ -76,7 +76,7 @@ describe('PreviewPromotionUseCase', () => {
       ],
     };
 
-    const result = await useCase.execute(dto);
+    const result = useCase.execute(dto);
 
     expect(result.totalStudents).toBe(3);
     expect(result.promotedCount).toBe(2);
@@ -89,24 +89,7 @@ describe('PreviewPromotionUseCase', () => {
     );
   });
 
-  it('should throw if source = target semester', async () => {
-    const dto: PromotionDto = {
-      sourceAcademicYearId: 'ay-old',
-      targetAcademicYearId: 'ay-new',
-      students: [
-        {
-          studentId: 'stu-1',
-          sourceClassroomId: 'cls-1',
-          targetClassroomId: 'cls-2',
-          action: PromotionAction.PROMOTE,
-        },
-      ],
-    };
-
-    await expect(useCase.execute(dto)).rejects.toThrow(BadRequestException);
-  });
-
-  it('refuses both years being the same, and points at rollover', async () => {
+  it('refuses one year twice', () => {
     const dto: PromotionDto = {
       sourceAcademicYearId: 'ay-old',
       targetAcademicYearId: 'ay-old',
@@ -120,7 +103,24 @@ describe('PreviewPromotionUseCase', () => {
       ],
     };
 
-    await expect(useCase.execute(dto)).rejects.toThrow(BadRequestException);
+    expect(() => useCase.execute(dto)).toThrow(BadRequestException);
+  });
+
+  it('refuses both years being the same, and points at rollover', () => {
+    const dto: PromotionDto = {
+      sourceAcademicYearId: 'ay-old',
+      targetAcademicYearId: 'ay-old',
+      students: [
+        {
+          studentId: 'stu-1',
+          sourceClassroomId: 'cls-1',
+          targetClassroomId: 'cls-2',
+          action: PromotionAction.PROMOTE,
+        },
+      ],
+    };
+
+    expect(() => useCase.execute(dto)).toThrow(BadRequestException);
     // Settled before anything is read: naming one year twice is not a
     // question about semesters, so no semester is looked up to answer it.
     expect(
@@ -128,12 +128,12 @@ describe('PreviewPromotionUseCase', () => {
     ).not.toHaveBeenCalled();
   });
 
-  it('refuses a source academic year that has no term to read from', async () => {
-    mockRepository.findEdgeSemesterOfAcademicYear
-      .mockResolvedValueOnce(null)
-      .mockResolvedValueOnce(targetSemester);
-    mockRepository.findAcademicYearName.mockResolvedValue('2024/2025');
-
+  /**
+   * A preview counts up the decisions it was handed. Requiring either year to
+   * have a term refused the one moment you most want a preview: while the year
+   * ahead is still being set up.
+   */
+  it('previews a promotion into a year that has no term yet', () => {
     const dto: PromotionDto = {
       sourceAcademicYearId: 'ay-old',
       targetAcademicYearId: 'ay-new',
@@ -147,8 +147,11 @@ describe('PreviewPromotionUseCase', () => {
       ],
     };
 
-    // A year without semesters is something the operator can fix, so it is a
-    // bad request naming the year rather than a 404 on an id they never typed.
-    await expect(useCase.execute(dto)).rejects.toThrow(BadRequestException);
+    const result = useCase.execute(dto);
+
+    expect(result.totalStudents).toBe(1);
+    expect(
+      mockRepository.findEdgeSemesterOfAcademicYear,
+    ).not.toHaveBeenCalled();
   });
 });
