@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import SchoolLocationMap from './SchoolLocationMap.vue'
-import type { SchoolUnitAddress, SchoolUnitProfile } from '../types'
+import type { SchoolUnitAddress } from '../types'
 import { buildFullAddress, formatCoordinate, hasCoordinates } from '../utils'
 import { Button } from '@/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/ui/dialog'
@@ -9,7 +9,6 @@ import { ExternalLink, MapPin, Navigation } from 'lucide-vue-next'
 
 const props = defineProps<{
   open: boolean
-  schoolUnit: SchoolUnitProfile
   address: SchoolUnitAddress
 }>()
 
@@ -39,7 +38,9 @@ const openStreetMapUrl = computed(() =>
 
 <template>
   <Dialog v-model:open="open">
-    <DialogContent class="sm:max-w-3xl flex flex-col gap-0 p-0 overflow-hidden">
+    <DialogContent
+      class="sm:max-w-2xl flex flex-col gap-0 p-0 overflow-hidden max-h-[90svh]"
+    >
       <DialogHeader class="px-6 py-4 border-b shrink-0">
         <DialogTitle class="flex items-center gap-2">
           <MapPin class="size-4 text-primary shrink-0" />
@@ -47,15 +48,14 @@ const openStreetMapUrl = computed(() =>
         </DialogTitle>
       </DialogHeader>
 
-      <div class="px-6 py-5 space-y-4">
+      <div class="px-6 py-5 space-y-4 overflow-y-auto">
         <div
           v-if="hasPin"
-          class="h-[360px] w-full overflow-hidden rounded-xl border"
+          class="h-[280px] w-full overflow-hidden rounded-xl border"
         >
           <SchoolLocationMap
             :latitude="address.latitude as number"
             :longitude="address.longitude as number"
-            :title="schoolUnit.surname || schoolUnit.name"
             :zoom="17"
           />
         </div>
@@ -75,24 +75,6 @@ const openStreetMapUrl = computed(() =>
         </div>
 
         <dl class="grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
-          <div>
-            <dt class="text-xs font-medium text-muted-foreground">
-              Nama Resmi
-            </dt>
-            <dd class="mt-0.5 font-semibold text-foreground">
-              {{ schoolUnit.name || '-' }}
-            </dd>
-          </div>
-
-          <div>
-            <dt class="text-xs font-medium text-muted-foreground">
-              Nama Singkat
-            </dt>
-            <dd class="mt-0.5 font-semibold text-foreground">
-              {{ schoolUnit.surname || '-' }}
-            </dd>
-          </div>
-
           <div class="col-span-2">
             <dt class="text-xs font-medium text-muted-foreground">Alamat</dt>
             <dd class="mt-0.5 font-medium text-foreground leading-relaxed">

@@ -349,7 +349,9 @@ const hasValidAddress = computed(() => {
               :aria-label="`Perbesar peta lokasi ${mapTitle}`"
               @click="isLocationDialogOpen = true"
             >
-              <div class="pointer-events-none absolute inset-0">
+              <div
+                class="pointer-events-none absolute inset-0 overflow-hidden isolate"
+              >
                 <SchoolLocationMap
                   :latitude="address.latitude as number"
                   :longitude="address.longitude as number"
@@ -407,7 +409,6 @@ const hasValidAddress = computed(() => {
 
     <SchoolLocationDialog
       v-model:open="isLocationDialogOpen"
-      :school-unit="schoolUnit"
       :address="address"
     />
   </div>
