@@ -31,11 +31,17 @@ export const academicCalendarApi = {
   },
 
   createCalendar: (payload: CalendarCreatePayload) => {
-    return api.post<CalendarEventData>('/academic-calendars', payload)
+    return api.post<ApiSingleResponse<CalendarEventData>>(
+      '/academic-calendars',
+      payload,
+    )
   },
 
   updateCalendar: (id: string, payload: CalendarUpdatePayload) => {
-    return api.patch<CalendarEventData>(`/academic-calendars/${id}`, payload)
+    return api.patch<ApiSingleResponse<CalendarEventData>>(
+      `/academic-calendars/${id}`,
+      payload,
+    )
   },
 
   deleteCalendar: (id: string) => {
