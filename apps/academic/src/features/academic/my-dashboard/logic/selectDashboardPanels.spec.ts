@@ -56,12 +56,18 @@ describe('selectDashboardPanels', () => {
   })
 
   /**
-   * A head teacher still teaches. Showing them only the school totals would
-   * hide their own timetable and the marking they owe.
+   * The reason this rule exists. Administrator accounts are routinely attached
+   * to a staff record, so ranking the halves side by side put two tabs in front
+   * of every operator who also teaches — and they picked the same one every
+   * time. Holding `dashboards.read` settles it outright.
    */
-  it('puts a teacher who may also read the school on their own day first', () => {
-    const panels = selectDashboardPanels(payload(null, teacherHalf), true)
-    expect(values(panels)).toEqual(['teacher', 'institution'])
+  it('gives only the school view to someone who may read it, records or not', () => {
+    expect(
+      values(selectDashboardPanels(payload(null, teacherHalf), true)),
+    ).toEqual(['institution'])
+    expect(
+      values(selectDashboardPanels(payload(studentHalf, teacherHalf), true)),
+    ).toEqual(['institution'])
   })
 
   it('gives an administrator with no records the school dashboard', () => {

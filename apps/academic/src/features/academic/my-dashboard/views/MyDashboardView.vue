@@ -17,8 +17,11 @@ import { selectDashboardPanels } from '../logic/selectDashboardPanels'
  * Nothing here reads a role name. The payload's two halves are already the
  * answer — the backend resolved the caller to a student record and a teacher
  * record, so a teacher the school gave an invented role (SARPRAS exists) still
- * gets a teacher half, and a role renamed on a whim changes nothing. The only
- * thing asked of the permission set is whether to make each call at all.
+ * gets a teacher half, and a role renamed on a whim changes nothing.
+ *
+ * Permissions decide one thing on top of that: `dashboards.read` means the
+ * school view, on its own. `selectDashboardPanels` holds the rule and the
+ * reasoning; this file only renders what it returns.
  */
 const { can } = useRoleGuard()
 const { dashboard, loading, loadError, loaded, fetchMyDashboard } =
@@ -26,6 +29,18 @@ const { dashboard, loading, loadError, loaded, fetchMyDashboard } =
 
 const canReadOwn = computed(() => can('dashboards.read-own'))
 const canReadInstitution = computed(() => can('dashboards.read'))
+
+/**
+ * Whether to ask for the personal payload at all.
+ *
+ * Someone who gets the school view has nothing personal rendered, so the call
+ * is skipped rather than made and discarded — it is eight queries, and
+ * SUPER_ADMIN passes every permission check, so it would run on every
+ * administrator's sign-in.
+ */
+const needsPersonal = computed(
+  () => canReadOwn.value && !canReadInstitution.value,
+)
 
 const student = computed(() => dashboard.value?.student ?? null)
 const teacher = computed(() => dashboard.value?.teacher ?? null)
@@ -43,14 +58,14 @@ const panels = computed(() =>
 
 const defaultPanel = computed(() => panels.value[0]?.value ?? '')
 
-// Still waiting on the answer that decides what to render. Someone without the
-// own-dashboard permission is never waiting: no call is made for them.
+// Still waiting on the answer that decides what to render. Nobody who was
+// never asked about waits: an administrator goes straight to the school view.
 const isDeciding = computed(
-  () => canReadOwn.value && (loading.value || !loaded.value),
+  () => needsPersonal.value && (loading.value || !loaded.value),
 )
 
 onMounted(() => {
-  if (!canReadOwn.value) return
+  if (!needsPersonal.value) return
   void fetchMyDashboard()
 })
 </script>
@@ -87,21 +102,28 @@ onMounted(() => {
         <p class="text-sm">Belum ada dashboard untuk akun Anda.</p>
       </div>
 
-      <!-- One panel: no tab strip. A single tab is a control that does nothing. -->
+      <!-- One panel: no tab strip. A single tab is a control that does nothing.
+           Switched on the chosen panel rather than on which data happens to be
+           present — an administrator holds no personal payload only because the
+           call was skipped, and that is a reason to be explicit, not to lean on
+           it. -->
       <template v-else-if="panels.length === 1">
         <StudentDashboard
-          v-if="student"
+          v-if="defaultPanel === 'student' && student"
           :data="student"
           :is-weekly-holiday="isWeeklyHoliday"
         />
         <TeacherDashboard
-          v-else-if="teacher"
+          v-else-if="defaultPanel === 'teacher' && teacher"
           :data="teacher"
           :is-weekly-holiday="isWeeklyHoliday"
         />
         <DashboardView v-else />
       </template>
 
+      <!-- Only ever the two personal halves: the school view is returned on its
+           own, so it never shares a tab strip with anything. Rare but real —
+           someone enrolled here who also teaches here. -->
       <Tabs
         v-else
         :default-value="defaultPanel"
@@ -135,13 +157,6 @@ onMounted(() => {
             :data="teacher"
             :is-weekly-holiday="isWeeklyHoliday"
           />
-        </TabsContent>
-        <TabsContent
-          v-if="canReadInstitution"
-          value="institution"
-          class="mt-4"
-        >
-          <DashboardView />
         </TabsContent>
       </Tabs>
     </template>
