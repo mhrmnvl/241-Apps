@@ -13,6 +13,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/ui/select'
+import { Skeleton } from '@/ui/skeleton'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/ui/table'
 import {
   ArrowRight,
   CheckCircle2,
@@ -25,6 +34,8 @@ import {
 const props = defineProps<{
   decisions: PromotionStudentDecision[]
   recommendations: PromotionRecommendationItem[]
+  isLoading?: boolean
+  activeClass?: string
 }>()
 
 const searchQuery = ref('')
@@ -36,26 +47,30 @@ const decisionByStudent = computed(
 )
 
 const previewRows = computed(() => {
-  return props.recommendations.map((rec) => {
-    const decision = decisionByStudent.value.get(rec.studentId)
-    const isApproved = decision ? decision.approved : true
-    const action = isApproved ? (decision?.action ?? 'PROMOTE') : 'REPEAT'
-    const targetClass = isApproved
-      ? rec.targetClassroomName || 'Belum Ditentukan'
-      : `Tinggal (${rec.sourceClassroomName})`
+  if (!props.activeClass) return []
 
-    return {
-      studentId: rec.studentId,
-      studentName: rec.studentName,
-      nis: rec.nis,
-      sourceClassroomName: rec.sourceClassroomName,
-      targetClassroomName: targetClass,
-      rawTargetClass: rec.targetClassroomName,
-      action,
-      isApproved,
-      declineReason: decision?.declineReason,
-    }
-  })
+  return props.recommendations
+    .filter((rec) => rec.sourceClassroomName === props.activeClass)
+    .map((rec) => {
+      const decision = decisionByStudent.value.get(rec.studentId)
+      const isApproved = decision ? decision.approved : true
+      const action = isApproved ? (decision?.action ?? 'PROMOTE') : 'REPEAT'
+      const targetClass = isApproved
+        ? rec.targetClassroomName || 'Belum Ditentukan'
+        : `Tinggal (${rec.sourceClassroomName})`
+
+      return {
+        studentId: rec.studentId,
+        studentName: rec.studentName,
+        nis: rec.nis,
+        sourceClassroomName: rec.sourceClassroomName,
+        targetClassroomName: targetClass,
+        rawTargetClass: rec.targetClassroomName,
+        action,
+        isApproved,
+        declineReason: decision?.declineReason,
+      }
+    })
 })
 
 const uniqueTargetClasses = computed(() => {
@@ -174,8 +189,9 @@ const summary = computed(() => {
             <SelectItem
               value="all"
               class="text-xs"
-              >Semua Kelas Tujuan</SelectItem
             >
+              Semua Kelas Tujuan
+            </SelectItem>
             <SelectItem
               v-for="cls in uniqueTargetClasses"
               :key="cls"
@@ -201,44 +217,70 @@ const summary = computed(() => {
             <SelectItem
               value="all"
               class="text-xs"
-              >Semua Status</SelectItem
             >
+              Semua Status
+            </SelectItem>
             <SelectItem
               value="promote"
               class="text-xs"
-              >Naik Kelas</SelectItem
             >
+              Naik Kelas
+            </SelectItem>
             <SelectItem
               value="repeat"
               class="text-xs"
-              >Tinggal Kelas</SelectItem
             >
+              Tinggal Kelas
+            </SelectItem>
           </SelectContent>
         </Select>
       </div>
     </div>
 
-    <!-- Table -->
-    <div class="overflow-x-auto rounded-xl border bg-background shadow-xs">
-      <table class="w-full text-xs">
-        <thead class="bg-muted/50 sticky top-0 backdrop-blur-xs z-10">
-          <tr class="border-b">
-            <th class="p-3 text-left font-semibold text-muted-foreground">
+    <!-- Shadcn-Vue Table Component -->
+    <div class="overflow-hidden rounded-xl border bg-background shadow-xs">
+      <Table>
+        <TableHeader class="bg-muted/50">
+          <TableRow>
+            <TableHead class="text-left font-semibold text-xs">
               Nama Siswa
-            </th>
-            <th class="p-3 text-center font-semibold text-muted-foreground">
+            </TableHead>
+            <TableHead class="text-center font-semibold text-xs">
               Alur Kelas
-            </th>
-            <th class="p-3 text-center font-semibold text-muted-foreground">
+            </TableHead>
+            <TableHead class="text-center font-semibold text-xs">
               Status
-            </th>
-            <th class="p-3 text-left font-semibold text-muted-foreground">
+            </TableHead>
+            <TableHead class="text-left font-semibold text-xs">
               Keterangan
-            </th>
-          </tr>
-        </thead>
-        <tbody class="divide-y">
-          <tr
+            </TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          <!-- Loading skeleton rows -->
+          <template v-if="isLoading">
+            <TableRow
+              v-for="i in 6"
+              :key="i"
+            >
+              <TableCell class="py-3">
+                <Skeleton class="h-3.5 w-32 mb-1" />
+                <Skeleton class="h-3 w-20" />
+              </TableCell>
+              <TableCell class="text-center py-3">
+                <div class="flex items-center justify-center gap-1.5">
+                  <Skeleton class="h-5 w-12 rounded-full" />
+                  <Skeleton class="size-3 rounded" />
+                  <Skeleton class="h-5 w-14 rounded-full" />
+                </div>
+              </TableCell>
+              <TableCell class="text-center py-3"
+                ><Skeleton class="h-5 w-20 mx-auto rounded-full"
+              /></TableCell>
+              <TableCell class="py-3"><Skeleton class="h-3 w-24" /></TableCell>
+            </TableRow>
+          </template>
+          <TableRow
             v-for="row in filteredRows"
             :key="row.studentId"
             class="transition-colors hover:bg-muted/30"
@@ -246,15 +288,15 @@ const summary = computed(() => {
               'bg-amber-500/5': !row.isApproved || row.action === 'REPEAT',
             }"
           >
-            <td class="p-3">
-              <div class="font-semibold text-foreground">
+            <TableCell class="py-2.5">
+              <div class="font-semibold text-xs text-foreground">
                 {{ row.studentName }}
               </div>
               <div class="text-[11px] text-muted-foreground mt-0.5">
                 NIS: {{ row.nis }}
               </div>
-            </td>
-            <td class="p-3 text-center">
+            </TableCell>
+            <TableCell class="text-center py-2.5">
               <div class="inline-flex items-center gap-1.5 font-medium">
                 <Badge
                   variant="outline"
@@ -274,16 +316,16 @@ const summary = computed(() => {
                   {{ row.targetClassroomName }}
                 </Badge>
               </div>
-            </td>
-            <td class="p-3 text-center">
+            </TableCell>
+            <TableCell class="text-center py-2.5">
               <Badge
                 :variant="row.isApproved ? 'default' : 'destructive'"
                 class="font-medium text-[10px] px-2 py-0.5 shadow-none"
               >
                 {{ row.isApproved ? 'Naik Kelas' : 'Tinggal Kelas' }}
               </Badge>
-            </td>
-            <td class="p-3">
+            </TableCell>
+            <TableCell class="py-2.5">
               <span
                 v-if="row.declineReason"
                 class="text-[11px] text-destructive italic font-medium"
@@ -296,24 +338,36 @@ const summary = computed(() => {
               >
                 -
               </span>
-            </td>
-          </tr>
-          <tr v-if="filteredRows.length === 0">
-            <td
+            </TableCell>
+          </TableRow>
+          <TableRow v-if="!isLoading && filteredRows.length === 0">
+            <TableCell
               colspan="4"
-              class="p-8 text-center"
+              class="p-10 text-center"
             >
               <div
                 class="flex flex-col items-center justify-center gap-1.5 text-muted-foreground"
               >
-                <Search class="size-5 opacity-40" />
-                <p class="font-medium text-xs">Tidak ada siswa ditemukan</p>
-                <p class="text-[11px]">Coba ubah filter atau kata pencarian.</p>
+                <GraduationCap class="size-5 opacity-30" />
+                <p class="font-medium text-xs">
+                  {{
+                    !activeClass
+                      ? 'Pilih kelas untuk melihat preview'
+                      : 'Tidak ada siswa ditemukan'
+                  }}
+                </p>
+                <p class="text-[11px]">
+                  {{
+                    !activeClass
+                      ? 'Pilih kelas di panel kiri untuk melihat hasil penempatan kelas tujuan.'
+                      : 'Coba ubah filter atau kata pencarian.'
+                  }}
+                </p>
               </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+            </TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>
     </div>
   </div>
 </template>

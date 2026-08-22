@@ -23,7 +23,8 @@ import {
 } from '@/ui/alert-dialog'
 import { Badge } from '@/ui/badge'
 import { Button } from '@/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/ui/card'
+import { Card, CardHeader, CardTitle } from '@/ui/card'
+import { Label } from '@/ui/label'
 import {
   Select,
   SelectContent,
@@ -36,7 +37,6 @@ import {
   CheckCircle2,
   GraduationCap,
   Loader2,
-  Sparkles,
 } from 'lucide-vue-next'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useSemesterList } from '../composables/useSemesterList'
@@ -62,6 +62,7 @@ const {
 const sourceAcademicYearId = ref('')
 const targetAcademicYearId = ref('')
 const studentDecisions = ref<PromotionStudentDecision[]>([])
+const selectedClass = ref('')
 const showConfirmDialog = ref(false)
 const showResultDialog = ref(false)
 const promotionResult = ref<PromotionResult | null>(null)
@@ -140,6 +141,10 @@ function onDecisionsUpdate(decisions: PromotionStudentDecision[]) {
   studentDecisions.value = decisions
 }
 
+function onFilterClassChange(cls: string) {
+  selectedClass.value = cls
+}
+
 watch(sourceAcademicYearId, () => {
   if (sourceAcademicYearId.value === targetAcademicYearId.value) {
     targetAcademicYearId.value = ''
@@ -201,195 +206,111 @@ onMounted(() => {
       </CardHeader>
 
       <!-- Main Card Body -->
-      <div class="p-6 space-y-6">
-        <!-- Top Semester Selection Card -->
-        <Card class="rounded-xl shadow-xs py-0 gap-0">
-          <CardHeader
-            class="flex flex-row items-center justify-between border-b px-5 py-3.5 pb-3.5!"
-          >
-            <div class="flex items-center gap-2">
-              <GraduationCap class="size-4 text-primary shrink-0" />
-              <CardTitle class="text-sm font-semibold tracking-normal">
-                Pilih Siklus Tahun Ajaran
-              </CardTitle>
-            </div>
-            <span class="text-xs text-muted-foreground hidden sm:inline">
-              Tentukan tahun ajaran asal siswa dan tahun ajaran tujuan kenaikan
+      <div class="px-6 pb-6 pt-8 space-y-4">
+        <!-- Tahun Ajaran Selectors -->
+        <div
+          class="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] items-end gap-4"
+        >
+          <!-- Tahun Ajaran Asal -->
+          <div class="grid gap-2">
+            <Label>Tahun Ajaran Asal</Label>
+            <Select v-model="sourceAcademicYearId">
+              <SelectTrigger class="bg-background">
+                <SelectValue placeholder="Pilih tahun ajaran asal..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem
+                  v-for="y in academicYears"
+                  :key="y.id"
+                  :value="y.id"
+                >
+                  <div class="flex items-center gap-2">
+                    <span>{{ y.name }}</span>
+                    <Badge
+                      v-if="y.isActive"
+                      variant="default"
+                      class="text-[10px] px-1.5 py-0"
+                    >
+                      Aktif
+                    </Badge>
+                  </div>
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <!-- Divider Icon -->
+          <div class="hidden md:flex items-center justify-center pb-0.5">
+            <ArrowRight class="size-4 text-muted-foreground" />
+          </div>
+
+          <!-- Tahun Ajaran Tujuan -->
+          <div class="grid gap-2">
+            <Label>Tahun Ajaran Tujuan</Label>
+            <Select
+              v-model="targetAcademicYearId"
+              :disabled="!sourceAcademicYearId"
+            >
+              <SelectTrigger class="bg-background">
+                <SelectValue placeholder="Pilih tahun ajaran tujuan..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem
+                  v-for="y in availableTargetYears"
+                  :key="y.id"
+                  :value="y.id"
+                >
+                  <div class="flex items-center gap-2">
+                    <span>{{ y.name }}</span>
+                    <Badge
+                      v-if="y.isActive"
+                      variant="default"
+                      class="text-[10px] px-1.5 py-0"
+                    >
+                      Aktif
+                    </Badge>
+                  </div>
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        <!-- Excluded Cohort Notice -->
+        <div
+          v-if="!isLoadingRecommendations && excludedGraduatingCount > 0"
+          class="rounded-lg border border-blue-200 bg-blue-50/70 dark:border-blue-900/60 dark:bg-blue-950/20 p-3.5 flex items-start gap-3 text-xs"
+        >
+          <GraduationCap
+            class="size-4 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5"
+          />
+          <div>
+            <span class="font-semibold text-blue-900 dark:text-blue-200">
+              {{ excludedGraduatingCount }} siswa tingkat akhir tidak termasuk
+              dalam kenaikan kelas ini.
             </span>
-          </CardHeader>
-
-          <CardContent class="p-5">
-            <div
-              class="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] items-center gap-4"
-            >
-              <!-- Tahun Ajaran Asal -->
-              <div class="space-y-1.5">
-                <label class="text-xs font-medium text-muted-foreground">
-                  Tahun Ajaran Asal (Posisi Siswa Saat Ini)
-                </label>
-                <Select v-model="sourceAcademicYearId">
-                  <SelectTrigger class="h-10 text-sm bg-background">
-                    <SelectValue placeholder="Pilih tahun ajaran asal..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem
-                      v-for="y in academicYears"
-                      :key="y.id"
-                      :value="y.id"
-                    >
-                      <div class="flex items-center gap-2">
-                        <span>{{ y.name }}</span>
-                        <Badge
-                          v-if="y.isActive"
-                          variant="default"
-                          class="text-[10px] px-1.5 py-0"
-                        >
-                          Aktif
-                        </Badge>
-                      </div>
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <!-- Divider Icon -->
-              <div class="hidden md:flex items-center justify-center pt-5">
-                <div
-                  class="flex size-9 items-center justify-center rounded-full bg-muted text-muted-foreground"
-                >
-                  <ArrowRight class="size-4" />
-                </div>
-              </div>
-
-              <!-- Tahun Ajaran Tujuan -->
-              <div class="space-y-1.5">
-                <label class="text-xs font-medium text-muted-foreground">
-                  Tahun Ajaran Tujuan (Tujuan Kenaikan Kelas)
-                </label>
-                <Select
-                  v-model="targetAcademicYearId"
-                  :disabled="!sourceAcademicYearId"
-                >
-                  <SelectTrigger class="h-10 text-sm bg-background">
-                    <SelectValue placeholder="Pilih tahun ajaran tujuan..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem
-                      v-for="y in availableTargetYears"
-                      :key="y.id"
-                      :value="y.id"
-                    >
-                      <div class="flex items-center gap-2">
-                        <span>{{ y.name }}</span>
-                        <Badge
-                          v-if="y.isActive"
-                          variant="default"
-                          class="text-[10px] px-1.5 py-0"
-                        >
-                          Aktif
-                        </Badge>
-                      </div>
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <!-- Excluded Cohort Notice -->
-            <div
-              v-if="!isLoadingRecommendations && excludedGraduatingCount > 0"
-              class="mt-4 rounded-lg border border-blue-200 bg-blue-50/70 dark:border-blue-900/60 dark:bg-blue-950/20 p-3.5 flex items-start gap-3 text-xs"
-            >
-              <GraduationCap
-                class="size-4 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5"
-              />
-              <div>
-                <span class="font-semibold text-blue-900 dark:text-blue-200">
-                  {{ excludedGraduatingCount }} siswa tingkat akhir tidak
-                  termasuk dalam kenaikan kelas ini.
-                </span>
-                <span class="text-blue-800/80 dark:text-blue-300/80 ml-1">
-                  Kelulusan mereka dicatat terpisah lewat menu
-                  <RouterLink
-                    to="/student/alumni"
-                    class="font-semibold underline underline-offset-2 hover:text-blue-950 dark:hover:text-blue-100"
-                  >
-                    Kelulusan &amp; Alumni </RouterLink
-                  >.
-                </span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <!-- Main Content State: Unselected / Loading / Empty / 2-DataTable View -->
-        <div v-if="!sourceAcademicYearId || !targetAcademicYearId">
-          <Card class="rounded-xl border-dashed py-16 text-center shadow-none">
-            <div
-              class="flex flex-col items-center justify-center gap-3 max-w-sm mx-auto"
-            >
-              <div
-                class="flex size-12 items-center justify-center rounded-xl bg-primary/10 text-primary"
+            <span class="text-blue-800/80 dark:text-blue-300/80 ml-1">
+              Kelulusan mereka dicatat terpisah lewat menu
+              <RouterLink
+                to="/student/alumni"
+                class="font-semibold underline underline-offset-2 hover:text-blue-950 dark:hover:text-blue-100"
               >
-                <Sparkles class="size-6" />
-              </div>
-              <h3 class="text-base font-semibold text-foreground">
-                Pilih Semester Asal & Tujuan
-              </h3>
-              <p class="text-xs text-muted-foreground leading-relaxed">
-                Silakan pilih semester asal dan tujuan di atas untuk memulai
-                analisis dan menyusun kenaikan kelas siswa secara otomatis.
-              </p>
-            </div>
-          </Card>
+                Kelulusan &amp; Alumni </RouterLink
+              >.
+            </span>
+          </div>
         </div>
 
-        <!-- Loading State -->
-        <div
-          v-else-if="isLoadingRecommendations"
-          class="py-20 text-center flex flex-col items-center justify-center gap-3"
-        >
-          <Loader2 class="size-8 animate-spin text-primary" />
-          <p class="text-sm font-medium text-foreground">
-            Menganalisis data siswa...
-          </p>
-          <p class="text-xs text-muted-foreground">
-            Menghitung nilai rata-rata dan rekomendasi kelas tujuan.
-          </p>
-        </div>
-
-        <!-- Empty State -->
-        <div
-          v-else-if="promotionRecommendations.length === 0"
-          class="py-16 text-center"
-        >
-          <Card
-            class="rounded-xl border-dashed p-10 max-w-md mx-auto shadow-none"
-          >
-            <GraduationCap
-              class="size-8 mx-auto text-muted-foreground mb-3 opacity-60"
-            />
-            <h3 class="text-base font-semibold text-foreground">
-              Tidak Ada Data Siswa
-            </h3>
-            <p class="text-xs text-muted-foreground mt-1">
-              Tidak ada siswa aktif yang ditemukan pada semester asal yang
-              dipilih.
-            </p>
-          </Card>
-        </div>
-
-        <!-- 2 DataTables Side-by-Side -->
-        <div
-          v-else
-          class="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start animate-in fade-in duration-300"
-        >
+        <!-- 2 DataTables — always visible, empty until year is selected & loaded -->
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start">
           <!-- Left Panel: Siswa Asal & Keputusan -->
           <Card class="rounded-xl shadow-xs py-0 gap-0">
             <CardContent class="p-5">
               <PromotionStudentTable
                 :recommendations="promotionRecommendations"
+                :is-loading="isLoadingRecommendations"
                 @update:decisions="onDecisionsUpdate"
+                @update:filter-class="onFilterClassChange"
               />
             </CardContent>
           </Card>
@@ -400,6 +321,8 @@ onMounted(() => {
               <PromotionPreviewTable
                 :decisions="studentDecisions"
                 :recommendations="promotionRecommendations"
+                :is-loading="isLoadingRecommendations"
+                :active-class="selectedClass"
               />
             </CardContent>
           </Card>
@@ -408,10 +331,7 @@ onMounted(() => {
         <!-- Bottom Actions / Execution Status -->
         <div
           v-if="
-            sourceAcademicYearId &&
-            targetAcademicYearId &&
-            promotionRecommendations.length > 0 &&
-            !isLoadingRecommendations
+            promotionRecommendations.length > 0 && !isLoadingRecommendations
           "
           class="flex flex-col sm:flex-row items-center justify-between gap-4 rounded-xl border bg-card p-4 shadow-xs"
         >
@@ -473,7 +393,7 @@ onMounted(() => {
             summaryStats.approved
           }}
           naik kelas, {{ summaryStats.declined }} tinggal kelas). Siswa akan
-          langsung didaftarkan ke kelas tujuan pada semester target.
+          langsung didaftarkan ke kelas tujuan pada tahun ajaran target.
         </AlertDialogDescription>
       </AlertDialogHeader>
       <AlertDialogFooter>
