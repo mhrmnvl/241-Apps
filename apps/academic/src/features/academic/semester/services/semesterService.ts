@@ -180,7 +180,7 @@ export const semesterService = {
 
   previewPromotion: async (payload: PromotionPayload) => {
     const store = useSemesterStore()
-    store.isPromoting = true
+    store.isPreviewing = true
     store.promotionPreview = null
     try {
       const res = await semesterApi.previewPromotion(payload)
@@ -189,12 +189,12 @@ export const semesterService = {
     } catch (error: unknown) {
       const msg = getIndonesianErrorMessage(
         error,
-        'Gagal memuat preview kenaikan kelas.',
+        'Gagal memuat ringkasan kenaikan kelas.',
       )
       toast.error(msg)
       return { success: false, error: msg }
     } finally {
-      store.isPromoting = false
+      store.isPreviewing = false
     }
   },
 
