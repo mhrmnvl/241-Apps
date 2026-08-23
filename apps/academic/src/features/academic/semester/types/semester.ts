@@ -6,6 +6,14 @@ export interface SemesterTypeRef {
 export interface AcademicYearRef {
   id: string
   name: string
+  /**
+   * The calendar year this school year opens in.
+   *
+   * What the promotion screen orders by to find the year after the active
+   * one. Never the name: years are master data the school renames, and a
+   * rename would move a whole cohort into the wrong year in silence.
+   */
+  startYear?: number
   isActive?: boolean
 }
 

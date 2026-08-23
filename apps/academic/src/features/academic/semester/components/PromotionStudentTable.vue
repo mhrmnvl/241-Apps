@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed, toRefs, watch } from 'vue'
-import { Badge } from '@/ui/badge'
 import { Button } from '@/ui/button'
 import { Checkbox } from '@/ui/checkbox'
 import {
@@ -29,7 +28,13 @@ import {
   TableRow,
 } from '@/ui/table'
 import { Textarea } from '@/ui/textarea'
-import { CheckCircle2, Filter, Search, Users, XCircle } from 'lucide-vue-next'
+import {
+  ArrowRight,
+  CheckCircle2,
+  Filter,
+  Search,
+  XCircle,
+} from 'lucide-vue-next'
 import type {
   PromotionAction,
   PromotionRecommendationItem,
@@ -64,7 +69,6 @@ const {
   uniqueClasses,
   filteredRows,
   allVisibleSelected,
-  summaryStats,
   toggleSelectAll,
   toggleSelect,
   getDecision,
@@ -105,53 +109,23 @@ function formatScore(score?: number | null) {
   if (score == null) return '-'
   return score.toFixed(1)
 }
+
+/** Resolve the target classroom name for a student based on their current decision. */
+function getTargetClass(row: PromotionRecommendationItem): string {
+  const decision = getDecision(row.studentId)
+  if (!decision) return row.targetClassroomName ?? '-'
+  if (!decision.approved) return `Tinggal (${row.sourceClassroomName})`
+  return row.targetClassroomName ?? '-'
+}
 </script>
 
 <template>
   <div class="space-y-4">
-    <!-- Header & Action Row -->
-    <div class="flex flex-col gap-3">
-      <div class="flex items-center justify-between">
-        <div class="flex items-center gap-2">
-          <Users class="size-4 text-primary" />
-          <h3 class="font-semibold text-base text-foreground">
-            Daftar Siswa Asal
-          </h3>
-          <Badge
-            variant="secondary"
-            class="font-medium text-xs"
-          >
-            {{ filteredRows.length }} / {{ summaryStats.total }} Siswa
-          </Badge>
-        </div>
-
-        <div class="flex items-center gap-2">
-          <Button
-            size="sm"
-            variant="outline"
-            class="h-8 text-xs font-medium"
-            :disabled="selectedIds.size === 0"
-            @click="bulkApprove"
-          >
-            <CheckCircle2 class="size-3.5 mr-1 text-green-600" />
-            Setujui ({{ selectedIds.size }})
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            class="h-8 text-xs font-medium text-destructive hover:text-destructive"
-            :disabled="selectedIds.size === 0"
-            @click="bulkDecline"
-          >
-            <XCircle class="size-3.5 mr-1" />
-            Tolak ({{ selectedIds.size }})
-          </Button>
-        </div>
-      </div>
-
-      <!-- Filters -->
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-        <div class="relative sm:col-span-1">
+    <!-- Filter Bar -->
+    <div class="rounded-lg border bg-muted/20 p-4">
+      <div class="flex flex-col gap-3 sm:flex-row sm:items-end">
+        <!-- Search -->
+        <div class="relative flex-1">
           <Search
             class="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground"
           />
@@ -162,8 +136,9 @@ function formatScore(score?: number | null) {
           />
         </div>
 
+        <!-- Kelas filter -->
         <Select v-model="filterClass">
-          <SelectTrigger class="h-9 text-xs">
+          <SelectTrigger class="h-9 text-xs bg-background sm:w-44">
             <Filter class="size-3 mr-1 text-muted-foreground" />
             <SelectValue placeholder="Pilih Kelas..." />
           </SelectTrigger>
@@ -179,35 +154,57 @@ function formatScore(score?: number | null) {
           </SelectContent>
         </Select>
 
+        <!-- Status filter -->
         <Select v-model="filterStatus">
-          <SelectTrigger class="h-9 text-xs">
+          <SelectTrigger class="h-9 text-xs bg-background sm:w-40">
             <SelectValue placeholder="Semua Status" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem
               value="all"
               class="text-xs"
+              >Semua Status</SelectItem
             >
-              Semua Status
-            </SelectItem>
             <SelectItem
               value="approved"
               class="text-xs"
+              >Disetujui</SelectItem
             >
-              Disetujui
-            </SelectItem>
             <SelectItem
               value="declined"
               class="text-xs"
+              >Ditolak</SelectItem
             >
-              Ditolak
-            </SelectItem>
           </SelectContent>
         </Select>
+
+        <!-- Bulk actions -->
+        <div class="flex items-center gap-2 shrink-0">
+          <Button
+            size="sm"
+            variant="outline"
+            class="h-9 text-xs font-medium"
+            :disabled="selectedIds.size === 0"
+            @click="bulkApprove"
+          >
+            <CheckCircle2 class="size-3.5 mr-1 text-green-600" />
+            Setujui ({{ selectedIds.size }})
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            class="h-9 text-xs font-medium text-destructive hover:text-destructive"
+            :disabled="selectedIds.size === 0"
+            @click="bulkDecline"
+          >
+            <XCircle class="size-3.5 mr-1" />
+            Tolak ({{ selectedIds.size }})
+          </Button>
+        </div>
       </div>
     </div>
 
-    <!-- Shadcn-Vue Table Component -->
+    <!-- Table -->
     <div class="overflow-hidden rounded-xl border bg-background shadow-xs">
       <Table>
         <TableHeader class="bg-muted/50">
@@ -222,13 +219,16 @@ function formatScore(score?: number | null) {
               Nama Siswa
             </TableHead>
             <TableHead class="text-center font-semibold text-xs">
-              Kelas
+              Kelas Asal
             </TableHead>
             <TableHead class="text-center font-semibold text-xs">
               Nilai
             </TableHead>
             <TableHead class="text-center font-semibold text-xs">
               Rekomendasi
+            </TableHead>
+            <TableHead class="text-center font-semibold text-xs">
+              Kelas Tujuan
             </TableHead>
             <TableHead class="text-center font-semibold text-xs w-[130px]">
               Keputusan
@@ -250,7 +250,7 @@ function formatScore(score?: number | null) {
                 <Skeleton class="h-3 w-20" />
               </TableCell>
               <TableCell class="text-center py-3"
-                ><Skeleton class="h-5 w-12 mx-auto rounded-full"
+                ><Skeleton class="h-5 w-16 mx-auto rounded-full"
               /></TableCell>
               <TableCell class="text-center py-3"
                 ><Skeleton class="h-3.5 w-8 mx-auto"
@@ -258,11 +258,19 @@ function formatScore(score?: number | null) {
               <TableCell class="text-center py-3"
                 ><Skeleton class="h-5 w-20 mx-auto rounded-full"
               /></TableCell>
+              <TableCell class="text-center py-3">
+                <div class="flex items-center justify-center gap-1">
+                  <Skeleton class="h-5 w-16 rounded-full" />
+                  <Skeleton class="size-3 rounded" />
+                  <Skeleton class="h-5 w-16 rounded-full" />
+                </div>
+              </TableCell>
               <TableCell class="text-center py-3"
                 ><Skeleton class="h-7 w-24 mx-auto rounded-md"
               /></TableCell>
             </TableRow>
           </template>
+
           <TableRow
             v-for="row in filteredRows"
             :key="row.studentId"
@@ -330,6 +338,28 @@ function formatScore(score?: number | null) {
                 }}
               </Badge>
             </TableCell>
+            <!-- Kelas Tujuan -->
+            <TableCell class="text-center py-2.5">
+              <div class="flex items-center justify-center gap-1.5 text-xs">
+                <Badge
+                  variant="outline"
+                  class="font-medium bg-background text-[11px] px-2 py-0.5"
+                >
+                  {{ row.sourceClassroomName }}
+                </Badge>
+                <ArrowRight class="size-3 text-muted-foreground shrink-0" />
+                <Badge
+                  :variant="
+                    getDecision(row.studentId)?.approved === false
+                      ? 'destructive'
+                      : 'secondary'
+                  "
+                  class="font-medium text-[11px] px-2 py-0.5"
+                >
+                  {{ getTargetClass(row) }}
+                </Badge>
+              </div>
+            </TableCell>
             <TableCell class="text-center py-2.5">
               <div class="flex items-center justify-center gap-1">
                 <Button
@@ -361,9 +391,10 @@ function formatScore(score?: number | null) {
               </div>
             </TableCell>
           </TableRow>
+
           <TableRow v-if="!isLoading && filteredRows.length === 0">
             <TableCell
-              colspan="6"
+              colspan="7"
               class="p-10 text-center"
             >
               <div

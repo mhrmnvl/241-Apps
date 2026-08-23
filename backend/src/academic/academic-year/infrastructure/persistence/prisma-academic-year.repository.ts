@@ -67,7 +67,7 @@ export class PrismaAcademicYearRepository extends IAcademicYearRepository {
   async findLatestAcademicYear(): Promise<AcademicYear | null> {
     return this.prisma.academicYear.findFirst({
       where: { deletedAt: null },
-      orderBy: { name: 'desc' },
+      orderBy: [{ startYear: 'desc' }, { name: 'desc' }],
     });
   }
 
@@ -77,6 +77,7 @@ export class PrismaAcademicYearRepository extends IAcademicYearRepository {
     return this.prisma.academicYear.create({
       data: {
         name: data.name,
+        startYear: data.startYear,
         isActive: data.isActive,
       },
       include: ACADEMIC_YEAR_WITH_DETAILS_INCLUDE,
