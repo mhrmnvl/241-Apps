@@ -12,7 +12,12 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../../../platform/auth/index.js';
 import { RequirePermissions } from '../../../../platform/access-control/permission/decorators/require-permissions.decorator.js';
 import { GetCategoriesUseCase } from '../use-cases/get-categories.use-case.js';
@@ -21,6 +26,7 @@ import { UpdateCategoryUseCase } from '../use-cases/update-category.use-case.js'
 import { DeleteCategoryUseCase } from '../use-cases/delete-category.use-case.js';
 import { CreateCategoryDto } from '../dto/request/create-category.dto.js';
 import { UpdateCategoryDto } from '../dto/request/update-category.dto.js';
+import { InventoryCategoryResponseDto } from '../dto/response/category-response.dto.js';
 
 @ApiTags('Inventory Categories')
 @ApiBearerAuth()
@@ -37,6 +43,7 @@ export class CategoryController {
   @Get()
   @RequirePermissions('inventory-master-data.read')
   @ApiOperation({ summary: 'Get category list' })
+  @ApiResponse({ status: 200, type: [InventoryCategoryResponseDto] })
   async getCategories(@Query('search') search?: string) {
     return this.getCategoriesUseCase.execute(search);
   }
@@ -44,6 +51,7 @@ export class CategoryController {
   @Post()
   @RequirePermissions('inventory-master-data.create')
   @ApiOperation({ summary: 'Create category item' })
+  @ApiResponse({ status: 201, type: InventoryCategoryResponseDto })
   async createCategory(@Body() data: CreateCategoryDto) {
     return this.createCategoryUseCase.execute(data);
   }
@@ -51,6 +59,7 @@ export class CategoryController {
   @Patch(':id')
   @RequirePermissions('inventory-master-data.update')
   @ApiOperation({ summary: 'Update category item' })
+  @ApiResponse({ status: 200, type: InventoryCategoryResponseDto })
   async updateCategory(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() data: UpdateCategoryDto,

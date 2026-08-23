@@ -12,7 +12,12 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../../../platform/auth/index.js';
 import { RequirePermissions } from '../../../../platform/access-control/permission/decorators/require-permissions.decorator.js';
 import { GetStatusesUseCase } from '../use-cases/get-statuses.use-case.js';
@@ -21,6 +26,7 @@ import { UpdateStatusUseCase } from '../use-cases/update-status.use-case.js';
 import { DeleteStatusUseCase } from '../use-cases/delete-status.use-case.js';
 import { CreateStatusDto } from '../dto/request/create-status.dto.js';
 import { UpdateStatusDto } from '../dto/request/update-status.dto.js';
+import { InventoryStatusResponseDto } from '../dto/response/status-response.dto.js';
 
 @ApiTags('Inventory Statuses')
 @ApiBearerAuth()
@@ -37,6 +43,7 @@ export class StatusController {
   @Get()
   @RequirePermissions('inventory-master-data.read')
   @ApiOperation({ summary: 'Get status list' })
+  @ApiResponse({ status: 200, type: [InventoryStatusResponseDto] })
   async getStatuses(@Query('search') search?: string) {
     return this.getStatusesUseCase.execute(search);
   }
@@ -44,6 +51,7 @@ export class StatusController {
   @Post()
   @RequirePermissions('inventory-master-data.create')
   @ApiOperation({ summary: 'Create status item' })
+  @ApiResponse({ status: 201, type: InventoryStatusResponseDto })
   async createStatus(@Body() data: CreateStatusDto) {
     return this.createStatusUseCase.execute(data);
   }
@@ -51,6 +59,7 @@ export class StatusController {
   @Patch(':id')
   @RequirePermissions('inventory-master-data.update')
   @ApiOperation({ summary: 'Update status item' })
+  @ApiResponse({ status: 200, type: InventoryStatusResponseDto })
   async updateStatus(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() data: UpdateStatusDto,

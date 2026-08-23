@@ -12,7 +12,12 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../../../platform/auth/index.js';
 import { RequirePermissions } from '../../../../platform/access-control/permission/decorators/require-permissions.decorator.js';
 import { GetLocationsUseCase } from '../use-cases/get-locations.use-case.js';
@@ -21,6 +26,7 @@ import { UpdateLocationUseCase } from '../use-cases/update-location.use-case.js'
 import { DeleteLocationUseCase } from '../use-cases/delete-location.use-case.js';
 import { CreateLocationDto } from '../dto/request/create-location.dto.js';
 import { UpdateLocationDto } from '../dto/request/update-location.dto.js';
+import { InventoryLocationResponseDto } from '../dto/response/location-response.dto.js';
 
 @ApiTags('Inventory Locations')
 @ApiBearerAuth()
@@ -37,6 +43,7 @@ export class LocationController {
   @Get()
   @RequirePermissions('inventory-master-data.read')
   @ApiOperation({ summary: 'Get location list' })
+  @ApiResponse({ status: 200, type: [InventoryLocationResponseDto] })
   async getLocations(@Query('search') search?: string) {
     return this.getLocationsUseCase.execute(search);
   }
@@ -44,6 +51,7 @@ export class LocationController {
   @Post()
   @RequirePermissions('inventory-master-data.create')
   @ApiOperation({ summary: 'Create location item' })
+  @ApiResponse({ status: 201, type: InventoryLocationResponseDto })
   async createLocation(@Body() data: CreateLocationDto) {
     return this.createLocationUseCase.execute(data);
   }
@@ -51,6 +59,7 @@ export class LocationController {
   @Patch(':id')
   @RequirePermissions('inventory-master-data.update')
   @ApiOperation({ summary: 'Update location item' })
+  @ApiResponse({ status: 200, type: InventoryLocationResponseDto })
   async updateLocation(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() data: UpdateLocationDto,

@@ -29,12 +29,15 @@ import { join, sep } from 'node:path';
  * 274 → 263 was the gate devices and the presence cards, whose response DTOs
  * already existed and matched their handlers' return types one for one.
  *
- * 263 → 261 is the institution dashboard and the semester rollover. The
+ * 263 → 261 was the institution dashboard and the semester rollover. The
  * dashboard is the first one here to have needed its DTO written: it is
  * transcribed from what the use case returns, not designed, which is the only
  * way to add one without quietly changing the contract.
+ *
+ * 261 → 245 is inventory's reference data — five identical CRUD modules and
+ * the metadata call that serves all five at once.
  */
-const UNTYPED_CEILING = 261;
+const UNTYPED_CEILING = 245;
 
 interface Handler {
   controller: string;
