@@ -11,13 +11,19 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 
 import { JwtAuthGuard } from '../../../auth/index.js';
 
 import { CreateScholarshipDto } from '../dto/request/create-scholarship.dto.js';
 import { ScholarshipQueryDto } from '../dto/request/scholarship-query.dto.js';
 import { UpdateScholarshipDto } from '../dto/request/update-scholarship.dto.js';
+import { ScholarshipResponseDto } from '../dto/response/scholarship-response.dto.js';
 import { CreateScholarshipUseCase } from '../use-cases/create-scholarship.use-case.js';
 import { DeleteScholarshipUseCase } from '../use-cases/delete-scholarship.use-case.js';
 import { GetScholarshipByIdUseCase } from '../use-cases/get-scholarship-by-id.use-case.js';
@@ -40,6 +46,7 @@ export class ScholarshipController {
   @Post()
   @RequirePermissions('scholarships.create')
   @ApiOperation({ summary: 'Create a new scholarship' })
+  @ApiResponse({ status: 201, type: ScholarshipResponseDto })
   create(@Body() dto: CreateScholarshipDto) {
     return this.createService.execute(dto);
   }
@@ -47,6 +54,7 @@ export class ScholarshipController {
   @Get()
   @RequirePermissions('scholarships.read')
   @ApiOperation({ summary: 'Get all scholarships (filter by userId, status)' })
+  @ApiResponse({ status: 200, type: [ScholarshipResponseDto] })
   findAll(@Query() query: ScholarshipQueryDto) {
     return this.getListService.execute(query);
   }
@@ -54,6 +62,7 @@ export class ScholarshipController {
   @Get(':id')
   @RequirePermissions('scholarships.read')
   @ApiOperation({ summary: 'Get scholarship by ID' })
+  @ApiResponse({ status: 200, type: ScholarshipResponseDto })
   findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.getByIdService.execute(id);
   }
@@ -61,6 +70,7 @@ export class ScholarshipController {
   @Patch(':id')
   @RequirePermissions('scholarships.update')
   @ApiOperation({ summary: 'Update scholarship' })
+  @ApiResponse({ status: 200, type: ScholarshipResponseDto })
   update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateScholarshipDto,
@@ -71,6 +81,7 @@ export class ScholarshipController {
   @Delete(':id')
   @RequirePermissions('scholarships.delete')
   @ApiOperation({ summary: 'Delete scholarship (soft delete)' })
+  @ApiResponse({ status: 200, type: ScholarshipResponseDto })
   remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.deleteService.execute(id);
   }
