@@ -51,3 +51,9 @@ MONOREPO-MIGRATION-PLAN.md
 
 # Claude AI worktrees
 .claude/
+
+# Generated from the running Nest metadata by `pnpm openapi:emit`. Not
+# committed while most operations still declare no response type — a
+# checked-in artifact that is more than half empty invites being trusted.
+backend/openapi.json
+packages/shared/src/types/openapi.ts

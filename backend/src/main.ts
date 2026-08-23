@@ -2,12 +2,13 @@ import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import type { NestExpressApplication } from '@nestjs/platform-express';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { SwaggerModule } from '@nestjs/swagger';
 import cookieParser from 'cookie-parser';
 import type { NextFunction, Request, Response } from 'express';
 import helmet from 'helmet';
 import { Logger } from 'nestjs-pino';
 import { AppModule } from './app.module.js';
+import { buildSwaggerConfig } from './openapi/swagger-config.js';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
@@ -81,14 +82,8 @@ async function bootstrap() {
   );
 
   if (!isProduction) {
-    const swaggerConfig = new DocumentBuilder()
-      .setTitle('SIAKAD API')
-      .setDescription('School Academic Information System REST API')
-      .setVersion('1.0')
-      .addBearerAuth()
-      .build();
     const documentFactory = () =>
-      SwaggerModule.createDocument(app, swaggerConfig);
+      SwaggerModule.createDocument(app, buildSwaggerConfig());
     SwaggerModule.setup('api', app, documentFactory, {
       swaggerOptions: { persistAuthorization: true },
     });
