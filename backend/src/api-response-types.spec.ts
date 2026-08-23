@@ -19,10 +19,17 @@ import { join, sep } from 'node:path';
  */
 
 /**
- * Handlers whose success response carries no `type:`, as of the promotion
- * endpoints being annotated. Lower it; never raise it.
+ * Handlers that owe a response type. Lower it; never raise it.
+ *
+ * 343 → 274 of that was correcting the count, not paying it down: 69 handlers
+ * answer 204 and have no body to describe, and the first version of this called
+ * them debt. A ratchet measuring the wrong thing is worse than none — that one
+ * could have been satisfied by annotating deletes.
+ *
+ * 274 → 263 is the gate devices and the presence cards, whose response DTOs
+ * already existed and matched their handlers' return types one for one.
  */
-const UNTYPED_CEILING = 343;
+const UNTYPED_CEILING = 263;
 
 interface Handler {
   controller: string;
@@ -31,6 +38,13 @@ interface Handler {
 
 const ROUTE_DECORATOR = /^\s*@(?:Get|Post|Patch|Put|Delete)\(/;
 const TYPED_SUCCESS = /@ApiResponse\(\s*\{[^)]*?status:\s*20[01][^)]*?type:/s;
+
+/**
+ * A handler that answers 204 has nothing to type, whether it says so through
+ * `@ApiResponse` or through `@HttpCode`.
+ */
+const NO_CONTENT =
+  /@ApiResponse\(\s*\{[^)]*?status:\s*204|@HttpCode\(\s*(?:HttpStatus\.NO_CONTENT|204)\s*\)/s;
 
 export function handlersIn(source: string, controller: string): Handler[] {
   // Split at each route decorator, so a chunk is one handler: its decorator
@@ -41,10 +55,13 @@ export function handlersIn(source: string, controller: string): Handler[] {
 
   return chunks
     .filter((chunk) => ROUTE_DECORATOR.test(chunk))
-    .map((chunk) => ({
-      controller,
-      typed: TYPED_SUCCESS.test(chunk.split('async ')[0] ?? chunk),
-    }));
+    .map((chunk) => {
+      const block = chunk.split('async ')[0] ?? chunk;
+      return {
+        controller,
+        typed: TYPED_SUCCESS.test(block) || NO_CONTENT.test(block),
+      };
+    });
 }
 
 describe('endpoints document what they return', () => {
@@ -111,6 +128,30 @@ describe('endpoints document what they return', () => {
 
       expect(handlersIn(bare, 'x.controller.ts')).toEqual([
         { controller: 'x.controller.ts', typed: false },
+      ]);
+    });
+
+    it('asks nothing of a handler that answers 204', () => {
+      const deleted = [
+        `  @Delete(':id')`,
+        `  @ApiResponse({ status: 204, description: 'Permission deleted' })`,
+        `  async remove() {}`,
+      ].join('\n');
+
+      expect(handlersIn(deleted, 'x.controller.ts')).toEqual([
+        { controller: 'x.controller.ts', typed: true },
+      ]);
+    });
+
+    it('accepts 204 declared through @HttpCode instead', () => {
+      const deleted = [
+        `  @Delete(':id')`,
+        `  @HttpCode(HttpStatus.NO_CONTENT)`,
+        `  async remove() {}`,
+      ].join('\n');
+
+      expect(handlersIn(deleted, 'x.controller.ts')).toEqual([
+        { controller: 'x.controller.ts', typed: true },
       ]);
     });
 
