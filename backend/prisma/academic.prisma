@@ -45,8 +45,21 @@ model AcademicSetting {
 }
 
 model AcademicYear {
-  id        String    @id @default(uuid()) @db.Uuid
-  name      String    @unique @db.VarChar(50)
+  id   String @id @default(uuid()) @db.Uuid
+  name String @unique @db.VarChar(50)
+
+  /// The calendar year the school year opens in: 2026 for "2026/2027".
+  ///
+  /// Recorded rather than parsed out of `name`. Academic years are master data
+  /// the school edits, so a rename — "TA 2027-2028", a curriculum suffix — would
+  /// silently break anything reading the name for order. `SemesterType.sequence`
+  /// exists for the same reason, and for the same kind of bug.
+  ///
+  /// What reads it: the promotion screen, to work out which year follows the
+  /// active one without asking. Ordering by this rather than by name is what
+  /// keeps "the next year" a fact rather than a guess about spelling.
+  startYear Int @map("start_year")
+
   isActive  Boolean   @default(false) @map("is_active")
   deletedAt DateTime? @map("deleted_at")
 

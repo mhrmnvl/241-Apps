@@ -96,7 +96,7 @@ describe('AcademicYearController', () => {
 
   describe('create', () => {
     it('should delegate to CreateAcademicYearUseCase with dto', async () => {
-      const dto: CreateAcademicYearDto = { name: '2025/2026' };
+      const dto: CreateAcademicYearDto = { name: '2025/2026', startYear: 2024 };
       const expected = { id: 'ay-new', name: '2025/2026', isActive: false };
       mockCreateAcademicYearService.execute.mockResolvedValue(expected);
 
@@ -110,7 +110,10 @@ describe('AcademicYearController', () => {
   describe('update', () => {
     it('should delegate to UpdateAcademicYearUseCase with id and dto', async () => {
       const id = 'ay-1';
-      const dto: UpdateAcademicYearDto = { name: 'Updated 2025/2026' };
+      const dto: UpdateAcademicYearDto = {
+        name: 'Updated 2025/2026',
+        startYear: 2024,
+      };
       const expected = {
         id: 'ay-1',
         name: 'Updated 2025/2026',

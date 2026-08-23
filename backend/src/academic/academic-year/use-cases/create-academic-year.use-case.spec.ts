@@ -37,7 +37,7 @@ describe('CreateAcademicYearUseCase', () => {
   });
 
   describe('execute', () => {
-    const dto: CreateAcademicYearDto = { name: '2025/2026' };
+    const dto: CreateAcademicYearDto = { name: '2025/2026', startYear: 2025 };
 
     it('should create academic year', async () => {
       mockRepository.findByName.mockResolvedValue(null);
@@ -46,8 +46,11 @@ describe('CreateAcademicYearUseCase', () => {
       const result = await useCase.execute(dto);
 
       expect(mockRepository.findByName).toHaveBeenCalledWith('2025/2026');
+      // `startYear` is carried, not derived from the name: the two agree here
+      // because the caller made them agree, which is the point of storing it.
       expect(mockRepository.create).toHaveBeenCalledWith({
         name: '2025/2026',
+        startYear: 2025,
         isActive: false,
       });
       expect(result.name).toBe('2025/2026');
@@ -66,6 +69,7 @@ describe('CreateAcademicYearUseCase', () => {
     it('should deactivate all others when isActive is true', async () => {
       const activeDto: CreateAcademicYearDto = {
         name: '2025/2026',
+        startYear: 2025,
         isActive: true,
       };
 
@@ -81,6 +85,7 @@ describe('CreateAcademicYearUseCase', () => {
       expect(mockRepository.deactivateAll).toHaveBeenCalledWith();
       expect(mockRepository.create).toHaveBeenCalledWith({
         name: '2025/2026',
+        startYear: 2025,
         isActive: true,
       });
     });

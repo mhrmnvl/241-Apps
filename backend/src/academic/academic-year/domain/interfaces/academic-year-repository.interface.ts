@@ -13,6 +13,7 @@ export interface AcademicYearQueryInput extends PaginationQueryInput {
 
 export interface CreateAcademicYearRepositoryInput {
   name: string;
+  startYear: number;
   isActive?: boolean;
 }
 

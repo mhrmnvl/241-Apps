@@ -5,11 +5,7 @@ import type {
   PromotionStudentDecision,
   PromotionStudentPayload,
 } from '../types'
-import {
-  PromotionPreviewTable,
-  PromotionResultDialog,
-  PromotionStudentTable,
-} from '../components'
+import { PromotionResultDialog, PromotionStudentTable } from '../components'
 import { RouterLink, useRouter } from 'vue-router'
 import {
   AlertDialog,
@@ -41,6 +37,7 @@ import {
 import { computed, onMounted, ref, watch } from 'vue'
 import { useSemesterList } from '../composables/useSemesterList'
 import { useSemesterPromotion } from '../composables/useSemesterPromotion'
+import { derivePromotionYears } from '../logic/derivePromotionYears'
 
 const router = useRouter()
 
@@ -64,8 +61,27 @@ const {
 // same year, which it used to be able to do in two clicks.
 const sourceAcademicYearId = ref('')
 const targetAcademicYearId = ref('')
+
+/**
+ * A promotion runs out of the year the school is in and into the one after it,
+ * so the screen works that out instead of asking. `derivePromotionYears` holds
+ * the rule and is spec'd against it.
+ *
+ * Shown as a sentence rather than hidden: this moves every student in the
+ * school, once a year, and the value of stating it is that somebody can stop
+ * before it happens.
+ */
+const derived = computed(() => derivePromotionYears(academicYears.value))
+
+/**
+ * The override exists for the school that ran a year late.
+ *
+ * Activating next year before promoting out of this one is an ordinary
+ * mistake — and after it, the derived pair is wrong in exactly the way nobody
+ * would notice. Folded away, because that is a rare day.
+ */
+const isChoosingYears = ref(false)
 const studentDecisions = ref<PromotionStudentDecision[]>([])
-const selectedClass = ref('')
 const showConfirmDialog = ref(false)
 const showResultDialog = ref(false)
 const promotionResult = ref<PromotionResult | null>(null)
@@ -157,10 +173,6 @@ function onDecisionsUpdate(decisions: PromotionStudentDecision[]) {
   studentDecisions.value = decisions
 }
 
-function onFilterClassChange(cls: string) {
-  selectedClass.value = cls
-}
-
 watch(sourceAcademicYearId, () => {
   if (sourceAcademicYearId.value === targetAcademicYearId.value) {
     targetAcademicYearId.value = ''
@@ -179,8 +191,17 @@ watch(
   },
 )
 
-onMounted(() => {
-  void fetchAcademicYears()
+onMounted(async () => {
+  await fetchAcademicYears()
+
+  // Only seeds the fields; an operator who has already picked something keeps
+  // it, and a run started before the list arrived is not overwritten.
+  if (!sourceAcademicYearId.value && derived.value.source) {
+    sourceAcademicYearId.value = derived.value.source.id
+  }
+  if (!targetAcademicYearId.value && derived.value.target) {
+    targetAcademicYearId.value = derived.value.target.id
+  }
 })
 </script>
 
@@ -190,105 +211,132 @@ onMounted(() => {
       class="overflow-hidden rounded-2xl shadow-sm shadow-black/5 ring-1 ring-black/4 py-0 gap-0"
     >
       <!-- Main Card Header -->
-      <CardHeader
-        class="flex flex-col gap-3 border-b px-6 py-5 sm:flex-row sm:items-center sm:justify-between"
-      >
+      <CardHeader class="border-b px-6 py-5">
         <CardTitle class="text-2xl font-bold tracking-tight">
           Kenaikan Kelas
         </CardTitle>
-
-        <div class="flex w-full items-center justify-end gap-2 sm:w-auto">
-          <Button
-            :disabled="!canExecute"
-            @click="openConfirmDialog"
-          >
-            <Loader2
-              v-if="isPromoting"
-              class="size-4 mr-2 animate-spin"
-            />
-            <CheckCircle2
-              v-else
-              class="size-4 mr-2"
-            />
-            Proses Kenaikan Kelas
-            <span
-              v-if="summaryStats.total > 0"
-              class="ml-1.5 rounded-full bg-primary-foreground/20 px-2 py-0.5 text-xs font-semibold"
-            >
-              {{ summaryStats.total }}
-            </span>
-          </Button>
-        </div>
       </CardHeader>
 
       <!-- Main Card Body -->
       <div class="px-6 pb-6 pt-8 space-y-4">
-        <!-- Tahun Ajaran Selectors -->
+        <!-- Stated, not asked. The pair is derived; the selects are the way
+             back for a school that ran a year late. -->
         <div
-          class="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] items-end gap-4"
+          v-if="!isChoosingYears"
+          class="flex flex-wrap items-center justify-between gap-3 rounded-lg border bg-muted/30 px-4 py-3"
         >
-          <!-- Tahun Ajaran Asal -->
-          <div class="grid gap-2">
-            <Label>Tahun Ajaran Asal</Label>
-            <Select v-model="sourceAcademicYearId">
-              <SelectTrigger class="bg-background">
-                <SelectValue placeholder="Pilih tahun ajaran asal..." />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem
-                  v-for="y in academicYears"
-                  :key="y.id"
-                  :value="y.id"
-                >
-                  <div class="flex items-center gap-2">
-                    <span>{{ y.name }}</span>
-                    <Badge
-                      v-if="y.isActive"
-                      variant="default"
-                      class="text-[10px] px-1.5 py-0"
-                    >
-                      Aktif
-                    </Badge>
-                  </div>
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <!-- Divider Icon -->
-          <div class="hidden md:flex items-center justify-center pb-0.5">
+          <div class="flex flex-wrap items-center gap-2 text-sm">
+            <span class="text-muted-foreground">Menaikkan siswa dari</span>
+            <span class="font-semibold">
+              {{ derived.source?.name ?? 'tahun ajaran aktif' }}
+            </span>
             <ArrowRight class="size-4 text-muted-foreground" />
+            <span
+              v-if="derived.target"
+              class="font-semibold"
+            >
+              {{ derived.target.name }}
+            </span>
+            <span
+              v-else
+              class="font-medium text-destructive"
+            >
+              tahun ajaran berikutnya belum dibuat
+            </span>
           </div>
 
-          <!-- Tahun Ajaran Tujuan -->
-          <div class="grid gap-2">
-            <Label>Tahun Ajaran Tujuan</Label>
-            <Select
-              v-model="targetAcademicYearId"
-              :disabled="!sourceAcademicYearId"
+          <Button
+            variant="ghost"
+            size="sm"
+            class="text-muted-foreground"
+            @click="isChoosingYears = true"
+          >
+            Ubah
+          </Button>
+        </div>
+
+        <div
+          v-else
+          class="space-y-3 rounded-lg border bg-muted/30 px-4 py-3"
+        >
+          <div class="flex items-center justify-between gap-3">
+            <p class="text-xs text-muted-foreground">
+              Biasanya tidak perlu diubah. Gunakan ini bila kenaikan kelas tahun
+              sebelumnya terlewat.
+            </p>
+            <Button
+              variant="ghost"
+              size="sm"
+              class="text-muted-foreground"
+              @click="isChoosingYears = false"
             >
-              <SelectTrigger class="bg-background">
-                <SelectValue placeholder="Pilih tahun ajaran tujuan..." />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem
-                  v-for="y in availableTargetYears"
-                  :key="y.id"
-                  :value="y.id"
-                >
-                  <div class="flex items-center gap-2">
-                    <span>{{ y.name }}</span>
-                    <Badge
-                      v-if="y.isActive"
-                      variant="default"
-                      class="text-[10px] px-1.5 py-0"
-                    >
-                      Aktif
-                    </Badge>
-                  </div>
-                </SelectItem>
-              </SelectContent>
-            </Select>
+              Selesai
+            </Button>
+          </div>
+
+          <div
+            class="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] items-end gap-4"
+          >
+            <div class="grid gap-2">
+              <Label>Tahun Ajaran Asal</Label>
+              <Select v-model="sourceAcademicYearId">
+                <SelectTrigger class="bg-background">
+                  <SelectValue placeholder="Pilih tahun ajaran asal..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem
+                    v-for="y in academicYears"
+                    :key="y.id"
+                    :value="y.id"
+                  >
+                    <div class="flex items-center gap-2">
+                      <span>{{ y.name }}</span>
+                      <Badge
+                        v-if="y.isActive"
+                        variant="default"
+                        class="text-[10px] px-1.5 py-0"
+                      >
+                        Aktif
+                      </Badge>
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div class="hidden md:flex items-center justify-center pb-0.5">
+              <ArrowRight class="size-4 text-muted-foreground" />
+            </div>
+
+            <div class="grid gap-2">
+              <Label>Tahun Ajaran Tujuan</Label>
+              <Select
+                v-model="targetAcademicYearId"
+                :disabled="!sourceAcademicYearId"
+              >
+                <SelectTrigger class="bg-background">
+                  <SelectValue placeholder="Pilih tahun ajaran tujuan..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem
+                    v-for="y in availableTargetYears"
+                    :key="y.id"
+                    :value="y.id"
+                  >
+                    <div class="flex items-center gap-2">
+                      <span>{{ y.name }}</span>
+                      <Badge
+                        v-if="y.isActive"
+                        variant="default"
+                        class="text-[10px] px-1.5 py-0"
+                      >
+                        Aktif
+                      </Badge>
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </div>
 
@@ -317,83 +365,61 @@ onMounted(() => {
           </div>
         </div>
 
-        <!-- 2 DataTables — always visible, empty until year is selected & loaded -->
-        <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start">
-          <!-- Left Panel: Siswa Asal & Keputusan -->
-          <Card class="rounded-xl shadow-xs py-0 gap-0">
-            <CardContent class="p-5">
-              <PromotionStudentTable
-                :recommendations="promotionRecommendations"
-                :is-loading="isLoadingRecommendations"
-                @update:decisions="onDecisionsUpdate"
-                @update:filter-class="onFilterClassChange"
-              />
-            </CardContent>
-          </Card>
+        <!-- DataTable -->
+        <PromotionStudentTable
+          :recommendations="promotionRecommendations"
+          :is-loading="isLoadingRecommendations"
+          @update:decisions="onDecisionsUpdate"
+        />
+      </div>
 
-          <!-- Right Panel: Kelas Tujuan & Preview -->
-          <Card class="rounded-xl shadow-xs py-0 gap-0">
-            <CardContent class="p-5">
-              <PromotionPreviewTable
-                :decisions="studentDecisions"
-                :recommendations="promotionRecommendations"
-                :is-loading="isLoadingRecommendations"
-                :active-class="selectedClass"
-              />
-            </CardContent>
-          </Card>
-        </div>
-
-        <!-- Bottom Actions / Execution Status -->
-        <div
-          v-if="
-            promotionRecommendations.length > 0 && !isLoadingRecommendations
-          "
-          class="flex flex-col sm:flex-row items-center justify-between gap-4 rounded-xl border bg-card p-4 shadow-xs"
-        >
-          <div class="flex items-center gap-4 text-xs">
-            <div class="flex items-center gap-1.5">
-              <div class="size-2.5 rounded-full bg-green-500" />
-              <span class="text-muted-foreground">
-                Naik Kelas:
-                <strong class="text-foreground">{{
-                  summaryStats.approved
-                }}</strong>
-              </span>
-            </div>
-            <div class="flex items-center gap-1.5">
-              <div class="size-2.5 rounded-full bg-amber-500" />
-              <span class="text-muted-foreground">
-                Tinggal Kelas:
-                <strong class="text-foreground">{{
-                  summaryStats.declined
-                }}</strong>
-              </span>
-            </div>
-            <div class="text-muted-foreground">
-              Total:
-              <strong class="text-foreground">{{ summaryStats.total }}</strong>
-              Siswa
-            </div>
+      <!-- Card Footer: Execution Status & Action -->
+      <div
+        v-if="promotionRecommendations.length > 0 && !isLoadingRecommendations"
+        class="flex flex-col sm:flex-row items-center justify-between gap-4 border-t px-6 py-4"
+      >
+        <div class="flex items-center gap-4 text-xs">
+          <div class="flex items-center gap-1.5">
+            <div class="size-2.5 rounded-full bg-green-500" />
+            <span class="text-muted-foreground">
+              Naik Kelas:
+              <strong class="text-foreground">{{
+                summaryStats.approved
+              }}</strong>
+            </span>
           </div>
-
-          <Button
-            size="default"
-            class="w-full sm:w-auto font-semibold px-6"
-            :disabled="!canExecute"
-            @click="openConfirmDialog"
-          >
-            <Loader2
-              v-if="isPromoting"
-              class="size-4 mr-2 animate-spin"
-            />
-            <CheckCircle2
-              v-else
-              class="size-4 mr-2"
-            />
-            Eksekusi Kenaikan Kelas ({{ summaryStats.total }})
-          </Button>
+          <div class="flex items-center gap-1.5">
+            <div class="size-2.5 rounded-full bg-amber-500" />
+            <span class="text-muted-foreground">
+              Tinggal Kelas:
+              <strong class="text-foreground">{{
+                summaryStats.declined
+              }}</strong>
+            </span>
+          </div>
+          <div class="text-muted-foreground">
+            Total:
+            <strong class="text-foreground">{{ summaryStats.total }}</strong>
+            Siswa
+          </div>
         </div>
+
+        <Button
+          size="default"
+          class="w-full sm:w-auto font-semibold px-6"
+          :disabled="!canExecute"
+          @click="openConfirmDialog"
+        >
+          <Loader2
+            v-if="isPromoting"
+            class="size-4 mr-2 animate-spin"
+          />
+          <CheckCircle2
+            v-else
+            class="size-4 mr-2"
+          />
+          Eksekusi Kenaikan Kelas ({{ summaryStats.total }})
+        </Button>
       </div>
     </Card>
   </div>
