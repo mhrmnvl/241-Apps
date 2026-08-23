@@ -37,10 +37,12 @@ import { join, sep } from 'node:path';
  * 261 → 245 was inventory's reference data — five identical CRUD modules and
  * the metadata call that serves all five at once.
  *
- * 245 → 230 is achievements, scholarships and educational histories, which
+ * 245 → 230 was achievements, scholarships and educational histories, which
  * hang off a profile and share the narrow owner reference it is included by.
+ *
+ * 230 → 226 is the school's own list of leave kinds.
  */
-const UNTYPED_CEILING = 230;
+const UNTYPED_CEILING = 226;
 
 interface Handler {
   controller: string;

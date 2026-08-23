@@ -10,12 +10,13 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { RequirePermissions } from '../../../platform/access-control/permission/decorators/require-permissions.decorator.js';
 import { JwtAuthGuard } from '../../../platform/auth/index.js';
 import type { LeaveTypeEntity } from '../domain/entities/leave.entity.js';
 import { CreateLeaveTypeDto } from '../dto/request/create-leave-type.dto.js';
 import { UpdateLeaveTypeDto } from '../dto/request/update-leave-type.dto.js';
+import { LeaveTypeResponseDto } from '../dto/response/leave-type-response.dto.js';
 import {
   CreateLeaveTypeUseCase,
   DeleteLeaveTypeUseCase,
@@ -42,6 +43,7 @@ export class LeaveTypeController {
 
   @Get()
   @RequirePermissions('leave-types.read')
+  @ApiResponse({ status: 200, type: [LeaveTypeResponseDto] })
   async list(
     @Query('includeInactive') includeInactive?: string,
   ): Promise<LeaveTypeEntity[]> {
@@ -50,6 +52,7 @@ export class LeaveTypeController {
 
   @Post()
   @RequirePermissions('leave-types.create')
+  @ApiResponse({ status: 201, type: LeaveTypeResponseDto })
   async add(@Body() dto: CreateLeaveTypeDto): Promise<LeaveTypeEntity> {
     return this.createType.execute(dto);
   }
@@ -57,6 +60,7 @@ export class LeaveTypeController {
   @Patch(':id')
   @RequirePermissions('leave-types.update')
   @ApiParam({ name: 'id', format: 'uuid' })
+  @ApiResponse({ status: 200, type: LeaveTypeResponseDto })
   async edit(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateLeaveTypeDto,
@@ -67,6 +71,7 @@ export class LeaveTypeController {
   @Delete(':id')
   @RequirePermissions('leave-types.delete')
   @ApiParam({ name: 'id', format: 'uuid' })
+  @ApiResponse({ status: 200, type: LeaveTypeResponseDto })
   async remove(
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<LeaveTypeEntity> {
