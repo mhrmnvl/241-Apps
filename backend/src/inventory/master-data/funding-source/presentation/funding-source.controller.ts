@@ -12,7 +12,12 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../../../platform/auth/index.js';
 import { RequirePermissions } from '../../../../platform/access-control/permission/decorators/require-permissions.decorator.js';
 import { GetFundingSourcesUseCase } from '../use-cases/get-funding-sources.use-case.js';
@@ -21,6 +26,7 @@ import { UpdateFundingSourceUseCase } from '../use-cases/update-funding-source.u
 import { DeleteFundingSourceUseCase } from '../use-cases/delete-funding-source.use-case.js';
 import { CreateFundingSourceDto } from '../dto/request/create-funding-source.dto.js';
 import { UpdateFundingSourceDto } from '../dto/request/update-funding-source.dto.js';
+import { InventoryFundingSourceResponseDto } from '../dto/response/funding-source-response.dto.js';
 
 @ApiTags('Inventory Funding Sources')
 @ApiBearerAuth()
@@ -37,6 +43,7 @@ export class FundingSourceController {
   @Get()
   @RequirePermissions('inventory-master-data.read')
   @ApiOperation({ summary: 'Get funding source list' })
+  @ApiResponse({ status: 200, type: [InventoryFundingSourceResponseDto] })
   async getFundingSources(@Query('search') search?: string) {
     return this.getFundingSourcesUseCase.execute(search);
   }
@@ -44,6 +51,7 @@ export class FundingSourceController {
   @Post()
   @RequirePermissions('inventory-master-data.create')
   @ApiOperation({ summary: 'Create funding source item' })
+  @ApiResponse({ status: 201, type: InventoryFundingSourceResponseDto })
   async createFundingSource(@Body() data: CreateFundingSourceDto) {
     return this.createFundingSourceUseCase.execute(data);
   }
@@ -51,6 +59,7 @@ export class FundingSourceController {
   @Patch(':id')
   @RequirePermissions('inventory-master-data.update')
   @ApiOperation({ summary: 'Update funding source item' })
+  @ApiResponse({ status: 200, type: InventoryFundingSourceResponseDto })
   async updateFundingSource(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() data: UpdateFundingSourceDto,
