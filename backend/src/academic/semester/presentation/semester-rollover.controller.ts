@@ -31,6 +31,7 @@ export class SemesterRolloverController {
   @ApiResponse({
     status: 200,
     description: 'Rollover summary with created/skipped counts',
+    type: RolloverSummaryDto,
   })
   @ApiResponse({ status: 400, description: 'Source and target must differ' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })

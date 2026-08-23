@@ -26,10 +26,15 @@ import { join, sep } from 'node:path';
  * them debt. A ratchet measuring the wrong thing is worse than none — that one
  * could have been satisfied by annotating deletes.
  *
- * 274 → 263 is the gate devices and the presence cards, whose response DTOs
+ * 274 → 263 was the gate devices and the presence cards, whose response DTOs
  * already existed and matched their handlers' return types one for one.
+ *
+ * 263 → 261 is the institution dashboard and the semester rollover. The
+ * dashboard is the first one here to have needed its DTO written: it is
+ * transcribed from what the use case returns, not designed, which is the only
+ * way to add one without quietly changing the contract.
  */
-const UNTYPED_CEILING = 263;
+const UNTYPED_CEILING = 261;
 
 interface Handler {
   controller: string;
