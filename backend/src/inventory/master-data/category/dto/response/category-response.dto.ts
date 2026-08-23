@@ -1,12 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 /**
- * Asset category reference data, as it leaves the server.
+ * An asset category, as it leaves the server.
  *
- * Transcribed from what the repository returns: it selects no columns, so
- * Prisma hands back every scalar the model owns and all of them are on the
- * wire. `deletedAt` is one of them — it is always null, because deleting one of
- * these removes the row rather than marking it.
+ * Transcribed from the Prisma model rather than from `InventoryCategoryEntity`.
+ * The repository selects no columns, so what reaches the client is every scalar
+ * the model owns — and the entity interface is narrower than that, and wrong:
+ * it declares a `deletedAt` this table does not have and omits three fields it
+ * does. A response type copied from it would have described something the
+ * server never sends, which is the defect this whole exercise is about.
  */
 export class InventoryCategoryResponseDto {
   @ApiProperty({ format: 'uuid' }) id!: string;
@@ -16,10 +18,20 @@ export class InventoryCategoryResponseDto {
   @ApiProperty({ example: 'Elektronik' }) name!: string;
 
   @ApiProperty({
-    type: String,
-    format: 'date-time',
+    format: 'uuid',
     nullable: true,
-    description: 'Always null: these are removed outright, not soft-deleted.',
+    description: 'Categories nest; null at the top of a tree.',
   })
-  deletedAt!: Date | null;
+  parentId!: string | null;
+
+  @ApiProperty({
+    type: String,
+    example: '12.50',
+    description:
+      'A string, not a number: the column is `Decimal(5,2)`, and Prisma hands ' +
+      'a Decimal back as its string form so no precision is lost on the way.',
+  })
+  depreciationRatePercent!: string;
+
+  @ApiProperty({ type: String, format: 'date-time' }) createdAt!: Date;
 }

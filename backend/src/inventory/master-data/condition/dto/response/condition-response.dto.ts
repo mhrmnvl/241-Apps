@@ -1,12 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 /**
- * Asset condition reference data, as it leaves the server.
+ * An asset condition, as it leaves the server.
  *
- * Transcribed from what the repository returns: it selects no columns, so
- * Prisma hands back every scalar the model owns and all of them are on the
- * wire. `deletedAt` is one of them — it is always null, because deleting one of
- * these removes the row rather than marking it.
+ * Transcribed from the Prisma model rather than from `InventoryConditionEntity`. The
+ * repository selects no columns, so every scalar the model owns is on the
+ * wire — and the entity interface is narrower than that, and wrong: it
+ * declares a `deletedAt` this table does not have.
  */
 export class InventoryConditionResponseDto {
   @ApiProperty({ format: 'uuid' }) id!: string;
@@ -16,10 +16,10 @@ export class InventoryConditionResponseDto {
   @ApiProperty({ example: 'Baik' }) name!: string;
 
   @ApiProperty({
-    type: String,
-    format: 'date-time',
-    nullable: true,
-    description: 'Always null: these are removed outright, not soft-deleted.',
+    example: true,
+    description: 'Whether an asset in this condition may still be lent out.',
   })
-  deletedAt!: Date | null;
+  isUsable!: boolean;
+
+  @ApiProperty({ type: String, format: 'date-time' }) createdAt!: Date;
 }

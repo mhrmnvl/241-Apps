@@ -1,12 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { InventoryStatusKey } from '@prisma/client';
 
 /**
- * Asset status reference data, as it leaves the server.
+ * An asset status, as it leaves the server.
  *
- * Transcribed from what the repository returns: it selects no columns, so
- * Prisma hands back every scalar the model owns and all of them are on the
- * wire. `deletedAt` is one of them — it is always null, because deleting one of
- * these removes the row rather than marking it.
+ * Transcribed from the Prisma model rather than from `InventoryStatusEntity`. The
+ * repository selects no columns, so every scalar the model owns is on the
+ * wire — and the entity interface is narrower than that, and wrong: it
+ * declares a `deletedAt` this table does not have.
  */
 export class InventoryStatusResponseDto {
   @ApiProperty({ format: 'uuid' }) id!: string;
@@ -16,19 +17,19 @@ export class InventoryStatusResponseDto {
   @ApiProperty({ example: 'Tersedia' }) name!: string;
 
   @ApiProperty({
-    example: 'AVAILABLE',
-    nullable: true,
-    description:
-      'Set on the rows the workflow reasons about, so renaming one in the ' +
-      'interface cannot change what the code does with it.',
+    example: true,
+    description: 'Whether an asset in this status may be borrowed or returned.',
   })
-  systemKey!: string | null;
+  allowTransactions!: boolean;
 
   @ApiProperty({
-    type: String,
-    format: 'date-time',
+    enum: InventoryStatusKey,
     nullable: true,
-    description: 'Always null: these are removed outright, not soft-deleted.',
+    description:
+      'Set only on the statuses the workflow reasons about, so renaming one ' +
+      'in the interface cannot change what the code does with it.',
   })
-  deletedAt!: Date | null;
+  systemKey!: InventoryStatusKey | null;
+
+  @ApiProperty({ type: String, format: 'date-time' }) createdAt!: Date;
 }

@@ -1,12 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 /**
- * Asset location reference data, as it leaves the server.
+ * An asset location, as it leaves the server.
  *
- * Transcribed from what the repository returns: it selects no columns, so
- * Prisma hands back every scalar the model owns and all of them are on the
- * wire. `deletedAt` is one of them — it is always null, because deleting one of
- * these removes the row rather than marking it.
+ * Transcribed from the Prisma model rather than from `InventoryLocationEntity`. The
+ * repository selects no columns, so every scalar the model owns is on the
+ * wire — and the entity interface is narrower than that, and wrong: it
+ * declares a `deletedAt` this table does not have.
  */
 export class InventoryLocationResponseDto {
   @ApiProperty({ format: 'uuid' }) id!: string;
@@ -15,11 +15,14 @@ export class InventoryLocationResponseDto {
 
   @ApiProperty({ example: 'Laboratorium 1' }) name!: string;
 
-  @ApiProperty({
-    type: String,
-    format: 'date-time',
-    nullable: true,
-    description: 'Always null: these are removed outright, not soft-deleted.',
-  })
-  deletedAt!: Date | null;
+  @ApiProperty({ example: 'Gedung A', nullable: true })
+  building!: string | null;
+
+  @ApiProperty({ example: 'R-08', nullable: true }) room!: string | null;
+
+  @ApiProperty({ example: 'Rak 3', nullable: true }) rack!: string | null;
+
+  @ApiProperty({ nullable: true }) description!: string | null;
+
+  @ApiProperty({ type: String, format: 'date-time' }) createdAt!: Date;
 }
