@@ -11,13 +11,19 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 
 import { JwtAuthGuard } from '../../../auth/index.js';
 
 import { CreateEducationalHistoryDto } from '../dto/request/create-educational-history.dto.js';
 import { EducationalHistoryQueryDto } from '../dto/request/educational-history-query.dto.js';
 import { UpdateEducationalHistoryDto } from '../dto/request/update-educational-history.dto.js';
+import { EducationalHistoryResponseDto } from '../dto/response/educational-history-response.dto.js';
 import { CreateEducationalHistoryUseCase } from '../use-cases/create-educational-history.use-case.js';
 import { DeleteEducationalHistoryUseCase } from '../use-cases/delete-educational-history.use-case.js';
 import { GetEducationalHistoriesUseCase } from '../use-cases/get-educational-histories.use-case.js';
@@ -40,6 +46,7 @@ export class EducationalHistoryController {
   @Post()
   @RequirePermissions('educational-histories.create')
   @ApiOperation({ summary: 'Create a new educational history entry' })
+  @ApiResponse({ status: 201, type: EducationalHistoryResponseDto })
   create(@Body() dto: CreateEducationalHistoryDto) {
     return this.createService.execute(dto);
   }
@@ -49,6 +56,7 @@ export class EducationalHistoryController {
   @ApiOperation({
     summary: 'Get all educational histories (filter by userId, level)',
   })
+  @ApiResponse({ status: 200, type: [EducationalHistoryResponseDto] })
   findAll(@Query() query: EducationalHistoryQueryDto) {
     return this.getListService.execute(query);
   }
@@ -56,6 +64,7 @@ export class EducationalHistoryController {
   @Get(':id')
   @RequirePermissions('educational-histories.read')
   @ApiOperation({ summary: 'Get educational history by ID' })
+  @ApiResponse({ status: 200, type: EducationalHistoryResponseDto })
   findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.getByIdService.execute(id);
   }
@@ -63,6 +72,7 @@ export class EducationalHistoryController {
   @Patch(':id')
   @RequirePermissions('educational-histories.update')
   @ApiOperation({ summary: 'Update educational history' })
+  @ApiResponse({ status: 200, type: EducationalHistoryResponseDto })
   update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateEducationalHistoryDto,
@@ -73,6 +83,7 @@ export class EducationalHistoryController {
   @Delete(':id')
   @RequirePermissions('educational-histories.delete')
   @ApiOperation({ summary: 'Delete educational history (soft delete)' })
+  @ApiResponse({ status: 200, type: EducationalHistoryResponseDto })
   remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.deleteService.execute(id);
   }

@@ -34,10 +34,13 @@ import { join, sep } from 'node:path';
  * transcribed from what the use case returns, not designed, which is the only
  * way to add one without quietly changing the contract.
  *
- * 261 → 245 is inventory's reference data — five identical CRUD modules and
+ * 261 → 245 was inventory's reference data — five identical CRUD modules and
  * the metadata call that serves all five at once.
+ *
+ * 245 → 230 is achievements, scholarships and educational histories, which
+ * hang off a profile and share the narrow owner reference it is included by.
  */
-const UNTYPED_CEILING = 245;
+const UNTYPED_CEILING = 230;
 
 interface Handler {
   controller: string;
