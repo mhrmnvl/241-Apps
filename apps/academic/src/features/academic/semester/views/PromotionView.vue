@@ -25,7 +25,6 @@ import {
 import { Badge } from '@/ui/badge'
 import { Button } from '@/ui/button'
 import { Card, CardHeader, CardTitle } from '@/ui/card'
-import { Label } from '@/ui/label'
 import {
   Select,
   SelectContent,
@@ -36,7 +35,6 @@ import {
 import {
   AlertCircle,
   ArrowRight,
-  CalendarRange,
   Check,
   CheckCircle2,
   GraduationCap,
@@ -364,56 +362,53 @@ onMounted(async () => {
 <template>
   <div class="p-4 md:p-6 lg:p-8">
     <Card
-      class="overflow-hidden rounded-2xl shadow-sm shadow-black/5 ring-1 ring-black/4 py-0 gap-0"
+      class="overflow-hidden rounded-2xl shadow-sm shadow-black/5 ring-1 ring-black/4"
     >
       <!-- Main Card Header -->
-      <CardHeader class="border-b px-6 py-5">
+      <CardHeader
+        class="flex flex-row items-center justify-between border-b px-6 py-5"
+      >
         <CardTitle class="text-2xl font-bold tracking-tight">
           Kenaikan Kelas
         </CardTitle>
       </CardHeader>
 
       <!-- Main Card Body -->
-      <div class="px-6 pb-6 pt-8 space-y-4">
+      <div class="p-6 space-y-4">
         <!-- Stated, not asked. The pair is derived; the selects are the way
              back for a school that ran a year late. -->
         <div
           v-if="!isChoosingYears"
           class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border bg-muted/20 px-4 py-3"
         >
-          <div class="flex items-center gap-3">
-            <div
-              class="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary shrink-0"
+          <div
+            class="flex flex-wrap items-center justify-center sm:justify-start gap-2 text-xs"
+          >
+            <span class="text-muted-foreground font-medium"
+              >Siklus Kenaikan:</span
             >
-              <CalendarRange class="size-4" />
-            </div>
-            <div class="flex flex-wrap items-center gap-2 text-xs">
-              <span class="text-muted-foreground font-medium"
-                >Siklus Kenaikan:</span
-              >
-              <span class="font-semibold text-foreground">
-                {{ derived.source?.name ?? 'Tahun Aktif' }}
-              </span>
-              <ArrowRight class="size-3.5 text-muted-foreground shrink-0" />
-              <span
-                v-if="derived.target"
-                class="font-semibold text-foreground"
-              >
-                {{ derived.target.name }}
-              </span>
-              <span
-                v-else
-                class="font-medium text-destructive"
-              >
-                Tahun ajaran target belum dibuat
-              </span>
-            </div>
+            <span class="font-semibold text-foreground">
+              {{ derived.source?.name ?? 'Tahun Aktif' }}
+            </span>
+            <ArrowRight class="size-3.5 text-muted-foreground shrink-0" />
+            <span
+              v-if="derived.target"
+              class="font-semibold text-foreground"
+            >
+              {{ derived.target.name }}
+            </span>
+            <span
+              v-else
+              class="font-medium text-destructive"
+            >
+              Tahun ajaran target belum dibuat
+            </span>
           </div>
 
           <Button
             variant="outline"
             size="sm"
-            class="h-8 text-xs font-medium shrink-0 self-start sm:self-auto"
+            class="h-8 text-xs font-medium shrink-0 self-center sm:self-auto"
             @click="isChoosingYears = true"
           >
             <Pencil class="size-3.5 mr-1.5 text-muted-foreground" />
@@ -423,41 +418,18 @@ onMounted(async () => {
 
         <div
           v-else
-          class="rounded-xl border bg-muted/20 p-4 space-y-3.5"
+          class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border bg-muted/20 px-4 py-3 sm:py-2.5"
         >
-          <div class="flex items-center justify-between gap-3 border-b pb-3">
-            <div class="flex items-center gap-2.5">
-              <div
-                class="flex size-7 items-center justify-center rounded-md bg-primary/10 text-primary shrink-0"
-              >
-                <CalendarRange class="size-3.5" />
-              </div>
-              <h4 class="text-xs font-semibold text-foreground">
-                Pengaturan Tahun Ajaran Kenaikan Kelas
-              </h4>
-            </div>
-
-            <Button
-              variant="secondary"
-              size="sm"
-              class="h-7 text-xs font-medium px-3 shrink-0"
-              @click="isChoosingYears = false"
-            >
-              <Check class="size-3.5 mr-1" />
-              Selesai
-            </Button>
-          </div>
-
           <div
-            class="grid grid-cols-1 sm:grid-cols-[1fr_auto_1fr] items-end justify-center gap-2.5 max-w-[360px] mx-auto pt-1"
+            class="flex flex-col sm:flex-row sm:items-center items-center gap-2 sm:gap-2.5"
           >
-            <div class="space-y-1.5">
-              <Label class="text-xs font-medium text-muted-foreground">
-                Tahun Ajaran Asal
-              </Label>
+            <span class="text-xs font-medium text-muted-foreground shrink-0"
+              >Siklus Kenaikan:</span
+            >
+            <div class="flex items-center gap-2 sm:gap-2.5">
               <Select v-model="sourceAcademicYearId">
-                <SelectTrigger class="w-full h-9 text-xs bg-background">
-                  <SelectValue placeholder="Pilih tahun ajaran asal..." />
+                <SelectTrigger class="h-8 w-36 sm:w-40 text-xs bg-background">
+                  <SelectValue placeholder="Tahun Asal" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem
@@ -470,24 +442,15 @@ onMounted(async () => {
                   </SelectItem>
                 </SelectContent>
               </Select>
-            </div>
 
-            <div
-              class="hidden sm:flex h-9 items-center justify-center px-1 text-muted-foreground"
-            >
-              <ArrowRight class="size-4" />
-            </div>
+              <ArrowRight class="size-3.5 text-muted-foreground shrink-0" />
 
-            <div class="space-y-1.5">
-              <Label class="text-xs font-medium text-muted-foreground">
-                Tahun Ajaran Tujuan
-              </Label>
               <Select
                 v-model="targetAcademicYearId"
                 :disabled="!sourceAcademicYearId"
               >
-                <SelectTrigger class="w-full h-9 text-xs bg-background">
-                  <SelectValue placeholder="Pilih tahun ajaran tujuan..." />
+                <SelectTrigger class="h-8 w-36 sm:w-40 text-xs bg-background">
+                  <SelectValue placeholder="Tahun Tujuan" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem
@@ -502,6 +465,16 @@ onMounted(async () => {
               </Select>
             </div>
           </div>
+
+          <Button
+            variant="secondary"
+            size="sm"
+            class="h-8 text-xs font-medium px-3 shrink-0 self-center sm:self-auto"
+            @click="isChoosingYears = false"
+          >
+            <Check class="size-3.5 mr-1" />
+            Selesai
+          </Button>
         </div>
 
         <!-- Nowhere to put them: the year ahead is missing the classes they
@@ -553,10 +526,10 @@ onMounted(async () => {
             <span class="text-blue-800/80 dark:text-blue-300/80 ml-1">
               Kelulusan mereka dicatat terpisah lewat menu
               <RouterLink
-                to="/student/alumni"
+                to="/academic/graduation"
                 class="font-semibold underline underline-offset-2 hover:text-blue-950 dark:hover:text-blue-100"
               >
-                Kelulusan &amp; Alumni </RouterLink
+                Kelulusan</RouterLink
               >.
             </span>
           </div>
@@ -570,56 +543,53 @@ onMounted(async () => {
           @update:decisions="onDecisionsUpdate"
           @update:filter-class="selectedClass = $event"
         />
-      </div>
 
-      <!-- Card Footer: Execution Status & Action -->
-      <div
-        v-if="promotionRecommendations.length > 0 && !isLoadingRecommendations"
-        class="flex flex-col sm:flex-row items-center justify-between gap-4 border-t px-6 py-4"
-      >
-        <div class="flex items-center gap-4 text-xs">
-          <div class="flex items-center gap-1.5">
-            <div class="size-2.5 rounded-full bg-green-500" />
-            <span class="text-muted-foreground">
-              Naik Kelas:
-              <strong class="text-foreground">{{
-                summaryStats.approved
-              }}</strong>
-            </span>
-          </div>
-          <div class="flex items-center gap-1.5">
-            <div class="size-2.5 rounded-full bg-amber-500" />
-            <span class="text-muted-foreground">
-              Tinggal Kelas:
-              <strong class="text-foreground">{{
-                summaryStats.declined
-              }}</strong>
-            </span>
-          </div>
-          <div class="text-muted-foreground">
-            Total:
-            <strong class="text-foreground">{{ summaryStats.total }}</strong>
-            Siswa
-          </div>
-        </div>
-
-        <Button
-          size="default"
-          class="w-full sm:w-auto font-semibold px-6"
-          :disabled="!canExecute"
-          @click="openConfirmDialog"
+        <!-- Card Footer: Execution Status & Action -->
+        <div
+          v-if="
+            promotionRecommendations.length > 0 && !isLoadingRecommendations
+          "
+          class="-mx-6 -mb-6 mt-6 flex flex-col sm:flex-row items-center justify-between gap-4 border-t px-6 py-4"
         >
-          <Loader2
-            v-if="isPromoting"
-            class="size-4 mr-2 animate-spin"
-          />
-          <CheckCircle2
-            v-else
-            class="size-4 mr-2"
-          />
-          Naikkan
-          <template v-if="selectedClass">{{ selectedClass }}</template>
-        </Button>
+          <div class="flex items-center gap-4 text-xs">
+            <div class="flex items-center gap-1.5">
+              <div class="size-2.5 rounded-full bg-green-500" />
+              <span class="text-muted-foreground">
+                Naik Kelas:
+                <strong class="text-foreground">{{
+                  summaryStats.approved
+                }}</strong>
+              </span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <div class="size-2.5 rounded-full bg-amber-500" />
+              <span class="text-muted-foreground">
+                Tinggal Kelas:
+                <strong class="text-foreground">{{
+                  summaryStats.declined
+                }}</strong>
+              </span>
+            </div>
+            <div class="text-muted-foreground">
+              Total:
+              <strong class="text-foreground">{{ summaryStats.total }}</strong>
+              Siswa
+            </div>
+          </div>
+
+          <Button
+            size="default"
+            class="w-full sm:w-auto font-semibold px-6"
+            :disabled="!canExecute"
+            @click="openConfirmDialog"
+          >
+            <Loader2
+              v-if="isPromoting"
+              class="size-4 mr-2 animate-spin"
+            />
+            Proses Kenaikan
+          </Button>
+        </div>
       </div>
     </Card>
   </div>
@@ -630,11 +600,7 @@ onMounted(async () => {
       class="sm:max-w-3xl flex flex-col gap-0 p-0 overflow-hidden max-h-[90svh]"
     >
       <DialogHeader class="px-6 py-4 border-b shrink-0">
-        <DialogTitle>
-          Naikkan
-          <template v-if="selectedClass">kelas {{ selectedClass }}</template>
-          <template v-else>kelas ini</template>?
-        </DialogTitle>
+        <DialogTitle>Konfirmasi Kenaikan Kelas</DialogTitle>
       </DialogHeader>
 
       <div class="overflow-y-auto px-6 py-4 space-y-4">
@@ -674,9 +640,9 @@ onMounted(async () => {
 
           <!-- Student preview table -->
           <div
-            class="overflow-hidden rounded-xl border bg-background shadow-xs"
+            class="overflow-x-auto rounded-xl border bg-background shadow-xs"
           >
-            <Table>
+            <Table class="min-w-[600px]">
               <TableHeader class="bg-muted/50">
                 <TableRow>
                   <TableHead class="text-center text-xs font-semibold w-[100px]"
