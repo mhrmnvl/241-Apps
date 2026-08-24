@@ -77,16 +77,14 @@ export class UpdateDailyPresenceUseCase {
     const updated = await this.dailyPresence.correct(id, this.toInput(dto));
 
     await this.corrections.recordMany(
-      changes.map(
-        (change): RecordCorrectionInput => ({
-          dailyPresenceId: id,
-          field: change.field,
-          previousValue: change.previous,
-          newValue: change.next,
-          reason: dto.reason,
-          actorId,
-        }),
-      ),
+      changes.map((change): RecordCorrectionInput => ({
+        dailyPresenceId: id,
+        field: change.field,
+        previousValue: change.previous,
+        newValue: change.next,
+        reason: dto.reason,
+        actorId,
+      })),
     );
 
     await this.audit.record('presence-record.correct', id, actorId, {

@@ -1,10 +1,5 @@
 export type EnrollmentStatus =
-  | 'ACTIVE'
-  | 'PROMOTED'
-  | 'REPEATED'
-  | 'TRANSFERRED'
-  | 'DROPPED'
-  | 'GRADUATED'
+  'ACTIVE' | 'PROMOTED' | 'REPEATED' | 'TRANSFERRED' | 'DROPPED' | 'GRADUATED'
 
 export interface ClassroomEnrollment {
   id: string

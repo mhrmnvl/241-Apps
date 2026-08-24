@@ -85,8 +85,8 @@ export function useCalendarFormPage() {
       const s = values.startDate ?? ''
       const e = values.endDate ?? ''
       return {
-        start: s ? parseDate(s.split('T')[0]!) : undefined,
-        end: e ? parseDate(e.split('T')[0]!) : undefined,
+        start: s ? parseDate(s.split('T')[0]) : undefined,
+        end: e ? parseDate(e.split('T')[0]) : undefined,
       }
     },
     set(val: DateRange) {
@@ -176,9 +176,7 @@ export function useCalendarFormPage() {
       // boundary because `history.state` is `any` — the cast belongs here,
       // once, rather than spreading unchecked access through the function.
       const navigationState = history.state as
-        | { eventData?: CalendarEventData }
-        | null
-        | undefined
+        { eventData?: CalendarEventData } | null | undefined
       const state = navigationState?.eventData
       if (state) {
         eventData.value = state

@@ -34,11 +34,7 @@ export interface AttendanceSchedule {
 }
 
 export type AttendanceStatus =
-  | 'PRESENT'
-  | 'SICK'
-  | 'EXCUSED'
-  | 'ABSENT'
-  | 'LATE'
+  'PRESENT' | 'SICK' | 'EXCUSED' | 'ABSENT' | 'LATE'
 
 export interface Attendance {
   id: string

@@ -228,7 +228,7 @@ export const classroomEnrollmentService = {
   ) => {
     if (enrollmentIds.length === 1) {
       return classroomEnrollmentService.transferStudent(
-        enrollmentIds[0]!,
+        enrollmentIds[0],
         targetClassroomId,
         note,
       )

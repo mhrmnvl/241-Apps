@@ -66,7 +66,7 @@ const handleSaveRole = async (
   formError.value = null
   try {
     if (isEditing.value && roleId.value) {
-      await rolesApi.updateRole(roleId.value, payload as UpdateRolePayload)
+      await rolesApi.updateRole(roleId.value, payload)
       toast.success('Berhasil memperbarui data role')
     } else {
       await rolesApi.createRole(payload as CreateRolePayload)

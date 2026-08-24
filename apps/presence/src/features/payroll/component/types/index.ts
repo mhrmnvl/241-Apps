@@ -1,8 +1,5 @@
 export type SalaryComponentType =
-  | 'BASE'
-  | 'ALLOWANCE'
-  | 'ATTENDANCE_DRIVEN'
-  | 'DEDUCTION'
+  'BASE' | 'ALLOWANCE' | 'ATTENDANCE_DRIVEN' | 'DEDUCTION'
 
 export type AttendanceDriver =
   | 'PRESENT_DAYS'

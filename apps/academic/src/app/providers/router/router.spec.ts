@@ -51,7 +51,7 @@ describe('academic route tree', () => {
   it('renders shell routes through the layout without changing their URL', () => {
     const first = studentRoutes[0]
     expect(first).toBeDefined()
-    const resolved = buildRouter([...studentRoutes]).resolve(first!.path)
+    const resolved = buildRouter([...studentRoutes]).resolve(first.path)
     expect(resolved.matched).toHaveLength(2)
     expect(resolved.matched[0]?.components?.default).toBe(Layout)
   })
