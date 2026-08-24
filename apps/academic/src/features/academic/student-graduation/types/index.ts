@@ -61,6 +61,20 @@ export interface StudentGraduationColumnActions {
   canDelete?: boolean
 }
 
+/**
+ * A year the school already decided to hold this student, and why.
+ *
+ * A hold does not take anyone off the candidate list — it is a decision to
+ * revisit, not a permanent state — so this is how the screen tells a student
+ * who was held last year from one nobody has looked at yet.
+ */
+export interface GraduationPreviousHold {
+  academicYearId: string
+  academicYearName: string
+  reason: string
+  decidedAt: string
+}
+
 /** A student the bulk screen may graduate: final grade, still enrolled. */
 export interface GraduationCandidate {
   studentId: string
@@ -69,6 +83,7 @@ export interface GraduationCandidate {
   classroomId: string
   classroomName: string
   gradeName: string
+  previousHold?: GraduationPreviousHold
 }
 
 /** The year the server chose, reported so the screen shows it. */
@@ -88,12 +103,33 @@ export interface GraduationCandidateList {
 export interface BulkGraduationPayload {
   graduationDate?: string
   students: { studentId: string; certificateNo?: string; note?: string }[]
+  /**
+   * Students the school decided not to graduate, with the reason.
+   *
+   * Sent with the graduations rather than after them: both halves are one
+   * decision about one class, and the server writes them in one transaction.
+   */
+  held?: { studentId: string; reason: string }[]
 }
 
 export interface BulkGraduationResult {
   graduated: number
   /** Already held a record — a re-run is safe and says so. */
   skipped: number
+  /** Recorded as held back. A rerun rewrites the reason rather than stacking. */
+  held: number
+}
+
+/** A recorded decision not to graduate a student. */
+export interface GraduationHold {
+  id: string
+  studentId: string
+  studentName: string
+  nis: string
+  academicYearId: string
+  academicYearName: string
+  reason: string
+  decidedAt: string
 }
 
 export interface GraduationStudentDecision {

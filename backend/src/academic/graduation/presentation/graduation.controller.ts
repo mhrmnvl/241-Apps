@@ -29,9 +29,12 @@ import { BulkGraduationDto } from '../dto/request/bulk-graduation.dto.js';
 import {
   BulkGraduationResultDto,
   GraduationCandidateListDto,
+  GraduationHoldDto,
 } from '../dto/response/graduation-candidate.dto.js';
 import { GetGraduationCandidatesUseCase } from '../use-cases/get-graduation-candidates.use-case.js';
 import { BulkGraduateStudentsUseCase } from '../use-cases/bulk-graduate-students.use-case.js';
+import { GetGraduationHoldsUseCase } from '../use-cases/get-graduation-holds.use-case.js';
+import { GraduationHoldQueryDto } from '../dto/request/graduation-hold-query.dto.js';
 import { StudentGraduationQueryDto } from '../dto/request/student-graduation-query.dto.js';
 import { UpdateStudentGraduationDto } from '../dto/request/update-student-graduation.dto.js';
 import { CreateStudentGraduationUseCase } from '../use-cases/create-student-graduation.use-case.js';
@@ -53,6 +56,7 @@ export class GraduationController {
     private readonly deleteUC: DeleteStudentGraduationUseCase,
     private readonly getCandidatesUC: GetGraduationCandidatesUseCase,
     private readonly bulkUC: BulkGraduateStudentsUseCase,
+    private readonly getHoldsUC: GetGraduationHoldsUseCase,
   ) {}
 
   /**
@@ -67,6 +71,26 @@ export class GraduationController {
   @ApiResponse({ status: 200, type: GraduationCandidateListDto })
   async findCandidates(): Promise<GraduationCandidateListDto> {
     return this.getCandidatesUC.execute();
+  }
+
+  /**
+   * Declared before `:id` for the same reason as `candidates`.
+   *
+   * Behind `graduations.read` rather than a permission of its own: a hold is
+   * half of the graduation decision, and a school that can see who finished
+   * can see who did not. Inventing a second permission would mean a role that
+   * reads the screen and cannot read half of what it shows.
+   */
+  @Get('holds')
+  @RequirePermissions('graduations.read')
+  @ApiOperation({
+    summary: 'Students held back from graduating, newest decision first',
+  })
+  @ApiResponse({ status: 200, type: [GraduationHoldDto] })
+  async findHolds(
+    @Query() query: GraduationHoldQueryDto,
+  ): Promise<GraduationHoldDto[]> {
+    return this.getHoldsUC.execute(query.academicYearId);
   }
 
   @Post('bulk')

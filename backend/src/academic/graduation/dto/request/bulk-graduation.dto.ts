@@ -31,6 +31,26 @@ export class BulkGraduationStudentDto {
   note?: string;
 }
 
+/**
+ * A student the school decided not to graduate, and why.
+ *
+ * The reason is required here and nowhere else in this payload, because a hold
+ * with no reason is a hold nobody can answer for next year — which is the
+ * whole point of recording it.
+ */
+export class BulkGraduationHeldStudentDto {
+  @ApiProperty({ format: 'uuid' })
+  @IsUUID()
+  @IsNotEmpty()
+  studentId: string;
+
+  @ApiProperty({ example: 'Nilai belum lengkap' })
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(1000)
+  reason: string;
+}
+
 export class BulkGraduationDto {
   /** One date for the whole cohort; a certificate number is still per student. */
   @ApiPropertyOptional({ example: '2026-06-15' })
@@ -49,4 +69,19 @@ export class BulkGraduationDto {
   @ValidateNested({ each: true })
   @Type(() => BulkGraduationStudentDto)
   students: BulkGraduationStudentDto[];
+
+  /**
+   * Recorded alongside the graduations, in the same transaction.
+   *
+   * Optional and allowed to be empty: a year where everyone finishes is the
+   * ordinary case, and requiring an empty array would make the common run
+   * carry ceremony for the rare one.
+   */
+  @ApiPropertyOptional({ type: [BulkGraduationHeldStudentDto] })
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(1000)
+  @ValidateNested({ each: true })
+  @Type(() => BulkGraduationHeldStudentDto)
+  held?: BulkGraduationHeldStudentDto[];
 }

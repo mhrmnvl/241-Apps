@@ -496,6 +496,16 @@ function toggleAllVisible() {
                 >
                   Alasan: {{ getDecision(candidate.studentId)?.declineReason }}
                 </div>
+                <!-- A hold does not take anyone off this list, so a student
+                     held last year arrives again looking like anyone else.
+                     Whoever is deciding now needs to know that. -->
+                <div
+                  v-if="candidate.previousHold"
+                  class="text-[11px] text-amber-600 dark:text-amber-400 mt-0.5"
+                >
+                  Ditahan {{ candidate.previousHold.academicYearName }}:
+                  {{ candidate.previousHold.reason }}
+                </div>
               </TableCell>
               <TableCell class="text-center py-2.5 text-xs text-foreground">
                 {{ candidate.classroomName }}

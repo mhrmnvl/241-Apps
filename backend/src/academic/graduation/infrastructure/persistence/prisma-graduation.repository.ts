@@ -16,6 +16,7 @@ import type {
   BulkGraduationInput,
   BulkGraduationResult,
   GraduationCandidateList,
+  GraduationHoldRecord,
 } from '../../domain/interfaces/graduation-repository.interface.js';
 import { graduateStudentSteps } from './prisma-graduation.steps.js';
 import { PaginatedResult } from '../../../../shared/domain/interfaces/repository.interface.js';
@@ -221,18 +222,90 @@ export class PrismaGraduationRepository extends IGraduationRepository {
       orderBy: { student: { nis: 'asc' } },
     });
 
+    // A hold does not take anyone off this list — it is a decision to revisit,
+    // not a permanent state — so a student held before arrives here again. The
+    // screen needs to be able to say which, and why, rather than presenting
+    // them as though nothing had been decided.
+    const holds = await this.prisma.studentGraduationHold.findMany({
+      where: { studentId: { in: enrollments.map((e) => e.studentId) } },
+      select: {
+        studentId: true,
+        academicYearId: true,
+        reason: true,
+        decidedAt: true,
+        academicYear: { select: { name: true } },
+      },
+      orderBy: { decidedAt: 'desc' },
+    });
+
+    // Most recent wins: `orderBy` above put it first, and a later hold is the
+    // one that describes where the student stands now.
+    const latestHold = new Map<string, (typeof holds)[number]>();
+    for (const hold of holds) {
+      if (!latestHold.has(hold.studentId)) latestHold.set(hold.studentId, hold);
+    }
+
     return {
       academicYear: term,
       finalGradeName,
-      students: enrollments.map((e) => ({
-        studentId: e.studentId,
-        studentName: e.student.user?.profile?.name ?? '-',
-        nis: e.student.nis,
-        classroomId: e.classroom.id,
-        classroomName: e.classroom.code,
-        gradeName: e.classroom.grade.name,
-      })),
+      students: enrollments.map((e) => {
+        const hold = latestHold.get(e.studentId);
+        return {
+          studentId: e.studentId,
+          studentName: e.student.user?.profile?.name ?? '-',
+          nis: e.student.nis,
+          classroomId: e.classroom.id,
+          classroomName: e.classroom.code,
+          gradeName: e.classroom.grade.name,
+          ...(hold && {
+            previousHold: {
+              academicYearId: hold.academicYearId,
+              academicYearName: hold.academicYear.name,
+              reason: hold.reason,
+              decidedAt: hold.decidedAt,
+            },
+          }),
+        };
+      }),
     };
+  }
+
+  /**
+   * Every hold on record, newest first, optionally for one year.
+   *
+   * Read through the join rather than assembled from two queries: the point of
+   * the record is to be answerable next year, and a name is what makes it so.
+   */
+  async findHolds(academicYearId?: string): Promise<GraduationHoldRecord[]> {
+    const holds = await this.prisma.studentGraduationHold.findMany({
+      where: { ...(academicYearId && { academicYearId }) },
+      select: {
+        id: true,
+        studentId: true,
+        academicYearId: true,
+        reason: true,
+        decidedAt: true,
+        academicYear: { select: { name: true } },
+        student: {
+          select: {
+            nis: true,
+            user: { select: { profile: { select: { name: true } } } },
+          },
+        },
+      },
+      orderBy: [{ decidedAt: 'desc' }, { student: { nis: 'asc' } }],
+    });
+
+    return holds.map((hold) => ({
+      id: hold.id,
+      studentId: hold.studentId,
+      studentName: hold.student.user?.profile?.name ?? '-',
+      nis: hold.student.nis,
+      academicYearId: hold.academicYearId,
+      academicYearName: hold.academicYear.name,
+      reason: hold.reason,
+      decidedAt: hold.decidedAt,
+    }));
   }
 
   /** The year a bulk run files its graduations under. */
@@ -250,7 +323,11 @@ export class PrismaGraduationRepository extends IGraduationRepository {
    */
   async executeBulk(input: BulkGraduationInput): Promise<BulkGraduationResult> {
     return this.prisma.$transaction(async (tx) => {
-      const result: BulkGraduationResult = { graduated: 0, skipped: 0 };
+      const result: BulkGraduationResult = {
+        graduated: 0,
+        skipped: 0,
+        held: 0,
+      };
 
       for (const student of input.students) {
         const existing = await tx.studentGraduation.findFirst({
@@ -274,6 +351,34 @@ export class PrismaGraduationRepository extends IGraduationRepository {
           ...(student.note && { note: student.note }),
         });
         result.graduated++;
+      }
+
+      // Written in the same transaction as the graduations above, because the
+      // two halves are one decision about one class. Split apart, a run
+      // half-succeeds: the graduations land, the holds do not, and the
+      // students nobody graduated look like students nobody looked at.
+      //
+      // Upserted on (student, year), so an operator who reruns the screen after
+      // changing their mind rewrites the reason instead of stacking a second
+      // hold — and a student who is graduated on the rerun keeps the hold that
+      // explains why the first pass did not.
+      for (const hold of input.held ?? []) {
+        await tx.studentGraduationHold.upsert({
+          where: {
+            studentId_academicYearId: {
+              studentId: hold.studentId,
+              academicYearId: input.academicYearId,
+            },
+          },
+          create: {
+            studentId: hold.studentId,
+            academicYearId: input.academicYearId,
+            reason: hold.reason,
+          },
+          update: { reason: hold.reason, decidedAt: new Date() },
+          select: { id: true },
+        });
+        result.held++;
       }
 
       return result;

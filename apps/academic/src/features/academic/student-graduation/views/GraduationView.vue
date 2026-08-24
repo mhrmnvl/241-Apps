@@ -102,15 +102,19 @@ const previewRows = computed(() => {
       classroomName: c.classroomName,
       approved: d?.approved !== false,
       declineReason: d?.declineReason,
+      previousHold: c.previousHold,
     }
   })
 })
 
+// A class where nobody finishes is a real thing to process — the marks are
+// not in, everyone is held, and that decision is worth recording. So the gate
+// is "some decision was made", not "somebody is graduating".
 const canGraduate = computed(
   () =>
     can('graduations.create') &&
     selectedClass.value !== '' &&
-    summaryStats.value.approved > 0 &&
+    summaryStats.value.total > 0 &&
     !isGraduating.value,
 )
 
@@ -132,21 +136,32 @@ onMounted(load)
 async function handleConfirmGraduate() {
   if (!graduationDate.value) return
 
-  // `note` is a note on the graduation record, so only a graduating student
-  // can carry one — and this list is exactly the students who are not
-  // declined, whose `declineReason` is therefore always undefined. Sending it
-  // set a field to nothing for everybody and read as though the reason for
-  // holding a student back travelled with the run. It does not: a held student
-  // is left out of the payload, and their reason stays on the screen.
+  // `note` is a note on the *graduation record*, so only a graduating student
+  // can carry one. A held student's reason travels in `held` instead, which
+  // the server writes to its own table in the same transaction.
   const graduatingStudents = decisions.value
     .filter((d) => d.approved !== false)
     .map((d) => ({ studentId: d.studentId }))
 
-  if (graduatingStudents.length === 0) return
+  // Both halves go together. Sent apart, a run half-succeeds: the graduations
+  // land, the holds do not, and the students nobody graduated look like
+  // students nobody looked at.
+  const heldStudents = decisions.value
+    .filter((d) => d.approved === false)
+    .map((d) => ({
+      studentId: d.studentId,
+      // The reason is optional on screen and required on the wire — a hold
+      // with no reason is a hold nobody can answer for next year, so an
+      // operator who skipped the box still leaves something behind.
+      reason: d.declineReason?.trim() || 'Tidak ada alasan yang dicatat',
+    }))
+
+  if (graduatingStudents.length === 0 && heldStudents.length === 0) return
 
   const result = await bulkGraduate({
     graduationDate: graduationDate.value,
     students: graduatingStudents,
+    ...(heldStudents.length > 0 && { held: heldStudents }),
   })
 
   if (result.success) {

@@ -222,18 +222,18 @@ model ApprovalWorkflow {
 }
 
 model ApprovalStep {
-  id             String   @id @default(uuid()) @db.Uuid
-  workflowId     String   @map("workflow_id") @db.Uuid
-  stepSequence   Int      @map("step_sequence")
+  id               String   @id @default(uuid()) @db.Uuid
+  workflowId       String   @map("workflow_id") @db.Uuid
+  stepSequence     Int      @map("step_sequence")
   /// The *code* of the role that approves this step — 'SARPRAS', 'PRINCIPAL'.
   /// Named `approverRoleId` until 2026-08-15, while holding a code in a
   /// VarChar(50); the name invited a correction to a uuid that would have made
   /// the comparison never match and stopped every approval silently.
-  approverRoleCode String @map("approver_role_code") @db.VarChar(50)
+  approverRoleCode String   @map("approver_role_code") @db.VarChar(50)
   /// False means the step may be skipped, and the previous approver decides
   /// whether to skip it. A mandatory step is always taken.
-  isMandatory      Boolean @default(true) @map("is_mandatory")
-  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
+  isMandatory      Boolean  @default(true) @map("is_mandatory")
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz
 
   workflow ApprovalWorkflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
 

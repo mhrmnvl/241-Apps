@@ -18,10 +18,11 @@ model Student {
   parents                   StudentParent[]
   enrollments               StudentEnrollment[]
   graduations               StudentGraduation[]
-  classroomPresidencies     ClassroomStructure[]  @relation("ClassroomPresident")
-  classroomVicePresidencies ClassroomStructure[]  @relation("ClassroomVicePresident")
-  classroomSecretaryRoles   ClassroomStructure[]  @relation("ClassroomSecretary")
-  classroomTreasurerRoles   ClassroomStructure[]  @relation("ClassroomTreasurer")
+  graduationHolds           StudentGraduationHold[]
+  classroomPresidencies     ClassroomStructure[]    @relation("ClassroomPresident")
+  classroomVicePresidencies ClassroomStructure[]    @relation("ClassroomVicePresident")
+  classroomSecretaryRoles   ClassroomStructure[]    @relation("ClassroomSecretary")
+  classroomTreasurerRoles   ClassroomStructure[]    @relation("ClassroomTreasurer")
   admissionApplication      AdmissionApplication?
 
   user  User   @relation(fields: [userId], references: [id])

@@ -8,24 +8,24 @@ model User {
   updatedAt    DateTime  @updatedAt @map("updated_at")
   deletedAt    DateTime? @map("deleted_at")
 
-  teacher              Teacher?
-  profile              Profile?
-  sessions             AuthSession[]
-  student              Student?
-  userRoles            UserRole[]
-  auditLogs            AuditLog[]
-  uploadedFiles        File[]
-  passwordResetTokens  PasswordResetToken[]
-  admissionApplication AdmissionApplication?
-  updatedAppSettings   AppSetting[]
+  teacher                Teacher?
+  profile                Profile?
+  sessions               AuthSession[]
+  student                Student?
+  userRoles              UserRole[]
+  auditLogs              AuditLog[]
+  uploadedFiles          File[]
+  passwordResetTokens    PasswordResetToken[]
+  admissionApplication   AdmissionApplication?
+  updatedAppSettings     AppSetting[]
   /// Marks this person corrected in a class they supervise but do not teach.
-  correctedStudentScores StudentScore[] @relation("StudentScoreCorrectedBy")
+  correctedStudentScores StudentScore[]        @relation("StudentScoreCorrectedBy")
   // Restrict, not Cascade: a user row backing published portal content cannot be
   // hard-deleted, which is what preserves attribution after deactivation.
-  portalPosts          Post[]                @relation("PortalPostAuthor")
-  portalPages          PortalPage[]          @relation("PortalPageAuthor")
-  portalAgendaEntries  AgendaEntry[]         @relation("PortalAgendaAuthor")
-  portalAlbums         GalleryAlbum[]        @relation("PortalAlbumAuthor")
+  portalPosts            Post[]                @relation("PortalPostAuthor")
+  portalPages            PortalPage[]          @relation("PortalPageAuthor")
+  portalAgendaEntries    AgendaEntry[]         @relation("PortalAgendaAuthor")
+  portalAlbums           GalleryAlbum[]        @relation("PortalAlbumAuthor")
 
   // Presence keys on the user rather than on Student or Teacher — that is what
   // keeps `presence/` free of any dependency on `academic/` (ADR-0007).
