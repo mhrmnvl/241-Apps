@@ -194,19 +194,34 @@ The order is always:
 work -> dev -> deploys to development -> verified there -> PR dev->main -> production
 ```
 
-Two mechanisms hold that line, and neither is a substitute for the other:
+Three mechanisms hold that line, and none is a substitute for the others:
 
 - `.github/workflows/promotion-guard.yml` fails any pull request into `main`
   that does not come from `dev`, or whose exact commit has no successful
   `Deploy to Development` run. It asks the API rather than believing the pull
   request description.
+- **Branch protection on `main` makes that check blocking**, not advisory. Three
+  contexts are required before the merge button works — `Promotion to
+  production`, `Backend · lint, types, tests, build`, and `Frontend · lint,
+  types, tests, build`. `Dependency audit` is deliberately not among them: it
+  reports rather than blocks. Force pushes and deletion of `main` are refused
+  outright.
 - `.husky/pre-push` refuses a direct push to `main`.
 
-Both are advisory in the strict sense: branch protection would make the check
-blocking, and it needs GitHub Pro on a private repository, which this account
-does not have. So a red check is loud and recorded, not enforced, and
-`--no-verify` walks past the hook. Treat the rule as the thing that matters and
-the mechanisms as reminders.
+This repository is **public**, which is why protection is available at all —
+GitHub gives it free on public repositories and charges for it on private ones.
+An older version of this file said the opposite, and described the guard as
+advisory; it is not, and has not been since protection was turned on.
+
+Two gaps remain, and both are the same shape — the person who owns the
+repository can still step over the line:
+
+- `enforce_admins` is off, so an administrator's merge is not held to the
+  required checks.
+- `--no-verify` walks past the pre-push hook, as it does past any hook.
+
+So treat the rule as the thing that matters and the mechanisms as what makes
+breaking it deliberate rather than accidental.
 
 See `docs/environments.md` for what deploys where and `docs/vps-setup.md` for
 what a box needs.
