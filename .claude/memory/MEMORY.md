@@ -1,0 +1,3 @@
+- [Validate against external sources](validate-against-external-sources.md) — repo docs alone are not authoritative; check code, skills, and the web
+- [Ship via dev after green CI](ship-via-dev-after-green-ci.md) — commit, PR to dev, wait for CI, merge, clean up
+- [Public repo is deliberate](public-repo-is-deliberate.md) — 241-Apps is public on purpose; Actions is free, branch protection already on
