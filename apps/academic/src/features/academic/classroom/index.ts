@@ -11,6 +11,8 @@ export { useClassroomForm } from './composables/useClassroomForm'
 export { useClassroomSupervisor } from './composables/useClassroomSupervisor'
 export { useClassroomEnrollment } from './composables/useClassroomEnrollment'
 export { useClassroomStructure } from './composables/useClassroomStructure'
+export { default as EnrollmentHistoryTab } from './components/EnrollmentHistoryTab.vue'
+export { enrollmentOutcome } from './logic/enrollmentOutcome'
 export { classroomRoutes } from './routes'
 export type {
   AcademicYear,

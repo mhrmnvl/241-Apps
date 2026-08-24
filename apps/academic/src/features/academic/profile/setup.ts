@@ -33,6 +33,8 @@ import {
 
 import { EditStudentIdentityDialog } from '@/features/academic/student'
 
+import { EnrollmentHistoryTab } from '@/features/academic/classroom'
+
 import { useSocialMedia } from '@/features/academic/social-media'
 
 import {
@@ -93,6 +95,20 @@ export function setupProfileFeature() {
           editingEduItem.value = null
           showEditEdu.value = true
         },
+      },
+      // Beside Riwayat Pendidikan, which is about the schools before this one.
+      // This is about the years inside it — and it is where the reason a
+      // student was held back finally becomes readable. The promotion run has
+      // been writing it to the closed enrolment's note all along, and so have
+      // transfers and drops; nothing has ever shown one.
+      {
+        value: 'enrollment-history',
+        label: 'Riwayat Kelas',
+        component: EnrollmentHistoryTab,
+        show: (roles: string[]) => roles.includes('STUDENT'),
+        props: (ctx: ExtraTabPropsContext) => ({
+          studentId: ctx.rawProfile?.student?.id,
+        }),
       },
       {
         value: 'scholarship',
