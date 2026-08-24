@@ -55,3 +55,10 @@ export type {
   PopoverState,
   PopoverStates,
 } from './structure-form'
+
+/** What copying one year's classrooms into another did. */
+export interface CopyClassroomsResult {
+  created: number
+  /** Already there, matched on grade and code. */
+  skipped: number
+}

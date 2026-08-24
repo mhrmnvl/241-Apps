@@ -10,6 +10,39 @@ import { toast } from 'vue-sonner'
 import { useReferenceList } from '@/features/platform/reference-data'
 
 export const classroomService = {
+  /**
+   * Gives a new academic year the classrooms the old one had.
+   *
+   * Not a store operation: nothing on the promotion screen holds a classroom
+   * list, and the thing that changes afterwards is what the server recommends.
+   * So this reports and returns, and the caller refetches.
+   */
+  copyClassroomsToAcademicYear: async (
+    sourceAcademicYearId: string,
+    targetAcademicYearId: string,
+  ) => {
+    try {
+      const res = await classroomApi.copyClassroomsToAcademicYear({
+        sourceAcademicYearId,
+        targetAcademicYearId,
+      })
+      const result = res.data.data
+      const created = result?.created ?? 0
+      const skipped = result?.skipped ?? 0
+
+      toast.success(
+        skipped > 0
+          ? `${created} kelas disalin, ${skipped} sudah ada sebelumnya.`
+          : `${created} kelas disalin.`,
+      )
+      return { success: true, result }
+    } catch (error: unknown) {
+      const msg = getIndonesianErrorMessage(error, 'Gagal menyalin kelas.')
+      toast.error(msg)
+      return { success: false, error: msg }
+    }
+  },
+
   fetchClassrooms: async (params?: ClassroomQueryParams) => {
     const store = useClassroomStore()
     store.loading = true

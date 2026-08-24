@@ -8,6 +8,8 @@ import { IClassroomSupervisorRepository } from './domain/interfaces/classroom-su
 import { PrismaClassroomRepository } from './infrastructure/persistence/prisma-classroom.repository.js';
 import { PrismaClassroomStructureRepository } from './infrastructure/persistence/prisma-classroom-structure.repository.js';
 import { PrismaClassroomSupervisorRepository } from './infrastructure/persistence/prisma-classroom-supervisor.repository.js';
+import { AcademicYearModule } from '../academic-year/academic-year.module.js';
+import { CopyClassroomsToAcademicYearUseCase } from './use-cases/copy-classrooms-to-academic-year.use-case.js';
 import { CreateClassroomUseCase } from './use-cases/create-classroom.use-case.js';
 import { DeleteClassroomUseCase } from './use-cases/delete-classroom.use-case.js';
 import { GetClassroomByIdUseCase } from './use-cases/get-classroom-by-id.use-case.js';
@@ -24,6 +26,9 @@ import { GetClassroomSupervisorsUseCase } from './use-cases/get-classroom-superv
 import { UpdateClassroomSupervisorUseCase } from './use-cases/update-classroom-supervisor.use-case.js';
 
 @Module({
+  // For `IAcademicYearRepository`: copying classrooms names both years in its
+  // refusals, and a uuid says nothing to whoever has to fix it.
+  imports: [AcademicYearModule],
   controllers: [
     ClassroomController,
     ClassroomStructureController,
@@ -39,6 +44,7 @@ import { UpdateClassroomSupervisorUseCase } from './use-cases/update-classroom-s
       provide: IClassroomSupervisorRepository,
       useClass: PrismaClassroomSupervisorRepository,
     },
+    CopyClassroomsToAcademicYearUseCase,
     CreateClassroomUseCase,
     DeleteClassroomUseCase,
     GetClassroomByIdUseCase,
