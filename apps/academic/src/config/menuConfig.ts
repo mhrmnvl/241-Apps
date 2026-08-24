@@ -93,6 +93,14 @@ export const menuSections: MenuSection[] = [
             url: '/academic/semester/promotion',
             requiredPermission: 'semesters.create',
           },
+          {
+            // Beside Kenaikan Kelas: the two halves of moving a school into
+            // its next year. One sends everybody up, the other sends the top
+            // year out. Alumni — the record of who left — sits under Siswa.
+            title: 'Kelulusan',
+            url: '/academic/graduation',
+            requiredPermission: 'graduations.read',
+          },
         ],
       },
       {
@@ -229,9 +237,9 @@ export const menuSections: MenuSection[] = [
         requiredPermission: 'students.read',
       },
       {
-        // Named for the act, not just its result. This is where a student is
-        // graduated now — promotion no longer does it as a side effect.
-        title: 'Kelulusan & Alumni',
+        // The record of who has left. Graduating them is Kelulusan, under
+        // Periode Akademik, next to the promotion it happens alongside.
+        title: 'Alumni',
         url: '/student/alumni',
         icon: GraduationCap,
         requiredPermission: 'graduations.read',
