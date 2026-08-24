@@ -8,15 +8,20 @@ import type {
 import { PromotionResultDialog, PromotionStudentTable } from '../components'
 import { RouterLink, useRouter } from 'vue-router'
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/ui/alert-dialog'
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/ui/dialog'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/ui/table'
 import { Badge } from '@/ui/badge'
 import { Button } from '@/ui/button'
 import { Card, CardHeader, CardTitle } from '@/ui/card'
@@ -31,14 +36,19 @@ import {
 import {
   AlertCircle,
   ArrowRight,
+  CalendarRange,
+  Check,
   CheckCircle2,
   GraduationCap,
   Loader2,
+  Pencil,
+  XCircle,
 } from 'lucide-vue-next'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useSemesterList } from '../composables/useSemesterList'
 import { useSemesterPromotion } from '../composables/useSemesterPromotion'
 import { derivePromotionYears } from '../logic/derivePromotionYears'
+import { selectableTargetYears } from '../logic/selectableTargetYears'
 import { classroomApi } from '@/features/academic/classroom'
 import { classroomService } from '@/features/academic/classroom'
 import type { Classroom } from '@/features/academic/classroom'
@@ -186,8 +196,14 @@ const showConfirmDialog = ref(false)
 const showResultDialog = ref(false)
 const promotionResult = ref<PromotionResult | null>(null)
 
+/**
+ * Forward only. The override is for a school that ran a year late, not for
+ * sending a cohort back into a year it has already finished — and the server
+ * would accept that, because a backward promotion still passes its "grade goes
+ * up" check. `selectableTargetYears` holds the rule and its spec.
+ */
 const availableTargetYears = computed(() =>
-  academicYears.value.filter((y) => y.id !== sourceAcademicYearId.value),
+  selectableTargetYears(academicYears.value, sourceAcademicYearId.value),
 )
 
 const canExecute = computed(() => {
@@ -222,6 +238,29 @@ const summaryStats = computed(() => {
     declined,
     total: decisionsForSelectedClass.value.length,
   }
+})
+
+/** Rows shown in the confirm-dialog preview. */
+const previewRows = computed(() => {
+  return decisionsForSelectedClass.value.map((d) => {
+    const rec = promotionRecommendations.value.find(
+      (r) => r.studentId === d.studentId,
+    )
+    const targetName =
+      targetClassrooms.value.find((c) => c.id === d.targetClassroomId)?.code ??
+      rec?.targetClassroomName ??
+      '-'
+    return {
+      studentId: d.studentId,
+      studentName: rec?.studentName ?? '-',
+      nis: rec?.nis ?? '-',
+      sourceClass: rec?.sourceClassroomName ?? '-',
+      targetClass:
+        targetName !== '-' ? targetName : (rec?.sourceClassroomName ?? '-'),
+      approved: d.approved,
+      declineReason: d.declineReason,
+    }
+  })
 })
 
 function buildPayload(): PromotionPayload {
@@ -280,8 +319,15 @@ function onDecisionsUpdate(decisions: PromotionStudentDecision[]) {
   studentDecisions.value = decisions
 }
 
+// Changing the source can strand the target behind it — picking 2027/2028 as
+// the source while 2026/2027 is selected as the target leaves a backward pair
+// that the list no longer offers but the state still holds. Clearing anything
+// the list would not offer keeps the two in step.
 watch(sourceAcademicYearId, () => {
-  if (sourceAcademicYearId.value === targetAcademicYearId.value) {
+  const stillOffered = availableTargetYears.value.some(
+    (year) => year.id === targetAcademicYearId.value,
+  )
+  if (!stillOffered) {
     targetAcademicYearId.value = ''
   }
 })
@@ -333,64 +379,84 @@ onMounted(async () => {
              back for a school that ran a year late. -->
         <div
           v-if="!isChoosingYears"
-          class="flex flex-wrap items-center justify-between gap-3 rounded-lg border bg-muted/30 px-4 py-3"
+          class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border bg-muted/20 px-4 py-3"
         >
-          <div class="flex flex-wrap items-center gap-2 text-sm">
-            <span class="text-muted-foreground">Menaikkan siswa dari</span>
-            <span class="font-semibold">
-              {{ derived.source?.name ?? 'tahun ajaran aktif' }}
-            </span>
-            <ArrowRight class="size-4 text-muted-foreground" />
-            <span
-              v-if="derived.target"
-              class="font-semibold"
+          <div class="flex items-center gap-3">
+            <div
+              class="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary shrink-0"
             >
-              {{ derived.target.name }}
-            </span>
-            <span
-              v-else
-              class="font-medium text-destructive"
-            >
-              tahun ajaran berikutnya belum dibuat
-            </span>
+              <CalendarRange class="size-4" />
+            </div>
+            <div class="flex flex-wrap items-center gap-2 text-xs">
+              <span class="text-muted-foreground font-medium"
+                >Siklus Kenaikan:</span
+              >
+              <span class="font-semibold text-foreground">
+                {{ derived.source?.name ?? 'Tahun Aktif' }}
+              </span>
+              <ArrowRight class="size-3.5 text-muted-foreground shrink-0" />
+              <span
+                v-if="derived.target"
+                class="font-semibold text-foreground"
+              >
+                {{ derived.target.name }}
+              </span>
+              <span
+                v-else
+                class="font-medium text-destructive"
+              >
+                Tahun ajaran target belum dibuat
+              </span>
+            </div>
           </div>
 
           <Button
-            variant="ghost"
+            variant="outline"
             size="sm"
-            class="text-muted-foreground"
+            class="h-8 text-xs font-medium shrink-0 self-start sm:self-auto"
             @click="isChoosingYears = true"
           >
-            Ubah
+            <Pencil class="size-3.5 mr-1.5 text-muted-foreground" />
+            Ubah Tahun
           </Button>
         </div>
 
         <div
           v-else
-          class="space-y-3 rounded-lg border bg-muted/30 px-4 py-3"
+          class="rounded-xl border bg-muted/20 p-4 space-y-3.5"
         >
-          <div class="flex items-center justify-between gap-3">
-            <p class="text-xs text-muted-foreground">
-              Biasanya tidak perlu diubah. Gunakan ini bila kenaikan kelas tahun
-              sebelumnya terlewat.
-            </p>
+          <div class="flex items-center justify-between gap-3 border-b pb-3">
+            <div class="flex items-center gap-2.5">
+              <div
+                class="flex size-7 items-center justify-center rounded-md bg-primary/10 text-primary shrink-0"
+              >
+                <CalendarRange class="size-3.5" />
+              </div>
+              <h4 class="text-xs font-semibold text-foreground">
+                Pengaturan Tahun Ajaran Kenaikan Kelas
+              </h4>
+            </div>
+
             <Button
-              variant="ghost"
+              variant="secondary"
               size="sm"
-              class="text-muted-foreground"
+              class="h-7 text-xs font-medium px-3 shrink-0"
               @click="isChoosingYears = false"
             >
+              <Check class="size-3.5 mr-1" />
               Selesai
             </Button>
           </div>
 
           <div
-            class="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] items-end gap-4"
+            class="grid grid-cols-1 sm:grid-cols-[1fr_auto_1fr] items-end justify-center gap-2.5 max-w-[360px] mx-auto pt-1"
           >
-            <div class="grid gap-2">
-              <Label>Tahun Ajaran Asal</Label>
+            <div class="space-y-1.5">
+              <Label class="text-xs font-medium text-muted-foreground">
+                Tahun Ajaran Asal
+              </Label>
               <Select v-model="sourceAcademicYearId">
-                <SelectTrigger class="bg-background">
+                <SelectTrigger class="w-full h-9 text-xs bg-background">
                   <SelectValue placeholder="Pilih tahun ajaran asal..." />
                 </SelectTrigger>
                 <SelectContent>
@@ -398,33 +464,29 @@ onMounted(async () => {
                     v-for="y in academicYears"
                     :key="y.id"
                     :value="y.id"
+                    class="text-xs"
                   >
-                    <div class="flex items-center gap-2">
-                      <span>{{ y.name }}</span>
-                      <Badge
-                        v-if="y.isActive"
-                        variant="default"
-                        class="text-[10px] px-1.5 py-0"
-                      >
-                        Aktif
-                      </Badge>
-                    </div>
+                    {{ y.name }}
                   </SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
-            <div class="hidden md:flex items-center justify-center pb-0.5">
-              <ArrowRight class="size-4 text-muted-foreground" />
+            <div
+              class="hidden sm:flex h-9 items-center justify-center px-1 text-muted-foreground"
+            >
+              <ArrowRight class="size-4" />
             </div>
 
-            <div class="grid gap-2">
-              <Label>Tahun Ajaran Tujuan</Label>
+            <div class="space-y-1.5">
+              <Label class="text-xs font-medium text-muted-foreground">
+                Tahun Ajaran Tujuan
+              </Label>
               <Select
                 v-model="targetAcademicYearId"
                 :disabled="!sourceAcademicYearId"
               >
-                <SelectTrigger class="bg-background">
+                <SelectTrigger class="w-full h-9 text-xs bg-background">
                   <SelectValue placeholder="Pilih tahun ajaran tujuan..." />
                 </SelectTrigger>
                 <SelectContent>
@@ -432,17 +494,9 @@ onMounted(async () => {
                     v-for="y in availableTargetYears"
                     :key="y.id"
                     :value="y.id"
+                    class="text-xs"
                   >
-                    <div class="flex items-center gap-2">
-                      <span>{{ y.name }}</span>
-                      <Badge
-                        v-if="y.isActive"
-                        variant="default"
-                        class="text-[10px] px-1.5 py-0"
-                      >
-                        Aktif
-                      </Badge>
-                    </div>
+                    {{ y.name }}
                   </SelectItem>
                 </SelectContent>
               </Select>
@@ -571,40 +625,140 @@ onMounted(async () => {
   </div>
 
   <!-- Confirmation Dialog -->
-  <AlertDialog v-model:open="showConfirmDialog">
-    <AlertDialogContent>
-      <AlertDialogHeader>
-        <AlertDialogTitle>
+  <Dialog v-model:open="showConfirmDialog">
+    <DialogContent
+      class="sm:max-w-3xl flex flex-col gap-0 p-0 overflow-hidden max-h-[90svh]"
+    >
+      <DialogHeader class="px-6 py-4 border-b shrink-0">
+        <DialogTitle>
           Naikkan
           <template v-if="selectedClass">kelas {{ selectedClass }}</template>
           <template v-else>kelas ini</template>?
-        </AlertDialogTitle>
-        <AlertDialogDescription>
-          <span
-            v-if="isPreviewing"
-            class="flex items-center gap-2"
+        </DialogTitle>
+      </DialogHeader>
+
+      <div class="overflow-y-auto px-6 py-4 space-y-4">
+        <!-- Loading state -->
+        <div
+          v-if="isPreviewing"
+          class="flex items-center gap-2 text-sm text-muted-foreground"
+        >
+          <Loader2 class="size-4 animate-spin" />
+          Memeriksa data yang akan diproses...
+        </div>
+
+        <template v-else>
+          <!-- Summary chips -->
+          <div class="flex flex-wrap gap-2">
+            <div
+              class="inline-flex items-center gap-1.5 rounded-full bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 px-3 py-1 text-xs font-medium text-green-700 dark:text-green-400"
+            >
+              <CheckCircle2 class="size-3.5" />
+              {{ promotionPreview?.promotedCount ?? summaryStats.approved }}
+              Naik Kelas
+            </div>
+            <div
+              class="inline-flex items-center gap-1.5 rounded-full bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 px-3 py-1 text-xs font-medium text-amber-700 dark:text-amber-400"
+            >
+              <XCircle class="size-3.5" />
+              {{ promotionPreview?.repeatedCount ?? summaryStats.declined }}
+              Tinggal Kelas
+            </div>
+            <div
+              class="inline-flex items-center gap-1.5 rounded-full bg-muted border px-3 py-1 text-xs font-medium text-muted-foreground"
+            >
+              Total:
+              {{ promotionPreview?.totalStudents ?? summaryStats.total }} Siswa
+            </div>
+          </div>
+
+          <!-- Student preview table -->
+          <div
+            class="overflow-hidden rounded-xl border bg-background shadow-xs"
           >
-            <Loader2 class="size-4 animate-spin" />
-            Memeriksa data yang akan diproses...
-          </span>
-          <template v-else>
-            Memproses
-            <strong>
-              {{ promotionPreview?.totalStudents ?? summaryStats.total }} siswa
-            </strong>
-            dari kelas <strong>{{ selectedClass }}</strong> saja ({{
-              promotionPreview?.promotedCount ?? summaryStats.approved
-            }}
-            naik kelas,
-            {{ promotionPreview?.repeatedCount ?? summaryStats.declined }}
-            tinggal kelas). Kelas lain tidak tersentuh — pilih kelas berikutnya
-            di filter untuk memprosesnya.
-          </template>
-        </AlertDialogDescription>
-      </AlertDialogHeader>
-      <AlertDialogFooter>
-        <AlertDialogCancel :disabled="isPromoting"> Batal </AlertDialogCancel>
-        <AlertDialogAction
+            <Table>
+              <TableHeader class="bg-muted/50">
+                <TableRow>
+                  <TableHead class="text-center text-xs font-semibold w-[100px]"
+                    >NIS</TableHead
+                  >
+                  <TableHead class="text-xs font-semibold"
+                    >Nama Siswa</TableHead
+                  >
+                  <TableHead class="text-center text-xs font-semibold w-[90px]"
+                    >Kelas Asal</TableHead
+                  >
+                  <TableHead class="text-center text-xs font-semibold w-[170px]"
+                    >Kelas Tujuan</TableHead
+                  >
+                  <TableHead class="text-center text-xs font-semibold w-[110px]"
+                    >Status</TableHead
+                  >
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                <TableRow
+                  v-for="row in previewRows"
+                  :key="row.studentId"
+                  :class="{ 'bg-destructive/5': !row.approved }"
+                  class="transition-colors"
+                >
+                  <TableCell class="text-center py-2 text-xs text-foreground">
+                    {{ row.nis }}
+                  </TableCell>
+                  <TableCell class="py-2">
+                    <div class="font-medium text-xs text-foreground">
+                      {{ row.studentName }}
+                    </div>
+                    <div
+                      v-if="row.declineReason"
+                      class="text-[11px] text-destructive italic mt-0.5"
+                    >
+                      Alasan: {{ row.declineReason }}
+                    </div>
+                  </TableCell>
+                  <TableCell class="text-center py-2">
+                    <Badge
+                      variant="outline"
+                      class="text-[11px] font-medium bg-background"
+                    >
+                      {{ row.sourceClass }}
+                    </Badge>
+                  </TableCell>
+                  <TableCell class="text-center py-2">
+                    <Badge
+                      :variant="row.approved ? 'secondary' : 'destructive'"
+                      class="text-[11px] font-medium"
+                    >
+                      {{ row.targetClass }}
+                    </Badge>
+                  </TableCell>
+                  <TableCell class="text-center py-2">
+                    <Badge
+                      :variant="row.approved ? 'default' : 'destructive'"
+                      class="text-[11px] shadow-none"
+                    >
+                      {{ row.approved ? 'Naik Kelas' : 'Tinggal Kelas' }}
+                    </Badge>
+                  </TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </div>
+        </template>
+      </div>
+
+      <DialogFooter
+        class="px-6 py-4 border-t shrink-0 flex flex-row gap-2 justify-end"
+      >
+        <Button
+          variant="outline"
+          :disabled="isPromoting"
+          @click="showConfirmDialog = false"
+        >
+          Batal
+        </Button>
+        <Button
           :disabled="isPromoting || isPreviewing"
           @click="handleExecute"
         >
@@ -613,10 +767,10 @@ onMounted(async () => {
             class="size-4 mr-2 animate-spin"
           />
           Ya, Proses Sekarang
-        </AlertDialogAction>
-      </AlertDialogFooter>
-    </AlertDialogContent>
-  </AlertDialog>
+        </Button>
+      </DialogFooter>
+    </DialogContent>
+  </Dialog>
 
   <!-- Result Dialog -->
   <PromotionResultDialog

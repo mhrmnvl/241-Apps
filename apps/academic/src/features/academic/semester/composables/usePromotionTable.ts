@@ -154,24 +154,32 @@ export function usePromotionTable(
     showDeclineDialog.value = true
   }
 
+  /**
+   * Marks one student as staying where they are, and forgets where they were
+   * going.
+   *
+   * Clearing the destination is the point. It used to be carried over from the
+   * recommendation — the class a grade up — and the server refuses that:
+   * "REPEAT expects target level VII, but got VIII". It validates every student
+   * before it writes any of them, so one declined student took the whole class
+   * down with them, with a message about levels that named nobody.
+   *
+   * A repeating student still enrols somewhere, in the grade they were already
+   * in, and which section that is belongs to the school rather than to a guess
+   * here. `canExecute` requires a destination, so the row's picker asks for one
+   * and the button stays disabled until it has been given.
+   */
   function confirmDecline() {
     if (!declineTarget.value || !declineReason.value.trim()) return
 
     const d = decisions.value.get(declineTarget.value)
-    const rec = recommendations.value.find(
-      (r) => r.studentId === declineTarget.value,
-    )
-    if (!d || !rec) return
-
-    const sameLevel = recommendations.value.find(
-      (r) => r.sourceClassroomName === rec.sourceClassroomName,
-    )
+    if (!d) return
 
     decisions.value.set(declineTarget.value, {
       ...d,
       approved: false,
       action: 'REPEAT',
-      targetClassroomId: sameLevel?.targetClassroomId,
+      targetClassroomId: undefined,
       declineReason: declineReason.value.trim(),
     })
 
@@ -228,24 +236,33 @@ export function usePromotionTable(
     showDeclineDialog.value = true
   }
 
+  /**
+   * The same for everyone ticked, and with the same destination cleared: these
+   * rows kept a grade-up target too, which is the shape of defect that fails
+   * the batch rather than the student.
+   *
+   * The selection survives, unlike everywhere else. Everyone here now needs a
+   * destination chosen, and "Pindahkan N ke..." is how that is done for a
+   * group — clearing the ticks would mean re-ticking the same rows to answer
+   * the question this action just raised.
+   */
   function confirmBulkDecline() {
     if (!declineReason.value.trim()) return
 
     for (const studentId of selectedIds.value) {
       const d = decisions.value.get(studentId)
-      const rec = recommendations.value.find((r) => r.studentId === studentId)
-      if (!d || !rec) continue
+      if (!d) continue
 
       decisions.value.set(studentId, {
         ...d,
         approved: false,
         action: 'REPEAT',
+        targetClassroomId: undefined,
         declineReason: declineReason.value.trim(),
       })
     }
 
     showDeclineDialog.value = false
-    selectedIds.value.clear()
     emitDecisions()
   }
 
