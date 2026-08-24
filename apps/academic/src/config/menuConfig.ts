@@ -144,12 +144,6 @@ export const menuSections: MenuSection[] = [
           },
         ],
       },
-      {
-        title: 'Pengaturan Akademik',
-        url: '/academic/setting',
-        icon: Settings,
-        requiredPermission: 'academic-settings.read',
-      },
     ],
   },
 
@@ -339,6 +333,19 @@ export const menuSections: MenuSection[] = [
             title: 'Tipe Semester',
             url: '/setting/semester-type',
             requiredPermission: 'semesters.read',
+          },
+          // "Mingguan" because these repeat every week; the holidays in
+          // Kalender Pendidikan are dates. Two entries called "Hari Libur"
+          // would leave nothing to tell a person which one to open.
+          {
+            title: 'Hari Libur Mingguan',
+            url: '/setting/weekly-holiday',
+            requiredPermission: 'academic-settings.read',
+          },
+          {
+            title: 'Nilai Ketuntasan Minimum (KKM)',
+            url: '/setting/passing-score',
+            requiredPermission: 'academic-settings.read',
           },
           {
             title: 'Tipe Jam',

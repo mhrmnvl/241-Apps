@@ -1,0 +1,31 @@
+{
+  "enabledMcpjsonServers": [
+    "shadcnVue"
+  ],
+  "enableAllProjectMcpServers": true,
+  "skillOverrides": {
+    "codebase-design": "off",
+    "domain-modeling": "off",
+    "find-skills": "off",
+    "frontend-design": "off",
+    "grill-me": "off",
+    "grill-with-docs": "off",
+    "grilling": "off",
+    "handoff": "off",
+    "setup-matt-pocock-skills": "off",
+    "shadcn-vue": "off",
+    "speckit-checklist": "off",
+    "speckit-clarify": "off",
+    "speckit-converge": "off",
+    "speckit-taskstoissues": "off",
+    "tdd": "off",
+    "to-spec": "off",
+    "to-tickets": "off",
+    "triage": "off",
+    "ubiquitous-language": "off",
+    "vercel-react-best-practices": "off"
+  },
+  "disabledMcpjsonServers": [
+    "shadcnVue"
+  ]
+}
