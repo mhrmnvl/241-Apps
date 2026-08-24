@@ -21,6 +21,10 @@ import {
 import { useRoleGuard } from '@/features/platform/auth'
 import { Copy, Plus } from 'lucide-vue-next'
 import { onMounted, ref, watch } from 'vue'
+import {
+  suggestRollover,
+  type RolloverSuggestion,
+} from '../logic/suggestRollover'
 import { toast } from 'vue-sonner'
 
 const {
@@ -80,6 +84,16 @@ async function handleRollover(payload: RolloverSemesterPayload) {
   }
 }
 
+/**
+ * Offered after activating a term that turns out to be empty.
+ *
+ * Forgetting the rollover does not look like a missed step — it looks like a
+ * broken screen, because every list scoped to the active term comes back
+ * empty. Asking here, at the moment the omission happens, is what stops that
+ * being discovered later.
+ */
+const rolloverSuggestion = ref<RolloverSuggestion | null>(null)
+
 async function handleConfirmAction() {
   if (!confirmAction.value) return
   isProcessing.value = true
@@ -90,9 +104,26 @@ async function handleConfirmAction() {
       : await deactivateSemester(item.id)
   if (result.success) {
     await fetchSemesters()
+    if (type === 'activate') {
+      // Read from the refetched list, not from the row that was clicked: the
+      // counts on that row are as stale as the click.
+      const activated = semesters.value.find((s) => s.id === item.id)
+      rolloverSuggestion.value = suggestRollover(activated, semesters.value)
+    }
   }
   isProcessing.value = false
   confirmAction.value = null
+}
+
+async function acceptRolloverSuggestion() {
+  const suggestion = rolloverSuggestion.value
+  if (!suggestion) return
+
+  rolloverSuggestion.value = null
+  await handleRollover({
+    sourceSemesterId: suggestion.source.id,
+    targetSemesterId: suggestion.target.id,
+  })
 }
 
 watch(isAddModalOpen, (isOpen) => {
@@ -201,6 +232,45 @@ onMounted(() => {
           @click="handleConfirmAction"
         >
           {{ isProcessing ? 'Memproses...' : 'Ya, Lanjutkan' }}
+        </AlertDialogAction>
+      </AlertDialogFooter>
+    </AlertDialogContent>
+  </AlertDialog>
+
+  <!-- Asked where the omission happens. A term activated while empty makes
+       every list scoped to it come back empty, which reads as a broken screen
+       rather than as a step nobody took yet. -->
+  <AlertDialog :open="rolloverSuggestion !== null">
+    <AlertDialogContent>
+      <AlertDialogHeader>
+        <AlertDialogTitle
+          >Salin data dari semester sebelumnya?</AlertDialogTitle
+        >
+        <AlertDialogDescription>
+          Semester yang baru diaktifkan belum punya data sama sekali. Salin
+          kelas, siswa, wali kelas, penugasan mengajar, dan jadwal dari
+          <strong
+            >{{ rolloverSuggestion?.source.academicYear?.name }}
+            {{
+              rolloverSuggestion?.source.type?.name === 'ODD'
+                ? 'Ganjil'
+                : 'Genap'
+            }}</strong
+          >? Tanpa ini, layar yang mengikuti semester aktif akan tampak kosong.
+        </AlertDialogDescription>
+      </AlertDialogHeader>
+      <AlertDialogFooter>
+        <AlertDialogCancel
+          :disabled="isRollingOver"
+          @click="rolloverSuggestion = null"
+        >
+          Nanti Saja
+        </AlertDialogCancel>
+        <AlertDialogAction
+          :disabled="isRollingOver"
+          @click="acceptRolloverSuggestion"
+        >
+          {{ isRollingOver ? 'Menyalin...' : 'Ya, Salin' }}
         </AlertDialogAction>
       </AlertDialogFooter>
     </AlertDialogContent>
