@@ -28,13 +28,7 @@ import {
   TableRow,
 } from '@/ui/table'
 import { Textarea } from '@/ui/textarea'
-import {
-  ArrowRight,
-  CheckCircle2,
-  Filter,
-  Search,
-  XCircle,
-} from 'lucide-vue-next'
+import { CheckCircle2, Filter, Search, XCircle } from 'lucide-vue-next'
 import type {
   PromotionAction,
   PromotionRecommendationItem,
@@ -275,19 +269,20 @@ function getTargetClass(row: PromotionRecommendationItem): string {
                 @update:model-value="toggleSelectAll"
               />
             </TableHead>
-            <TableHead class="text-left font-semibold text-xs">
-              Nama Siswa
+            <TableHead class="text-left font-semibold text-xs w-[110px]">
+              NIS
             </TableHead>
-            <TableHead class="text-center font-semibold text-xs">
-              Kelas Asal
-            </TableHead>
-            <TableHead class="text-center font-semibold text-xs">
+            <TableHead class="text-left font-semibold text-xs">Nama</TableHead>
+            <TableHead class="text-center font-semibold text-xs w-[70px]">
               Nilai
             </TableHead>
-            <TableHead class="text-center font-semibold text-xs">
+            <TableHead class="text-center font-semibold text-xs w-[120px]">
               Rekomendasi
             </TableHead>
-            <TableHead class="text-center font-semibold text-xs">
+            <TableHead class="text-center font-semibold text-xs w-[100px]">
+              Kelas Asal
+            </TableHead>
+            <TableHead class="text-center font-semibold text-xs w-[150px]">
               Kelas Tujuan
             </TableHead>
             <TableHead class="text-center font-semibold text-xs w-[130px]">
@@ -305,12 +300,11 @@ function getTargetClass(row: PromotionRecommendationItem): string {
               <TableCell class="px-3"
                 ><Skeleton class="size-4 rounded"
               /></TableCell>
-              <TableCell class="py-3">
-                <Skeleton class="h-3.5 w-32 mb-1" />
-                <Skeleton class="h-3 w-20" />
-              </TableCell>
-              <TableCell class="text-center py-3"
-                ><Skeleton class="h-5 w-16 mx-auto rounded-full"
+              <TableCell class="py-3"
+                ><Skeleton class="h-3.5 w-20"
+              /></TableCell>
+              <TableCell class="py-3"
+                ><Skeleton class="h-3.5 w-32"
               /></TableCell>
               <TableCell class="text-center py-3"
                 ><Skeleton class="h-3.5 w-8 mx-auto"
@@ -318,13 +312,12 @@ function getTargetClass(row: PromotionRecommendationItem): string {
               <TableCell class="text-center py-3"
                 ><Skeleton class="h-5 w-20 mx-auto rounded-full"
               /></TableCell>
-              <TableCell class="text-center py-3">
-                <div class="flex items-center justify-center gap-1">
-                  <Skeleton class="h-5 w-16 rounded-full" />
-                  <Skeleton class="size-3 rounded" />
-                  <Skeleton class="h-5 w-16 rounded-full" />
-                </div>
-              </TableCell>
+              <TableCell class="text-center py-3"
+                ><Skeleton class="h-5 w-16 mx-auto rounded-full"
+              /></TableCell>
+              <TableCell class="text-center py-3"
+                ><Skeleton class="h-7 w-28 mx-auto rounded-md"
+              /></TableCell>
               <TableCell class="text-center py-3"
                 ><Skeleton class="h-7 w-24 mx-auto rounded-md"
               /></TableCell>
@@ -346,27 +339,23 @@ function getTargetClass(row: PromotionRecommendationItem): string {
                 @update:model-value="toggleSelect(row.studentId)"
               />
             </TableCell>
+            <TableCell
+              class="py-2.5 tabular-nums text-xs text-muted-foreground"
+            >
+              {{ row.nis }}
+            </TableCell>
             <TableCell class="py-2.5">
               <div class="font-semibold text-xs text-foreground">
                 {{ row.studentName }}
               </div>
-              <div class="text-[11px] text-muted-foreground mt-0.5">
-                NIS: {{ row.nis }}
-              </div>
+              <!-- The reason belongs beside the name it is about; a column of
+                   its own would be empty for everyone who is naik kelas. -->
               <div
                 v-if="getDecision(row.studentId)?.declineReason"
                 class="text-[11px] text-destructive mt-0.5 italic"
               >
                 Alasan: {{ getDecision(row.studentId)?.declineReason }}
               </div>
-            </TableCell>
-            <TableCell class="text-center py-2.5">
-              <Badge
-                variant="outline"
-                class="font-medium bg-background text-[11px] px-2 py-0.5"
-              >
-                {{ row.sourceClassroomName }}
-              </Badge>
             </TableCell>
             <TableCell class="text-center py-2.5">
               <span
@@ -398,54 +387,58 @@ function getTargetClass(row: PromotionRecommendationItem): string {
                 }}
               </Badge>
             </TableCell>
-            <!-- Kelas Tujuan -->
             <TableCell class="text-center py-2.5">
-              <div class="flex items-center justify-center gap-1.5 text-xs">
-                <Badge
-                  variant="outline"
-                  class="font-medium bg-background text-[11px] px-2 py-0.5"
-                >
-                  {{ row.sourceClassroomName }}
-                </Badge>
-                <ArrowRight class="size-3 text-muted-foreground shrink-0" />
-                <Badge
-                  :variant="
-                    getDecision(row.studentId)?.approved === false
-                      ? 'destructive'
-                      : 'secondary'
-                  "
-                  class="font-medium text-[11px] px-2 py-0.5"
-                >
-                  {{ getTargetClass(row) }}
-                </Badge>
-
-                <!-- The recommendation pairs a class with its own section a
-                     grade up, which is right for most and wrong for the few a
-                     school moves on purpose. Only levels the server accepts
-                     are offered. -->
-                <Select
-                  v-if="targetOptionsFor(row).length > 0"
-                  :model-value="chosenTargetFor(row)"
-                  @update:model-value="
-                    setTargetClassroom(row.studentId, String($event))
-                  "
-                >
-                  <SelectTrigger class="h-7 w-28 text-[11px]">
-                    <SelectValue placeholder="Pilih kelas" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem
-                      v-for="option in targetOptionsFor(row)"
-                      :key="option.id"
-                      :value="option.id"
-                      class="text-xs"
-                    >
-                      {{ option.code }}
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+              <Badge
+                variant="outline"
+                class="font-medium bg-background text-[11px] px-2 py-0.5"
+              >
+                {{ row.sourceClassroomName }}
+              </Badge>
             </TableCell>
+
+            <!-- Kelas Tujuan is the picker itself, not a picker standing next
+                 to a label that says the same thing: what the recommendation
+                 chose is what the dropdown already shows as selected.
+
+                 The badge is the fallback for when there is nothing to choose
+                 between — a failed fetch, or a level the year ahead has no
+                 classes for — so the destination stays visible and the
+                 promotion still runs. -->
+            <TableCell class="text-center py-2.5">
+              <Select
+                v-if="targetOptionsFor(row).length > 0"
+                :model-value="chosenTargetFor(row)"
+                @update:model-value="
+                  setTargetClassroom(row.studentId, String($event))
+                "
+              >
+                <SelectTrigger class="h-7 w-full text-[11px]">
+                  <SelectValue placeholder="Pilih kelas" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem
+                    v-for="option in targetOptionsFor(row)"
+                    :key="option.id"
+                    :value="option.id"
+                    class="text-xs"
+                  >
+                    {{ option.code }}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+              <Badge
+                v-else
+                :variant="
+                  getDecision(row.studentId)?.approved === false
+                    ? 'destructive'
+                    : 'secondary'
+                "
+                class="font-medium text-[11px] px-2 py-0.5"
+              >
+                {{ getTargetClass(row) }}
+              </Badge>
+            </TableCell>
+
             <TableCell class="text-center py-2.5">
               <div class="flex items-center justify-center gap-1">
                 <Button
@@ -480,7 +473,7 @@ function getTargetClass(row: PromotionRecommendationItem): string {
 
           <TableRow v-if="!isLoading && filteredRows.length === 0">
             <TableCell
-              colspan="7"
+              colspan="8"
               class="p-10 text-center"
             >
               <div
