@@ -40,6 +40,7 @@ import {
   Pencil,
 } from 'lucide-vue-next'
 import { computed, onMounted, ref, watch } from 'vue'
+import { useAcademicSetting } from '@/features/academic/academic-setting'
 import { useSemesterList } from '../composables/useSemesterList'
 import { useSemesterPromotion } from '../composables/useSemesterPromotion'
 import { derivePromotionYears } from '../logic/derivePromotionYears'
@@ -342,8 +343,18 @@ watch(
   },
 )
 
+// The school's KKM, for colouring an average in the table. Read here rather
+// than in the table so there is one request and one answer.
+const { defaultPassingScore, fetch: fetchAcademicSetting } =
+  useAcademicSetting()
+
 onMounted(async () => {
-  await fetchAcademicYears()
+  // Alongside, not before: a KKM that fails to arrive costs the colour on one
+  // column, and holding the whole screen for it would cost the promotion.
+  await Promise.all([
+    fetchAcademicYears(),
+    fetchAcademicSetting().catch(() => undefined),
+  ])
 
   // Only seeds the fields; an operator who has already picked something keeps
   // it, and a run started before the list arrived is not overwritten.
@@ -537,6 +548,7 @@ onMounted(async () => {
           :recommendations="promotionRecommendations"
           :is-loading="isLoadingRecommendations"
           :target-classrooms="targetClassrooms"
+          :passing-score="defaultPassingScore"
           @update:decisions="onDecisionsUpdate"
           @update:filter-class="selectedClass = $event"
         />
@@ -692,13 +704,21 @@ onMounted(async () => {
         <!-- Left side: Summary Stats (paling kiri) -->
         <div class="flex flex-wrap items-center gap-3 text-xs mr-auto">
           <div
+            v-if="
+              (promotionPreview?.promotedCount ?? summaryStats.approved) > 0
+            "
             class="flex items-center gap-1.5 font-medium text-green-600 dark:text-green-400"
           >
             <div class="size-2 rounded-full bg-green-500" />
             {{ promotionPreview?.promotedCount ?? summaryStats.approved }} Naik
             Kelas
           </div>
+          <!-- A count of nothing is not news. The total below still says how
+               many are being processed, so nothing is lost by hiding it. -->
           <div
+            v-if="
+              (promotionPreview?.repeatedCount ?? summaryStats.declined) > 0
+            "
             class="flex items-center gap-1.5 font-medium text-amber-600 dark:text-amber-400"
           >
             <div class="size-2 rounded-full bg-amber-500" />
