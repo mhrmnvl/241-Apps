@@ -64,12 +64,10 @@ function routesOf(controller: (typeof CONTROLLERS)[number]): Route[] {
       const handler = (prototype as Record<string, unknown>)[name];
       if (typeof handler !== 'function') return [];
       const path = Reflect.getMetadata(PATH_METADATA, handler) as
-        | string
-        | undefined;
+        string | undefined;
       if (path === undefined) return [];
       const method = Reflect.getMetadata(METHOD_METADATA, handler) as
-        | RequestMethod
-        | undefined;
+        RequestMethod | undefined;
       return [
         {
           controller: controller.name,

@@ -27,10 +27,7 @@ export interface MediaUsageOwner {
 }
 
 export type MediaUsageOwnerColumn =
-  | 'postId'
-  | 'agendaId'
-  | 'albumId'
-  | 'pageId';
+  'postId' | 'agendaId' | 'albumId' | 'pageId';
 
 export abstract class IMediaUsageRepository {
   /**

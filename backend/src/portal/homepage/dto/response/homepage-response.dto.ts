@@ -12,9 +12,7 @@ import { PostSummaryDto } from '../../../post/dto/response/post-detail.dto.js';
 export type HomepageSectionKind = 'post' | 'agenda' | 'album';
 
 export type HomepageItemDto =
-  | PostSummaryDto
-  | AgendaSummaryDto
-  | AlbumSummaryDto;
+  PostSummaryDto | AgendaSummaryDto | AlbumSummaryDto;
 
 export class HomepageSectionDto {
   @ApiProperty({ example: 'berita' }) key: string;
