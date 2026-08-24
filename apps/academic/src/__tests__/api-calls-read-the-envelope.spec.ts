@@ -85,6 +85,10 @@ export function isEnveloped(generic: string): boolean {
 describe('every API call reads the envelope it is sent', () => {
   let files: { path: string; text: string }[]
 
+  // Reading a few hundred files is legitimately slow, and slower still when
+  // the root `pnpm test` runs six vitest processes against one Windows disk.
+  // The default ten seconds is enough alone and not enough alongside, which is
+  // a sweep that fails for being busy rather than for finding anything.
   beforeAll(async () => {
     const found: { path: string; text: string }[] = []
     for (const dir of SCAN) {
@@ -100,7 +104,7 @@ describe('every API call reads the envelope it is sent', () => {
       }
     }
     files = found
-  })
+  }, 60_000)
 
   it('finds the call sites', () => {
     const total = files.reduce((n, f) => n + apiCallGenerics(f.text).length, 0)

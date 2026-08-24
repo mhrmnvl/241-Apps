@@ -8,7 +8,6 @@ import SchoolLocationMap from './SchoolLocationMap.vue'
 import { Card, CardHeader, CardTitle, CardContent } from '@/ui/card'
 import {
   Building2,
-  Phone,
   MapPin,
   MapPinned,
   Maximize2,
@@ -93,144 +92,125 @@ const hasValidAddress = computed(() => {
       v-else
       class="space-y-6"
     >
-      <!-- Row 1: Identitas & Legalitas | Kontak -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <!-- 1. Identitas Lembaga & Legalitas -->
-        <Card class="rounded-xl shadow-xs py-0 gap-0">
-          <CardHeader
-            class="flex flex-row items-center gap-2.5 border-b px-5 py-3.5 pb-3.5!"
-          >
-            <Building2 class="size-4 text-primary shrink-0" />
-            <CardTitle class="text-sm font-semibold tracking-normal">
-              Identitas & Legalitas
-            </CardTitle>
-          </CardHeader>
+      <!-- Row 1: Identitas & Legalitas + Kontak (single full-width card) -->
+      <Card class="rounded-xl shadow-xs py-0 gap-0">
+        <CardHeader
+          class="flex flex-row items-center gap-2.5 border-b px-5 py-3.5 pb-3.5!"
+        >
+          <Building2 class="size-4 text-primary shrink-0" />
+          <CardTitle class="text-sm font-semibold tracking-normal">
+            Identitas, Legalitas &amp; Kontak
+          </CardTitle>
+        </CardHeader>
 
-          <CardContent class="px-5 pt-3.5 pb-5">
-            <dl class="grid grid-cols-2 gap-x-6 gap-y-4 text-sm">
-              <div>
-                <dt class="text-xs font-medium text-muted-foreground">
-                  Nama Resmi
-                </dt>
-                <dd class="font-semibold text-foreground mt-0.5">
-                  {{ formatValue(schoolUnit.name) }}
-                </dd>
-              </div>
+        <CardContent class="px-5 pt-3.5 pb-5">
+          <dl class="grid grid-cols-2 gap-x-6 gap-y-4 text-sm">
+            <div>
+              <dt class="text-xs font-medium text-muted-foreground">
+                Nama Resmi
+              </dt>
+              <dd class="font-semibold text-foreground mt-0.5">
+                {{ formatValue(schoolUnit.name) }}
+              </dd>
+            </div>
 
-              <div>
-                <dt class="text-xs font-medium text-muted-foreground">
-                  Nama Singkat / Alias
-                </dt>
-                <dd class="font-semibold text-foreground mt-0.5">
-                  {{ formatValue(schoolUnit.surname) }}
-                </dd>
-              </div>
+            <div>
+              <dt class="text-xs font-medium text-muted-foreground">
+                Nama Alias
+              </dt>
+              <dd class="font-semibold text-foreground mt-0.5">
+                {{ formatValue(schoolUnit.surname) }}
+              </dd>
+            </div>
 
-              <div>
-                <dt class="text-xs font-medium text-muted-foreground">NPSN</dt>
-                <dd class="font-semibold text-foreground mt-0.5">
-                  {{ formatValue(schoolUnit.npsn) }}
-                </dd>
-              </div>
+            <div>
+              <dt class="text-xs font-medium text-muted-foreground">
+                Nomor Pokok Sekolah Nasional (NPSN)
+              </dt>
+              <dd class="font-semibold text-foreground mt-0.5">
+                {{ formatValue(schoolUnit.npsn) }}
+              </dd>
+            </div>
 
-              <div>
-                <dt class="text-xs font-medium text-muted-foreground">NSM</dt>
-                <dd class="font-semibold text-foreground mt-0.5">
-                  {{ formatValue(schoolUnit.nsm) }}
-                </dd>
-              </div>
+            <div>
+              <dt class="text-xs font-medium text-muted-foreground">
+                Nomor Statistik Madrasah (NSM)
+              </dt>
+              <dd class="font-semibold text-foreground mt-0.5">
+                {{ formatValue(schoolUnit.nsm) }}
+              </dd>
+            </div>
 
-              <div>
-                <dt class="text-xs font-medium text-muted-foreground">
-                  Status Lembaga
-                </dt>
-                <dd class="font-semibold text-foreground mt-0.5">
-                  {{ formatValue(statusLabel) }}
-                </dd>
-              </div>
+            <div>
+              <dt class="text-xs font-medium text-muted-foreground">Status</dt>
+              <dd class="font-semibold text-foreground mt-0.5">
+                {{ formatValue(statusLabel) }}
+              </dd>
+            </div>
 
-              <div>
-                <dt class="text-xs font-medium text-muted-foreground">
-                  Jenjang / Tipe
-                </dt>
-                <dd class="font-semibold text-foreground mt-0.5">
-                  {{ formatValue(typeLabel) }}
-                </dd>
-              </div>
+            <div>
+              <dt class="text-xs font-medium text-muted-foreground">Jenjang</dt>
+              <dd class="font-semibold text-foreground mt-0.5">
+                {{ formatValue(typeLabel) }}
+              </dd>
+            </div>
 
-              <div class="col-span-2">
-                <dt class="text-xs font-medium text-muted-foreground">
-                  NPWP Lembaga
-                </dt>
-                <dd class="font-semibold text-foreground mt-0.5">
-                  {{ formatValue(schoolUnit.npwp) }}
-                </dd>
-              </div>
-            </dl>
-          </CardContent>
-        </Card>
+            <div>
+              <dt class="text-xs font-medium text-muted-foreground">
+                Nomor Pokok Wajib Pajak (NPWP)
+              </dt>
+              <dd class="font-semibold text-foreground mt-0.5">
+                {{ formatValue(schoolUnit.npwp) }}
+              </dd>
+            </div>
 
-        <!-- 2. Kontak & Komunikasi -->
-        <Card class="rounded-xl shadow-xs py-0 gap-0">
-          <CardHeader
-            class="flex flex-row items-center gap-2.5 border-b px-5 py-3.5 pb-3.5!"
-          >
-            <Phone class="size-4 text-primary shrink-0" />
-            <CardTitle class="text-sm font-semibold tracking-normal">
-              Kontak & Komunikasi
-            </CardTitle>
-          </CardHeader>
+            <div>
+              <dt class="text-xs font-medium text-muted-foreground">
+                Nomor Telepon
+              </dt>
+              <dd class="font-semibold text-foreground mt-0.5">
+                {{ formatValue(schoolUnit.phone) }}
+              </dd>
+            </div>
 
-          <CardContent class="px-5 pt-3.5 pb-5">
-            <dl class="space-y-4 text-sm">
-              <div>
-                <dt class="text-xs font-medium text-muted-foreground">
-                  Nomor Telepon
-                </dt>
-                <dd class="font-semibold text-foreground mt-0.5">
-                  {{ formatValue(schoolUnit.phone) }}
-                </dd>
-              </div>
+            <div>
+              <dt class="text-xs font-medium text-muted-foreground">
+                Email Resmi
+              </dt>
+              <dd class="font-semibold text-foreground mt-0.5">
+                {{ formatValue(schoolUnit.email) }}
+              </dd>
+            </div>
 
-              <div>
-                <dt class="text-xs font-medium text-muted-foreground">
-                  Email Resmi
-                </dt>
-                <dd class="font-semibold text-foreground mt-0.5">
-                  {{ formatValue(schoolUnit.email) }}
-                </dd>
-              </div>
-
-              <div>
-                <dt class="text-xs font-medium text-muted-foreground">
-                  Situs Web Resmi
-                </dt>
-                <dd class="mt-0.5">
-                  <a
-                    v-if="schoolUnit.website"
-                    :href="
-                      schoolUnit.website.startsWith('http')
-                        ? schoolUnit.website
-                        : `https://${schoolUnit.website}`
-                    "
-                    target="_blank"
-                    rel="noreferrer"
-                    class="inline-flex items-center gap-1.5 font-medium text-primary hover:underline break-all"
-                  >
-                    {{ schoolUnit.website }}
-                    <ExternalLink class="size-3 shrink-0 opacity-70" />
-                  </a>
-                  <span
-                    v-else
-                    class="font-semibold text-foreground"
-                    >-</span
-                  >
-                </dd>
-              </div>
-            </dl>
-          </CardContent>
-        </Card>
-      </div>
+            <div>
+              <dt class="text-xs font-medium text-muted-foreground">
+                Situs Web Resmi
+              </dt>
+              <dd class="mt-0.5">
+                <a
+                  v-if="schoolUnit.website"
+                  :href="
+                    schoolUnit.website.startsWith('http')
+                      ? schoolUnit.website
+                      : `https://${schoolUnit.website}`
+                  "
+                  target="_blank"
+                  rel="noreferrer"
+                  class="inline-flex items-center gap-1.5 font-medium text-primary hover:underline break-all"
+                >
+                  {{ schoolUnit.website }}
+                  <ExternalLink class="size-3 shrink-0 opacity-70" />
+                </a>
+                <span
+                  v-else
+                  class="font-semibold text-foreground"
+                  >-</span
+                >
+              </dd>
+            </div>
+          </dl>
+        </CardContent>
+      </Card>
 
       <!-- Row 2: Alamat & Titik Lokasi -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">

@@ -62,6 +62,10 @@ const SANCTIONED = [
 describe('no screen decides what to show from a role name', () => {
   let files: { path: string; text: string }[]
 
+  // Reading a few hundred files is legitimately slow, and slower still when
+  // the root `pnpm test` runs six vitest processes against one Windows disk.
+  // The default ten seconds is enough alone and not enough alongside, which is
+  // a sweep that fails for being busy rather than for finding anything.
   beforeAll(async () => {
     const found: { path: string; text: string }[] = []
     for await (const entry of glob('**/*.{ts,vue}', { cwd: FEATURES })) {
@@ -72,7 +76,7 @@ describe('no screen decides what to show from a role name', () => {
       })
     }
     files = found
-  })
+  }, 60_000)
 
   it('finds the academic features', () => {
     expect(files.length).toBeGreaterThan(100)

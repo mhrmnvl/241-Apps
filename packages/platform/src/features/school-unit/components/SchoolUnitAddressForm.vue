@@ -295,9 +295,6 @@ const onSave = form.handleSubmit((values) => {
                 v-bind="componentField"
               />
             </FormControl>
-            <p class="text-xs text-muted-foreground">
-              Opsional. Titik ini yang ditampilkan pada peta di profil sekolah.
-            </p>
             <FormMessage />
           </FormItem>
         </FormField>
@@ -316,9 +313,6 @@ const onSave = form.handleSubmit((values) => {
                 v-bind="componentField"
               />
             </FormControl>
-            <p class="text-xs text-muted-foreground">
-              Kosongkan keduanya untuk menghapus titik lokasi.
-            </p>
             <FormMessage />
           </FormItem>
         </FormField>
