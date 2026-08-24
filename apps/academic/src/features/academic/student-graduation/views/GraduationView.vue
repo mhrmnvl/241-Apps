@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { Badge } from '@/ui/badge'
 import { Button } from '@/ui/button'
 import { Card, CardHeader, CardTitle } from '@/ui/card'
 import { DatePicker } from '@/ui'
@@ -21,13 +20,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/ui/table'
-import {
-  Calendar,
-  CheckCircle2,
-  Loader2,
-  Pencil,
-  XCircle,
-} from 'lucide-vue-next'
+import { Calendar, Loader2, Pencil } from 'lucide-vue-next'
 import { toast } from 'vue-sonner'
 import { useRoleGuard } from '@/features/platform/auth'
 import { useStudentGraduation } from '../composables/useStudentGraduation'
@@ -343,34 +336,6 @@ async function handleConfirmGraduate() {
       </DialogHeader>
 
       <div class="overflow-y-auto px-6 py-4 space-y-4">
-        <!-- Summary Chips -->
-        <div class="flex flex-wrap gap-2">
-          <div
-            class="inline-flex items-center gap-1.5 rounded-full bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 px-3 py-1 text-xs font-medium text-green-700 dark:text-green-400"
-          >
-            <CheckCircle2 class="size-3.5" />
-            {{ summaryStats.approved }} Lulus
-          </div>
-          <div
-            v-if="summaryStats.declined > 0"
-            class="inline-flex items-center gap-1.5 rounded-full bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 px-3 py-1 text-xs font-medium text-amber-700 dark:text-amber-400"
-          >
-            <XCircle class="size-3.5" />
-            {{ summaryStats.declined }} Tidak Lulus
-          </div>
-          <div
-            class="inline-flex items-center gap-1.5 rounded-full bg-muted border px-3 py-1 text-xs font-medium text-muted-foreground"
-          >
-            Total: {{ summaryStats.total }} Siswa
-          </div>
-          <div
-            class="inline-flex items-center gap-1.5 rounded-full bg-muted border px-3 py-1 text-xs font-medium text-muted-foreground"
-          >
-            <Calendar class="size-3.5" />
-            Tanggal: {{ formattedGraduationDate }}
-          </div>
-        </div>
-
         <!-- Student Preview Table -->
         <div class="overflow-x-auto rounded-xl border bg-background shadow-xs">
           <Table class="min-w-[500px]">
@@ -416,13 +381,15 @@ async function handleConfirmGraduate() {
                 <TableCell class="text-center py-2 text-xs text-foreground">
                   {{ row.classroomName }}
                 </TableCell>
-                <TableCell class="text-center py-2">
-                  <Badge
-                    :variant="row.approved ? 'default' : 'destructive'"
-                    class="text-[11px] shadow-none"
-                  >
-                    {{ row.approved ? 'Lulus' : 'Tidak Lulus' }}
-                  </Badge>
+                <TableCell
+                  class="text-center py-2 text-xs font-medium"
+                  :class="
+                    row.approved
+                      ? 'text-green-600 dark:text-green-400'
+                      : 'text-destructive'
+                  "
+                >
+                  {{ row.approved ? 'Lulus' : 'Tidak Lulus' }}
                 </TableCell>
               </TableRow>
             </TableBody>
@@ -431,25 +398,59 @@ async function handleConfirmGraduate() {
       </div>
 
       <DialogFooter
-        class="px-6 py-4 border-t shrink-0 flex flex-row gap-2 justify-end"
+        class="px-6 py-3.5 border-t shrink-0 flex flex-col sm:flex-row sm:items-center justify-between sm:justify-between gap-3 w-full"
       >
-        <Button
-          variant="outline"
-          :disabled="isGraduating"
-          @click="showConfirmDialog = false"
-        >
-          Batal
-        </Button>
-        <Button
-          :disabled="isGraduating"
-          @click="handleConfirmGraduate"
-        >
-          <Loader2
-            v-if="isGraduating"
-            class="size-4 mr-2 animate-spin"
-          />
-          Ya, Proses Sekarang
-        </Button>
+        <!-- Left side: Summary Stats (paling kiri) -->
+        <div class="flex flex-wrap items-center gap-3 text-xs mr-auto">
+          <div
+            class="flex items-center gap-1.5 font-medium text-green-600 dark:text-green-400"
+          >
+            <div class="size-2 rounded-full bg-green-500" />
+            {{ summaryStats.approved }} Lulus
+          </div>
+          <div
+            class="flex items-center gap-1.5 font-medium text-amber-600 dark:text-amber-400"
+          >
+            <div class="size-2 rounded-full bg-amber-500" />
+            {{ summaryStats.declined }} Tidak Lulus
+          </div>
+          <div class="text-muted-foreground">
+            Total:
+            <strong class="text-foreground">{{ summaryStats.total }}</strong>
+            Siswa
+          </div>
+          <div
+            v-if="graduationDate"
+            class="text-muted-foreground flex items-center gap-1"
+          >
+            <Calendar class="size-3.5" />
+            {{ formattedGraduationDate }}
+          </div>
+        </div>
+
+        <!-- Right side: Primary Action -->
+        <div class="flex items-center justify-end gap-2 shrink-0">
+          <!-- Same reason as the promotion dialog: graduating a cohort is not
+               a step whose only labelled control should be the one that does
+               it. -->
+          <Button
+            variant="outline"
+            :disabled="isGraduating"
+            @click="showConfirmDialog = false"
+          >
+            Batal
+          </Button>
+          <Button
+            :disabled="isGraduating"
+            @click="handleConfirmGraduate"
+          >
+            <Loader2
+              v-if="isGraduating"
+              class="size-4 mr-2 animate-spin"
+            />
+            Ya, Proses Sekarang
+          </Button>
+        </div>
       </DialogFooter>
     </DialogContent>
   </Dialog>
