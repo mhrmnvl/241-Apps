@@ -28,6 +28,8 @@ export const EMPTY_ADDRESS: SchoolUnitAddress = {
   province: '',
   country: 'Indonesia',
   postalCode: '',
+  latitude: null,
+  longitude: null,
 }
 
 export const statusOptions: { value: SchoolUnitStatus; label: string }[] = [

@@ -120,4 +120,99 @@ describe('BulkGraduateStudentsUseCase', () => {
 
     expect(result).toEqual({ graduated: 1, skipped: 3 });
   });
+
+  describe('students the school decided not to graduate', () => {
+    /**
+     * Before this, a held student was simply left out of the payload: their
+     * enrolment stayed ACTIVE, nothing recorded the decision, and the reason
+     * the operator was made to type never left the browser.
+     */
+    it('records them alongside the graduations', async () => {
+      mockRepo.executeBulk.mockResolvedValue({
+        graduated: 1,
+        skipped: 0,
+        held: 1,
+      });
+
+      const result = await useCase.execute({
+        students: [{ studentId: 'stu-1' }],
+        held: [{ studentId: 'stu-2', reason: 'Nilai belum lengkap' }],
+      });
+
+      expect(result.held).toBe(1);
+      expect(mockRepo.executeBulk).toHaveBeenCalledWith({
+        academicYearId: 'ay-1',
+        students: [{ studentId: 'stu-1' }],
+        held: [{ studentId: 'stu-2', reason: 'Nilai belum lengkap' }],
+      });
+    });
+
+    /** A class whose marks are not in yet is a real thing to want. */
+    it('allows a run that only holds people', async () => {
+      mockRepo.executeBulk.mockResolvedValue({
+        graduated: 0,
+        skipped: 0,
+        held: 2,
+      });
+
+      await expect(
+        useCase.execute({
+          students: [],
+          held: [
+            { studentId: 'stu-1', reason: 'Nilai belum lengkap' },
+            { studentId: 'stu-2', reason: 'Belum melunasi administrasi' },
+          ],
+        }),
+      ).resolves.toEqual({ graduated: 0, skipped: 0, held: 2 });
+    });
+
+    it('refuses a run that does neither', async () => {
+      await expect(useCase.execute({ students: [], held: [] })).rejects.toThrow(
+        BadRequestException,
+      );
+      expect(mockRepo.executeBulk).not.toHaveBeenCalled();
+    });
+
+    /**
+     * Graduated and held are opposite answers to one question. Letting one
+     * win silently would record an outcome nobody chose.
+     */
+    it('refuses a student who is in both lists', async () => {
+      await expect(
+        useCase.execute({
+          students: [{ studentId: 'stu-1' }],
+          held: [{ studentId: 'stu-1', reason: 'Nilai belum lengkap' }],
+        }),
+      ).rejects.toThrow(BadRequestException);
+      expect(mockRepo.executeBulk).not.toHaveBeenCalled();
+    });
+
+    it('refuses the same student held twice', async () => {
+      await expect(
+        useCase.execute({
+          students: [],
+          held: [
+            { studentId: 'stu-1', reason: 'a' },
+            { studentId: 'stu-1', reason: 'b' },
+          ],
+        }),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    /** The ordinary year, where everyone finishes, carries no ceremony. */
+    it('sends no held list when there is nothing to hold', async () => {
+      mockRepo.executeBulk.mockResolvedValue({
+        graduated: 1,
+        skipped: 0,
+        held: 0,
+      });
+
+      await useCase.execute({ students: [{ studentId: 'stu-1' }] });
+
+      expect(mockRepo.executeBulk).toHaveBeenCalledWith({
+        academicYearId: 'ay-1',
+        students: [{ studentId: 'stu-1' }],
+      });
+    });
+  });
 });

@@ -6,6 +6,7 @@ import { CreateStudentGraduationUseCase } from '../use-cases/create-student-grad
 import { DeleteStudentGraduationUseCase } from '../use-cases/delete-student-graduation.use-case.js';
 import { GetGraduationCandidatesUseCase } from '../use-cases/get-graduation-candidates.use-case.js';
 import { BulkGraduateStudentsUseCase } from '../use-cases/bulk-graduate-students.use-case.js';
+import { GetGraduationHoldsUseCase } from '../use-cases/get-graduation-holds.use-case.js';
 import { GetStudentGraduationByIdUseCase } from '../use-cases/get-student-graduation-by-id.use-case.js';
 import { GetStudentGraduationsUseCase } from '../use-cases/get-student-graduations.use-case.js';
 import { UpdateStudentGraduationUseCase } from '../use-cases/update-student-graduation.use-case.js';
@@ -21,6 +22,7 @@ describe('GraduationController', () => {
   const mockDelete = { execute: jest.fn() };
   const mockCandidates = { execute: jest.fn() };
   const mockBulk = { execute: jest.fn() };
+  const mockHolds = { execute: jest.fn() };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -33,6 +35,7 @@ describe('GraduationController', () => {
         { provide: DeleteStudentGraduationUseCase, useValue: mockDelete },
         { provide: GetGraduationCandidatesUseCase, useValue: mockCandidates },
         { provide: BulkGraduateStudentsUseCase, useValue: mockBulk },
+        { provide: GetGraduationHoldsUseCase, useValue: mockHolds },
       ],
     }).compile();
 
@@ -89,6 +92,21 @@ describe('GraduationController', () => {
       mockDelete.execute.mockResolvedValue(undefined);
       await controller.remove('grad-1');
       expect(mockDelete.execute).toHaveBeenCalledWith('grad-1');
+    });
+  });
+
+  describe('findHolds', () => {
+    it('passes the year through, and passes nothing through when none is given', async () => {
+      const holds = [{ id: 'h1' }];
+      mockHolds.execute.mockResolvedValue(holds);
+
+      await expect(
+        controller.findHolds({ academicYearId: 'ay-1' }),
+      ).resolves.toBe(holds);
+      expect(mockHolds.execute).toHaveBeenCalledWith('ay-1');
+
+      await controller.findHolds({});
+      expect(mockHolds.execute).toHaveBeenLastCalledWith(undefined);
     });
   });
 });

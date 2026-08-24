@@ -8,12 +8,7 @@
  * no cast.
  */
 export type JsonValue =
-  | string
-  | number
-  | boolean
-  | null
-  | JsonValue[]
-  | JsonObject;
+  string | number | boolean | null | JsonValue[] | JsonObject;
 
 /**
  * Values are optional because a JSON object read back from the database may

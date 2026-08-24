@@ -64,8 +64,7 @@ onBeforeUnmount(() => editor.value?.destroy())
 
 function promptForLink() {
   const previous = editor.value?.getAttributes('link').href as
-    | string
-    | undefined
+    string | undefined
   const url = window.prompt('Alamat tautan (https://…)', previous ?? '')
   if (url === null) return
 

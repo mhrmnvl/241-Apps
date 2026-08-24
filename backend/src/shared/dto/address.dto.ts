@@ -1,6 +1,8 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsBoolean,
+  IsLatitude,
+  IsLongitude,
   IsNotEmpty,
   IsOptional,
   IsString,
@@ -66,6 +68,27 @@ export class CreateAddressDto {
   @IsOptional()
   @IsBoolean()
   isPrimary?: boolean;
+
+  /**
+   * Where this address is, for a map.
+   *
+   * Optional on every owner. Only the school's own address is pinned today;
+   * a student's is the obvious next one — zonasi is a distance from home to
+   * school — and nothing reads it yet.
+   *
+   * `@IsLatitude`/`@IsLongitude` carry the WGS84 ranges, so a transposed pair
+   * with a latitude past 90 is refused here with a message rather than stored
+   * and drawn in the wrong hemisphere.
+   */
+  @ApiPropertyOptional({ example: -6.914744, nullable: true })
+  @IsOptional()
+  @IsLatitude()
+  latitude?: number | null;
+
+  @ApiPropertyOptional({ example: 107.60981, nullable: true })
+  @IsOptional()
+  @IsLongitude()
+  longitude?: number | null;
 }
 
 export class UpdateAddressDto {
@@ -127,6 +150,27 @@ export class UpdateAddressDto {
   @IsOptional()
   @IsBoolean()
   isPrimary?: boolean;
+
+  /**
+   * Where this address is, for a map.
+   *
+   * Optional on every owner. Only the school's own address is pinned today;
+   * a student's is the obvious next one — zonasi is a distance from home to
+   * school — and nothing reads it yet.
+   *
+   * `@IsLatitude`/`@IsLongitude` carry the WGS84 ranges, so a transposed pair
+   * with a latitude past 90 is refused here with a message rather than stored
+   * and drawn in the wrong hemisphere.
+   */
+  @ApiPropertyOptional({ example: -6.914744, nullable: true })
+  @IsOptional()
+  @IsLatitude()
+  latitude?: number | null;
+
+  @ApiPropertyOptional({ example: 107.60981, nullable: true })
+  @IsOptional()
+  @IsLongitude()
+  longitude?: number | null;
 }
 
 export class AddressResponseDto {
@@ -162,4 +206,18 @@ export class AddressResponseDto {
 
   @ApiProperty({ example: false })
   isPrimary: boolean;
+
+  @ApiProperty({
+    example: -6.914744,
+    nullable: true,
+    description: 'WGS84 latitude. Null when no pin has been recorded.',
+  })
+  latitude: number | null;
+
+  @ApiProperty({
+    example: 107.60981,
+    nullable: true,
+    description: 'WGS84 longitude. Null when no pin has been recorded.',
+  })
+  longitude: number | null;
 }

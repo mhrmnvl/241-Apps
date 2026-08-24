@@ -5,7 +5,10 @@ import type {
   SocialMediaUpdatePayload,
   SocialMediaQuery,
 } from '../types'
-import type { ApiPaginatedResponse } from '@/shared/types/api'
+import type {
+  ApiPaginatedResponse,
+  ApiSingleResponse,
+} from '@/shared/types/api'
 
 export const socialMediaApi = {
   getSocialMedias: (params?: SocialMediaQuery) => {
@@ -14,10 +17,13 @@ export const socialMediaApi = {
     })
   },
   createSocialMedia: (payload: SocialMediaCreatePayload) => {
-    return api.post<SocialMedia>('/social-medias', payload)
+    return api.post<ApiSingleResponse<SocialMedia>>('/social-medias', payload)
   },
   updateSocialMedia: (id: string, payload: SocialMediaUpdatePayload) => {
-    return api.patch<SocialMedia>(`/social-medias/${id}`, payload)
+    return api.patch<ApiSingleResponse<SocialMedia>>(
+      `/social-medias/${id}`,
+      payload,
+    )
   },
   deleteSocialMedia: (id: string) => {
     return api.delete(`/social-medias/${id}`)

@@ -93,11 +93,19 @@ export const menuSections: MenuSection[] = [
             url: '/academic/semester/promotion',
             requiredPermission: 'semesters.create',
           },
+          {
+            // Beside Kenaikan Kelas: the two halves of moving a school into
+            // its next year. One sends everybody up, the other sends the top
+            // year out. Alumni — the record of who left — sits under Siswa.
+            title: 'Kelulusan',
+            url: '/academic/graduation',
+            requiredPermission: 'graduations.read',
+          },
         ],
       },
       {
         key: 'academic-calendars',
-        title: 'Kalender',
+        title: 'Kalender Pendidikan',
         url: '#',
         icon: CalendarRange,
         items: [
@@ -110,6 +118,11 @@ export const menuSections: MenuSection[] = [
             title: 'Kalender',
             url: '/academic/education-calendar',
             requiredPermission: 'academic-calendars.read',
+          },
+          {
+            title: 'Manajemen Kalender',
+            url: '/academic/education-calendar/manage',
+            requiredPermission: 'academic-calendars.create',
           },
         ],
       },
@@ -218,9 +231,9 @@ export const menuSections: MenuSection[] = [
         requiredPermission: 'students.read',
       },
       {
-        // Named for the act, not just its result. This is where a student is
-        // graduated now — promotion no longer does it as a side effect.
-        title: 'Kelulusan & Alumni',
+        // The record of who has left. Graduating them is Kelulusan, under
+        // Periode Akademik, next to the promotion it happens alongside.
+        title: 'Alumni',
         url: '/student/alumni',
         icon: GraduationCap,
         requiredPermission: 'graduations.read',
@@ -320,6 +333,19 @@ export const menuSections: MenuSection[] = [
             title: 'Tipe Semester',
             url: '/setting/semester-type',
             requiredPermission: 'semesters.read',
+          },
+          // "Mingguan" because these repeat every week; the holidays in
+          // Kalender Pendidikan are dates. Two entries called "Hari Libur"
+          // would leave nothing to tell a person which one to open.
+          {
+            title: 'Hari Libur Mingguan',
+            url: '/setting/weekly-holiday',
+            requiredPermission: 'academic-settings.read',
+          },
+          {
+            title: 'Nilai Ketuntasan Minimum (KKM)',
+            url: '/setting/passing-score',
+            requiredPermission: 'academic-settings.read',
           },
           {
             title: 'Tipe Jam',

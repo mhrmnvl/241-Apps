@@ -178,7 +178,12 @@ export const raporService = {
         scope === 'own'
           ? await raporApi.getMyRaporDetail(id)
           : await raporApi.getRaporDetail(id)
-      return res.data
+      // `.data.data`: the outer is the response envelope every endpoint is
+      // wrapped in, the inner is the report card. Returning the envelope here
+      // is what left the detail dialog showing a dash for the average, a dash
+      // for the rank, "Draft" for a published card and no subjects at all —
+      // every field read straight off the wrapper, and every one undefined.
+      return res.data.data
     } catch (error: unknown) {
       toast.error(
         getIndonesianErrorMessage(error, 'Gagal memuat detail rapor.'),
@@ -268,14 +273,12 @@ export const raporService = {
           ? await studentScoreApi.getMyScores(params)
           : await studentScoreApi.getScores(params)
       const rawScores = res.data?.data ?? []
-      return rawScores.map(
-        (s: StudentScoreItem): RaporScoreRow => ({
-          subject: s.assessmentItem?.name ?? '-',
-          type: s.assessmentItem?.type ?? '-',
-          score: s.score,
-          weight: s.assessmentItem?.weight ?? 1,
-        }),
-      )
+      return rawScores.map((s: StudentScoreItem): RaporScoreRow => ({
+        subject: s.assessmentItem?.name ?? '-',
+        type: s.assessmentItem?.type ?? '-',
+        score: s.score,
+        weight: s.assessmentItem?.weight ?? 1,
+      }))
     } catch (error: unknown) {
       toast.error(getIndonesianErrorMessage(error, 'Gagal memuat data nilai.'))
       return []

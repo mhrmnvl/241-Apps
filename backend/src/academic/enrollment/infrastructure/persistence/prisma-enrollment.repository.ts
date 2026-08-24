@@ -45,13 +45,26 @@ export class PrismaEnrollmentRepository extends IEnrollmentRepository {
   async findAll(
     query: StudentEnrollmentQueryInput,
   ): Promise<PaginatedResult<EnrollmentWithDetails>> {
-    const { page = 1, limit = 10, semesterId, academicYearId } = query;
+    const {
+      page = 1,
+      limit = 10,
+      semesterId,
+      academicYearId,
+      studentId,
+    } = query;
 
-    // Neither scope given: fall back to the active semester so the list is not
-    // an unbounded read across every year.
+    // No scope given: fall back to the active semester so the list is not an
+    // unbounded read across every year.
+    //
+    // A `studentId` counts as a scope. One student has a handful of enrolments
+    // — one per year they have been here — so asking for them all is bounded
+    // by the student, not by the term. Without this there was no way to ask
+    // for a student's history at all: the fallback quietly narrowed every such
+    // query to the current term and returned the one row the caller already
+    // had.
+    const scoped = Boolean(academicYearId ?? studentId);
     const resolvedSemesterId =
-      semesterId ??
-      (academicYearId ? undefined : await resolveSemesterId(this.prisma));
+      semesterId ?? (scoped ? undefined : await resolveSemesterId(this.prisma));
 
     const where = buildEnrollmentListWhere(query, resolvedSemesterId);
 

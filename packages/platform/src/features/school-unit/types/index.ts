@@ -35,6 +35,13 @@ export interface SchoolUnitAddress {
   province: string
   country: string
   postalCode: string
+  /**
+   * Where this address is. A pin belongs to the place, not to the
+   * institution — the school profile draws its map from the primary
+   * address, and a school with no address has no pin to draw.
+   */
+  latitude?: number | null
+  longitude?: number | null
 }
 
 export interface SchoolUnitApiResponse {

@@ -22,6 +22,7 @@ export class CreateAcademicYearUseCase {
 
     const academicYear = await this.academicYearRepository.create({
       name: dto.name,
+      startYear: dto.startYear,
       isActive: dto.isActive ?? false,
     });
 

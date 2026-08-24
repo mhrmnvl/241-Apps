@@ -17,6 +17,8 @@ import { SemesterTypeModule } from './master-data/semester-type/semester-type.mo
 import { ParentModule } from './parent/parent.module.js';
 import { ReportCardModule } from './report-card/report-card.module.js';
 import { ScheduleModule as AcademicScheduleModule } from './schedule/schedule.module.js';
+import { AcademicSettingModule } from './academic-setting/academic-setting.module.js';
+import { MyDashboardModule } from './my-dashboard/my-dashboard.module.js';
 import { SemesterModule } from './semester/semester.module.js';
 import { StudentModule } from './student/student.module.js';
 import { SubjectModule } from './subject/subject.module.js';
@@ -25,6 +27,7 @@ import { TeachingAssignmentModule } from './teaching-assignment/teaching-assignm
 
 @Module({
   imports: [
+    AcademicSettingModule,
     AcademicYearModule,
     AssessmentModule,
     AttendanceModule,
@@ -34,6 +37,7 @@ import { TeachingAssignmentModule } from './teaching-assignment/teaching-assignm
     EnrollmentModule,
     GradeModule,
     GraduationModule,
+    MyDashboardModule,
     AcademicCalendarTypeModule,
     EmploymentTypeModule,
     OccupationModule,
@@ -50,6 +54,7 @@ import { TeachingAssignmentModule } from './teaching-assignment/teaching-assignm
     TeachingAssignmentModule,
   ],
   exports: [
+    AcademicSettingModule,
     AcademicYearModule,
     AssessmentModule,
     AttendanceModule,

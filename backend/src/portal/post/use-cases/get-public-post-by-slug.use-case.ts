@@ -12,8 +12,7 @@ import { toPublicDetail } from '../infrastructure/mappers/post.mapper.js';
  * that knows how to say 301 in HTTP.
  */
 export type PublicPostResult =
-  | { kind: 'found'; post: PostDetailDto }
-  | { kind: 'moved'; slug: string };
+  { kind: 'found'; post: PostDetailDto } | { kind: 'moved'; slug: string };
 
 @Injectable()
 export class GetPublicPostBySlugUseCase {

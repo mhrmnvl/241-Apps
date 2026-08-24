@@ -1,118 +1,304 @@
-﻿<script setup lang="ts">
+<script setup lang="ts">
 import type {
   PromotionPayload,
   PromotionResult,
   PromotionStudentDecision,
   PromotionStudentPayload,
 } from '../types'
+import { PromotionResultDialog, PromotionStudentTable } from '../components'
+import { RouterLink, useRouter } from 'vue-router'
 import {
-  PromotionPreviewTable,
-  PromotionResultDialog,
-  PromotionStudentTable,
-  PromotionStepSelect,
-  PromotionStepExecuting,
-} from '../components'
-import { RouterLink } from 'vue-router'
-import { GraduationCap } from 'lucide-vue-next'
-import { useSemesterList } from '../composables/useSemesterList'
-import { useSemesterPromotion } from '../composables/useSemesterPromotion'
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/ui/dialog'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/ui/table'
 import { Button } from '@/ui/button'
 import { Card, CardHeader, CardTitle } from '@/ui/card'
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/ui/alert-dialog'
-import { ArrowLeft, ArrowRight, Loader2, CheckCircle2 } from 'lucide-vue-next'
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/ui/select'
+import {
+  AlertCircle,
+  ArrowRight,
+  Check,
+  GraduationCap,
+  Loader2,
+  Pencil,
+} from 'lucide-vue-next'
 import { computed, onMounted, ref, watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { useAcademicSetting } from '@/features/academic/academic-setting'
+import { useSemesterList } from '../composables/useSemesterList'
+import { useSemesterPromotion } from '../composables/useSemesterPromotion'
+import { derivePromotionYears } from '../logic/derivePromotionYears'
+import { selectableTargetYears } from '../logic/selectableTargetYears'
+import { classroomApi } from '@/features/academic/classroom'
+import { classroomService } from '@/features/academic/classroom'
+import type { Classroom } from '@/features/academic/classroom'
 
 const router = useRouter()
 
-const { semesters, fetchSemesters } = useSemesterList()
+const { academicYears, fetchAcademicYears } = useSemesterList()
 const {
   isPromoting,
+  isPreviewing,
+  promotionPreview,
   isLoadingRecommendations,
   promotionRecommendations,
   excludedGraduatingCount,
   fetchPromotionRecommendation,
+  previewPromotion,
   executePromotion,
 } = useSemesterPromotion()
 
-const currentStep = ref(0)
-const sourceSemesterId = ref('')
-const targetSemesterId = ref('')
+// Academic years, not semesters. Kenaikan kelas moves a student between years;
+// moving between the terms of one year is a rollover and has its own screen.
+// Which term of each year is read and written is the server's call — see
+// `PromotionSemesterResolver` — so this screen cannot pair two terms of the
+// same year, which it used to be able to do in two clicks.
+const sourceAcademicYearId = ref('')
+const targetAcademicYearId = ref('')
+
+/**
+ * A promotion runs out of the year the school is in and into the one after it,
+ * so the screen works that out instead of asking. `derivePromotionYears` holds
+ * the rule and is spec'd against it.
+ *
+ * Shown as a sentence rather than hidden: this moves every student in the
+ * school, once a year, and the value of stating it is that somebody can stop
+ * before it happens.
+ */
+const derived = computed(() => derivePromotionYears(academicYears.value))
+
+/**
+ * The override exists for the school that ran a year late.
+ *
+ * Activating next year before promoting out of this one is an ordinary
+ * mistake — and after it, the derived pair is wrong in exactly the way nobody
+ * would notice. Folded away, because that is a rare day.
+ */
+const isChoosingYears = ref(false)
+const isCopyingClassrooms = ref(false)
+
+/**
+ * Students the server could find no destination for.
+ *
+ * Always the same cause: the year ahead has no classroom at the level they are
+ * moving into. The recommendation itself works out which level follows which
+ * from the levels present in the target year, so a year holding one class
+ * leaves almost everybody here.
+ */
+const studentsWithoutTarget = computed(() =>
+  promotionRecommendations.value.filter((rec) => !rec.targetClassroomId),
+)
+
+/**
+ * The classes the year ahead has, so a student can be sent somewhere other
+ * than the one recommended for them.
+ *
+ * Fetched rather than derived from the recommendation, which names only the
+ * class it chose. The server validates the destination — right year, and a
+ * level that goes up for PROMOTE or stays put for REPEAT — so the table
+ * filters this list to the level each row is allowed.
+ */
+const targetClassrooms = ref<Classroom[]>([])
+
+async function loadTargetClassrooms(academicYearId: string) {
+  try {
+    const res = await classroomApi.getClassrooms({
+      academicYearId,
+      limit: 200,
+    })
+    targetClassrooms.value = res.data.data ?? []
+  } catch {
+    // A missing list costs the picker, not the promotion: every row keeps the
+    // destination the server recommended, and the run still works.
+    targetClassrooms.value = []
+  }
+}
+
+/**
+ * Only the class on screen.
+ *
+ * The class filter is not optional — nothing is listed until one is chosen —
+ * so the screen reads as being about that class. The button used to cover
+ * every class behind it, which meant reviewing VII-A and promoting all four.
+ */
+const decisionsForSelectedClass = computed(() => {
+  if (!selectedClass.value) return []
+  const inClass = new Set(
+    promotionRecommendations.value
+      .filter((rec) => rec.sourceClassroomName === selectedClass.value)
+      .map((rec) => rec.studentId),
+  )
+  return studentDecisions.value.filter((d) => inClass.has(d.studentId))
+})
+
+/**
+ * Gives the year ahead the classes this one has, then asks again.
+ *
+ * Copying is idempotent server-side, so pressing this twice is harmless — and
+ * a year part-filled by hand keeps what is already in it.
+ */
+async function copyClassroomsForward() {
+  const source = sourceAcademicYearId.value
+  const target = targetAcademicYearId.value
+  if (!source || !target) return
+
+  isCopyingClassrooms.value = true
+  try {
+    const outcome = await classroomService.copyClassroomsToAcademicYear(
+      source,
+      target,
+    )
+    if (outcome.success) {
+      // The picker's options are among what was just created, so both are
+      // refreshed — otherwise the new classes exist but cannot be chosen.
+      await Promise.all([
+        fetchPromotionRecommendation({
+          sourceAcademicYearId: source,
+          targetAcademicYearId: target,
+        }),
+        loadTargetClassrooms(target),
+      ])
+    }
+  } finally {
+    isCopyingClassrooms.value = false
+  }
+}
 const studentDecisions = ref<PromotionStudentDecision[]>([])
+
+/**
+ * The class the table is filtered to, which is also what the button acts on.
+ *
+ * Reported by the table rather than owned here: the filter is its control, and
+ * two copies of the same choice is one more thing that can disagree.
+ */
+const selectedClass = ref('')
 const showConfirmDialog = ref(false)
 const showResultDialog = ref(false)
 const promotionResult = ref<PromotionResult | null>(null)
 
-const steps = [
-  { title: 'Pilih Semester', description: 'Pilih semester asal dan tujuan' },
-  { title: 'Review Siswa', description: 'Setujui atau tolak per siswa' },
-  { title: 'Preview', description: 'Tinjau ringkasan keputusan' },
-  { title: 'Eksekusi', description: 'Proses kenaikan kelas' },
-]
-
-const canProceedStep0 = computed(
-  () => !!sourceSemesterId.value && !!targetSemesterId.value,
+/**
+ * Forward only. The override is for a school that ran a year late, not for
+ * sending a cohort back into a year it has already finished — and the server
+ * would accept that, because a backward promotion still passes its "grade goes
+ * up" check. `selectableTargetYears` holds the rule and its spec.
+ */
+const availableTargetYears = computed(() =>
+  selectableTargetYears(academicYears.value, sourceAcademicYearId.value),
 )
 
-const canProceedStep1 = computed(() => {
-  if (studentDecisions.value.length === 0) return false
-  return studentDecisions.value.every((d) => {
+const canExecute = computed(() => {
+  if (!sourceAcademicYearId.value || !targetAcademicYearId.value) return false
+  if (isLoadingRecommendations.value || isPromoting.value) return false
+  // One class at a time, and only the one on screen. Nothing is listed until
+  // a class is chosen, so promoting more than that was promoting unseen.
+  if (!selectedClass.value) return false
+  if (decisionsForSelectedClass.value.length === 0) return false
+
+  return decisionsForSelectedClass.value.every((d) => {
     if (!d.approved && !d.declineReason) return false
+    // Every decision needs a classroom, including a student held back — they
+    // still enrol somewhere, in the grade they were already in. The server
+    // refuses a decision without one, so catching it here keeps the button
+    // from promising a run that would be rejected on arrival.
     if (!d.targetClassroomId) return false
     return true
   })
 })
 
+/** About the class on screen, which is what the button acts on. */
+const summaryStats = computed(() => {
+  let approved = 0
+  let declined = 0
+  for (const d of decisionsForSelectedClass.value) {
+    if (d.approved) approved++
+    else declined++
+  }
+  return {
+    approved,
+    declined,
+    total: decisionsForSelectedClass.value.length,
+  }
+})
+
+/** Rows shown in the confirm-dialog preview. */
+const previewRows = computed(() => {
+  return decisionsForSelectedClass.value.map((d) => {
+    const rec = promotionRecommendations.value.find(
+      (r) => r.studentId === d.studentId,
+    )
+    const targetName =
+      targetClassrooms.value.find((c) => c.id === d.targetClassroomId)?.code ??
+      rec?.targetClassroomName ??
+      '-'
+    return {
+      studentId: d.studentId,
+      studentName: rec?.studentName ?? '-',
+      nis: rec?.nis ?? '-',
+      sourceClass: rec?.sourceClassroomName ?? '-',
+      targetClass:
+        targetName !== '-' ? targetName : (rec?.sourceClassroomName ?? '-'),
+      approved: d.approved,
+      declineReason: d.declineReason,
+    }
+  })
+})
+
 function buildPayload(): PromotionPayload {
-  const students: PromotionStudentPayload[] = studentDecisions.value.map(
-    (d) => ({
+  const students: PromotionStudentPayload[] = decisionsForSelectedClass.value
+    // Provably empty by the time this runs — `canExecute` gates the only
+    // caller on every decision having a classroom. It is a filter rather than
+    // a non-null assertion so that if that gate is ever loosened, the payload
+    // narrows instead of carrying `undefined` into the request.
+    .filter(
+      (d): d is typeof d & { targetClassroomId: string } =>
+        d.targetClassroomId !== undefined,
+    )
+    .map((d) => ({
       studentId: d.studentId,
       sourceClassroomId: d.sourceClassroomId,
       targetClassroomId: d.targetClassroomId,
-      action: d.approved ? d.action : 'REPEAT',
+      action: d.approved ? d.action : ('REPEAT' as const),
       declineReason: d.approved ? undefined : d.declineReason,
-    }),
-  )
+    }))
 
   return {
-    sourceSemesterId: sourceSemesterId.value,
-    targetSemesterId: targetSemesterId.value,
+    sourceAcademicYearId: sourceAcademicYearId.value,
+    targetAcademicYearId: targetAcademicYearId.value,
     students,
   }
 }
 
-async function handleNext() {
-  if (currentStep.value === 0) {
-    await fetchPromotionRecommendation({
-      sourceSemesterId: sourceSemesterId.value,
-      targetSemesterId: targetSemesterId.value,
-    })
-    currentStep.value = 1
-  } else if (currentStep.value === 1) {
-    currentStep.value = 2
-  } else if (currentStep.value === 2) {
-    showConfirmDialog.value = true
-  }
-}
-
-function handleBack() {
-  if (currentStep.value > 0) {
-    currentStep.value--
-  }
+/**
+ * Opens the confirmation, and asks the server what it makes of the payload.
+ *
+ * The numbers in the dialog then come from the same request that is about to
+ * be sent, counted by the side that will act on it — rather than from the
+ * screen agreeing with itself. `summaryStats` still stands behind it, so a
+ * preview that fails to load costs the reassurance and not the operation.
+ */
+function openConfirmDialog() {
+  showConfirmDialog.value = true
+  void previewPromotion(buildPayload())
 }
 
 async function handleExecute() {
   showConfirmDialog.value = false
-  currentStep.value = 3
   const result = await executePromotion(buildPayload())
   if (result.success) {
     promotionResult.value = result.result ?? null
@@ -129,14 +315,55 @@ function onDecisionsUpdate(decisions: PromotionStudentDecision[]) {
   studentDecisions.value = decisions
 }
 
-watch(sourceSemesterId, () => {
-  if (sourceSemesterId.value === targetSemesterId.value) {
-    targetSemesterId.value = ''
+// Changing the source can strand the target behind it — picking 2027/2028 as
+// the source while 2026/2027 is selected as the target leaves a backward pair
+// that the list no longer offers but the state still holds. Clearing anything
+// the list would not offer keeps the two in step.
+watch(sourceAcademicYearId, () => {
+  const stillOffered = availableTargetYears.value.some(
+    (year) => year.id === targetAcademicYearId.value,
+  )
+  if (!stillOffered) {
+    targetAcademicYearId.value = ''
   }
 })
 
-onMounted(() => {
-  void fetchSemesters()
+watch(
+  [sourceAcademicYearId, targetAcademicYearId],
+  async ([source, target]) => {
+    if (source && target) {
+      await Promise.all([
+        fetchPromotionRecommendation({
+          sourceAcademicYearId: source,
+          targetAcademicYearId: target,
+        }),
+        loadTargetClassrooms(target),
+      ])
+    }
+  },
+)
+
+// The school's KKM, for colouring an average in the table. Read here rather
+// than in the table so there is one request and one answer.
+const { defaultPassingScore, fetch: fetchAcademicSetting } =
+  useAcademicSetting()
+
+onMounted(async () => {
+  // Alongside, not before: a KKM that fails to arrive costs the colour on one
+  // column, and holding the whole screen for it would cost the promotion.
+  await Promise.all([
+    fetchAcademicYears(),
+    fetchAcademicSetting().catch(() => undefined),
+  ])
+
+  // Only seeds the fields; an operator who has already picked something keeps
+  // it, and a run started before the list arrived is not overwritten.
+  if (!sourceAcademicYearId.value && derived.value.source) {
+    sourceAcademicYearId.value = derived.value.source.id
+  }
+  if (!targetAcademicYearId.value && derived.value.target) {
+    targetAcademicYearId.value = derived.value.target.id
+  }
 })
 </script>
 
@@ -145,223 +372,397 @@ onMounted(() => {
     <Card
       class="overflow-hidden rounded-2xl shadow-sm shadow-black/5 ring-1 ring-black/4"
     >
-      <CardHeader class="border-b px-6 py-5">
+      <!-- Main Card Header -->
+      <CardHeader
+        class="flex flex-row items-center justify-between border-b px-6 py-5"
+      >
         <CardTitle class="text-2xl font-bold tracking-tight">
           Kenaikan Kelas
         </CardTitle>
       </CardHeader>
 
-      <div class="p-0">
-        <div class="bg-muted/30 border-b px-6 py-4">
-          <div class="flex items-center justify-between max-w-3xl mx-auto">
-            <div
-              v-for="(step, idx) in steps"
-              :key="idx"
-              class="flex items-center"
-              :class="idx < steps.length - 1 ? 'flex-1' : ''"
+      <!-- Main Card Body -->
+      <div class="p-6 space-y-4">
+        <!-- Stated, not asked. The pair is derived; the selects are the way
+             back for a school that ran a year late. -->
+        <div
+          v-if="!isChoosingYears"
+          class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border bg-muted/20 px-4 py-3"
+        >
+          <div
+            class="flex flex-wrap items-center justify-center sm:justify-start gap-2 text-xs"
+          >
+            <span class="text-muted-foreground font-medium"
+              >Siklus Kenaikan:</span
             >
-              <div class="flex items-center gap-3">
-                <div
-                  class="flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold transition-all duration-300"
-                  :class="[
-                    idx < currentStep
-                      ? 'bg-primary/20 text-primary'
-                      : idx === currentStep
-                        ? 'bg-primary text-primary-foreground shadow-md ring-4 ring-primary/10'
-                        : 'bg-muted text-muted-foreground',
-                  ]"
-                >
-                  <CheckCircle2
-                    v-if="idx < currentStep"
-                    class="h-5 w-5"
-                  />
-                  <span v-else>{{ idx + 1 }}</span>
-                </div>
-                <div class="hidden md:block">
-                  <p
-                    class="text-sm font-semibold transition-colors duration-300"
-                    :class="
-                      idx <= currentStep
-                        ? 'text-foreground'
-                        : 'text-muted-foreground'
-                    "
+            <span class="font-semibold text-foreground">
+              {{ derived.source?.name ?? 'Tahun Aktif' }}
+            </span>
+            <ArrowRight class="size-3.5 text-muted-foreground shrink-0" />
+            <span
+              v-if="derived.target"
+              class="font-semibold text-foreground"
+            >
+              {{ derived.target.name }}
+            </span>
+            <span
+              v-else
+              class="font-medium text-destructive"
+            >
+              Tahun ajaran target belum dibuat
+            </span>
+          </div>
+
+          <Button
+            variant="outline"
+            size="sm"
+            class="h-8 text-xs font-medium shrink-0 self-center sm:self-auto"
+            @click="isChoosingYears = true"
+          >
+            <Pencil class="size-3.5 mr-1.5 text-muted-foreground" />
+            Ubah Tahun
+          </Button>
+        </div>
+
+        <div
+          v-else
+          class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border bg-muted/20 px-4 py-3 sm:py-2.5"
+        >
+          <div
+            class="flex flex-col sm:flex-row sm:items-center items-center gap-2 sm:gap-2.5"
+          >
+            <span class="text-xs font-medium text-muted-foreground shrink-0"
+              >Siklus Kenaikan:</span
+            >
+            <div class="flex items-center gap-2 sm:gap-2.5">
+              <Select v-model="sourceAcademicYearId">
+                <SelectTrigger class="h-8 w-36 sm:w-40 text-xs bg-background">
+                  <SelectValue placeholder="Tahun Asal" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem
+                    v-for="y in academicYears"
+                    :key="y.id"
+                    :value="y.id"
+                    class="text-xs"
                   >
-                    {{ step.title }}
-                  </p>
-                  <p class="text-xs text-muted-foreground hidden lg:block">
-                    {{ step.description }}
-                  </p>
-                </div>
-              </div>
-              <div
-                v-if="idx < steps.length - 1"
-                class="mx-4 h-[2px] flex-1 rounded-full transition-colors duration-300"
-                :class="idx < currentStep ? 'bg-primary' : 'bg-border'"
-              />
+                    {{ y.name }}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+
+              <ArrowRight class="size-3.5 text-muted-foreground shrink-0" />
+
+              <Select
+                v-model="targetAcademicYearId"
+                :disabled="!sourceAcademicYearId"
+              >
+                <SelectTrigger class="h-8 w-36 sm:w-40 text-xs bg-background">
+                  <SelectValue placeholder="Tahun Tujuan" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem
+                    v-for="y in availableTargetYears"
+                    :key="y.id"
+                    :value="y.id"
+                    class="text-xs"
+                  >
+                    {{ y.name }}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
             </div>
+          </div>
+
+          <Button
+            variant="secondary"
+            size="sm"
+            class="h-8 text-xs font-medium px-3 shrink-0 self-center sm:self-auto"
+            @click="isChoosingYears = false"
+          >
+            <Check class="size-3.5 mr-1" />
+            Selesai
+          </Button>
+        </div>
+
+        <!-- Nowhere to put them: the year ahead is missing the classes they
+             move into. Offered here because this is where it is noticed. -->
+        <div
+          v-if="!isLoadingRecommendations && studentsWithoutTarget.length > 0"
+          class="flex flex-wrap items-start justify-between gap-3 rounded-lg border border-amber-200 bg-amber-50/70 p-3.5 text-xs dark:border-amber-900/60 dark:bg-amber-950/20"
+        >
+          <div class="flex items-start gap-3">
+            <AlertCircle
+              class="mt-0.5 size-4 shrink-0 text-amber-600 dark:text-amber-400"
+            />
+            <p class="leading-relaxed">
+              <strong>{{ studentsWithoutTarget.length }} siswa</strong> belum
+              punya kelas tujuan —
+              {{ derived.target?.name ?? 'tahun ajaran tujuan' }} belum punya
+              kelas di tingkat yang mereka tuju. Salin kelas dari
+              {{ derived.source?.name ?? 'tahun ini' }} untuk mengisinya.
+            </p>
+          </div>
+
+          <Button
+            size="sm"
+            variant="outline"
+            :disabled="isCopyingClassrooms"
+            @click="copyClassroomsForward"
+          >
+            <Loader2
+              v-if="isCopyingClassrooms"
+              class="size-4 mr-2 animate-spin"
+            />
+            Salin Kelas
+          </Button>
+        </div>
+
+        <!-- Excluded Cohort Notice -->
+        <div
+          v-if="!isLoadingRecommendations && excludedGraduatingCount > 0"
+          class="rounded-lg border border-blue-200 bg-blue-50/70 dark:border-blue-900/60 dark:bg-blue-950/20 p-3.5 flex items-start gap-3 text-xs"
+        >
+          <GraduationCap
+            class="size-4 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5"
+          />
+          <div>
+            <span class="font-semibold text-blue-900 dark:text-blue-200">
+              {{ excludedGraduatingCount }} siswa tingkat akhir tidak termasuk
+              dalam kenaikan kelas ini.
+            </span>
+            <span class="text-blue-800/80 dark:text-blue-300/80 ml-1">
+              Kelulusan mereka dicatat terpisah lewat menu
+              <RouterLink
+                to="/academic/graduation"
+                class="font-semibold underline underline-offset-2 hover:text-blue-950 dark:hover:text-blue-100"
+              >
+                Kelulusan</RouterLink
+              >.
+            </span>
           </div>
         </div>
 
-        <div class="p-6 sm:p-8 md:p-10">
-          <PromotionStepSelect
-            v-if="currentStep === 0"
-            v-model:source-semester-id="sourceSemesterId"
-            v-model:target-semester-id="targetSemesterId"
-            :semesters="semesters"
-          />
+        <!-- DataTable -->
+        <PromotionStudentTable
+          :recommendations="promotionRecommendations"
+          :is-loading="isLoadingRecommendations"
+          :target-classrooms="targetClassrooms"
+          :passing-score="defaultPassingScore"
+          @update:decisions="onDecisionsUpdate"
+          @update:filter-class="selectedClass = $event"
+        />
 
-          <div
-            v-if="currentStep === 1"
-            class="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-6"
-          >
-            <div class="space-y-1 mb-6">
-              <h2 class="text-xl font-bold tracking-tight">
-                Review & Keputusan Per Siswa
-              </h2>
-              <p class="text-muted-foreground text-sm">
-                Sistem telah memberikan rekomendasi otomatis. Anda dapat
-                menyetujui atau menolak kenaikan kelas untuk setiap siswa. Siswa
-                yang ditolak wajib diberikan alasan.
-              </p>
+        <!-- Card Footer: Execution Status & Action -->
+        <div
+          v-if="
+            promotionRecommendations.length > 0 && !isLoadingRecommendations
+          "
+          class="-mx-6 -mb-6 mt-6 flex flex-col sm:flex-row items-center justify-between gap-4 border-t px-6 py-4"
+        >
+          <div class="flex items-center gap-4 text-xs">
+            <div class="flex items-center gap-1.5">
+              <div class="size-2.5 rounded-full bg-green-500" />
+              <span class="text-muted-foreground">
+                Naik Kelas:
+                <strong class="text-foreground">{{
+                  summaryStats.approved
+                }}</strong>
+              </span>
             </div>
-
-            <!--
-              Final-year students are not in this list. Saying so beside the
-              table is the whole safeguard: without it a promotion run looks
-              complete while the graduating cohort is still enrolled.
-            -->
-            <div
-              v-if="!isLoadingRecommendations && excludedGraduatingCount > 0"
-              class="rounded-xl border border-blue-200 bg-blue-50 dark:border-blue-900 dark:bg-blue-950/20 p-4 flex items-start gap-3"
-            >
-              <GraduationCap class="h-5 w-5 text-blue-600 shrink-0 mt-0.5" />
-              <div class="text-sm">
-                <p class="font-semibold text-blue-900 dark:text-blue-200">
-                  {{ excludedGraduatingCount }} siswa tingkat akhir tidak
-                  termasuk dalam kenaikan kelas ini.
-                </p>
-                <p class="text-blue-800/80 dark:text-blue-300/80 mt-0.5">
-                  Kelulusan mereka dicatat terpisah lewat menu
-                  <RouterLink
-                    to="/student/alumni"
-                    class="font-medium underline underline-offset-2"
-                    >Kelulusan &amp; Alumni</RouterLink
-                  >.
-                </p>
-              </div>
+            <div class="flex items-center gap-1.5">
+              <div class="size-2.5 rounded-full bg-amber-500" />
+              <span class="text-muted-foreground">
+                Tinggal Kelas:
+                <strong class="text-foreground">{{
+                  summaryStats.declined
+                }}</strong>
+              </span>
             </div>
-
-            <div
-              class="rounded-xl border shadow-sm overflow-hidden bg-background"
-            >
-              <div
-                v-if="isLoadingRecommendations"
-                class="flex flex-col items-center justify-center py-20"
-              >
-                <Loader2 class="h-8 w-8 animate-spin text-primary mb-4" />
-                <span class="text-muted-foreground font-medium"
-                  >Menganalisis data siswa...</span
-                >
-              </div>
-              <PromotionStudentTable
-                v-else
-                :recommendations="promotionRecommendations"
-                @update:decisions="onDecisionsUpdate"
-              />
+            <div class="text-muted-foreground">
+              Total:
+              <strong class="text-foreground">{{ summaryStats.total }}</strong>
+              Siswa
             </div>
           </div>
 
-          <div
-            v-if="currentStep === 2"
-            class="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-6"
+          <Button
+            size="default"
+            class="w-full sm:w-auto font-semibold px-6"
+            :disabled="!canExecute"
+            @click="openConfirmDialog"
           >
-            <div class="space-y-1 mb-6">
-              <h2 class="text-xl font-bold tracking-tight">Tinjauan Akhir</h2>
-              <p class="text-muted-foreground text-sm">
-                Periksa kembali ringkasan keputusan kenaikan kelas sebelum
-                memproses. Tindakan ini tidak dapat dibatalkan.
-              </p>
-            </div>
-
-            <div
-              class="rounded-xl border shadow-sm overflow-hidden bg-background p-6"
-            >
-              <PromotionPreviewTable
-                :decisions="studentDecisions"
-                :recommendations="promotionRecommendations"
-              />
-            </div>
-          </div>
-
-          <PromotionStepExecuting v-if="currentStep === 3" />
-
-          <div
-            v-if="currentStep < 3"
-            class="flex items-center justify-between mt-8 pt-6 border-t"
-          >
-            <Button
-              v-if="currentStep > 0"
-              variant="outline"
-              size="lg"
-              class="font-semibold"
-              @click="handleBack"
-            >
-              <ArrowLeft class="size-4 mr-2" />
-              Kembali
-            </Button>
-            <div v-else />
-
-            <Button
-              size="lg"
-              class="font-semibold px-8"
-              :disabled="
-                (currentStep === 0 && !canProceedStep0) ||
-                (currentStep === 1 && !canProceedStep1) ||
-                isPromoting ||
-                isLoadingRecommendations
-              "
-              @click="handleNext"
-            >
-              <Loader2
-                v-if="isPromoting || isLoadingRecommendations"
-                class="size-4 mr-2 animate-spin"
-              />
-              {{ currentStep === 2 ? 'Proses Kenaikan' : 'Selanjutnya' }}
-              <ArrowRight
-                v-if="
-                  currentStep < 2 && !isPromoting && !isLoadingRecommendations
-                "
-                class="size-4 ml-2"
-              />
-            </Button>
-          </div>
+            <Loader2
+              v-if="isPromoting"
+              class="size-4 mr-2 animate-spin"
+            />
+            Proses Kenaikan
+          </Button>
         </div>
       </div>
     </Card>
   </div>
 
-  <AlertDialog v-model:open="showConfirmDialog">
-    <AlertDialogContent>
-      <AlertDialogHeader>
-        <AlertDialogTitle>Proses Kenaikan Kelas?</AlertDialogTitle>
-        <AlertDialogDescription>
-          Tindakan ini akan memproses keputusan kenaikan kelas untuk semua siswa
-          yang telah direview. Proses ini tidak dapat dibatalkan. Pastikan semua
-          keputusan sudah benar sebelum melanjutkan.
-        </AlertDialogDescription>
-      </AlertDialogHeader>
-      <AlertDialogFooter>
-        <AlertDialogCancel :disabled="isPromoting"> Batal </AlertDialogCancel>
-        <AlertDialogAction
-          :disabled="isPromoting"
-          @click="handleExecute"
-        >
-          Ya, Proses Sekarang
-        </AlertDialogAction>
-      </AlertDialogFooter>
-    </AlertDialogContent>
-  </AlertDialog>
+  <!-- Confirmation Dialog -->
+  <Dialog v-model:open="showConfirmDialog">
+    <DialogContent
+      class="sm:max-w-3xl flex flex-col gap-0 p-0 overflow-hidden max-h-[90svh]"
+    >
+      <DialogHeader class="px-6 py-4 border-b shrink-0">
+        <DialogTitle>Konfirmasi Kenaikan Kelas</DialogTitle>
+      </DialogHeader>
 
+      <div class="overflow-y-auto px-6 py-4 space-y-4">
+        <!-- Loading state -->
+        <div
+          v-if="isPreviewing"
+          class="flex items-center gap-2 text-sm text-muted-foreground"
+        >
+          <Loader2 class="size-4 animate-spin" />
+          Memeriksa data yang akan diproses...
+        </div>
+
+        <template v-else>
+          <!-- Student preview table -->
+          <div
+            class="overflow-x-auto rounded-xl border bg-background shadow-xs"
+          >
+            <Table class="min-w-[600px]">
+              <TableHeader class="bg-muted/50">
+                <TableRow>
+                  <TableHead class="text-center text-xs font-semibold w-[100px]"
+                    >NIS</TableHead
+                  >
+                  <TableHead class="text-xs font-semibold"
+                    >Nama Siswa</TableHead
+                  >
+                  <TableHead class="text-center text-xs font-semibold w-[90px]"
+                    >Kelas Asal</TableHead
+                  >
+                  <TableHead class="text-center text-xs font-semibold w-[170px]"
+                    >Kelas Tujuan</TableHead
+                  >
+                  <TableHead class="text-center text-xs font-semibold w-[110px]"
+                    >Status</TableHead
+                  >
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                <TableRow
+                  v-for="row in previewRows"
+                  :key="row.studentId"
+                  :class="{ 'bg-destructive/5': !row.approved }"
+                  class="transition-colors"
+                >
+                  <TableCell class="text-center py-2 text-xs text-foreground">
+                    {{ row.nis }}
+                  </TableCell>
+                  <TableCell class="py-2">
+                    <div class="font-medium text-xs text-foreground">
+                      {{ row.studentName }}
+                    </div>
+                    <div
+                      v-if="row.declineReason"
+                      class="text-[11px] text-destructive italic mt-0.5"
+                    >
+                      Alasan: {{ row.declineReason }}
+                    </div>
+                  </TableCell>
+                  <TableCell class="text-center py-2 text-xs text-foreground">
+                    {{ row.sourceClass }}
+                  </TableCell>
+                  <TableCell
+                    class="text-center py-2 text-xs"
+                    :class="
+                      row.approved
+                        ? 'text-foreground'
+                        : 'text-destructive font-medium'
+                    "
+                  >
+                    {{ row.targetClass }}
+                  </TableCell>
+                  <TableCell
+                    class="text-center py-2 text-xs font-medium"
+                    :class="
+                      row.approved
+                        ? 'text-green-600 dark:text-green-400'
+                        : 'text-destructive'
+                    "
+                  >
+                    {{ row.approved ? 'Naik Kelas' : 'Tinggal Kelas' }}
+                  </TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </div>
+        </template>
+      </div>
+
+      <DialogFooter
+        class="px-6 py-3.5 border-t shrink-0 flex flex-col sm:flex-row sm:items-center justify-between sm:justify-between gap-3 w-full"
+      >
+        <!-- Left side: Summary Stats (paling kiri) -->
+        <div class="flex flex-wrap items-center gap-3 text-xs mr-auto">
+          <div
+            v-if="
+              (promotionPreview?.promotedCount ?? summaryStats.approved) > 0
+            "
+            class="flex items-center gap-1.5 font-medium text-green-600 dark:text-green-400"
+          >
+            <div class="size-2 rounded-full bg-green-500" />
+            {{ promotionPreview?.promotedCount ?? summaryStats.approved }} Naik
+            Kelas
+          </div>
+          <!-- A count of nothing is not news. The total below still says how
+               many are being processed, so nothing is lost by hiding it. -->
+          <div
+            v-if="
+              (promotionPreview?.repeatedCount ?? summaryStats.declined) > 0
+            "
+            class="flex items-center gap-1.5 font-medium text-amber-600 dark:text-amber-400"
+          >
+            <div class="size-2 rounded-full bg-amber-500" />
+            {{ promotionPreview?.repeatedCount ?? summaryStats.declined }}
+            Tinggal Kelas
+          </div>
+          <div class="text-muted-foreground">
+            Total:
+            <strong class="text-foreground">{{
+              promotionPreview?.totalStudents ?? summaryStats.total
+            }}</strong>
+            Siswa
+          </div>
+        </div>
+
+        <!-- Right side: Primary Action -->
+        <div class="flex items-center justify-end gap-2 shrink-0">
+          <!-- The way out has to be visible. This is a plain Dialog, so Esc
+               and the X still close it, but on a step that promotes a whole
+               class the only labelled control cannot be the one that does it —
+               a reader looking for "no" should not have to guess. -->
+          <Button
+            variant="outline"
+            :disabled="isPromoting"
+            @click="showConfirmDialog = false"
+          >
+            Batal
+          </Button>
+          <Button
+            :disabled="isPromoting || isPreviewing"
+            @click="handleExecute"
+          >
+            <Loader2
+              v-if="isPromoting"
+              class="size-4 mr-2 animate-spin"
+            />
+            Ya, Proses Sekarang
+          </Button>
+        </div>
+      </DialogFooter>
+    </DialogContent>
+  </Dialog>
+
+  <!-- Result Dialog -->
   <PromotionResultDialog
     v-model:open="showResultDialog"
     :result="promotionResult"

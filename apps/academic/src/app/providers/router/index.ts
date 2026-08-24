@@ -1,12 +1,13 @@
 import '@/shared/types/router'
 import { academicCalendarRoutes } from '@/features/academic/academic-calendar'
+import { academicSettingRoutes } from '@/features/academic/academic-setting'
 import { academicYearRoutes } from '@/features/academic/academic-year'
 import { authRoutes } from '@/features/platform/auth'
 import { classroomRoutes } from '@/features/academic/classroom'
 import { gradeRoutes } from '@/features/academic/grade'
 import { curriculumRoutes } from '@/features/academic/curriculum'
 import { curriculumSubjectRoutes } from '@/features/academic/curriculum-subject'
-import { dashboardRoutes } from '@/features/platform/dashboard'
+import { myDashboardRoutes } from '@/features/academic/my-dashboard'
 import { teacherRoutes } from '@/features/academic/teacher'
 import { schoolUnitRoutes } from '@/features/platform/school-unit'
 import { organizationRoutes } from '@/features/platform/organization'
@@ -65,7 +66,7 @@ const router = createRouter({
       // starting with '/' as a root path, which is what lets the shell wrap
       // these routes without changing a single URL.
       children: [
-        ...dashboardRoutes,
+        ...myDashboardRoutes,
         ...studentRoutes,
         ...studentGraduationRoutes,
         ...teacherRoutes,
@@ -76,6 +77,7 @@ const router = createRouter({
         ...lessonRoutes,
         ...scheduleRoutes,
         ...academicCalendarRoutes,
+        ...academicSettingRoutes,
         ...academicYearRoutes,
         ...semesterRoutes,
         ...curriculumRoutes,

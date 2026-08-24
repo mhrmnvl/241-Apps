@@ -1,5 +1,8 @@
 import api from '@/shared/utils/api'
-import type { ApiPaginatedResponse } from '@/shared/types/api'
+import type {
+  ApiPaginatedResponse,
+  ApiSingleResponse,
+} from '@/shared/types/api'
 import type {
   CalendarEventData,
   CalendarQueryParams,
@@ -17,12 +20,28 @@ export const academicCalendarApi = {
     )
   },
 
+  getCalendarById: (id: string) => {
+    // The envelope, not the entity: every response is wrapped in
+    // `{ statusCode, message, data }` by the API's interceptor, so the caller
+    // reads `res.data.data`. Typing it as the entity compiles and then hands
+    // back an object whose every field is undefined.
+    return api.get<ApiSingleResponse<CalendarEventData>>(
+      `/academic-calendars/${id}`,
+    )
+  },
+
   createCalendar: (payload: CalendarCreatePayload) => {
-    return api.post<CalendarEventData>('/academic-calendars', payload)
+    return api.post<ApiSingleResponse<CalendarEventData>>(
+      '/academic-calendars',
+      payload,
+    )
   },
 
   updateCalendar: (id: string, payload: CalendarUpdatePayload) => {
-    return api.patch<CalendarEventData>(`/academic-calendars/${id}`, payload)
+    return api.patch<ApiSingleResponse<CalendarEventData>>(
+      `/academic-calendars/${id}`,
+      payload,
+    )
   },
 
   deleteCalendar: (id: string) => {

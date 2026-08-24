@@ -8,6 +8,12 @@ export class AcademicYearResponseDto {
   @ApiProperty({ example: '2024/2025' })
   name!: string;
 
+  @ApiProperty({
+    example: 2024,
+    description: 'Calendar year this year opens in',
+  })
+  startYear!: number;
+
   @ApiProperty({ example: true })
   isActive!: boolean;
 }

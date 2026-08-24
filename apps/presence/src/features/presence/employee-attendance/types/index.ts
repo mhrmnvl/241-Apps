@@ -1,10 +1,5 @@
 export type PresenceDayStatus =
-  | 'PRESENT'
-  | 'LATE'
-  | 'ABSENT'
-  | 'ON_LEAVE'
-  | 'OFFICIAL_DUTY'
-  | 'NOT_EXPECTED'
+  'PRESENT' | 'LATE' | 'ABSENT' | 'ON_LEAVE' | 'OFFICIAL_DUTY' | 'NOT_EXPECTED'
 
 export type PresenceValueSource = 'SCAN' | 'MANUAL'
 

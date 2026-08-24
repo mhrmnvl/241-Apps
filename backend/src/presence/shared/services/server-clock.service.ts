@@ -11,8 +11,7 @@ export interface ClockAnchor {
 }
 
 export type ScanTimeVerdict =
-  | { accepted: true; occurredAt: Date }
-  | { accepted: false; reason: string };
+  { accepted: true; occurredAt: Date } | { accepted: false; reason: string };
 
 /**
  * The only source of recorded time in the presence domain.

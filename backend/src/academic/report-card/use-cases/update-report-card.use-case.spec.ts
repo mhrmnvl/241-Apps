@@ -38,9 +38,38 @@ describe('UpdateReportCardUseCase', () => {
       expect(mockRepo.update).toHaveBeenCalledWith('rap-1', {
         teacherNote: dto.teacherNote,
         rank: dto.rank,
-        isPublished: undefined,
       });
       expect(result).toEqual(updated);
+    });
+
+    /**
+     * Publishing has its own route, its own guard — a report card with no
+     * calculated average cannot be published — and its own permission,
+     * `report-cards.publish` rather than `report-cards.update`. Letting the
+     * flag through here skipped all three, and a published report card is what
+     * a parent sees through `GET /rapors/me`.
+     *
+     * The DTO no longer declares the field and `forbidNonWhitelisted` rejects
+     * it at the edge; this holds the line one layer further in, where a caller
+     * constructing the input directly would otherwise still get through.
+     */
+    it('never writes isPublished, whatever it is handed', async () => {
+      mockRepo.findById.mockResolvedValue({ id: 'rap-1', isPublished: false });
+      mockRepo.update.mockResolvedValue({ id: 'rap-1' });
+
+      await useCase.execute('rap-1', {
+        teacherNote: 'Baik',
+        isPublished: true,
+      } as UpdateReportCardDto);
+
+      expect(mockRepo.update).toHaveBeenCalledWith('rap-1', {
+        teacherNote: 'Baik',
+        rank: undefined,
+      });
+      expect(mockRepo.update).not.toHaveBeenCalledWith(
+        'rap-1',
+        expect.objectContaining({ isPublished: expect.anything() }),
+      );
     });
 
     it('should throw NotFoundException when not found', async () => {

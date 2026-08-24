@@ -38,6 +38,7 @@ export class SemesterPromotionController {
   @ApiResponse({
     status: 200,
     description: 'List of students with recommended promotion actions',
+    type: PromotionRecommendationDto,
   })
   @ApiResponse({ status: 400, description: 'Validation error' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
@@ -56,13 +57,14 @@ export class SemesterPromotionController {
   @ApiResponse({
     status: 200,
     description: 'Promotion preview with student counts per action',
+    type: PromotionPreviewDto,
   })
   @ApiResponse({ status: 400, description: 'Validation error' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Semester not found' })
-  async previewPromotion(
-    @Body() dto: PromotionDto,
-  ): Promise<PromotionPreviewDto> {
+  // Not async: a preview counts up the decisions in the request and reads
+  // nothing, so there is nothing to await. Nest serialises the value the same.
+  previewPromotion(@Body() dto: PromotionDto): PromotionPreviewDto {
     return this.previewPromotionService.execute(dto);
   }
 
@@ -75,6 +77,7 @@ export class SemesterPromotionController {
   @ApiResponse({
     status: 200,
     description: 'Promotion result with counts',
+    type: PromotionResultDto,
   })
   @ApiResponse({ status: 400, description: 'Validation error' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })

@@ -161,9 +161,11 @@ export const semesterService = {
     store.excludedGraduatingCount = 0
     try {
       const res = await semesterApi.getPromotionRecommendation(payload)
-      store.promotionRecommendations = res.data.items ?? []
-      store.excludedGraduatingCount = res.data.excludedGraduatingCount ?? 0
-      return { success: true, data: res.data }
+      const recommendation = res.data.data
+      store.promotionRecommendations = recommendation?.items ?? []
+      store.excludedGraduatingCount =
+        recommendation?.excludedGraduatingCount ?? 0
+      return { success: true, data: recommendation }
     } catch (error: unknown) {
       const msg = getIndonesianErrorMessage(
         error,
@@ -178,21 +180,21 @@ export const semesterService = {
 
   previewPromotion: async (payload: PromotionPayload) => {
     const store = useSemesterStore()
-    store.isPromoting = true
+    store.isPreviewing = true
     store.promotionPreview = null
     try {
       const res = await semesterApi.previewPromotion(payload)
-      store.promotionPreview = res.data
-      return { success: true, preview: res.data }
+      store.promotionPreview = res.data.data
+      return { success: true, preview: res.data.data }
     } catch (error: unknown) {
       const msg = getIndonesianErrorMessage(
         error,
-        'Gagal memuat preview kenaikan kelas.',
+        'Gagal memuat ringkasan kenaikan kelas.',
       )
       toast.error(msg)
       return { success: false, error: msg }
     } finally {
-      store.isPromoting = false
+      store.isPreviewing = false
     }
   },
 
@@ -201,7 +203,7 @@ export const semesterService = {
     store.isPromoting = true
     try {
       const res = await semesterApi.executePromotion(payload)
-      return { success: true, result: res.data }
+      return { success: true, result: res.data.data }
     } catch (error: unknown) {
       const msg = getIndonesianErrorMessage(
         error,

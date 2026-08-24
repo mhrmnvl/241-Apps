@@ -14,6 +14,7 @@ import {
   ApiBearerAuth,
   ApiOperation,
   ApiParam,
+  ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
 import { RequirePermissions } from '../../../platform/access-control/permission/decorators/require-permissions.decorator.js';
@@ -23,6 +24,10 @@ import { DeviceEntity } from '../domain/entities/device.entity.js';
 import { DeviceQueryDto } from '../dto/request/device-query.dto.js';
 import { RegisterDeviceDto } from '../dto/request/register-device.dto.js';
 import { UpdateDeviceDto } from '../dto/request/update-device.dto.js';
+import {
+  DeviceResponseDto,
+  DeviceWithTokenResponseDto,
+} from '../dto/response/device-response.dto.js';
 import {
   DeleteDeviceUseCase,
   GetDevicesUseCase,
@@ -50,6 +55,7 @@ export class DeviceController {
   @Get()
   @RequirePermissions('presence-devices.read')
   @ApiOperation({ summary: 'List gate devices with their last-seen time' })
+  @ApiResponse({ status: 200, type: [DeviceResponseDto] })
   async list(
     @Query() query: DeviceQueryDto,
   ): Promise<PaginatedResponse<DeviceEntity>> {
@@ -59,6 +65,7 @@ export class DeviceController {
   @Post()
   @RequirePermissions('presence-devices.create')
   @ApiOperation({ summary: 'Register a gate — the token is shown once' })
+  @ApiResponse({ status: 201, type: DeviceWithTokenResponseDto })
   async register(@Body() dto: RegisterDeviceDto): Promise<DeviceWithToken> {
     return this.registerUC.execute(dto);
   }
@@ -67,6 +74,7 @@ export class DeviceController {
   @RequirePermissions('presence-devices.update')
   @ApiParam({ name: 'id', format: 'uuid' })
   @ApiOperation({ summary: 'Issue a new token — the old one stops working' })
+  @ApiResponse({ status: 201, type: DeviceWithTokenResponseDto })
   async rotate(
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<DeviceWithToken> {
@@ -76,6 +84,7 @@ export class DeviceController {
   @Patch(':id')
   @RequirePermissions('presence-devices.update')
   @ApiParam({ name: 'id', format: 'uuid' })
+  @ApiResponse({ status: 200, type: DeviceResponseDto })
   async update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateDeviceDto,
@@ -87,6 +96,7 @@ export class DeviceController {
   @RequirePermissions('presence-devices.delete')
   @ApiParam({ name: 'id', format: 'uuid' })
   @ApiOperation({ summary: 'Retire a gate — its scan history is kept' })
+  @ApiResponse({ status: 200, type: DeviceResponseDto })
   async remove(@Param('id', ParseUUIDPipe) id: string): Promise<DeviceEntity> {
     return this.deleteUC.execute(id);
   }

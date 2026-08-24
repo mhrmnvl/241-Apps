@@ -12,6 +12,7 @@ import {
   ApiBearerAuth,
   ApiOperation,
   ApiParam,
+  ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
 import { CurrentUser } from '../../../core/decorators/current-user.decorator.js';
@@ -19,6 +20,10 @@ import type { AuthenticatedUser } from '../../../core/types/authenticated-user.t
 import { RequirePermissions } from '../../../platform/access-control/permission/decorators/require-permissions.decorator.js';
 import { JwtAuthGuard } from '../../../platform/auth/index.js';
 import { PaginatedResponse } from '../../../shared/domain/interfaces/repository.interface.js';
+import {
+  CredentialResponseDto,
+  CredentialWithCodeResponseDto,
+} from '../dto/response/credential-response.dto.js';
 import {
   CredentialWithCode,
   CredentialWithHolder,
@@ -53,6 +58,7 @@ export class CredentialController {
   @Get()
   @RequirePermissions('presence-credentials.read')
   @ApiOperation({ summary: 'List cards (never returns the card code)' })
+  @ApiResponse({ status: 200, type: [CredentialResponseDto] })
   async list(
     @Query() query: CredentialQueryDto,
   ): Promise<PaginatedResponse<CredentialWithHolder>> {
@@ -63,6 +69,7 @@ export class CredentialController {
   @Get('print')
   @RequirePermissions('presence-credentials.read')
   @ApiOperation({ summary: 'Card codes for a print run' })
+  @ApiResponse({ status: 200, type: [CredentialWithCodeResponseDto] })
   async print(
     @Query() query: CredentialPrintQueryDto,
   ): Promise<CredentialWithCode[]> {
@@ -72,6 +79,7 @@ export class CredentialController {
   @Get(':id')
   @RequirePermissions('presence-credentials.read')
   @ApiParam({ name: 'id', format: 'uuid' })
+  @ApiResponse({ status: 200, type: CredentialResponseDto })
   async detail(
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<CredentialWithHolder> {
@@ -81,6 +89,7 @@ export class CredentialController {
   @Post()
   @RequirePermissions('presence-credentials.create')
   @ApiOperation({ summary: 'Issue a card — the code is returned once' })
+  @ApiResponse({ status: 201, type: CredentialWithCodeResponseDto })
   async create(
     @Body() dto: IssueCredentialDto,
     @CurrentUser() user: AuthenticatedUser,
@@ -92,6 +101,7 @@ export class CredentialController {
   @RequirePermissions('presence-credentials.update')
   @ApiParam({ name: 'id', format: 'uuid' })
   @ApiOperation({ summary: 'Revoke a card — ends the holder’s expected days' })
+  @ApiResponse({ status: 201, type: CredentialResponseDto })
   async revokeCard(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: RevokeCredentialDto,
@@ -103,6 +113,7 @@ export class CredentialController {
   @RequirePermissions('presence-credentials.create')
   @ApiParam({ name: 'id', format: 'uuid' })
   @ApiOperation({ summary: 'Replace a lost card — history stays continuous' })
+  @ApiResponse({ status: 201, type: CredentialWithCodeResponseDto })
   async replaceCard(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: RevokeCredentialDto,

@@ -9,42 +9,27 @@ import {
   PromotionPreviewDto,
   PromotionPreviewItemDto,
 } from '../dto/response/promotion-preview.dto.js';
-import { IPromotionRepository } from '../domain/interfaces/promotion-repository.interface.js';
+import { PromotionSemesterResolver } from '../services/promotion-semester-resolver.service.js';
 
 @Injectable()
 export class PreviewPromotionUseCase {
-  constructor(private readonly promotionRepository: IPromotionRepository) {}
+  constructor(private readonly semesterResolver: PromotionSemesterResolver) {}
 
-  async execute(dto: PromotionDto): Promise<PromotionPreviewDto> {
-    const { sourceSemesterId, targetSemesterId, students } = dto;
+  /**
+   * Synchronous, because it is. A preview counts up the decisions it was
+   * handed — it reads no semester, no classroom and no enrolment — so there is
+   * nothing to await. The controller returning it into a promise is unchanged.
+   */
+  execute(dto: PromotionDto): PromotionPreviewDto {
+    const { sourceAcademicYearId, targetAcademicYearId, students } = dto;
 
-    if (sourceSemesterId === targetSemesterId) {
-      throw new BadRequestException(
-        'Source and target semester must be different',
-      );
-    }
-
-    const [sourceSemester, targetSemester] = await Promise.all([
-      this.promotionRepository.findSemesterWithAcademicYear(sourceSemesterId),
-      this.promotionRepository.findSemesterWithAcademicYear(targetSemesterId),
-    ]);
-
-    if (!sourceSemester) {
-      throw new NotFoundException(
-        `Source semester with ID ${sourceSemesterId} not found`,
-      );
-    }
-    if (!targetSemester) {
-      throw new NotFoundException(
-        `Target semester with ID ${targetSemesterId} not found`,
-      );
-    }
-
-    if (sourceSemester.academicYearId === targetSemester.academicYearId) {
-      throw new BadRequestException(
-        'Promotion requires different academic years. Use rollover for same academic year transitions.',
-      );
-    }
+    // Nothing here reads a term. A preview counts up the decisions it was
+    // handed, so the only thing worth refusing is a pair of years that is not
+    // a promotion at all.
+    this.semesterResolver.assertDifferentYears(
+      sourceAcademicYearId,
+      targetAcademicYearId,
+    );
 
     let promotedCount = 0;
     let repeatedCount = 0;

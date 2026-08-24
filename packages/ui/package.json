@@ -10,14 +10,14 @@
     "./lib/*": "./src/lib/*"
   },
   "dependencies": {
-    "reka-ui": "^2.9.8",
-    "@vueuse/core": "^14.3.0",
+    "reka-ui": "^2.10.3",
+    "@vueuse/core": "^14.4.0",
     "clsx": "^2.1.1",
     "tailwind-merge": "^3.6.0",
     "class-variance-authority": "^0.7.1",
     "lucide-vue-next": "^0.577.0",
     "@tanstack/vue-table": "^8.21.3",
-    "@internationalized/date": "^3.12.2",
+    "@internationalized/date": "^3.12.3",
     "vee-validate": "^4.15.1",
     "vue-sonner": "^2.0.9"
   },

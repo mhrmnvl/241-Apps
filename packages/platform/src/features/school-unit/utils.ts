@@ -28,6 +28,27 @@ export function toSchoolUnitProfile(
   }
 }
 
+/**
+ * A pin exists only when both halves of it do.
+ *
+ * Asked of an address, which is what holds the coordinate. The profile map
+ * asks it of the primary address and draws nothing when the answer is no —
+ * it never looks for a pin on some other address the school may have.
+ */
+export function hasCoordinates(
+  address: Pick<SchoolUnitAddress, 'latitude' | 'longitude'>,
+): boolean {
+  return (
+    typeof address.latitude === 'number' &&
+    typeof address.longitude === 'number'
+  )
+}
+
+/** Six decimals is about 10 cm — past that the digits are noise on a map. */
+export function formatCoordinate(value: number | null): string {
+  return typeof value === 'number' ? value.toFixed(6) : '-'
+}
+
 export function toSchoolUnitAddress(
   data: Partial<SchoolUnitAddress> | null | undefined,
 ): SchoolUnitAddress {
@@ -41,6 +62,10 @@ export function toSchoolUnitAddress(
     province: data?.province ?? EMPTY_ADDRESS.province,
     country: data?.country ?? EMPTY_ADDRESS.country,
     postalCode: data?.postalCode ?? EMPTY_ADDRESS.postalCode,
+    // `??` rather than `||`: 0 is a real coordinate — the equator and the
+    // prime meridian — and would otherwise be read as "no pin".
+    latitude: data?.latitude ?? null,
+    longitude: data?.longitude ?? null,
   }
 }
 
@@ -91,6 +116,8 @@ const schoolUnitAddressKeys: (keyof SchoolUnitAddress)[] = [
   'province',
   'country',
   'postalCode',
+  'latitude',
+  'longitude',
 ]
 
 export function hasSchoolUnitProfileChanges(

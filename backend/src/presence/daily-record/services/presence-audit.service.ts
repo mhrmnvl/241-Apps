@@ -4,8 +4,7 @@ import { CreateAuditLogUseCase } from '../../../platform/audit-log/use-cases/cre
 export const PRESENCE_AUDIT_RESOURCE = 'presence-record';
 
 export type PresenceAuditAction =
-  | 'presence-record.create'
-  | 'presence-record.correct';
+  'presence-record.create' | 'presence-record.correct';
 
 /**
  * Records the two actions that change someone's attendance by hand (FR-052).

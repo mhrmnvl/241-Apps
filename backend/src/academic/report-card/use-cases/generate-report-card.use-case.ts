@@ -14,6 +14,7 @@ import {
   ICurriculumSubjectRepository,
   type PassingScoreQuery,
 } from '../../curriculum/domain/interfaces/curriculum-subject-repository.interface.js';
+import { IAcademicSettingRepository } from '../../academic-setting/domain/interfaces/academic-setting-repository.interface.js';
 import { DEFAULT_PASSING_SCORE } from '../constants/report-card.constants.js';
 import { GenerateReportCardDto } from '../dto/request/generate-report-card.dto.js';
 import { IReportCardRepository } from '../domain/interfaces/report-card-repository.interface.js';
@@ -33,6 +34,7 @@ export class GenerateReportCardUseCase {
     private readonly studentScoreRepository: IStudentScoreRepository,
     private readonly enrollmentRepository: IEnrollmentRepository,
     private readonly curriculumSubjectRepository: ICurriculumSubjectRepository,
+    private readonly academicSettingRepository: IAcademicSettingRepository,
   ) {}
 
   /**
@@ -89,6 +91,7 @@ export class GenerateReportCardUseCase {
   private groupBySubject(
     scores: ReportCardScoreRow[],
     curriculumPassingScores: Map<string, number>,
+    defaultPassingScore: number,
   ): SubjectGradeInput[] {
     const bySubject = new Map<string, SubjectGradeInput>();
 
@@ -115,7 +118,7 @@ export class GenerateReportCardUseCase {
             curriculumPassingScores.get(
               `${assignment.classroom.gradeId}:${assignment.classroom.academicYearId}:${subject.id}`,
             ) ??
-            DEFAULT_PASSING_SCORE,
+            defaultPassingScore,
           typeWeights,
           assessments: [],
         };
@@ -160,9 +163,15 @@ export class GenerateReportCardUseCase {
       dto.enrollmentId,
     );
 
+    // The school's own figure, falling back to the constant only on a database
+    // with no settings row — which the migration makes impossible in practice.
+    const setting = await this.academicSettingRepository.find();
+    const defaultPassingScore =
+      setting?.defaultPassingScore ?? DEFAULT_PASSING_SCORE;
+
     const curriculumPassingScores = await this.resolvePassingScores(scores);
     const rows = calculateSubjectGrades(
-      this.groupBySubject(scores, curriculumPassingScores),
+      this.groupBySubject(scores, curriculumPassingScores, defaultPassingScore),
     );
     const totalAverage = calculateTotalAverage(rows);
 

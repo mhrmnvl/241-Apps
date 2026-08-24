@@ -1,8 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { GenerateRecommendationDto } from '../dto/request/generate-recommendation.dto.js';
 import {
   PromotionRecommendationDto,
@@ -10,51 +6,36 @@ import {
 } from '../dto/response/promotion-recommendation.dto.js';
 import { PromotionAction } from '../domain/enums/promotion-action.enum.js';
 import { IPromotionRepository } from '../domain/interfaces/promotion-repository.interface.js';
+import { isSameSection } from '../logic/classroom-section.js';
+import { PromotionSemesterResolver } from '../services/promotion-semester-resolver.service.js';
 
 @Injectable()
 export class GeneratePromotionRecommendationUseCase {
-  constructor(private readonly promotionRepository: IPromotionRepository) {}
+  constructor(
+    private readonly promotionRepository: IPromotionRepository,
+    private readonly semesterResolver: PromotionSemesterResolver,
+  ) {}
 
   async execute(
     dto: GenerateRecommendationDto,
   ): Promise<PromotionRecommendationDto> {
-    const { sourceSemesterId, targetSemesterId } = dto;
+    const { sourceAcademicYearId, targetAcademicYearId } = dto;
 
-    if (sourceSemesterId === targetSemesterId) {
-      throw new BadRequestException(
-        'Source and target semester must be different',
-      );
-    }
-
-    const [sourceSemester, targetSemester] = await Promise.all([
-      this.promotionRepository.findSemesterWithAcademicYear(sourceSemesterId),
-      this.promotionRepository.findSemesterWithAcademicYear(targetSemesterId),
-    ]);
-
-    if (!sourceSemester) {
-      throw new NotFoundException(
-        `Source semester with ID ${sourceSemesterId} not found`,
-      );
-    }
-    if (!targetSemester) {
-      throw new NotFoundException(
-        `Target semester with ID ${targetSemesterId} not found`,
-      );
-    }
-
-    if (sourceSemester.academicYearId === targetSemester.academicYearId) {
-      throw new BadRequestException(
-        'Promotion requires different academic years. Use rollover for same academic year transitions.',
-      );
-    }
+    // Only the source term is needed. Which one that is remains the resolver's
+    // call, not the caller's — but the target side of a recommendation is a
+    // set of classrooms, and those hang off the academic year rather than off
+    // a term. Asking for the target term here would refuse to plan a promotion
+    // into a year still being set up, which is exactly when you plan one.
+    const sourceSemester = await this.semesterResolver.resolveSource(
+      sourceAcademicYearId,
+      targetAcademicYearId,
+    );
 
     const [enrollments, targetClassrooms] = await Promise.all([
       this.promotionRepository.findActiveEnrollmentsWithDetails(
-        sourceSemesterId,
+        sourceSemester.id,
       ),
-      this.promotionRepository.findClassesByAcademicYear(
-        targetSemester.academicYearId,
-      ),
+      this.promotionRepository.findClassesByAcademicYear(targetAcademicYearId),
     ]);
 
     // Build a map of level (int) → next level's classrooms
@@ -100,10 +81,18 @@ export class GeneratePromotionRecommendationUseCase {
             const matchingTargets = targetClassrooms.filter(
               (c) => c.grade.level === nextLevel,
             );
+            // By section, not by code: codes carry the grade too, so `VII-A`
+            // never equals `VIII-A` and every VII class used to fall through
+            // to the first VIII class on the list. A class stays together.
+            const sectionMatch = matchingTargets.find((c) =>
+              isSameSection(enrollment.classroom.code, c.code),
+            );
+            // Only where a school names classes after the grade alone, and the
+            // grades therefore match one to one.
             const codeMatch = matchingTargets.find(
               (c) => c.code === enrollment.classroom.code,
             );
-            const bestMatch = codeMatch ?? matchingTargets[0];
+            const bestMatch = sectionMatch ?? codeMatch ?? matchingTargets[0];
 
             if (bestMatch) {
               targetClassroomId = bestMatch.id;

@@ -27,18 +27,47 @@ const emit = defineEmits<{
   'update:draftAddress': [value: SchoolUnitAddress]
 }>()
 
+/**
+ * A coordinate is optional, and an emptied field means "no pin" rather than 0 —
+ * which is a real place in the Atlantic. The preprocess turns the input's empty
+ * string into null before the number rules ever see it.
+ */
+const coordinate = (label: string, bound: number) =>
+  z.preprocess(
+    (value) =>
+      value === '' || value === null || value === undefined
+        ? null
+        : Number(value),
+    z
+      .number({ invalid_type_error: `${label} harus berupa angka.` })
+      .min(-bound, `${label} minimal -${bound}.`)
+      .max(bound, `${label} maksimal ${bound}.`)
+      .nullable(),
+  )
+
 const formSchema = toTypedSchema(
-  z.object({
-    street: z.string().min(1, 'Alamat wajib diisi.'),
-    rt: z.string().max(5, 'RT maksimal 5 karakter.').optional().default(''),
-    rw: z.string().max(5, 'RW maksimal 5 karakter.').optional().default(''),
-    village: z.string().min(1, 'Kelurahan / Desa wajib diisi.'),
-    district: z.string().min(1, 'Kecamatan wajib diisi.'),
-    city: z.string().min(1, 'Kota / Kabupaten wajib diisi.'),
-    province: z.string().min(1, 'Provinsi wajib diisi.'),
-    country: z.string().min(1, 'Negara wajib diisi.'),
-    postalCode: z.string().min(1, 'Kode Pos wajib diisi.'),
-  }),
+  z
+    .object({
+      street: z.string().min(1, 'Alamat wajib diisi.'),
+      rt: z.string().max(5, 'RT maksimal 5 karakter.').optional().default(''),
+      rw: z.string().max(5, 'RW maksimal 5 karakter.').optional().default(''),
+      village: z.string().min(1, 'Kelurahan / Desa wajib diisi.'),
+      district: z.string().min(1, 'Kecamatan wajib diisi.'),
+      city: z.string().min(1, 'Kota / Kabupaten wajib diisi.'),
+      province: z.string().min(1, 'Provinsi wajib diisi.'),
+      country: z.string().min(1, 'Negara wajib diisi.'),
+      postalCode: z.string().min(1, 'Kode Pos wajib diisi.'),
+      latitude: coordinate('Latitude', 90),
+      longitude: coordinate('Longitude', 180),
+    })
+    // The pair is checked here as well as on the server, which refuses half a
+    // coordinate with a 400. Catching it in the form puts the message under the
+    // field that is missing instead of in a toast that does not say which.
+    .refine((v) => (v.latitude === null) === (v.longitude === null), {
+      message:
+        'Isi Latitude dan Longitude bersama-sama, atau kosongkan keduanya.',
+      path: ['longitude'],
+    }),
 )
 
 const form = useForm({
@@ -53,6 +82,8 @@ const form = useForm({
     province: '',
     country: 'Indonesia',
     postalCode: '',
+    latitude: null,
+    longitude: null,
   },
 })
 
@@ -70,6 +101,10 @@ watch(
         province: newVal.province || '',
         country: newVal.country || 'Indonesia',
         postalCode: newVal.postalCode || '',
+        // `??` rather than `||`: 0 is a real coordinate, and would otherwise
+        // reset itself to null every time the form reloaded.
+        latitude: newVal.latitude ?? null,
+        longitude: newVal.longitude ?? null,
       },
     })
   },
@@ -239,6 +274,42 @@ const onSave = form.handleSubmit((values) => {
             <FormControl>
               <Input
                 placeholder="Masukkan kode pos"
+                v-bind="componentField"
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        </FormField>
+
+        <FormField
+          v-slot="{ componentField }"
+          name="latitude"
+        >
+          <FormItem class="content-start">
+            <FormLabel>Latitude</FormLabel>
+            <FormControl>
+              <Input
+                type="text"
+                inputmode="decimal"
+                placeholder="-6.914744"
+                v-bind="componentField"
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        </FormField>
+
+        <FormField
+          v-slot="{ componentField }"
+          name="longitude"
+        >
+          <FormItem class="content-start">
+            <FormLabel>Longitude</FormLabel>
+            <FormControl>
+              <Input
+                type="text"
+                inputmode="decimal"
+                placeholder="107.609810"
                 v-bind="componentField"
               />
             </FormControl>

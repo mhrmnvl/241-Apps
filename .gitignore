@@ -32,7 +32,6 @@ Thumbs.db
 # Editor & tooling
 .vscode/
 .idea/
-.agents/
 .eslintcache
 
 # TypeScript build info
@@ -45,9 +44,25 @@ Thumbs.db
 uploads/
 tmp/
 
-# Agent tooling / one-off docs (kept locally, not tracked)
-skills-lock.json
+# One-off docs (kept locally, not tracked)
 MONOREPO-MIGRATION-PLAN.md
 
-# Claude AI worktrees
-.claude/
+# Agent configuration is tracked on purpose.
+#
+# The skills, their lockfile and the local settings are how this repository is
+# worked on, and they lived only on one laptop — a reinstall took the setup with
+# it and left CLAUDE.md describing skills nobody had. They are text, they are
+# small, and none of them holds a credential.
+#
+# `.claude/worktrees/` is the exception and stays out: it is a gigabyte of
+# checked-out copies of this same repository.
+.claude/*
+!.claude/skills/
+!.claude/settings.local.json
+!.claude/memory/
+
+# Generated from the running Nest metadata by `pnpm openapi:emit`. Not
+# committed while most operations still declare no response type — a
+# checked-in artifact that is more than half empty invites being trusted.
+backend/openapi.json
+packages/shared/src/types/openapi.ts

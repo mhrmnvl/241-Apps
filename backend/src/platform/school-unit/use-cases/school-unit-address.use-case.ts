@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   Logger,
@@ -10,6 +11,26 @@ import {
 } from '../../../shared/dto/address.dto.js';
 import { ISchoolUnitRepository } from '../domain/interfaces/school-unit-repository.interface.js';
 import { ISchoolUnitAddressRepository } from '../domain/interfaces/school-unit-address-repository.interface.js';
+
+/**
+ * A coordinate is a pair or it is nothing.
+ *
+ * One half is not a place: it draws no pin, answers no distance, and there is
+ * no sensible thing for a map to do with it. Refusing it here keeps that out of
+ * the database, where it would otherwise sit looking like data.
+ *
+ * Both null is the ordinary state — most addresses are not pinned — and 0 is a
+ * real coordinate, so the check is against null rather than falsiness.
+ */
+function assertWholeCoordinate(
+  latitude: number | null,
+  longitude: number | null,
+): void {
+  if ((latitude === null) === (longitude === null)) return;
+  throw new BadRequestException(
+    'Latitude and longitude must be provided together, or both left empty.',
+  );
+}
 
 @Injectable()
 export class SchoolUnitAddressUseCase {
@@ -36,6 +57,8 @@ export class SchoolUnitAddressUseCase {
       );
     }
 
+    assertWholeCoordinate(dto.latitude ?? null, dto.longitude ?? null);
+
     const address = await this.schoolUnitAddressRepository.create(
       schoolUnit.id,
       dto,
@@ -52,6 +75,16 @@ export class SchoolUnitAddressUseCase {
     if (!existing) {
       throw new NotFoundException('School unit address has not been set yet');
     }
+
+    // Judged on the result, not on the payload. A patch carrying only
+    // `latitude` over an address that already has both is a perfectly ordinary
+    // request; the same patch over one that has neither leaves half a pin.
+    assertWholeCoordinate(
+      dto.latitude !== undefined ? dto.latitude : (existing.latitude ?? null),
+      dto.longitude !== undefined
+        ? dto.longitude
+        : (existing.longitude ?? null),
+    );
 
     const updated = await this.schoolUnitAddressRepository.update(
       existing.id,

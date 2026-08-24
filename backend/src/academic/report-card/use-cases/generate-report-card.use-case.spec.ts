@@ -1,5 +1,6 @@
 import { ConflictException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
+import { IAcademicSettingRepository } from '../../academic-setting/domain/interfaces/academic-setting-repository.interface.js';
 import { ICurriculumSubjectRepository } from '../../curriculum/domain/interfaces/curriculum-subject-repository.interface.js';
 import { IEnrollmentRepository } from '../../enrollment/domain/interfaces/enrollment-repository.interface.js';
 import { IStudentScoreRepository } from '../../assessment/domain/interfaces/student-score-repository.interface.js';
@@ -55,6 +56,14 @@ describe('GenerateReportCardUseCase', () => {
   };
   const mockScoreRepository = { findAllForReportCard: jest.fn() };
   const mockEnrollmentRepository = { findById: jest.fn() };
+  /**
+   * The school's own pass mark. Returned rather than left undefined so these
+   * cases exercise the settings path, not the constant fallback.
+   */
+  const mockAcademicSettingRepository = {
+    find: jest.fn().mockResolvedValue({ defaultPassingScore: 75 }),
+  };
+
   const mockCurriculumSubjectRepository = { findPassingScores: jest.fn() };
 
   beforeEach(async () => {
@@ -67,6 +76,10 @@ describe('GenerateReportCardUseCase', () => {
         {
           provide: ICurriculumSubjectRepository,
           useValue: mockCurriculumSubjectRepository,
+        },
+        {
+          provide: IAcademicSettingRepository,
+          useValue: mockAcademicSettingRepository,
         },
       ],
     }).compile();

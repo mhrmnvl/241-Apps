@@ -1,20 +1,37 @@
 model Address {
-  id           String    @id @default(uuid()) @db.Uuid
-  studentId    String?   @map("student_id") @db.Uuid
-  teacherId    String?   @map("teacher_id") @db.Uuid
-  parentId     String?   @map("parent_id") @db.Uuid
-  schoolUnitId String?   @map("school_unit_id") @db.Uuid
-  street       String    @db.VarChar(255)
-  rt           String    @db.VarChar(5)
-  rw           String    @db.VarChar(5)
-  village      String    @db.VarChar(100)
-  district     String    @db.VarChar(100)
-  city         String    @db.VarChar(100)
-  province     String    @db.VarChar(100)
-  country      String    @default("Indonesia") @db.VarChar(100)
-  postalCode   String    @map("postal_code") @db.VarChar(10)
-  isPrimary    Boolean   @default(false) @map("is_primary")
-  deletedAt    DateTime? @map("deleted_at")
+  id           String  @id @default(uuid()) @db.Uuid
+  studentId    String? @map("student_id") @db.Uuid
+  teacherId    String? @map("teacher_id") @db.Uuid
+  parentId     String? @map("parent_id") @db.Uuid
+  schoolUnitId String? @map("school_unit_id") @db.Uuid
+  street       String  @db.VarChar(255)
+  rt           String  @db.VarChar(5)
+  rw           String  @db.VarChar(5)
+  village      String  @db.VarChar(100)
+  district     String  @db.VarChar(100)
+  city         String  @db.VarChar(100)
+  province     String  @db.VarChar(100)
+  country      String  @default("Indonesia") @db.VarChar(100)
+  postalCode   String  @map("postal_code") @db.VarChar(10)
+  isPrimary    Boolean @default(false) @map("is_primary")
+
+  // Where this address actually is. A coordinate is the machine-readable form
+  // of the same fact the street line states in words, so it belongs to the
+  // address rather than to whoever owns it — no amount of parsing turns
+  // "Jl. Pesantren No. 2" into a pin you can trust.
+  //
+  // Nullable and unused by most rows today: only the school's own address is
+  // pinned. Students are the obvious next holder — zonasi is a distance from
+  // home to school — but nothing reads them yet.
+  //
+  // Float, not Decimal. Decimal is the right answer for money, where a binary
+  // fraction eventually loses a cent; a coordinate has no such duty, and double
+  // precision carries far more digits than the ~9 a WGS84 pin needs. It also
+  // reaches the client as a JSON number — `Prisma.Decimal` serialises to a
+  // string, which every caller would then have to remember to coerce.
+  latitude  Float?
+  longitude Float?
+  deletedAt DateTime? @map("deleted_at")
 
   teacher    Teacher?    @relation(fields: [teacherId], references: [id])
   parent     Parent?     @relation(fields: [parentId], references: [id])

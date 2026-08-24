@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { AcademicYear } from '../types'
-import AcademicYearFormSheet from '../components/AcademicYearFormSheet.vue'
+import AcademicYearFormDialog from '../components/AcademicYearFormDialog.vue'
 import { createAcademicYearColumns } from '../components/columns'
 import { useAcademicYearList } from '../composables/useAcademicYearList'
 import { DataTable } from '@/ui'
@@ -120,7 +120,7 @@ onMounted(() => {
           filter-placeholder="Cari tahun ajaran..."
         />
 
-        <AcademicYearFormSheet
+        <AcademicYearFormDialog
           v-if="isAddModalOpen"
           v-model:open="isAddModalOpen"
           :edit-data="editingItem"

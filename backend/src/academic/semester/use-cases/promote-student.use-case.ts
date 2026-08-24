@@ -8,43 +8,28 @@ import { PromotionAction } from '../domain/enums/promotion-action.enum.js';
 import { PromotionDto } from '../dto/request/promotion.dto.js';
 import { PromotionResultDto } from '../dto/response/promotion-result.dto.js';
 import { IPromotionRepository } from '../domain/interfaces/promotion-repository.interface.js';
+import { PromotionSemesterResolver } from '../services/promotion-semester-resolver.service.js';
 
 @Injectable()
 export class PromoteStudentsUseCase {
   private readonly logger = new Logger(PromoteStudentsUseCase.name);
 
-  constructor(private readonly promotionRepository: IPromotionRepository) {}
+  constructor(
+    private readonly promotionRepository: IPromotionRepository,
+    private readonly semesterResolver: PromotionSemesterResolver,
+  ) {}
 
   async execute(dto: PromotionDto): Promise<PromotionResultDto> {
-    const { sourceSemesterId, targetSemesterId, students } = dto;
+    const { sourceAcademicYearId, targetAcademicYearId, students } = dto;
 
-    if (sourceSemesterId === targetSemesterId) {
-      throw new BadRequestException(
-        'Source and target semester must be different',
+    // Both terms, because this is the step that writes: an enrolment row
+    // carries a `semesterId`, so the target term has to exist before anyone
+    // can be put in it.
+    const { source: sourceSemester, target: targetSemester } =
+      await this.semesterResolver.resolveBoth(
+        sourceAcademicYearId,
+        targetAcademicYearId,
       );
-    }
-
-    const [sourceSemester, targetSemester] = await Promise.all([
-      this.promotionRepository.findSemesterWithAcademicYear(sourceSemesterId),
-      this.promotionRepository.findSemesterWithAcademicYear(targetSemesterId),
-    ]);
-
-    if (!sourceSemester) {
-      throw new NotFoundException(
-        `Source semester with ID ${sourceSemesterId} not found`,
-      );
-    }
-    if (!targetSemester) {
-      throw new NotFoundException(
-        `Target semester with ID ${targetSemesterId} not found`,
-      );
-    }
-
-    if (sourceSemester.academicYearId === targetSemester.academicYearId) {
-      throw new BadRequestException(
-        'Promotion requires different academic years. Use rollover for same academic year transitions.',
-      );
-    }
 
     for (const student of students) {
       const sourceClassroom = await this.promotionRepository.findClassroomById(
@@ -108,8 +93,8 @@ export class PromoteStudentsUseCase {
     }
 
     const result = await this.promotionRepository.executePromotion(
-      sourceSemesterId,
-      targetSemesterId,
+      sourceSemester.id,
+      targetSemester.id,
       students,
     );
 

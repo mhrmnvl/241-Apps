@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import { Loader2, Save, Trash2 } from 'lucide-vue-next'
+import { Loader2, Trash2 } from 'lucide-vue-next'
 import { useTimeSlotManager } from '../composables/useTimeSlotManager'
 import type { EditableTimeSlotRow } from '../composables/useTimeSlotManager'
 import { Button } from '@/ui/button'
@@ -13,7 +13,17 @@ import {
   SelectValue,
 } from '@/ui/select'
 import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/ui/table'
+import {
   AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
@@ -50,105 +60,98 @@ defineExpose({
   addRow,
   saveAll,
   hasChanges,
+  loading,
 })
 </script>
 
 <template>
-  <div class="rounded-md border overflow-hidden">
+  <div class="border rounded-md bg-background overflow-hidden">
     <div class="overflow-x-auto">
-      <table class="w-full border-collapse text-sm">
-        <thead>
-          <tr class="bg-muted/40 text-muted-foreground">
-            <th class="border-b px-4 py-3 text-center font-semibold w-20">
-              Urutan
-            </th>
-            <th
-              class="border-b px-4 py-3 text-center font-semibold min-w-[160px]"
-            >
+      <Table>
+        <TableHeader>
+          <TableRow class="bg-muted/50 hover:bg-muted/50">
+            <TableHead class="text-center font-medium w-20"> Urutan </TableHead>
+            <TableHead class="text-center font-medium min-w-[160px]">
               Nama Jam
-            </th>
-            <th class="border-b px-4 py-3 text-center font-semibold w-32">
-              Mulai
-            </th>
-            <th class="border-b px-4 py-3 text-center font-semibold w-32">
+            </TableHead>
+            <TableHead class="text-center font-medium w-32"> Mulai </TableHead>
+            <TableHead class="text-center font-medium w-32">
               Selesai
-            </th>
-            <th
-              class="border-b px-4 py-3 text-center font-semibold min-w-[150px]"
-            >
+            </TableHead>
+            <TableHead class="text-center font-medium min-w-[150px]">
               Tipe
-            </th>
-            <th
+            </TableHead>
+            <TableHead
               v-if="props.canEdit"
-              class="border-b px-4 py-3 text-center font-semibold w-28"
+              class="text-center font-medium w-20"
             >
               Aksi
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-if="loading">
-            <td
+            </TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          <TableRow v-if="loading">
+            <TableCell
               :colspan="props.canEdit ? 6 : 5"
-              class="px-4 py-10 text-center text-muted-foreground"
+              class="h-32 text-center text-muted-foreground"
             >
-              <Loader2 class="size-5 mx-auto animate-spin" />
-            </td>
-          </tr>
+              <Loader2 class="size-6 mx-auto animate-spin" />
+            </TableCell>
+          </TableRow>
 
-          <tr v-else-if="rows.length === 0">
-            <td
+          <TableRow v-else-if="rows.length === 0">
+            <TableCell
               :colspan="props.canEdit ? 6 : 5"
-              class="px-4 py-10 text-center text-sm text-muted-foreground italic"
+              class="h-32 text-center text-sm text-muted-foreground italic"
             >
               Belum ada jam pelajaran. Klik "Tambah Baris" untuk membuat.
-            </td>
-          </tr>
+            </TableCell>
+          </TableRow>
 
-          <tr
+          <TableRow
             v-for="(row, index) in rows"
             v-else
             :key="row.id ?? `draft-${index}`"
-            class="hover:bg-muted/10 transition-colors"
-            :class="row.id === null ? 'bg-primary/5' : ''"
           >
-            <td class="border-b px-3 py-2 text-center align-middle">
+            <TableCell class="text-center align-middle py-2 px-3">
               <Input
                 v-model.number="row.order"
                 type="number"
                 min="1"
-                class="w-16 text-center mx-auto"
+                class="w-16 text-center mx-auto h-9"
                 :disabled="!props.canEdit || row.saving"
               />
-            </td>
-            <td class="border-b px-3 py-2 align-middle">
+            </TableCell>
+            <TableCell class="align-middle py-2 px-3">
               <Input
                 v-model="row.name"
                 placeholder="cth: Jam ke-1"
-                class="text-center"
+                class="text-center h-9"
                 :disabled="!props.canEdit || row.saving"
               />
-            </td>
-            <td class="border-b px-3 py-2 align-middle">
+            </TableCell>
+            <TableCell class="align-middle py-2 px-3">
               <Input
                 v-model="row.startTime"
                 type="time"
+                class="h-9 text-center"
                 :disabled="!props.canEdit || row.saving"
               />
-            </td>
-            <td class="border-b px-3 py-2 align-middle">
+            </TableCell>
+            <TableCell class="align-middle py-2 px-3">
               <Input
                 v-model="row.endTime"
                 type="time"
+                class="h-9 text-center"
                 :disabled="!props.canEdit || row.saving"
               />
-            </td>
-            <td class="border-b px-3 py-2 align-middle">
+            </TableCell>
+            <TableCell class="align-middle py-2 px-3">
               <Select
                 v-model="row.typeId"
                 :disabled="!props.canEdit || row.saving"
               >
-                <SelectTrigger class="w-full justify-center">
+                <SelectTrigger class="w-full justify-center h-9">
                   <SelectValue placeholder="Pilih tipe..." />
                 </SelectTrigger>
                 <SelectContent>
@@ -161,47 +164,26 @@ defineExpose({
                   </SelectItem>
                 </SelectContent>
               </Select>
-            </td>
-            <td
+            </TableCell>
+            <TableCell
               v-if="props.canEdit"
-              class="border-b px-3 py-2 text-center align-middle"
+              class="text-center align-middle py-2 px-3"
             >
               <div class="flex items-center justify-center">
                 <Button
                   size="icon"
                   variant="ghost"
-                  class="text-destructive hover:text-destructive h-8 w-8"
+                  class="text-destructive hover:text-destructive hover:bg-destructive/10 h-8 w-8"
                   :disabled="row.saving"
                   @click="requestDelete(row, index)"
                 >
                   <Trash2 class="size-4" />
                 </Button>
               </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- Simpan Semua Button at bottom -->
-    <div
-      v-if="props.canEdit"
-      class="flex justify-end gap-2 border-t px-6 py-4 bg-muted/10"
-    >
-      <Button
-        :disabled="!hasChanges || loading"
-        @click="saveAll"
-      >
-        <Loader2
-          v-if="loading"
-          class="size-4 mr-2 animate-spin"
-        />
-        <Save
-          v-else
-          class="size-4 mr-2"
-        />
-        Simpan
-      </Button>
+            </TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>
     </div>
   </div>
 
@@ -217,18 +199,15 @@ defineExpose({
         </AlertDialogDescription>
       </AlertDialogHeader>
       <AlertDialogFooter>
-        <Button
-          variant="outline"
-          @click="pendingDeleteIndex = null"
-        >
+        <AlertDialogCancel @click="pendingDeleteIndex = null">
           Batal
-        </Button>
-        <Button
-          variant="destructive"
+        </AlertDialogCancel>
+        <AlertDialogAction
+          class="bg-destructive text-destructive-foreground hover:bg-destructive/90"
           @click="confirmDelete"
         >
           Hapus
-        </Button>
+        </AlertDialogAction>
       </AlertDialogFooter>
     </AlertDialogContent>
   </AlertDialog>

@@ -29,7 +29,13 @@ overrides:
   'brace-expansion@1': ^1.1.18 # DoS via unbounded expansion (vite → stylus → glob)
   'brace-expansion@2': ^2.1.4 # same, other major (exceljs → archiver)
   fast-uri: ^3.1.5 # host confusion via backslash authority (vue-router → unplugin)
-  js-yaml: ^5.2.2 # exponential parse time in flow collections (@nestjs/swagger)
+  # Scoped per major, for the reason spelled out above brace-expansion. The
+  # unscoped form forced v5 onto @redocly/openapi-core, which pins 4.3.1 and
+  # calls `types.merge` — removed in v5 — so openapi-typescript died on
+  # "Cannot read properties of undefined (reading 'merge')" before reading a
+  # single schema. Both lines are past the advisory's fix.
+  'js-yaml@4': ^4.3.1 # exponential parse time in flow collections (@redocly/openapi-core)
+  'js-yaml@5': ^5.2.2 # same, other major (@nestjs/swagger)
   nanoid: ^3.3.17 # custom generators can loop indefinitely (postcss)
   postcss: ^8.5.23 # incomplete fix of GHSA-6g55-p6wh-862q (vite, @vue/compiler-sfc)
 

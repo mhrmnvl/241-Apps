@@ -83,8 +83,8 @@ export function useCalendarDialogForm(props: {
       const s = values.startDate ?? ''
       const e = values.endDate ?? ''
       return {
-        start: s ? parseDate(s.split('T')[0]!) : undefined,
-        end: e ? parseDate(e.split('T')[0]!) : undefined,
+        start: s ? parseDate(s.split('T')[0]) : undefined,
+        end: e ? parseDate(e.split('T')[0]) : undefined,
       }
     },
     set(val: DateRange) {

@@ -13,10 +13,14 @@ name: Promotion Guard
 # `Deploy to Development` run for this precise SHA is a fact, and this asks the
 # API for it rather than trusting the description of the pull request.
 #
-# Note what this can and cannot do. Without branch protection — which needs
-# GitHub Pro on a private repository — a red check does not *block* the merge
-# button. It makes the violation loud and recorded. Combined with
-# `.husky/pre-push`, that is the strongest guard available on this plan.
+# This check is required by branch protection on `main`, so a red result blocks
+# the merge button rather than merely recording the violation. It is free here
+# because the repository is public; GitHub charges for protection on private
+# ones, which is what an earlier version of this comment was describing.
+#
+# One gap: `enforce_admins` is off, so an administrator can still merge over a
+# red check. Turning it on is a deliberate trade — it also removes the hotfix
+# path for a production emergency while CI is failing.
 on:
   pull_request:
     branches: [main]

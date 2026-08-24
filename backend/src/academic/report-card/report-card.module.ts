@@ -20,9 +20,11 @@ import { UpdateReportCardUseCase } from './use-cases/update-report-card.use-case
 import { PdfService } from './services/pdf.service.js';
 import { ExportReportCardPdfUseCase } from './use-cases/export-report-card-pdf.use-case.js';
 import { IReportCardRepository } from './domain/interfaces/report-card-repository.interface.js';
+import { AcademicSettingModule } from '../academic-setting/academic-setting.module.js';
 
 @Module({
   imports: [
+    AcademicSettingModule,
     AssessmentModule,
     CurriculumModule,
     EnrollmentModule,

@@ -10,17 +10,10 @@ export type AdmissionStatus =
 export type AdmissionDocumentStatus = 'PENDING' | 'APPROVED' | 'REJECTED'
 
 export type AdmissionPaymentStatus =
-  | 'UNPAID'
-  | 'PENDING'
-  | 'VERIFIED'
-  | 'REJECTED'
+  'UNPAID' | 'PENDING' | 'VERIFIED' | 'REJECTED'
 
 export type AdmissionNotificationType =
-  | 'STATUS_CHANGE'
-  | 'DOCUMENT'
-  | 'PAYMENT'
-  | 'ANNOUNCEMENT'
-  | 'GENERAL'
+  'STATUS_CHANGE' | 'DOCUMENT' | 'PAYMENT' | 'ANNOUNCEMENT' | 'GENERAL'
 
 export type ParentRelation = 'FATHER' | 'MOTHER' | 'GUARDIAN'
 export type UserGender = 'MALE' | 'FEMALE'

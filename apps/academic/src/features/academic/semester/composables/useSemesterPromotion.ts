@@ -7,6 +7,7 @@ export function useSemesterPromotion() {
   const {
     isPromoting,
     promotionPreview,
+    isPreviewing,
     promotionRecommendations,
     excludedGraduatingCount,
     isLoadingRecommendations,
@@ -15,6 +16,7 @@ export function useSemesterPromotion() {
   return {
     isPromoting,
     promotionPreview,
+    isPreviewing,
     promotionRecommendations,
     excludedGraduatingCount,
     isLoadingRecommendations,

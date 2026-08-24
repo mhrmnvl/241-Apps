@@ -11,6 +11,8 @@ import {
 export interface AcademicYearEntity {
   id: string;
   name: string;
+  /** The calendar year the school year opens in: 2026 for "2026/2027". */
+  startYear: number;
   isActive: boolean;
   deletedAt: Date | null;
 }

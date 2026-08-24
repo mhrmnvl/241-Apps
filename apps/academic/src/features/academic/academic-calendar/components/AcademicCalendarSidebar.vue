@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/card'
-import { Badge } from '@/ui/badge'
-import { Calendar as CalendarIcon, Clock } from 'lucide-vue-next'
+import { Calendar as CalendarIcon, ChevronRight, Clock } from 'lucide-vue-next'
 import type { CalendarEventData, EventClickInfo } from '../types'
+import { useCalendarFormat } from '../composables/useCalendarFormat'
 
 defineProps<{
   todayEvents: CalendarEventData[]
@@ -13,37 +13,15 @@ const emit = defineEmits<{
   eventClick: [info: EventClickInfo]
 }>()
 
-const padZero = (num: number) => num.toString().padStart(2, '0')
-
-const formatTime = (dateStr: string) => {
-  const d = new Date(dateStr)
-  return `${padZero(d.getHours())}:${padZero(d.getMinutes())}`
-}
-
-const formatDateStr = (dateStr: string) => {
-  const d = new Date(dateStr)
-  const months = [
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'Mei',
-    'Jun',
-    'Jul',
-    'Agu',
-    'Sep',
-    'Okt',
-    'Nov',
-    'Des',
-  ]
-  return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`
-}
+// The same function, month array and all, used to live here too.
+const { formatDateStr } = useCalendarFormat()
 </script>
 
 <template>
   <div class="space-y-6">
-    <Card class="border-none shadow-none bg-primary/5">
-      <CardHeader class="pb-3 px-4">
+    <!-- Kegiatan Hari Ini -->
+    <Card class="bg-primary/5">
+      <CardHeader class="border-b px-4 py-3">
         <CardTitle
           class="text-sm font-semibold text-primary flex items-center gap-2"
         >
@@ -51,15 +29,15 @@ const formatDateStr = (dateStr: string) => {
           Kegiatan Hari Ini
         </CardTitle>
       </CardHeader>
-      <CardContent class="px-4 pb-4">
+      <CardContent class="p-3 pt-0">
         <div
           v-if="todayEvents.length > 0"
-          class="space-y-3"
+          class="rounded-xl border bg-background divide-y divide-border/60 overflow-hidden shadow-xs"
         >
           <div
             v-for="event in todayEvents"
             :key="event.id"
-            class="bg-background rounded-xl p-3 shadow-sm border cursor-pointer hover:border-primary/50 transition-colors"
+            class="group flex items-center justify-between gap-3 p-3 hover:bg-muted/40 cursor-pointer transition-colors"
             @click="
               emit('eventClick', {
                 event: {
@@ -70,24 +48,14 @@ const formatDateStr = (dateStr: string) => {
               })
             "
           >
-            <div class="font-medium text-sm mb-1 line-clamp-1">
+            <div
+              class="font-medium text-xs sm:text-sm text-foreground group-hover:text-primary transition-colors line-clamp-1 flex-1"
+            >
               {{ event.title }}
             </div>
-            <div
-              class="text-xs text-muted-foreground flex items-center gap-1.5 mb-2"
-            >
-              <CalendarIcon class="size-3" />
-              <span
-                >{{ formatTime(event.startDate) }} -
-                {{ formatTime(event.endDate) }}</span
-              >
-            </div>
-            <Badge
-              variant="secondary"
-              class="text-[10px] px-1.5 py-0"
-            >
-              {{ event.type?.name ?? 'Kegiatan' }}
-            </Badge>
+            <ChevronRight
+              class="size-3.5 text-muted-foreground/40 group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0"
+            />
           </div>
         </div>
         <div
@@ -99,22 +67,23 @@ const formatDateStr = (dateStr: string) => {
       </CardContent>
     </Card>
 
-    <Card class="border-none shadow-none bg-muted/30">
-      <CardHeader class="pb-3 px-4">
+    <!-- Kegiatan Mendatang -->
+    <Card class="bg-muted/30">
+      <CardHeader class="border-b px-4 py-3">
         <CardTitle class="text-sm font-semibold flex items-center gap-2">
           <CalendarIcon class="size-4" />
           Kegiatan Mendatang
         </CardTitle>
       </CardHeader>
-      <CardContent class="px-4 pb-4">
+      <CardContent class="p-3 pt-0">
         <div
           v-if="upcomingEvents.length > 0"
-          class="space-y-3"
+          class="rounded-xl border bg-background divide-y divide-border/60 overflow-hidden shadow-xs"
         >
           <div
             v-for="event in upcomingEvents"
             :key="event.id"
-            class="bg-background rounded-xl p-3 shadow-sm border cursor-pointer hover:border-primary/50 transition-colors"
+            class="group flex items-center justify-between gap-3 p-3 hover:bg-muted/40 cursor-pointer transition-colors"
             @click="
               emit('eventClick', {
                 event: {
@@ -125,21 +94,19 @@ const formatDateStr = (dateStr: string) => {
               })
             "
           >
-            <div class="font-medium text-sm mb-1 line-clamp-1">
-              {{ event.title }}
+            <div class="min-w-0 flex-1">
+              <div
+                class="font-medium text-xs sm:text-sm text-foreground group-hover:text-primary transition-colors line-clamp-1"
+              >
+                {{ event.title }}
+              </div>
+              <div class="text-[11px] text-muted-foreground mt-0.5">
+                {{ formatDateStr(event.startDate) }}
+              </div>
             </div>
-            <div
-              class="text-xs text-muted-foreground flex items-center gap-1.5 mb-2"
-            >
-              <CalendarIcon class="size-3" />
-              <span>{{ formatDateStr(event.startDate) }}</span>
-            </div>
-            <Badge
-              variant="outline"
-              class="text-[10px] px-1.5 py-0 bg-background"
-            >
-              {{ event.type?.name ?? 'Kegiatan' }}
-            </Badge>
+            <ChevronRight
+              class="size-3.5 text-muted-foreground/40 group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0"
+            />
           </div>
         </div>
         <div

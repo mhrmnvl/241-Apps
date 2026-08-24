@@ -16,6 +16,7 @@ import {
 } from './prisma-classroom.includes.js';
 import type {
   ClassroomQueryInput,
+  CopyClassroomsResult,
   CreateClassroomRepositoryInput,
   UpdateClassroomRepositoryInput,
 } from '../../domain/interfaces/classroom-repository.interface.js';
@@ -177,6 +178,58 @@ export class PrismaClassroomRepository extends IClassroomRepository {
   async countTeachingAssignments(id: string): Promise<number> {
     return this.prisma.teachingAssignment.count({
       where: { classroomId: id, deletedAt: null },
+    });
+  }
+
+  async copyToAcademicYear(
+    sourceAcademicYearId: string,
+    targetAcademicYearId: string,
+  ): Promise<CopyClassroomsResult> {
+    const source = await this.prisma.classroom.findMany({
+      where: { academicYearId: sourceAcademicYearId, deletedAt: null },
+      select: {
+        gradeId: true,
+        code: true,
+        name: true,
+        capacity: true,
+        isActive: true,
+      },
+      orderBy: [{ gradeId: 'asc' }, { code: 'asc' }],
+    });
+
+    // One transaction. A half-copied year is worse than an uncopied one: the
+    // promotion screen reads the levels present in the target to work out what
+    // follows what, so a partial set makes it recommend confidently and wrongly.
+    return this.prisma.$transaction(async (tx) => {
+      const existing = await tx.classroom.findMany({
+        where: { academicYearId: targetAcademicYearId, deletedAt: null },
+        select: { gradeId: true, code: true },
+      });
+      const taken = new Set(
+        existing.map((row) => `${row.gradeId}:${row.code}`),
+      );
+
+      const toCreate = source.filter(
+        (row) => !taken.has(`${row.gradeId}:${row.code}`),
+      );
+
+      if (toCreate.length > 0) {
+        await tx.classroom.createMany({
+          data: toCreate.map((row) => ({
+            academicYearId: targetAcademicYearId,
+            gradeId: row.gradeId,
+            code: row.code,
+            name: row.name,
+            capacity: row.capacity,
+            isActive: row.isActive,
+          })),
+        });
+      }
+
+      return {
+        created: toCreate.length,
+        skipped: source.length - toCreate.length,
+      };
     });
   }
 }

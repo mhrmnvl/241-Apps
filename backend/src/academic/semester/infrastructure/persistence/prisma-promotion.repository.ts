@@ -28,6 +28,58 @@ export class PrismaPromotionRepository implements IPromotionRepository {
     });
   }
 
+  async findEdgeSemesterOfAcademicYear(
+    academicYearId: string,
+    edge: 'first' | 'last',
+  ) {
+    return this.prisma.semester.findFirst({
+      where: { academicYearId, deletedAt: null },
+      select: {
+        id: true,
+        type: true,
+        academicYearId: true,
+        academicYear: { select: { id: true, name: true } },
+      },
+      // `sequence` and not `name`: see the port. `id` breaks the tie so two
+      // terms sharing a sequence still resolve to the same one every run —
+      // a promotion that picked a different term on a re-run would be worse
+      // than one that picked the wrong term consistently.
+      orderBy: [
+        { type: { sequence: edge === 'first' ? 'asc' : 'desc' } },
+        { id: 'asc' },
+      ],
+    });
+  }
+
+  async findLatestEnrolledSemesterOfAcademicYear(academicYearId: string) {
+    return this.prisma.semester.findFirst({
+      where: {
+        academicYearId,
+        deletedAt: null,
+        // The roster is the point. A term nobody is enrolled in has nothing to
+        // promote out of, whatever the calendar says about its order.
+        enrollments: {
+          some: { status: EnrollmentStatus.ACTIVE, deletedAt: null },
+        },
+      },
+      select: {
+        id: true,
+        type: true,
+        academicYearId: true,
+        academicYear: { select: { id: true, name: true } },
+      },
+      orderBy: [{ type: { sequence: 'desc' } }, { id: 'asc' }],
+    });
+  }
+
+  async findAcademicYearName(id: string) {
+    const year = await this.prisma.academicYear.findFirst({
+      where: { id, deletedAt: null },
+      select: { name: true },
+    });
+    return year?.name ?? null;
+  }
+
   async findClassroomById(id: string) {
     return this.prisma.classroom.findFirst({
       where: { id, deletedAt: null },

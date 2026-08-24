@@ -22,29 +22,29 @@
     "@241/platform": "workspace:*",
     "@241/shared": "workspace:*",
     "@241/ui": "workspace:*",
-    "@internationalized/date": "^3.12.2",
+    "@internationalized/date": "^3.12.3",
     "@tailwindcss/vite": "^4.3.0",
     "@tanstack/vue-query": "^5.101.4",
     "@tanstack/vue-table": "^8.21.3",
     "@vee-validate/zod": "^4.15.1",
-    "@vueuse/core": "^14.3.0",
-    "axios": "^1.16.1",
+    "@vueuse/core": "^14.4.0",
+    "axios": "^1.19.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.4.0",
     "lucide-vue-next": "^0.577.0",
     "pinia": "^3.0.4",
-    "reka-ui": "^2.9.8",
+    "reka-ui": "^2.10.3",
     "tailwind-merge": "^3.6.0",
     "tailwindcss": "^4.3.0",
     "vee-validate": "^4.15.1",
-    "vue": "^3.5.35",
+    "vue": "^3.5.41",
     "vue-router": "^5.1.0",
     "vue-sonner": "^2.0.9",
     "zod": "^3.25.76"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^6.0.7",
-    "vitest": "^3.2.4"
+    "vitest": "^4.1.11"
   }
 }

@@ -13,6 +13,7 @@ export interface AcademicYearQueryInput extends PaginationQueryInput {
 
 export interface CreateAcademicYearRepositoryInput {
   name: string;
+  startYear: number;
   isActive?: boolean;
 }
 
@@ -47,7 +48,6 @@ export abstract class IAcademicYearRepository {
   abstract deactivateAll(excludeId?: string): Promise<AffectedCount>;
   abstract activateById(id: string): Promise<AcademicYearEntity>;
   abstract countActive(): Promise<number>;
-  abstract countSemesters(academicYearId: string): Promise<number>;
   abstract deactivateSemestersByAcademicYearId(
     id: string,
   ): Promise<AffectedCount>;

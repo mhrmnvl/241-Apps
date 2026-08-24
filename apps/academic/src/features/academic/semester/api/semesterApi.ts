@@ -52,21 +52,33 @@ export const semesterApi = {
     return api.patch<ApiSingleResponse<Semester>>(`/semesters/${id}/deactivate`)
   },
 
+  /**
+   * Enveloped like everything else.
+   *
+   * These three used to type the body as the payload itself, so `res.data` was
+   * read as the answer when it was the `{ statusCode, message, data }` wrapper
+   * the global interceptor puts around every response. Nothing complained: the
+   * type said the field was there, so the compiler agreed and the value was
+   * `undefined` only at runtime.
+   */
   getPromotionRecommendation: (payload: GenerateRecommendationPayload) => {
-    return api.post<PromotionRecommendationResponse>(
+    return api.post<ApiSingleResponse<PromotionRecommendationResponse>>(
       '/semesters/promote/recommend',
       payload,
     )
   },
 
   previewPromotion: (payload: PromotionPayload) => {
-    return api.post<PromotionPreviewResponse>(
+    return api.post<ApiSingleResponse<PromotionPreviewResponse>>(
       '/semesters/promote/preview',
       payload,
     )
   },
 
   executePromotion: (payload: PromotionPayload) => {
-    return api.post<PromotionResult>('/semesters/promote', payload)
+    return api.post<ApiSingleResponse<PromotionResult>>(
+      '/semesters/promote',
+      payload,
+    )
   },
 }

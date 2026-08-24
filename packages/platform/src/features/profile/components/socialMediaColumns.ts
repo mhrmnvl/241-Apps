@@ -25,8 +25,8 @@ export const createSocialMediaColumns = (
     cell: ({ row }) => {
       const sosmeds = row.original.socialMedias || []
       if (sosmeds.length === 0) return '-'
-      if (sosmeds.length === 1) return sosmeds[0]!.platformName
-      return `${sosmeds[0]!.platformName} + ${sosmeds.length - 1}`
+      if (sosmeds.length === 1) return sosmeds[0].platformName
+      return `${sosmeds[0].platformName} + ${sosmeds.length - 1}`
     },
   },
   {
@@ -35,7 +35,7 @@ export const createSocialMediaColumns = (
     cell: ({ row }) => {
       const sosmeds = row.original.socialMedias || []
       if (sosmeds.length === 0) return '-'
-      if (sosmeds.length === 1) return sosmeds[0]!.username
+      if (sosmeds.length === 1) return sosmeds[0].username
 
       return h(
         'button',
@@ -54,7 +54,7 @@ export const createSocialMediaColumns = (
       const sosmeds = row.original.socialMedias || []
       if (sosmeds.length === 0) return '-'
       if (sosmeds.length === 1) {
-        const sm = sosmeds[0]!
+        const sm = sosmeds[0]
         const url = `${sm.platformBaseUrl}${sm.username}`
         return h(
           'a',
