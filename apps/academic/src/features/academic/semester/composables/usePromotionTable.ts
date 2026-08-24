@@ -181,6 +181,39 @@ export function usePromotionTable(
     emitDecisions()
   }
 
+  /**
+   * Sends one student somewhere other than the class recommended for them.
+   *
+   * The recommendation pairs a class with its own section a grade up, which is
+   * right for most of a cohort and wrong for the few a school moves on
+   * purpose. The server validates the destination — right academic year, and
+   * a level that goes up for PROMOTE or stays put for REPEAT — so what is
+   * offered here has to be filtered to that, and what is chosen is trusted.
+   */
+  function setTargetClassroom(studentId: string, classroomId: string) {
+    const d = decisions.value.get(studentId)
+    if (!d) return
+
+    decisions.value.set(studentId, { ...d, targetClassroomId: classroomId })
+    emitDecisions()
+  }
+
+  /**
+   * The same for everyone ticked, which is how a school that reshuffles its
+   * classes each year works: a group at a time, not a student at a time.
+   *
+   * Only the ticked students move, and the selection survives so a mistake can
+   * be undone by choosing again rather than by re-ticking thirty rows.
+   */
+  function setTargetClassroomForSelected(classroomId: string) {
+    for (const studentId of selectedIds.value) {
+      const d = decisions.value.get(studentId)
+      if (!d) continue
+      decisions.value.set(studentId, { ...d, targetClassroomId: classroomId })
+    }
+    emitDecisions()
+  }
+
   function bulkApprove() {
     for (const id of selectedIds.value) {
       approveStudent(id)
@@ -241,6 +274,8 @@ export function usePromotionTable(
     toggleSelect,
     getDecision,
     approveStudent,
+    setTargetClassroom,
+    setTargetClassroomForSelected,
     openDeclineDialog,
     confirmDecline,
     bulkApprove,

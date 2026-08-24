@@ -41,10 +41,13 @@ import type {
   PromotionStudentDecision,
 } from '../types'
 import { usePromotionTable } from '../composables/usePromotionTable'
+import type { Classroom } from '@/features/academic/classroom'
 
 const props = defineProps<{
   recommendations: PromotionRecommendationItem[]
   isLoading?: boolean
+  /** Every class the year ahead has, filtered per row to the allowed level. */
+  targetClassrooms?: Classroom[]
 }>()
 
 const emit = defineEmits<{
@@ -73,6 +76,8 @@ const {
   toggleSelect,
   getDecision,
   approveStudent,
+  setTargetClassroom,
+  setTargetClassroomForSelected,
   openDeclineDialog,
   bulkApprove,
   bulkDecline,
@@ -111,6 +116,35 @@ function formatScore(score?: number | null) {
 }
 
 /** Resolve the target classroom name for a student based on their current decision. */
+/**
+ * Where this row is allowed to go.
+ *
+ * The server refuses a destination at the wrong level — up for PROMOTE, the
+ * same for REPEAT — so offering one would only produce a rejection after the
+ * confirmation. A held-back student is offered their own grade; everyone else
+ * the grade above.
+ */
+function targetOptionsFor(row: PromotionRecommendationItem): Classroom[] {
+  const decision = getDecision(row.studentId)
+  const wantedGrade =
+    decision && !decision.approved ? row.sourceLevel : row.targetLevel
+  if (!wantedGrade) return []
+
+  return (props.targetClassrooms ?? []).filter(
+    (classroom) => classroom.grade?.name === wantedGrade,
+  )
+}
+
+/** The class chosen for this row, which starts as the recommended one. */
+function chosenTargetFor(row: PromotionRecommendationItem): string {
+  return getDecision(row.studentId)?.targetClassroomId ?? ''
+}
+
+const bulkTargetOptions = computed(() => {
+  const first = filteredRows.value[0]
+  return first ? targetOptionsFor(first) : []
+})
+
 function getTargetClass(row: PromotionRecommendationItem): string {
   const decision = getDecision(row.studentId)
   if (!decision) return row.targetClassroomName ?? '-'
@@ -200,6 +234,32 @@ function getTargetClass(row: PromotionRecommendationItem): string {
             <XCircle class="size-3.5 mr-1" />
             Tolak ({{ selectedIds.size }})
           </Button>
+
+          <!-- A school that reshuffles its classes moves a group at a time.
+               The selection survives the choice, so a wrong pick is undone by
+               choosing again rather than by re-ticking thirty rows. -->
+          <Select
+            v-if="bulkTargetOptions.length > 0"
+            :model-value="''"
+            :disabled="selectedIds.size === 0"
+            @update:model-value="setTargetClassroomForSelected(String($event))"
+          >
+            <SelectTrigger class="h-9 w-44 text-xs">
+              <SelectValue
+                :placeholder="`Pindahkan ${selectedIds.size} ke...`"
+              />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem
+                v-for="option in bulkTargetOptions"
+                :key="option.id"
+                :value="option.id"
+                class="text-xs"
+              >
+                {{ option.code }}
+              </SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
     </div>
@@ -358,6 +418,32 @@ function getTargetClass(row: PromotionRecommendationItem): string {
                 >
                   {{ getTargetClass(row) }}
                 </Badge>
+
+                <!-- The recommendation pairs a class with its own section a
+                     grade up, which is right for most and wrong for the few a
+                     school moves on purpose. Only levels the server accepts
+                     are offered. -->
+                <Select
+                  v-if="targetOptionsFor(row).length > 0"
+                  :model-value="chosenTargetFor(row)"
+                  @update:model-value="
+                    setTargetClassroom(row.studentId, String($event))
+                  "
+                >
+                  <SelectTrigger class="h-7 w-28 text-[11px]">
+                    <SelectValue placeholder="Pilih kelas" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem
+                      v-for="option in targetOptionsFor(row)"
+                      :key="option.id"
+                      :value="option.id"
+                      class="text-xs"
+                    >
+                      {{ option.code }}
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </TableCell>
             <TableCell class="text-center py-2.5">
