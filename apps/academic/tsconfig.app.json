@@ -15,6 +15,14 @@
       "@/master-data/*": ["../../packages/master-data/src/*"]
     },
 
+    // The two sweep specs under `src/__tests__` read the repository off disk —
+    // `node:fs/promises`, `node:path`, `process.cwd()`. `@vue/tsconfig`'s DOM
+    // preset carries no node types, and until vitest 4 they resolved anyway
+    // because vitest 3 pulled `@types/node` in transitively. It no longer
+    // does, so the dependency is declared and named here rather than inherited
+    // by luck.
+    "types": ["node"],
+
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,

@@ -12,13 +12,12 @@ describe('useImageUpload', () => {
   beforeEach(() => {
     createObjectURL = vi.fn(() => 'blob:mock-url')
     revokeObjectURL = vi.fn()
-    vi.stubGlobal(
-      'URL',
-      class extends URL {
-        static createObjectURL = createObjectURL
-        static revokeObjectURL = revokeObjectURL
-      },
-    )
+    // Only the two statics are used, so only the two are stubbed. Extending
+    // the real `URL` to hang them off it dragged its whole static side along —
+    // `canParse`, `parse`, a `prototype` — and an anonymous subclass cannot
+    // satisfy that, which is a type error about a class nobody is
+    // instantiating.
+    vi.stubGlobal('URL', { createObjectURL, revokeObjectURL })
   })
 
   afterEach(() => {
