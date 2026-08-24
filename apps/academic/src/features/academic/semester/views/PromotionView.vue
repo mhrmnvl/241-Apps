@@ -39,7 +39,9 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useSemesterList } from '../composables/useSemesterList'
 import { useSemesterPromotion } from '../composables/useSemesterPromotion'
 import { derivePromotionYears } from '../logic/derivePromotionYears'
+import { classroomApi } from '@/features/academic/classroom'
 import { classroomService } from '@/features/academic/classroom'
+import type { Classroom } from '@/features/academic/classroom'
 
 const router = useRouter()
 
@@ -98,6 +100,48 @@ const studentsWithoutTarget = computed(() =>
 )
 
 /**
+ * The classes the year ahead has, so a student can be sent somewhere other
+ * than the one recommended for them.
+ *
+ * Fetched rather than derived from the recommendation, which names only the
+ * class it chose. The server validates the destination — right year, and a
+ * level that goes up for PROMOTE or stays put for REPEAT — so the table
+ * filters this list to the level each row is allowed.
+ */
+const targetClassrooms = ref<Classroom[]>([])
+
+async function loadTargetClassrooms(academicYearId: string) {
+  try {
+    const res = await classroomApi.getClassrooms({
+      academicYearId,
+      limit: 200,
+    })
+    targetClassrooms.value = res.data.data ?? []
+  } catch {
+    // A missing list costs the picker, not the promotion: every row keeps the
+    // destination the server recommended, and the run still works.
+    targetClassrooms.value = []
+  }
+}
+
+/**
+ * Only the class on screen.
+ *
+ * The class filter is not optional — nothing is listed until one is chosen —
+ * so the screen reads as being about that class. The button used to cover
+ * every class behind it, which meant reviewing VII-A and promoting all four.
+ */
+const decisionsForSelectedClass = computed(() => {
+  if (!selectedClass.value) return []
+  const inClass = new Set(
+    promotionRecommendations.value
+      .filter((rec) => rec.sourceClassroomName === selectedClass.value)
+      .map((rec) => rec.studentId),
+  )
+  return studentDecisions.value.filter((d) => inClass.has(d.studentId))
+})
+
+/**
  * Gives the year ahead the classes this one has, then asks again.
  *
  * Copying is idempotent server-side, so pressing this twice is harmless — and
@@ -115,16 +159,29 @@ async function copyClassroomsForward() {
       target,
     )
     if (outcome.success) {
-      await fetchPromotionRecommendation({
-        sourceAcademicYearId: source,
-        targetAcademicYearId: target,
-      })
+      // The picker's options are among what was just created, so both are
+      // refreshed — otherwise the new classes exist but cannot be chosen.
+      await Promise.all([
+        fetchPromotionRecommendation({
+          sourceAcademicYearId: source,
+          targetAcademicYearId: target,
+        }),
+        loadTargetClassrooms(target),
+      ])
     }
   } finally {
     isCopyingClassrooms.value = false
   }
 }
 const studentDecisions = ref<PromotionStudentDecision[]>([])
+
+/**
+ * The class the table is filtered to, which is also what the button acts on.
+ *
+ * Reported by the table rather than owned here: the filter is its control, and
+ * two copies of the same choice is one more thing that can disagree.
+ */
+const selectedClass = ref('')
 const showConfirmDialog = ref(false)
 const showResultDialog = ref(false)
 const promotionResult = ref<PromotionResult | null>(null)
@@ -136,10 +193,12 @@ const availableTargetYears = computed(() =>
 const canExecute = computed(() => {
   if (!sourceAcademicYearId.value || !targetAcademicYearId.value) return false
   if (isLoadingRecommendations.value || isPromoting.value) return false
-  if (promotionRecommendations.value.length === 0) return false
-  if (studentDecisions.value.length === 0) return false
+  // One class at a time, and only the one on screen. Nothing is listed until
+  // a class is chosen, so promoting more than that was promoting unseen.
+  if (!selectedClass.value) return false
+  if (decisionsForSelectedClass.value.length === 0) return false
 
-  return studentDecisions.value.every((d) => {
+  return decisionsForSelectedClass.value.every((d) => {
     if (!d.approved && !d.declineReason) return false
     // Every decision needs a classroom, including a student held back — they
     // still enrol somewhere, in the grade they were already in. The server
@@ -150,18 +209,23 @@ const canExecute = computed(() => {
   })
 })
 
+/** About the class on screen, which is what the button acts on. */
 const summaryStats = computed(() => {
   let approved = 0
   let declined = 0
-  for (const d of studentDecisions.value) {
+  for (const d of decisionsForSelectedClass.value) {
     if (d.approved) approved++
     else declined++
   }
-  return { approved, declined, total: studentDecisions.value.length }
+  return {
+    approved,
+    declined,
+    total: decisionsForSelectedClass.value.length,
+  }
 })
 
 function buildPayload(): PromotionPayload {
-  const students: PromotionStudentPayload[] = studentDecisions.value
+  const students: PromotionStudentPayload[] = decisionsForSelectedClass.value
     // Provably empty by the time this runs — `canExecute` gates the only
     // caller on every decision having a classroom. It is a filter rather than
     // a non-null assertion so that if that gate is ever loosened, the payload
@@ -226,10 +290,13 @@ watch(
   [sourceAcademicYearId, targetAcademicYearId],
   async ([source, target]) => {
     if (source && target) {
-      await fetchPromotionRecommendation({
-        sourceAcademicYearId: source,
-        targetAcademicYearId: target,
-      })
+      await Promise.all([
+        fetchPromotionRecommendation({
+          sourceAcademicYearId: source,
+          targetAcademicYearId: target,
+        }),
+        loadTargetClassrooms(target),
+      ])
     }
   },
 )
@@ -445,7 +512,9 @@ onMounted(async () => {
         <PromotionStudentTable
           :recommendations="promotionRecommendations"
           :is-loading="isLoadingRecommendations"
+          :target-classrooms="targetClassrooms"
           @update:decisions="onDecisionsUpdate"
+          @update:filter-class="selectedClass = $event"
         />
       </div>
 
@@ -494,7 +563,9 @@ onMounted(async () => {
             v-else
             class="size-4 mr-2"
           />
-          Eksekusi Kenaikan Kelas ({{ summaryStats.total }})
+          Naikkan
+          <template v-if="selectedClass">{{ selectedClass }}</template>
+          ({{ summaryStats.total }} siswa)
         </Button>
       </div>
     </Card>
@@ -504,7 +575,11 @@ onMounted(async () => {
   <AlertDialog v-model:open="showConfirmDialog">
     <AlertDialogContent>
       <AlertDialogHeader>
-        <AlertDialogTitle>Proses Kenaikan Kelas?</AlertDialogTitle>
+        <AlertDialogTitle>
+          Naikkan
+          <template v-if="selectedClass">kelas {{ selectedClass }}</template>
+          <template v-else>kelas ini</template>?
+        </AlertDialogTitle>
         <AlertDialogDescription>
           <span
             v-if="isPreviewing"
@@ -514,15 +589,17 @@ onMounted(async () => {
             Memeriksa data yang akan diproses...
           </span>
           <template v-else>
-            Tindakan ini akan memproses data kenaikan kelas untuk
+            Memproses
             <strong>
               {{ promotionPreview?.totalStudents ?? summaryStats.total }} siswa
             </strong>
-            ({{ promotionPreview?.promotedCount ?? summaryStats.approved }} naik
-            kelas,
+            dari kelas <strong>{{ selectedClass }}</strong> saja ({{
+              promotionPreview?.promotedCount ?? summaryStats.approved
+            }}
+            naik kelas,
             {{ promotionPreview?.repeatedCount ?? summaryStats.declined }}
-            tinggal kelas). Siswa akan langsung didaftarkan ke kelas tujuan pada
-            tahun ajaran target.
+            tinggal kelas). Kelas lain tidak tersentuh — pilih kelas berikutnya
+            di filter untuk memprosesnya.
           </template>
         </AlertDialogDescription>
       </AlertDialogHeader>
