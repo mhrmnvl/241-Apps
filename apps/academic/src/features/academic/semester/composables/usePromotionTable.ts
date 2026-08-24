@@ -91,6 +91,35 @@ export function usePromotionTable(
     return items
   })
 
+  /**
+   * Changing the class filter drops the ticks made in the previous class.
+   *
+   * The promotion runs one class at a time, and everything bulk acts on
+   * `selectedIds` — approve, decline, and "Pindahkan N ke...". Ticking all of
+   * VII-A and then switching to VIII-A left those thirty-four still selected
+   * and off screen, so the next bulk action reached students the operator
+   * could not see and had not chosen, and their decisions changed without
+   * anything to show it.
+   *
+   * A tick means "this row, here". Carrying it into another class is carrying
+   * a different sentence.
+   */
+  watch(filterClass, () => {
+    selectedIds.value = new Set()
+  })
+
+  /**
+   * The ticked rows that are actually on screen.
+   *
+   * Every bulk action goes through this rather than through `selectedIds`, so
+   * a selection can never reach past what is being looked at — including past
+   * a search that narrowed the class further. Clearing on a filter change is
+   * what stops it happening; this is what makes it impossible.
+   */
+  const selectedVisibleRows = computed(() =>
+    filteredRows.value.filter((row) => selectedIds.value.has(row.studentId)),
+  )
+
   const allVisibleSelected = computed(() => {
     if (filteredRows.value.length === 0) return false
     return filteredRows.value.every((r) => selectedIds.value.has(r.studentId))
@@ -214,17 +243,20 @@ export function usePromotionTable(
    * be undone by choosing again rather than by re-ticking thirty rows.
    */
   function setTargetClassroomForSelected(classroomId: string) {
-    for (const studentId of selectedIds.value) {
-      const d = decisions.value.get(studentId)
+    for (const row of selectedVisibleRows.value) {
+      const d = decisions.value.get(row.studentId)
       if (!d) continue
-      decisions.value.set(studentId, { ...d, targetClassroomId: classroomId })
+      decisions.value.set(row.studentId, {
+        ...d,
+        targetClassroomId: classroomId,
+      })
     }
     emitDecisions()
   }
 
   function bulkApprove() {
-    for (const id of selectedIds.value) {
-      approveStudent(id)
+    for (const row of selectedVisibleRows.value) {
+      approveStudent(row.studentId)
     }
     selectedIds.value.clear()
   }
@@ -249,11 +281,11 @@ export function usePromotionTable(
   function confirmBulkDecline() {
     if (!declineReason.value.trim()) return
 
-    for (const studentId of selectedIds.value) {
-      const d = decisions.value.get(studentId)
+    for (const row of selectedVisibleRows.value) {
+      const d = decisions.value.get(row.studentId)
       if (!d) continue
 
-      decisions.value.set(studentId, {
+      decisions.value.set(row.studentId, {
         ...d,
         approved: false,
         action: 'REPEAT',
@@ -280,6 +312,7 @@ export function usePromotionTable(
     filterClass,
     filterStatus,
     selectedIds,
+    selectedVisibleRows,
     showDeclineDialog,
     declineTarget,
     declineReason,
