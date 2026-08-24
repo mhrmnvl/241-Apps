@@ -61,6 +61,7 @@ const {
   filterClass,
   filterStatus,
   selectedIds,
+  selectedVisibleRows,
   showDeclineDialog,
   declineReason,
   uniqueClasses,
@@ -135,9 +136,7 @@ function chosenTargetFor(row: PromotionRecommendationItem): string {
 }
 
 const bulkTargetOptions = computed(() => {
-  const chosen = filteredRows.value.filter((row) =>
-    selectedIds.value.has(row.studentId),
-  )
+  const chosen = selectedVisibleRows.value
   if (chosen.length === 0) return []
 
   const grades = new Set(
@@ -330,7 +329,7 @@ function getTargetClass(row: PromotionRecommendationItem): string {
             <TableHead class="text-center font-semibold text-xs w-[100px]">
               Kelas Asal
             </TableHead>
-            <TableHead class="text-center font-semibold text-xs w-[150px]">
+            <TableHead class="text-center font-semibold text-xs w-[120px]">
               Kelas Tujuan
             </TableHead>
             <TableHead class="text-center font-semibold text-xs w-[130px]">
@@ -364,7 +363,7 @@ function getTargetClass(row: PromotionRecommendationItem): string {
                 ><Skeleton class="h-5 w-16 mx-auto rounded-full"
               /></TableCell>
               <TableCell class="text-center py-3"
-                ><Skeleton class="h-7 w-28 mx-auto rounded-md"
+                ><Skeleton class="h-7 w-20 mx-auto rounded-md"
               /></TableCell>
               <TableCell class="text-center py-3"
                 ><Skeleton class="h-7 w-24 mx-auto rounded-md"
@@ -433,7 +432,7 @@ function getTargetClass(row: PromotionRecommendationItem): string {
             <TableCell class="text-center py-2.5">
               <Badge
                 variant="outline"
-                class="font-medium bg-background text-[11px] px-2 py-0.5"
+                class="font-medium bg-transparent text-[11px] px-2 py-0.5"
               >
                 {{ row.sourceClassroomName }}
               </Badge>
@@ -456,7 +455,7 @@ function getTargetClass(row: PromotionRecommendationItem): string {
                 "
               >
                 <SelectTrigger
-                  class="h-7 w-full text-[11px]"
+                  class="h-7 w-20 mx-auto text-[11px] justify-center text-center px-2 [&_svg]:hidden [&_[data-slot=select-value]]:justify-center"
                   :class="
                     chosenTargetFor(row)
                       ? ''
