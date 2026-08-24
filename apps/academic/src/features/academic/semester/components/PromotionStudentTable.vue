@@ -135,14 +135,62 @@ function chosenTargetFor(row: PromotionRecommendationItem): string {
 }
 
 const bulkTargetOptions = computed(() => {
-  const first = filteredRows.value[0]
-  return first ? targetOptionsFor(first) : []
+  const chosen = filteredRows.value.filter((row) =>
+    selectedIds.value.has(row.studentId),
+  )
+  if (chosen.length === 0) return []
+
+  const grades = new Set(
+    chosen.map((row) => {
+      const decision = getDecision(row.studentId)
+      return decision && !decision.approved ? row.sourceLevel : row.targetLevel
+    }),
+  )
+
+  // A selection spanning both decisions is going to two grades at once, and
+  // one list cannot answer for both.
+  if (grades.size !== 1) return []
+
+  const [grade] = [...grades]
+  if (!grade) return []
+
+  return (props.targetClassrooms ?? []).filter(
+    (classroom) => classroom.grade?.name === grade,
+  )
 })
 
+/**
+ * Turns the chosen word into the decision it stands for.
+ *
+ * Declining needs a reason before it means anything — the server refuses a
+ * REPEAT without one — so it opens the dialog rather than writing the decision
+ * straight away. Closing that dialog leaves the row as it was, and the
+ * dropdown goes back to showing that, which is what a cancelled choice should
+ * look like.
+ */
+function setDecision(studentId: string, action: string) {
+  if (action === 'REPEAT') openDeclineDialog(studentId)
+  else approveStudent(studentId)
+}
+
+/** What the dropdown shows: the decision on record, not the recommendation. */
+function decisionValueFor(row: PromotionRecommendationItem): PromotionAction {
+  return getDecision(row.studentId)?.approved === false ? 'REPEAT' : 'PROMOTE'
+}
+
+/**
+ * The destination in words, for when there is no list to choose from.
+ *
+ * Only reached when `targetOptionsFor` comes back empty — a failed fetch, or a
+ * grade the year ahead has no classes for — so it has to be right about a
+ * held-back student, who stays in the grade they were already in rather than
+ * going to the class worked out for a promotion.
+ */
 function getTargetClass(row: PromotionRecommendationItem): string {
   const decision = getDecision(row.studentId)
-  if (!decision) return row.targetClassroomName ?? '-'
-  if (!decision.approved) return `Tinggal (${row.sourceClassroomName})`
+  if (decision && !decision.approved) {
+    return `Tinggal (${row.sourceClassroomName})`
+  }
   return row.targetClassroomName ?? '-'
 }
 </script>
@@ -269,7 +317,7 @@ function getTargetClass(row: PromotionRecommendationItem): string {
                 @update:model-value="toggleSelectAll"
               />
             </TableHead>
-            <TableHead class="text-left font-semibold text-xs w-[110px]">
+            <TableHead class="text-center font-semibold text-xs w-[110px]">
               NIS
             </TableHead>
             <TableHead class="text-left font-semibold text-xs">Nama</TableHead>
@@ -300,8 +348,8 @@ function getTargetClass(row: PromotionRecommendationItem): string {
               <TableCell class="px-3"
                 ><Skeleton class="size-4 rounded"
               /></TableCell>
-              <TableCell class="py-3"
-                ><Skeleton class="h-3.5 w-20"
+              <TableCell class="text-center py-3"
+                ><Skeleton class="h-3.5 w-20 mx-auto"
               /></TableCell>
               <TableCell class="py-3"
                 ><Skeleton class="h-3.5 w-32"
@@ -340,7 +388,7 @@ function getTargetClass(row: PromotionRecommendationItem): string {
               />
             </TableCell>
             <TableCell
-              class="py-2.5 tabular-nums text-xs text-muted-foreground"
+              class="text-center py-2.5 text-xs text-foreground tabular-nums"
             >
               {{ row.nis }}
             </TableCell>
@@ -371,20 +419,15 @@ function getTargetClass(row: PromotionRecommendationItem): string {
                 {{ formatScore(row.averageScore) }}
               </span>
             </TableCell>
+            <!-- What the server worked out, and only that. It used to be overwritten
+                 by the decision, which made the column agree with Keputusan by
+                 construction and left nothing to check a decision against. -->
             <TableCell class="text-center py-2.5">
               <Badge
-                :variant="
-                  getActionVariant(
-                    getDecision(row.studentId)?.action ?? row.recommendedAction,
-                  )
-                "
+                :variant="getActionVariant(row.recommendedAction)"
                 class="font-medium text-[10px] px-2 py-0.5 shadow-none"
               >
-                {{
-                  getActionLabel(
-                    getDecision(row.studentId)?.action ?? row.recommendedAction,
-                  )
-                }}
+                {{ getActionLabel(row.recommendedAction) }}
               </Badge>
             </TableCell>
             <TableCell class="text-center py-2.5">
@@ -412,7 +455,14 @@ function getTargetClass(row: PromotionRecommendationItem): string {
                   setTargetClassroom(row.studentId, String($event))
                 "
               >
-                <SelectTrigger class="h-7 w-full text-[11px]">
+                <SelectTrigger
+                  class="h-7 w-full text-[11px]"
+                  :class="
+                    chosenTargetFor(row)
+                      ? ''
+                      : 'border-destructive text-destructive'
+                  "
+                >
                   <SelectValue placeholder="Pilih kelas" />
                 </SelectTrigger>
                 <SelectContent>
@@ -439,35 +489,40 @@ function getTargetClass(row: PromotionRecommendationItem): string {
               </Badge>
             </TableCell>
 
+            <!-- One answer with two values, so it is shaped like one control.
+                 Two ghost buttons read as two things you could do, and until
+                 one was pressed neither looked chosen — even though every row
+                 arrives already decided. -->
             <TableCell class="text-center py-2.5">
-              <div class="flex items-center justify-center gap-1">
-                <Button
-                  size="sm"
-                  :variant="
-                    getDecision(row.studentId)?.approved ? 'default' : 'ghost'
-                  "
-                  class="text-xs h-7 px-2"
-                  title="Setujui Kenaikan"
-                  @click="approveStudent(row.studentId)"
-                >
-                  <CheckCircle2 class="size-3.5" />
-                  <span class="ml-1 text-[11px]">Setuju</span>
-                </Button>
-                <Button
-                  size="sm"
-                  :variant="
+              <Select
+                :model-value="decisionValueFor(row)"
+                @update:model-value="setDecision(row.studentId, String($event))"
+              >
+                <SelectTrigger
+                  class="h-7 w-full text-[11px]"
+                  :class="
                     getDecision(row.studentId)?.approved === false
-                      ? 'destructive'
-                      : 'ghost'
+                      ? 'text-destructive border-destructive/50'
+                      : ''
                   "
-                  class="text-xs h-7 px-2"
-                  title="Tolak Kenaikan"
-                  @click="openDeclineDialog(row.studentId)"
                 >
-                  <XCircle class="size-3.5" />
-                  <span class="ml-1 text-[11px]">Tolak</span>
-                </Button>
-              </div>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem
+                    value="PROMOTE"
+                    class="text-xs"
+                  >
+                    Naik Kelas
+                  </SelectItem>
+                  <SelectItem
+                    value="REPEAT"
+                    class="text-xs"
+                  >
+                    Tinggal Kelas
+                  </SelectItem>
+                </SelectContent>
+              </Select>
             </TableCell>
           </TableRow>
 
@@ -507,8 +562,9 @@ function getTargetClass(row: PromotionRecommendationItem): string {
         <DialogHeader>
           <DialogTitle>Alasan Penolakan</DialogTitle>
           <DialogDescription>
-            Masukkan alasan mengapa siswa ini tidak naik kelas. Alasan ini akan
-            tersimpan pada riwayat akademik siswa.
+            Wajib diisi — keputusan Tinggal Kelas tanpa alasan akan ditolak
+            server. Alasan disimpan sebagai catatan pada data enrolmen tahun
+            ajaran yang ditutup; belum ada halaman yang menampilkannya kembali.
           </DialogDescription>
         </DialogHeader>
         <div class="py-4">
