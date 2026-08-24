@@ -22,7 +22,7 @@
     "@241/platform": "workspace:*",
     "@241/shared": "workspace:*",
     "@241/ui": "workspace:*",
-    "@fullcalendar/core": "^6.1.20",
+    "@fullcalendar/core": "^7.0.2",
     "@fullcalendar/daygrid": "^6.1.20",
     "@fullcalendar/interaction": "^6.1.20",
     "@fullcalendar/vue3": "^6.1.20",
