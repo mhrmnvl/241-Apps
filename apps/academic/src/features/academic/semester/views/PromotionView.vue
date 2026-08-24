@@ -565,7 +565,6 @@ onMounted(async () => {
           />
           Naikkan
           <template v-if="selectedClass">{{ selectedClass }}</template>
-          ({{ summaryStats.total }} siswa)
         </Button>
       </div>
     </Card>
