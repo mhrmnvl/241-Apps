@@ -22,7 +22,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/ui/table'
-import { Badge } from '@/ui/badge'
 import { Button } from '@/ui/button'
 import { Card, CardHeader, CardTitle } from '@/ui/card'
 import {
@@ -36,11 +35,9 @@ import {
   AlertCircle,
   ArrowRight,
   Check,
-  CheckCircle2,
   GraduationCap,
   Loader2,
   Pencil,
-  XCircle,
 } from 'lucide-vue-next'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useSemesterList } from '../composables/useSemesterList'
@@ -614,30 +611,6 @@ onMounted(async () => {
         </div>
 
         <template v-else>
-          <!-- Summary chips -->
-          <div class="flex flex-wrap gap-2">
-            <div
-              class="inline-flex items-center gap-1.5 rounded-full bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 px-3 py-1 text-xs font-medium text-green-700 dark:text-green-400"
-            >
-              <CheckCircle2 class="size-3.5" />
-              {{ promotionPreview?.promotedCount ?? summaryStats.approved }}
-              Naik Kelas
-            </div>
-            <div
-              class="inline-flex items-center gap-1.5 rounded-full bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 px-3 py-1 text-xs font-medium text-amber-700 dark:text-amber-400"
-            >
-              <XCircle class="size-3.5" />
-              {{ promotionPreview?.repeatedCount ?? summaryStats.declined }}
-              Tinggal Kelas
-            </div>
-            <div
-              class="inline-flex items-center gap-1.5 rounded-full bg-muted border px-3 py-1 text-xs font-medium text-muted-foreground"
-            >
-              Total:
-              {{ promotionPreview?.totalStudents ?? summaryStats.total }} Siswa
-            </div>
-          </div>
-
           <!-- Student preview table -->
           <div
             class="overflow-x-auto rounded-xl border bg-background shadow-xs"
@@ -683,29 +656,28 @@ onMounted(async () => {
                       Alasan: {{ row.declineReason }}
                     </div>
                   </TableCell>
-                  <TableCell class="text-center py-2">
-                    <Badge
-                      variant="outline"
-                      class="text-[11px] font-medium bg-background"
-                    >
-                      {{ row.sourceClass }}
-                    </Badge>
+                  <TableCell class="text-center py-2 text-xs text-foreground">
+                    {{ row.sourceClass }}
                   </TableCell>
-                  <TableCell class="text-center py-2">
-                    <Badge
-                      :variant="row.approved ? 'secondary' : 'destructive'"
-                      class="text-[11px] font-medium"
-                    >
-                      {{ row.targetClass }}
-                    </Badge>
+                  <TableCell
+                    class="text-center py-2 text-xs"
+                    :class="
+                      row.approved
+                        ? 'text-foreground'
+                        : 'text-destructive font-medium'
+                    "
+                  >
+                    {{ row.targetClass }}
                   </TableCell>
-                  <TableCell class="text-center py-2">
-                    <Badge
-                      :variant="row.approved ? 'default' : 'destructive'"
-                      class="text-[11px] shadow-none"
-                    >
-                      {{ row.approved ? 'Naik Kelas' : 'Tinggal Kelas' }}
-                    </Badge>
+                  <TableCell
+                    class="text-center py-2 text-xs font-medium"
+                    :class="
+                      row.approved
+                        ? 'text-green-600 dark:text-green-400'
+                        : 'text-destructive'
+                    "
+                  >
+                    {{ row.approved ? 'Naik Kelas' : 'Tinggal Kelas' }}
                   </TableCell>
                 </TableRow>
               </TableBody>
@@ -715,25 +687,57 @@ onMounted(async () => {
       </div>
 
       <DialogFooter
-        class="px-6 py-4 border-t shrink-0 flex flex-row gap-2 justify-end"
+        class="px-6 py-3.5 border-t shrink-0 flex flex-col sm:flex-row sm:items-center justify-between sm:justify-between gap-3 w-full"
       >
-        <Button
-          variant="outline"
-          :disabled="isPromoting"
-          @click="showConfirmDialog = false"
-        >
-          Batal
-        </Button>
-        <Button
-          :disabled="isPromoting || isPreviewing"
-          @click="handleExecute"
-        >
-          <Loader2
-            v-if="isPromoting"
-            class="size-4 mr-2 animate-spin"
-          />
-          Ya, Proses Sekarang
-        </Button>
+        <!-- Left side: Summary Stats (paling kiri) -->
+        <div class="flex flex-wrap items-center gap-3 text-xs mr-auto">
+          <div
+            class="flex items-center gap-1.5 font-medium text-green-600 dark:text-green-400"
+          >
+            <div class="size-2 rounded-full bg-green-500" />
+            {{ promotionPreview?.promotedCount ?? summaryStats.approved }} Naik
+            Kelas
+          </div>
+          <div
+            class="flex items-center gap-1.5 font-medium text-amber-600 dark:text-amber-400"
+          >
+            <div class="size-2 rounded-full bg-amber-500" />
+            {{ promotionPreview?.repeatedCount ?? summaryStats.declined }}
+            Tinggal Kelas
+          </div>
+          <div class="text-muted-foreground">
+            Total:
+            <strong class="text-foreground">{{
+              promotionPreview?.totalStudents ?? summaryStats.total
+            }}</strong>
+            Siswa
+          </div>
+        </div>
+
+        <!-- Right side: Primary Action -->
+        <div class="flex items-center justify-end gap-2 shrink-0">
+          <!-- The way out has to be visible. This is a plain Dialog, so Esc
+               and the X still close it, but on a step that promotes a whole
+               class the only labelled control cannot be the one that does it —
+               a reader looking for "no" should not have to guess. -->
+          <Button
+            variant="outline"
+            :disabled="isPromoting"
+            @click="showConfirmDialog = false"
+          >
+            Batal
+          </Button>
+          <Button
+            :disabled="isPromoting || isPreviewing"
+            @click="handleExecute"
+          >
+            <Loader2
+              v-if="isPromoting"
+              class="size-4 mr-2 animate-spin"
+            />
+            Ya, Proses Sekarang
+          </Button>
+        </div>
       </DialogFooter>
     </DialogContent>
   </Dialog>

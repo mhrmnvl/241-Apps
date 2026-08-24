@@ -4,13 +4,13 @@ import { Button } from '@/ui/button'
 import { Checkbox } from '@/ui/checkbox'
 import {
   Dialog,
-  DialogDescription,
+  DialogContent,
   DialogFooter,
   DialogHeader,
-  DialogScrollContent,
   DialogTitle,
 } from '@/ui/dialog'
 import { Input } from '@/ui/input'
+import { Label } from '@/ui/label'
 import {
   Select,
   SelectContent,
@@ -28,7 +28,7 @@ import {
   TableRow,
 } from '@/ui/table'
 import { Textarea } from '@/ui/textarea'
-import { CheckCircle2, Filter, Search, XCircle } from 'lucide-vue-next'
+import { Filter, Search, Users } from 'lucide-vue-next'
 import type {
   PromotionAction,
   PromotionRecommendationItem,
@@ -210,136 +210,154 @@ function getTargetClass(row: PromotionRecommendationItem): string {
 
 <template>
   <div class="space-y-4">
-    <!-- Filter Bar -->
-    <div class="rounded-lg border bg-muted/20 p-4">
-      <div class="flex flex-col gap-3 sm:flex-row sm:items-end">
-        <!-- Search -->
-        <div class="relative flex-1">
-          <Search
-            class="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground"
-          />
-          <Input
-            v-model="searchQuery"
-            placeholder="Cari nama / NIS..."
-            class="pl-8 h-9 text-xs"
-          />
-        </div>
+    <!-- Filter & Bulk Actions Bar -->
+    <div class="flex flex-wrap items-center gap-2">
+      <!-- Kelas filter -->
+      <Select
+        v-model="filterClass"
+        :disabled="uniqueClasses.length === 0"
+      >
+        <SelectTrigger class="h-8 text-xs bg-background w-36">
+          <Filter class="size-3 mr-1 text-muted-foreground" />
+          <SelectValue placeholder="Pilih Kelas..." />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem
+            v-for="cls in uniqueClasses"
+            :key="cls"
+            :value="cls"
+            class="text-xs"
+          >
+            {{ cls }}
+          </SelectItem>
+        </SelectContent>
+      </Select>
 
-        <!-- Kelas filter -->
-        <!-- Disabled rather than empty: a dropdown with no items opens onto
-             nothing and cannot be closed by choosing, which reads as a frozen
-             screen rather than as "there is nobody to promote". -->
+      <!-- Status filter -->
+      <Select
+        v-model="filterStatus"
+        :disabled="!filterClass"
+      >
+        <SelectTrigger class="h-8 text-xs bg-background w-32">
+          <SelectValue placeholder="Semua Status" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem
+            value="all"
+            class="text-xs"
+          >
+            Semua Status
+          </SelectItem>
+          <SelectItem
+            value="approved"
+            class="text-xs"
+          >
+            Disetujui
+          </SelectItem>
+          <SelectItem
+            value="declined"
+            class="text-xs"
+          >
+            Ditolak
+          </SelectItem>
+        </SelectContent>
+      </Select>
+
+      <!-- Bulk actions -->
+      <template v-if="filterClass">
+        <!-- Bulk actions select dropdown -->
         <Select
-          v-model="filterClass"
-          :disabled="uniqueClasses.length === 0"
+          :model-value="undefined"
+          :disabled="selectedIds.size === 0"
+          @update:model-value="
+            (val) => {
+              if (val === 'approve') bulkApprove()
+              if (val === 'decline') void nextTick(bulkDecline)
+            }
+          "
         >
-          <SelectTrigger class="h-9 text-xs bg-background sm:w-44">
-            <Filter class="size-3 mr-1 text-muted-foreground" />
-            <SelectValue placeholder="Pilih Kelas..." />
+          <SelectTrigger class="h-8 text-xs bg-background w-36">
+            <SelectValue
+              :placeholder="
+                selectedIds.size > 0
+                  ? `Aksi (${selectedIds.size})`
+                  : 'Aksi Massal'
+              "
+            />
           </SelectTrigger>
           <SelectContent>
             <SelectItem
-              v-for="cls in uniqueClasses"
-              :key="cls"
-              :value="cls"
-              class="text-xs"
+              value="approve"
+              class="text-xs text-green-600 focus:text-green-600"
             >
-              {{ cls }}
+              Setujui
+            </SelectItem>
+            <SelectItem
+              value="decline"
+              class="text-xs text-destructive focus:text-destructive"
+            >
+              Tolak
             </SelectItem>
           </SelectContent>
         </Select>
 
-        <!-- Status filter -->
-        <Select v-model="filterStatus">
-          <SelectTrigger class="h-9 text-xs bg-background sm:w-40">
-            <SelectValue placeholder="Semua Status" />
+        <!-- Pindahkan massal -->
+        <Select
+          v-if="bulkTargetOptions.length > 0"
+          :model-value="undefined"
+          :disabled="selectedIds.size === 0"
+          @update:model-value="setTargetClassroomForSelected(String($event))"
+        >
+          <SelectTrigger class="h-8 w-40 text-xs bg-background">
+            <SelectValue :placeholder="`Pindahkan ${selectedIds.size} ke...`" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem
-              value="all"
+              v-for="option in bulkTargetOptions"
+              :key="option.id"
+              :value="option.id"
               class="text-xs"
-              >Semua Status</SelectItem
             >
-            <SelectItem
-              value="approved"
-              class="text-xs"
-              >Disetujui</SelectItem
-            >
-            <SelectItem
-              value="declined"
-              class="text-xs"
-              >Ditolak</SelectItem
-            >
+              {{ option.code }}
+            </SelectItem>
           </SelectContent>
         </Select>
+      </template>
+    </div>
 
-        <!-- Bulk actions -->
-        <div class="flex items-center gap-2 shrink-0">
-          <Button
-            size="sm"
-            variant="outline"
-            class="h-9 text-xs font-medium"
-            :disabled="selectedIds.size === 0"
-            @click="bulkApprove"
-          >
-            <CheckCircle2 class="size-3.5 mr-1 text-green-600" />
-            Setujui ({{ selectedIds.size }})
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            class="h-9 text-xs font-medium text-destructive hover:text-destructive"
-            :disabled="selectedIds.size === 0"
-            @click="bulkDecline"
-          >
-            <XCircle class="size-3.5 mr-1" />
-            Tolak ({{ selectedIds.size }})
-          </Button>
-
-          <!-- A school that reshuffles its classes moves a group at a time.
-               The selection survives the choice, so a wrong pick is undone by
-               choosing again rather than by re-ticking thirty rows. -->
-          <Select
-            v-if="bulkTargetOptions.length > 0"
-            :model-value="undefined"
-            :disabled="selectedIds.size === 0"
-            @update:model-value="setTargetClassroomForSelected(String($event))"
-          >
-            <SelectTrigger class="h-9 w-44 text-xs">
-              <SelectValue
-                :placeholder="`Pindahkan ${selectedIds.size} ke...`"
-              />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem
-                v-for="option in bulkTargetOptions"
-                :key="option.id"
-                :value="option.id"
-                class="text-xs"
-              >
-                {{ option.code }}
-              </SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+    <!-- Table Header Toolbar (Search Box directly above DataTable) -->
+    <div class="flex items-center justify-end w-full">
+      <div class="relative w-full sm:w-48 max-w-[200px]">
+        <Search
+          class="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground"
+        />
+        <Input
+          v-model="searchQuery"
+          placeholder="Cari siswa..."
+          :disabled="!filterClass"
+          class="h-8 pl-8 w-full text-xs"
+        />
       </div>
     </div>
 
-    <!-- Table -->
-    <div class="overflow-hidden rounded-xl border bg-background shadow-xs">
-      <Table>
+    <!-- Table Container -->
+    <div class="overflow-x-auto rounded-xl border bg-background shadow-xs">
+      <Table class="min-w-[850px]">
         <TableHeader class="bg-muted/50">
           <TableRow>
             <TableHead class="w-[36px] px-3">
               <Checkbox
                 :model-value="allVisibleSelected"
+                :disabled="filteredRows.length === 0"
                 @update:model-value="toggleSelectAll"
               />
             </TableHead>
             <TableHead class="text-center font-semibold text-xs w-[110px]">
               NIS
             </TableHead>
-            <TableHead class="text-left font-semibold text-xs">Nama</TableHead>
+            <TableHead class="text-left font-semibold text-xs">
+              Nama
+            </TableHead>
             <TableHead class="text-center font-semibold text-xs w-[70px]">
               Nilai
             </TableHead>
@@ -364,251 +382,278 @@ function getTargetClass(row: PromotionRecommendationItem): string {
               v-for="i in 6"
               :key="i"
             >
-              <TableCell class="px-3"
-                ><Skeleton class="size-4 rounded"
-              /></TableCell>
-              <TableCell class="text-center py-3"
-                ><Skeleton class="h-3.5 w-20 mx-auto"
-              /></TableCell>
-              <TableCell class="py-3"
-                ><Skeleton class="h-3.5 w-32"
-              /></TableCell>
-              <TableCell class="text-center py-3"
-                ><Skeleton class="h-3.5 w-8 mx-auto"
-              /></TableCell>
-              <TableCell class="text-center py-3"
-                ><Skeleton class="h-5 w-20 mx-auto rounded-full"
-              /></TableCell>
-              <TableCell class="text-center py-3"
-                ><Skeleton class="h-5 w-16 mx-auto rounded-full"
-              /></TableCell>
-              <TableCell class="text-center py-3"
-                ><Skeleton class="h-7 w-20 mx-auto rounded-md"
-              /></TableCell>
-              <TableCell class="text-center py-3"
-                ><Skeleton class="h-7 w-24 mx-auto rounded-md"
-              /></TableCell>
+              <TableCell class="px-3">
+                <Skeleton class="size-4 rounded" />
+              </TableCell>
+              <TableCell class="text-center py-3">
+                <Skeleton class="h-3.5 w-20 mx-auto" />
+              </TableCell>
+              <TableCell class="py-3">
+                <Skeleton class="h-3.5 w-32" />
+              </TableCell>
+              <TableCell class="text-center py-3">
+                <Skeleton class="h-3.5 w-8 mx-auto" />
+              </TableCell>
+              <TableCell class="text-center py-3">
+                <Skeleton class="h-5 w-20 mx-auto rounded-full" />
+              </TableCell>
+              <TableCell class="text-center py-3">
+                <Skeleton class="h-5 w-16 mx-auto rounded-full" />
+              </TableCell>
+              <TableCell class="text-center py-3">
+                <Skeleton class="h-7 w-20 mx-auto rounded-md" />
+              </TableCell>
+              <TableCell class="text-center py-3">
+                <Skeleton class="h-7 w-24 mx-auto rounded-md" />
+              </TableCell>
             </TableRow>
           </template>
 
-          <TableRow
-            v-for="row in filteredRows"
-            :key="row.studentId"
-            class="transition-colors hover:bg-muted/30"
-            :class="{
-              'bg-destructive/5':
-                getDecision(row.studentId)?.approved === false,
-            }"
-          >
-            <TableCell class="px-3">
-              <Checkbox
-                :model-value="selectedIds.has(row.studentId)"
-                @update:model-value="toggleSelect(row.studentId)"
-              />
-            </TableCell>
-            <TableCell
-              class="text-center py-2.5 text-xs text-foreground tabular-nums"
+          <!-- State Belum Memilih Kelas -->
+          <template v-else-if="!filterClass">
+            <TableRow>
+              <TableCell
+                :colspan="8"
+                class="py-14 text-center"
+              >
+                <div
+                  class="flex flex-col items-center gap-2 text-muted-foreground"
+                >
+                  <Filter class="size-8 opacity-40" />
+                  <p class="text-xs font-medium text-foreground">
+                    Pilih kelas terlebih dahulu
+                  </p>
+                  <p class="text-[11px] max-w-sm">
+                    Silakan pilih salah satu kelas pada filter di atas untuk
+                    menampilkan dan memproses kenaikan kelas siswa.
+                  </p>
+                </div>
+              </TableCell>
+            </TableRow>
+          </template>
+
+          <!-- State Kosong setelah Filter / Pencarian -->
+          <template v-else-if="filteredRows.length === 0">
+            <TableRow>
+              <TableCell
+                :colspan="8"
+                class="py-12 text-center"
+              >
+                <div
+                  class="flex flex-col items-center gap-2 text-muted-foreground"
+                >
+                  <Users class="size-8 opacity-40" />
+                  <p class="text-xs font-medium text-foreground">
+                    Tidak ada siswa yang sesuai dengan filter pencarian
+                  </p>
+                </div>
+              </TableCell>
+            </TableRow>
+          </template>
+
+          <template v-else>
+            <TableRow
+              v-for="row in filteredRows"
+              :key="row.studentId"
+              class="transition-colors hover:bg-muted/30"
+              :class="{
+                'bg-destructive/5':
+                  getDecision(row.studentId)?.approved === false,
+              }"
             >
-              {{ row.nis }}
-            </TableCell>
-            <TableCell class="py-2.5">
-              <div class="font-semibold text-xs text-foreground">
-                {{ row.studentName }}
-              </div>
-              <!-- The reason belongs beside the name it is about; a column of
-                   its own would be empty for everyone who is naik kelas. -->
-              <div
-                v-if="getDecision(row.studentId)?.declineReason"
-                class="text-[11px] text-destructive mt-0.5 italic"
+              <TableCell class="px-3">
+                <Checkbox
+                  :model-value="selectedIds.has(row.studentId)"
+                  @update:model-value="toggleSelect(row.studentId)"
+                />
+              </TableCell>
+              <TableCell
+                class="text-center py-2.5 text-xs text-foreground tabular-nums"
               >
-                Alasan: {{ getDecision(row.studentId)?.declineReason }}
-              </div>
-            </TableCell>
-            <TableCell class="text-center py-2.5">
-              <span
-                class="font-semibold tabular-nums text-xs"
-                :class="
-                  row.averageScore != null
-                    ? row.averageScore >= 75
-                      ? 'text-green-600'
-                      : 'text-amber-600'
-                    : 'text-muted-foreground'
-                "
-              >
-                {{ formatScore(row.averageScore) }}
-              </span>
-            </TableCell>
-            <!-- What the server worked out, and only that. It used to be overwritten
-                 by the decision, which made the column agree with Keputusan by
-                 construction and left nothing to check a decision against. -->
-            <TableCell class="text-center py-2.5">
-              <Badge
-                :variant="getActionVariant(row.recommendedAction)"
-                class="font-medium text-[10px] px-2 py-0.5 shadow-none"
-              >
-                {{ getActionLabel(row.recommendedAction) }}
-              </Badge>
-            </TableCell>
-            <TableCell class="text-center py-2.5">
-              <Badge
-                variant="outline"
-                class="font-medium bg-transparent text-[11px] px-2 py-0.5"
-              >
+                {{ row.nis }}
+              </TableCell>
+              <TableCell class="py-2.5">
+                <div class="font-semibold text-xs text-foreground">
+                  {{ row.studentName }}
+                </div>
+                <!-- The reason belongs beside the name it is about; a column of
+                     its own would be empty for everyone who is naik kelas. -->
+                <div
+                  v-if="getDecision(row.studentId)?.declineReason"
+                  class="text-[11px] text-destructive mt-0.5 italic"
+                >
+                  Alasan: {{ getDecision(row.studentId)?.declineReason }}
+                </div>
+              </TableCell>
+              <TableCell class="text-center py-2.5">
+                <span
+                  class="font-semibold tabular-nums text-xs"
+                  :class="
+                    row.averageScore != null
+                      ? row.averageScore >= 75
+                        ? 'text-green-600'
+                        : 'text-amber-600'
+                      : 'text-muted-foreground'
+                  "
+                >
+                  {{ formatScore(row.averageScore) }}
+                </span>
+              </TableCell>
+              <!-- What the server worked out, and only that. It used to be overwritten
+                   by the decision, which made the column agree with Keputusan by
+                   construction and left nothing to check a decision against. -->
+              <TableCell class="text-center py-2.5">
+                <Badge
+                  :variant="getActionVariant(row.recommendedAction)"
+                  class="font-medium text-[10px] px-2 py-0.5 shadow-none"
+                >
+                  {{ getActionLabel(row.recommendedAction) }}
+                </Badge>
+              </TableCell>
+              <TableCell class="text-center py-2.5 text-xs text-foreground">
                 {{ row.sourceClassroomName }}
-              </Badge>
-            </TableCell>
+              </TableCell>
 
-            <!-- Kelas Tujuan is the picker itself, not a picker standing next
-                 to a label that says the same thing: what the recommendation
-                 chose is what the dropdown already shows as selected.
+              <!-- Kelas Tujuan is the picker itself, not a picker standing next
+                   to a label that says the same thing: what the recommendation
+                   chose is what the dropdown already shows as selected.
 
-                 The badge is the fallback for when there is nothing to choose
-                 between — a failed fetch, or a level the year ahead has no
-                 classes for — so the destination stays visible and the
-                 promotion still runs. -->
-            <TableCell class="text-center py-2.5">
-              <Select
-                v-if="targetOptionsFor(row).length > 0"
-                :model-value="chosenTargetFor(row)"
-                @update:model-value="
-                  setTargetClassroom(row.studentId, String($event))
-                "
-              >
-                <SelectTrigger
-                  class="h-7 w-20 mx-auto text-[11px] justify-center text-center px-2 [&_svg]:hidden [&_[data-slot=select-value]]:justify-center"
-                  :class="
-                    chosenTargetFor(row)
-                      ? ''
-                      : 'border-destructive text-destructive'
+                   The badge is the fallback for when there is nothing to choose
+                   between — a failed fetch, or a level the year ahead has no
+                   classes for — so the destination stays visible and the
+                   promotion still runs. -->
+              <TableCell class="text-center py-2.5">
+                <Select
+                  v-if="targetOptionsFor(row).length > 0"
+                  :model-value="chosenTargetFor(row)"
+                  @update:model-value="
+                    setTargetClassroom(row.studentId, String($event))
                   "
                 >
-                  <SelectValue placeholder="Pilih kelas" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem
-                    v-for="option in targetOptionsFor(row)"
-                    :key="option.id"
-                    :value="option.id"
-                    class="text-xs"
+                  <SelectTrigger
+                    class="h-7 w-20 mx-auto text-[11px] justify-center text-center px-2 [&_svg]:hidden [&_[data-slot=select-value]]:justify-center"
+                    :class="
+                      chosenTargetFor(row)
+                        ? ''
+                        : 'border-destructive text-destructive'
+                    "
                   >
-                    {{ option.code }}
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-              <Badge
-                v-else
-                :variant="
-                  getDecision(row.studentId)?.approved === false
-                    ? 'destructive'
-                    : 'secondary'
-                "
-                class="font-medium text-[11px] px-2 py-0.5"
-              >
-                {{ getTargetClass(row) }}
-              </Badge>
-            </TableCell>
-
-            <!-- One answer with two values, so it is shaped like one control.
-                 Two ghost buttons read as two things you could do, and until
-                 one was pressed neither looked chosen — even though every row
-                 arrives already decided. -->
-            <TableCell class="text-center py-2.5">
-              <Select
-                :model-value="decisionValueFor(row)"
-                @update:model-value="setDecision(row.studentId, String($event))"
-              >
-                <SelectTrigger
-                  class="h-7 w-full text-[11px]"
-                  :class="
+                    <SelectValue placeholder="Pilih kelas" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem
+                      v-for="option in targetOptionsFor(row)"
+                      :key="option.id"
+                      :value="option.id"
+                      class="text-xs"
+                    >
+                      {{ option.code }}
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+                <Badge
+                  v-else
+                  :variant="
                     getDecision(row.studentId)?.approved === false
-                      ? 'text-destructive border-destructive/50'
-                      : ''
+                      ? 'destructive'
+                      : 'secondary'
+                  "
+                  class="font-medium text-[11px] px-2 py-0.5"
+                >
+                  {{ getTargetClass(row) }}
+                </Badge>
+              </TableCell>
+
+              <!-- One answer with two values, so it is shaped like one control.
+                   Two ghost buttons read as two things you could do, and until
+                   one was pressed neither looked chosen — even though every row
+                   arrives already decided. -->
+              <TableCell class="text-center py-2.5">
+                <Select
+                  :model-value="decisionValueFor(row)"
+                  @update:model-value="
+                    setDecision(row.studentId, String($event))
                   "
                 >
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem
-                    value="PROMOTE"
-                    class="text-xs"
+                  <SelectTrigger
+                    class="h-7 w-full text-[11px]"
+                    :class="
+                      getDecision(row.studentId)?.approved === false
+                        ? 'text-destructive border-destructive/50'
+                        : ''
+                    "
                   >
-                    Naik Kelas
-                  </SelectItem>
-                  <SelectItem
-                    value="REPEAT"
-                    class="text-xs"
-                  >
-                    Tinggal Kelas
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </TableCell>
-          </TableRow>
-
-          <TableRow v-if="!isLoading && filteredRows.length === 0">
-            <TableCell
-              colspan="8"
-              class="p-10 text-center"
-            >
-              <div
-                class="flex flex-col items-center justify-center gap-1.5 text-muted-foreground"
-              >
-                <Users class="size-5 opacity-30" />
-                <p class="font-medium text-xs">
-                  {{
-                    !filterClass
-                      ? 'Pilih kelas untuk menampilkan siswa'
-                      : 'Tidak ada siswa ditemukan'
-                  }}
-                </p>
-                <p class="text-[11px]">
-                  {{
-                    !filterClass
-                      ? 'Gunakan filter kelas di atas untuk memulai review.'
-                      : 'Coba ubah filter atau kata pencarian.'
-                  }}
-                </p>
-              </div>
-            </TableCell>
-          </TableRow>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem
+                      value="PROMOTE"
+                      class="text-xs"
+                    >
+                      Naik Kelas
+                    </SelectItem>
+                    <SelectItem
+                      value="REPEAT"
+                      class="text-xs"
+                    >
+                      Tinggal Kelas
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </TableCell>
+            </TableRow>
+          </template>
         </TableBody>
       </Table>
     </div>
 
     <!-- Decline Reason Dialog -->
     <Dialog v-model:open="showDeclineDialog">
-      <DialogScrollContent class="sm:max-w-md">
-        <DialogHeader>
+      <DialogContent
+        class="sm:max-w-md flex flex-col gap-0 p-0 overflow-hidden"
+      >
+        <DialogHeader class="px-6 py-4 border-b shrink-0 bg-muted/20">
           <DialogTitle>Alasan Penolakan</DialogTitle>
-          <DialogDescription>
-            Wajib diisi — keputusan Tinggal Kelas tanpa alasan akan ditolak
-            server. Alasan disimpan sebagai catatan pada data enrolmen tahun
-            ajaran yang ditutup; belum ada halaman yang menampilkannya kembali.
-          </DialogDescription>
         </DialogHeader>
-        <div class="py-4">
-          <Textarea
-            v-model="declineReason"
-            placeholder="Contoh: Nilai di bawah KKM, kehadiran kurang, dll."
-            class="min-h-[100px]"
-          />
+
+        <div class="px-6 py-4 space-y-3">
+          <div class="space-y-1.5">
+            <Label
+              for="promotion-decline-reason"
+              class="text-xs font-medium"
+            >
+              Alasan / Catatan
+            </Label>
+            <Textarea
+              id="promotion-decline-reason"
+              v-model="declineReason"
+              placeholder="Contoh: Nilai di bawah KKM, kehadiran kurang, dll."
+              rows="3"
+              class="text-xs resize-none"
+            />
+          </div>
         </div>
-        <DialogFooter>
+
+        <DialogFooter
+          class="border-t px-6 py-3 flex justify-end gap-2 bg-muted/10"
+        >
           <Button
             variant="outline"
+            size="sm"
             @click="showDeclineDialog = false"
           >
             Batal
           </Button>
           <Button
             variant="destructive"
+            size="sm"
             :disabled="!declineReason.trim()"
             @click="handleConfirmDeclineModal"
           >
             Konfirmasi Tolak
           </Button>
         </DialogFooter>
-      </DialogScrollContent>
+      </DialogContent>
     </Dialog>
   </div>
 </template>
