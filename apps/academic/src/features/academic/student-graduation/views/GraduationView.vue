@@ -1,98 +1,158 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
+import { Badge } from '@/ui/badge'
 import { Button } from '@/ui/button'
 import { Card, CardHeader, CardTitle } from '@/ui/card'
-import { Checkbox } from '@/ui/checkbox'
-import { Input } from '@/ui/input'
+import { DatePicker } from '@/ui'
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/ui/dialog'
 import { Label } from '@/ui/label'
-import { Skeleton } from '@/ui/skeleton'
-import { GraduationCap, Loader2, Users } from 'lucide-vue-next'
+import { Popover, PopoverContent, PopoverTrigger } from '@/ui/popover'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/ui/table'
+import {
+  Calendar,
+  CheckCircle2,
+  Loader2,
+  Pencil,
+  XCircle,
+} from 'lucide-vue-next'
+import { toast } from 'vue-sonner'
 import { useRoleGuard } from '@/features/platform/auth'
 import { useStudentGraduation } from '../composables/useStudentGraduation'
-import type { GraduationCandidate } from '../types'
+import { GraduationStudentTable } from '../components'
+import type { GraduationStudentDecision } from '../types'
 
-/**
- * Who is finishing school this year, and the act of graduating them.
- *
- * Separated from Alumni, which lists the records afterwards. One screen used to
- * be both, and it opened on the record list — empty until somebody graduates —
- * with the students hidden inside a dialog. It read as a screen with no data
- * rather than one that had not been used yet.
- *
- * There is no year to choose. A school has one active academic year and one
- * final grade, and both are the server's answer; asking for either would be
- * asking somebody to restate what the system knows, with a chance of naming the
- * wrong one. Eligibility is the server's too — final grade, still enrolled, no
- * record yet — so this screen and the promotion screen cannot come to disagree
- * about who is in the last year.
- */
 const { can } = useRoleGuard()
 
 const {
   candidates,
   graduationTerm,
-  finalGradeName,
   isLoadingCandidates,
   isGraduating,
   fetchCandidates,
   bulkGraduate,
 } = useStudentGraduation()
 
+const selectedClass = ref('')
 const graduationDate = ref('')
-const selectedIds = ref<Set<string>>(new Set())
+const isDatePopoverOpen = ref(false)
+const decisions = ref<GraduationStudentDecision[]>([])
+const showConfirmDialog = ref(false)
 
-const allSelected = computed(
-  () =>
-    candidates.value.length > 0 &&
-    selectedIds.value.size === candidates.value.length,
-)
+const formattedGraduationDate = computed(() => {
+  if (!graduationDate.value) return 'Belum diatur'
+  try {
+    const [y, m, d] = graduationDate.value.split('-').map(Number)
+    if (!y || !m || !d) return graduationDate.value
+    const date = new Date(y, m - 1, d)
+    return new Intl.DateTimeFormat('id-ID', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    }).format(date)
+  } catch {
+    return graduationDate.value
+  }
+})
+
+function onDecisionsUpdate(updated: GraduationStudentDecision[]) {
+  decisions.value = updated
+}
+
+function clearGraduationDate() {
+  graduationDate.value = ''
+  isDatePopoverOpen.value = false
+}
+
+// Rekapitulasi keputusan siswa pada kelas terpilih
+const summaryStats = computed(() => {
+  let approved = 0
+  let declined = 0
+  for (const d of decisions.value) {
+    if (d.approved === false) declined++
+    else approved++
+  }
+  return { approved, declined, total: decisions.value.length }
+})
+
+// Daftar baris preview untuk konfirmasi dialog
+const previewRows = computed(() => {
+  if (!selectedClass.value) return []
+  const inClass = candidates.value.filter(
+    (c) => c.classroomName === selectedClass.value,
+  )
+  return inClass.map((c) => {
+    const d = decisions.value.find((dec) => dec.studentId === c.studentId)
+    return {
+      studentId: c.studentId,
+      nis: c.nis,
+      studentName: c.studentName,
+      classroomName: c.classroomName,
+      approved: d?.approved !== false,
+      declineReason: d?.declineReason,
+    }
+  })
+})
 
 const canGraduate = computed(
   () =>
     can('graduations.create') &&
-    selectedIds.value.size > 0 &&
+    selectedClass.value !== '' &&
+    summaryStats.value.approved > 0 &&
     !isGraduating.value,
 )
 
-function selectEveryone() {
-  selectedIds.value = new Set(
-    candidates.value.map((c: GraduationCandidate) => c.studentId),
-  )
+function onProcessClick() {
+  if (!graduationDate.value) {
+    isDatePopoverOpen.value = true
+    toast.warning('Silakan tentukan tanggal kelulusan terlebih dahulu.')
+    return
+  }
+  showConfirmDialog.value = true
 }
 
-function toggle(id: string) {
-  const next = new Set(selectedIds.value)
-  if (next.has(id)) next.delete(id)
-  else next.add(id)
-  selectedIds.value = next
-}
-
-function toggleAll() {
-  if (allSelected.value) selectedIds.value = new Set()
-  else selectEveryone()
-}
-
-// Everyone starts ticked: graduating the whole final year is the normal case,
-// and unticking the exceptions is less work than ticking the rest.
 async function load() {
   await fetchCandidates()
-  selectEveryone()
 }
 
 onMounted(load)
 
-async function handleGraduate() {
-  if (selectedIds.value.size === 0) return
+async function handleConfirmGraduate() {
+  if (!graduationDate.value) return
+
+  // `note` is a note on the graduation record, so only a graduating student
+  // can carry one — and this list is exactly the students who are not
+  // declined, whose `declineReason` is therefore always undefined. Sending it
+  // set a field to nothing for everybody and read as though the reason for
+  // holding a student back travelled with the run. It does not: a held student
+  // is left out of the payload, and their reason stays on the screen.
+  const graduatingStudents = decisions.value
+    .filter((d) => d.approved !== false)
+    .map((d) => ({ studentId: d.studentId }))
+
+  if (graduatingStudents.length === 0) return
 
   const result = await bulkGraduate({
-    ...(graduationDate.value ? { graduationDate: graduationDate.value } : {}),
-    students: [...selectedIds.value].map((studentId) => ({ studentId })),
+    graduationDate: graduationDate.value,
+    students: graduatingStudents,
   })
 
   if (result.success) {
+    showConfirmDialog.value = false
     graduationDate.value = ''
-    // Whoever was graduated now has a record, so they leave the list. What
-    // remains is what was deliberately left out.
+    selectedClass.value = ''
     await load()
   }
 }
@@ -101,137 +161,281 @@ async function handleGraduate() {
 <template>
   <div class="p-4 md:p-6 lg:p-8">
     <Card
-      class="overflow-hidden rounded-2xl shadow-sm shadow-black/5 ring-1 ring-black/4 py-0 gap-0"
+      class="overflow-hidden rounded-2xl shadow-sm shadow-black/5 ring-1 ring-black/4"
     >
+      <!-- Main Card Header -->
       <CardHeader
-        class="flex flex-col gap-3 border-b px-6 py-5 sm:flex-row sm:items-center sm:justify-between"
+        class="flex flex-row items-center justify-between border-b px-6 py-5"
       >
-        <div>
-          <CardTitle class="text-2xl font-bold tracking-tight">
-            Kelulusan
-          </CardTitle>
-          <p
-            v-if="graduationTerm"
-            class="mt-1 text-sm text-muted-foreground"
-          >
-            Tahun ajaran {{ graduationTerm.name }}
-            <template v-if="finalGradeName">
-              · tingkat akhir {{ finalGradeName }}
-            </template>
-          </p>
+        <CardTitle class="text-2xl font-bold tracking-tight">
+          Kelulusan
+        </CardTitle>
+      </CardHeader>
+
+      <!-- Main Card Body -->
+      <div class="p-6 space-y-4">
+        <!-- Cohort & Graduation Date Box (Stacked Vertically with aligned colons and normal font) -->
+        <div
+          class="rounded-xl border bg-muted/20 p-4 space-y-2 text-xs leading-5"
+        >
+          <div class="flex items-center gap-2">
+            <span class="w-[125px] shrink-0 text-muted-foreground"
+              >Tahun Ajaran</span
+            >
+            <span class="text-muted-foreground shrink-0">:</span>
+            <span class="text-foreground">
+              {{ graduationTerm?.name ?? 'Tahun Aktif' }}
+            </span>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <span class="w-[125px] shrink-0 text-muted-foreground"
+              >Total Calon</span
+            >
+            <span class="text-muted-foreground shrink-0">:</span>
+            <span class="text-foreground"> {{ candidates.length }} Siswa </span>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <span class="w-[125px] shrink-0 text-muted-foreground"
+              >Tanggal Kelulusan</span
+            >
+            <span class="text-muted-foreground shrink-0">:</span>
+            <div class="flex items-center gap-2">
+              <span
+                :class="
+                  graduationDate
+                    ? 'text-foreground'
+                    : 'text-amber-600 dark:text-amber-400 font-medium italic'
+                "
+              >
+                {{ formattedGraduationDate }}
+              </span>
+              <Popover v-model:open="isDatePopoverOpen">
+                <PopoverTrigger as-child>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    class="h-6 text-[11px] px-2 gap-1 font-normal text-muted-foreground hover:text-foreground"
+                  >
+                    <Pencil class="size-3" />
+                    {{ graduationDate ? 'Ubah' : 'Atur' }}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent
+                  class="w-auto p-3 space-y-2.5"
+                  align="start"
+                >
+                  <div class="space-y-1">
+                    <Label class="text-xs font-medium text-foreground">
+                      Pilih Tanggal Kelulusan
+                    </Label>
+                    <DatePicker
+                      v-model="graduationDate"
+                      placeholder="Pilih Tanggal Lulus"
+                      :allow-future-dates="true"
+                      class="h-8 text-xs w-44"
+                    />
+                  </div>
+                  <div class="flex items-center justify-between gap-2 pt-1">
+                    <Button
+                      v-if="graduationDate"
+                      variant="ghost"
+                      size="sm"
+                      class="h-6 text-[11px] px-2 text-muted-foreground"
+                      @click="clearGraduationDate"
+                    >
+                      Hapus
+                    </Button>
+                    <div v-else />
+                    <Button
+                      size="sm"
+                      class="h-6 text-[11px] px-2.5"
+                      @click="isDatePopoverOpen = false"
+                    >
+                      Selesai
+                    </Button>
+                  </div>
+                </PopoverContent>
+              </Popover>
+            </div>
+          </div>
         </div>
 
+        <!-- Student Graduation Table Component -->
+        <GraduationStudentTable
+          :candidates="candidates"
+          :is-loading="isLoadingCandidates"
+          @update:decisions="onDecisionsUpdate"
+          @update:filter-class="selectedClass = $event"
+        />
+
+        <!-- Card Footer: Summary & Action -->
         <div
-          v-if="can('graduations.create')"
-          class="flex flex-wrap items-end gap-3"
+          v-if="selectedClass && summaryStats.total > 0 && !isLoadingCandidates"
+          class="-mx-6 -mb-6 mt-6 flex flex-col sm:flex-row items-center justify-between gap-4 border-t px-6 py-4"
         >
-          <div class="grid gap-1.5">
-            <Label class="text-xs">Tanggal Lulus</Label>
-            <Input
-              v-model="graduationDate"
-              type="date"
-              class="h-9 w-40 text-sm"
-            />
+          <div class="flex items-center gap-4 text-xs">
+            <div class="flex items-center gap-1.5">
+              <div class="size-2.5 rounded-full bg-green-500" />
+              <span class="text-muted-foreground">
+                Lulus:
+                <strong class="text-foreground">{{
+                  summaryStats.approved
+                }}</strong>
+              </span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <div class="size-2.5 rounded-full bg-amber-500" />
+              <span class="text-muted-foreground">
+                Tidak Lulus:
+                <strong class="text-foreground">{{
+                  summaryStats.declined
+                }}</strong>
+              </span>
+            </div>
+            <div class="text-muted-foreground">
+              Total:
+              <strong class="text-foreground">{{ summaryStats.total }}</strong>
+              Siswa
+            </div>
           </div>
+
           <Button
+            size="default"
+            class="w-full sm:w-auto font-semibold px-6"
             :disabled="!canGraduate"
-            @click="handleGraduate"
+            @click="onProcessClick"
           >
             <Loader2
               v-if="isGraduating"
               class="size-4 mr-2 animate-spin"
             />
-            <GraduationCap
-              v-else
-              class="size-4 mr-2"
-            />
-            Luluskan
-            <span
-              v-if="selectedIds.size > 0"
-              class="ml-1.5 rounded-full bg-primary-foreground/20 px-2 py-0.5 text-xs font-semibold"
-            >
-              {{ selectedIds.size }}
-            </span>
+            Proses Kelulusan
           </Button>
-        </div>
-      </CardHeader>
-
-      <div class="p-6">
-        <div
-          v-if="isLoadingCandidates"
-          class="space-y-2"
-        >
-          <Skeleton class="h-10 w-full" />
-          <Skeleton class="h-10 w-full" />
-          <Skeleton class="h-10 w-full" />
-        </div>
-
-        <!-- Empty here has two meanings, and they need different words: a year
-             where nobody is finishing, and one where everybody already has. -->
-        <div
-          v-else-if="candidates.length === 0"
-          class="flex flex-col items-center gap-3 py-16 text-center text-muted-foreground"
-        >
-          <Users class="size-10 opacity-40" />
-          <p class="text-sm font-medium text-foreground">
-            Tidak ada calon lulusan
-          </p>
-          <p class="max-w-sm text-sm">
-            Semua siswa tingkat akhir
-            <template v-if="graduationTerm">
-              {{ graduationTerm.name }}
-            </template>
-            sudah diluluskan, atau tahun ajaran aktif belum punya kelas di
-            tingkat akhir.
-          </p>
-        </div>
-
-        <div
-          v-else
-          class="overflow-hidden rounded-lg border"
-        >
-          <table class="w-full text-sm">
-            <thead class="border-b bg-muted/40">
-              <tr>
-                <th class="w-10 px-3 py-2.5">
-                  <Checkbox
-                    :model-value="allSelected"
-                    :disabled="!can('graduations.create')"
-                    @update:model-value="toggleAll"
-                  />
-                </th>
-                <th class="px-3 py-2.5 text-left font-medium">NIS</th>
-                <th class="px-3 py-2.5 text-left font-medium">Nama</th>
-                <th class="px-3 py-2.5 text-left font-medium">Kelas</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y">
-              <tr
-                v-for="candidate in candidates"
-                :key="candidate.studentId"
-                class="hover:bg-muted/30"
-              >
-                <td class="px-3 py-2.5">
-                  <Checkbox
-                    :model-value="selectedIds.has(candidate.studentId)"
-                    :disabled="!can('graduations.create')"
-                    @update:model-value="toggle(candidate.studentId)"
-                  />
-                </td>
-                <td class="px-3 py-2.5 tabular-nums text-muted-foreground">
-                  {{ candidate.nis }}
-                </td>
-                <td class="px-3 py-2.5 font-medium">
-                  {{ candidate.studentName }}
-                </td>
-                <td class="px-3 py-2.5 text-muted-foreground">
-                  {{ candidate.classroomName }}
-                </td>
-              </tr>
-            </tbody>
-          </table>
         </div>
       </div>
     </Card>
   </div>
+
+  <!-- Confirmation Dialog (Consistent with Kenaikan Kelas) -->
+  <Dialog v-model:open="showConfirmDialog">
+    <DialogContent
+      class="sm:max-w-3xl flex flex-col gap-0 p-0 overflow-hidden max-h-[90svh]"
+    >
+      <DialogHeader class="px-6 py-4 border-b shrink-0">
+        <DialogTitle>Konfirmasi Kelulusan</DialogTitle>
+      </DialogHeader>
+
+      <div class="overflow-y-auto px-6 py-4 space-y-4">
+        <!-- Summary Chips -->
+        <div class="flex flex-wrap gap-2">
+          <div
+            class="inline-flex items-center gap-1.5 rounded-full bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 px-3 py-1 text-xs font-medium text-green-700 dark:text-green-400"
+          >
+            <CheckCircle2 class="size-3.5" />
+            {{ summaryStats.approved }} Lulus
+          </div>
+          <div
+            v-if="summaryStats.declined > 0"
+            class="inline-flex items-center gap-1.5 rounded-full bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 px-3 py-1 text-xs font-medium text-amber-700 dark:text-amber-400"
+          >
+            <XCircle class="size-3.5" />
+            {{ summaryStats.declined }} Tidak Lulus
+          </div>
+          <div
+            class="inline-flex items-center gap-1.5 rounded-full bg-muted border px-3 py-1 text-xs font-medium text-muted-foreground"
+          >
+            Total: {{ summaryStats.total }} Siswa
+          </div>
+          <div
+            class="inline-flex items-center gap-1.5 rounded-full bg-muted border px-3 py-1 text-xs font-medium text-muted-foreground"
+          >
+            <Calendar class="size-3.5" />
+            Tanggal: {{ formattedGraduationDate }}
+          </div>
+        </div>
+
+        <!-- Student Preview Table -->
+        <div class="overflow-x-auto rounded-xl border bg-background shadow-xs">
+          <Table class="min-w-[500px]">
+            <TableHeader class="bg-muted/50">
+              <TableRow>
+                <TableHead class="text-center text-xs font-semibold w-[120px]">
+                  NIS
+                </TableHead>
+                <TableHead class="text-xs font-semibold">
+                  Nama Siswa
+                </TableHead>
+                <TableHead class="text-center text-xs font-semibold w-[110px]">
+                  Kelas
+                </TableHead>
+                <TableHead class="text-center text-xs font-semibold w-[120px]">
+                  Status
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              <TableRow
+                v-for="row in previewRows"
+                :key="row.studentId"
+                :class="{ 'bg-destructive/5': !row.approved }"
+                class="transition-colors"
+              >
+                <TableCell
+                  class="text-center py-2 text-xs text-foreground tabular-nums"
+                >
+                  {{ row.nis }}
+                </TableCell>
+                <TableCell class="py-2">
+                  <div class="font-medium text-xs text-foreground">
+                    {{ row.studentName }}
+                  </div>
+                  <div
+                    v-if="row.declineReason"
+                    class="text-[11px] text-destructive italic mt-0.5"
+                  >
+                    Alasan: {{ row.declineReason }}
+                  </div>
+                </TableCell>
+                <TableCell class="text-center py-2 text-xs text-foreground">
+                  {{ row.classroomName }}
+                </TableCell>
+                <TableCell class="text-center py-2">
+                  <Badge
+                    :variant="row.approved ? 'default' : 'destructive'"
+                    class="text-[11px] shadow-none"
+                  >
+                    {{ row.approved ? 'Lulus' : 'Tidak Lulus' }}
+                  </Badge>
+                </TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        </div>
+      </div>
+
+      <DialogFooter
+        class="px-6 py-4 border-t shrink-0 flex flex-row gap-2 justify-end"
+      >
+        <Button
+          variant="outline"
+          :disabled="isGraduating"
+          @click="showConfirmDialog = false"
+        >
+          Batal
+        </Button>
+        <Button
+          :disabled="isGraduating"
+          @click="handleConfirmGraduate"
+        >
+          <Loader2
+            v-if="isGraduating"
+            class="size-4 mr-2 animate-spin"
+          />
+          Ya, Proses Sekarang
+        </Button>
+      </DialogFooter>
+    </DialogContent>
+  </Dialog>
 </template>

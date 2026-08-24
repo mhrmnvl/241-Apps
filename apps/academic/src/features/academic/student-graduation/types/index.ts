@@ -95,3 +95,9 @@ export interface BulkGraduationResult {
   /** Already held a record — a re-run is safe and says so. */
   skipped: number
 }
+
+export interface GraduationStudentDecision {
+  studentId: string
+  approved: boolean
+  declineReason?: string
+}

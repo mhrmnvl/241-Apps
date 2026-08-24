@@ -21,29 +21,65 @@ export function usePromotionTable(
     onUpdateDecisions(Array.from(decisions.value.values()))
   }
 
+  /**
+   * Rebuilds the decisions when a new list of recommendations arrives, keeping
+   * the ones the operator already made where they still mean something.
+   *
+   * Two different things arrive through here and they need opposite answers.
+   *
+   * A *refetch of the same cohort* — which is what copying classrooms forward
+   * does — used to wipe every decision on screen. Half an hour of review, gone,
+   * because the screen fetched again to learn about the new classes.
+   *
+   * A *different academic year* must wipe them. A decision names classroom ids,
+   * and the ids belong to the year they were fetched for; carrying one across
+   * would send a student to a classroom the server refuses as "does not belong
+   * to target academic year".
+   *
+   * `sourceClassroomId` tells the two apart. Classrooms are per academic year,
+   * so a student whose source classroom is the same id is the same student in
+   * the same year, and their decision still holds. A different id means a
+   * different year's data, whatever the class is called.
+   */
   watch(
     recommendations,
     (items) => {
+      const previous = decisions.value
       const map = new Map<string, PromotionStudentDecision>()
+
       for (const item of items) {
-        map.set(item.studentId, {
-          studentId: item.studentId,
-          sourceClassroomId: item.sourceClassroomId,
-          targetClassroomId: item.targetClassroomId,
-          action: item.recommendedAction,
-          approved: true,
-          declineReason: undefined,
-        })
+        const kept = previous.get(item.studentId)
+        const sameCohort = kept?.sourceClassroomId === item.sourceClassroomId
+
+        map.set(
+          item.studentId,
+          sameCohort
+            ? kept
+            : {
+                studentId: item.studentId,
+                sourceClassroomId: item.sourceClassroomId,
+                targetClassroomId: item.targetClassroomId,
+                action: item.recommendedAction,
+                approved: true,
+                declineReason: undefined,
+              },
+        )
       }
+
       decisions.value = map
 
-      // Anything that names a student or a class from the previous roster goes
-      // with it. Changing the academic year fetches a different cohort, and a
-      // class filter left pointing at "VII-A" from the year before matches
-      // nothing — both this table and the preview beside it would go blank
-      // with nothing on screen to say why.
-      filterClass.value = ''
-      selectedIds.value = new Set()
+      // A class filter naming a class this cohort does not have matches
+      // nothing, and the table goes blank with nothing on screen to say why —
+      // which is what happened on every year change. Keeping it when the class
+      // is still there is what lets a refetch leave the operator where they
+      // were.
+      const classStillListed = items.some(
+        (item) => item.sourceClassroomName === filterClass.value,
+      )
+      if (!classStillListed) {
+        filterClass.value = ''
+        selectedIds.value = new Set()
+      }
 
       emitDecisions()
     },

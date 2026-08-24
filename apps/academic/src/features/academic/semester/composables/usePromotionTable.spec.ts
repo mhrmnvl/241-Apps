@@ -182,3 +182,80 @@ describe('usePromotionTable — declining forgets where the student was going', 
     expect(decisionFor('a1')?.declineReason).toBeUndefined()
   })
 })
+
+describe('usePromotionTable — a refetch is not always a new cohort', () => {
+  /**
+   * Copying classrooms forward refetches the recommendations, and that used to
+   * wipe every decision on screen: half an hour of review gone, because the
+   * screen went to learn about the new classes.
+   */
+  it('keeps decisions when the same cohort comes back', async () => {
+    const { recommendations, table, decisionFor } = setup()
+
+    table.filterClass.value = 'VII-A'
+    await nextTick()
+    table.openDeclineDialog('a1')
+    table.declineReason.value = 'Kehadiran kurang'
+    table.confirmDecline()
+
+    // A fresh array of the same students, as a refetch produces.
+    recommendations.value = [
+      student('a1', 'VII-A'),
+      student('a2', 'VII-A'),
+      student('b1', 'VII-B'),
+    ]
+    await nextTick()
+
+    expect(decisionFor('a1')?.approved).toBe(false)
+    expect(decisionFor('a1')?.declineReason).toBe('Kehadiran kurang')
+  })
+
+  it('keeps the class on screen through that refetch', async () => {
+    const { recommendations, table } = setup()
+
+    table.filterClass.value = 'VII-A'
+    await nextTick()
+
+    recommendations.value = [student('a1', 'VII-A'), student('b1', 'VII-B')]
+    await nextTick()
+
+    expect(table.filterClass.value).toBe('VII-A')
+    expect(table.filteredRows.value).toHaveLength(1)
+  })
+
+  /**
+   * The opposite case, and the reason the test is on `sourceClassroomId`
+   * rather than on the student: a decision names classroom ids, and ids belong
+   * to the year they were fetched for. Carrying one across would send a
+   * student to a classroom the server refuses.
+   */
+  it('starts over when the same student arrives from another year', async () => {
+    const { recommendations, table, decisionFor } = setup()
+
+    table.filterClass.value = 'VII-A'
+    await nextTick()
+    table.openDeclineDialog('a1')
+    table.declineReason.value = 'Kehadiran kurang'
+    table.confirmDecline()
+
+    const nextYear = student('a1', 'VII-A')
+    nextYear.sourceClassroomId = 'vii-a-id-2027'
+    recommendations.value = [nextYear]
+    await nextTick()
+
+    expect(decisionFor('a1')?.approved).toBe(true)
+    expect(decisionFor('a1')?.declineReason).toBeUndefined()
+  })
+
+  it('clears the filter when the class is not in the new list', async () => {
+    const { recommendations, table } = setup()
+
+    table.filterClass.value = 'VII-B'
+    await nextTick()
+
+    recommendations.value = [student('a1', 'VII-A')]
+    await nextTick()
+
+    expect(table.filterClass.value).toBe('')
+  })
+})
