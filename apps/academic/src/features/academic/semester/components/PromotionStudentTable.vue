@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, toRefs, watch } from 'vue'
+import { computed, nextTick, toRefs, watch } from 'vue'
 import { Button } from '@/ui/button'
 import { Checkbox } from '@/ui/checkbox'
 import {
@@ -168,8 +168,22 @@ const bulkTargetOptions = computed(() => {
  * look like.
  */
 function setDecision(studentId: string, action: string) {
-  if (action === 'REPEAT') openDeclineDialog(studentId)
-  else approveStudent(studentId)
+  if (action !== 'REPEAT') {
+    approveStudent(studentId)
+    return
+  }
+
+  // Deferred by one tick, deliberately.
+  //
+  // This runs inside the select's own close sequence. Opening a modal there
+  // means a dialog mounts its overlay while the select is still tearing its
+  // own down, and the teardown puts back what it took — `pointer-events` on
+  // the document body. Interleaved, the restore can be skipped, and what is
+  // left is a page that renders normally and ignores every click: the class
+  // filter opens and will not close, and no class can be chosen.
+  //
+  // Letting the select finish first costs a frame nobody sees.
+  void nextTick(() => openDeclineDialog(studentId))
 }
 
 /** What the dropdown shows: the decision on record, not the recommendation. */
@@ -212,7 +226,13 @@ function getTargetClass(row: PromotionRecommendationItem): string {
         </div>
 
         <!-- Kelas filter -->
-        <Select v-model="filterClass">
+        <!-- Disabled rather than empty: a dropdown with no items opens onto
+             nothing and cannot be closed by choosing, which reads as a frozen
+             screen rather than as "there is nobody to promote". -->
+        <Select
+          v-model="filterClass"
+          :disabled="uniqueClasses.length === 0"
+        >
           <SelectTrigger class="h-9 text-xs bg-background sm:w-44">
             <Filter class="size-3 mr-1 text-muted-foreground" />
             <SelectValue placeholder="Pilih Kelas..." />
@@ -281,7 +301,7 @@ function getTargetClass(row: PromotionRecommendationItem): string {
                choosing again rather than by re-ticking thirty rows. -->
           <Select
             v-if="bulkTargetOptions.length > 0"
-            :model-value="''"
+            :model-value="undefined"
             :disabled="selectedIds.size === 0"
             @update:model-value="setTargetClassroomForSelected(String($event))"
           >

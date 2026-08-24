@@ -89,7 +89,10 @@ export function usePromotionTable(
   const uniqueClasses = computed(() => {
     const set = new Set<string>()
     for (const r of recommendations.value) {
-      set.add(r.sourceClassroomName)
+      // A blank name would become a `<SelectItem value="">`, which the select
+      // rejects — and one bad item takes the whole list with it, leaving a
+      // dropdown that opens onto nothing and cannot be dismissed by choosing.
+      if (r.sourceClassroomName) set.add(r.sourceClassroomName)
     }
     return Array.from(set).sort()
   })

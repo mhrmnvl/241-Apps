@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, toRefs, watch } from 'vue'
+import { computed, nextTick, ref, toRefs, watch } from 'vue'
 import { Button } from '@/ui/button'
 import { Checkbox } from '@/ui/checkbox'
 import {
@@ -181,11 +181,15 @@ function handleConfirmDecline() {
 }
 
 function setDecision(studentId: string, action: string) {
-  if (action === 'HOLD') {
-    openDeclineDialog(studentId)
-  } else {
+  if (action !== 'HOLD') {
     approveStudent(studentId)
+    return
   }
+
+  // Deferred for the same reason as the promotion table: opening a modal from
+  // inside a select's close sequence can leave the body's `pointer-events`
+  // restore unrun, and the page then ignores every click.
+  void nextTick(() => openDeclineDialog(studentId))
 }
 
 function bulkApprove() {
@@ -257,7 +261,12 @@ function toggleAllVisible() {
     <!-- Filter & Bulk Actions Bar -->
     <div class="flex flex-wrap items-center gap-2">
       <!-- Kelas Filter -->
-      <Select v-model="filterClass">
+      <!-- Disabled rather than empty: a dropdown with no items opens onto
+           nothing and cannot be closed by choosing. -->
+      <Select
+        v-model="filterClass"
+        :disabled="uniqueClasses.length === 0"
+      >
         <SelectTrigger class="h-8 text-xs bg-background w-36">
           <Filter class="size-3 mr-1 text-muted-foreground" />
           <SelectValue placeholder="Pilih Kelas..." />
@@ -313,7 +322,7 @@ function toggleAllVisible() {
           @update:model-value="
             (val) => {
               if (val === 'approve') bulkApprove()
-              if (val === 'decline') bulkDecline()
+              if (val === 'decline') void nextTick(bulkDecline)
             }
           "
         >
