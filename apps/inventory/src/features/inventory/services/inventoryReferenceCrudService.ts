@@ -18,11 +18,7 @@ import type { InventoryReferenceItem } from '../types'
  * asset screen's held copy stale. Every write now invalidates it.
  */
 export type InventoryReferenceType =
-  | 'categories'
-  | 'conditions'
-  | 'locations'
-  | 'statuses'
-  | 'funding-sources'
+  'categories' | 'conditions' | 'locations' | 'statuses' | 'funding-sources'
 
 interface ReferenceLabels {
   /** "kategori aset", "sumber dana" — reads inside every message below. */

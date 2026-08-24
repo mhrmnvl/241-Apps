@@ -17,8 +17,8 @@ const emit = defineEmits<{ toggle: [weekday: number] }>()
  * or correcting the numbering cannot leave two lists disagreeing.
  */
 const DISPLAY_ORDER = [1, 2, 3, 4, 5, 6, 0]
-const DISPLAY_WEEKDAYS = DISPLAY_ORDER.map(
-  (value) => WEEKDAYS.find((day) => day.value === value)!,
+const DISPLAY_WEEKDAYS = DISPLAY_ORDER.map((value) =>
+  WEEKDAYS.find((day) => day.value === value)!,
 )
 </script>
 

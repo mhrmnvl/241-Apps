@@ -273,14 +273,12 @@ export const raporService = {
           ? await studentScoreApi.getMyScores(params)
           : await studentScoreApi.getScores(params)
       const rawScores = res.data?.data ?? []
-      return rawScores.map(
-        (s: StudentScoreItem): RaporScoreRow => ({
-          subject: s.assessmentItem?.name ?? '-',
-          type: s.assessmentItem?.type ?? '-',
-          score: s.score,
-          weight: s.assessmentItem?.weight ?? 1,
-        }),
-      )
+      return rawScores.map((s: StudentScoreItem): RaporScoreRow => ({
+        subject: s.assessmentItem?.name ?? '-',
+        type: s.assessmentItem?.type ?? '-',
+        score: s.score,
+        weight: s.assessmentItem?.weight ?? 1,
+      }))
     } catch (error: unknown) {
       toast.error(getIndonesianErrorMessage(error, 'Gagal memuat data nilai.'))
       return []

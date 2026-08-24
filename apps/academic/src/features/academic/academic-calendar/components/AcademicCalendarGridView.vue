@@ -85,13 +85,13 @@ const colorPalette = [
 ]
 
 const getColorForEvent = (id?: string) => {
-  if (!id) return colorPalette[0]!
+  if (!id) return colorPalette[0]
   let hash = 0
   for (let i = 0; i < id.length; i++) {
     hash = id.charCodeAt(i) + ((hash << 5) - hash)
   }
   const index = Math.abs(hash) % colorPalette.length
-  return colorPalette[index]!
+  return colorPalette[index]
 }
 
 const isHolidayWeekday = (date: Date) =>

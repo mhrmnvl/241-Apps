@@ -50,5 +50,5 @@ export function suggestRollover(
   // third term is exactly the case that should be asked rather than guessed.
   if (populatedSiblings.length !== 1) return null
 
-  return { source: populatedSiblings[0]!, target: activated }
+  return { source: populatedSiblings[0], target: activated }
 }

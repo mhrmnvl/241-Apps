@@ -1,9 +1,5 @@
 export type AssessmentType =
-  | 'DAILY'
-  | 'MIDTERM'
-  | 'FINAL'
-  | 'ASSIGNMENT'
-  | 'PRACTICAL'
+  'DAILY' | 'MIDTERM' | 'FINAL' | 'ASSIGNMENT' | 'PRACTICAL'
 
 export interface AssessmentItem {
   id: string

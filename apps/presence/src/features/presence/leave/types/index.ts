@@ -1,9 +1,6 @@
 export type LeaveTreatment = 'ON_LEAVE' | 'OFFICIAL_DUTY'
 export type LeaveRequestStatus =
-  | 'PENDING'
-  | 'APPROVED'
-  | 'REJECTED'
-  | 'WITHDRAWN'
+  'PENDING' | 'APPROVED' | 'REJECTED' | 'WITHDRAWN'
 
 export interface LeaveType {
   id: string
