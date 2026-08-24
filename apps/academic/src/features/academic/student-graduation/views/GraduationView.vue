@@ -403,12 +403,16 @@ async function handleConfirmGraduate() {
         <!-- Left side: Summary Stats (paling kiri) -->
         <div class="flex flex-wrap items-center gap-3 text-xs mr-auto">
           <div
+            v-if="summaryStats.approved > 0"
             class="flex items-center gap-1.5 font-medium text-green-600 dark:text-green-400"
           >
             <div class="size-2 rounded-full bg-green-500" />
             {{ summaryStats.approved }} Lulus
           </div>
+          <!-- A count of nothing is not news. The total below still says how
+               many are being processed, so nothing is lost by hiding it. -->
           <div
+            v-if="summaryStats.declined > 0"
             class="flex items-center gap-1.5 font-medium text-amber-600 dark:text-amber-400"
           >
             <div class="size-2 rounded-full bg-amber-500" />

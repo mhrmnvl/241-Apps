@@ -36,12 +36,21 @@ import type {
 } from '../types'
 import { usePromotionTable } from '../composables/usePromotionTable'
 import type { Classroom } from '@/features/academic/classroom'
+import { scoreStanding } from '../logic/scoreStanding'
 
 const props = defineProps<{
   recommendations: PromotionRecommendationItem[]
   isLoading?: boolean
   /** Every class the year ahead has, filtered per row to the allowed level. */
   targetClassrooms?: Classroom[]
+  /**
+   * The school's KKM, for colouring an average.
+   *
+   * Passed in rather than read here: the view already fetches the academic
+   * settings, and a table that fetched its own would be a second request for
+   * the same number that could disagree with the first.
+   */
+  passingScore?: number
 }>()
 
 const emit = defineEmits<{
@@ -486,15 +495,22 @@ function getTargetClass(row: PromotionRecommendationItem): string {
                 </div>
               </TableCell>
               <TableCell class="text-center py-2.5">
+                <!-- Coloured against the school's own KKM. This was a
+                     hardcoded 75, which disagreed with the school in any year
+                     the mark was not 75 — a second opinion beside Rekomendasi,
+                     computed from a number nobody chose. -->
                 <span
                   class="font-semibold tabular-nums text-xs"
-                  :class="
-                    row.averageScore != null
-                      ? row.averageScore >= 75
-                        ? 'text-green-600'
-                        : 'text-amber-600'
-                      : 'text-muted-foreground'
-                  "
+                  :class="{
+                    'text-green-600':
+                      scoreStanding(row.averageScore, passingScore) ===
+                      'at-or-above',
+                    'text-amber-600':
+                      scoreStanding(row.averageScore, passingScore) === 'below',
+                    'text-muted-foreground':
+                      scoreStanding(row.averageScore, passingScore) ===
+                      'unknown',
+                  }"
                 >
                   {{ formatScore(row.averageScore) }}
                 </span>
