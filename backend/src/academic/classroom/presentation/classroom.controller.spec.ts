@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { CopyClassroomsToAcademicYearUseCase } from '../use-cases/copy-classrooms-to-academic-year.use-case.js';
 import { CreateClassroomUseCase } from '../use-cases/create-classroom.use-case.js';
 import { DeleteClassroomUseCase } from '../use-cases/delete-classroom.use-case.js';
 import { GetClassroomByIdUseCase } from '../use-cases/get-classroom-by-id.use-case.js';
@@ -11,6 +12,7 @@ describe('ClassroomController', () => {
 
   const mockGetClassesUC = { execute: jest.fn() };
   const mockGetClassroomByIdUC = { execute: jest.fn() };
+  const mockCopyClassroomsUC = { execute: jest.fn() };
   const mockCreateClassroomUC = { execute: jest.fn() };
   const mockUpdateClassroomUC = { execute: jest.fn() };
   const mockDeleteClassroomUC = { execute: jest.fn() };
@@ -22,6 +24,10 @@ describe('ClassroomController', () => {
         { provide: GetClassroomsUseCase, useValue: mockGetClassesUC },
         { provide: GetClassroomByIdUseCase, useValue: mockGetClassroomByIdUC },
         { provide: CreateClassroomUseCase, useValue: mockCreateClassroomUC },
+        {
+          provide: CopyClassroomsToAcademicYearUseCase,
+          useValue: mockCopyClassroomsUC,
+        },
         { provide: UpdateClassroomUseCase, useValue: mockUpdateClassroomUC },
         { provide: DeleteClassroomUseCase, useValue: mockDeleteClassroomUC },
       ],

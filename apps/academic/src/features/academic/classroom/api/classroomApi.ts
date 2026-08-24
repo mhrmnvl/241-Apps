@@ -5,6 +5,7 @@ import type {
 import api from '@/shared/utils/api'
 import type {
   Classroom,
+  CopyClassroomsResult,
   ClassroomQueryParams,
   ClassroomSavePayload,
   ClassroomSupervisorAssignment,
@@ -90,5 +91,21 @@ export const classroomApi = {
 
   deleteClassroomStructure: (id: string) => {
     return api.delete(`/classroom-structures/${id}`)
+  },
+
+  /**
+   * Clones one academic year's classrooms into another.
+   *
+   * Idempotent on the server, matched on grade and code, so a caller unsure
+   * whether it already ran can simply run it again.
+   */
+  copyClassroomsToAcademicYear: (payload: {
+    sourceAcademicYearId: string
+    targetAcademicYearId: string
+  }) => {
+    return api.post<ApiSingleResponse<CopyClassroomsResult>>(
+      '/classrooms/copy',
+      payload,
+    )
   },
 }

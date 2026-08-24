@@ -22,14 +22,20 @@ import {
 } from '@nestjs/swagger';
 
 import { JwtAuthGuard } from '../../../platform/auth/index.js';
+import { CopyClassroomsDto } from '../dto/request/copy-classrooms.dto.js';
 import { CreateClassroomDto } from '../dto/request/create-classroom.dto.js';
 import { ClassroomQueryDto } from '../dto/request/classroom-query.dto.js';
 import {
   ClassroomListResponseDto,
   ClassroomResponseDto,
 } from '../dto/response/classroom-response.dto.js';
-import { ClassroomWithDetails } from '../domain/interfaces/classroom-repository.interface.js';
+import { CopyClassroomsResponseDto } from '../dto/response/copy-classrooms-response.dto.js';
+import {
+  ClassroomWithDetails,
+  CopyClassroomsResult,
+} from '../domain/interfaces/classroom-repository.interface.js';
 import { UpdateClassroomDto } from '../dto/request/update-classroom.dto.js';
+import { CopyClassroomsToAcademicYearUseCase } from '../use-cases/copy-classrooms-to-academic-year.use-case.js';
 import { CreateClassroomUseCase } from '../use-cases/create-classroom.use-case.js';
 import { DeleteClassroomUseCase } from '../use-cases/delete-classroom.use-case.js';
 import { GetClassroomByIdUseCase } from '../use-cases/get-classroom-by-id.use-case.js';
@@ -46,6 +52,7 @@ export class ClassroomController {
     private readonly getClassroomsService: GetClassroomsUseCase,
     private readonly getClassroomByIdService: GetClassroomByIdUseCase,
     private readonly createClassroomService: CreateClassroomUseCase,
+    private readonly copyClassroomsService: CopyClassroomsToAcademicYearUseCase,
     private readonly updateClassroomService: UpdateClassroomUseCase,
     private readonly deleteClassroomService: DeleteClassroomUseCase,
   ) {}
@@ -79,6 +86,27 @@ export class ClassroomController {
   @ApiResponse({ status: 409, description: 'Classroom code already exists' })
   async create(@Body() dto: CreateClassroomDto): Promise<ClassroomWithDetails> {
     return this.createClassroomService.execute(dto);
+  }
+
+  /**
+   * Declared before `:id` so "copy" is never taken for a classroom id, and
+   * gated on `classrooms.create` because that is what it does — several times.
+   */
+  @Post('copy')
+  @RequirePermissions('classrooms.create')
+  @ApiOperation({
+    summary: "Clone one academic year's classrooms into another",
+  })
+  @ApiResponse({ status: 201, type: CopyClassroomsResponseDto })
+  @ApiResponse({
+    status: 400,
+    description: 'Same year twice, a year not found, or nothing to copy',
+  })
+  async copy(@Body() dto: CopyClassroomsDto): Promise<CopyClassroomsResult> {
+    return this.copyClassroomsService.execute(
+      dto.sourceAcademicYearId,
+      dto.targetAcademicYearId,
+    );
   }
 
   @Patch(':id')

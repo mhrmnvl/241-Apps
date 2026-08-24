@@ -29,6 +29,7 @@ import {
   SelectValue,
 } from '@/ui/select'
 import {
+  AlertCircle,
   ArrowRight,
   CheckCircle2,
   GraduationCap,
@@ -38,6 +39,7 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useSemesterList } from '../composables/useSemesterList'
 import { useSemesterPromotion } from '../composables/useSemesterPromotion'
 import { derivePromotionYears } from '../logic/derivePromotionYears'
+import { classroomService } from '@/features/academic/classroom'
 
 const router = useRouter()
 
@@ -81,6 +83,47 @@ const derived = computed(() => derivePromotionYears(academicYears.value))
  * would notice. Folded away, because that is a rare day.
  */
 const isChoosingYears = ref(false)
+const isCopyingClassrooms = ref(false)
+
+/**
+ * Students the server could find no destination for.
+ *
+ * Always the same cause: the year ahead has no classroom at the level they are
+ * moving into. The recommendation itself works out which level follows which
+ * from the levels present in the target year, so a year holding one class
+ * leaves almost everybody here.
+ */
+const studentsWithoutTarget = computed(() =>
+  promotionRecommendations.value.filter((rec) => !rec.targetClassroomId),
+)
+
+/**
+ * Gives the year ahead the classes this one has, then asks again.
+ *
+ * Copying is idempotent server-side, so pressing this twice is harmless — and
+ * a year part-filled by hand keeps what is already in it.
+ */
+async function copyClassroomsForward() {
+  const source = sourceAcademicYearId.value
+  const target = targetAcademicYearId.value
+  if (!source || !target) return
+
+  isCopyingClassrooms.value = true
+  try {
+    const outcome = await classroomService.copyClassroomsToAcademicYear(
+      source,
+      target,
+    )
+    if (outcome.success) {
+      await fetchPromotionRecommendation({
+        sourceAcademicYearId: source,
+        targetAcademicYearId: target,
+      })
+    }
+  } finally {
+    isCopyingClassrooms.value = false
+  }
+}
 const studentDecisions = ref<PromotionStudentDecision[]>([])
 const showConfirmDialog = ref(false)
 const showResultDialog = ref(false)
@@ -338,6 +381,39 @@ onMounted(async () => {
               </Select>
             </div>
           </div>
+        </div>
+
+        <!-- Nowhere to put them: the year ahead is missing the classes they
+             move into. Offered here because this is where it is noticed. -->
+        <div
+          v-if="!isLoadingRecommendations && studentsWithoutTarget.length > 0"
+          class="flex flex-wrap items-start justify-between gap-3 rounded-lg border border-amber-200 bg-amber-50/70 p-3.5 text-xs dark:border-amber-900/60 dark:bg-amber-950/20"
+        >
+          <div class="flex items-start gap-3">
+            <AlertCircle
+              class="mt-0.5 size-4 shrink-0 text-amber-600 dark:text-amber-400"
+            />
+            <p class="leading-relaxed">
+              <strong>{{ studentsWithoutTarget.length }} siswa</strong> belum
+              punya kelas tujuan —
+              {{ derived.target?.name ?? 'tahun ajaran tujuan' }} belum punya
+              kelas di tingkat yang mereka tuju. Salin kelas dari
+              {{ derived.source?.name ?? 'tahun ini' }} untuk mengisinya.
+            </p>
+          </div>
+
+          <Button
+            size="sm"
+            variant="outline"
+            :disabled="isCopyingClassrooms"
+            @click="copyClassroomsForward"
+          >
+            <Loader2
+              v-if="isCopyingClassrooms"
+              class="size-4 mr-2 animate-spin"
+            />
+            Salin Kelas
+          </Button>
         </div>
 
         <!-- Excluded Cohort Notice -->

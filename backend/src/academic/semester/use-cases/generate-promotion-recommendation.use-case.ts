@@ -6,6 +6,7 @@ import {
 } from '../dto/response/promotion-recommendation.dto.js';
 import { PromotionAction } from '../domain/enums/promotion-action.enum.js';
 import { IPromotionRepository } from '../domain/interfaces/promotion-repository.interface.js';
+import { isSameSection } from '../logic/classroom-section.js';
 import { PromotionSemesterResolver } from '../services/promotion-semester-resolver.service.js';
 
 @Injectable()
@@ -80,10 +81,18 @@ export class GeneratePromotionRecommendationUseCase {
             const matchingTargets = targetClassrooms.filter(
               (c) => c.grade.level === nextLevel,
             );
+            // By section, not by code: codes carry the grade too, so `VII-A`
+            // never equals `VIII-A` and every VII class used to fall through
+            // to the first VIII class on the list. A class stays together.
+            const sectionMatch = matchingTargets.find((c) =>
+              isSameSection(enrollment.classroom.code, c.code),
+            );
+            // Only where a school names classes after the grade alone, and the
+            // grades therefore match one to one.
             const codeMatch = matchingTargets.find(
               (c) => c.code === enrollment.classroom.code,
             );
-            const bestMatch = codeMatch ?? matchingTargets[0];
+            const bestMatch = sectionMatch ?? codeMatch ?? matchingTargets[0];
 
             if (bestMatch) {
               targetClassroomId = bestMatch.id;
