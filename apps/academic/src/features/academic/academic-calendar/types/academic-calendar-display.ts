@@ -12,11 +12,23 @@ export interface DateClickInfo {
   dateStr: string
 }
 
+/**
+ * What FullCalendar hands back when an entry is clicked.
+ *
+ * Whatever `AcademicCalendarGridView` spreads into an event and FullCalendar
+ * does not recognise ends up here, so this mirrors `CalendarEventData` — and
+ * has to keep mirroring it. A field present at runtime but missing here is
+ * reachable only by casting through `Record<string, unknown>`, which is how
+ * `startTime` and `endTime` were being read.
+ */
 export interface EventClickExtendedProps {
   description?: string
   type?: { id: string; name: string } | null
   startDate?: string
   endDate?: string
+  /** Clock hours, when the entry has any — see `CalendarEventData`. */
+  startTime?: string | null
+  endTime?: string | null
   academicYearId?: string
 }
 

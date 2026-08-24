@@ -1,15 +1,19 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import AcademicCalendarDetailDialog from '../components/AcademicCalendarDetailDialog.vue'
 import AcademicCalendarGridView from '../components/AcademicCalendarGridView.vue'
 import AcademicCalendarSidebar from '../components/AcademicCalendarSidebar.vue'
 import { useAcademicCalendarView } from '../composables/useAcademicCalendarView'
 import { Card, CardHeader, CardTitle } from '@/ui/card'
 import '../styles/calendar.css'
-import type { DateClickInfo, EventClickInfo } from '../types'
+import type { CalendarEventData, DateClickInfo, EventClickInfo } from '../types'
 import { useAcademicSetting } from '@/features/academic/academic-setting'
 
 const router = useRouter()
+
+const selectedEvent = ref<CalendarEventData | null>(null)
+const isDetailOpen = ref(false)
 
 const {
   events,
@@ -40,22 +44,28 @@ function handleDateClick(info: DateClickInfo) {
 }
 
 function handleEventClick(info: EventClickInfo) {
-  if (!canManageCalendar.value) return
   const ep = info.event.extendedProps
+  selectedEvent.value = {
+    id: info.event.id,
+    title: info.event.title,
+    description: ep.description,
+    typeId: ep.type?.id ?? '',
+    type: ep.type,
+    startDate: ep.startDate!,
+    endDate: ep.endDate!,
+    startTime: ep.startTime,
+    endTime: ep.endTime,
+    academicYearId: ep.academicYearId,
+  }
+  isDetailOpen.value = true
+}
+
+function handleEditEvent(eventObj: CalendarEventData) {
   void router.push({
     name: 'academic-calendar-edit',
-    params: { id: info.event.id },
+    params: { id: eventObj.id },
     state: {
-      eventData: {
-        id: info.event.id,
-        title: info.event.title,
-        description: ep.description,
-        typeId: ep.type?.id ?? '',
-        type: ep.type,
-        startDate: ep.startDate!,
-        endDate: ep.endDate!,
-        academicYearId: ep.academicYearId,
-      },
+      eventData: { ...eventObj },
     },
   })
 }
@@ -106,5 +116,13 @@ onMounted(() => {
         </div>
       </div>
     </Card>
+
+    <!-- Event Detail / Preview Dialog -->
+    <AcademicCalendarDetailDialog
+      v-model:open="isDetailOpen"
+      :event="selectedEvent"
+      :can-manage="canManageCalendar"
+      @edit="handleEditEvent"
+    />
   </div>
 </template>

@@ -26,6 +26,24 @@ export function useCalendarFormat() {
   }
 
   /**
+   * "22 Agustus 2026" — the same date `formatDateStr` shortens, spelled out.
+   *
+   * For a detail view, where there is room and only one date to read. An
+   * unparseable value is returned as it came rather than as "Invalid Date":
+   * showing the raw string at least says what the server sent.
+   */
+  const formatLongDate = (dateStr?: string | null) => {
+    if (!dateStr) return '-'
+    const d = new Date(dateStr)
+    if (Number.isNaN(d.getTime())) return dateStr
+    return d.toLocaleDateString('id-ID', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    })
+  }
+
+  /**
    * The clock hours of an entry, read off the string rather than through `Date`.
    *
    * The API sends them as an instant on the epoch — `1970-01-01T08:00:00.000Z`
@@ -74,6 +92,7 @@ export function useCalendarFormat() {
     formatClock,
     formatHourRange,
     formatDateStr,
+    formatLongDate,
     formatEventType,
   }
 }
