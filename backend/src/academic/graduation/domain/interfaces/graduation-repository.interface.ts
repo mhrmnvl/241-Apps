@@ -37,6 +37,20 @@ export interface GraduationCandidate {
   classroomId: string;
   classroomName: string;
   gradeName: string;
+  /**
+   * A year the school already decided to hold this student, and why.
+   *
+   * A hold does not remove anyone from the list — being held is a decision to
+   * revisit, not a permanent state — so the screen needs a way to say "this
+   * one was held last time, for this reason" rather than presenting them as
+   * though nothing had happened.
+   */
+  previousHold?: {
+    academicYearId: string;
+    academicYearName: string;
+    reason: string;
+    decidedAt: Date;
+  };
 }
 
 export interface BulkGraduationStudentInput {
@@ -45,11 +59,37 @@ export interface BulkGraduationStudentInput {
   note?: string;
 }
 
+/** A student the school decided not to graduate this year, and why. */
+export interface GraduationHoldInput {
+  studentId: string;
+  reason: string;
+}
+
 export interface BulkGraduationInput {
   /** Derived from the active semester, never supplied by the caller. */
   academicYearId: string;
   graduationDate?: Date;
   students: BulkGraduationStudentInput[];
+  /**
+   * Recorded in the same transaction as the graduations.
+   *
+   * Both halves are one decision about one class, and writing them apart is
+   * how a run half-succeeds: the graduations land, the holds do not, and the
+   * students nobody graduated look like students nobody looked at.
+   */
+  held?: GraduationHoldInput[];
+}
+
+/** A recorded hold, with the names needed to display it. */
+export interface GraduationHoldRecord {
+  id: string;
+  studentId: string;
+  studentName: string;
+  nis: string;
+  academicYearId: string;
+  academicYearName: string;
+  reason: string;
+  decidedAt: Date;
 }
 
 /**
@@ -75,6 +115,8 @@ export interface GraduationCandidateList {
 export interface BulkGraduationResult {
   graduated: number;
   skipped: number;
+  /** Students recorded as held. A repeat run rewrites rather than stacks. */
+  held: number;
 }
 
 export abstract class IGraduationRepository {
@@ -99,4 +141,5 @@ export abstract class IGraduationRepository {
   abstract executeBulk(
     input: BulkGraduationInput,
   ): Promise<BulkGraduationResult>;
+  abstract findHolds(academicYearId?: string): Promise<GraduationHoldRecord[]>;
 }

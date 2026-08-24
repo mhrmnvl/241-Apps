@@ -68,6 +68,7 @@ model AcademicYear {
   semesters          Semester[]
   academicCalendars  AcademicCalendar[]
   graduations        StudentGraduation[]
+  graduationHolds    StudentGraduationHold[]
   admissionWaves     AdmissionWave[]
   gradeAcademicYears GradeAcademicYear[]
 
@@ -121,9 +122,9 @@ model AcademicCalendar {
   description    String?   @db.Text
   deletedAt      DateTime? @map("deleted_at")
 
-  academicYear AcademicYear         @relation(fields: [academicYearId], references: [id])
-  semester     Semester?            @relation(fields: [semesterId], references: [id])
-  type         AcademicCalendarType @relation(fields: [typeId], references: [id])
+  academicYear AcademicYear                @relation(fields: [academicYearId], references: [id])
+  semester     Semester?                   @relation(fields: [semesterId], references: [id])
+  type         AcademicCalendarType        @relation(fields: [typeId], references: [id])
   classrooms   AcademicCalendarClassroom[]
 
   @@map("academic_calendars")

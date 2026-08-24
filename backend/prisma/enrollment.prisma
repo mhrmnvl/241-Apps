@@ -50,3 +50,35 @@ model StudentGraduation {
   @@index([academicYearId])
   @@map("student_graduations")
 }
+
+/// A final-year student the school decided *not* to graduate this year, and why.
+///
+/// Separate from `StudentGraduation` rather than a flag on it, because the two
+/// are not the same record with a different outcome. A graduation is terminal
+/// and belongs to a student once — `studentId` is unique there. A hold belongs
+/// to a student *and a year*: the same student is held in 2026/2027 and
+/// graduates in 2027/2028, and both facts have to survive.
+///
+/// It also has to exist at all. Before this, a held student was simply left out
+/// of the bulk payload — their enrolment stayed ACTIVE, nothing recorded the
+/// decision, and the reason the operator typed never left the browser.
+model StudentGraduationHold {
+  id             String   @id @default(uuid()) @db.Uuid
+  studentId      String   @map("student_id") @db.Uuid
+  academicYearId String   @map("academic_year_id") @db.Uuid
+  /// Why the student was held. Required: a hold with no reason is a hold
+  /// nobody can answer for next year.
+  reason         String   @db.Text
+  decidedAt      DateTime @default(now()) @map("decided_at")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  student      Student      @relation(fields: [studentId], references: [id])
+  academicYear AcademicYear @relation(fields: [academicYearId], references: [id])
+
+  /// One decision per student per year, so re-running the screen after a
+  /// change of mind rewrites the reason instead of stacking a second hold.
+  @@unique([studentId, academicYearId])
+  @@index([academicYearId])
+  @@map("student_graduation_holds")
+}
