@@ -46,7 +46,7 @@ function onInput(value: string | number) {
         for="default-passing-score"
         class="text-xs font-semibold text-muted-foreground uppercase tracking-wider block"
       >
-        KKM Default Sekolah
+        Nilai Ketuntasan Minimum (KKM)
       </label>
       <Input
         id="default-passing-score"
