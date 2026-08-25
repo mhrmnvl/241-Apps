@@ -160,8 +160,7 @@ api.interceptors.response.use(
   },
   async (error: AxiosError) => {
     const originalRequest = error.config as
-      | (InternalAxiosRequestConfig & { _retry?: boolean })
-      | undefined
+      (InternalAxiosRequestConfig & { _retry?: boolean }) | undefined
 
     const isAuthEndpoint = originalRequest?.url?.includes('/auth/')
     const isRetry = originalRequest?._retry === true

@@ -54,8 +54,19 @@ export interface ActiveSemesterIdRef {
   id: string;
 }
 
+/**
+ * A teaching assignment, with the three things a lesson clashes over.
+ *
+ * This was the id alone, which was enough to write a row and not enough to
+ * check one: "is this teacher already teaching then" and "is this class
+ * already busy then" cannot be asked without knowing who and where. The
+ * conflict queries below existed the whole time and nothing called them.
+ */
 export interface TeachingAssignmentIdRef {
   id: string;
+  teacherId: string;
+  classroomId: string;
+  semesterId: string;
 }
 
 export abstract class IScheduleRepository {
@@ -97,10 +108,13 @@ export abstract class IScheduleRepository {
     classroomId: string,
     day: DayEnum,
   ): Promise<{ count: number }>;
+  // Named to match the implementation and every caller, which pass the day
+  // second. The contract said `(taId, slotId, day)` and typed the day as a
+  // plain string, so the two could be swapped and still compile.
   abstract findSoftDeleted(
-    taId: string,
-    slotId: string,
-    day: string,
+    teachingAssignmentId: string,
+    day: DayEnum,
+    timeSlotId: string,
   ): Promise<ScheduleEntity | null>;
   abstract restore(
     id: string,

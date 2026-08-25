@@ -369,6 +369,12 @@ export const SYSTEM_PERMISSIONS: SystemPermission[] = [
   },
   {
     module: 'classrooms',
+    action: 'read-own',
+    code: 'classrooms.read-own',
+    description: 'Read the classroom you are enrolled in',
+  },
+  {
+    module: 'classrooms',
     action: 'update',
     code: 'classrooms.update',
     description: 'Update classrooms',

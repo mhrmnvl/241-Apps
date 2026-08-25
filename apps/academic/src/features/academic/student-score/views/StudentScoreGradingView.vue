@@ -1,10 +1,10 @@
-﻿<script setup lang="ts">
+<script setup lang="ts">
 import StudentScoreInputTable from '../components/StudentScoreInputTable.vue'
 import { useStudentScore } from '../composables/useStudentScore'
 import { useBreadcrumbs } from '@/shared/composables/useBreadcrumbs'
 import { Alert, AlertDescription } from '@/ui/alert'
 import { Button } from '@/ui/button'
-import { Card, CardHeader, CardTitle, CardDescription } from '@/ui/card'
+import { Card, CardHeader, CardTitle } from '@/ui/card'
 import { useRoleGuard } from '@/features/platform/auth'
 import { AlertCircle, ArrowLeft } from 'lucide-vue-next'
 import { computed, onMounted } from 'vue'
@@ -38,7 +38,7 @@ const {
 
 useBreadcrumbs(() => [
   { title: 'Penilaian', href: '#' },
-  { title: 'Tugas & Nilai', href: '/academic/student-score' },
+  { title: 'Penilaian', href: '/academic/assessment/penilaian' },
   { title: assessmentItem.value?.name ?? 'Nilai', href: route.path },
 ])
 
@@ -68,7 +68,7 @@ onMounted(() => {
               variant="ghost"
               size="icon"
               class="size-8"
-              @click="router.push('/academic/student-score')"
+              @click="router.push('/academic/assessment/penilaian')"
             >
               <ArrowLeft class="size-4" />
             </Button>
@@ -76,18 +76,44 @@ onMounted(() => {
               {{ assessmentItem?.name ?? 'Nilai Siswa' }}
             </CardTitle>
           </div>
-          <CardDescription
-            v-if="assessmentItem"
-            class="mt-1 ml-10"
-          >
-            {{ TYPE_LABELS[assessmentItem.type] ?? assessmentItem.type }} ·
-            Bobot {{ assessmentItem.weight }}% · Skor Maks
-            {{ assessmentItem.maxScore }}
-          </CardDescription>
         </div>
       </CardHeader>
 
       <div class="space-y-4 p-6">
+        <!--
+          What the assessment is, below the title rather than in it. A heading
+          reading "UAS · Bobot 1% · Skor Maks 100" is four facts competing to
+          be the name of the page; the name is "UAS", and the rest is what you
+          need while typing marks.
+        -->
+        <div
+          v-if="assessmentItem"
+          class="flex flex-wrap items-center justify-center sm:justify-start gap-2"
+        >
+          <div
+            class="flex items-center gap-1.5 rounded-md border bg-muted/30 px-2.5 h-8 text-xs"
+          >
+            <span class="text-muted-foreground">Tipe</span>
+            <span class="font-semibold">
+              {{ TYPE_LABELS[assessmentItem.type] ?? assessmentItem.type }}
+            </span>
+          </div>
+          <div
+            class="flex items-center gap-1.5 rounded-md border bg-muted/30 px-2.5 h-8 text-xs"
+          >
+            <span class="text-muted-foreground">Bobot</span>
+            <span class="font-semibold">{{ assessmentItem.weight }}%</span>
+          </div>
+          <div
+            class="flex items-center gap-1.5 rounded-md border bg-muted/30 px-2.5 h-8 text-xs"
+          >
+            <span class="text-muted-foreground">Skor maks</span>
+            <span class="font-semibold tabular-nums">
+              {{ assessmentItem.maxScore }}
+            </span>
+          </div>
+        </div>
+
         <Alert
           v-if="formError"
           variant="destructive"

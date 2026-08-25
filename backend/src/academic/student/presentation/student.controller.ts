@@ -1,3 +1,8 @@
+import { MyClassroomResponseDto } from '../dto/response/my-classroom-response.dto.js';
+import {
+  GetMyClassroomUseCase,
+  type MyClassroom,
+} from '../use-cases/get-my-classroom.use-case.js';
 import type { UserEntity } from '../../../shared/domain/entities/user.entity.js';
 import { RequirePermissions } from '../../../platform/access-control/permission/decorators/require-permissions.decorator.js';
 import {
@@ -56,6 +61,7 @@ export class StudentController {
     private readonly getStudentsService: GetStudentsUseCase,
     private readonly getStudentByIdService: GetStudentByIdUseCase,
     private readonly getMyStudentService: GetMyStudentUseCase,
+    private readonly getMyClassroomService: GetMyClassroomUseCase,
     private readonly createStudentService: CreateStudentUseCase,
     private readonly createStudentWithRelationsService: CreateStudentWithRelationsUseCase,
     private readonly updateStudentService: UpdateStudentUseCase,
@@ -109,6 +115,30 @@ export class StudentController {
     @CurrentUser() user: AuthenticatedUser,
   ): Promise<StudentWithDetails> {
     return this.getMyStudentService.execute(user.id);
+  }
+
+  /**
+   * The classroom this student sits in — no id parameter exists.
+   *
+   * `classrooms.read` is the register of every class the school runs, and a
+   * student holds nothing of the sort. This answers one question about one
+   * person, resolved from their enrolment, and returns null where they have no
+   * enrolment this term rather than widening into the register.
+   */
+  @Get('me/classroom')
+  @RequirePermissions('classrooms.read-own')
+  @ApiOperation({
+    summary: 'The classroom you are enrolled in — no id parameter exists',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Your classroom, or null when you have no enrolment this term',
+    type: MyClassroomResponseDto,
+  })
+  async findMyClassroom(
+    @CurrentUser() user: AuthenticatedUser,
+  ): Promise<MyClassroom | null> {
+    return this.getMyClassroomService.execute(user.id);
   }
 
   @Get(':id')

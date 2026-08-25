@@ -7,7 +7,6 @@ import type { AssessmentItem } from '../types'
 import { DataTable } from '@/ui'
 import { Button } from '@/ui/button'
 import { Card, CardHeader, CardTitle } from '@/ui/card'
-import { Label } from '@/ui/label'
 import {
   Select,
   SelectContent,
@@ -15,21 +14,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/ui/select'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/ui/dialog'
 import { useRoleGuard } from '@/features/platform/auth'
 import { AssessmentWeightDialog } from '@/features/academic/assessment-weight'
-import { Plus, Filter, Scale } from 'lucide-vue-next'
+import { Plus, Scale } from 'lucide-vue-next'
 import { computed, onMounted, ref, watch } from 'vue'
-import { useRouter } from 'vue-router'
 
-const router = useRouter()
 const { can } = useRoleGuard()
 
 const {
@@ -42,49 +31,132 @@ const {
   selectedClassroomId,
   selectedSubjectId,
   selectedSemesterId,
+  assignments,
   teachingAssignment,
   fetchRelatedData,
   fetchItems,
   deleteItem,
 } = useAssessmentItem()
 
-const semesterFilterOptions = computed<FilterOption[]>(() =>
-  semesters.value.map((s) => ({
-    value: s.id,
-    label: `${s.academicYear?.name ?? ''} - ${s.type.name} (${s.isActive ? 'Aktif' : 'Tidak Aktif'})`,
-  })),
-)
-const classroomFilterOptions = computed<FilterOption[]>(() =>
-  classrooms.value.map((c) => ({
-    value: c.id,
-    label: c.code ?? '-',
-  })),
-)
-const subjectFilterOptions = computed<FilterOption[]>(() =>
-  subjects.value.map((s) => ({
-    value: s.id,
-    label: `${s.name} (Kelas ${s.gradeLevel ?? '-'})`,
-  })),
-)
+/**
+ * The two filters answer to each other.
+ *
+ * A task lives on a teaching assignment, so only pairs that have one can be
+ * written. Listing every subject against every class offered combinations that
+ * cannot be saved — pick VII-A and the list still showed subjects nobody
+ * teaches there, which reads as missing data rather than as an impossible
+ * choice.
+ *
+ * So each filter offers what the other one leaves possible: the classes that
+ * teach the chosen subject, and the subjects taught in the chosen class.
+ */
+const classroomFilterOptions = computed<FilterOption[]>(() => {
+  const allowed = new Set(
+    assignments.value
+      .filter(
+        (a) =>
+          !selectedSubjectId.value || a.subjectId === selectedSubjectId.value,
+      )
+      .map((a) => a.classroomId),
+  )
+  return classrooms.value
+    .filter((c) => allowed.has(c.id))
+    .map((c) => ({ value: c.id, label: c.code ?? '-' }))
+})
+
+const subjectFilterOptions = computed<FilterOption[]>(() => {
+  const allowed = new Set(
+    assignments.value
+      .filter(
+        (a) =>
+          !selectedClassroomId.value ||
+          a.classroomId === selectedClassroomId.value,
+      )
+      .map((a) => a.subjectId),
+  )
+  return subjects.value
+    .filter((s) => allowed.has(s.id))
+    .map((s) => ({
+      value: s.id,
+      label: s.name,
+    }))
+})
 
 const openForm = ref(false)
 const editingItem = ref<AssessmentItem | null>(null)
-const hasDisplayedData = ref(false)
-const isFilterDialogOpen = ref(false)
+
 const weightDialogOpen = ref(false)
 
 const isFilterReady = computed(() =>
   Boolean(selectedClassroomId.value && selectedSubjectId.value),
 )
 
-/** Names the class and subject whose weights the dialog is about to edit. */
-const weightContextLabel = computed(() => {
-  const classroom = classrooms.value.find(
-    (c) => c.id === selectedClassroomId.value,
-  )
-  const subject = subjects.value.find((s) => s.id === selectedSubjectId.value)
-  return [subject?.name, classroom?.code].filter(Boolean).join(' · ')
+/**
+ * The term the school is in, stated rather than asked for.
+ *
+ * `fetchRelatedData` picks it; this is only how the screen says which one it
+ * settled on. A task filed under last term is not obviously wrong on screen,
+ * which is why it is not a question.
+ */
+const activeSemester = computed(
+  () => semesters.value.find((s) => s.id === selectedSemesterId.value) ?? null,
+)
+
+const academicYearLabel = computed(
+  () => activeSemester.value?.academicYear?.name ?? null,
+)
+
+/** 'ODD' and 'EVEN' are the server's words; these are the school's. */
+const semesterLabel = computed(() => {
+  const name = activeSemester.value?.type.name
+  if (name === 'ODD') return 'Ganjil'
+  if (name === 'EVEN') return 'Genap'
+  return name ?? null
 })
+
+/**
+ * A teacher of one subject is not asked which subject.
+ *
+ * The list is already narrowed to what they are assigned to, so one option
+ * means there is nothing to choose — it is stated instead. Somebody who teaches
+ * two still has to say which.
+ */
+const hasSubjectChoice = computed(() => subjectFilterOptions.value.length > 1)
+
+/**
+ * What the screen is still waiting for, in words.
+ *
+ * The table and the Tambah Tugas button both wait on a teaching assignment —
+ * the row saying this teacher takes this subject in this class. Where there is
+ * none, hiding the button without saying so leaves somebody hunting for a
+ * control that is deliberately absent.
+ */
+const waitingFor = computed(() => {
+  if (!selectedSemesterId.value) {
+    return 'Belum ada semester aktif. Aktifkan satu lewat menu Periode Akademik.'
+  }
+  if (!selectedClassroomId.value) return 'Pilih kelas untuk menampilkan tugas.'
+  if (!selectedSubjectId.value) return 'Pilih mata pelajaran terlebih dahulu.'
+  if (!teachingAssignment.value) {
+    return 'Tidak ada jadwal mengajar untuk kelas dan mata pelajaran ini di semester berjalan, jadi belum ada tugas yang bisa dibuat.'
+  }
+  return null
+})
+const selectedSubjectLabel = computed(
+  () =>
+    subjects.value.find((s) => s.id === selectedSubjectId.value)?.name ?? null,
+)
+
+const weightSubjectName = computed(
+  () =>
+    subjects.value.find((s) => s.id === selectedSubjectId.value)?.name ??
+    undefined,
+)
+const weightClassroomName = computed(
+  () =>
+    classrooms.value.find((c) => c.id === selectedClassroomId.value)?.code ??
+    undefined,
+)
 
 const canCreate = computed(() => can('assessment-items.create'))
 const canUpdate = computed(() => can('assessment-items.update'))
@@ -98,9 +170,10 @@ const columns = computed(() =>
       editingItem.value = item
       openForm.value = true
     },
-    onGrade: (item) => {
-      void router.push(`/academic/student-score/${item.id}/nilai`)
-    },
+    // No grading from this view — grading is accessible through the
+    // Penilaian menu, which surfaces the same tasks with grade as the
+    // primary action.
+    onGrade: undefined,
     onDelete: async (item, { closeAlert, setLoading }) => {
       setLoading(true)
       const result = await deleteItem(item.id)
@@ -113,10 +186,15 @@ const columns = computed(() =>
   }),
 )
 
+/**
+ * The filters no longer live behind a dialog, so there is nothing to close
+ * here — an assignment to the dialog's flag was left behind when they moved
+ * inline, and it threw before the fetch on every single selection. That is why
+ * picking any class and any subject reported no teaching assignment: the
+ * lookup was never reached.
+ */
 async function handleFilter() {
-  isFilterDialogOpen.value = false
   if (!isFilterReady.value) return
-  hasDisplayedData.value = true
   await fetchItems()
 }
 
@@ -132,19 +210,40 @@ watch(openForm, (isOpen) => {
   }
 })
 
-watch([selectedClassroomId, selectedSubjectId, selectedSemesterId], () => {
-  if (isFilterReady.value) {
-    void handleFilter()
-  } else {
-    hasDisplayedData.value = false
+/**
+ * Changing one filter can strand the other.
+ *
+ * Pick Matematika, then a class that does not have it, and the subject is left
+ * naming something the new class never teaches. Cleared when it stops being on
+ * offer — and taken up again straight away when only one option remains, since
+ * one option is not a question.
+ */
+function reconcile(
+  selected: typeof selectedSubjectId,
+  options: FilterOption[],
+) {
+  if (selected.value && !options.some((o) => o.value === selected.value)) {
+    selected.value = null
   }
+  if (!selected.value && options.length === 1) {
+    selected.value = options[0].value
+  }
+}
+
+watch(classroomFilterOptions, (options) =>
+  reconcile(selectedClassroomId, options),
+)
+watch(subjectFilterOptions, (options) => reconcile(selectedSubjectId, options))
+
+// The filters apply themselves; there is no Tampilkan button to wait for.
+watch([selectedClassroomId, selectedSubjectId, selectedSemesterId], () => {
+  if (isFilterReady.value) void handleFilter()
 })
 
-onMounted(async () => {
-  await fetchRelatedData()
-  selectedSemesterId.value ??=
-    semesters.value.find((semester) => semester.isActive)?.id ?? null
-})
+// The active semester and, for a teacher, their subject are settled inside
+// `fetchRelatedData` — one place, so the screen and the query cannot disagree
+// about which term is being written to.
+onMounted(fetchRelatedData)
 </script>
 
 <template>
@@ -153,22 +252,39 @@ onMounted(async () => {
       class="overflow-hidden rounded-2xl shadow-sm shadow-black/5 ring-1 ring-black/4"
     >
       <CardHeader
-        class="flex flex-col items-start justify-between gap-2 border-b px-6 py-5 sm:flex-row sm:items-center"
+        class="flex flex-row items-center justify-between border-b px-6 py-5"
       >
-        <CardTitle class="text-2xl font-bold tracking-tight">
-          Tugas & Nilai
-        </CardTitle>
+        <CardTitle class="text-2xl font-bold tracking-tight"> Tugas </CardTitle>
         <div class="flex items-center gap-2">
           <Button
             v-if="teachingAssignment && canCreate"
             variant="outline"
+            size="icon"
+            class="sm:hidden"
+            @click="weightDialogOpen = true"
+          >
+            <Scale class="size-4" />
+          </Button>
+          <Button
+            v-if="teachingAssignment && canCreate"
+            variant="outline"
+            class="hidden sm:inline-flex"
             @click="weightDialogOpen = true"
           >
             <Scale class="size-4 mr-2" />
             Bobot Penilaian
           </Button>
           <Button
-            v-if="hasDisplayedData && teachingAssignment && canCreate"
+            v-if="!waitingFor && canCreate"
+            size="icon"
+            class="sm:hidden"
+            @click="openAddForm"
+          >
+            <Plus class="size-4" />
+          </Button>
+          <Button
+            v-if="!waitingFor && canCreate"
+            class="hidden sm:inline-flex"
             @click="openAddForm"
           >
             <Plus class="size-4 mr-2" />
@@ -178,26 +294,33 @@ onMounted(async () => {
       </CardHeader>
 
       <div class="space-y-6 p-6">
-        <!-- Desktop Filter Bar -->
+        <!-- Filter Bar -->
+        <!-- Desktop: horizontal row with info badges + selects -->
         <div class="hidden lg:flex lg:flex-row lg:items-center gap-3 mb-6">
-          <Select v-model="selectedSemesterId">
-            <SelectTrigger class="w-[200px]">
-              <SelectValue placeholder="Pilih Semester" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem
-                v-for="s in semesterFilterOptions"
-                :key="s.value"
-                :value="s.value"
-              >
-                {{ s.label }}
-              </SelectItem>
-            </SelectContent>
-          </Select>
+          <template v-if="academicYearLabel">
+            <div
+              class="flex items-center gap-2 rounded-md border bg-muted/30 px-3 h-9 text-sm"
+            >
+              <span class="text-muted-foreground">Tahun Ajaran</span>
+              <span class="font-semibold">{{ academicYearLabel }}</span>
+            </div>
+            <div
+              class="flex items-center gap-2 rounded-md border bg-muted/30 px-3 h-9 text-sm"
+            >
+              <span class="text-muted-foreground">Semester</span>
+              <span class="font-semibold">{{ semesterLabel }}</span>
+            </div>
+          </template>
+          <div
+            v-else
+            class="flex items-center rounded-md border border-destructive/40 bg-destructive/5 px-3 h-9 text-sm text-destructive"
+          >
+            Belum ada semester aktif
+          </div>
 
           <Select v-model="selectedClassroomId">
-            <SelectTrigger class="w-[150px]">
-              <SelectValue placeholder="Pilih Kelas" />
+            <SelectTrigger class="w-[92px]">
+              <SelectValue placeholder="Kelas" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem
@@ -210,7 +333,10 @@ onMounted(async () => {
             </SelectContent>
           </Select>
 
-          <Select v-model="selectedSubjectId">
+          <Select
+            v-if="hasSubjectChoice"
+            v-model="selectedSubjectId"
+          >
             <SelectTrigger class="w-[220px]">
               <SelectValue placeholder="Pilih Mata Pelajaran" />
             </SelectTrigger>
@@ -224,101 +350,88 @@ onMounted(async () => {
               </SelectItem>
             </SelectContent>
           </Select>
+          <div
+            v-else-if="selectedSubjectLabel"
+            class="flex items-center gap-2 rounded-md border bg-muted/30 px-3 h-9 text-sm"
+          >
+            <span class="text-muted-foreground">Mapel</span>
+            <span class="font-semibold">{{ selectedSubjectLabel }}</span>
+          </div>
         </div>
 
-        <!-- Mobile Filter Bar -->
-        <div class="flex lg:hidden items-center gap-2 mb-6">
-          <Button
-            variant="outline"
-            class="w-full relative justify-center"
-            @click="isFilterDialogOpen = true"
+        <!-- Mobile: academic info + inline selects -->
+        <div class="flex lg:hidden flex-col gap-3 mb-6">
+          <div
+            v-if="academicYearLabel"
+            class="flex items-center justify-center gap-2"
           >
-            <Filter class="size-4 mr-2" />
-            Filter Tugas & Nilai
-          </Button>
-        </div>
-
-        <!-- Mobile Filter Dialog -->
-        <Dialog v-model:open="isFilterDialogOpen">
-          <DialogContent
-            class="sm:max-w-md flex flex-col gap-0 p-0 overflow-hidden"
-          >
-            <DialogHeader class="px-6 py-5 border-b shrink-0 bg-muted/20">
-              <DialogTitle>Filter Tugas & Nilai</DialogTitle>
-              <DialogDescription class="sr-only">
-                Saring data berdasarkan semester, kelas, dan mata pelajaran.
-              </DialogDescription>
-            </DialogHeader>
-
-            <div class="p-6 space-y-4">
-              <div class="grid gap-2">
-                <Label>Tahun Ajaran / Semester</Label>
-                <Select v-model="selectedSemesterId">
-                  <SelectTrigger>
-                    <SelectValue placeholder="Pilih Semester" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem
-                      v-for="s in semesterFilterOptions"
-                      :key="s.value"
-                      :value="s.value"
-                    >
-                      {{ s.label }}
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div class="grid gap-2">
-                <Label>Kelas</Label>
-                <Select v-model="selectedClassroomId">
-                  <SelectTrigger>
-                    <SelectValue placeholder="Pilih Kelas" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem
-                      v-for="c in classroomFilterOptions"
-                      :key="c.value"
-                      :value="c.value"
-                    >
-                      {{ c.label }}
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div class="grid gap-2">
-                <Label>Mata Pelajaran</Label>
-                <Select v-model="selectedSubjectId">
-                  <SelectTrigger>
-                    <SelectValue placeholder="Pilih Mata Pelajaran" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem
-                      v-for="sub in subjectFilterOptions"
-                      :key="sub.value"
-                      :value="sub.value"
-                    >
-                      {{ sub.label }}
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <DialogFooter
-              class="p-6 border-t bg-muted/10 flex items-center justify-end gap-2 shrink-0"
+            <div
+              class="flex items-center gap-1.5 rounded-md border bg-muted/30 px-2.5 h-8 text-xs"
             >
-              <Button
-                class="w-full"
-                @click="isFilterDialogOpen = false"
-              >
-                Tutup
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+              <span class="text-muted-foreground">Tahun Ajaran</span>
+              <span class="font-semibold">{{ academicYearLabel }}</span>
+            </div>
+            <div
+              class="flex items-center gap-1.5 rounded-md border bg-muted/30 px-2.5 h-8 text-xs"
+            >
+              <span class="text-muted-foreground">Semester</span>
+              <span class="font-semibold">{{ semesterLabel }}</span>
+            </div>
+          </div>
+          <div
+            v-else
+            class="flex items-center rounded-md border border-destructive/40 bg-destructive/5 px-2.5 h-8 text-xs text-destructive"
+          >
+            Belum ada semester aktif
+          </div>
+
+          <div class="flex justify-center">
+            <Select v-model="selectedClassroomId">
+              <SelectTrigger class="rounded-r-none border-r-0 min-w-0">
+                <SelectValue placeholder="Kelas" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem
+                  v-for="c in classroomFilterOptions"
+                  :key="c.value"
+                  :value="c.value"
+                >
+                  {{ c.label }}
+                </SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select
+              v-if="hasSubjectChoice"
+              v-model="selectedSubjectId"
+            >
+              <SelectTrigger class="rounded-l-none min-w-0">
+                <SelectValue placeholder="Mapel" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem
+                  v-for="sub in subjectFilterOptions"
+                  :key="sub.value"
+                  :value="sub.value"
+                >
+                  {{ sub.label }}
+                </SelectItem>
+              </SelectContent>
+            </Select>
+            <div
+              v-else-if="selectedSubjectLabel"
+              class="flex items-center gap-2 rounded-l-none rounded-r-md border bg-muted/30 px-3 h-9 text-sm min-w-0"
+            >
+              <span class="text-muted-foreground shrink-0">Mapel</span>
+              <span class="font-semibold truncate">{{
+                selectedSubjectLabel
+              }}</span>
+            </div>
+          </div>
+        </div>
 
         <DataTable
-          v-if="hasDisplayedData"
+          v-if="!waitingFor"
           :columns="columns"
           :data="items"
           :is-loading="loading"
@@ -327,21 +440,15 @@ onMounted(async () => {
           filter-placeholder="Cari nama tugas..."
         />
 
+        <!-- Says which of the three it is waiting for, rather than one message
+             covering every reason the table is not there. -->
         <div
           v-else
           class="flex flex-col items-center justify-center rounded-lg border-2 border-dashed bg-muted/20 px-6 py-16 text-center"
         >
-          <h3 class="text-lg font-semibold text-foreground">
-            {{
-              isFilterReady ? 'Data Siap Ditampilkan' : 'Pilih Konteks Nilai'
-            }}
-          </h3>
-          <p class="mt-2 max-w-sm text-sm text-muted-foreground">
-            {{
-              isFilterReady
-                ? 'Klik Tampilkan untuk memuat daftar tugas sesuai konteks yang dipilih.'
-                : 'Pilih kelas dan mata pelajaran terlebih dahulu untuk mulai mengelola tugas.'
-            }}
+          <h3 class="text-lg font-semibold text-foreground">Belum ada tugas</h3>
+          <p class="mt-2 max-w-md text-sm text-muted-foreground">
+            {{ waitingFor }}
           </p>
         </div>
 
@@ -357,7 +464,8 @@ onMounted(async () => {
           v-if="teachingAssignment"
           v-model:open="weightDialogOpen"
           :teaching-assignment-id="teachingAssignment.id"
-          :context-label="weightContextLabel"
+          :subject-name="weightSubjectName"
+          :classroom-name="weightClassroomName"
         />
       </div>
     </Card>

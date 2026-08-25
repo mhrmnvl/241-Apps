@@ -2,7 +2,7 @@
 import { computed, toRefs } from 'vue'
 import { useAssessmentItemForm } from '../composables/useAssessmentItemForm'
 import type { AssessmentItem } from '../types'
-import { Alert, AlertDescription } from '@/ui/alert'
+import { Alert, AlertDescription, AlertTitle } from '@/ui/alert'
 import { Button } from '@/ui/button'
 import {
   Dialog,
@@ -12,6 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/ui/dialog'
+import { ScrollArea } from '@/ui/scroll-area'
 import { Input } from '@/ui/input'
 import {
   Select,
@@ -71,12 +72,12 @@ const itemForm = useAssessmentItemForm({
 
 <template>
   <Dialog v-model:open="open">
-    <DialogContent class="sm:max-w-md">
-      <DialogHeader>
+    <DialogContent class="sm:max-w-md flex flex-col gap-0 p-0 overflow-hidden">
+      <DialogHeader class="px-6 py-5 border-b shrink-0 bg-muted/20">
         <DialogTitle>{{
           itemForm.isEditing.value ? 'Ubah Tugas' : 'Tambah Tugas'
         }}</DialogTitle>
-        <DialogDescription>
+        <DialogDescription class="sr-only">
           {{
             itemForm.isEditing.value
               ? 'Perbarui informasi tugas. Klik simpan untuk menerapkan.'
@@ -85,109 +86,116 @@ const itemForm = useAssessmentItemForm({
         </DialogDescription>
       </DialogHeader>
 
-      <form
-        id="assessment-item-form"
-        class="space-y-4 py-2"
-        @submit.prevent="itemForm.onSubmit"
-      >
-        <FormField
-          v-slot="{ value, handleChange }"
-          name="name"
+      <ScrollArea class="flex-1 min-h-0">
+        <form
+          id="assessment-item-form"
+          class="space-y-4 px-6 py-4"
+          @submit.prevent="itemForm.onSubmit"
         >
-          <FormItem>
-            <FormLabel
-              >Nama Tugas <span class="text-destructive">*</span></FormLabel
-            >
-            <FormControl>
-              <Input
+          <FormField
+            v-slot="{ value, handleChange }"
+            name="name"
+          >
+            <FormItem>
+              <FormLabel
+                >Nama Tugas <span class="text-destructive">*</span></FormLabel
+              >
+              <FormControl>
+                <Input
+                  :model-value="value"
+                  placeholder="Contoh: Ulangan Harian Bab 3"
+                  @update:model-value="handleChange"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          </FormField>
+
+          <FormField
+            v-slot="{ value, handleChange }"
+            name="type"
+          >
+            <FormItem>
+              <FormLabel
+                >Tipe <span class="text-destructive">*</span></FormLabel
+              >
+              <Select
                 :model-value="value"
-                placeholder="Contoh: Ulangan Harian Bab 3"
                 @update:model-value="handleChange"
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        </FormField>
+              >
+                <FormControl>
+                  <SelectTrigger class="w-full">
+                    <SelectValue placeholder="Pilih tipe" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem
+                    v-for="opt in assessmentTypeOptions"
+                    :key="opt.value"
+                    :value="opt.value"
+                  >
+                    {{ opt.label }}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          </FormField>
 
-        <FormField
-          v-slot="{ value, handleChange }"
-          name="type"
-        >
-          <FormItem>
-            <FormLabel>Tipe <span class="text-destructive">*</span></FormLabel>
-            <Select
-              :model-value="value"
-              @update:model-value="handleChange"
+          <div class="grid gap-4 sm:grid-cols-2">
+            <FormField
+              v-slot="{ value, handleChange }"
+              name="weight"
             >
-              <FormControl>
-                <SelectTrigger class="w-full">
-                  <SelectValue placeholder="Pilih tipe" />
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                <SelectItem
-                  v-for="opt in assessmentTypeOptions"
-                  :key="opt.value"
-                  :value="opt.value"
-                >
-                  {{ opt.label }}
-                </SelectItem>
-              </SelectContent>
-            </Select>
-            <FormMessage />
-          </FormItem>
-        </FormField>
+              <FormItem>
+                <FormLabel>Bobot (%)</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    min="0"
+                    :model-value="value"
+                    @update:model-value="(v) => handleChange(Number(v))"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            </FormField>
 
-        <div class="grid gap-4 sm:grid-cols-2">
-          <FormField
-            v-slot="{ value, handleChange }"
-            name="weight"
+            <FormField
+              v-slot="{ value, handleChange }"
+              name="maxScore"
+            >
+              <FormItem>
+                <FormLabel>Skor Maksimal</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    min="0"
+                    max="1000"
+                    :model-value="value"
+                    @update:model-value="(v) => handleChange(Number(v))"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            </FormField>
+          </div>
+
+          <Alert
+            v-if="itemForm.formError.value"
+            variant="destructive"
+            class="mt-2"
           >
-            <FormItem>
-              <FormLabel>Bobot (%)</FormLabel>
-              <FormControl>
-                <Input
-                  type="number"
-                  min="0"
-                  :model-value="value"
-                  @update:model-value="(v) => handleChange(Number(v))"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          </FormField>
+            <AlertCircle class="size-4" />
+            <AlertTitle>Kesalahan Sistem</AlertTitle>
+            <AlertDescription>{{ itemForm.formError.value }}</AlertDescription>
+          </Alert>
+        </form>
+      </ScrollArea>
 
-          <FormField
-            v-slot="{ value, handleChange }"
-            name="maxScore"
-          >
-            <FormItem>
-              <FormLabel>Skor Maksimal</FormLabel>
-              <FormControl>
-                <Input
-                  type="number"
-                  min="0"
-                  max="1000"
-                  :model-value="value"
-                  @update:model-value="(v) => handleChange(Number(v))"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          </FormField>
-        </div>
-
-        <Alert
-          v-if="itemForm.formError.value"
-          variant="destructive"
-          class="mt-2"
-        >
-          <AlertCircle class="size-4" />
-          <AlertDescription>{{ itemForm.formError.value }}</AlertDescription>
-        </Alert>
-      </form>
-
-      <DialogFooter class="flex sm:justify-between gap-2">
+      <DialogFooter
+        class="px-6 py-4 border-t shrink-0 flex sm:justify-between w-full bg-background"
+      >
         <Button
           type="button"
           variant="outline"

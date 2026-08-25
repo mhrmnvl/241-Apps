@@ -11,15 +11,6 @@ import type { RaporData } from '../types'
 
 /**
  * A student's own report cards.
- *
- * Nothing here writes. There is no generate, no publish, no delete, and no
- * export for anyone else — not disabled, absent. A greyed-out Publish button
- * would still tell a student the school is about to publish something, which
- * is not theirs to read from this screen.
- *
- * The read is `/rapors/me`, which returns published cards belonging to whoever
- * signed in. No classroom or student is chosen here, because the server
- * already knows both.
  */
 const store = useRaporStore()
 const { rapors, loading, summary } = storeToRefs(store)
@@ -38,50 +29,56 @@ onMounted(() => void raporService.fetchMine())
 </script>
 
 <template>
-  <div class="space-y-6 p-4 md:p-6">
-    <div>
-      <h1 class="text-2xl font-bold tracking-tight">Rapor Saya</h1>
-      <p class="text-sm text-muted-foreground">
-        Rapor yang sudah diterbitkan sekolah.
-      </p>
-    </div>
-
-    <Card v-if="summary && summary.published > 0">
-      <CardHeader class="pb-2">
-        <CardTitle class="text-sm font-medium text-muted-foreground">
-          Rata-rata keseluruhan
+  <div class="p-4 md:p-5 lg:p-6">
+    <Card
+      class="overflow-hidden rounded-2xl shadow-sm shadow-black/5 ring-1 ring-black/4"
+    >
+      <CardHeader
+        class="flex flex-row items-center justify-between border-b px-6 py-5"
+      >
+        <CardTitle class="text-2xl font-bold tracking-tight">
+          Rapor Saya
         </CardTitle>
+
+        <!-- Average score badge -->
+        <div
+          v-if="
+            summary && summary.published > 0 && summary.averageScore !== null
+          "
+          class="flex items-center gap-2 rounded-lg bg-muted/50 px-3 py-1.5 border"
+        >
+          <span class="text-xs text-muted-foreground font-medium"
+            >Rata-rata:</span
+          >
+          <span class="text-base font-bold tabular-nums">
+            {{ summary.averageScore.toFixed(2) }}
+          </span>
+        </div>
       </CardHeader>
-      <CardContent>
-        <p class="text-2xl font-bold">
-          {{
-            summary.averageScore !== null
-              ? summary.averageScore.toFixed(2)
-              : '-'
-          }}
-        </p>
-      </CardContent>
-    </Card>
 
-    <!--
-      The empty state says which emptiness this is. "Belum ada rapor" would tell
-      a student whose report card exists but is not yet published that nothing
-      was ever written for them.
-    -->
-    <Card v-if="!loading && rapors.length === 0">
-      <CardContent class="py-10 text-center text-sm text-muted-foreground">
-        Belum ada rapor yang diterbitkan untuk Anda. Rapor akan muncul di sini
-        setelah wali kelas menerbitkannya.
-      </CardContent>
-    </Card>
+      <div class="p-6 space-y-4">
+        <!-- Empty state -->
+        <Card
+          v-if="!loading && rapors.length === 0"
+          class="shadow-none"
+        >
+          <CardContent class="py-10 text-center text-sm text-muted-foreground">
+            Belum ada rapor yang diterbitkan untuk Anda. Rapor akan muncul di
+            sini setelah wali kelas menerbitkannya.
+          </CardContent>
+        </Card>
 
-    <DataTable
-      v-else
-      :columns="tableColumns"
-      :data="rapors"
-      :is-loading="loading"
-      hide-per-page
-    />
+        <!-- Data table -->
+        <DataTable
+          v-else
+          :columns="tableColumns"
+          :data="rapors"
+          :is-loading="loading"
+          item-label="rapor"
+          hide-per-page
+        />
+      </div>
+    </Card>
 
     <!-- The student's own screen, so it reads through the self-service routes. -->
     <RaporDetailDialog

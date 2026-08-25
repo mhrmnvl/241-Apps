@@ -62,3 +62,4 @@ export interface CopyClassroomsResult {
   /** Already there, matched on grade and code. */
   skipped: number
 }
+export type { MyClassroom } from './my-classroom'

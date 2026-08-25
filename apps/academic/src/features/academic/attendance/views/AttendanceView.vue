@@ -1,10 +1,18 @@
 <script setup lang="ts">
 import type { FilterOption } from '@/shared/types/filter.types'
-import AttendanceFilterBar from '../components/AttendanceFilterBar.vue'
 import AttendanceInputTable from '../components/AttendanceInputTable.vue'
 import AttendanceRecapTab from '../components/AttendanceRecapTab.vue'
 import { useAttendance } from '../composables/useAttendance'
+import { toDateInputValue } from '@/shared/utils/utils'
+import { DatePicker } from '@/ui'
 import { Card, CardHeader, CardTitle } from '@/ui/card'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/tabs'
 import { onMounted, computed, watch } from 'vue'
 import { useRoleGuard } from '@/features/platform/auth'
@@ -50,13 +58,19 @@ const {
   fetchRecap,
 } = useAttendance()
 
-const semesterFilterOptions = computed<FilterOption[]>(() =>
-  semesters.value.map((s) => ({
-    value: s.id,
-    label:
-      `${s.type?.name === 'ODD' ? 'Ganjil' : 'Genap'} ${s.academicYear?.name ?? ''}`.trim(),
-  })),
+// ── Semester badge info (same pattern as Tugas) ──────────────────────
+const activeSemester = computed(
+  () => semesters.value.find((s) => s.id === selectedSemesterId.value) ?? null,
 )
+const academicYearLabel = computed(
+  () => activeSemester.value?.academicYear?.name ?? null,
+)
+const semesterLabel = computed(() => {
+  const name = activeSemester.value?.type?.name
+  if (name === 'ODD') return 'Ganjil'
+  if (name === 'EVEN') return 'Genap'
+  return name ?? null
+})
 
 const classroomFilterOptions = computed<FilterOption[]>(() =>
   classrooms.value.map((c) => ({
@@ -69,6 +83,20 @@ const yearFilterOptions = computed<FilterOption[]>(() => {
   const current = new Date().getFullYear()
   const years = [current - 2, current - 1, current, current + 1]
   return years.map((y) => ({ value: String(y), label: String(y) }))
+})
+
+const selectedMonthStr = computed({
+  get: () => String(selectedMonth.value),
+  set: (val: string) => {
+    selectedMonth.value = Number(val)
+  },
+})
+
+const selectedYearStr = computed({
+  get: () => String(selectedYear.value),
+  set: (val: string) => {
+    selectedYear.value = Number(val)
+  },
 })
 
 const isFilterReady = computed(() => {
@@ -115,12 +143,11 @@ onMounted(async () => {
     activeTab.value = 'recap'
   }
   await fetchFilterOptions()
-  const activeSemester = semesters.value.find((s) => s.isActive)
-  if (activeSemester) {
-    selectedSemesterId.value = activeSemester.id
+  const activeSem = semesters.value.find((s) => s.isActive)
+  if (activeSem) {
+    selectedSemesterId.value = activeSem.id
   }
-  const today = new Date()
-  selectedDate.value = today.toISOString().split('T')[0] ?? ''
+  selectedDate.value = toDateInputValue()
 })
 </script>
 
@@ -138,18 +165,160 @@ onMounted(async () => {
       </CardHeader>
 
       <div class="p-6 space-y-6">
-        <AttendanceFilterBar
-          v-model:selected-semester-id="selectedSemesterId"
-          v-model:selected-classroom-id="selectedClassroomId"
-          v-model:selected-date="selectedDate"
-          v-model:selected-month="selectedMonth"
-          v-model:selected-year="selectedYear"
-          :active-tab="activeTab"
-          :semester-filter-options="semesterFilterOptions"
-          :classroom-filter-options="classroomFilterOptions"
-          :month-options="MONTH_OPTIONS"
-          :year-filter-options="yearFilterOptions"
-        />
+        <!-- Desktop Filter Bar -->
+        <div class="hidden lg:flex lg:flex-row lg:items-center gap-3 mb-6">
+          <template v-if="academicYearLabel">
+            <div
+              class="flex items-center gap-2 rounded-md border bg-muted/30 px-3 h-9 text-sm"
+            >
+              <span class="text-muted-foreground">Tahun Ajaran</span>
+              <span class="font-semibold">{{ academicYearLabel }}</span>
+            </div>
+            <div
+              class="flex items-center gap-2 rounded-md border bg-muted/30 px-3 h-9 text-sm"
+            >
+              <span class="text-muted-foreground">Semester</span>
+              <span class="font-semibold">{{ semesterLabel }}</span>
+            </div>
+          </template>
+          <div
+            v-else
+            class="flex items-center rounded-md border border-destructive/40 bg-destructive/5 px-3 h-9 text-sm text-destructive"
+          >
+            Belum ada semester aktif
+          </div>
+
+          <Select v-model="selectedClassroomId">
+            <SelectTrigger class="w-[92px]">
+              <SelectValue placeholder="Kelas" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem
+                v-for="c in classroomFilterOptions"
+                :key="c.value"
+                :value="c.value"
+              >
+                {{ c.label }}
+              </SelectItem>
+            </SelectContent>
+          </Select>
+
+          <DatePicker
+            v-if="activeTab === 'input'"
+            v-model="selectedDate"
+            class="w-[160px]"
+          />
+          <template v-else>
+            <Select v-model="selectedMonthStr">
+              <SelectTrigger class="w-[130px]">
+                <SelectValue placeholder="Bulan" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem
+                  v-for="m in MONTH_OPTIONS"
+                  :key="m.value"
+                  :value="m.value"
+                >
+                  {{ m.label }}
+                </SelectItem>
+              </SelectContent>
+            </Select>
+            <Select v-model="selectedYearStr">
+              <SelectTrigger class="w-[110px]">
+                <SelectValue placeholder="Tahun" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem
+                  v-for="y in yearFilterOptions"
+                  :key="y.value"
+                  :value="y.value"
+                >
+                  {{ y.label }}
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </template>
+        </div>
+
+        <!-- Mobile: academic info + inline selects -->
+        <div class="flex lg:hidden flex-col gap-3 mb-6">
+          <div
+            v-if="academicYearLabel"
+            class="flex items-center justify-center gap-2"
+          >
+            <div
+              class="flex items-center gap-1.5 rounded-md border bg-muted/30 px-2.5 h-8 text-xs"
+            >
+              <span class="text-muted-foreground">Tahun Ajaran</span>
+              <span class="font-semibold">{{ academicYearLabel }}</span>
+            </div>
+            <div
+              class="flex items-center gap-1.5 rounded-md border bg-muted/30 px-2.5 h-8 text-xs"
+            >
+              <span class="text-muted-foreground">Semester</span>
+              <span class="font-semibold">{{ semesterLabel }}</span>
+            </div>
+          </div>
+          <div
+            v-else
+            class="flex items-center justify-center rounded-md border border-destructive/40 bg-destructive/5 px-2.5 h-8 text-xs text-destructive"
+          >
+            Belum ada semester aktif
+          </div>
+
+          <div class="flex justify-center gap-2">
+            <Select v-model="selectedClassroomId">
+              <SelectTrigger class="min-w-0">
+                <SelectValue placeholder="Kelas" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem
+                  v-for="c in classroomFilterOptions"
+                  :key="c.value"
+                  :value="c.value"
+                >
+                  {{ c.label }}
+                </SelectItem>
+              </SelectContent>
+            </Select>
+
+            <DatePicker
+              v-if="activeTab === 'input'"
+              v-model="selectedDate"
+              class="min-w-0"
+            />
+            <template v-else>
+              <Select v-model="selectedMonthStr">
+                <SelectTrigger class="min-w-0">
+                  <SelectValue placeholder="Bulan" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem
+                    v-for="m in MONTH_OPTIONS"
+                    :key="m.value"
+                    :value="m.value"
+                  >
+                    {{ m.label }}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+              <Select v-model="selectedYearStr">
+                <SelectTrigger class="min-w-0">
+                  <SelectValue placeholder="Tahun" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem
+                    v-for="y in yearFilterOptions"
+                    :key="y.value"
+                    :value="y.value"
+                  >
+                    {{ y.label }}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </template>
+          </div>
+        </div>
 
         <Tabs
           v-model="activeTab"

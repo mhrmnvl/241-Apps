@@ -39,5 +39,13 @@ export interface StudentScoreItem {
     name: string
     type: string
     weight: number
+    teachingAssignment?: {
+      id?: string
+      subject?: {
+        id?: string
+        name?: string
+        code?: string
+      }
+    }
   }
 }

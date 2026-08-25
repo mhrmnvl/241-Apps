@@ -1,4 +1,5 @@
 import { PrismaService } from '../../../../core/database/prisma.service.js';
+import type { TeachingAssignmentIdRef } from '../../domain/interfaces/schedule-repository.interface.js';
 
 /**
  * Reads that leave the Schedule aggregate. `BatchUpsertScheduleUseCase` needs
@@ -7,17 +8,28 @@ import { PrismaService } from '../../../../core/database/prisma.service.js';
  * than pulling in the whole TeachingAssignment module.
  */
 
+/**
+ * Not the id alone: placing a lesson has to know whose it is and where, or the
+ * clash checks have nothing to compare against.
+ */
+const ASSIGNMENT_REF_SELECT = {
+  id: true,
+  teacherId: true,
+  classroomId: true,
+  semesterId: true,
+} as const;
+
 export async function findTeachingAssignmentId(
   prisma: PrismaService,
   id: string,
-): Promise<{ id: string } | null> {
+): Promise<TeachingAssignmentIdRef | null> {
   return prisma.teachingAssignment.findFirst({
     where: {
       id,
       classroom: { academicYear: { deletedAt: null } },
       deletedAt: null,
     },
-    select: { id: true },
+    select: ASSIGNMENT_REF_SELECT,
   });
 }
 
@@ -49,10 +61,10 @@ export async function findTeachingAssignmentIdBySubject(
   classroomId: string,
   subjectId: string,
   semesterId: string,
-): Promise<{ id: string } | null> {
+): Promise<TeachingAssignmentIdRef | null> {
   return prisma.teachingAssignment.findFirst({
     where: { classroomId, subjectId, semesterId, deletedAt: null },
-    select: { id: true },
+    select: ASSIGNMENT_REF_SELECT,
   });
 }
 
@@ -76,6 +88,9 @@ export async function createTeachingAssignmentRow(
     teacherId: string;
     semesterId: string;
   },
-): Promise<{ id: string }> {
-  return prisma.teachingAssignment.create({ data, select: { id: true } });
+): Promise<TeachingAssignmentIdRef> {
+  return prisma.teachingAssignment.create({
+    data,
+    select: ASSIGNMENT_REF_SELECT,
+  });
 }

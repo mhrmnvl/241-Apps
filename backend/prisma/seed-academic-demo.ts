@@ -3,11 +3,46 @@ import { pgSslOptions } from '../src/core/database/pg-ssl.js';
 import {
   AssessmentType,
   AttendanceStatus,
-  Day,
+  IncomeRange,
+  ParentRelation,
   PrismaClient,
 } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import 'dotenv/config';
+import { seedTeachingPlan } from './seeds/modules/teaching-plan.seed.js';
+import {
+  seedTimetable,
+  type TimetablePeriod,
+} from './seeds/modules/timetable.seed.js';
+
+/**
+ * Every period of the school day, as the timetable builder needs it.
+ *
+ * All of them, not only the teaching ones: the ceremony and the breaks are
+ * what say which teaching periods are already spoken for. `@db.Time(0)` comes
+ * back as a Date on 1970-01-01, so the clock is read off it in UTC.
+ */
+async function readPeriods(prisma: PrismaClient): Promise<TimetablePeriod[]> {
+  const slots = await prisma.timeSlot.findMany({
+    where: { deletedAt: null },
+    select: {
+      id: true,
+      startTime: true,
+      endTime: true,
+      type: { select: { isLesson: true, days: true } },
+    },
+    orderBy: { order: 'asc' },
+  });
+
+  const minutes = (d: Date) => d.getUTCHours() * 60 + d.getUTCMinutes();
+  return slots.map((slot) => ({
+    id: slot.id,
+    startMinutes: minutes(slot.startTime),
+    endMinutes: minutes(slot.endTime),
+    isLesson: slot.type.isLesson,
+    days: slot.type.days,
+  }));
+}
 import {
   calculateSubjectGrades,
   calculateTotalAverage,
@@ -138,15 +173,6 @@ const TYPE_WEIGHTS: { type: AssessmentType; weight: number }[] = [
   { type: AssessmentType.FINAL, weight: 0.35 },
 ];
 
-const TEACHING_DAYS: Day[] = [
-  Day.MONDAY,
-  Day.TUESDAY,
-  Day.WEDNESDAY,
-  Day.THURSDAY,
-  Day.FRIDAY,
-  Day.SATURDAY,
-];
-
 /**
  * Deterministic pseudo-randomness.
  *
@@ -186,6 +212,613 @@ function schoolDays(count: number): Date[] {
   return days.reverse();
 }
 
+/**
+ * Rows written against the wrong academic year, taken back out.
+ *
+ * An earlier version of this fixture taught and enrolled next year's
+ * classrooms in this year's semester. Those rows are not merely untidy: a
+ * teaching assignment whose classroom sits in one year and whose semester sits
+ * in another is a combination the API will not create, so nothing downstream
+ * is written to expect it.
+ *
+ * Compared row by row rather than by ruling out a whole year, so that a school
+ * which has legitimately opened next year's term keeps its teaching. The only
+ * rows that match are ones no API call could have produced.
+ *
+ * Deleted rather than soft-deleted, and in dependency order: `student_scores`
+ * and `attendances` hold their enrolment by a plain foreign key, so the
+ * database refuses to remove the enrolment underneath them.
+ */
+async function repairYearMismatch(prisma: PrismaClient) {
+  const yearOf = {
+    classroom: { select: { academicYearId: true } },
+    semester: { select: { academicYearId: true } },
+  };
+
+  const straddlesTwoYears = (row: {
+    classroom: { academicYearId: string };
+    semester: { academicYearId: string };
+  }) => row.classroom.academicYearId !== row.semester.academicYearId;
+
+  const assignments = await prisma.teachingAssignment.findMany({
+    select: { id: true, ...yearOf },
+  });
+  const enrolments = await prisma.studentEnrollment.findMany({
+    select: { id: true, ...yearOf },
+  });
+
+  const assignmentIds = assignments.filter(straddlesTwoYears).map((a) => a.id);
+  const enrolmentIds = enrolments.filter(straddlesTwoYears).map((e) => e.id);
+  if (assignmentIds.length === 0 && enrolmentIds.length === 0) return;
+
+  const items = await prisma.assessmentItem.findMany({
+    where: { teachingAssignmentId: { in: assignmentIds } },
+    select: { id: true },
+  });
+  const itemIds = items.map((i) => i.id);
+
+  const removed = await prisma.$transaction(async (tx) => {
+    const scores = await tx.studentScore.deleteMany({
+      where: {
+        OR: [
+          { assessmentItemId: { in: itemIds } },
+          { enrollmentId: { in: enrolmentIds } },
+        ],
+      },
+    });
+    const attendances = await tx.attendance.deleteMany({
+      where: { enrollmentId: { in: enrolmentIds } },
+    });
+    // ReportCardSubject follows its report card by cascade.
+    const reportCards = await tx.reportCard.deleteMany({
+      where: { enrollmentId: { in: enrolmentIds } },
+    });
+    const schedules = await tx.schedule.deleteMany({
+      where: { teachingAssignmentId: { in: assignmentIds } },
+    });
+    // AssessmentWeight follows its assignment by cascade; AssessmentItem is
+    // removed here so the count can be reported.
+    const assessmentItems = await tx.assessmentItem.deleteMany({
+      where: { id: { in: itemIds } },
+    });
+    await tx.teachingAssignment.deleteMany({
+      where: { id: { in: assignmentIds } },
+    });
+    await tx.studentEnrollment.deleteMany({
+      where: { id: { in: enrolmentIds } },
+    });
+
+    return {
+      scores: scores.count,
+      attendances: attendances.count,
+      reportCards: reportCards.count,
+      schedules: schedules.count,
+      assessmentItems: assessmentItems.count,
+    };
+  });
+
+  console.log('  Cleared rows filed under the wrong academic year:');
+  console.log(
+    `    ${assignmentIds.length} teaching assignments, ${removed.assessmentItems} tasks, ${removed.scores} marks`,
+  );
+  console.log(
+    `    ${enrolmentIds.length} enrolments, ${removed.attendances} attendances, ${removed.reportCards} report cards`,
+  );
+  console.log(`    ${removed.schedules} timetable rows`);
+}
+
+/**
+ * Everything that names one invented child, derived from one number.
+ *
+ * The account name and the NIK used to be numbered separately — the name from
+ * the classroom's position in the list, the NIK from a counter that ran across
+ * the whole seeding. Shorten the list, as scoping it to one academic year
+ * does, and the two came apart: the run asked for an account name that did not
+ * exist yet, went to create it, and was refused because some earlier child was
+ * still holding the NIK that counter had reached.
+ *
+ * One key for all four means an account name always implies the same NIK, so
+ * the fixture converges on the same children however the last run left it.
+ */
+function fixtureStudentKeys(
+  classCode: string,
+  classIndex: number,
+  indexInClass: number,
+) {
+  const ordinal = classIndex * STUDENTS_PER_CLASS + indexInClass + 1;
+  const serial = String(ordinal).padStart(3, '0');
+  return {
+    identifier: `siswa.${classCode.toLowerCase()}.${serial}`,
+    nis: `2460${serial}`,
+    nisn: `00912360${serial}`,
+    nik: `3573061201${String(199999 + ordinal).padStart(6, '0')}`,
+  };
+}
+
+/**
+ * Children this fixture invented and would not invent again, removed.
+ *
+ * The account name carries the classroom it was made for —
+ * `siswa.viii-a.019` — so shortening the classroom list leaves the children of
+ * the classrooms that went away with nowhere to sit, and shifts the numbering
+ * of everyone after the first classroom. Both are cleared the same way: this
+ * fixture owns every `siswa.*` account, so any it would not create on this run
+ * is one it left behind on an earlier one.
+ *
+ * Nothing here can match a student the school entered: those are named by the
+ * school, not `siswa.<class>.<number>`.
+ */
+async function removeUnownedFixtureStudents(
+  prisma: PrismaClient,
+  owned: string[],
+) {
+  const orphans = await prisma.user.findMany({
+    where: {
+      identifier: { startsWith: 'siswa.', notIn: owned },
+    },
+    select: { id: true, student: { select: { id: true } } },
+  });
+  if (orphans.length === 0) return;
+
+  const userIds = orphans.map((u) => u.id);
+  const studentIds = orphans.flatMap((u) => (u.student ? [u.student.id] : []));
+
+  const enrolments = await prisma.studentEnrollment.findMany({
+    where: { studentId: { in: studentIds } },
+    select: { id: true },
+  });
+  const enrolmentIds = enrolments.map((e) => e.id);
+
+  await prisma.$transaction(async (tx) => {
+    // A child this fixture is giving up may still be sitting in a classroom,
+    // with marks and attendance against that seat. Those go first: they hold
+    // the enrolment by a plain foreign key, and the enrolment holds the child.
+    await tx.studentScore.deleteMany({
+      where: { enrollmentId: { in: enrolmentIds } },
+    });
+    await tx.attendance.deleteMany({
+      where: { enrollmentId: { in: enrolmentIds } },
+    });
+    await tx.reportCard.deleteMany({
+      where: { enrollmentId: { in: enrolmentIds } },
+    });
+    await tx.studentEnrollment.deleteMany({
+      where: { id: { in: enrolmentIds } },
+    });
+    await tx.studentParent.deleteMany({
+      where: { studentId: { in: studentIds } },
+    });
+    await tx.studentGraduationHold.deleteMany({
+      where: { studentId: { in: studentIds } },
+    });
+    await tx.studentGraduation.deleteMany({
+      where: { studentId: { in: studentIds } },
+    });
+    await tx.student.deleteMany({ where: { id: { in: studentIds } } });
+    // Profile holds its user by a plain foreign key; UserRole and the refresh
+    // tokens follow by cascade.
+    await tx.profile.deleteMany({ where: { userId: { in: userIds } } });
+    await tx.user.deleteMany({ where: { id: { in: userIds } } });
+  });
+
+  console.log(
+    `  Removed ${orphans.length} fixture students this run does not own`,
+  );
+}
+
+/**
+ * The school's noticeboard.
+ *
+ * The table was empty, and the menu entry is one of the few every role can
+ * open — a teacher, a student and an administrator all land on it. An empty
+ * noticeboard is the one screen that cannot be told apart from a broken one.
+ *
+ * A few are addressed to particular classes, because that is the part of the
+ * feature nothing else demonstrates: the rest of the school does not see them.
+ */
+const ANNOUNCEMENTS: {
+  title: string;
+  description: string;
+  daysAgo: number;
+  /** Class codes, or empty for the whole school. */
+  classes: string[];
+}[] = [
+  {
+    title: 'Pembagian Rapor Semester Ganjil',
+    description:
+      'Pembagian rapor semester ganjil dilaksanakan pada hari Sabtu pukul 08.00 WIB di ruang kelas masing-masing. Rapor diambil oleh orang tua atau wali murid.',
+    daysAgo: 3,
+    classes: [],
+  },
+  {
+    title: 'Libur Hari Guru Nasional',
+    description:
+      'Sehubungan dengan peringatan Hari Guru Nasional, kegiatan belajar mengajar diliburkan. Peserta didik mengikuti upacara peringatan di lapangan sekolah.',
+    daysAgo: 9,
+    classes: [],
+  },
+  {
+    title: 'Jadwal Penilaian Akhir Semester',
+    description:
+      'Penilaian Akhir Semester berlangsung selama dua pekan. Jadwal lengkap per mata pelajaran dapat dilihat pada menu Jadwal Pelajaran.',
+    daysAgo: 14,
+    classes: [],
+  },
+  {
+    title: 'Pembayaran SPP Bulan Berjalan',
+    description:
+      'Pembayaran SPP paling lambat tanggal 10 setiap bulan melalui bendahara sekolah pada jam kerja.',
+    daysAgo: 20,
+    classes: [],
+  },
+  {
+    title: 'Persiapan Ujian Akhir Kelas IX',
+    description:
+      'Peserta didik kelas IX mengikuti bimbingan belajar tambahan setiap hari Selasa dan Kamis sepulang sekolah.',
+    daysAgo: 6,
+    classes: ['IX-A', 'IX-B'],
+  },
+  {
+    title: 'Kegiatan Tahfidz Kelas VII',
+    description:
+      'Setoran hafalan pekan ini dimajukan menjadi hari Rabu. Peserta didik membawa buku setoran masing-masing.',
+    daysAgo: 2,
+    classes: ['VII-A', 'VII-B'],
+  },
+];
+
+async function seedAnnouncements(
+  prisma: PrismaClient,
+  classrooms: { id: string; code: string }[],
+) {
+  const idOf = new Map(classrooms.map((c) => [c.code, c.id]));
+  let created = 0;
+
+  for (const spec of ANNOUNCEMENTS) {
+    const date = new Date();
+    date.setUTCHours(0, 0, 0, 0);
+    date.setUTCDate(date.getUTCDate() - spec.daysAgo);
+
+    // Keyed by title: a fixture that appended would leave six more of these on
+    // the board every time it ran.
+    const existing = await prisma.announcement.findFirst({
+      where: { title: spec.title, deletedAt: null },
+      select: { id: true },
+    });
+
+    const announcement =
+      existing ??
+      (await prisma.announcement.create({
+        data: { title: spec.title, description: spec.description, date },
+      }));
+    if (!existing) created++;
+
+    for (const code of spec.classes) {
+      const classroomId = idOf.get(code);
+      if (!classroomId) continue;
+      await prisma.announcementClassroom.upsert({
+        where: {
+          announcementId_classroomId: {
+            announcementId: announcement.id,
+            classroomId,
+          },
+        },
+        update: {},
+        create: { announcementId: announcement.id, classroomId },
+      });
+    }
+  }
+
+  console.log(
+    `  ${created} announcements posted (${ANNOUNCEMENTS.length} on the board)`,
+  );
+}
+
+const FATHER_NAMES = [
+  'Asep Sutisna',
+  'Budi Rahmat',
+  'Cecep Hidayat',
+  'Dadang Suryana',
+  'Endang Permana',
+  'Farid Nugraha',
+  'Gunawan Setiadi',
+  'Hendra Wijaya',
+  'Irfan Sopandi',
+  'Jajang Kurnia',
+  'Komar Solihin',
+  'Lukman Hakim',
+];
+
+const MOTHER_NAMES = [
+  'Ani Suryani',
+  'Betty Marlina',
+  'Cucu Rohaeti',
+  'Dewi Kartika',
+  'Euis Nurhayati',
+  'Fitria Ningsih',
+  'Gina Aprilia',
+  'Hesti Wulandari',
+  'Ika Rosmiati',
+  'Juju Juariah',
+  'Kartini Lestari',
+  'Lilis Sumiati',
+];
+
+/**
+ * A guardian each, so that Data Orang Tua and Relasi Orang Tua hold something.
+ *
+ * Both screens read empty, and the relation between them is the part worth
+ * showing: a parent record exists once and is tied to a child, rather than
+ * being copied into the child's row. Each invented student gets a father
+ * marked primary and a mother beside him.
+ *
+ * Only students this fixture invented. A child the school entered has a real
+ * family, and inventing one for them would put a made-up name on a real
+ * record.
+ */
+async function seedGuardians(prisma: PrismaClient) {
+  const students = await prisma.student.findMany({
+    where: { deletedAt: null, user: { identifier: { startsWith: 'siswa.' } } },
+    select: { id: true },
+    orderBy: { nis: 'asc' },
+  });
+  if (students.length === 0) return;
+
+  const occupations = await prisma.occupation.findMany({
+    where: { deletedAt: null },
+    select: { id: true },
+    orderBy: { name: 'asc' },
+  });
+  const educations = await prisma.education.findMany({
+    where: { deletedAt: null },
+    select: { id: true },
+    orderBy: { name: 'asc' },
+  });
+  if (occupations.length === 0) {
+    console.log('  no occupations on this box, skipping guardians');
+    return;
+  }
+
+  const incomes = Object.values(IncomeRange);
+  let created = 0;
+  let linked = 0;
+
+  for (const [i, student] of students.entries()) {
+    const pair = [
+      {
+        name: FATHER_NAMES[i % FATHER_NAMES.length],
+        relation: ParentRelation.FATHER,
+        isPrimary: true,
+        nik: `3573060101${String(700000 + i * 2).padStart(6, '0')}`,
+      },
+      {
+        name: MOTHER_NAMES[i % MOTHER_NAMES.length],
+        relation: ParentRelation.MOTHER,
+        isPrimary: false,
+        nik: `3573064102${String(700001 + i * 2).padStart(6, '0')}`,
+      },
+    ];
+
+    for (const [n, spec] of pair.entries()) {
+      // The NIK is the identity here, as it is on the form.
+      const existing = await prisma.parent.findFirst({
+        where: { nik: spec.nik, deletedAt: null },
+        select: { id: true },
+      });
+      const parent =
+        existing ??
+        (await prisma.parent.create({
+          data: {
+            name: spec.name,
+            nik: spec.nik,
+            birthPlace: 'Bandung',
+            birthDate: new Date(
+              `198${(i + n) % 10}-0${((i + n) % 9) + 1}-1${(i + n) % 9}`,
+            ),
+            phone: `08${String(1200000000 + i * 7 + n).slice(0, 10)}`,
+            occupationId: occupations[(i + n) % occupations.length].id,
+            educationId: educations.length
+              ? educations[(i + n) % educations.length].id
+              : null,
+            income: incomes[(i + n) % incomes.length],
+          },
+        }));
+      if (!existing) created++;
+
+      const link = await prisma.studentParent.findFirst({
+        where: { studentId: student.id, parentId: parent.id, deletedAt: null },
+        select: { id: true },
+      });
+      if (!link) {
+        await prisma.studentParent.create({
+          data: {
+            studentId: student.id,
+            parentId: parent.id,
+            relation: spec.relation,
+            isPrimary: spec.isPrimary,
+          },
+        });
+        linked++;
+      }
+    }
+  }
+
+  console.log(`  ${created} guardians recorded, ${linked} tied to a child`);
+}
+
+/**
+ * Who runs each class: ketua, wakil, sekretaris, bendahara.
+ *
+ * One row per class per term, which is what the unique key says — so this
+ * updates rather than appends, and a class that gains students does not end up
+ * with two committees.
+ */
+async function seedClassroomStructures(
+  prisma: PrismaClient,
+  semesterId: string,
+  classrooms: { id: string; code: string }[],
+) {
+  let written = 0;
+
+  for (const classroom of classrooms) {
+    const enrolled = await prisma.studentEnrollment.findMany({
+      where: { deletedAt: null, semesterId, classroomId: classroom.id },
+      select: { studentId: true },
+      orderBy: { studentId: 'asc' },
+      take: 4,
+    });
+    if (enrolled.length < 4) continue;
+
+    const [president, vice, secretary, treasurer] = enrolled.map(
+      (e) => e.studentId,
+    );
+
+    const seats = {
+      presidentId: president,
+      vicePresidentId: vice,
+      secretaryId: secretary,
+      treasurerId: treasurer,
+    };
+
+    await prisma.classroomStructure.upsert({
+      where: {
+        classroomId_semesterId: { classroomId: classroom.id, semesterId },
+      },
+      update: seats,
+      create: { classroomId: classroom.id, semesterId, ...seats },
+    });
+    written++;
+  }
+
+  console.log(`  ${written} class committees seated`);
+}
+
+/**
+ * The days the school is shut.
+ *
+ * Attendance and the presence app both read this: a day on the list is not a
+ * day anybody was absent. With the table empty every national holiday counted
+ * as a school day that the whole school missed.
+ *
+ * Dates are worked out from the year the school is in rather than written down
+ * once, so this stays right as the years move.
+ */
+const HOLIDAYS: {
+  monthDay: string;
+  name: string;
+  inSecondHalf: boolean;
+}[] = [
+  {
+    monthDay: '08-17',
+    name: 'Hari Kemerdekaan Republik Indonesia',
+    inSecondHalf: false,
+  },
+  { monthDay: '12-25', name: 'Hari Raya Natal', inSecondHalf: false },
+  { monthDay: '01-01', name: 'Tahun Baru Masehi', inSecondHalf: true },
+  {
+    monthDay: '05-01',
+    name: 'Hari Buruh Internasional',
+    inSecondHalf: true,
+  },
+  { monthDay: '06-01', name: 'Hari Lahir Pancasila', inSecondHalf: true },
+];
+
+async function seedNonWorkingDays(prisma: PrismaClient, openingYear: number) {
+  let created = 0;
+
+  for (const holiday of HOLIDAYS) {
+    const year = holiday.inSecondHalf ? openingYear + 1 : openingYear;
+    const date = new Date(`${year}-${holiday.monthDay}T00:00:00.000Z`);
+
+    const existing = await prisma.nonWorkingDay.findFirst({
+      where: { date, deletedAt: null },
+      select: { id: true },
+    });
+    if (existing) continue;
+
+    await prisma.nonWorkingDay.create({ data: { date, name: holiday.name } });
+    created++;
+  }
+
+  console.log(`  ${created} public holidays recorded`);
+}
+
+/**
+ * Something on the Prestasi Siswa screen.
+ *
+ * The table held one row — a single achievement against a single child, which
+ * on a list screen is indistinguishable from a feature that does not work.
+ *
+ * Hung off the profile rather than the student: an achievement belongs to a
+ * person, and a teacher can hold one too. These are all students, because that
+ * is the screen that was empty.
+ */
+const ACHIEVEMENTS: { name: string; level: string; yearsAgo: number }[] = [
+  {
+    name: "Juara 1 Musabaqah Tilawatil Qur'an",
+    level: 'Kecamatan',
+    yearsAgo: 0,
+  },
+  { name: 'Juara 2 Olimpiade Matematika', level: 'Kabupaten', yearsAgo: 0 },
+  { name: 'Juara 1 Pidato Bahasa Arab', level: 'Kecamatan', yearsAgo: 1 },
+  { name: 'Juara 3 Lomba Cerdas Cermat', level: 'Kabupaten', yearsAgo: 0 },
+  { name: 'Juara 1 Futsal Antar Madrasah', level: 'Kecamatan', yearsAgo: 1 },
+  { name: 'Juara 2 Kaligrafi', level: 'Provinsi', yearsAgo: 0 },
+  { name: 'Juara Harapan 1 Tahfidz 5 Juz', level: 'Kabupaten', yearsAgo: 0 },
+  { name: 'Juara 3 Lomba Pramuka', level: 'Kecamatan', yearsAgo: 1 },
+];
+
+async function seedAchievements(prisma: PrismaClient, openingYear: number) {
+  const types = await prisma.achievementType.findMany({
+    where: { deletedAt: null },
+    select: { id: true },
+    orderBy: { name: 'asc' },
+  });
+  if (types.length === 0) {
+    console.log('  no achievement types on this box, skipping achievements');
+    return;
+  }
+
+  // Students this fixture invented, so nothing is credited to a real child who
+  // did not win it.
+  const students = await prisma.student.findMany({
+    where: { deletedAt: null, user: { identifier: { startsWith: 'siswa.' } } },
+    select: { user: { select: { profile: { select: { id: true } } } } },
+    orderBy: { nis: 'asc' },
+  });
+  const profileIds = students
+    .map((s) => s.user.profile?.id)
+    .filter((id): id is string => Boolean(id));
+  if (profileIds.length === 0) return;
+
+  let created = 0;
+  for (const [i, spec] of ACHIEVEMENTS.entries()) {
+    const profileId = profileIds[i % profileIds.length];
+
+    // Keyed by the child and the award, so a re-run does not hand the same
+    // student the same trophy twice.
+    const existing = await prisma.achievement.findFirst({
+      where: { profileId, name: spec.name, deletedAt: null },
+      select: { id: true },
+    });
+    if (existing) continue;
+
+    await prisma.achievement.create({
+      data: {
+        profileId,
+        name: spec.name,
+        level: spec.level,
+        typeId: types[i % types.length].id,
+        year: openingYear - spec.yearsAgo,
+        description: `Diraih mewakili madrasah pada tingkat ${spec.level.toLowerCase()}.`,
+      },
+    });
+    created++;
+  }
+
+  console.log(`  ${created} student achievements recorded`);
+}
+
 async function main() {
   const url = `${process.env.DATABASE_URL ?? ''} ${process.env.DIRECT_URL ?? ''}`;
   if (/apps241_prod|_prod\?|_prod\b/.test(url)) {
@@ -198,15 +831,51 @@ async function main() {
 
   const semester = await prisma.semester.findFirst({
     where: { isActive: true },
+    include: { academicYear: { select: { startYear: true, name: true } } },
   });
   if (!semester) throw new Error('No active semester on this box.');
 
+  // The calendar year the school year opens in — 2026 for "2026/2027". Read
+  // rather than parsed out of the name, which the school is free to rename.
+  const openingYear = semester.academicYear.startYear;
+
+  // Before writing anything: an earlier run of this fixture filed teaching and
+  // enrolments under a classroom from another academic year.
+  await repairYearMismatch(prisma);
+
+  /*
+   * Only this year's classrooms.
+   *
+   * Unfiltered, this picked up next year's set as well — the copies the
+   * kenaikan-kelas screen makes ahead of a promotion — and taught, timetabled
+   * and enrolled them against *this* year's semester. Six classrooms became
+   * twelve, every code appeared twice, and half the teaching in the active
+   * term pointed at a classroom belonging to a year that has no term yet.
+   *
+   * The API refuses exactly this: `CreateTeachingAssignmentUseCase` answers
+   * with "Classroom and semester must belong to the same academic year". A
+   * fixture writing through Prisma walks past that check, which is why it has
+   * to keep the rule itself.
+   */
   const classrooms = await prisma.classroom.findMany({
-    where: { deletedAt: null },
+    where: { deletedAt: null, academicYearId: semester.academicYearId },
     include: { grade: true },
     orderBy: { code: 'asc' },
   });
-  if (classrooms.length === 0) throw new Error('No classrooms on this box.');
+  if (classrooms.length === 0) {
+    throw new Error('No classrooms in the active academic year on this box.');
+  }
+
+  // Whatever an earlier run left behind under a different classroom list.
+  await removeUnownedFixtureStudents(
+    prisma,
+    classrooms.flatMap((classroom, classIndex) =>
+      Array.from(
+        { length: STUDENTS_PER_CLASS },
+        (_, i) => fixtureStudentKeys(classroom.code, classIndex, i).identifier,
+      ),
+    ),
+  );
 
   const subjects = await prisma.subject.findMany({
     where: { deletedAt: null },
@@ -247,10 +916,12 @@ async function main() {
   // a classroom and a timetable and do nothing else, so the marking that fills
   // every screen downstream was impossible for the role that does it.
   //
-  // Only added here, never removed: what dev holds *beyond* this — including
-  // `teachers.create` and `teachers.delete`, which let a teacher remove a
-  // colleague — is the school's to decide on the role screen, not a fixture's
-  // to quietly revoke.
+  // Only added here, never removed. A fixture's job is to make its own
+  // screens work, not to decide what a role holds — and taking a grant away
+  // silently is worse than leaving one too many. Where a box has drifted the
+  // other way, `pnpm --filter backend seed:iam` puts every built-in role back
+  // to the list in `iam.seed.ts`, which is where that decision is written
+  // down. Every code below is part of it.
   const teacherRole = await prisma.role.findFirst({
     where: { code: 'TEACHER' },
   });
@@ -277,7 +948,6 @@ async function main() {
       // class in the school, the teacher picks one they do not teach, and the
       // save is refused — a correct refusal that reads as a broken screen.
       'teaching-assignments.read-own',
-      'parents.read',
       // A teacher's own teaching schedule comes through the same self-service
       // route a student's timetable does — feature 005 defined the code as
       // covering both — and the role held only the wide `schedules.read`, so
@@ -330,7 +1000,6 @@ async function main() {
   const enrollmentIds: { id: string; classroomId: string }[] = [];
 
   let nameCursor = 0;
-  let nikCursor = 0;
 
   for (const [classIndex, classroom] of classrooms.entries()) {
     // The code already carries the grade — 'VII-A', not 'A' — so prefixing the
@@ -395,30 +1064,9 @@ async function main() {
         });
       }
 
-      // 2. When it is taught. One period a week per subject, spread across the
-      //    days so a timetable reads like a timetable.
-      //
-      //    The subject's whole timetable is replaced rather than added to.
-      //    Creating only what is missing is idempotent until the rule that
-      //    picks the slot changes, and then it is not: moving lessons out of
-      //    the break periods left the old rows in place beside the new ones,
-      //    and every subject appeared twice. A fixture has to converge on the
-      //    same timetable however the last version left it.
-      const day = TEACHING_DAYS[s % TEACHING_DAYS.length];
-      const slot = timeSlots[(classIndex + s) % timeSlots.length];
-      await prisma.schedule.deleteMany({
-        where: { teachingAssignmentId: assignment.id },
-      });
-      await prisma.schedule.create({
-        data: {
-          teachingAssignmentId: assignment.id,
-          timeSlotId: slot.id,
-          day,
-          room: label,
-        },
-      });
-
-      // 3. What is assessed.
+      // 2. What is assessed. (When it is taught is decided for the whole
+      //    school at once, further down — a timetable cannot be built one
+      //    subject at a time without double-booking the teacher.)
       for (const spec of ASSESSMENTS) {
         const existingItem = await prisma.assessmentItem.findFirst({
           where: {
@@ -445,15 +1093,11 @@ async function main() {
     for (let i = 0; i < STUDENTS_PER_CLASS; i++) {
       const name = GIVEN_NAMES[nameCursor % GIVEN_NAMES.length];
       nameCursor++;
-      const serial = String(classIndex * STUDENTS_PER_CLASS + i + 1).padStart(
-        3,
-        '0',
+      const { identifier, nis, nisn, nik } = fixtureStudentKeys(
+        label,
+        classIndex,
+        i,
       );
-      const identifier = `siswa.${label.toLowerCase()}.${serial}`;
-      const nis = `2460${serial}`;
-      const nisn = `00912360${serial}`;
-      const nik = `3573061201${String(200000 + nikCursor).padStart(6, '0')}`;
-      nikCursor++;
 
       const user = await prisma.user.upsert({
         where: { identifier },
@@ -529,9 +1173,25 @@ async function main() {
     }
   }
 
-  console.log(
-    `  ${classrooms.length} classrooms taught, timetabled and assessed`,
+  // Who teaches what, for the whole school: one teacher per subject, every
+  // teacher holding something, every class studying everything. Done before
+  // the timetable, which can only place what has been assigned.
+  await seedTeachingPlan(
+    prisma,
+    semester.id,
+    classrooms.map((classroom) => ({ id: classroom.id, code: classroom.code })),
   );
+
+  // Every class's week at once — a timetable cannot be built one subject at a
+  // time without standing the same teacher in two rooms at once.
+  await seedTimetable(
+    prisma,
+    semester.id,
+    classrooms.map((classroom) => ({ id: classroom.id, code: classroom.code })),
+    await readPeriods(prisma),
+  );
+
+  console.log(`  ${classrooms.length} classrooms taught and assessed`);
   console.log(`  ${enrollmentIds.length} students enrolled`);
 
   // 5. Marks and attendance, for every enrolment in the active semester —
@@ -750,6 +1410,13 @@ async function main() {
   console.log(
     `  ${published} report cards published, ${lines} subject lines frozen`,
   );
+  console.log('\n── Around the classroom ──');
+  await seedAnnouncements(prisma, classrooms);
+  await seedGuardians(prisma);
+  await seedClassroomStructures(prisma, semester.id, classrooms);
+  await seedNonWorkingDays(prisma, openingYear);
+  await seedAchievements(prisma, openingYear);
+
   console.log(
     '\n  students sign in with siswa123, teaching staff with guru123\n',
   );

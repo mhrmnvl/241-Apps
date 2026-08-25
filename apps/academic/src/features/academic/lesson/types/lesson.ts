@@ -61,14 +61,26 @@ export interface EditableScheduleRow {
 
 export type ScheduleTableRow = LockedScheduleRow | EditableScheduleRow
 
-/** Shape dari response GET /schedules/classroom/:id */
+/**
+ * Shape dari response GET /schedules/classroom/:id dan /schedules/me.
+ *
+ * Nama mapel, kelas, dan guru semuanya menggantung di `teachingAssignment` —
+ * itulah baris yang menyatakan "guru ini mengajar mapel ini di kelas ini".
+ * Baris jadwal sendiri hanya menyatakan kapan.
+ *
+ * Sebelumnya tipe ini hanya menyebut `subjectId` dan `subject.id`, padahal
+ * server mengirim jauh lebih banyak. Layar jadwal membaca nama dari sana dan
+ * tidak menemukannya, dan tipe yang kekurangan field tidak bisa mengeluh.
+ */
 export interface ScheduleResponse {
   id: string
   day: string
   timeSlotId: string
-  timeSlot?: { id: string }
+  timeSlot?: { id: string; name?: string; order?: number }
   teachingAssignment?: {
     subjectId: string
-    subject?: { id: string }
+    subject?: { id: string; name?: string }
+    classroom?: { id?: string; name?: string; code?: string }
+    teacher?: { id?: string; user?: { profile?: { name?: string } } }
   }
 }
