@@ -79,25 +79,33 @@ export const SAFETY_MM = 2
  *
  * The logo takes a fifth. The rest is what somebody actually reads.
  */
-const LOGO_SHARE = 0.2
+const LOGO_SHARE = 0.15
 
 /** The inner padding of the text cells, twice over. */
-const TEXT_INSET_MM = 4
+const TEXT_INSET_MM = 3
 
 /**
- * How the text is sized.
+ * How many characters a unit number can be.
  *
- * Width is what binds, not height: a unit number has to fit across the
- * right-hand column, and a 24mm-tall label has vertical room to spare. So the
- * font is that column divided by the characters it has to hold, capped by the
- * height of the half it sits in.
+ * Not a guess — the format is built in `create-asset.use-case.ts`:
  *
- * Both numbers below were too generous and the number ran past the edge of the
- * label. Fourteen characters assumed nobody would ever have a longer one, and
- * 0.55 of an em is the advance width of ordinary text — the number is set bold,
- * where digits and capitals are wider.
+ *     AST-{category}/{year}/{seq3}-{nn}        AST-ELEK/2026/001-05
+ *      4  +  code  + 6     + 3   + 3  =  16 + the category code
+ *
+ * The codes in use are four characters, which makes twenty. Twenty-four leaves
+ * room for an eight-character one without anybody having to come back here.
+ *
+ * It was sixteen, and every real unit number was four characters too long for
+ * the type it was sized against — which is why they were coming out truncated.
  */
-const NUMBER_CHAR_BUDGET = 16
+const NUMBER_CHAR_BUDGET = 24
+
+/**
+ * Roughly the advance width of one character, as a fraction of the font size.
+ *
+ * 0.55 is ordinary text; the number is set bold and is mostly digits and
+ * capitals, which are wider.
+ */
 const CHAR_WIDTH_RATIO = 0.62
 const NAME_FONT_RATIO = 0.78
 const LINE_HEIGHT = 1.15
