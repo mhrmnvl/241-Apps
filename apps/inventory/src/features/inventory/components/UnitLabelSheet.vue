@@ -6,11 +6,10 @@ import {
   DEFAULT_PAPER_ID,
   LABEL_HEIGHT_MM,
   LABEL_WIDTH_MM,
-  LOGO_MM,
-  NAME_FONT_MM,
   NUMBER_FONT_MM,
   PAGE_MARGIN_MM,
   labelSheetLayout,
+  nameFontMm,
   paginateLabels,
 } from '../logic/labelSheetLayout'
 
@@ -47,10 +46,21 @@ const sheetStyle = computed(() => ({
   '--cell-pad': `${CELL_PADDING_MM}mm`,
   '--label-w': `${LABEL_WIDTH_MM}mm`,
   '--label-h': `${LABEL_HEIGHT_MM}mm`,
-  '--logo-w': `${LOGO_MM}mm`,
   '--font-number': `${NUMBER_FONT_MM}mm`,
-  '--font-name': `${NAME_FONT_MM}mm`,
 }))
+
+/**
+ * The name is sized per label rather than once for the sheet.
+ *
+ * Names are all different lengths, and one size chosen for the longest wastes
+ * the label of every short one — so each gets as much type as its own half of
+ * the label can hold. The number stays one size for every label: those are all
+ * the same length, and a column of codes at different sizes would read as a
+ * mistake.
+ */
+function nameStyle(name: string) {
+  return { fontSize: `${nameFontMm(name)}mm` }
+}
 
 /**
  * `@page` cannot read a custom property, so the paper size is written into a
@@ -148,7 +158,12 @@ defineExpose({ print })
                   <span class="label-value">{{ u.unitNumber }}</span>
                 </div>
                 <div class="label-row label-name">
-                  <span class="label-value">{{ u.assetName }}</span>
+                  <span
+                    class="label-value"
+                    :style="nameStyle(u.assetName)"
+                  >
+                    {{ u.assetName }}
+                  </span>
                 </div>
               </div>
             </div>
@@ -238,13 +253,20 @@ defineExpose({ print })
     font-family: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
     color: #000;
   }
-  /* A fifth of the label, square, with a rule between it and the text. */
+  /*
+    Square, and as tall as the label — which is what makes the label as tall as
+    the logo rather than the other way round. `aspect-ratio` keeps the two
+    sides equal without anyone having to state the width, so there is one
+    number and nothing to keep in step.
+  */
   .unit-label-print .label-logo-box {
-    flex: 0 0 var(--logo-w);
+    flex: 0 0 auto;
+    height: 100%;
+    aspect-ratio: 1 / 1;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 1mm;
+    padding: 0.8mm;
     border-right: 0.3mm solid #000;
   }
   .unit-label-print .label-logo {
@@ -292,9 +314,7 @@ defineExpose({ print })
     white-space: nowrap;
     text-overflow: ellipsis;
   }
-  .unit-label-print .label-name {
-    font-size: var(--font-name);
-  }
+  /* Size comes from the element's own style attribute — see `nameStyle`. */
   /* Two lines: an asset name is the half of a label most likely to be long. */
   .unit-label-print .label-name .label-value {
     display: -webkit-box;

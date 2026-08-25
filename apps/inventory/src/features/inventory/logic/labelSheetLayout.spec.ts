@@ -4,13 +4,13 @@ import {
   LABEL_HEIGHT_MM,
   LABEL_WIDTH_MM,
   LOGO_MM,
-  NAME_FONT_MM,
   NUMBER_FONT_MM,
   PAGE_MARGIN_MM,
   PAPER_SIZES,
   SAFETY_MM,
   TEXT_WIDTH_MM,
   labelSheetLayout,
+  nameFontMm,
   paginateLabels,
   paperById,
 } from './labelSheetLayout'
@@ -51,13 +51,13 @@ describe('the label is one size', () => {
     )
   })
 
-  /** A4 has always held 27, and still does. */
-  it('lays A4 out three across and nine down', () => {
+  /** Three across, and a shorter label means more rows than before. */
+  it('lays A4 out three across and twelve down', () => {
     const layout = labelSheetLayout('a4')
 
     expect(layout.columns).toBe(3)
-    expect(layout.rowsPerPage).toBe(9)
-    expect(layout.labelsPerPage).toBe(27)
+    expect(layout.rowsPerPage).toBe(12)
+    expect(layout.labelsPerPage).toBe(36)
   })
 })
 
@@ -106,9 +106,9 @@ describe('nothing overflows the page', () => {
 
 describe('the three parts of the label', () => {
   /** Logo on the left, the number above the name on the right. */
-  it('gives the logo a sixth and the text the rest', () => {
-    expect(LOGO_MM).toBeCloseTo(LABEL_WIDTH_MM * 0.15, 5)
-    expect(TEXT_WIDTH_MM).toBeGreaterThan(LABEL_WIDTH_MM * 0.66)
+  it('makes the logo square and the label as tall as it', () => {
+    expect(LOGO_MM).toBe(LABEL_HEIGHT_MM)
+    expect(TEXT_WIDTH_MM).toBeGreaterThan(LABEL_WIDTH_MM * 0.6)
   })
 
   /** Square, so it can never be taller than the label containing it. */
@@ -117,33 +117,72 @@ describe('the three parts of the label', () => {
     expect(LOGO_MM).toBeGreaterThan(0)
   })
 
-  /** The number identifies the unit, so it is the one set larger. */
-  it('sets the number larger than the name', () => {
-    expect(NUMBER_FONT_MM).toBeGreaterThan(NAME_FONT_MM)
+  /**
+   * Names are all different lengths, so each gets as much type as its own half
+   * of the label can hold — a size chosen for the longest wastes the label of
+   * every short one.
+   */
+  it('gives a short name more type than a long one', () => {
+    const ordinary = nameFontMm('Lemari Arsip Besi')
+    const long = nameFontMm('Lemari Penyimpanan Arsip Besi Dua Pintu Warna Abu')
+
+    expect(ordinary).toBeGreaterThan(long)
+  })
+
+  /**
+   * Up to the budget every name gets the same size. Without that ceiling a
+   * three-word name filled its whole row — 17pt beside a 7pt number, which
+   * read as a poster rather than a label.
+   */
+  it('does not let a short name tower over the number', () => {
+    const short = nameFontMm('Kursi')
+
+    expect(short).toBe(nameFontMm('Lemari Arsip Besi'))
+    expect(short).toBeLessThan(NUMBER_FONT_MM * 1.5)
+  })
+
+  it('never lets a name outgrow its half of the label', () => {
+    for (const name of ['A', 'Kursi', 'Meja Guru Kayu Jati']) {
+      const half = LABEL_HEIGHT_MM / 2 - 1
+      expect(nameFontMm(name) * 1.15).toBeLessThanOrEqual(half)
+    }
+  })
+
+  /** However long it gets, it stays worth printing. */
+  it('floors the name rather than shrinking it away', () => {
+    const absurd = nameFontMm('x'.repeat(400))
+
+    expect(absurd).toBeGreaterThanOrEqual(1.8)
+  })
+
+  it('does not divide by an empty name', () => {
+    expect(Number.isFinite(nameFontMm(''))).toBe(true)
+    expect(Number.isFinite(nameFontMm('   '))).toBe(true)
   })
 
   /**
    * Measured in millimetres of actual type, not as a fraction of the label.
    *
-   * The label has vertical room to spare — the binding constraint is the
-   * twenty characters of a unit number across a 46mm column, so the height it
-   * could reach is beside the point. What matters is that what comes out is
-   * still large enough to read: 3mm is about 8.5pt, ordinary small print.
+   * The binding constraint is twenty-four characters of unit number across a
+   * 39mm column, so the height the type could reach is beside the point. What
+   * matters is that what comes out is still large enough to read: 2.5mm is
+   * about 7pt, ordinary small print.
    */
   it('sets type large enough to read at arm’s length', () => {
-    expect(NUMBER_FONT_MM).toBeGreaterThanOrEqual(3)
-    expect(NAME_FONT_MM).toBeGreaterThanOrEqual(2.2)
+    expect(NUMBER_FONT_MM).toBeGreaterThanOrEqual(2.5)
+    expect(nameFontMm('Lemari Arsip Besi')).toBeGreaterThanOrEqual(2)
   })
 
   /**
    * Each takes half the label's height, less the rule between them. The number
-   * gets one line of its half; the name may take two of its.
+   * gets one line of its half; a wrapped name gets two of its.
    */
   it('fits each line inside its own half', () => {
     const half = LABEL_HEIGHT_MM / 2 - 1
+    const wrapped = nameFontMm('Lemari Penyimpanan Arsip Besi Dua Pintu Abu')
 
     expect(NUMBER_FONT_MM * 1.15).toBeLessThanOrEqual(half)
-    expect(NAME_FONT_MM * 1.15 * 2).toBeLessThanOrEqual(half)
+    expect(wrapped * 1.15 * 2).toBeLessThanOrEqual(half)
   })
 
   /**
@@ -167,8 +206,8 @@ describe('the three parts of the label', () => {
   })
 
   /** The logo keeps its share, and the text keeps the rest. */
-  it('leaves the text five sixths of the label', () => {
-    expect(TEXT_WIDTH_MM).toBeGreaterThan(LABEL_WIDTH_MM * 0.75)
+  it('leaves the text most of the label', () => {
+    expect(TEXT_WIDTH_MM).toBeGreaterThan(LABEL_WIDTH_MM * 0.6)
   })
 })
 
