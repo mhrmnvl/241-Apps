@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, reactive, ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/card'
 import { DataTable } from '@/ui'
@@ -14,9 +14,11 @@ import type {
 import AssetForm from '../components/AssetForm.vue'
 import UnitLabelSheet from '../components/UnitLabelSheet.vue'
 import {
+  DEFAULT_LABEL_SIZE_ID,
   DEFAULT_PAPER_ID,
+  LABEL_SIZES,
   PAPER_SIZES,
-  columnChoicesFor,
+  labelSheetLayout,
 } from '../logic/labelSheetLayout'
 import { createUnitColumns } from '../components/unitColumns'
 import { Button } from '@/ui'
@@ -164,28 +166,21 @@ async function saveUnit() {
 
 const labelSheetRef = ref<{ print: () => Promise<void> } | null>(null)
 const printUnits = ref<LabelUnit[]>([])
-const labelColumns = ref(3)
-
 /**
- * Paper first, then how many fit across it.
+ * How big the sticker is, and what it is being printed on.
  *
- * The column list is not fixed: A4 stops at five across before a label runs out
- * of room for its own text, and A3 goes to eight — which is most of the reason
- * to reach for A3.
+ * Two independent choices, which is the point: a label is a physical object, so
+ * its size is picked once and paper only decides how many fit on a sheet. The
+ * same asset comes off the guillotine the same size whether the tray held A4 or
+ * A3.
  */
+const labelSize = ref(DEFAULT_LABEL_SIZE_ID)
 const paperSize = ref(DEFAULT_PAPER_ID)
-const columnChoices = computed(() => columnChoicesFor(paperSize.value))
 
-// Changing paper can strand the column count outside what the new one offers.
-// Nearest still on offer, rather than snapping back to a default.
-watch(columnChoices, (choices) => {
-  if (choices.includes(labelColumns.value)) return
-  labelColumns.value = choices.reduce((best, choice) =>
-    Math.abs(choice - labelColumns.value) < Math.abs(best - labelColumns.value)
-      ? choice
-      : best,
-  )
-})
+/** Said out loud: it is the number that decides how much paper to load. */
+const sheetPlan = computed(() =>
+  labelSheetLayout(paperSize.value, labelSize.value),
+)
 
 async function printLabels(units: InventoryAssetUnit[]) {
   if (units.length === 0) return
@@ -283,20 +278,25 @@ const unitColumns = computed(() =>
           </p>
         </div>
         <div class="flex flex-wrap items-center gap-2">
+          <!-- The arithmetic said out loud, because it is what decides how
+               much paper to put in the tray. -->
+          <span class="text-xs text-muted-foreground mr-1">
+            {{ sheetPlan.labelsPerPage }} label/halaman
+          </span>
           <Select
-            :model-value="String(labelColumns)"
-            @update:model-value="labelColumns = Number($event)"
+            :model-value="labelSize"
+            @update:model-value="labelSize = String($event)"
           >
-            <SelectTrigger class="w-[120px]">
+            <SelectTrigger class="w-[170px]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
               <SelectItem
-                v-for="choice in columnChoices"
-                :key="choice"
-                :value="String(choice)"
+                v-for="size in LABEL_SIZES"
+                :key="size.id"
+                :value="size.id"
               >
-                {{ choice }} / baris
+                {{ size.label }}
               </SelectItem>
             </SelectContent>
           </Select>
@@ -460,7 +460,7 @@ const unitColumns = computed(() =>
   <UnitLabelSheet
     ref="labelSheetRef"
     :units="printUnits"
-    :columns="labelColumns"
+    :label-size="labelSize"
     :paper-size="paperSize"
   />
 </template>
