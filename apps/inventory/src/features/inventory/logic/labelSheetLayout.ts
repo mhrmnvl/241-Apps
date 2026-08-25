@@ -1,5 +1,5 @@
 /**
- * How many labels fit on one A4 page, worked out rather than discovered.
+ * How many labels fit on one page, worked out rather than discovered.
  *
  * Everything here exists because letting the browser decide kept going wrong.
  * A label, or the dashed guide beside it, would land across a page boundary —
@@ -17,8 +17,38 @@
  * invite the next time somebody adjusts a label.
  */
 
-/** A4 is 297mm tall; `@page` takes 8mm off the top and the bottom. */
-const PRINTABLE_HEIGHT_MM = 297 - 8 - 8
+export interface PaperSize {
+  id: string
+  /** What the operator picks it by. */
+  label: string
+  widthMm: number
+  heightMm: number
+}
+
+/**
+ * The papers a school actually feeds a printer.
+ *
+ * Given as millimetres rather than the CSS keywords `A4` / `A3` / `legal`,
+ * because F4 has no keyword — and it is the one an Indonesian school reaches
+ * for most. One representation for all of them beats a special case for the
+ * one that matters.
+ */
+export const PAPER_SIZES: PaperSize[] = [
+  { id: 'a4', label: 'A4 (210 × 297)', widthMm: 210, heightMm: 297 },
+  { id: 'f4', label: 'F4 / Folio (215 × 330)', widthMm: 215, heightMm: 330 },
+  { id: 'a3', label: 'A3 (297 × 420)', widthMm: 297, heightMm: 420 },
+  { id: 'a5', label: 'A5 (148 × 210)', widthMm: 148, heightMm: 210 },
+  { id: 'letter', label: 'Letter (216 × 279)', widthMm: 216, heightMm: 279 },
+  { id: 'legal', label: 'Legal (216 × 356)', widthMm: 216, heightMm: 356 },
+]
+
+export const DEFAULT_PAPER_ID = 'a4'
+
+/** Taken off every edge, and the same number `@page` is given. */
+export const PAGE_MARGIN_MM = 8
+
+/** The padding above and below the label, inside its cut guide. */
+export const CELL_PADDING_MM = 3
 
 /**
  * Never bet the last millimetre.
@@ -28,59 +58,128 @@ const PRINTABLE_HEIGHT_MM = 297 - 8 - 8
  */
 const SAFETY_MM = 2
 
-/** The 3mm of padding above and below the label, inside its cut guide. */
-export const CELL_PADDING_MM = 3
+/**
+ * Roughly how much wider than tall a label should be.
+ *
+ * Derived from the width rather than looked up per paper, because the lookup
+ * would need an entry for every paper and column count and would be wrong the
+ * moment a new paper was added.
+ */
+const TARGET_ASPECT = 2.4
+
+/** Below this the QR stops being worth scanning; above it the label is a card. */
+const MIN_LABEL_HEIGHT_MM = 16
+const MAX_LABEL_HEIGHT_MM = 30
 
 /**
- * How tall a label is at each column count.
+ * The most of a label's width the logo and the QR may each take.
  *
- * Shorter as the columns grow, so the label keeps a shape worth printing: at
- * five per row it is a third the width it has at two, and a label that stayed
- * 28mm tall would be nearly square with a QR code taking most of it.
+ * They are square, so their width follows the label's height — and the height
+ * has a floor. Without this cap, a narrow label on a narrow paper reached the
+ * point where the two squares were wider than the label containing them, and
+ * the text between them had negative room.
  */
-const LABEL_HEIGHT_MM: Record<number, number> = {
-  2: 28,
-  3: 24,
-  4: 20,
-  5: 18,
-}
+const MAX_SQUARE_SHARE = 0.3
+
+/**
+ * Narrower than this and there is nothing useful left between the logo and the
+ * QR. Used to decide which column counts a paper can actually offer, rather
+ * than letting somebody pick one that prints unreadable labels.
+ */
+const MIN_LABEL_WIDTH_MM = 28
+
+/** Nobody hand-cuts more than eight across, even on A3. */
+const MAX_COLUMNS = 8
 
 const DEFAULT_COLUMNS = 3
 
 export interface LabelSheetLayout {
-  /** Columns actually used — an unknown count falls back rather than breaking. */
+  paper: PaperSize
   columns: number
-  /** Height of one label, excluding the padding inside its cut guide. */
+  /** Width of one label, excluding the padding inside its cut guide. */
+  labelWidthMm: number
   labelHeightMm: number
-  /** Height of one cell: the label plus its padding, which is what tiles. */
+  /**
+   * The side of the square logo and QR cells.
+   *
+   * As tall as the label allows, but never so wide that the two of them crowd
+   * out the text between them.
+   */
+  squareMm: number
+  /** The label plus its padding — the box that tiles and that breaks pages. */
   cellHeightMm: number
   rowsPerPage: number
   /** `rowsPerPage * columns` — the answer the whole module exists to give. */
   labelsPerPage: number
 }
 
-export function labelSheetLayout(columns: number): LabelSheetLayout {
-  // `?? DEFAULT` rather than a non-null assertion: the lookup is a plain index
-  // into a record, and TypeScript is right that it can miss.
-  const labelHeightMm =
-    LABEL_HEIGHT_MM[columns] ?? LABEL_HEIGHT_MM[DEFAULT_COLUMNS]
-  const resolved =
-    LABEL_HEIGHT_MM[columns] === undefined ? DEFAULT_COLUMNS : columns
+export function paperById(id: string | undefined): PaperSize {
+  return (
+    PAPER_SIZES.find((paper) => paper.id === id) ??
+    PAPER_SIZES.find((paper) => paper.id === DEFAULT_PAPER_ID)!
+  )
+}
+
+export function labelSheetLayout(
+  paperId: string | undefined,
+  columns: number,
+): LabelSheetLayout {
+  const paper = paperById(paperId)
+  const resolvedColumns =
+    Number.isInteger(columns) && columns >= 1 ? columns : DEFAULT_COLUMNS
+
+  const printableWidth = paper.widthMm - PAGE_MARGIN_MM * 2
+  const printableHeight = paper.heightMm - PAGE_MARGIN_MM * 2
+
+  const labelWidthMm = printableWidth / resolvedColumns - CELL_PADDING_MM * 2
+
+  // Whole millimetres: a label measured to three decimal places is a label
+  // nobody can check with a ruler.
+  const labelHeightMm = Math.min(
+    MAX_LABEL_HEIGHT_MM,
+    Math.max(MIN_LABEL_HEIGHT_MM, Math.round(labelWidthMm / TARGET_ASPECT)),
+  )
+
+  const squareMm = Math.min(labelHeightMm, labelWidthMm * MAX_SQUARE_SHARE)
+
   const cellHeightMm = labelHeightMm + CELL_PADDING_MM * 2
 
   // Floor, not round: a row that half fits does not fit.
   const rowsPerPage = Math.max(
     1,
-    Math.floor((PRINTABLE_HEIGHT_MM - SAFETY_MM) / cellHeightMm),
+    Math.floor((printableHeight - SAFETY_MM) / cellHeightMm),
   )
 
   return {
-    columns: resolved,
+    paper,
+    columns: resolvedColumns,
+    labelWidthMm,
     labelHeightMm,
+    squareMm,
     cellHeightMm,
     rowsPerPage,
-    labelsPerPage: rowsPerPage * resolved,
+    labelsPerPage: rowsPerPage * resolvedColumns,
   }
+}
+
+/**
+ * The column counts a paper can print a usable label at.
+ *
+ * A4 stops at five across and A3 goes to eight, which is most of the reason to
+ * reach for A3 in the first place. Offering every count on every paper would
+ * mean offering some that produce a label with no room for its own text —
+ * easier to leave out of the list than to explain afterwards.
+ */
+export function columnChoicesFor(paperId: string | undefined): number[] {
+  const choices: number[] = []
+  for (let columns = 2; columns <= MAX_COLUMNS; columns++) {
+    if (labelSheetLayout(paperId, columns).labelWidthMm >= MIN_LABEL_WIDTH_MM) {
+      choices.push(columns)
+    }
+  }
+  // Every paper here is wide enough for two; the fallback is for one that
+  // somehow is not, so the select is never empty.
+  return choices.length > 0 ? choices : [2]
 }
 
 /**

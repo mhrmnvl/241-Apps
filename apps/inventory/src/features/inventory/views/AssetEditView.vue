@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, onMounted, reactive, ref } from 'vue'
+import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/card'
 import { DataTable } from '@/ui'
@@ -13,6 +13,11 @@ import type {
 } from '../types'
 import AssetForm from '../components/AssetForm.vue'
 import UnitLabelSheet from '../components/UnitLabelSheet.vue'
+import {
+  DEFAULT_PAPER_ID,
+  PAPER_SIZES,
+  columnChoicesFor,
+} from '../logic/labelSheetLayout'
 import { createUnitColumns } from '../components/unitColumns'
 import { Button } from '@/ui'
 import { Input } from '@/ui/input'
@@ -161,6 +166,27 @@ const labelSheetRef = ref<{ print: () => Promise<void> } | null>(null)
 const printUnits = ref<LabelUnit[]>([])
 const labelColumns = ref(3)
 
+/**
+ * Paper first, then how many fit across it.
+ *
+ * The column list is not fixed: A4 stops at five across before a label runs out
+ * of room for its own text, and A3 goes to eight — which is most of the reason
+ * to reach for A3.
+ */
+const paperSize = ref(DEFAULT_PAPER_ID)
+const columnChoices = computed(() => columnChoicesFor(paperSize.value))
+
+// Changing paper can strand the column count outside what the new one offers.
+// Nearest still on offer, rather than snapping back to a default.
+watch(columnChoices, (choices) => {
+  if (choices.includes(labelColumns.value)) return
+  labelColumns.value = choices.reduce((best, choice) =>
+    Math.abs(choice - labelColumns.value) < Math.abs(best - labelColumns.value)
+      ? choice
+      : best,
+  )
+})
+
 async function printLabels(units: InventoryAssetUnit[]) {
   if (units.length === 0) return
   printUnits.value = units.map((u) => ({
@@ -265,10 +291,30 @@ const unitColumns = computed(() =>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="2">2 / baris</SelectItem>
-              <SelectItem value="3">3 / baris</SelectItem>
-              <SelectItem value="4">4 / baris</SelectItem>
-              <SelectItem value="5">5 / baris</SelectItem>
+              <SelectItem
+                v-for="choice in columnChoices"
+                :key="choice"
+                :value="String(choice)"
+              >
+                {{ choice }} / baris
+              </SelectItem>
+            </SelectContent>
+          </Select>
+          <Select
+            :model-value="paperSize"
+            @update:model-value="paperSize = String($event)"
+          >
+            <SelectTrigger class="w-[190px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem
+                v-for="paper in PAPER_SIZES"
+                :key="paper.id"
+                :value="paper.id"
+              >
+                {{ paper.label }}
+              </SelectItem>
             </SelectContent>
           </Select>
           <Button
@@ -415,5 +461,6 @@ const unitColumns = computed(() =>
     ref="labelSheetRef"
     :units="printUnits"
     :columns="labelColumns"
+    :paper-size="paperSize"
   />
 </template>

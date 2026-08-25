@@ -1,16 +1,23 @@
 <script setup lang="ts">
-import { computed, nextTick } from 'vue'
+import { computed, nextTick, onBeforeUnmount, watchEffect } from 'vue'
 import QRCode from 'qrcode'
 import type { LabelUnit } from '../types'
-import { labelSheetLayout, paginateLabels } from '../logic/labelSheetLayout'
+import {
+  DEFAULT_PAPER_ID,
+  PAGE_MARGIN_MM,
+  labelSheetLayout,
+  paginateLabels,
+} from '../logic/labelSheetLayout'
 
-// columns = how many labels per row on the A4 sheet (more = smaller labels).
 const props = withDefaults(
   defineProps<{
     units: LabelUnit[]
+    /** How many labels per row. What a paper can take is `columnChoicesFor`. */
     columns?: number
+    /** A `PAPER_SIZES` id; an unknown one falls back to A4 rather than failing. */
+    paperSize?: string
   }>(),
-  { columns: 3 },
+  { columns: 3, paperSize: DEFAULT_PAPER_ID },
 )
 
 /**
@@ -25,7 +32,7 @@ const props = withDefaults(
  * The same numbers drive the CSS below, so the height a label is drawn at and
  * the count used to chunk them cannot drift apart.
  */
-const layout = computed(() => labelSheetLayout(props.columns))
+const layout = computed(() => labelSheetLayout(props.paperSize, props.columns))
 const pages = computed(() =>
   paginateLabels(props.units, layout.value.labelsPerPage),
 )
@@ -34,7 +41,37 @@ const sheetStyle = computed(() => ({
   '--label-cols': String(layout.value.columns),
   '--label-h': `${layout.value.labelHeightMm}mm`,
   '--cell-h': `${layout.value.cellHeightMm}mm`,
+  '--label-square': `${layout.value.squareMm}mm`,
 }))
+
+/**
+ * `@page` cannot read a custom property, so the paper size is written into a
+ * stylesheet of its own instead.
+ *
+ * One element with a fixed id, rewritten in place: the size has to be in the
+ * document before `window.print()` is called, and a rule left behind from a
+ * previous choice would silently print the wrong paper.
+ */
+const PAGE_STYLE_ID = 'unit-label-page-size'
+
+function applyPageSize() {
+  const { paper } = layout.value
+  let style = document.getElementById(PAGE_STYLE_ID) as HTMLStyleElement | null
+  if (!style) {
+    style = document.createElement('style')
+    style.id = PAGE_STYLE_ID
+    document.head.appendChild(style)
+  }
+  style.textContent =
+    `@page { size: ${paper.widthMm}mm ${paper.heightMm}mm;` +
+    ` margin: ${PAGE_MARGIN_MM}mm; }`
+}
+
+watchEffect(applyPageSize)
+
+onBeforeUnmount(() => {
+  document.getElementById(PAGE_STYLE_ID)?.remove()
+})
 
 async function renderQrs() {
   await Promise.all(
@@ -58,6 +95,7 @@ async function renderQrs() {
 }
 
 async function print() {
+  applyPageSize()
   await nextTick()
   await renderQrs()
   await nextTick()
@@ -150,19 +188,15 @@ defineExpose({ print })
 }
 
 @media print {
-  @page {
-    size: A4;
-    /* `labelSheetLayout` subtracts exactly this from A4's height. Changing it
-       here without changing it there is how a page starts overflowing again. */
-    margin: 8mm;
-  }
-
   /*
     Everything the app renders into <body> goes away — the SPA root, the toast
     container, any dialog portal — leaving the teleported sheet alone on the
     page. `display: none` rather than `visibility: hidden`: a hidden box still
     occupies its space, and a hidden-but-present app is what forced the sheet to
     be pinned over the top of it.
+
+    The `@page` rule is not here: it carries the chosen paper size, so it is
+    written into its own stylesheet from the script above.
   */
   body > *:not(.unit-label-print) {
     display: none !important;
@@ -216,13 +250,13 @@ defineExpose({ print })
     overflow: hidden;
   }
   /*
-    Square, and as large as the label is tall, so the QR grows with the label
-    rather than staying at a fixed 11mm that was too big at five per row and
-    too small at two.
+    Square, and as large as the label is tall — but capped so that on a narrow
+    label the two of them cannot crowd out the text between them. Both numbers
+    come from `labelSheetLayout`.
   */
   .unit-label-print .label-logo-cell,
   .unit-label-print .label-qr-cell {
-    width: var(--label-h);
+    width: var(--label-square);
     text-align: center;
     vertical-align: middle;
     padding: 1.2mm;
