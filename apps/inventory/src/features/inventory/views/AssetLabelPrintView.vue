@@ -169,6 +169,7 @@ onMounted(async () => {
               <SelectItem value="2">2 / baris</SelectItem>
               <SelectItem value="3">3 / baris</SelectItem>
               <SelectItem value="4">4 / baris</SelectItem>
+              <SelectItem value="5">5 / baris</SelectItem>
             </SelectContent>
           </Select>
           <Button
