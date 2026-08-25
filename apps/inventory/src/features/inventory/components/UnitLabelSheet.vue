@@ -3,6 +3,7 @@ import { computed, nextTick, onBeforeUnmount, watchEffect } from 'vue'
 import QRCode from 'qrcode'
 import type { LabelUnit } from '../types'
 import {
+  DEFAULT_LABEL_SIZE_ID,
   DEFAULT_PAPER_ID,
   PAGE_MARGIN_MM,
   labelSheetLayout,
@@ -12,12 +13,18 @@ import {
 const props = withDefaults(
   defineProps<{
     units: LabelUnit[]
-    /** How many labels per row. What a paper can take is `columnChoicesFor`. */
-    columns?: number
+    /**
+     * A `LABEL_SIZES` id — how big the sticker is, in millimetres.
+     *
+     * Not how many fit across: that follows from the size and the paper, and a
+     * count would mean the same choice printed a different sticker on A3 than
+     * on A4.
+     */
+    labelSize?: string
     /** A `PAPER_SIZES` id; an unknown one falls back to A4 rather than failing. */
     paperSize?: string
   }>(),
-  { columns: 3, paperSize: DEFAULT_PAPER_ID },
+  { labelSize: DEFAULT_LABEL_SIZE_ID, paperSize: DEFAULT_PAPER_ID },
 )
 
 /**
@@ -26,20 +33,22 @@ const props = withDefaults(
  * Automatic fragmentation kept putting a label — or the dashed guide beside it
  * — across a page boundary: a grid broken at whatever point the content
  * happened to reach, with `break-inside: avoid` treated as a hint. Every label
- * is now a known height, so the number of rows that fit is arithmetic, and the
+ * is a known size, so the rows and columns that fit are arithmetic, and the
  * units are cut into pages before anything is rendered.
  *
- * The same numbers drive the CSS below, so the height a label is drawn at and
- * the count used to chunk them cannot drift apart.
+ * The same numbers drive the CSS below, so what a label is drawn at and what
+ * it was counted as cannot drift apart.
  */
-const layout = computed(() => labelSheetLayout(props.paperSize, props.columns))
+const layout = computed(() =>
+  labelSheetLayout(props.paperSize, props.labelSize),
+)
 const pages = computed(() =>
   paginateLabels(props.units, layout.value.labelsPerPage),
 )
 
 const sheetStyle = computed(() => ({
   '--label-cols': String(layout.value.columns),
-  '--label-h': `${layout.value.labelHeightMm}mm`,
+  '--cell-w': `${layout.value.cellWidthMm}mm`,
   '--cell-h': `${layout.value.cellHeightMm}mm`,
   '--label-square': `${layout.value.squareMm}mm`,
 }))
@@ -218,7 +227,14 @@ defineExpose({ print })
 
   .unit-label-print .label-grid {
     display: grid;
-    grid-template-columns: repeat(var(--label-cols, 3), 1fr);
+    /*
+      Fixed columns, not `1fr`. A label is a physical object: stretching it to
+      fill whatever paper it landed on is what made the same asset come out a
+      different size on A3. Whatever is left over is shared as margin, which is
+      what `justify-content` is doing.
+    */
+    grid-template-columns: repeat(var(--label-cols, 3), var(--cell-w));
+    justify-content: center;
     /*
       No gap. The 6mm that used to separate two labels is 3mm of padding inside
       each of their cells, so the guide sits where the gap was and the cells
@@ -229,7 +245,8 @@ defineExpose({ print })
   }
   .unit-label-print .label-cell {
     box-sizing: border-box;
-    /* Fixed, and the same number the page count was worked out from. */
+    /* Fixed, and the same numbers the page count was worked out from. */
+    width: var(--cell-w);
     height: var(--cell-h);
     padding: 3mm;
     /* Cut guide. Adjacent cells each draw their own, so the line between two
