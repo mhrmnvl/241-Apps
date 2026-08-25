@@ -68,39 +68,56 @@ defineExpose({ print })
         class="label-grid"
         :style="{ '--label-cols': String(columns) }"
       >
-        <table
+        <!--
+          The cut guide is a border on this wrapper, not an outline on the
+          table inside it.
+
+          An outline is painted, not laid out: it takes no space, nothing
+          measures it, and `break-inside: avoid` does not know it is there. So
+          the guide around a label at the foot of a page was drawn 3mm below a
+          box the browser had already decided to keep whole, and that 3mm fell
+          across the page boundary.
+
+          A border belongs to a box that is really there. The box is what the
+          page break is decided around, so the guide breaks where the box does:
+          the last row on a page closes its own rectangle, and the first row of
+          the next page opens a new one.
+        -->
+        <div
           v-for="u in units"
           :key="u.id"
-          class="label-card"
+          class="label-cell"
         >
-          <tbody>
-            <tr>
-              <td
-                class="label-logo-cell"
-                rowspan="2"
-              >
-                <img
-                  src="/logo.webp"
-                  alt=""
-                  class="label-logo"
-                />
-              </td>
-              <td class="label-number-cell">{{ u.unitNumber }}</td>
-              <td
-                class="label-qr-cell"
-                rowspan="2"
-              >
-                <div
-                  :id="`unit-qr-${u.id}`"
-                  class="label-qr"
-                ></div>
-              </td>
-            </tr>
-            <tr>
-              <td class="label-name-cell">{{ u.assetName }}</td>
-            </tr>
-          </tbody>
-        </table>
+          <table class="label-card">
+            <tbody>
+              <tr>
+                <td
+                  class="label-logo-cell"
+                  rowspan="2"
+                >
+                  <img
+                    src="/logo.webp"
+                    alt=""
+                    class="label-logo"
+                  />
+                </td>
+                <td class="label-number-cell">{{ u.unitNumber }}</td>
+                <td
+                  class="label-qr-cell"
+                  rowspan="2"
+                >
+                  <div
+                    :id="`unit-qr-${u.id}`"
+                    class="label-qr"
+                  ></div>
+                </td>
+              </tr>
+              <tr>
+                <td class="label-name-cell">{{ u.assetName }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </Teleport>
@@ -137,20 +154,33 @@ defineExpose({ print })
   .unit-label-print .label-grid {
     display: grid;
     grid-template-columns: repeat(var(--label-cols, 3), 1fr);
-    gap: 6mm;
+    /*
+      No gap. The 6mm that used to separate two labels is now 3mm of padding
+      inside each of their cells, so the cut guide sits where the gap used to
+      be and the cells tile edge to edge — which is what makes the dashed lines
+      run unbroken across a row.
+    */
+    gap: 0;
+  }
+  .unit-label-print .label-cell {
+    box-sizing: border-box;
     padding: 3mm;
+    /* Cut guide. Adjacent cells each draw their own, so the line between two
+       labels is two hairlines rather than one — at 0.15mm that is what a
+       guillotine wants to sit on anyway. */
+    border: 0.15mm dashed #999;
+    /* Decided around this box, which is why the guide can no longer straddle
+       a page: a cell is either on this page whole, or on the next one whole. */
+    page-break-inside: avoid;
+    break-inside: avoid;
   }
   .unit-label-print .label-card {
     width: 100%;
     height: 100%;
     border-collapse: collapse;
     table-layout: fixed;
-    /* A label split down the middle by a page boundary is a wasted label. */
     page-break-inside: avoid;
     break-inside: avoid;
-    /* Cut guide: dashed line in the middle of the gap between labels. */
-    outline: 0.15mm dashed #999;
-    outline-offset: 3mm;
     font-family: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
   }
   .unit-label-print .label-card td {
