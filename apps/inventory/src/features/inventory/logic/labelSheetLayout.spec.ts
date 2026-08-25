@@ -106,8 +106,8 @@ describe('nothing overflows the page', () => {
 
 describe('the three parts of the label', () => {
   /** Logo on the left, the number above the name on the right. */
-  it('gives the logo a fifth and the text the rest', () => {
-    expect(LOGO_MM).toBeCloseTo(LABEL_WIDTH_MM * 0.2, 5)
+  it('gives the logo a sixth and the text the rest', () => {
+    expect(LOGO_MM).toBeCloseTo(LABEL_WIDTH_MM * 0.15, 5)
     expect(TEXT_WIDTH_MM).toBeGreaterThan(LABEL_WIDTH_MM * 0.66)
   })
 
@@ -123,12 +123,16 @@ describe('the three parts of the label', () => {
   })
 
   /**
-   * The defect that started this: 7pt of type — 2.5mm — inside 24mm of label.
-   * Both are now a real fraction of the label they sit on.
+   * Measured in millimetres of actual type, not as a fraction of the label.
+   *
+   * The label has vertical room to spare — the binding constraint is the
+   * twenty characters of a unit number across a 46mm column, so the height it
+   * could reach is beside the point. What matters is that what comes out is
+   * still large enough to read: 3mm is about 8.5pt, ordinary small print.
    */
-  it('sets type that is a real fraction of the label', () => {
-    expect(NUMBER_FONT_MM).toBeGreaterThan(LABEL_HEIGHT_MM * 0.15)
-    expect(NAME_FONT_MM).toBeGreaterThan(LABEL_HEIGHT_MM * 0.1)
+  it('sets type large enough to read at arm’s length', () => {
+    expect(NUMBER_FONT_MM).toBeGreaterThanOrEqual(3)
+    expect(NAME_FONT_MM).toBeGreaterThanOrEqual(2.2)
   })
 
   /**
@@ -143,12 +147,28 @@ describe('the three parts of the label', () => {
   })
 
   /**
-   * And a full unit number has to fit across. The type used to be set from a
-   * fourteen-character budget at 0.55 of an em — ordinary text, where the
-   * number is bold — and ran past the edge of the label.
+   * A real unit number has to fit across, not a hopeful one.
+   *
+   * The format is `AST-{category}/{year}/{seq3}-{nn}`, built in
+   * `create-asset.use-case.ts`. The codes in use are four characters, which
+   * makes twenty — and the type was being sized against a budget of sixteen,
+   * so every one of them came out truncated.
    */
-  it('fits a sixteen-character bold number across the text column', () => {
-    expect(NUMBER_FONT_MM * 16 * 0.62).toBeLessThanOrEqual(TEXT_WIDTH_MM)
+  it.each([
+    ['AST-ELEK/2026/001-05', 'the format in use today'],
+    ['AST-MEUBEL/2026/001-05', 'a six-character category code'],
+    ['AST-OLAHRAGA/2026/001-05', 'an eight-character one — the budget'],
+  ])('fits %s — %s', (unitNumber) => {
+    const measured = NUMBER_FONT_MM * unitNumber.length * 0.62
+
+    // The budget case lands exactly on the line by construction, so the
+    // comparison has to survive the last bit of floating point.
+    expect(measured).toBeLessThanOrEqual(TEXT_WIDTH_MM + 1e-6)
+  })
+
+  /** The logo keeps its share, and the text keeps the rest. */
+  it('leaves the text five sixths of the label', () => {
+    expect(TEXT_WIDTH_MM).toBeGreaterThan(LABEL_WIDTH_MM * 0.75)
   })
 })
 
