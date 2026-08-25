@@ -1,21 +1,22 @@
 /**
- * How many labels fit on one page, worked out rather than discovered.
+ * One label, and how many of it fit on a page.
  *
- * Two things this module is built around.
+ * Three things this module is built around.
  *
- * **A label is a physical object.** It gets stuck on a cupboard and read from
- * arm's length, so its size is chosen once and does not move. Paper decides how
- * many of them fit on a sheet and nothing else — print the same asset on A4 or
- * on A3 and the sticker that comes off the guillotine is the same sticker. The
- * sizes here are the ones A4 has always produced, so nothing that was printed
- * before changes size now.
+ * **There is one label.** It is a physical object stuck on a cupboard and read
+ * from arm's length, so it has one size and that size does not move. Offering
+ * four was offering a decision nobody wanted to make, and it let two assets on
+ * the same shelf end up wearing different stickers.
+ *
+ * **Paper decides only how many fit.** Print on A4 or on A3 and what comes off
+ * the guillotine is the same sticker; A3 simply holds more of them.
  *
  * **Nothing is left to the browser to decide.** Automatic fragmentation kept
- * putting a label — or the dashed guide beside it — across a page boundary: a
- * grid broken at whatever point the content happened to reach, with
- * `break-inside: avoid` treated as a hint. Every label is a known size, the
- * rows and columns that fit are arithmetic, and the units are cut into explicit
- * pages before anything is rendered.
+ * putting a label — or the cut guide beside it — across a page boundary: a grid
+ * broken at whatever point the content happened to reach, with
+ * `break-inside: avoid` treated as a hint. The rows and columns that fit are
+ * arithmetic, and the units are cut into explicit pages before anything is
+ * rendered.
  *
  * The CSS reads these same numbers back as custom properties, so what a label
  * is drawn at and what it was counted as cannot drift apart.
@@ -48,34 +49,20 @@ export const PAPER_SIZES: PaperSize[] = [
 
 export const DEFAULT_PAPER_ID = 'a4'
 
-export interface LabelSize {
-  id: string
-  label: string
-  widthMm: number
-  heightMm: number
-}
-
 /**
- * The four label sizes, in millimetres of actual sticker.
+ * The label, in millimetres of actual sticker.
  *
- * These are what A4 produced when the sheet was described as "2 / baris"
- * through "5 / baris" — the counts are gone because they stopped being true
- * the moment a second paper existed, but the sizes they made are kept exactly.
- * On A4 the sheet still lays out two, three, four or five across.
+ * 58 × 24 was the middle of the four sizes that used to be on offer and the one
+ * both screens defaulted to, so nothing printed before this comes out a
+ * different size.
  */
-export const LABEL_SIZES: LabelSize[] = [
-  { id: 'lg', label: 'Besar (91 × 30 mm)', widthMm: 91, heightMm: 30 },
-  { id: 'md', label: 'Sedang (58 × 24 mm)', widthMm: 58, heightMm: 24 },
-  { id: 'sm', label: 'Kecil (42 × 18 mm)', widthMm: 42, heightMm: 18 },
-  { id: 'xs', label: 'Mini (32 × 14 mm)', widthMm: 32, heightMm: 14 },
-]
-
-export const DEFAULT_LABEL_SIZE_ID = 'md'
+export const LABEL_WIDTH_MM = 58
+export const LABEL_HEIGHT_MM = 24
 
 /** Taken off every edge, and the same number `@page` is given. */
 export const PAGE_MARGIN_MM = 8
 
-/** The padding around the label, inside its cut guide. */
+/** The padding around the label, between it and its cut guide. */
 export const CELL_PADDING_MM = 3
 
 /**
@@ -87,49 +74,47 @@ export const CELL_PADDING_MM = 3
 export const SAFETY_MM = 2
 
 /**
- * What the label is actually for.
+ * The label is in three parts: a logo square on the left, and to the right of
+ * it the asset name above its number.
  *
- * The unit number and the asset name are what somebody reads off a cupboard.
- * The logo says whose it is and takes a fifth of the width; everything else
- * belongs to the text.
- *
- * There was a QR code here, sharing that width. It is gone — the school is not
- * scanning anything yet, and it was taking a quarter of every label to say what
- * the number beneath it already said.
+ * The logo takes a fifth. The rest is what somebody actually reads.
  */
 const LOGO_SHARE = 0.2
 
-/** The inner padding of each table cell, twice over. */
+/** The inner padding of the text cells, twice over. */
 const TEXT_INSET_MM = 4
 
 /**
  * How the text is sized.
  *
  * Width is what binds, not height: `INV-2026-0012` has to fit across the
- * middle column, and a 24mm-tall label has vertical room to spare. So the font
- * is the text column divided by the characters it has to hold — with a cap
- * from the height, for the shapes where that stops being true.
+ * right-hand column, and a 24mm-tall label has vertical room to spare. So the
+ * font is that column divided by the characters it has to hold, capped by the
+ * height for the case where that stops being true.
  */
 const NUMBER_CHAR_BUDGET = 14
 const CHAR_WIDTH_RATIO = 0.55
-const NAME_FONT_RATIO = 0.72
+const NAME_FONT_RATIO = 0.78
 const LINE_HEIGHT = 1.15
 /** The name is allowed two lines; the number is always one. */
 const NAME_LINES = 2
-const MIN_FONT_MM = 1.6
+
+/** The logo square, and the width of the two text rows beside it. */
+export const LOGO_MM = Math.min(LABEL_HEIGHT_MM, LABEL_WIDTH_MM * LOGO_SHARE)
+export const TEXT_WIDTH_MM = LABEL_WIDTH_MM - LOGO_MM - TEXT_INSET_MM
+
+const NUMBER_BY_WIDTH = TEXT_WIDTH_MM / (NUMBER_CHAR_BUDGET * CHAR_WIDTH_RATIO)
+const NUMBER_BY_HEIGHT =
+  (LABEL_HEIGHT_MM - 3) / (LINE_HEIGHT * (1 + NAME_FONT_RATIO * NAME_LINES))
+
+export const NUMBER_FONT_MM = Math.min(NUMBER_BY_WIDTH, NUMBER_BY_HEIGHT)
+export const NAME_FONT_MM = NUMBER_FONT_MM * NAME_FONT_RATIO
 
 export interface LabelSheetLayout {
   paper: PaperSize
-  size: LabelSize
   /** The label plus the padding around it — the box that tiles. */
   cellWidthMm: number
   cellHeightMm: number
-  /** Side of the square logo cell, on the left of the label. */
-  logoMm: number
-  /** Everything to the right of the logo: the number above the name. */
-  textWidthMm: number
-  numberFontMm: number
-  nameFontMm: number
   columns: number
   rowsPerPage: number
   /** `columns * rowsPerPage` — the answer the whole module exists to give. */
@@ -143,57 +128,28 @@ export function paperById(id: string | undefined): PaperSize {
   )
 }
 
-export function labelSizeById(id: string | undefined): LabelSize {
-  return (
-    LABEL_SIZES.find((size) => size.id === id) ??
-    LABEL_SIZES.find((size) => size.id === DEFAULT_LABEL_SIZE_ID)!
-  )
-}
-
 export function labelSheetLayout(
   paperId: string | undefined,
-  labelSizeId: string | undefined,
 ): LabelSheetLayout {
   const paper = paperById(paperId)
-  const size = labelSizeById(labelSizeId)
 
-  const cellWidthMm = size.widthMm + CELL_PADDING_MM * 2
-  const cellHeightMm = size.heightMm + CELL_PADDING_MM * 2
+  const cellWidthMm = LABEL_WIDTH_MM + CELL_PADDING_MM * 2
+  const cellHeightMm = LABEL_HEIGHT_MM + CELL_PADDING_MM * 2
 
   const printableWidth = paper.widthMm - PAGE_MARGIN_MM * 2
   const printableHeight = paper.heightMm - PAGE_MARGIN_MM * 2
 
-  // Floor, both ways: a row or a column that half fits does not fit. The floor
-  // of at least one is for a label wider than the paper — it would overflow,
-  // but printing one and seeing it is more use than printing nothing.
+  // Floor, both ways: a row or a column that half fits does not fit.
   const columns = Math.max(1, Math.floor(printableWidth / cellWidthMm))
   const rowsPerPage = Math.max(
     1,
     Math.floor((printableHeight - SAFETY_MM) / cellHeightMm),
   )
 
-  // Square, so it can never be taller than the label however wide that is.
-  const logoMm = Math.min(size.heightMm, size.widthMm * LOGO_SHARE)
-
-  const textWidthMm = size.widthMm - logoMm - TEXT_INSET_MM
-
-  // What the width allows, then what the height allows, then a floor so a Mini
-  // label is small rather than invisible.
-  const byWidth = textWidthMm / (NUMBER_CHAR_BUDGET * CHAR_WIDTH_RATIO)
-  const byHeight =
-    (size.heightMm - 3) / (LINE_HEIGHT * (1 + NAME_FONT_RATIO * NAME_LINES))
-  const numberFontMm = Math.max(MIN_FONT_MM, Math.min(byWidth, byHeight))
-  const nameFontMm = Math.max(MIN_FONT_MM, numberFontMm * NAME_FONT_RATIO)
-
   return {
     paper,
-    size,
     cellWidthMm,
     cellHeightMm,
-    logoMm,
-    textWidthMm,
-    numberFontMm,
-    nameFontMm,
     columns,
     rowsPerPage,
     labelsPerPage: columns * rowsPerPage,

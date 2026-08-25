@@ -2,8 +2,13 @@
 import { computed, nextTick, onBeforeUnmount, watchEffect } from 'vue'
 import type { LabelUnit } from '../types'
 import {
-  DEFAULT_LABEL_SIZE_ID,
+  CELL_PADDING_MM,
   DEFAULT_PAPER_ID,
+  LABEL_HEIGHT_MM,
+  LABEL_WIDTH_MM,
+  LOGO_MM,
+  NAME_FONT_MM,
+  NUMBER_FONT_MM,
   PAGE_MARGIN_MM,
   labelSheetLayout,
   paginateLabels,
@@ -12,35 +17,25 @@ import {
 const props = withDefaults(
   defineProps<{
     units: LabelUnit[]
-    /**
-     * A `LABEL_SIZES` id — how big the sticker is, in millimetres.
-     *
-     * Not how many fit across: that follows from the size and the paper, and a
-     * count would mean the same choice printed a different sticker on A3 than
-     * on A4.
-     */
-    labelSize?: string
     /** A `PAPER_SIZES` id; an unknown one falls back to A4 rather than failing. */
     paperSize?: string
   }>(),
-  { labelSize: DEFAULT_LABEL_SIZE_ID, paperSize: DEFAULT_PAPER_ID },
+  { paperSize: DEFAULT_PAPER_ID },
 )
 
 /**
  * The pages are worked out here, not left to the browser.
  *
- * Automatic fragmentation kept putting a label — or the dashed guide beside it
- * — across a page boundary: a grid broken at whatever point the content
- * happened to reach, with `break-inside: avoid` treated as a hint. Every label
- * is a known size, so the rows and columns that fit are arithmetic, and the
- * units are cut into pages before anything is rendered.
+ * Automatic fragmentation kept putting a label — or the cut guide beside it —
+ * across a page boundary: a grid broken at whatever point the content happened
+ * to reach, with `break-inside: avoid` treated as a hint. The label is one
+ * known size, so the rows and columns that fit are arithmetic, and the units
+ * are cut into pages before anything is rendered.
  *
- * The same numbers drive the CSS below, so what a label is drawn at and what
- * it was counted as cannot drift apart.
+ * The same numbers drive the CSS below, so what a label is drawn at and what it
+ * was counted as cannot drift apart.
  */
-const layout = computed(() =>
-  labelSheetLayout(props.paperSize, props.labelSize),
-)
+const layout = computed(() => labelSheetLayout(props.paperSize))
 const pages = computed(() =>
   paginateLabels(props.units, layout.value.labelsPerPage),
 )
@@ -49,9 +44,12 @@ const sheetStyle = computed(() => ({
   '--label-cols': String(layout.value.columns),
   '--cell-w': `${layout.value.cellWidthMm}mm`,
   '--cell-h': `${layout.value.cellHeightMm}mm`,
-  '--logo-w': `${layout.value.logoMm}mm`,
-  '--font-number': `${layout.value.numberFontMm}mm`,
-  '--font-name': `${layout.value.nameFontMm}mm`,
+  '--cell-pad': `${CELL_PADDING_MM}mm`,
+  '--label-w': `${LABEL_WIDTH_MM}mm`,
+  '--label-h': `${LABEL_HEIGHT_MM}mm`,
+  '--logo-w': `${LOGO_MM}mm`,
+  '--font-number': `${NUMBER_FONT_MM}mm`,
+  '--font-name': `${NAME_FONT_MM}mm`,
 }))
 
 /**
@@ -120,44 +118,30 @@ defineExpose({ print })
         class="label-page"
       >
         <div class="label-grid">
-          <!--
-            The cut guide is a border on this cell, not an outline on the table
-            inside it. An outline is painted rather than laid out — it takes no
-            space and no page break is decided around it, so the guide could be
-            drawn past a boundary the browser had already chosen. A border
-            belongs to a box that is really there.
-          -->
           <div
             v-for="u in page"
             :key="u.id"
             class="label-cell"
           >
-            <table class="label-card">
-              <tbody>
-                <!--
-                  Logo square on the left, the number above the name on the
-                  right. There was a QR in a third column; it took a quarter of
-                  every label to repeat the number underneath it, and nothing
-                  scans it yet.
-                -->
-                <tr>
-                  <td
-                    class="label-logo-cell"
-                    rowspan="2"
-                  >
-                    <img
-                      src="/logo.webp"
-                      alt=""
-                      class="label-logo"
-                    />
-                  </td>
-                  <td class="label-number-cell">{{ u.unitNumber }}</td>
-                </tr>
-                <tr>
-                  <td class="label-name-cell">{{ u.assetName }}</td>
-                </tr>
-              </tbody>
-            </table>
+            <!--
+              Three parts: the logo square on the left, and beside it the asset
+              name above its number. The number is set larger and bolder — it
+              is what identifies this one unit, and the name is what tells you
+              which cupboard you are looking at.
+            -->
+            <div class="label-card">
+              <div class="label-logo-box">
+                <img
+                  src="/logo.webp"
+                  alt=""
+                  class="label-logo"
+                />
+              </div>
+              <div class="label-text">
+                <div class="label-name">{{ u.assetName }}</div>
+                <div class="label-number">{{ u.unitNumber }}</div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -200,95 +184,101 @@ defineExpose({ print })
     break-after: auto;
   }
 
+  /*
+    The cut guide is one line between two labels, not two side by side.
+
+    Each cell draws only its right and bottom edge, and the grid draws the top
+    and the left. Adjacent cells then share a single line, and the grid closes
+    the outside of whichever page it is on — a border belongs to a box that is
+    really there, so it breaks where the box does rather than being painted
+    across a boundary the way an outline was.
+  */
   .unit-label-print .label-grid {
     display: grid;
     /*
       Fixed columns, not `1fr`. A label is a physical object: stretching it to
       fill whatever paper it landed on is what made the same asset come out a
-      different size on A3. Whatever is left over is shared as margin, which is
-      what `justify-content` is doing.
+      different size on A3. Whatever is left over is shared as margin.
     */
     grid-template-columns: repeat(var(--label-cols, 3), var(--cell-w));
     justify-content: center;
-    /*
-      No gap. The 6mm that used to separate two labels is 3mm of padding inside
-      each of their cells, so the guide sits where the gap was and the cells
-      tile edge to edge — which is what lets the dashes run unbroken along a row
-      instead of restarting at every label.
-    */
     gap: 0;
+    border-top: 0.15mm dashed #999;
+    border-left: 0.15mm dashed #999;
   }
   .unit-label-print .label-cell {
     box-sizing: border-box;
     /* Fixed, and the same numbers the page count was worked out from. */
     width: var(--cell-w);
     height: var(--cell-h);
-    padding: 3mm;
-    /* Cut guide. Adjacent cells each draw their own, so the line between two
-       labels is two hairlines; at 0.15mm that is what a guillotine sits on. */
-    border: 0.15mm dashed #999;
+    padding: var(--cell-pad);
+    border-right: 0.15mm dashed #999;
+    border-bottom: 0.15mm dashed #999;
     page-break-inside: avoid;
     break-inside: avoid;
   }
+
   .unit-label-print .label-card {
-    width: 100%;
-    height: 100%;
-    border-collapse: collapse;
-    table-layout: fixed;
-    font-family: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
-  }
-  .unit-label-print .label-card td {
-    border: 1px solid #000;
+    display: flex;
+    align-items: stretch;
+    width: var(--label-w);
+    height: var(--label-h);
+    border: 0.3mm solid #000;
     overflow: hidden;
+    font-family: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
+    color: #000;
   }
-  /*
-    A fifth of the width, square, on the left. The other four fifths are the
-    number and the name — which is the whole label now that the QR that used to
-    sit on the right is gone.
-  */
-  .unit-label-print .label-logo-cell {
-    width: var(--logo-w);
-    text-align: center;
-    vertical-align: middle;
+  /* A fifth of the label, square, with a rule between it and the text. */
+  .unit-label-print .label-logo-box {
+    flex: 0 0 var(--logo-w);
+    display: flex;
+    align-items: center;
+    justify-content: center;
     padding: 1mm;
+    border-right: 0.3mm solid #000;
   }
   .unit-label-print .label-logo {
     display: block;
-    width: 100%;
-    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
     object-fit: contain;
-    margin: 0 auto;
+  }
+
+  .unit-label-print .label-text {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 0.8mm 1.2mm;
+    line-height: 1.15;
+    overflow: hidden;
   }
   /*
     Sized from the label rather than fixed at 7pt, which was the same height of
-    type on a 30mm label as on a 14mm one — and lost on both. The width is what
-    binds: the font is the text column divided by the characters it has to
-    hold. `labelSheetLayout` does that arithmetic.
+    type on any label and lost on all of them. Width is what binds: the font is
+    the text column divided by the characters it has to hold, which
+    `labelSheetLayout` works out.
   */
-  .unit-label-print .label-number-cell,
-  .unit-label-print .label-name-cell {
-    text-align: center;
-    vertical-align: middle;
-    padding: 0.6mm 1.2mm;
-    line-height: 1.15;
+  .unit-label-print .label-name {
+    font-size: var(--font-name);
+    /* Two lines: an asset name is the half of a label most likely to be long. */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
     overflow: hidden;
-    color: #000;
+    word-break: break-word;
   }
-  .unit-label-print .label-number-cell {
+  .unit-label-print .label-number {
     font-size: var(--font-number);
     font-weight: 700;
     /* One line, always: half a unit number is worse than a truncated one. */
     white-space: nowrap;
+    overflow: hidden;
     text-overflow: ellipsis;
-  }
-  /* The name may take two lines — there is vertical room, and an asset name is
-     the half of the label most likely to be long. */
-  .unit-label-print .label-name-cell {
-    font-size: var(--font-name);
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    word-break: break-word;
+    max-width: 100%;
   }
 }
 </style>
