@@ -75,7 +75,7 @@ export const SAFETY_MM = 2
 
 /**
  * The label is in three parts: a logo square on the left, and to the right of
- * it the asset name above its number.
+ * it the unit number above the asset name.
  *
  * The logo takes a fifth. The rest is what somebody actually reads.
  */
