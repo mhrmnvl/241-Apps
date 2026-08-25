@@ -138,8 +138,18 @@ defineExpose({ print })
                 />
               </div>
               <div class="label-text">
-                <div class="label-row label-number">{{ u.unitNumber }}</div>
-                <div class="label-row label-name">{{ u.assetName }}</div>
+                <!--
+                  The text sits in a span of its own rather than directly in
+                  the row. The row is a flex container, and `text-overflow`
+                  does not apply to one — the number was overrunning the edge
+                  of the label instead of ending in an ellipsis.
+                -->
+                <div class="label-row label-number">
+                  <span class="label-value">{{ u.unitNumber }}</span>
+                </div>
+                <div class="label-row label-name">
+                  <span class="label-value">{{ u.assetName }}</span>
+                </div>
               </div>
             </div>
           </div>
@@ -268,17 +278,25 @@ defineExpose({ print })
     the text column divided by the characters it has to hold, which
     `labelSheetLayout` works out.
   */
+  .unit-label-print .label-value {
+    max-width: 100%;
+    overflow: hidden;
+  }
   .unit-label-print .label-number {
     border-bottom: 0.3mm solid #000;
     font-size: var(--font-number);
     font-weight: 700;
-    /* One line, always: half a unit number is worse than a truncated one. */
+  }
+  /* One line, always: half a unit number is worse than a truncated one. */
+  .unit-label-print .label-number .label-value {
     white-space: nowrap;
     text-overflow: ellipsis;
   }
   .unit-label-print .label-name {
     font-size: var(--font-name);
-    /* Two lines: an asset name is the half of a label most likely to be long. */
+  }
+  /* Two lines: an asset name is the half of a label most likely to be long. */
+  .unit-label-print .label-name .label-value {
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;

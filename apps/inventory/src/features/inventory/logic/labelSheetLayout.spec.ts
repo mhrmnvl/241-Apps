@@ -131,16 +131,24 @@ describe('the three parts of the label', () => {
     expect(NAME_FONT_MM).toBeGreaterThan(LABEL_HEIGHT_MM * 0.1)
   })
 
-  /** Two lines of name and one of number have to fit the height. */
-  it('fits its type vertically', () => {
-    const stacked = (NUMBER_FONT_MM + NAME_FONT_MM * 2) * 1.15
+  /**
+   * Each takes half the label's height, less the rule between them. The number
+   * gets one line of its half; the name may take two of its.
+   */
+  it('fits each line inside its own half', () => {
+    const half = LABEL_HEIGHT_MM / 2 - 1
 
-    expect(stacked).toBeLessThanOrEqual(LABEL_HEIGHT_MM)
+    expect(NUMBER_FONT_MM * 1.15).toBeLessThanOrEqual(half)
+    expect(NAME_FONT_MM * 1.15 * 2).toBeLessThanOrEqual(half)
   })
 
-  /** And a full unit number has to fit across. */
-  it('fits a fourteen-character number across the text column', () => {
-    expect(NUMBER_FONT_MM * 14 * 0.55).toBeLessThanOrEqual(TEXT_WIDTH_MM)
+  /**
+   * And a full unit number has to fit across. The type used to be set from a
+   * fourteen-character budget at 0.55 of an em — ordinary text, where the
+   * number is bold — and ran past the edge of the label.
+   */
+  it('fits a sixteen-character bold number across the text column', () => {
+    expect(NUMBER_FONT_MM * 16 * 0.62).toBeLessThanOrEqual(TEXT_WIDTH_MM)
   })
 })
 

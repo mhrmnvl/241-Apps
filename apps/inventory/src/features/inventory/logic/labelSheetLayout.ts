@@ -87,13 +87,18 @@ const TEXT_INSET_MM = 4
 /**
  * How the text is sized.
  *
- * Width is what binds, not height: `INV-2026-0012` has to fit across the
+ * Width is what binds, not height: a unit number has to fit across the
  * right-hand column, and a 24mm-tall label has vertical room to spare. So the
  * font is that column divided by the characters it has to hold, capped by the
- * height for the case where that stops being true.
+ * height of the half it sits in.
+ *
+ * Both numbers below were too generous and the number ran past the edge of the
+ * label. Fourteen characters assumed nobody would ever have a longer one, and
+ * 0.55 of an em is the advance width of ordinary text — the number is set bold,
+ * where digits and capitals are wider.
  */
-const NUMBER_CHAR_BUDGET = 14
-const CHAR_WIDTH_RATIO = 0.55
+const NUMBER_CHAR_BUDGET = 16
+const CHAR_WIDTH_RATIO = 0.62
 const NAME_FONT_RATIO = 0.78
 const LINE_HEIGHT = 1.15
 /** The name is allowed two lines; the number is always one. */
@@ -103,12 +108,21 @@ const NAME_LINES = 2
 export const LOGO_MM = Math.min(LABEL_HEIGHT_MM, LABEL_WIDTH_MM * LOGO_SHARE)
 export const TEXT_WIDTH_MM = LABEL_WIDTH_MM - LOGO_MM - TEXT_INSET_MM
 
+/**
+ * The number and the name each get half the label's height, divided by a rule.
+ * The name may take two lines of its half; the number always takes one of its.
+ */
+const ROW_HEIGHT_MM = LABEL_HEIGHT_MM / 2 - 1
+
 const NUMBER_BY_WIDTH = TEXT_WIDTH_MM / (NUMBER_CHAR_BUDGET * CHAR_WIDTH_RATIO)
-const NUMBER_BY_HEIGHT =
-  (LABEL_HEIGHT_MM - 3) / (LINE_HEIGHT * (1 + NAME_FONT_RATIO * NAME_LINES))
+const NUMBER_BY_HEIGHT = ROW_HEIGHT_MM / LINE_HEIGHT
+const NAME_BY_HEIGHT = ROW_HEIGHT_MM / (LINE_HEIGHT * NAME_LINES)
 
 export const NUMBER_FONT_MM = Math.min(NUMBER_BY_WIDTH, NUMBER_BY_HEIGHT)
-export const NAME_FONT_MM = NUMBER_FONT_MM * NAME_FONT_RATIO
+export const NAME_FONT_MM = Math.min(
+  NUMBER_FONT_MM * NAME_FONT_RATIO,
+  NAME_BY_HEIGHT,
+)
 
 export interface LabelSheetLayout {
   paper: PaperSize
