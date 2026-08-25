@@ -124,10 +124,10 @@ defineExpose({ print })
             class="label-cell"
           >
             <!--
-              Three parts: the logo square on the left, and beside it the asset
-              name above its number. The number is set larger and bolder — it
-              is what identifies this one unit, and the name is what tells you
-              which cupboard you are looking at.
+              Three parts: the logo square on the left, and beside it the unit
+              number above the asset name. The number goes on top and is set
+              larger — it is what identifies this one unit; the name below tells
+              you which cupboard you are looking at.
             -->
             <div class="label-card">
               <div class="label-logo-box">
@@ -138,8 +138,8 @@ defineExpose({ print })
                 />
               </div>
               <div class="label-text">
-                <div class="label-name">{{ u.assetName }}</div>
-                <div class="label-number">{{ u.unitNumber }}</div>
+                <div class="label-row label-number">{{ u.unitNumber }}</div>
+                <div class="label-row label-name">{{ u.assetName }}</div>
               </div>
             </div>
           </div>
@@ -244,15 +244,21 @@ defineExpose({ print })
     object-fit: contain;
   }
 
+  /* Two halves of equal height, divided by a rule, as on the drawing. */
   .unit-label-print .label-text {
     flex: 1 1 auto;
     min-width: 0;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+  }
+  .unit-label-print .label-row {
+    flex: 1 1 50%;
+    min-height: 0;
+    display: flex;
     align-items: center;
+    justify-content: center;
     text-align: center;
-    padding: 0.8mm 1.2mm;
+    padding: 0.4mm 1.2mm;
     line-height: 1.15;
     overflow: hidden;
   }
@@ -262,23 +268,21 @@ defineExpose({ print })
     the text column divided by the characters it has to hold, which
     `labelSheetLayout` works out.
   */
+  .unit-label-print .label-number {
+    border-bottom: 0.3mm solid #000;
+    font-size: var(--font-number);
+    font-weight: 700;
+    /* One line, always: half a unit number is worse than a truncated one. */
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
   .unit-label-print .label-name {
     font-size: var(--font-name);
     /* Two lines: an asset name is the half of a label most likely to be long. */
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
-    overflow: hidden;
     word-break: break-word;
-  }
-  .unit-label-print .label-number {
-    font-size: var(--font-number);
-    font-weight: 700;
-    /* One line, always: half a unit number is worse than a truncated one. */
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 100%;
   }
 }
 </style>

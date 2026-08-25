@@ -105,7 +105,7 @@ describe('nothing overflows the page', () => {
 })
 
 describe('the three parts of the label', () => {
-  /** Logo on the left, the name above the number on the right. */
+  /** Logo on the left, the number above the name on the right. */
   it('gives the logo a fifth and the text the rest', () => {
     expect(LOGO_MM).toBeCloseTo(LABEL_WIDTH_MM * 0.2, 5)
     expect(TEXT_WIDTH_MM).toBeGreaterThan(LABEL_WIDTH_MM * 0.66)
