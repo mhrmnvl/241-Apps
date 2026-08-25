@@ -143,7 +143,6 @@ async function printSelectedLabels() {
       units.push({
         id: u.id,
         unitNumber: u.unitNumber,
-        barcode: u.barcode,
         assetName: a.name,
       })
     }

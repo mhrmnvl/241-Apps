@@ -89,22 +89,15 @@ export const SAFETY_MM = 2
 /**
  * What the label is actually for.
  *
- * The unit number and the asset name are what somebody reads off a cupboard;
- * the logo says whose it is and the QR is for a scanner. When the logo and the
- * QR each took 30% of the width, the text was left with 40% of a 58mm label —
- * about 23mm — and set at 7pt inside 24mm of label height. Both wrong: the
- * text was crowded horizontally and lost vertically.
- */
-const LOGO_SHARE = 0.12
-const QR_SHARE = 0.24
-
-/**
- * A logo on a 32mm sticker is three millimetres of nothing.
+ * The unit number and the asset name are what somebody reads off a cupboard.
+ * The logo says whose it is and takes a fifth of the width; everything else
+ * belongs to the text.
  *
- * Below this the space it takes is worth more to the text, so it is left out
- * and the number gets it.
+ * There was a QR code here, sharing that width. It is gone — the school is not
+ * scanning anything yet, and it was taking a quarter of every label to say what
+ * the number beneath it already said.
  */
-const LOGO_MIN_LABEL_WIDTH_MM = 40
+const LOGO_SHARE = 0.2
 
 /** The inner padding of each table cell, twice over. */
 const TEXT_INSET_MM = 4
@@ -131,13 +124,9 @@ export interface LabelSheetLayout {
   /** The label plus the padding around it — the box that tiles. */
   cellWidthMm: number
   cellHeightMm: number
-  /** Whether a logo is worth the width on a label this size. */
-  showLogo: boolean
-  /** Side of the square logo cell; zero when there is no logo. */
+  /** Side of the square logo cell, on the left of the label. */
   logoMm: number
-  /** Side of the square QR cell. */
-  qrMm: number
-  /** What is left across the middle for the number and the name. */
+  /** Everything to the right of the logo: the number above the name. */
   textWidthMm: number
   numberFontMm: number
   nameFontMm: number
@@ -183,14 +172,10 @@ export function labelSheetLayout(
     Math.floor((printableHeight - SAFETY_MM) / cellHeightMm),
   )
 
-  // Square, so neither can be taller than the label however wide it is.
-  const showLogo = size.widthMm >= LOGO_MIN_LABEL_WIDTH_MM
-  const logoMm = showLogo
-    ? Math.min(size.heightMm, size.widthMm * LOGO_SHARE)
-    : 0
-  const qrMm = Math.min(size.heightMm, size.widthMm * QR_SHARE)
+  // Square, so it can never be taller than the label however wide that is.
+  const logoMm = Math.min(size.heightMm, size.widthMm * LOGO_SHARE)
 
-  const textWidthMm = size.widthMm - logoMm - qrMm - TEXT_INSET_MM
+  const textWidthMm = size.widthMm - logoMm - TEXT_INSET_MM
 
   // What the width allows, then what the height allows, then a floor so a Mini
   // label is small rather than invisible.
@@ -205,9 +190,7 @@ export function labelSheetLayout(
     size,
     cellWidthMm,
     cellHeightMm,
-    showLogo,
     logoMm,
-    qrMm,
     textWidthMm,
     numberFontMm,
     nameFontMm,
