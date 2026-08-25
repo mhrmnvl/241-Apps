@@ -87,13 +87,43 @@ export const CELL_PADDING_MM = 3
 export const SAFETY_MM = 2
 
 /**
- * The most of a label's width the logo and the QR may each take.
+ * What the label is actually for.
  *
- * They are square, so their width follows the label's height. Uncapped, the two
- * of them came out wider than a short wide label containing them, and the text
- * between them had negative room. At 30% each the text column always keeps 40%.
+ * The unit number and the asset name are what somebody reads off a cupboard;
+ * the logo says whose it is and the QR is for a scanner. When the logo and the
+ * QR each took 30% of the width, the text was left with 40% of a 58mm label —
+ * about 23mm — and set at 7pt inside 24mm of label height. Both wrong: the
+ * text was crowded horizontally and lost vertically.
  */
-const MAX_SQUARE_SHARE = 0.3
+const LOGO_SHARE = 0.12
+const QR_SHARE = 0.24
+
+/**
+ * A logo on a 32mm sticker is three millimetres of nothing.
+ *
+ * Below this the space it takes is worth more to the text, so it is left out
+ * and the number gets it.
+ */
+const LOGO_MIN_LABEL_WIDTH_MM = 40
+
+/** The inner padding of each table cell, twice over. */
+const TEXT_INSET_MM = 4
+
+/**
+ * How the text is sized.
+ *
+ * Width is what binds, not height: `INV-2026-0012` has to fit across the
+ * middle column, and a 24mm-tall label has vertical room to spare. So the font
+ * is the text column divided by the characters it has to hold — with a cap
+ * from the height, for the shapes where that stops being true.
+ */
+const NUMBER_CHAR_BUDGET = 14
+const CHAR_WIDTH_RATIO = 0.55
+const NAME_FONT_RATIO = 0.72
+const LINE_HEIGHT = 1.15
+/** The name is allowed two lines; the number is always one. */
+const NAME_LINES = 2
+const MIN_FONT_MM = 1.6
 
 export interface LabelSheetLayout {
   paper: PaperSize
@@ -101,8 +131,16 @@ export interface LabelSheetLayout {
   /** The label plus the padding around it — the box that tiles. */
   cellWidthMm: number
   cellHeightMm: number
-  /** The side of the square logo and QR cells. */
-  squareMm: number
+  /** Whether a logo is worth the width on a label this size. */
+  showLogo: boolean
+  /** Side of the square logo cell; zero when there is no logo. */
+  logoMm: number
+  /** Side of the square QR cell. */
+  qrMm: number
+  /** What is left across the middle for the number and the name. */
+  textWidthMm: number
+  numberFontMm: number
+  nameFontMm: number
   columns: number
   rowsPerPage: number
   /** `columns * rowsPerPage` — the answer the whole module exists to give. */
@@ -145,14 +183,34 @@ export function labelSheetLayout(
     Math.floor((printableHeight - SAFETY_MM) / cellHeightMm),
   )
 
-  const squareMm = Math.min(size.heightMm, size.widthMm * MAX_SQUARE_SHARE)
+  // Square, so neither can be taller than the label however wide it is.
+  const showLogo = size.widthMm >= LOGO_MIN_LABEL_WIDTH_MM
+  const logoMm = showLogo
+    ? Math.min(size.heightMm, size.widthMm * LOGO_SHARE)
+    : 0
+  const qrMm = Math.min(size.heightMm, size.widthMm * QR_SHARE)
+
+  const textWidthMm = size.widthMm - logoMm - qrMm - TEXT_INSET_MM
+
+  // What the width allows, then what the height allows, then a floor so a Mini
+  // label is small rather than invisible.
+  const byWidth = textWidthMm / (NUMBER_CHAR_BUDGET * CHAR_WIDTH_RATIO)
+  const byHeight =
+    (size.heightMm - 3) / (LINE_HEIGHT * (1 + NAME_FONT_RATIO * NAME_LINES))
+  const numberFontMm = Math.max(MIN_FONT_MM, Math.min(byWidth, byHeight))
+  const nameFontMm = Math.max(MIN_FONT_MM, numberFontMm * NAME_FONT_RATIO)
 
   return {
     paper,
     size,
     cellWidthMm,
     cellHeightMm,
-    squareMm,
+    showLogo,
+    logoMm,
+    qrMm,
+    textWidthMm,
+    numberFontMm,
+    nameFontMm,
     columns,
     rowsPerPage,
     labelsPerPage: columns * rowsPerPage,
