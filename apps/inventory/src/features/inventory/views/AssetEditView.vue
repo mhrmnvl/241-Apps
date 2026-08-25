@@ -187,7 +187,6 @@ async function printLabels(units: InventoryAssetUnit[]) {
   printUnits.value = units.map((u) => ({
     id: u.id,
     unitNumber: u.unitNumber,
-    barcode: u.barcode,
     assetName: asset.value?.name ?? '',
   }))
   await nextTick()

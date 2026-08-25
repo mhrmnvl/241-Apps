@@ -114,10 +114,16 @@ export interface InventoryAssetUnit {
 
 // Flattened unit for label printing — carries its own asset name so a single
 // label sheet can mix units from different assets (cross-asset batch print).
+/**
+ * What a printed label needs.
+ *
+ * No barcode: the QR that used to encode it is gone from the sheet. The field
+ * itself is untouched on `InventoryAssetUnit` — it is still recorded on the
+ * unit form, and it is not this view model's business to decide otherwise.
+ */
 export interface LabelUnit {
   id: string
   unitNumber: string
-  barcode: string | null
   assetName: string
 }
 

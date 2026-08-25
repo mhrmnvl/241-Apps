@@ -124,37 +124,26 @@ describe('labelSheetLayout — the label itself', () => {
 
   /**
    * The number and the name are what somebody reads off a cupboard; the logo
-   * says whose it is and the QR is for a scanner. When those two took 30% of
-   * the width each, a 58mm label was left with 23mm of text.
+   * only says whose it is. With a QR beside it too, a 58mm label was left with
+   * 23mm of text; without one it has 42mm.
    */
   it.each(LABEL_SIZES.map((s) => s.id))(
-    '%s gives the text more than half the label',
+    '%s gives the text two thirds of the label',
     (sizeId) => {
       const layout = labelSheetLayout('a4', sizeId)
 
-      expect(layout.textWidthMm).toBeGreaterThan(layout.size.widthMm * 0.5)
+      expect(layout.textWidthMm).toBeGreaterThan(layout.size.widthMm * 0.66)
     },
   )
 
-  /** A logo on a 32mm sticker costs more than it says. */
-  it('drops the logo on the smallest label and keeps it on the rest', () => {
-    expect(labelSheetLayout('a4', 'xs').showLogo).toBe(false)
-    expect(labelSheetLayout('a4', 'xs').logoMm).toBe(0)
-
-    for (const sizeId of ['lg', 'md', 'sm']) {
-      expect(labelSheetLayout('a4', sizeId).showLogo).toBe(true)
-      expect(labelSheetLayout('a4', sizeId).logoMm).toBeGreaterThan(0)
-    }
-  })
-
-  /** Neither square can be taller than the label containing it. */
+  /** The logo is square, so it can never be taller than the label. */
   it.each(LABEL_SIZES.map((s) => s.id))(
-    '%s keeps its squares inside',
+    '%s keeps its logo square and inside',
     (sizeId) => {
       const layout = labelSheetLayout('a4', sizeId)
 
+      expect(layout.logoMm).toBeGreaterThan(0)
       expect(layout.logoMm).toBeLessThanOrEqual(layout.size.heightMm)
-      expect(layout.qrMm).toBeLessThanOrEqual(layout.size.heightMm)
     },
   )
 

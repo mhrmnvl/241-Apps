@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, watchEffect } from 'vue'
-import QRCode from 'qrcode'
 import type { LabelUnit } from '../types'
 import {
   DEFAULT_LABEL_SIZE_ID,
@@ -51,7 +50,6 @@ const sheetStyle = computed(() => ({
   '--cell-w': `${layout.value.cellWidthMm}mm`,
   '--cell-h': `${layout.value.cellHeightMm}mm`,
   '--logo-w': `${layout.value.logoMm}mm`,
-  '--qr-w': `${layout.value.qrMm}mm`,
   '--font-number': `${layout.value.numberFontMm}mm`,
   '--font-name': `${layout.value.nameFontMm}mm`,
 }))
@@ -85,31 +83,8 @@ onBeforeUnmount(() => {
   document.getElementById(PAGE_STYLE_ID)?.remove()
 })
 
-async function renderQrs() {
-  await Promise.all(
-    props.units.map(async (u) => {
-      const el = document.getElementById(`unit-qr-${u.id}`)
-      if (!el) return
-      try {
-        // SVG scales crisply to the label size regardless of printer DPI.
-        const code =
-          u.barcode && u.barcode.length > 0 ? u.barcode : u.unitNumber
-        el.innerHTML = await QRCode.toString(code, {
-          type: 'svg',
-          margin: 0,
-          errorCorrectionLevel: 'M',
-        })
-      } catch {
-        // ignore content that can't be encoded
-      }
-    }),
-  )
-}
-
 async function print() {
   applyPageSize()
-  await nextTick()
-  await renderQrs()
   await nextTick()
   window.print()
 }
@@ -159,14 +134,14 @@ defineExpose({ print })
           >
             <table class="label-card">
               <tbody>
+                <!--
+                  Logo square on the left, the number above the name on the
+                  right. There was a QR in a third column; it took a quarter of
+                  every label to repeat the number underneath it, and nothing
+                  scans it yet.
+                -->
                 <tr>
-                  <!--
-                    Dropped below 40mm of label. A logo on a 32mm sticker is
-                    three millimetres of nothing, and the number it crowds out
-                    is what the label is for.
-                  -->
                   <td
-                    v-if="layout.showLogo"
                     class="label-logo-cell"
                     rowspan="2"
                   >
@@ -177,15 +152,6 @@ defineExpose({ print })
                     />
                   </td>
                   <td class="label-number-cell">{{ u.unitNumber }}</td>
-                  <td
-                    class="label-qr-cell"
-                    rowspan="2"
-                  >
-                    <div
-                      :id="`unit-qr-${u.id}`"
-                      class="label-qr"
-                    ></div>
-                  </td>
                 </tr>
                 <tr>
                   <td class="label-name-cell">{{ u.assetName }}</td>
@@ -276,18 +242,12 @@ defineExpose({ print })
     overflow: hidden;
   }
   /*
-    Both square, and both narrow: together they take a third of the label so the
-    number and the name get the rest. They used to take 60% between them, which
-    is how a 58mm label ended up with 23mm of text.
+    A fifth of the width, square, on the left. The other four fifths are the
+    number and the name — which is the whole label now that the QR that used to
+    sit on the right is gone.
   */
   .unit-label-print .label-logo-cell {
     width: var(--logo-w);
-    text-align: center;
-    vertical-align: middle;
-    padding: 1mm;
-  }
-  .unit-label-print .label-qr-cell {
-    width: var(--qr-w);
     text-align: center;
     vertical-align: middle;
     padding: 1mm;
@@ -298,15 +258,6 @@ defineExpose({ print })
     height: 100%;
     object-fit: contain;
     margin: 0 auto;
-  }
-  .unit-label-print .label-qr {
-    width: 100%;
-    height: 100%;
-  }
-  .unit-label-print .label-qr svg {
-    display: block;
-    width: 100%;
-    height: 100%;
   }
   /*
     Sized from the label rather than fixed at 7pt, which was the same height of
