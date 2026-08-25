@@ -50,7 +50,10 @@ const sheetStyle = computed(() => ({
   '--label-cols': String(layout.value.columns),
   '--cell-w': `${layout.value.cellWidthMm}mm`,
   '--cell-h': `${layout.value.cellHeightMm}mm`,
-  '--label-square': `${layout.value.squareMm}mm`,
+  '--logo-w': `${layout.value.logoMm}mm`,
+  '--qr-w': `${layout.value.qrMm}mm`,
+  '--font-number': `${layout.value.numberFontMm}mm`,
+  '--font-name': `${layout.value.nameFontMm}mm`,
 }))
 
 /**
@@ -157,7 +160,13 @@ defineExpose({ print })
             <table class="label-card">
               <tbody>
                 <tr>
+                  <!--
+                    Dropped below 40mm of label. A logo on a 32mm sticker is
+                    three millimetres of nothing, and the number it crowds out
+                    is what the label is for.
+                  -->
                   <td
+                    v-if="layout.showLogo"
                     class="label-logo-cell"
                     rowspan="2"
                   >
@@ -267,16 +276,21 @@ defineExpose({ print })
     overflow: hidden;
   }
   /*
-    Square, and as large as the label is tall — but capped so that on a narrow
-    label the two of them cannot crowd out the text between them. Both numbers
-    come from `labelSheetLayout`.
+    Both square, and both narrow: together they take a third of the label so the
+    number and the name get the rest. They used to take 60% between them, which
+    is how a 58mm label ended up with 23mm of text.
   */
-  .unit-label-print .label-logo-cell,
-  .unit-label-print .label-qr-cell {
-    width: var(--label-square);
+  .unit-label-print .label-logo-cell {
+    width: var(--logo-w);
     text-align: center;
     vertical-align: middle;
-    padding: 1.2mm;
+    padding: 1mm;
+  }
+  .unit-label-print .label-qr-cell {
+    width: var(--qr-w);
+    text-align: center;
+    vertical-align: middle;
+    padding: 1mm;
   }
   .unit-label-print .label-logo {
     display: block;
@@ -294,23 +308,36 @@ defineExpose({ print })
     width: 100%;
     height: 100%;
   }
+  /*
+    Sized from the label rather than fixed at 7pt, which was the same height of
+    type on a 30mm label as on a 14mm one — and lost on both. The width is what
+    binds: the font is the text column divided by the characters it has to
+    hold. `labelSheetLayout` does that arithmetic.
+  */
   .unit-label-print .label-number-cell,
   .unit-label-print .label-name-cell {
     text-align: center;
     vertical-align: middle;
-    padding: 1mm 1.5mm;
+    padding: 0.6mm 1.2mm;
     line-height: 1.15;
-    white-space: nowrap;
     overflow: hidden;
-    text-overflow: ellipsis;
     color: #000;
   }
   .unit-label-print .label-number-cell {
-    font-size: 7pt;
+    font-size: var(--font-number);
     font-weight: 700;
+    /* One line, always: half a unit number is worse than a truncated one. */
+    white-space: nowrap;
+    text-overflow: ellipsis;
   }
+  /* The name may take two lines — there is vertical room, and an asset name is
+     the half of the label most likely to be long. */
   .unit-label-print .label-name-cell {
-    font-size: 6.5pt;
+    font-size: var(--font-name);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    word-break: break-word;
   }
 }
 </style>

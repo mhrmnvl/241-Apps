@@ -123,17 +123,74 @@ describe('labelSheetLayout — the label itself', () => {
   })
 
   /**
-   * The logo and the QR are square, so their width follows the label's height.
-   * Uncapped, the two of them came out wider than a short wide label
-   * containing them and the text between had negative room.
+   * The number and the name are what somebody reads off a cupboard; the logo
+   * says whose it is and the QR is for a scanner. When those two took 30% of
+   * the width each, a 58mm label was left with 23mm of text.
    */
-  it.each(EVERY_COMBINATION)(
-    '%s / %s leaves the text at least 40% of the label',
-    (paperId, sizeId) => {
-      const layout = labelSheetLayout(paperId, sizeId)
-      const text = layout.size.widthMm - layout.squareMm * 2
+  it.each(LABEL_SIZES.map((s) => s.id))(
+    '%s gives the text more than half the label',
+    (sizeId) => {
+      const layout = labelSheetLayout('a4', sizeId)
 
-      expect(text).toBeGreaterThanOrEqual(layout.size.widthMm * 0.4)
+      expect(layout.textWidthMm).toBeGreaterThan(layout.size.widthMm * 0.5)
+    },
+  )
+
+  /** A logo on a 32mm sticker costs more than it says. */
+  it('drops the logo on the smallest label and keeps it on the rest', () => {
+    expect(labelSheetLayout('a4', 'xs').showLogo).toBe(false)
+    expect(labelSheetLayout('a4', 'xs').logoMm).toBe(0)
+
+    for (const sizeId of ['lg', 'md', 'sm']) {
+      expect(labelSheetLayout('a4', sizeId).showLogo).toBe(true)
+      expect(labelSheetLayout('a4', sizeId).logoMm).toBeGreaterThan(0)
+    }
+  })
+
+  /** Neither square can be taller than the label containing it. */
+  it.each(LABEL_SIZES.map((s) => s.id))(
+    '%s keeps its squares inside',
+    (sizeId) => {
+      const layout = labelSheetLayout('a4', sizeId)
+
+      expect(layout.logoMm).toBeLessThanOrEqual(layout.size.heightMm)
+      expect(layout.qrMm).toBeLessThanOrEqual(layout.size.heightMm)
+    },
+  )
+
+  /**
+   * The defect that started this: 7pt of type on a 30mm label and on a 14mm
+   * one alike. Type now grows with the label it sits on.
+   */
+  it('sizes the type from the label rather than fixing it', () => {
+    const sizes = LABEL_SIZES.map(
+      (s) => labelSheetLayout('a4', s.id).numberFontMm,
+    )
+
+    // LABEL_SIZES runs largest to smallest, so the fonts must too.
+    expect(sizes).toEqual([...sizes].sort((a, b) => b - a))
+    expect(new Set(sizes).size).toBe(sizes.length)
+  })
+
+  it.each(LABEL_SIZES.map((s) => s.id))(
+    '%s sets the number larger than the name, and both readably',
+    (sizeId) => {
+      const layout = labelSheetLayout('a4', sizeId)
+
+      expect(layout.numberFontMm).toBeGreaterThan(layout.nameFontMm)
+      // 1.6mm is about 4.5pt — small, but on a 32mm sticker read up close.
+      expect(layout.nameFontMm).toBeGreaterThanOrEqual(1.6)
+    },
+  )
+
+  /** Two lines of name and one of number have to fit the label's height. */
+  it.each(LABEL_SIZES.map((s) => s.id))(
+    '%s fits its type vertically',
+    (sizeId) => {
+      const layout = labelSheetLayout('a4', sizeId)
+      const stacked = (layout.numberFontMm + layout.nameFontMm * 2) * 1.15
+
+      expect(stacked).toBeLessThanOrEqual(layout.size.heightMm)
     },
   )
 
