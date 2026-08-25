@@ -14,9 +14,7 @@ import type {
 import AssetForm from '../components/AssetForm.vue'
 import UnitLabelSheet from '../components/UnitLabelSheet.vue'
 import {
-  DEFAULT_LABEL_SIZE_ID,
   DEFAULT_PAPER_ID,
-  LABEL_SIZES,
   PAPER_SIZES,
   labelSheetLayout,
 } from '../logic/labelSheetLayout'
@@ -167,20 +165,16 @@ async function saveUnit() {
 const labelSheetRef = ref<{ print: () => Promise<void> } | null>(null)
 const printUnits = ref<LabelUnit[]>([])
 /**
- * How big the sticker is, and what it is being printed on.
+ * What it is being printed on, and nothing else.
  *
- * Two independent choices, which is the point: a label is a physical object, so
- * its size is picked once and paper only decides how many fit on a sheet. The
- * same asset comes off the guillotine the same size whether the tray held A4 or
- * A3.
+ * There is one label size. Paper only decides how many fit on a sheet, so the
+ * same asset comes off the guillotine the same size whether the tray held A4
+ * or A3.
  */
-const labelSize = ref(DEFAULT_LABEL_SIZE_ID)
 const paperSize = ref(DEFAULT_PAPER_ID)
 
 /** Said out loud: it is the number that decides how much paper to load. */
-const sheetPlan = computed(() =>
-  labelSheetLayout(paperSize.value, labelSize.value),
-)
+const sheetPlan = computed(() => labelSheetLayout(paperSize.value))
 
 async function printLabels(units: InventoryAssetUnit[]) {
   if (units.length === 0) return
@@ -282,23 +276,6 @@ const unitColumns = computed(() =>
           <span class="text-xs text-muted-foreground mr-1">
             {{ sheetPlan.labelsPerPage }} label/halaman
           </span>
-          <Select
-            :model-value="labelSize"
-            @update:model-value="labelSize = String($event)"
-          >
-            <SelectTrigger class="w-[170px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem
-                v-for="size in LABEL_SIZES"
-                :key="size.id"
-                :value="size.id"
-              >
-                {{ size.label }}
-              </SelectItem>
-            </SelectContent>
-          </Select>
           <Select
             :model-value="paperSize"
             @update:model-value="paperSize = String($event)"
@@ -459,7 +436,6 @@ const unitColumns = computed(() =>
   <UnitLabelSheet
     ref="labelSheetRef"
     :units="printUnits"
-    :label-size="labelSize"
     :paper-size="paperSize"
   />
 </template>

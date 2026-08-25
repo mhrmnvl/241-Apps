@@ -1,20 +1,21 @@
 import { describe, expect, it } from 'vitest'
 import {
   CELL_PADDING_MM,
-  LABEL_SIZES,
+  LABEL_HEIGHT_MM,
+  LABEL_WIDTH_MM,
+  LOGO_MM,
+  NAME_FONT_MM,
+  NUMBER_FONT_MM,
   PAGE_MARGIN_MM,
   PAPER_SIZES,
   SAFETY_MM,
+  TEXT_WIDTH_MM,
   labelSheetLayout,
-  labelSizeById,
   paginateLabels,
   paperById,
 } from './labelSheetLayout'
 
-/** Every paper × label size pair the screens can produce. */
-const EVERY_COMBINATION = PAPER_SIZES.flatMap((paper) =>
-  LABEL_SIZES.map((size) => [paper.id, size.id] as const),
-)
+const EVERY_PAPER = PAPER_SIZES.map((paper) => paper.id)
 
 const printable = (paperId: string) => {
   const paper = paperById(paperId)
@@ -24,74 +25,66 @@ const printable = (paperId: string) => {
   }
 }
 
-describe('labelSheetLayout — a label is the same object on any paper', () => {
+describe('the label is one size', () => {
   /**
-   * The property this module was rebuilt around. A sticker that came out
-   * bigger on A3 than on A4 would be a different sticker for the same asset,
-   * decided by whatever paper happened to be in the tray.
+   * The property this was rebuilt around. A sticker that came out bigger on A3
+   * than on A4 would be a different sticker for the same asset, decided by
+   * whatever paper happened to be in the tray.
    */
-  it.each(LABEL_SIZES.map((s) => s.id))(
-    '%s measures the same on every paper',
-    (sizeId) => {
-      const widths = new Set(
-        PAPER_SIZES.map(
-          (paper) => labelSheetLayout(paper.id, sizeId).size.widthMm,
-        ),
-      )
-      const heights = new Set(
-        PAPER_SIZES.map(
-          (paper) => labelSheetLayout(paper.id, sizeId).size.heightMm,
-        ),
-      )
+  it.each(EVERY_PAPER)(
+    'measures the same on %s as anywhere else',
+    (paperId) => {
+      const layout = labelSheetLayout(paperId)
 
-      expect(widths.size).toBe(1)
-      expect(heights.size).toBe(1)
+      expect(layout.cellWidthMm).toBe(LABEL_WIDTH_MM + CELL_PADDING_MM * 2)
+      expect(layout.cellHeightMm).toBe(LABEL_HEIGHT_MM + CELL_PADDING_MM * 2)
     },
   )
 
   /** Bigger paper is the reason to reach for it. */
-  it.each(LABEL_SIZES.map((s) => s.id))(
-    'fits more %s labels on A3 than on A4',
-    (sizeId) => {
-      expect(labelSheetLayout('a3', sizeId).labelsPerPage).toBeGreaterThan(
-        labelSheetLayout('a4', sizeId).labelsPerPage,
-      )
-    },
-  )
+  it('fits more on A3 than on A4, and more on A4 than on A5', () => {
+    expect(labelSheetLayout('a3').labelsPerPage).toBeGreaterThan(
+      labelSheetLayout('a4').labelsPerPage,
+    )
+    expect(labelSheetLayout('a4').labelsPerPage).toBeGreaterThan(
+      labelSheetLayout('a5').labelsPerPage,
+    )
+  })
+
+  /** A4 has always held 27, and still does. */
+  it('lays A4 out three across and nine down', () => {
+    const layout = labelSheetLayout('a4')
+
+    expect(layout.columns).toBe(3)
+    expect(layout.rowsPerPage).toBe(9)
+    expect(layout.labelsPerPage).toBe(27)
+  })
 })
 
-describe('labelSheetLayout — nothing overflows the page', () => {
-  it.each(EVERY_COMBINATION)(
-    '%s / %s stays inside the width',
-    (paperId, sizeId) => {
-      const layout = labelSheetLayout(paperId, sizeId)
+describe('nothing overflows the page', () => {
+  it.each(EVERY_PAPER)('%s stays inside the width', (paperId) => {
+    const layout = labelSheetLayout(paperId)
 
-      expect(layout.columns * layout.cellWidthMm).toBeLessThanOrEqual(
-        printable(paperId).widthMm,
-      )
-    },
-  )
+    expect(layout.columns * layout.cellWidthMm).toBeLessThanOrEqual(
+      printable(paperId).widthMm,
+    )
+  })
 
-  it.each(EVERY_COMBINATION)(
-    '%s / %s stays inside the height',
-    (paperId, sizeId) => {
-      const layout = labelSheetLayout(paperId, sizeId)
+  it.each(EVERY_PAPER)('%s stays inside the height', (paperId) => {
+    const layout = labelSheetLayout(paperId)
 
-      expect(layout.rowsPerPage * layout.cellHeightMm).toBeLessThanOrEqual(
-        printable(paperId).heightMm,
-      )
-    },
-  )
+    expect(layout.rowsPerPage * layout.cellHeightMm).toBeLessThanOrEqual(
+      printable(paperId).heightMm,
+    )
+  })
 
   /**
-   * And is not so cautious that it wastes a row or a column.
-   *
-   * Measured against the budget the calculation actually targets — the
-   * printable area less the safety millimetres — because that cushion is
-   * deliberate and a row it costs is not waste.
+   * And is not so cautious that it wastes a row or a column. Measured against
+   * the budget the calculation targets — the printable area less the safety
+   * millimetres — because that cushion is deliberate.
    */
-  it.each(EVERY_COMBINATION)('%s / %s wastes neither', (paperId, sizeId) => {
-    const layout = labelSheetLayout(paperId, sizeId)
+  it.each(EVERY_PAPER)('%s wastes neither a row nor a column', (paperId) => {
+    const layout = labelSheetLayout(paperId)
     const { widthMm, heightMm } = printable(paperId)
 
     expect(widthMm - layout.columns * layout.cellWidthMm).toBeLessThan(
@@ -102,118 +95,69 @@ describe('labelSheetLayout — nothing overflows the page', () => {
     ).toBeLessThan(layout.cellHeightMm)
   })
 
-  /** Even the largest label has to fit the smallest paper on offer. */
-  it.each(EVERY_COMBINATION)(
-    '%s / %s fits at least one across',
-    (paperId, sizeId) => {
-      const layout = labelSheetLayout(paperId, sizeId)
+  /** Even the smallest paper on offer has to take a whole label. */
+  it.each(EVERY_PAPER)('%s fits at least one label', (paperId) => {
+    const layout = labelSheetLayout(paperId)
 
-      expect(layout.cellWidthMm).toBeLessThanOrEqual(printable(paperId).widthMm)
-      expect(layout.columns).toBeGreaterThanOrEqual(1)
-    },
-  )
-})
-
-describe('labelSheetLayout — the label itself', () => {
-  it('counts a cell as the label plus the padding around it', () => {
-    const layout = labelSheetLayout('a4', 'md')
-
-    expect(layout.cellWidthMm).toBe(layout.size.widthMm + CELL_PADDING_MM * 2)
-    expect(layout.cellHeightMm).toBe(layout.size.heightMm + CELL_PADDING_MM * 2)
-  })
-
-  /**
-   * The number and the name are what somebody reads off a cupboard; the logo
-   * only says whose it is. With a QR beside it too, a 58mm label was left with
-   * 23mm of text; without one it has 42mm.
-   */
-  it.each(LABEL_SIZES.map((s) => s.id))(
-    '%s gives the text two thirds of the label',
-    (sizeId) => {
-      const layout = labelSheetLayout('a4', sizeId)
-
-      expect(layout.textWidthMm).toBeGreaterThan(layout.size.widthMm * 0.66)
-    },
-  )
-
-  /** The logo is square, so it can never be taller than the label. */
-  it.each(LABEL_SIZES.map((s) => s.id))(
-    '%s keeps its logo square and inside',
-    (sizeId) => {
-      const layout = labelSheetLayout('a4', sizeId)
-
-      expect(layout.logoMm).toBeGreaterThan(0)
-      expect(layout.logoMm).toBeLessThanOrEqual(layout.size.heightMm)
-    },
-  )
-
-  /**
-   * The defect that started this: 7pt of type on a 30mm label and on a 14mm
-   * one alike. Type now grows with the label it sits on.
-   */
-  it('sizes the type from the label rather than fixing it', () => {
-    const sizes = LABEL_SIZES.map(
-      (s) => labelSheetLayout('a4', s.id).numberFontMm,
-    )
-
-    // LABEL_SIZES runs largest to smallest, so the fonts must too.
-    expect(sizes).toEqual([...sizes].sort((a, b) => b - a))
-    expect(new Set(sizes).size).toBe(sizes.length)
-  })
-
-  it.each(LABEL_SIZES.map((s) => s.id))(
-    '%s sets the number larger than the name, and both readably',
-    (sizeId) => {
-      const layout = labelSheetLayout('a4', sizeId)
-
-      expect(layout.numberFontMm).toBeGreaterThan(layout.nameFontMm)
-      // 1.6mm is about 4.5pt — small, but on a 32mm sticker read up close.
-      expect(layout.nameFontMm).toBeGreaterThanOrEqual(1.6)
-    },
-  )
-
-  /** Two lines of name and one of number have to fit the label's height. */
-  it.each(LABEL_SIZES.map((s) => s.id))(
-    '%s fits its type vertically',
-    (sizeId) => {
-      const layout = labelSheetLayout('a4', sizeId)
-      const stacked = (layout.numberFontMm + layout.nameFontMm * 2) * 1.15
-
-      expect(stacked).toBeLessThanOrEqual(layout.size.heightMm)
-    },
-  )
-
-  /** A4 still lays out the way it always did, which is the point. */
-  it.each([
-    ['lg', 2],
-    ['md', 3],
-    ['sm', 4],
-    ['xs', 5],
-  ] as const)('lays %s out %i across on A4', (sizeId, columns) => {
-    expect(labelSheetLayout('a4', sizeId).columns).toBe(columns)
+    expect(layout.cellWidthMm).toBeLessThanOrEqual(printable(paperId).widthMm)
+    expect(layout.cellHeightMm).toBeLessThanOrEqual(printable(paperId).heightMm)
   })
 })
 
-describe('lookups', () => {
-  it('finds a paper and a label size by id', () => {
+describe('the three parts of the label', () => {
+  /** Logo on the left, the name above the number on the right. */
+  it('gives the logo a fifth and the text the rest', () => {
+    expect(LOGO_MM).toBeCloseTo(LABEL_WIDTH_MM * 0.2, 5)
+    expect(TEXT_WIDTH_MM).toBeGreaterThan(LABEL_WIDTH_MM * 0.66)
+  })
+
+  /** Square, so it can never be taller than the label containing it. */
+  it('keeps the logo square and inside the label', () => {
+    expect(LOGO_MM).toBeLessThanOrEqual(LABEL_HEIGHT_MM)
+    expect(LOGO_MM).toBeGreaterThan(0)
+  })
+
+  /** The number identifies the unit, so it is the one set larger. */
+  it('sets the number larger than the name', () => {
+    expect(NUMBER_FONT_MM).toBeGreaterThan(NAME_FONT_MM)
+  })
+
+  /**
+   * The defect that started this: 7pt of type — 2.5mm — inside 24mm of label.
+   * Both are now a real fraction of the label they sit on.
+   */
+  it('sets type that is a real fraction of the label', () => {
+    expect(NUMBER_FONT_MM).toBeGreaterThan(LABEL_HEIGHT_MM * 0.15)
+    expect(NAME_FONT_MM).toBeGreaterThan(LABEL_HEIGHT_MM * 0.1)
+  })
+
+  /** Two lines of name and one of number have to fit the height. */
+  it('fits its type vertically', () => {
+    const stacked = (NUMBER_FONT_MM + NAME_FONT_MM * 2) * 1.15
+
+    expect(stacked).toBeLessThanOrEqual(LABEL_HEIGHT_MM)
+  })
+
+  /** And a full unit number has to fit across. */
+  it('fits a fourteen-character number across the text column', () => {
+    expect(NUMBER_FONT_MM * 14 * 0.55).toBeLessThanOrEqual(TEXT_WIDTH_MM)
+  })
+})
+
+describe('paperById', () => {
+  it('finds a paper by its id', () => {
     expect(paperById('a3')).toMatchObject({ widthMm: 297, heightMm: 420 })
-    expect(labelSizeById('lg')).toMatchObject({ widthMm: 91, heightMm: 30 })
   })
 
-  it('falls back rather than breaking on anything unknown', () => {
+  it('falls back to A4 for anything it does not know', () => {
     expect(paperById('foolscap').id).toBe('a4')
     expect(paperById(undefined).id).toBe('a4')
-    expect(labelSizeById('raksasa').id).toBe('md')
-    expect(labelSizeById(undefined).id).toBe('md')
-    expect(labelSheetLayout('tidak-ada', 'tidak-ada').paper.id).toBe('a4')
+    expect(labelSheetLayout('tidak-ada').paper.id).toBe('a4')
   })
 
   it('has no duplicate ids to be ambiguous about', () => {
-    const paperIds = PAPER_SIZES.map((p) => p.id)
-    const sizeIds = LABEL_SIZES.map((s) => s.id)
-
-    expect(new Set(paperIds).size).toBe(paperIds.length)
-    expect(new Set(sizeIds).size).toBe(sizeIds.length)
+    const ids = PAPER_SIZES.map((p) => p.id)
+    expect(new Set(ids).size).toBe(ids.length)
   })
 })
 
