@@ -52,12 +52,16 @@ export const DEFAULT_PAPER_ID = 'a4'
 /**
  * The label, in millimetres of actual sticker.
  *
- * 58 × 24 was the middle of the four sizes that used to be on offer and the one
- * both screens defaulted to, so nothing printed before this comes out a
- * different size.
+ * The height is the logo. The logo cell is square — one side, not a tall strip
+ * beside the text — and the label is as tall as that square, which is what
+ * makes the whole thing a plain rectangle divided in three.
+ *
+ * The width stays at 58: three across an A4 page is what it buys, and 194mm of
+ * printable width divided three ways leaves no room for more.
  */
 export const LABEL_WIDTH_MM = 58
-export const LABEL_HEIGHT_MM = 24
+export const LOGO_SIDE_MM = 16
+export const LABEL_HEIGHT_MM = LOGO_SIDE_MM
 
 /** Taken off every edge, and the same number `@page` is given. */
 export const PAGE_MARGIN_MM = 8
@@ -72,14 +76,6 @@ export const CELL_PADDING_MM = 3
  * practice costs a whole extra sheet — and puts one orphaned label on it.
  */
 export const SAFETY_MM = 2
-
-/**
- * The label is in three parts: a logo square on the left, and to the right of
- * it the unit number above the asset name.
- *
- * The logo takes a fifth. The rest is what somebody actually reads.
- */
-const LOGO_SHARE = 0.15
 
 /** The inner padding of the text cells, twice over. */
 const TEXT_INSET_MM = 3
@@ -107,13 +103,37 @@ const NUMBER_CHAR_BUDGET = 24
  * capitals, which are wider.
  */
 const CHAR_WIDTH_RATIO = 0.62
-const NAME_FONT_RATIO = 0.78
 const LINE_HEIGHT = 1.15
-/** The name is allowed two lines; the number is always one. */
+
+/**
+ * The name is set in regular weight and mixed case, which is narrower per
+ * character than the bold, mostly-capital number.
+ */
+const NAME_CHAR_WIDTH_RATIO = 0.5
+
+/** The name may take two lines of its half; the number always takes one. */
 const NAME_LINES = 2
 
-/** The logo square, and the width of the two text rows beside it. */
-export const LOGO_MM = Math.min(LABEL_HEIGHT_MM, LABEL_WIDTH_MM * LOGO_SHARE)
+/**
+ * The length a name is sized as if it had, at most.
+ *
+ * Without a ceiling a three-word name filled its whole row — 17pt beside a
+ * 7pt number, which read as a poster rather than a label. Twenty-four is the
+ * same budget the unit number is given, so a short name comes out at the size
+ * an ordinary one does and only genuinely long ones drop below it.
+ */
+const NAME_CHAR_BUDGET = 24
+
+/** Below this it stops being worth printing at all. */
+const NAME_MIN_FONT_MM = 1.8
+
+/**
+ * The logo square, and the width of the two text rows beside it.
+ *
+ * Square means its width is its height, so it takes exactly as much of the
+ * label's width as the label is tall — and the text gets the rest.
+ */
+export const LOGO_MM = LOGO_SIDE_MM
 export const TEXT_WIDTH_MM = LABEL_WIDTH_MM - LOGO_MM - TEXT_INSET_MM
 
 /**
@@ -124,13 +144,51 @@ const ROW_HEIGHT_MM = LABEL_HEIGHT_MM / 2 - 1
 
 const NUMBER_BY_WIDTH = TEXT_WIDTH_MM / (NUMBER_CHAR_BUDGET * CHAR_WIDTH_RATIO)
 const NUMBER_BY_HEIGHT = ROW_HEIGHT_MM / LINE_HEIGHT
-const NAME_BY_HEIGHT = ROW_HEIGHT_MM / (LINE_HEIGHT * NAME_LINES)
 
+/**
+ * The number is one size for every label.
+ *
+ * It has to be: they are all the same length, and a column of labels whose
+ * codes were set at different sizes would read as a mistake.
+ */
 export const NUMBER_FONT_MM = Math.min(NUMBER_BY_WIDTH, NUMBER_BY_HEIGHT)
-export const NAME_FONT_MM = Math.min(
-  NUMBER_FONT_MM * NAME_FONT_RATIO,
-  NAME_BY_HEIGHT,
-)
+
+/**
+ * The name is sized per label, from its own length.
+ *
+ * Unlike the number, names are all different — "Kursi" and "Lemari Arsip Besi
+ * Dua Pintu" are not the same problem, and one size chosen for the longest of
+ * them wastes the label of every short one. So each gets as much type as its
+ * own half of the label can hold.
+ *
+ * A name of ordinary length gets the ceiling. A longer one drops to two lines,
+ * which doubles the width available and buys back some of what it would
+ * otherwise lose. Longer still and it shrinks, down to a floor, and then the
+ * ellipsis takes over — which is what the two-line clamp in the stylesheet is
+ * for.
+ */
+export function nameFontMm(name: string): number {
+  const characters = Math.max(1, name.trim().length)
+  const budget = characters * NAME_CHAR_WIDTH_RATIO
+
+  // One line: the full row height, but only this much width.
+  const onOneLine = Math.min(
+    TEXT_WIDTH_MM / budget,
+    ROW_HEIGHT_MM / LINE_HEIGHT,
+  )
+  // Two: twice the width, half the height each.
+  const onTwoLines = Math.min(
+    (TEXT_WIDTH_MM * NAME_LINES) / budget,
+    ROW_HEIGHT_MM / (LINE_HEIGHT * NAME_LINES),
+  )
+
+  // Never larger than a name of `NAME_CHAR_BUDGET` characters would be given,
+  // so a short one does not tower over the number beneath it.
+  const ceiling = TEXT_WIDTH_MM / (NAME_CHAR_BUDGET * NAME_CHAR_WIDTH_RATIO)
+  const wanted = Math.min(ceiling, Math.max(onOneLine, onTwoLines))
+
+  return Math.max(NAME_MIN_FONT_MM, wanted)
+}
 
 export interface LabelSheetLayout {
   paper: PaperSize
