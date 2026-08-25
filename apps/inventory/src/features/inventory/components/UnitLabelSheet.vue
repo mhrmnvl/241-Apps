@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { nextTick } from 'vue'
+import { computed, nextTick } from 'vue'
 import QRCode from 'qrcode'
 import type { LabelUnit } from '../types'
+import { labelSheetLayout, paginateLabels } from '../logic/labelSheetLayout'
 
 // columns = how many labels per row on the A4 sheet (more = smaller labels).
 const props = withDefaults(
@@ -11,6 +12,29 @@ const props = withDefaults(
   }>(),
   { columns: 3 },
 )
+
+/**
+ * The pages are worked out here, not left to the browser.
+ *
+ * Automatic fragmentation kept putting a label — or the dashed guide beside it
+ * — across a page boundary: a grid broken at whatever point the content
+ * happened to reach, with `break-inside: avoid` treated as a hint. Every label
+ * is now a known height, so the number of rows that fit is arithmetic, and the
+ * units are cut into pages before anything is rendered.
+ *
+ * The same numbers drive the CSS below, so the height a label is drawn at and
+ * the count used to chunk them cannot drift apart.
+ */
+const layout = computed(() => labelSheetLayout(props.columns))
+const pages = computed(() =>
+  paginateLabels(props.units, layout.value.labelsPerPage),
+)
+
+const sheetStyle = computed(() => ({
+  '--label-cols': String(layout.value.columns),
+  '--label-h': `${layout.value.labelHeightMm}mm`,
+  '--cell-h': `${layout.value.cellHeightMm}mm`,
+}))
 
 async function renderQrs() {
   await Promise.all(
@@ -48,77 +72,73 @@ defineExpose({ print })
     Teleported to <body> on purpose.
 
     The sheet is rendered from a view mounted deep inside the app, and print
-    isolation used to be done where it sat: hide everything with
-    `visibility: hidden`, show this subtree again, and pin it with
-    `position: fixed; inset: 0` so it covered the page instead of sitting
-    wherever the page happened to be scrolled to.
-
-    That pin is what limited the print to one page. A fixed box is laid out
-    against a single page box and cannot break across pages, so every label
-    past the first page's worth was clipped — silently, and only when enough
-    were selected to need a second page.
+    isolation used to be done where it sat: hide everything, show this subtree
+    again, and pin it with `position: fixed` so it covered the page. A fixed box
+    is laid out against a single page box and cannot break across pages, which
+    is why the print used to stop after one.
 
     As a direct child of <body> it needs no pin: the app's other body children
-    are hidden for print, and this one lays out in normal flow and paginates
-    the way any long document does.
+    are hidden for print, and this one lays out in normal flow.
   -->
   <Teleport to="body">
-    <div class="unit-label-print">
-      <div
-        class="label-grid"
-        :style="{ '--label-cols': String(columns) }"
+    <div
+      class="unit-label-print"
+      :style="sheetStyle"
+    >
+      <!--
+        One section per page, ended by an explicit break. Nothing here depends
+        on the browser choosing where to divide the sheet.
+      -->
+      <section
+        v-for="(page, index) in pages"
+        :key="index"
+        class="label-page"
       >
-        <!--
-          The cut guide is a border on this wrapper, not an outline on the
-          table inside it.
-
-          An outline is painted, not laid out: it takes no space, nothing
-          measures it, and `break-inside: avoid` does not know it is there. So
-          the guide around a label at the foot of a page was drawn 3mm below a
-          box the browser had already decided to keep whole, and that 3mm fell
-          across the page boundary.
-
-          A border belongs to a box that is really there. The box is what the
-          page break is decided around, so the guide breaks where the box does:
-          the last row on a page closes its own rectangle, and the first row of
-          the next page opens a new one.
-        -->
-        <div
-          v-for="u in units"
-          :key="u.id"
-          class="label-cell"
-        >
-          <table class="label-card">
-            <tbody>
-              <tr>
-                <td
-                  class="label-logo-cell"
-                  rowspan="2"
-                >
-                  <img
-                    src="/logo.webp"
-                    alt=""
-                    class="label-logo"
-                  />
-                </td>
-                <td class="label-number-cell">{{ u.unitNumber }}</td>
-                <td
-                  class="label-qr-cell"
-                  rowspan="2"
-                >
-                  <div
-                    :id="`unit-qr-${u.id}`"
-                    class="label-qr"
-                  ></div>
-                </td>
-              </tr>
-              <tr>
-                <td class="label-name-cell">{{ u.assetName }}</td>
-              </tr>
-            </tbody>
-          </table>
+        <div class="label-grid">
+          <!--
+            The cut guide is a border on this cell, not an outline on the table
+            inside it. An outline is painted rather than laid out — it takes no
+            space and no page break is decided around it, so the guide could be
+            drawn past a boundary the browser had already chosen. A border
+            belongs to a box that is really there.
+          -->
+          <div
+            v-for="u in page"
+            :key="u.id"
+            class="label-cell"
+          >
+            <table class="label-card">
+              <tbody>
+                <tr>
+                  <td
+                    class="label-logo-cell"
+                    rowspan="2"
+                  >
+                    <img
+                      src="/logo.webp"
+                      alt=""
+                      class="label-logo"
+                    />
+                  </td>
+                  <td class="label-number-cell">{{ u.unitNumber }}</td>
+                  <td
+                    class="label-qr-cell"
+                    rowspan="2"
+                  >
+                    <div
+                      :id="`unit-qr-${u.id}`"
+                      class="label-qr"
+                    ></div>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="label-name-cell">{{ u.assetName }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
+      </section>
     </div>
   </Teleport>
 </template>
@@ -132,17 +152,17 @@ defineExpose({ print })
 @media print {
   @page {
     size: A4;
+    /* `labelSheetLayout` subtracts exactly this from A4's height. Changing it
+       here without changing it there is how a page starts overflowing again. */
     margin: 8mm;
   }
 
   /*
     Everything the app renders into <body> goes away — the SPA root, the toast
-    container, any dialog portal — leaving the teleported sheet as the only
-    thing on the page.
-
-    `display: none` rather than `visibility: hidden`: hidden boxes still take
-    up their space, and a hidden app is what forced the sheet to be pinned over
-    the top of it in the first place.
+    container, any dialog portal — leaving the teleported sheet alone on the
+    page. `display: none` rather than `visibility: hidden`: a hidden box still
+    occupies its space, and a hidden-but-present app is what forced the sheet to
+    be pinned over the top of it.
   */
   body > *:not(.unit-label-print) {
     display: none !important;
@@ -151,26 +171,36 @@ defineExpose({ print })
     display: block !important;
     background: #fff;
   }
+
+  .unit-label-print .label-page {
+    page-break-after: always;
+    break-after: page;
+  }
+  /* Or the sheet ends with a blank sheet. */
+  .unit-label-print .label-page:last-child {
+    page-break-after: auto;
+    break-after: auto;
+  }
+
   .unit-label-print .label-grid {
     display: grid;
     grid-template-columns: repeat(var(--label-cols, 3), 1fr);
     /*
-      No gap. The 6mm that used to separate two labels is now 3mm of padding
-      inside each of their cells, so the cut guide sits where the gap used to
-      be and the cells tile edge to edge — which is what makes the dashed lines
-      run unbroken across a row.
+      No gap. The 6mm that used to separate two labels is 3mm of padding inside
+      each of their cells, so the guide sits where the gap was and the cells
+      tile edge to edge — which is what lets the dashes run unbroken along a row
+      instead of restarting at every label.
     */
     gap: 0;
   }
   .unit-label-print .label-cell {
     box-sizing: border-box;
+    /* Fixed, and the same number the page count was worked out from. */
+    height: var(--cell-h);
     padding: 3mm;
     /* Cut guide. Adjacent cells each draw their own, so the line between two
-       labels is two hairlines rather than one — at 0.15mm that is what a
-       guillotine wants to sit on anyway. */
+       labels is two hairlines; at 0.15mm that is what a guillotine sits on. */
     border: 0.15mm dashed #999;
-    /* Decided around this box, which is why the guide can no longer straddle
-       a page: a cell is either on this page whole, or on the next one whole. */
     page-break-inside: avoid;
     break-inside: avoid;
   }
@@ -179,17 +209,20 @@ defineExpose({ print })
     height: 100%;
     border-collapse: collapse;
     table-layout: fixed;
-    page-break-inside: avoid;
-    break-inside: avoid;
     font-family: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
   }
   .unit-label-print .label-card td {
     border: 1px solid #000;
     overflow: hidden;
   }
+  /*
+    Square, and as large as the label is tall, so the QR grows with the label
+    rather than staying at a fixed 11mm that was too big at five per row and
+    too small at two.
+  */
   .unit-label-print .label-logo-cell,
   .unit-label-print .label-qr-cell {
-    width: 11mm;
+    width: var(--label-h);
     text-align: center;
     vertical-align: middle;
     padding: 1.2mm;
