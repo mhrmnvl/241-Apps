@@ -6,6 +6,7 @@ import { CreateAnnouncementUseCase } from '../use-cases/create-announcement.use-
 import { DeleteAnnouncementUseCase } from '../use-cases/delete-announcement.use-case.js';
 import { GetAnnouncementByIdUseCase } from '../use-cases/get-announcement-by-id.use-case.js';
 import { GetAnnouncementsUseCase } from '../use-cases/get-announcements.use-case.js';
+import { GetMyAnnouncementsUseCase } from '../use-cases/get-my-announcements.use-case.js';
 import { UpdateAnnouncementUseCase } from '../use-cases/update-announcement.use-case.js';
 import { AnnouncementController } from './announcement.controller.js';
 
@@ -13,6 +14,7 @@ describe('AnnouncementController', () => {
   let controller: AnnouncementController;
 
   const mockGetAnnouncementsService = { execute: jest.fn() };
+  const mockGetMyAnnouncementsService = { execute: jest.fn() };
   const mockGetAnnouncementByIdService = { execute: jest.fn() };
   const mockCreateAnnouncementService = { execute: jest.fn() };
   const mockUpdateAnnouncementService = { execute: jest.fn() };
@@ -25,6 +27,10 @@ describe('AnnouncementController', () => {
         {
           provide: GetAnnouncementsUseCase,
           useValue: mockGetAnnouncementsService,
+        },
+        {
+          provide: GetMyAnnouncementsUseCase,
+          useValue: mockGetMyAnnouncementsService,
         },
         {
           provide: GetAnnouncementByIdUseCase,
@@ -51,6 +57,41 @@ describe('AnnouncementController', () => {
 
   it('should be defined', () => {
     expect(controller).toBeDefined();
+  });
+
+  describe('findMine', () => {
+    it('passes the caller and their query, and nothing else', async () => {
+      const query = { page: 1, limit: 10 } as AnnouncementQueryDto;
+      mockGetMyAnnouncementsService.execute.mockResolvedValue({
+        data: [],
+        total: 0,
+        page: 1,
+        limit: 10,
+      });
+
+      await controller.findMine({ id: 'user-1' } as never, query);
+
+      expect(mockGetMyAnnouncementsService.execute).toHaveBeenCalledWith(
+        'user-1',
+        query,
+      );
+    });
+
+    it('never reaches the unscoped list', async () => {
+      mockGetMyAnnouncementsService.execute.mockResolvedValue({
+        data: [],
+        total: 0,
+        page: 1,
+        limit: 10,
+      });
+
+      await controller.findMine({ id: 'user-1' } as never, {
+        page: 1,
+        limit: 10,
+      });
+
+      expect(mockGetAnnouncementsService.execute).not.toHaveBeenCalled();
+    });
   });
 
   describe('findAll', () => {

@@ -276,7 +276,11 @@ export async function seedIam(prisma: PrismaClient) {
     // the entries carried no permission, so they showed, and the router asked
     // for these two codes and threw them back to the dashboard. The two
     // screens a student was most likely to open were the two that bounced.
-    'announcements.read',
+    // The noticeboard as it is addressed to them: school-wide notices plus
+    // their own class's. Not `announcements.read`, which is every notice the
+    // school has posted — a first-year would have read "Persiapan Ujian Akhir
+    // Kelas IX" under that one.
+    'announcements.read-own',
     'academic-calendars.read',
     'subjects.read',
 

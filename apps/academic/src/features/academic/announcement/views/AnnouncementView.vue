@@ -44,6 +44,8 @@ const canManageAnnouncements = computed(
     can('announcements.delete'),
 )
 
+const canFilterByClassroom = computed(() => can('classrooms.read'))
+
 const classroomFilterOptions = computed<ComboboxOption[]>(() => [
   { value: '', label: 'Semua Kelas' },
   ...classrooms.value.map((c) => ({
@@ -125,7 +127,14 @@ onMounted(async () => {
       </CardHeader>
 
       <div class="p-6 space-y-6">
-        <div class="rounded-lg border bg-muted/20 p-4 max-w-md">
+        <!--
+          The class filter belongs to whoever keeps the board. A student is
+          shown what is addressed to them and has nothing to filter by.
+        -->
+        <div
+          v-if="canFilterByClassroom"
+          class="rounded-lg border bg-muted/20 p-4 max-w-md"
+        >
           <div class="grid gap-2">
             <Label>Kelas</Label>
             <AppCombobox

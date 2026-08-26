@@ -242,6 +242,12 @@ export const SYSTEM_PERMISSIONS: SystemPermission[] = [
   },
   {
     module: 'announcements',
+    action: 'read-own',
+    code: 'announcements.read-own',
+    description: 'Read the announcements addressed to you',
+  },
+  {
+    module: 'announcements',
     action: 'read',
     code: 'announcements.read',
     description: 'Read announcements',

@@ -33,6 +33,7 @@
     "prisma:deploy": "prisma migrate deploy",
     "seed:iam": "tsx prisma/seed-iam.ts",
     "seed:timetable": "tsx prisma/seed-timetable.ts",
+    "seed:school-life": "tsx prisma/seed-school-life.ts",
     "seed:admin-minimal": "tsx prisma/seed-admin-minimal.ts",
     "seed:student-selfservice": "tsx prisma/seed-student-selfservice.ts",
     "seed:academic-demo": "tsx prisma/seed-academic-demo.ts"
