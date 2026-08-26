@@ -13,6 +13,10 @@ import {
   seedAnnouncements,
   seedNonWorkingDays,
 } from './seeds/modules/school-life.seed.js';
+import {
+  seedAchievements,
+  seedGuardians,
+} from './seeds/modules/academic-activity.seed.js';
 import { seedTeachingPlan } from './seeds/modules/teaching-plan.seed.js';
 import {
   seedTimetable,
@@ -410,138 +414,6 @@ async function removeUnownedFixtureStudents(
   );
 }
 
-const FATHER_NAMES = [
-  'Asep Sutisna',
-  'Budi Rahmat',
-  'Cecep Hidayat',
-  'Dadang Suryana',
-  'Endang Permana',
-  'Farid Nugraha',
-  'Gunawan Setiadi',
-  'Hendra Wijaya',
-  'Irfan Sopandi',
-  'Jajang Kurnia',
-  'Komar Solihin',
-  'Lukman Hakim',
-];
-
-const MOTHER_NAMES = [
-  'Ani Suryani',
-  'Betty Marlina',
-  'Cucu Rohaeti',
-  'Dewi Kartika',
-  'Euis Nurhayati',
-  'Fitria Ningsih',
-  'Gina Aprilia',
-  'Hesti Wulandari',
-  'Ika Rosmiati',
-  'Juju Juariah',
-  'Kartini Lestari',
-  'Lilis Sumiati',
-];
-
-/**
- * A guardian each, so that Data Orang Tua and Relasi Orang Tua hold something.
- *
- * Both screens read empty, and the relation between them is the part worth
- * showing: a parent record exists once and is tied to a child, rather than
- * being copied into the child's row. Each invented student gets a father
- * marked primary and a mother beside him.
- *
- * Only students this fixture invented. A child the school entered has a real
- * family, and inventing one for them would put a made-up name on a real
- * record.
- */
-async function seedGuardians(prisma: PrismaClient) {
-  const students = await prisma.student.findMany({
-    where: { deletedAt: null, user: { identifier: { startsWith: 'siswa.' } } },
-    select: { id: true },
-    orderBy: { nis: 'asc' },
-  });
-  if (students.length === 0) return;
-
-  const occupations = await prisma.occupation.findMany({
-    where: { deletedAt: null },
-    select: { id: true },
-    orderBy: { name: 'asc' },
-  });
-  const educations = await prisma.education.findMany({
-    where: { deletedAt: null },
-    select: { id: true },
-    orderBy: { name: 'asc' },
-  });
-  if (occupations.length === 0) {
-    console.log('  no occupations on this box, skipping guardians');
-    return;
-  }
-
-  const incomes = Object.values(IncomeRange);
-  let created = 0;
-  let linked = 0;
-
-  for (const [i, student] of students.entries()) {
-    const pair = [
-      {
-        name: FATHER_NAMES[i % FATHER_NAMES.length],
-        relation: ParentRelation.FATHER,
-        isPrimary: true,
-        nik: `3573060101${String(700000 + i * 2).padStart(6, '0')}`,
-      },
-      {
-        name: MOTHER_NAMES[i % MOTHER_NAMES.length],
-        relation: ParentRelation.MOTHER,
-        isPrimary: false,
-        nik: `3573064102${String(700001 + i * 2).padStart(6, '0')}`,
-      },
-    ];
-
-    for (const [n, spec] of pair.entries()) {
-      // The NIK is the identity here, as it is on the form.
-      const existing = await prisma.parent.findFirst({
-        where: { nik: spec.nik, deletedAt: null },
-        select: { id: true },
-      });
-      const parent =
-        existing ??
-        (await prisma.parent.create({
-          data: {
-            name: spec.name,
-            nik: spec.nik,
-            birthPlace: 'Bandung',
-            birthDate: new Date(
-              `198${(i + n) % 10}-0${((i + n) % 9) + 1}-1${(i + n) % 9}`,
-            ),
-            phone: `08${String(1200000000 + i * 7 + n).slice(0, 10)}`,
-            occupationId: occupations[(i + n) % occupations.length].id,
-            educationId: educations.length
-              ? educations[(i + n) % educations.length].id
-              : null,
-            income: incomes[(i + n) % incomes.length],
-          },
-        }));
-      if (!existing) created++;
-
-      const link = await prisma.studentParent.findFirst({
-        where: { studentId: student.id, parentId: parent.id, deletedAt: null },
-        select: { id: true },
-      });
-      if (!link) {
-        await prisma.studentParent.create({
-          data: {
-            studentId: student.id,
-            parentId: parent.id,
-            relation: spec.relation,
-            isPrimary: spec.isPrimary,
-          },
-        });
-        linked++;
-      }
-    }
-  }
-
-  console.log(`  ${created} guardians recorded, ${linked} tied to a child`);
-}
-
 /**
  * Who runs each class: ketua, wakil, sekretaris, bendahara.
  *
@@ -599,71 +471,6 @@ async function seedClassroomStructures(
  * person, and a teacher can hold one too. These are all students, because that
  * is the screen that was empty.
  */
-const ACHIEVEMENTS: { name: string; level: string; yearsAgo: number }[] = [
-  {
-    name: "Juara 1 Musabaqah Tilawatil Qur'an",
-    level: 'Kecamatan',
-    yearsAgo: 0,
-  },
-  { name: 'Juara 2 Olimpiade Matematika', level: 'Kabupaten', yearsAgo: 0 },
-  { name: 'Juara 1 Pidato Bahasa Arab', level: 'Kecamatan', yearsAgo: 1 },
-  { name: 'Juara 3 Lomba Cerdas Cermat', level: 'Kabupaten', yearsAgo: 0 },
-  { name: 'Juara 1 Futsal Antar Madrasah', level: 'Kecamatan', yearsAgo: 1 },
-  { name: 'Juara 2 Kaligrafi', level: 'Provinsi', yearsAgo: 0 },
-  { name: 'Juara Harapan 1 Tahfidz 5 Juz', level: 'Kabupaten', yearsAgo: 0 },
-  { name: 'Juara 3 Lomba Pramuka', level: 'Kecamatan', yearsAgo: 1 },
-];
-
-async function seedAchievements(prisma: PrismaClient, openingYear: number) {
-  const types = await prisma.achievementType.findMany({
-    where: { deletedAt: null },
-    select: { id: true },
-    orderBy: { name: 'asc' },
-  });
-  if (types.length === 0) {
-    console.log('  no achievement types on this box, skipping achievements');
-    return;
-  }
-
-  // Students this fixture invented, so nothing is credited to a real child who
-  // did not win it.
-  const students = await prisma.student.findMany({
-    where: { deletedAt: null, user: { identifier: { startsWith: 'siswa.' } } },
-    select: { user: { select: { profile: { select: { id: true } } } } },
-    orderBy: { nis: 'asc' },
-  });
-  const profileIds = students
-    .map((s) => s.user.profile?.id)
-    .filter((id): id is string => Boolean(id));
-  if (profileIds.length === 0) return;
-
-  let created = 0;
-  for (const [i, spec] of ACHIEVEMENTS.entries()) {
-    const profileId = profileIds[i % profileIds.length];
-
-    // Keyed by the child and the award, so a re-run does not hand the same
-    // student the same trophy twice.
-    const existing = await prisma.achievement.findFirst({
-      where: { profileId, name: spec.name, deletedAt: null },
-      select: { id: true },
-    });
-    if (existing) continue;
-
-    await prisma.achievement.create({
-      data: {
-        profileId,
-        name: spec.name,
-        level: spec.level,
-        typeId: types[i % types.length].id,
-        year: openingYear - spec.yearsAgo,
-        description: `Diraih mewakili madrasah pada tingkat ${spec.level.toLowerCase()}.`,
-      },
-    });
-    created++;
-  }
-
-  console.log(`  ${created} student achievements recorded`);
-}
 
 async function main() {
   const url = `${process.env.DATABASE_URL ?? ''} ${process.env.DIRECT_URL ?? ''}`;
