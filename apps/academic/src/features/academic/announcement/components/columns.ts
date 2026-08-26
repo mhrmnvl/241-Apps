@@ -46,8 +46,10 @@ export const createAnnouncementColumns = (
       if (!classrooms || classrooms.length === 0) {
         return h('span', { class: 'text-muted-foreground' }, 'Semua Kelas')
       }
+      // The code is what the school calls a class, and what every other
+      // class picker in the app shows.
       const names = classrooms
-        .map((c) => c.classroom?.name)
+        .map((c) => c.classroom?.code ?? c.classroom?.name)
         .filter(Boolean)
         .join(', ')
       return h('span', names || '-')
@@ -61,6 +63,12 @@ export const createAnnouncementColumns = (
           cell: ({ row }: { row: { original: Announcement } }) => {
             const item = row.original
             return h(ActionCell, {
+              // First in the menu, and offered to everyone: reading a notice
+              // in full is not a management action, and the row truncates it.
+              viewLabel: actions.onPreview ? 'Detail' : undefined,
+              onView: () => {
+                if (actions.onPreview) actions.onPreview(item)
+              },
               hideEdit: actions.canUpdate === false,
               hideDelete: actions.canDelete === false,
               deleteTitle: 'Hapus Pengumuman?',

@@ -6,9 +6,15 @@ export const socialMediaRoutes: RouteRecordRaw[] = [
     name: 'SocialMedia',
     component: () => import('./views/SocialMediaView.vue'),
     meta: {
-      title: 'SocialMedia Sosial Media',
+      // The route's own name had been pasted in front of the title.
+      title: 'Sosial Media',
       requiresAuth: true,
       requiredPermission: 'social-media.read',
+      breadcrumbs: [
+        { title: 'Pengaturan', href: '#' },
+        { title: 'Data Profil', href: '#' },
+        { title: 'Sosial Media' },
+      ],
     },
   },
 ]

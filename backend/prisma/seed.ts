@@ -167,7 +167,12 @@ async function main() {
   }
 
   console.log('\n── Academic Calendar ──');
-  await seedAcademicCalendar(prisma, academicYear.id, semesters);
+  await seedAcademicCalendar(
+    prisma,
+    academicYear.id,
+    semesters,
+    academicYear.startYear,
+  );
 
   console.log('\n── Activities ──');
   await seedEvents(prisma, classes, schoolUnit.id);

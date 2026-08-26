@@ -11,7 +11,10 @@ export const classroomRoutes: RouteRecordRaw[] = [
       requiresAuth: true,
       requiredPermission: 'classrooms.read-own',
       title: 'Kelas Saya',
-      breadcrumbs: [{ title: 'Kelas Saya' }],
+      breadcrumbs: [
+        { title: 'Akademik Saya', href: '#' },
+        { title: 'Kelas Saya' },
+      ],
     },
   },
   {
@@ -21,10 +24,11 @@ export const classroomRoutes: RouteRecordRaw[] = [
     meta: {
       requiresAuth: true,
       requiredPermission: 'classrooms.read',
-      title: 'Kelas',
+      title: 'Daftar Kelas',
       breadcrumbs: [
         { title: 'Akademik', href: '#' },
-        { title: 'Kelas', href: '/academic/classroom' },
+        { title: 'Kelas', href: '#' },
+        { title: 'Daftar Kelas' },
       ],
     },
   },

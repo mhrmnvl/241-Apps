@@ -59,6 +59,14 @@ const columns: ColumnDef<StudentScoreItem>[] = [
       row.original.assessmentItem?.teachingAssignment?.subject?.name ?? '-',
   },
   {
+    id: 'teacher',
+    header: 'Guru Pengampu',
+    meta: { align: 'left' },
+    cell: ({ row }) =>
+      row.original.assessmentItem?.teachingAssignment?.teacher?.user?.profile
+        ?.name ?? '-',
+  },
+  {
     id: 'assessment',
     header: 'Penilaian',
     meta: { align: 'left' },

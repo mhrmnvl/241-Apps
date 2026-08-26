@@ -47,121 +47,125 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="p-4 md:p-6 lg:p-8">
+  <div>
     <!-- Admin dashboard has its own Card wrapper, so it renders standalone -->
     <template v-if="!needsPersonal">
       <DashboardView />
     </template>
 
     <!-- Personal dashboards get the same outer Card as admin -->
-    <Card
+    <div
       v-else
-      class="overflow-hidden rounded-2xl shadow-sm shadow-black/5 ring-1 ring-black/4"
+      class="p-4 md:p-6 lg:p-8"
     >
-      <CardHeader
-        class="flex flex-row items-center justify-between border-b px-6 py-5"
+      <Card
+        class="overflow-hidden rounded-2xl shadow-sm shadow-black/5 ring-1 ring-black/4"
       >
-        <div>
-          <CardTitle class="text-2xl font-bold tracking-tight">
-            Dashboard
-          </CardTitle>
-        </div>
-      </CardHeader>
-
-      <div class="p-6 space-y-6">
-        <!-- Loading skeleton -->
-        <div
-          v-if="isDeciding"
-          class="space-y-6"
+        <CardHeader
+          class="flex flex-row items-center justify-between border-b px-6 py-5"
         >
-          <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <Skeleton
-              v-for="i in 3"
-              :key="i"
-              class="h-[84px] w-full rounded-lg"
-            />
+          <div>
+            <CardTitle class="text-2xl font-bold tracking-tight">
+              Dashboard
+            </CardTitle>
           </div>
-          <div class="grid gap-4 lg:grid-cols-2">
-            <Skeleton class="h-64 w-full rounded-lg" />
-            <Skeleton class="h-64 w-full rounded-lg" />
-          </div>
-        </div>
+        </CardHeader>
 
-        <template v-else>
-          <Alert
-            v-if="loadError"
-            variant="destructive"
-          >
-            <AlertCircle class="size-4" />
-            <AlertDescription>{{ loadError }}</AlertDescription>
-          </Alert>
-
+        <div class="p-6 space-y-6">
+          <!-- Loading skeleton -->
           <div
-            v-if="panels.length === 0"
-            class="flex flex-col items-center gap-3 py-16 text-center text-muted-foreground"
+            v-if="isDeciding"
+            class="space-y-6"
           >
-            <LayoutDashboard class="size-10 opacity-40" />
-            <p class="text-sm">Belum ada dashboard untuk akun Anda.</p>
+            <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <Skeleton
+                v-for="i in 3"
+                :key="i"
+                class="h-[84px] w-full rounded-lg"
+              />
+            </div>
+            <div class="grid gap-4 lg:grid-cols-2">
+              <Skeleton class="h-64 w-full rounded-lg" />
+              <Skeleton class="h-64 w-full rounded-lg" />
+            </div>
           </div>
 
-          <!-- Single panel: no tab strip -->
-          <template v-else-if="panels.length === 1">
-            <StudentDashboard
-              v-if="defaultPanel === 'student' && student"
-              :data="student"
-              :is-weekly-holiday="isWeeklyHoliday"
-              :loading="loading"
-            />
-            <TeacherDashboard
-              v-else-if="defaultPanel === 'teacher' && teacher"
-              :data="teacher"
-              :is-weekly-holiday="isWeeklyHoliday"
-              :loading="loading"
-              :today-date="todayDate"
-            />
-          </template>
-
-          <!-- Dual panels: tabs -->
-          <Tabs
-            v-else
-            :default-value="defaultPanel"
-          >
-            <TabsList>
-              <TabsTrigger
-                v-for="panel in panels"
-                :key="panel.value"
-                :value="panel.value"
-              >
-                {{ panel.label }}
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent
-              v-if="student"
-              value="student"
-              class="mt-4"
+          <template v-else>
+            <Alert
+              v-if="loadError"
+              variant="destructive"
             >
+              <AlertCircle class="size-4" />
+              <AlertDescription>{{ loadError }}</AlertDescription>
+            </Alert>
+
+            <div
+              v-if="panels.length === 0"
+              class="flex flex-col items-center gap-3 py-16 text-center text-muted-foreground"
+            >
+              <LayoutDashboard class="size-10 opacity-40" />
+              <p class="text-sm">Belum ada dashboard untuk akun Anda.</p>
+            </div>
+
+            <!-- Single panel: no tab strip -->
+            <template v-else-if="panels.length === 1">
               <StudentDashboard
+                v-if="defaultPanel === 'student' && student"
                 :data="student"
                 :is-weekly-holiday="isWeeklyHoliday"
                 :loading="loading"
               />
-            </TabsContent>
-            <TabsContent
-              v-if="teacher"
-              value="teacher"
-              class="mt-4"
-            >
               <TeacherDashboard
+                v-else-if="defaultPanel === 'teacher' && teacher"
                 :data="teacher"
                 :is-weekly-holiday="isWeeklyHoliday"
                 :loading="loading"
                 :today-date="todayDate"
               />
-            </TabsContent>
-          </Tabs>
-        </template>
-      </div>
-    </Card>
+            </template>
+
+            <!-- Dual panels: tabs -->
+            <Tabs
+              v-else
+              :default-value="defaultPanel"
+            >
+              <TabsList>
+                <TabsTrigger
+                  v-for="panel in panels"
+                  :key="panel.value"
+                  :value="panel.value"
+                >
+                  {{ panel.label }}
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent
+                v-if="student"
+                value="student"
+                class="mt-4"
+              >
+                <StudentDashboard
+                  :data="student"
+                  :is-weekly-holiday="isWeeklyHoliday"
+                  :loading="loading"
+                />
+              </TabsContent>
+              <TabsContent
+                v-if="teacher"
+                value="teacher"
+                class="mt-4"
+              >
+                <TeacherDashboard
+                  :data="teacher"
+                  :is-weekly-holiday="isWeeklyHoliday"
+                  :loading="loading"
+                  :today-date="todayDate"
+                />
+              </TabsContent>
+            </Tabs>
+          </template>
+        </div>
+      </Card>
+    </div>
   </div>
 </template>

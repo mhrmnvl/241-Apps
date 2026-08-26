@@ -1,6 +1,7 @@
 import type { Classroom } from './classroom'
 import type { ClassroomStructure } from './structure'
 import type { ClassroomEnrollment } from './enrollment'
+import type { TeachingAssignment } from '@/features/academic/teaching-assignment'
 
 /**
  * A student's own classroom, as `GET /students/me/classroom` answers it.
@@ -19,4 +20,6 @@ export interface MyClassroom {
     teacher?: { user?: { profile?: { name?: string | null } | null } | null }
   } | null
   classmates: ClassroomEnrollment[]
+  /** What the class is taught this term, and by whom. */
+  subjects: TeachingAssignment[]
 }

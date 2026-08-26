@@ -6,3 +6,11 @@
  * screen. Forty is roughly double the largest class this school runs.
  */
 export const CLASSMATE_LIMIT = 40;
+
+/**
+ * How many subjects one class read carries.
+ *
+ * A ceiling, like the classmate one: a curriculum is bounded by the week it
+ * has to fit into. The school teaches twenty-seven.
+ */
+export const SUBJECT_LIMIT = 60;
