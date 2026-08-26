@@ -1,3 +1,4 @@
+import { TeachingAssignmentModule } from '../teaching-assignment/teaching-assignment.module.js';
 import { GetMyClassroomUseCase } from './use-cases/get-my-classroom.use-case.js';
 import { Module, forwardRef } from '@nestjs/common';
 import { UserModule } from '../../platform/user/user.module.js';
@@ -38,6 +39,9 @@ import { UpdateStudentProfileUseCase } from './use-cases/update-student-profile.
     UserModule,
     GradeModule,
     ClassroomModule,
+    // For the subjects on a student's own classroom read. No cycle: this
+    // module imports only TeacherModule, which imports only UserModule.
+    TeachingAssignmentModule,
     forwardRef(() => EnrollmentModule),
   ],
   controllers: [

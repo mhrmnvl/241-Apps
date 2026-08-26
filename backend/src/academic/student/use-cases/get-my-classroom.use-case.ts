@@ -13,8 +13,15 @@ import {
   IClassroomSupervisorRepository,
   SupervisorWithDetails,
 } from '../../classroom/domain/interfaces/classroom-supervisor-repository.interface.js';
+import {
+  ITeachingAssignmentRepository,
+  TeachingAssignmentWithDetails,
+} from '../../teaching-assignment/domain/interfaces/teaching-assignment-repository.interface.js';
 import { EnrollmentWithDetails } from '../../enrollment/domain/interfaces/enrollment-repository.interface.js';
-import { CLASSMATE_LIMIT } from '../constants/my-classroom.constants.js';
+import {
+  CLASSMATE_LIMIT,
+  SUBJECT_LIMIT,
+} from '../constants/my-classroom.constants.js';
 
 export interface MyClassroom {
   classroom: ClassroomWithDetails;
@@ -24,6 +31,15 @@ export interface MyClassroom {
   supervisor: SupervisorWithDetails | null;
   /** Everyone enrolled in it this term, the caller included. */
   classmates: EnrollmentWithDetails[];
+  /**
+   * What the class is taught this term, and by whom.
+   *
+   * Part of the classroom rather than a read of its own: "which subjects do I
+   * study" is the same question as "whose class am I in", and answering it
+   * separately would mean a student needs `teaching-assignments.read` — the
+   * register of every assignment the school has made.
+   */
+  subjects: TeachingAssignmentWithDetails[];
 }
 
 /**
@@ -56,6 +72,7 @@ export class GetMyClassroomUseCase {
     private readonly structureRepository: IClassroomStructureRepository,
     private readonly supervisorRepository: IClassroomSupervisorRepository,
     private readonly enrollmentRepository: IEnrollmentRepository,
+    private readonly teachingAssignmentRepository: ITeachingAssignmentRepository,
     private readonly studentIdentity: IStudentIdentityReadPort,
   ) {}
 
@@ -77,13 +94,18 @@ export class GetMyClassroomUseCase {
       semesterId: enrollment.semesterId,
     };
 
-    const [structures, supervisors, classmates] = await Promise.all([
+    const [structures, supervisors, classmates, subjects] = await Promise.all([
       this.structureRepository.findAll({ ...scope, page: 1, limit: 1 }),
       this.supervisorRepository.findAll({ ...scope, page: 1, limit: 1 }),
       this.enrollmentRepository.findAll({
         ...scope,
         page: 1,
         limit: CLASSMATE_LIMIT,
+      }),
+      this.teachingAssignmentRepository.findAll({
+        ...scope,
+        page: 1,
+        limit: SUBJECT_LIMIT,
       }),
     ]);
 
@@ -92,6 +114,7 @@ export class GetMyClassroomUseCase {
       structure: structures.data[0] ?? null,
       supervisor: supervisors.data[0] ?? null,
       classmates: classmates.data,
+      subjects: subjects.data,
     };
   }
 }

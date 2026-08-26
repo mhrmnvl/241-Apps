@@ -12,6 +12,7 @@ import { Plus, Search } from 'lucide-vue-next'
 import { useAnnouncement } from '../composables/useAnnouncement'
 import { useRoleGuard } from '@/features/platform/auth'
 import { createAnnouncementColumns } from '../components/columns'
+import AnnouncementDetailDialog from '../components/AnnouncementDetailDialog.vue'
 import AnnouncementFormSheet from '../components/AnnouncementFormSheet.vue'
 import type { Announcement, AnnouncementSavePayload } from '../types'
 
@@ -36,6 +37,9 @@ const {
 
 const isAddModalOpen = ref(false)
 const editingItem = ref<Announcement | null>(null)
+
+const previewItem = ref<Announcement | null>(null)
+const isPreviewOpen = ref(false)
 const { can } = useRoleGuard()
 const canManageAnnouncements = computed(
   () =>
@@ -55,7 +59,14 @@ const classroomFilterOptions = computed<ComboboxOption[]>(() => [
 ])
 
 const tableColumns = createAnnouncementColumns({
-  showActions: can('announcements.update') || can('announcements.delete'),
+  onPreview: (item: Announcement) => {
+    previewItem.value = item
+    isPreviewOpen.value = true
+  },
+  // Always: Detail is in this menu now, and a student holds neither of the
+  // write permissions. Gated on those, the column vanished for the very
+  // readers the preview exists for.
+  showActions: true,
   canUpdate: can('announcements.update'),
   canDelete: can('announcements.delete'),
   onEdit: (item: Announcement) => {
@@ -171,6 +182,18 @@ onMounted(async () => {
             </div>
           </template>
         </DataTable>
+
+        <AnnouncementDetailDialog
+          v-model:open="isPreviewOpen"
+          :announcement="previewItem"
+          :can-manage="can('announcements.update')"
+          @edit="
+            (item) => {
+              editingItem = item
+              isAddModalOpen = true
+            }
+          "
+        />
 
         <AnnouncementFormSheet
           v-if="canManageAnnouncements && isAddModalOpen"

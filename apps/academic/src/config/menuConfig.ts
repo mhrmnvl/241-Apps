@@ -45,6 +45,14 @@ export const menuSections: MenuSection[] = [
         icon: School,
         requiredPermission: 'school-units.read',
       },
+      {
+        // `announcements.read-own` as well as the wide read: a student holds
+        // only the first, and the noticeboard is the screen every role opens.
+        title: 'Pengumuman',
+        url: '/announcement',
+        icon: Megaphone,
+        requiredAnyPermission: ['announcements.read', 'announcements.read-own'],
+      },
     ],
   },
 
@@ -527,6 +535,14 @@ export const menuSections: MenuSection[] = [
             requiredPermission: 'classrooms.read-own',
           },
           {
+            // The class's subjects come with the class, so this asks for the
+            // same code Kelas Saya does. `teaching-assignments.read-own` means
+            // "the classes I teach" — a teacher's code, which no student holds.
+            title: 'Mata Pelajaran Saya',
+            url: '/learning/my-subject',
+            requiredPermission: 'classrooms.read-own',
+          },
+          {
             title: 'Kehadiran',
             url: '/academic/my/attendance',
             requiredPermission: 'attendances.read-own',
@@ -549,7 +565,7 @@ export const menuSections: MenuSection[] = [
       // two entries a student was most likely to open were the two that threw
       // them back to the dashboard. Both codes are granted now, and both
       // screens are reached where everyone else reaches them — Kalender under
-      // Akademik, Pengumuman under Akan Datang.
+      // Akademik, Pengumuman under Utama.
     ],
   },
 
@@ -562,12 +578,6 @@ export const menuSections: MenuSection[] = [
     key: 'coming-soon',
     label: 'Akan Datang',
     items: [
-      {
-        title: 'Pengumuman',
-        url: '/announcement',
-        icon: Megaphone,
-        requiredPermission: 'announcements.read',
-      },
       {
         title: 'Berkas & Dokumen',
         url: '/files',

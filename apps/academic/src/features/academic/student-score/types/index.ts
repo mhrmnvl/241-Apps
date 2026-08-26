@@ -46,6 +46,14 @@ export interface StudentScoreItem {
         name?: string
         code?: string
       }
+      teacher?: {
+        id?: string
+        user?: {
+          profile?: {
+            name?: string | null
+          } | null
+        } | null
+      } | null
     }
   }
 }

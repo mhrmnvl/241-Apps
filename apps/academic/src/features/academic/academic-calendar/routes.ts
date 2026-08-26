@@ -12,7 +12,7 @@ export const academicCalendarRoutes: RouteRecordRaw[] = [
       breadcrumbs: [
         { title: 'Akademik', href: '#' },
         { title: 'Kalender Pendidikan', href: '#' },
-        { title: 'Kalender Pendidikan' },
+        { title: 'Kalender' },
       ],
     },
   },

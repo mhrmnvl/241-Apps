@@ -39,4 +39,11 @@ export class MyClassroomResponseDto {
     items: { type: 'object', additionalProperties: true },
   })
   classmates!: Record<string, unknown>[];
+
+  @ApiProperty({
+    description: 'What the class is taught this term, and by whom',
+    type: 'array',
+    items: { type: 'object', additionalProperties: true },
+  })
+  subjects!: Record<string, unknown>[];
 }
