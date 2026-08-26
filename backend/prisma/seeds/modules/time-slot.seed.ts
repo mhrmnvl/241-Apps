@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { Day, PrismaClient } from '@prisma/client';
 
 interface TimeSlotEntry {
   name: string;
@@ -121,40 +121,69 @@ function parseTime(hhmm: string): Date {
   return new Date(Date.UTC(1970, 0, 1, h, m, 0));
 }
 
+/**
+ * The school day: which periods exist and when.
+ *
+ * `schoolUnitId` is accepted and ignored. `TimeSlotType` and `TimeSlot` used to
+ * belong to a school unit and no longer do — the deployment is single-school —
+ * but this module still filtered and inserted by it, so every query it made was
+ * invalid and the seed threw. The parameter stays so the one caller in
+ * `seed.ts` does not have to change.
+ */
 export async function seedTimeSlots(
   prisma: PrismaClient,
-  schoolUnitId?: string,
+  _schoolUnitId?: string,
 ) {
-  if (!schoolUnitId) {
-    const schoolUnit = await prisma.schoolUnit.findFirst({
-      where: { deletedAt: null },
-    });
-    if (!schoolUnit) {
-      throw new Error('No school unit found for seeding time slots');
-    }
-    schoolUnitId = schoolUnit.id;
-  }
-
-  // Seed TimeSlotTypes first
+  // Seed TimeSlotTypes first.
+  //
+  // `isLesson` is stated for each, not left to the column default of `true`.
+  // Every type came out marked as a lesson, so anything asking for lesson
+  // periods — a timetable builder, the demo fixture — was offered the morning
+  // break and the flag ceremony as slots to teach Matematika in.
+  //
+  // `days` says which days of the week the type occupies at all. An empty list
+  // means every day, which is right for the breaks and for tahfidz and wrong
+  // for the one thing that happens once a week: the flag ceremony was seeded
+  // with no days and so appeared as a band across Senin to Sabtu, six weekly
+  // ceremonies where the school holds one.
   const types = [
-    { code: 'LESSON', name: 'Lesson' },
-    { code: 'BREAK', name: 'Break' },
-    { code: 'CEREMONY', name: 'Ceremony' },
-    { code: 'TAHFIDZ', name: 'Tahfidz' },
+    { code: 'LESSON', name: 'Lesson', isLesson: true, days: [] as Day[] },
+    { code: 'BREAK', name: 'Break', isLesson: false, days: [] as Day[] },
+    {
+      code: 'CEREMONY',
+      name: 'Ceremony',
+      isLesson: false,
+      days: [Day.MONDAY],
+    },
+    { code: 'TAHFIDZ', name: 'Tahfidz', isLesson: false, days: [] as Day[] },
   ];
 
   const typeMap = new Map<string, string>();
   for (const t of types) {
     let dbType = await prisma.timeSlotType.findFirst({
-      where: { schoolUnitId, code: t.code },
+      where: { code: t.code, deletedAt: null },
     });
-    dbType ??= await prisma.timeSlotType.create({
-      data: {
-        schoolUnitId,
-        code: t.code,
-        name: t.name,
-      },
-    });
+    if (dbType) {
+      // Corrects a type seeded before `isLesson` and `days` were stated here.
+      const sameDays =
+        dbType.days.length === t.days.length &&
+        t.days.every((d) => dbType!.days.includes(d));
+      if (dbType.isLesson !== t.isLesson || !sameDays) {
+        dbType = await prisma.timeSlotType.update({
+          where: { id: dbType.id },
+          data: { isLesson: t.isLesson, days: t.days },
+        });
+      }
+    } else {
+      dbType = await prisma.timeSlotType.create({
+        data: {
+          code: t.code,
+          name: t.name,
+          isLesson: t.isLesson,
+          days: t.days,
+        },
+      });
+    }
     typeMap.set(t.code, dbType.id);
   }
 
@@ -163,7 +192,7 @@ export async function seedTimeSlots(
 
   for (const slot of DEFAULT_SLOTS) {
     const exists = await prisma.timeSlot.findFirst({
-      where: { schoolUnitId, name: slot.name },
+      where: { name: slot.name, deletedAt: null },
     });
 
     if (!exists) {
@@ -172,7 +201,6 @@ export async function seedTimeSlots(
 
       await prisma.timeSlot.create({
         data: {
-          schoolUnitId,
           name: slot.name,
           startTime: parseTime(slot.startTime),
           endTime: parseTime(slot.endTime),

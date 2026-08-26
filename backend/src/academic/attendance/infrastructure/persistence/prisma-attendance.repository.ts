@@ -132,31 +132,75 @@ export class PrismaAttendanceRepository extends IAttendanceRepository {
     records: BulkAttendanceRecord[],
     scheduleId?: string,
   ) {
-    const results = await this.prisma.$transaction(
-      records.map((record) =>
-        this.prisma.attendance.upsert({
-          where: {
-            enrollmentId_date_scheduleId: {
+    /*
+     * The composite unique index is (enrollmentId, date, scheduleId).
+     * scheduleId is nullable, and Prisma cannot upsert on a compound unique
+     * that contains NULL — every NULL is distinct in SQL, so the WHERE never
+     * matches and a new row is inserted each time, eventually violating
+     * other constraints. When scheduleId is absent we fall back to a
+     * findFirst + create/update inside the same transaction.
+     */
+    const results = await this.prisma.$transaction(async (tx) => {
+      const ops = records.map(async (record) => {
+        if (scheduleId) {
+          // scheduleId is present — composite unique is fully non-null,
+          // so Prisma upsert works correctly.
+          return tx.attendance.upsert({
+            where: {
+              enrollmentId_date_scheduleId: {
+                enrollmentId: record.enrollmentId,
+                date,
+                scheduleId,
+              },
+            },
+            update: {
+              status: record.status,
+              note: record.note,
+              deletedAt: null,
+            },
+            create: {
               enrollmentId: record.enrollmentId,
               date,
-              scheduleId: (scheduleId ?? null)!,
+              status: record.status,
+              scheduleId,
+              note: record.note,
             },
-          },
-          update: {
-            status: record.status,
-            note: record.note,
+          });
+        }
+
+        // No scheduleId — manually find-then-upsert.
+        const existing = await tx.attendance.findFirst({
+          where: {
+            enrollmentId: record.enrollmentId,
+            date,
+            scheduleId: null,
             deletedAt: null,
           },
-          create: {
+        });
+
+        if (existing) {
+          return tx.attendance.update({
+            where: { id: existing.id },
+            data: {
+              status: record.status,
+              note: record.note,
+              deletedAt: null,
+            },
+          });
+        }
+
+        return tx.attendance.create({
+          data: {
             enrollmentId: record.enrollmentId,
             date,
             status: record.status,
-            scheduleId: scheduleId ?? undefined,
             note: record.note,
           },
-        }),
-      ),
-    );
+        });
+      });
+
+      return Promise.all(ops);
+    });
     return { saved: results.length };
   }
 

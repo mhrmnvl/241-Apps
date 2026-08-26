@@ -17,21 +17,14 @@ export const createAssessmentItemColumns = (
   {
     id: 'name',
     header: 'Nama Tugas',
+    meta: { align: 'left' },
     cell: ({ row }) => row.original.name,
   },
   {
     id: 'type',
     header: 'Tipe',
     meta: { align: 'center' },
-    cell: ({ row }) =>
-      h(
-        'span',
-        {
-          class:
-            'inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10',
-        },
-        TYPE_LABELS[row.original.type],
-      ),
+    cell: ({ row }) => TYPE_LABELS[row.original.type],
   },
   {
     id: 'weight',
@@ -52,7 +45,9 @@ export const createAssessmentItemColumns = (
       const item = row.original
       return h(ActionCell, {
         editLabel: 'Ubah',
-        manageLabel: 'Nilai',
+        // Only show "Nilai" when a grade handler is provided (Penilaian page).
+        // On the Tugas page onGrade is undefined, so the button won't appear.
+        manageLabel: actions.onGrade ? 'Nilai' : undefined,
         hideEdit: actions.canUpdate === false,
         hideDelete: actions.canDelete === false,
         deleteTitle: 'Hapus Tugas?',

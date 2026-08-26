@@ -2,17 +2,11 @@ import { h } from 'vue'
 import type { ColumnDef } from '@tanstack/vue-table'
 import { Badge } from '@/ui/badge'
 import { Button } from '@/ui/button'
+import { Eye } from 'lucide-vue-next'
 import type { RaporData } from '../types'
 
 /**
  * A student's own report cards.
- *
- * Its own column set rather than a filtered copy of the management one, for the
- * same reason `presence/leave` keeps `myLeaveColumns` beside
- * `leaveApprovalColumns`: the two audiences want different columns, and hiding
- * some of one set by condition is how a screen ends up serving two people
- * badly. A student needs no NIS and no name — they know who they are — and no
- * action column, because there is nothing here they may do.
  */
 export const createMyRaporColumns = (
   onView: (rapor: RaporData) => void,
@@ -23,10 +17,6 @@ export const createMyRaporColumns = (
     cell: ({ row }) => {
       const semester = row.original.enrollment?.semester
       const year = semester?.academicYear?.name
-      // `type` is a relation, and its `name` is the English enum the backend
-      // stores — ODD / EVEN. Joining the relation itself printed
-      // `[object Object] — 2024/2025`; showing its raw name would put "ODD" in
-      // front of a student. Presentation belongs to the frontend.
       const term =
         semester?.type?.name === 'ODD'
           ? 'Ganjil'
@@ -47,38 +37,56 @@ export const createMyRaporColumns = (
   {
     accessorKey: 'totalAverage',
     header: 'Rata-rata',
+    meta: { align: 'center' },
     cell: ({ row }) => {
       const val = row.original.totalAverage
-      return val !== null && val !== undefined ? Number(val).toFixed(2) : '-'
+      return val !== null && val !== undefined
+        ? h(
+            'span',
+            { class: 'font-semibold tabular-nums' },
+            Number(val).toFixed(2),
+          )
+        : '-'
     },
   },
   {
     accessorKey: 'rank',
     header: 'Peringkat',
-    cell: ({ row }) => row.original.rank ?? '-',
+    meta: { align: 'center' },
+    cell: ({ row }) =>
+      row.original.rank !== null && row.original.rank !== undefined
+        ? h('span', { class: 'tabular-nums' }, String(row.original.rank))
+        : '-',
   },
   {
     id: 'status',
     header: 'Status',
-    // Always published here — the self-service read returns nothing else — so
-    // this says so rather than offering a state a student can never see.
-    cell: () => h(Badge, { variant: 'default' }, () => 'Terbit'),
+    meta: { align: 'center' },
+    cell: () =>
+      h(
+        Badge,
+        {
+          variant: 'outline',
+          class:
+            'border-emerald-500/30 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400',
+        },
+        () => 'Terbit',
+      ),
   },
   {
-    id: 'detail',
+    id: 'actions',
     header: '',
-    // The only action on this screen, and it reads. Opening one's own report
-    // card to see its subjects is not an edit, and there is nothing else here
-    // a student may do.
+    meta: { align: 'center' },
     cell: ({ row }) =>
       h(
         Button,
         {
           variant: 'ghost',
           size: 'sm',
+          class: 'h-8 px-2.5 text-xs',
           onClick: () => onView(row.original),
         },
-        () => 'Lihat',
+        () => [h(Eye, { class: 'size-3.5 mr-1.5' }), 'Lihat Rapor'],
       ),
   },
 ]

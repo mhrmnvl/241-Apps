@@ -166,7 +166,13 @@ const ERROR_MAPPINGS: ErrorMapping[] = [
       m.includes('menumpuk') ||
       m.includes('sudah memiliki kegiatan') ||
       m.includes('bertepatan dengan hari libur') ||
-      m.includes('menetapkan hari libur'),
+      m.includes('menetapkan hari libur') ||
+      // Bentrok jadwal: pesannya menyebut pelajaran, kelas, hari dan jam yang
+      // bertabrakan. Tanpa baris ini, status 409 jatuh ke pesan generik
+      // "Data tersebut sudah ada atau konflik dengan data lain" — benar, dan
+      // tidak memberi tahu apa pun tentang bentrokannya.
+      m.includes('sudah ada pelajaran pada jam tersebut') ||
+      m.includes('sudah mengajar pada jam tersebut'),
     '__PASSTHROUGH__',
   ], // Pesan sudah dalam bahasa Indonesia dari backend
 

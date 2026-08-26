@@ -7,7 +7,9 @@ export const semesterRoutes: RouteRecordRaw[] = [
     component: () => import('./views/SemesterView.vue'),
     meta: {
       requiresAuth: true,
-      requiredPermission: 'semesters.read',
+      // Every screen with a term picker reads this list, so the read is held
+      // widely and only the editing belongs behind this route.
+      requiredPermission: 'semesters.update',
       title: 'Semester',
       breadcrumbs: [
         { title: 'Akademik', href: '#' },

@@ -1,3 +1,4 @@
+import { GetMyClassroomUseCase } from './use-cases/get-my-classroom.use-case.js';
 import { Module, forwardRef } from '@nestjs/common';
 import { UserModule } from '../../platform/user/user.module.js';
 import { GradeModule } from '../grade/grade.module.js';
@@ -45,6 +46,7 @@ import { UpdateStudentProfileUseCase } from './use-cases/update-student-profile.
     StudentParentController,
   ],
   providers: [
+    GetMyClassroomUseCase,
     { provide: IStudentRepository, useClass: PrismaStudentRepository },
     {
       provide: IStudentIdentityReadPort,

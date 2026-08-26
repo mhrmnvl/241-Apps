@@ -20,6 +20,7 @@ import {
 import { useRoleGuard } from '@/features/platform/auth'
 import { Plus } from 'lucide-vue-next'
 import { computed, onMounted, ref, watch } from 'vue'
+import { EVERY_CLASSROOM } from '../constants/filters'
 
 const {
   items,
@@ -44,7 +45,7 @@ const editingItem = ref<TeachingAssignment | null>(null)
 const { can } = useRoleGuard()
 
 const classroomFilterOptions = computed(() => [
-  { value: '', label: 'Semua Kelas' },
+  { value: EVERY_CLASSROOM, label: 'Semua Kelas' },
   ...classrooms.value.map((c) => ({
     value: c.id,
     label: c.code ?? '-',
@@ -95,6 +96,11 @@ watch(selectedClassroomId, () => {
 })
 
 onMounted(async () => {
+  // Defaults to every class. The sentinel exists because the select rejects an
+  // empty-string item value; the service is what keeps it off the wire.
+  if (!selectedClassroomId.value) {
+    selectedClassroomId.value = EVERY_CLASSROOM
+  }
   await fetchFilterOptions()
   await fetchTeachingAssignments()
 })

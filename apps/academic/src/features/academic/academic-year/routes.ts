@@ -7,7 +7,8 @@ export const academicYearRoutes: RouteRecordRaw[] = [
     component: () => import('./views/AcademicYearView.vue'),
     meta: {
       requiresAuth: true,
-      requiredPermission: 'academic-years.read',
+      // Management, like its menu entry — the read alone is held widely.
+      requiredPermission: 'academic-years.update',
       title: 'Tahun Ajaran',
       breadcrumbs: [
         { title: 'Akademik', href: '#' },

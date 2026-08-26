@@ -16,6 +16,7 @@ export function useAssessmentItem() {
     selectedClassroomId,
     selectedSubjectId,
     selectedSemesterId,
+    assignments,
     teachingAssignment,
   } = storeToRefs(store)
 
@@ -31,6 +32,7 @@ export function useAssessmentItem() {
     selectedClassroomId,
     selectedSubjectId,
     selectedSemesterId,
+    assignments,
     teachingAssignment,
     fetchRelatedData: assessmentItemService.fetchRelatedData,
     fetchItems: assessmentItemService.fetchItems,

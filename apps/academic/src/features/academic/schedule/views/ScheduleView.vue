@@ -3,6 +3,7 @@ import { onMounted, computed } from 'vue'
 import { useBreadcrumbs } from '@/shared/composables/useBreadcrumbs'
 import { formatEntityName } from '@/shared/utils/utils'
 import { useSchedule } from '../composables/useSchedule'
+import ScheduleExportActions from '../components/ScheduleExportActions.vue'
 import ScheduleHeader from '../components/ScheduleHeader.vue'
 import ScheduleSkeleton from '../components/ScheduleSkeleton.vue'
 import ScheduleEmptyState from '../components/ScheduleEmptyState.vue'
@@ -20,6 +21,7 @@ const {
   selectedClassroom,
   lessonMap,
   sortedTimeSlots,
+  scheduleSheet,
   breadcrumbs,
   init,
   onClassroomChange,
@@ -41,13 +43,21 @@ onMounted(init)
 
 <template>
   <div class="p-2 pt-0 md:p-6 md:pt-4 lg:p-8 space-y-5">
-    <ScheduleHeader
-      :is-admin="isAdmin"
-      :is-personal="isPersonal"
-      :selected-classroom-id="selectedClassroomId"
-      :options="scheduleClassroomOptions"
-      @classroom-change="onClassroomChange"
-    />
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+      <ScheduleHeader
+        class="flex-1"
+        :is-admin="isAdmin"
+        :is-personal="isPersonal"
+        :selected-classroom-id="selectedClassroomId"
+        :options="scheduleClassroomOptions"
+        @classroom-change="onClassroomChange"
+      />
+
+      <ScheduleExportActions
+        :sheet="scheduleSheet"
+        :disabled="isLoadingSchedule || lessons.length === 0"
+      />
+    </div>
 
     <ScheduleSkeleton v-if="isLoadingSchedule" />
 

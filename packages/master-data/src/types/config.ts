@@ -37,9 +37,7 @@ export interface MasterDataBooleanField {
 }
 
 export type MasterDataField =
-  | MasterDataTextField
-  | MasterDataNumberField
-  | MasterDataBooleanField
+  MasterDataTextField | MasterDataNumberField | MasterDataBooleanField
 
 export interface MasterDataEntity {
   id: string

@@ -1,4 +1,4 @@
-﻿import type { RouteRecordRaw } from 'vue-router'
+import type { RouteRecordRaw } from 'vue-router'
 
 export const assessmentItemRoutes: RouteRecordRaw[] = [
   {
@@ -6,12 +6,26 @@ export const assessmentItemRoutes: RouteRecordRaw[] = [
     name: 'AssessmentItems',
     component: () => import('./views/AssessmentItemListView.vue'),
     meta: {
-      title: 'Tugas & Nilai',
+      title: 'Tugas',
       requiresAuth: true,
       requiredPermission: 'assessment-items.read',
       breadcrumbs: [
         { title: 'Penilaian', href: '#' },
-        { title: 'Tugas & Nilai', href: '/academic/student-score' },
+        { title: 'Tugas', href: '/academic/student-score' },
+      ],
+    },
+  },
+  {
+    path: '/academic/assessment/penilaian',
+    name: 'AssessmentGrading',
+    component: () => import('./views/AssessmentGradingListView.vue'),
+    meta: {
+      title: 'Penilaian',
+      requiresAuth: true,
+      requiredPermission: 'student-scores.read',
+      breadcrumbs: [
+        { title: 'Penilaian', href: '#' },
+        { title: 'Penilaian', href: '/academic/assessment/penilaian' },
       ],
     },
   },

@@ -29,6 +29,12 @@ export function useMenuVisibility(
     return ctx.permissions.value.includes(required)
   }
 
+  function canShowByAnyPermission(required?: string[]): boolean {
+    if (!required || required.length === 0) return true
+    if (isSuperAdmin.value) return true
+    return required.some((p) => ctx.permissions.value.includes(p))
+  }
+
   function canShowByRole(allowed?: string[]): boolean {
     if (!allowed || allowed.length === 0) return true
     if (isSuperAdmin.value) return true
@@ -54,6 +60,8 @@ export function useMenuVisibility(
         if (isSectionHidden(section)) return false
         if (section.requiredPermission)
           return canShowByPermission(section.requiredPermission)
+        if (section.requiredAnyPermission)
+          return canShowByAnyPermission(section.requiredAnyPermission)
         if (section.allowedRoles) return canShowByRole(section.allowedRoles)
         return true
       })
@@ -63,6 +71,8 @@ export function useMenuVisibility(
             if (isHidden(item)) return false
             if (item.requiredPermission)
               return canShowByPermission(item.requiredPermission)
+            if (item.requiredAnyPermission)
+              return canShowByAnyPermission(item.requiredAnyPermission)
             if (item.allowedRoles) return canShowByRole(item.allowedRoles)
             return true
           })
@@ -72,6 +82,8 @@ export function useMenuVisibility(
               if (isHidden(sub)) return false
               if (sub.requiredPermission)
                 return canShowByPermission(sub.requiredPermission)
+              if (sub.requiredAnyPermission)
+                return canShowByAnyPermission(sub.requiredAnyPermission)
               if (sub.allowedRoles) return canShowByRole(sub.allowedRoles)
               return true
             })
