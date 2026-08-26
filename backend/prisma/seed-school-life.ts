@@ -3,6 +3,9 @@ import { PrismaClient } from '@prisma/client';
 import 'dotenv/config';
 import { pgSslOptions } from '../src/core/database/pg-ssl.js';
 import { seedAcademicCalendarTypes } from './seeds/modules/academic-calendar-type.seed.js';
+import { seedAchievementTypes } from './seeds/modules/achievement-type.seed.js';
+import { seedEducations } from './seeds/modules/education.seed.js';
+import { seedOccupations } from './seeds/modules/occupation.seed.js';
 import { seedAcademicCalendar } from './seeds/modules/academic-calendar.seed.js';
 import {
   seedAnnouncements,
@@ -55,6 +58,14 @@ async function main() {
   console.log(
     `  ${academicYear.name}: ${semesters.length} semester, ${classrooms.length} kelas\n`,
   );
+
+  // Reference lists the activity seed needs before it can record a guardian's
+  // job or the kind of a prize. Without them those two steps skip themselves,
+  // which is how a school ends up with a full rapor and an empty Data Orang
+  // Tua. All three are lists of words — no person is created by any of them.
+  await seedOccupations(prisma);
+  await seedEducations(prisma);
+  await seedAchievementTypes(prisma);
 
   await seedAcademicCalendarTypes(prisma);
   await seedAcademicCalendar(
