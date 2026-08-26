@@ -5,7 +5,6 @@ import { studentImportColumns } from '../importPreviewColumns'
 import { ImportExportDialog } from '@/features/academic/shared/import-export'
 import { studentImportExportLabels } from '../importExportLabels'
 import { DataTable } from '@/ui'
-import { formatEntityName } from '@/shared/utils/utils'
 import { watchDebounced } from '@vueuse/core'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
@@ -277,7 +276,7 @@ onMounted(async () => {
                   :key="cls.id"
                   :value="cls.id"
                 >
-                  {{ formatEntityName(cls.displayName) }}
+                  {{ cls.code }}
                 </SelectItem>
               </SelectContent>
             </Select>
@@ -385,7 +384,7 @@ onMounted(async () => {
                 :key="cls.id"
                 :value="cls.id"
               >
-                {{ formatEntityName(cls.displayName) }}
+                {{ cls.code }}
               </SelectItem>
             </SelectContent>
           </Select>
