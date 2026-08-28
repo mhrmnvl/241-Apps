@@ -1,12 +1,7 @@
 export type UserGender = 'MALE' | 'FEMALE'
 
 export type Religion =
-  | 'ISLAM'
-  | 'PROTESTANT'
-  | 'CATHOLIC'
-  | 'HINDU'
-  | 'BUDDHIST'
-  | 'CONFUCIAN'
+  'ISLAM' | 'PROTESTANT' | 'CATHOLIC' | 'HINDU' | 'BUDDHIST' | 'CONFUCIAN'
 
 export type BloodType =
   | 'A'

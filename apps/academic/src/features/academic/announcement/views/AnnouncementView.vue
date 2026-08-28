@@ -12,6 +12,7 @@ import { Plus, Search } from 'lucide-vue-next'
 import { useAnnouncement } from '../composables/useAnnouncement'
 import { useRoleGuard } from '@/features/platform/auth'
 import { createAnnouncementColumns } from '../components/columns'
+import AnnouncementDetailDialog from '../components/AnnouncementDetailDialog.vue'
 import AnnouncementFormSheet from '../components/AnnouncementFormSheet.vue'
 import type { Announcement, AnnouncementSavePayload } from '../types'
 
@@ -36,6 +37,9 @@ const {
 
 const isAddModalOpen = ref(false)
 const editingItem = ref<Announcement | null>(null)
+
+const previewItem = ref<Announcement | null>(null)
+const isPreviewOpen = ref(false)
 const { can } = useRoleGuard()
 const canManageAnnouncements = computed(
   () =>
@@ -43,6 +47,8 @@ const canManageAnnouncements = computed(
     can('announcements.update') ||
     can('announcements.delete'),
 )
+
+const canFilterByClassroom = computed(() => can('classrooms.read'))
 
 const classroomFilterOptions = computed<ComboboxOption[]>(() => [
   { value: '', label: 'Semua Kelas' },
@@ -53,7 +59,14 @@ const classroomFilterOptions = computed<ComboboxOption[]>(() => [
 ])
 
 const tableColumns = createAnnouncementColumns({
-  showActions: can('announcements.update') || can('announcements.delete'),
+  onPreview: (item: Announcement) => {
+    previewItem.value = item
+    isPreviewOpen.value = true
+  },
+  // Always: Detail is in this menu now, and a student holds neither of the
+  // write permissions. Gated on those, the column vanished for the very
+  // readers the preview exists for.
+  showActions: true,
   canUpdate: can('announcements.update'),
   canDelete: can('announcements.delete'),
   onEdit: (item: Announcement) => {
@@ -125,7 +138,14 @@ onMounted(async () => {
       </CardHeader>
 
       <div class="p-6 space-y-6">
-        <div class="rounded-lg border bg-muted/20 p-4 max-w-md">
+        <!--
+          The class filter belongs to whoever keeps the board. A student is
+          shown what is addressed to them and has nothing to filter by.
+        -->
+        <div
+          v-if="canFilterByClassroom"
+          class="rounded-lg border bg-muted/20 p-4 max-w-md"
+        >
           <div class="grid gap-2">
             <Label>Kelas</Label>
             <AppCombobox
@@ -162,6 +182,18 @@ onMounted(async () => {
             </div>
           </template>
         </DataTable>
+
+        <AnnouncementDetailDialog
+          v-model:open="isPreviewOpen"
+          :announcement="previewItem"
+          :can-manage="can('announcements.update')"
+          @edit="
+            (item) => {
+              editingItem = item
+              isAddModalOpen = true
+            }
+          "
+        />
 
         <AnnouncementFormSheet
           v-if="canManageAnnouncements && isAddModalOpen"

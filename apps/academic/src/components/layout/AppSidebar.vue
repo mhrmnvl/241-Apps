@@ -4,10 +4,6 @@ import type { SidebarProps } from '@/ui/sidebar'
 import { useAuthSession } from '@/features/platform/auth'
 import { useBranding, useSettingsStore } from '@/features/platform/settings'
 import { useMenuVisibility } from '@/composables/useMenuVisibility'
-import { academicYearApi } from '@/features/academic/academic-year/api/academicYearApi'
-import { semesterApi } from '@/features/academic/semester/api/semesterApi'
-import type { AcademicYear } from '@/features/academic/academic-year'
-import type { Semester } from '@/features/academic/semester'
 import NavMain from './NavMain.vue'
 import {
   Sidebar,
@@ -31,7 +27,6 @@ const settingsStore = useSettingsStore()
 const appTitle = computed(
   () => settingsStore.settings?.appTitle ?? 'SIAKAD 241',
 )
-const activeAcademicInfo = ref({ academicYear: 'Memuat...', semester: '' })
 
 const scrollContainer = ref<HTMLDivElement | null>(null)
 const STORAGE_KEY = 'sidebar-scroll-position'
@@ -39,7 +34,6 @@ const STORAGE_KEY = 'sidebar-scroll-position'
 onMounted(() => {
   if (user.value) {
     void syncAuthenticatedUserProfile()
-    void fetchActiveAcademicInfo()
   }
 
   const saved = sessionStorage.getItem(STORAGE_KEY)
@@ -51,39 +45,6 @@ onMounted(() => {
 function handleScroll(e: Event) {
   const target = e.target as HTMLDivElement
   sessionStorage.setItem(STORAGE_KEY, String(target.scrollTop))
-}
-
-async function fetchActiveAcademicInfo() {
-  try {
-    const [ayRes, semRes] = await Promise.all([
-      academicYearApi.getAcademicYears(),
-      semesterApi.getSemesters({ limit: 100 }),
-    ])
-
-    const ayData = ayRes.data?.data ?? []
-    const semData = semRes.data?.data ?? []
-    const activeAy = Array.isArray(ayData)
-      ? ayData.find((ay: AcademicYear) => ay.isActive)
-      : null
-    const activeSem = Array.isArray(semData)
-      ? semData.find((sem: Semester) => sem.isActive)
-      : null
-
-    if (activeAy) activeAcademicInfo.value.academicYear = activeAy.name
-    else activeAcademicInfo.value.academicYear = 'Belum diatur'
-
-    if (activeSem) {
-      const semName =
-        activeSem.type?.name === 'ODD'
-          ? 'Ganjil'
-          : activeSem.type?.name === 'EVEN'
-            ? 'Genap'
-            : (activeSem.type?.name ?? '-')
-      activeAcademicInfo.value.semester = `Semester ${semName}`
-    }
-  } catch {
-    activeAcademicInfo.value.academicYear = 'Gagal memuat'
-  }
 }
 </script>
 
@@ -106,16 +67,6 @@ async function fetchActiveAcademicInfo() {
                 <span class="truncate font-semibold text-base">{{
                   appTitle
                 }}</span>
-                <span
-                  class="truncate text-xs text-muted-foreground font-medium"
-                >
-                  {{ activeAcademicInfo.academicYear }}
-                  {{
-                    activeAcademicInfo.semester
-                      ? `- ${activeAcademicInfo.semester}`
-                      : ''
-                  }}
-                </span>
               </div>
             </RouterLink>
           </SidebarMenuButton>

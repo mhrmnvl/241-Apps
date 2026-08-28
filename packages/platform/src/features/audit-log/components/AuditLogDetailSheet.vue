@@ -220,8 +220,7 @@ const copyToClipboard = () => {
                 <pre
                   v-if="formattedMetadata"
                   class="p-4 text-[11px] font-mono overflow-auto max-h-[350px] leading-relaxed text-foreground select-all"
-                  >{{ formattedMetadata }}</pre
-                >
+                  >{{ formattedMetadata }}</pre>
                 <div
                   v-else
                   class="p-6 text-center text-xs text-muted-foreground"

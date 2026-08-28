@@ -8,22 +8,26 @@ export const baseColumns: ColumnDef<ClassroomEnrollment>[] = [
   {
     id: 'nis',
     header: 'NIS',
+    meta: { align: 'center' },
     accessorFn: (row) => row.student.nis,
   },
   {
     id: 'nisn',
     header: 'NISN',
+    meta: { align: 'center' },
     accessorFn: (row) => row.student.nisn,
   },
   {
     id: 'name',
     header: 'Nama Siswa',
+    meta: { align: 'left' },
     accessorFn: (row) => row.student.user.profile.name,
     cell: ({ row }) => formatEntityName(row.original.student.user.profile.name),
   },
   {
     id: 'gender',
     header: 'L/P',
+    meta: { align: 'center' },
     cell: ({ row }) => {
       const gender = row.original.student.user.profile.gender
       if (gender === 'MALE') return 'L'

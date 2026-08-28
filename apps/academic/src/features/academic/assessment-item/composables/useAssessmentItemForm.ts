@@ -31,7 +31,14 @@ export function useAssessmentItemForm(options: {
         .max(100, 'Nama tugas maksimal 100 karakter.'),
       type: z.enum(['DAILY', 'MIDTERM', 'FINAL', 'ASSIGNMENT', 'PRACTICAL']),
       weight: z.number().min(0, 'Bobot minimal 0.'),
-      maxScore: z.number().min(0).max(1000, 'Skor maksimal 1000.'),
+      // A mark is a percentage of this, so anything is arithmetically fine —
+      // but the school marks out of a hundred, and a task set out of 1000
+      // makes every rapor line read as a rounding error. Matched by the
+      // same bound on the server.
+      maxScore: z
+        .number()
+        .min(1, 'Skor maksimal minimal 1.')
+        .max(100, 'Skor maksimal tidak boleh lebih dari 100.'),
     }),
   )
 
@@ -71,14 +78,27 @@ export function useAssessmentItemForm(options: {
   const onSubmit = form.handleSubmit(
     async (values: AssessmentItemFormValues) => {
       const editItem = options.editData?.()
+      const fields = {
+        name: values.name,
+        type: values.type,
+        weight: values.weight,
+        maxScore: values.maxScore,
+      }
+
+      // The assignment is only sent when creating. On an update the server
+      // rejects it outright — which task belongs to which teacher is not
+      // something an edit gets to change.
+      const teachingAssignmentId = options.teachingAssignmentId()
+      if (!editItem && !teachingAssignmentId) {
+        store.formError =
+          'Belum ada jadwal mengajar untuk kelas dan mata pelajaran ini.'
+        return
+      }
+
       const result = await assessmentItemService.saveItem(
-        {
-          teachingAssignmentId: options.teachingAssignmentId() ?? undefined,
-          name: values.name,
-          type: values.type,
-          weight: values.weight,
-          maxScore: values.maxScore,
-        },
+        editItem
+          ? fields
+          : { ...fields, teachingAssignmentId: teachingAssignmentId! },
         editItem?.id,
       )
       if (result.success) {

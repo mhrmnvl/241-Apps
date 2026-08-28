@@ -138,10 +138,16 @@ async function main() {
   const semester = await prisma.semester.findFirst({
     where: { isActive: true },
   });
-  const classroom = await prisma.classroom.findFirst({
-    where: { deletedAt: null },
-    orderBy: { code: 'asc' },
-  });
+  // Scoped to the semester's own academic year. Next year's classrooms are
+  // copies of this year's, code and all, so an unscoped `findFirst` ordered by
+  // code can hand back a seat in a year that has no term yet — a combination
+  // the API refuses to create.
+  const classroom = semester
+    ? await prisma.classroom.findFirst({
+        where: { deletedAt: null, academicYearId: semester.academicYearId },
+        orderBy: { code: 'asc' },
+      })
+    : null;
   if (!semester || !classroom) {
     throw new Error(
       'No active semester or classroom on this box; nothing to enrol into.',
@@ -152,7 +158,11 @@ async function main() {
   // 3. One assessment to carry a mark, hung off a teaching assignment that
   //    already exists.
   const assignment = await prisma.teachingAssignment.findFirst({
-    where: { deletedAt: null },
+    where: {
+      deletedAt: null,
+      semesterId: semester.id,
+      classroomId: classroom.id,
+    },
   });
   let assessmentItem = assignment
     ? await prisma.assessmentItem.findFirst({

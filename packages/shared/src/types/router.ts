@@ -17,6 +17,20 @@ declare module 'vue-router' {
      * passes). Checked by the router guard and mirrored by the sidebar.
      */
     requiredPermission?: string
+    /**
+     * Permission gate for a route two kinds of person reach two ways.
+     *
+     * The teaching-assignment screen is the case it exists for: whoever
+     * assigns the teaching opens it with `teaching-assignments.read` and sees
+     * the school's, and a teacher opens it with `.read-own` and sees theirs.
+     * One string could only name one of them — the menu offered the entry and
+     * the router then bounced the teacher to the dashboard, which reads as the
+     * link being broken rather than as a refusal.
+     *
+     * `requiredPermission` wins where both are given. Mirrors
+     * `MenuSection.requiredAnyPermission`.
+     */
+    requiredAnyPermission?: string[]
     title?: string
     /**
      * Breadcrumb trail for this route, rendered by the app shell.

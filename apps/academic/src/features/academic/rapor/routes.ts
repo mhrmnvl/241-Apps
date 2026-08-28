@@ -1,4 +1,4 @@
-﻿import type { RouteRecordRaw } from 'vue-router'
+import type { RouteRecordRaw } from 'vue-router'
 
 export const raporRoutes: RouteRecordRaw[] = [
   {
@@ -23,8 +23,8 @@ export const raporRoutes: RouteRecordRaw[] = [
       requiredPermission: 'report-cards.read',
       title: 'Rapor Siswa',
       breadcrumbs: [
-        { title: 'Manajemen Akademik', href: '#' },
-        { title: 'Rapor Siswa', href: '/academic/report-card' },
+        { title: 'Penilaian & Rapor', href: '#' },
+        { title: 'Rapor' },
       ],
     },
   },

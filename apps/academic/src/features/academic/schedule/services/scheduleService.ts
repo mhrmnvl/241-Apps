@@ -1,4 +1,5 @@
 import { classroomApi } from '@/features/academic/classroom'
+import { toScheduleLesson } from '../logic/toScheduleLesson'
 import { lessonService } from '@/features/academic/lesson'
 import { useScheduleStore } from '../stores/scheduleStore'
 import { timeSlotApi } from '@/features/academic/time-slot'
@@ -60,11 +61,21 @@ export const scheduleService = {
         type: ts.type?.code,
         isLesson: ts.type?.isLesson,
         typeName: ts.type?.name,
+        // Which days the period exists on. Dropped here before, so the table
+        // had no way to know the ceremony is a Monday.
+        days: ts.type?.days,
       }))
 
       // A person who both teaches and is enrolled sees both, with their
       // teaching first — it is the one they came for.
-      store.lessons = [...mine.teaching, ...mine.classroom]
+      //
+      // Converted, not assigned: the table reads `lesson.subject.name` and the
+      // API answers with `lesson.teachingAssignment.subject.name`. Assigning
+      // the rows straight through type-checked — every field on
+      // `ScheduleLesson` is optional — and drew a full week of dashes.
+      store.lessons = [...mine.teaching, ...mine.classroom].map(
+        toScheduleLesson,
+      )
       return { success: true }
     } catch (e) {
       toast.error(getIndonesianErrorMessage(e, 'Gagal memuat jadwal Anda'))
@@ -111,8 +122,13 @@ export const scheduleService = {
         type: ts.type?.code,
         isLesson: ts.type?.isLesson,
         typeName: ts.type?.name,
+        // Which days the period exists on. Dropped here before, so the table
+        // had no way to know the ceremony is a Monday.
+        days: ts.type?.days,
       }))
-      store.lessons = Array.isArray(lessonRes.data) ? lessonRes.data : []
+      store.lessons = (Array.isArray(lessonRes.data) ? lessonRes.data : []).map(
+        toScheduleLesson,
+      )
 
       return { success: true }
     } catch (e) {

@@ -242,6 +242,12 @@ export const SYSTEM_PERMISSIONS: SystemPermission[] = [
   },
   {
     module: 'announcements',
+    action: 'read-own',
+    code: 'announcements.read-own',
+    description: 'Read the announcements addressed to you',
+  },
+  {
+    module: 'announcements',
     action: 'read',
     code: 'announcements.read',
     description: 'Read announcements',
@@ -366,6 +372,12 @@ export const SYSTEM_PERMISSIONS: SystemPermission[] = [
     action: 'read',
     code: 'classrooms.read',
     description: 'Read classrooms',
+  },
+  {
+    module: 'classrooms',
+    action: 'read-own',
+    code: 'classrooms.read-own',
+    description: 'Read the classroom you are enrolled in',
   },
   {
     module: 'classrooms',

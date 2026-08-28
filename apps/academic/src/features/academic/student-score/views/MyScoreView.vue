@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { DataTable } from '@/ui'
-import { Card, CardContent } from '@/ui/card'
-import { h, onMounted, ref } from 'vue'
+import { Card, CardContent, CardHeader, CardTitle } from '@/ui/card'
+import { computed, h, onMounted, ref } from 'vue'
 import type { ColumnDef } from '@tanstack/vue-table'
 import { Badge } from '@/ui/badge'
 import { toast } from 'vue-sonner'
@@ -11,46 +11,94 @@ import type { StudentScoreItem } from '../types'
 
 /**
  * A student's own marks, per assessment.
- *
- * Assessments the teacher has not marked yet are shown with the mark blank
- * rather than left out. A student wants to know what is still outstanding, and
- * an assessment that simply does not appear reads as one that does not exist.
- *
- * Nothing here marks anything: this is the same data the grading table holds,
- * from the other side.
  */
 const rows = ref<StudentScoreItem[]>([])
 const loading = ref(false)
 
+const TYPE_LABELS: Record<string, string> = {
+  DAILY: 'Harian',
+  MIDTERM: 'UTS',
+  FINAL: 'UAS',
+  ASSIGNMENT: 'Tugas',
+  PRACTICAL: 'Praktik',
+}
+
+const TYPE_ORDER: Record<string, number> = {
+  DAILY: 1,
+  ASSIGNMENT: 2,
+  PRACTICAL: 3,
+  MIDTERM: 4,
+  FINAL: 5,
+}
+
+const sortedRows = computed(() => {
+  return [...rows.value].sort((a, b) => {
+    const subjectA = a.assessmentItem?.teachingAssignment?.subject?.name ?? ''
+    const subjectB = b.assessmentItem?.teachingAssignment?.subject?.name ?? ''
+    const compareSubject = subjectA.localeCompare(subjectB, 'id')
+    if (compareSubject !== 0) return compareSubject
+
+    const typeA = a.assessmentItem?.type ?? ''
+    const typeB = b.assessmentItem?.type ?? ''
+    const orderA = TYPE_ORDER[typeA] ?? 99
+    const orderB = TYPE_ORDER[typeB] ?? 99
+    if (orderA !== orderB) return orderA - orderB
+
+    const itemA = a.assessmentItem?.name ?? ''
+    const itemB = b.assessmentItem?.name ?? ''
+    return itemA.localeCompare(itemB, 'id')
+  })
+})
+
 const columns: ColumnDef<StudentScoreItem>[] = [
+  {
+    id: 'subject',
+    header: 'Mata Pelajaran',
+    meta: { align: 'left' },
+    cell: ({ row }) =>
+      row.original.assessmentItem?.teachingAssignment?.subject?.name ?? '-',
+  },
+  {
+    id: 'teacher',
+    header: 'Guru Pengampu',
+    meta: { align: 'left' },
+    cell: ({ row }) =>
+      row.original.assessmentItem?.teachingAssignment?.teacher?.user?.profile
+        ?.name ?? '-',
+  },
   {
     id: 'assessment',
     header: 'Penilaian',
+    meta: { align: 'left' },
     cell: ({ row }) => row.original.assessmentItem?.name ?? '-',
   },
   {
     id: 'type',
     header: 'Jenis',
-    cell: ({ row }) =>
-      row.original.assessmentItem?.type
-        ? h(
-            Badge,
-            { variant: 'secondary' },
-            () => row.original.assessmentItem!.type,
-          )
-        : '-',
+    meta: { align: 'center' },
+    cell: ({ row }) => {
+      const type = row.original.assessmentItem?.type
+      if (!type) return '-'
+      return h(
+        Badge,
+        { variant: 'secondary', class: 'font-medium text-xs' },
+        () => TYPE_LABELS[type] ?? type,
+      )
+    },
   },
   {
     accessorKey: 'score',
     header: 'Nilai',
+    meta: { align: 'center' },
     cell: ({ row }) => {
       const score = row.original.score
-      // Null and undefined are "not marked yet", which is a real state and not
-      // a zero. Showing 0 would tell a student they failed something nobody has
-      // looked at.
       return score === null || score === undefined
-        ? h('span', { class: 'text-muted-foreground' }, 'Belum dinilai')
-        : String(score)
+        ? h('span', { class: 'text-muted-foreground text-xs' }, 'Belum dinilai')
+        : h(
+            'span',
+            { class: 'font-semibold tabular-nums text-sm' },
+            String(score),
+          )
     },
   },
 ]
@@ -72,26 +120,39 @@ onMounted(() => void load())
 </script>
 
 <template>
-  <div class="space-y-6 p-4 md:p-6">
-    <div>
-      <h1 class="text-2xl font-bold tracking-tight">Nilai Saya</h1>
-      <p class="text-sm text-muted-foreground">
-        Nilai per penilaian pada semester berjalan.
-      </p>
-    </div>
+  <div class="p-4 md:p-5 lg:p-6">
+    <Card
+      class="overflow-hidden rounded-2xl shadow-sm shadow-black/5 ring-1 ring-black/4"
+    >
+      <CardHeader
+        class="flex flex-row items-center justify-between border-b px-6 py-5"
+      >
+        <CardTitle class="text-2xl font-bold tracking-tight">
+          Nilai Saya
+        </CardTitle>
+      </CardHeader>
 
-    <Card v-if="!loading && rows.length === 0">
-      <CardContent class="py-10 text-center text-sm text-muted-foreground">
-        Belum ada penilaian untuk Anda pada semester ini. Nilai muncul di sini
-        setelah guru membuat penilaian dan mengisinya.
-      </CardContent>
+      <div class="p-6 space-y-4">
+        <!-- Empty state -->
+        <Card
+          v-if="!loading && sortedRows.length === 0"
+          class="shadow-none"
+        >
+          <CardContent class="py-10 text-center text-sm text-muted-foreground">
+            Belum ada penilaian untuk Anda pada semester ini. Nilai muncul di
+            sini setelah guru membuat penilaian dan mengisinya.
+          </CardContent>
+        </Card>
+
+        <!-- Data table -->
+        <DataTable
+          v-else
+          :columns="columns"
+          :data="sortedRows"
+          :is-loading="loading"
+          item-label="nilai"
+        />
+      </div>
     </Card>
-
-    <DataTable
-      v-else
-      :columns="columns"
-      :data="rows"
-      :is-loading="loading"
-    />
   </div>
 </template>

@@ -46,25 +46,32 @@ export const menuSections: MenuSection[] = [
         requiredPermission: 'school-units.read',
       },
       {
+        // `announcements.read-own` as well as the wide read: a student holds
+        // only the first, and the noticeboard is the screen every role opens.
         title: 'Pengumuman',
         url: '/announcement',
         icon: Megaphone,
-        requiredPermission: 'announcements.read',
-      },
-      {
-        title: 'Berkas & Dokumen',
-        url: '/files',
-        icon: FolderOpen,
-        requiredPermission: 'files.read',
+        requiredAnyPermission: ['announcements.read', 'announcements.read-own'],
       },
     ],
   },
 
   // ──────────────────── ACADEMIC ────────────────────
+  // No gate on the section itself.
+  //
+  // It used to ask for `academic-years.read` — a code only the people who run
+  // the school hold — which meant the calendar, the class list, the subject
+  // list and a teacher's own assignments were all unreachable for a teacher,
+  // though each of those entries asks for something they do have. A section
+  // with nothing left in it is dropped anyway, so the items can decide.
+  //
+  // What that exposed had to be re-gated, and the rule is the same everywhere
+  // below: an entry that exists to *change* reference data asks for the write
+  // permission, not the read. Everyone needs to read the semester list to fill
+  // a picker; almost nobody should be editing semesters.
   {
     key: 'academic',
     label: 'Akademik',
-    requiredPermission: 'academic-years.read',
     items: [
       {
         key: 'academic-calendar-semester',
@@ -73,14 +80,22 @@ export const menuSections: MenuSection[] = [
         icon: CalendarDays,
         items: [
           {
+            // `academic-years.update`, matching Semester below it. The read is
+            // held widely — the class list shows which year a class belongs to
+            // and filters by it, so a teacher opening Daftar Kelas needs it —
+            // and gating the register on the read put the school's years in
+            // front of everyone who looks at a class.
             title: 'Tahun Ajaran',
             url: '/academic/academic-year',
-            requiredPermission: 'academic-years.read',
+            requiredPermission: 'academic-years.update',
           },
           {
+            // `semesters.update`: every screen with a class or term picker
+            // reads this list, so gating the entry on `semesters.read` put the
+            // school's term register in front of everyone who fills one in.
             title: 'Semester',
             url: '/academic/semester',
-            requiredPermission: 'semesters.read',
+            requiredPermission: 'semesters.update',
           },
           {
             // `semesters.create`, matching the three endpoints behind this
@@ -133,9 +148,12 @@ export const menuSections: MenuSection[] = [
         icon: ClipboardList,
         items: [
           {
+            // Reference data behind the class list — VII, VIII, IX. Editing it
+            // is a school-structure decision; reading the classes it groups is
+            // not, so this asks for the write and Daftar Kelas below does not.
             title: 'Tingkat Kelas',
             url: '/academic/grade',
-            requiredPermission: 'classrooms.read',
+            requiredPermission: 'classrooms.update',
           },
           {
             title: 'Daftar Kelas',
@@ -144,17 +162,8 @@ export const menuSections: MenuSection[] = [
           },
         ],
       },
-    ],
-  },
-
-  // ──────────────────── LEARNING ────────────────────
-  {
-    key: 'learning',
-    label: 'Pembelajaran',
-    requiredPermission: 'subjects.read',
-    items: [
       {
-        key: 'learning-material-schedule',
+        key: 'academic-teaching',
         title: 'Pengajaran',
         url: '#',
         icon: BookOpen,
@@ -170,14 +179,25 @@ export const menuSections: MenuSection[] = [
             requiredPermission: 'subjects.read',
           },
           {
+            // Two people reach this by two different permissions: whoever
+            // assigns the teaching holds `teaching-assignments.read` and sees
+            // the school's, and a teacher holds `.read-own` and sees theirs.
+            // The screen serves both — the service asks for their own first —
+            // so the entry cannot be gated on either one alone.
             title: 'Penugasan Mengajar',
             url: '/learning/teaching-assignment',
-            requiredPermission: 'teaching-assignments.read',
+            requiredAnyPermission: [
+              'teaching-assignments.read',
+              'teaching-assignments.read-own',
+            ],
           },
           {
+            // The bell times. Every timetable renders against them — a
+            // teacher's own schedule included — so the read is widely held and
+            // only the editing belongs here.
             title: 'Jam Pelajaran',
             url: '/learning/time-slot',
-            requiredPermission: 'time-slots.read',
+            requiredPermission: 'time-slots.update',
           },
           {
             title: 'Jadwal Pelajaran',
@@ -186,28 +206,56 @@ export const menuSections: MenuSection[] = [
           },
         ],
       },
+    ],
+  },
+
+  // ──────────────────── PENILAIAN & RAPOR ────────────────────
+  {
+    key: 'assessment',
+    label: 'Penilaian & Rapor',
+    requiredPermission: 'attendances.read',
+    items: [
       {
-        key: 'learning-assessment',
+        key: 'assessment-attendance',
+        title: 'Kehadiran',
+        url: '#',
+        icon: UserCheck,
+        items: [
+          {
+            title: 'Input Kehadiran',
+            url: '/academic/attendance/input',
+            requiredPermission: 'attendances.manage',
+          },
+          {
+            title: 'Rekapitulasi',
+            url: '/academic/attendance/rekapitulasi',
+            requiredPermission: 'attendances.read',
+          },
+        ],
+      },
+      {
+        key: 'assessment-grading',
         title: 'Penilaian',
         url: '#',
         icon: FileSpreadsheet,
         items: [
           {
-            title: 'Kehadiran',
-            url: '/academic/attendance',
-            requiredPermission: 'attendances.read',
-          },
-          {
-            title: 'Tugas & Nilai',
+            title: 'Tugas',
             url: '/academic/student-score',
             requiredPermission: 'assessment-items.read',
           },
           {
-            title: 'Rapor',
-            url: '/academic/report-card',
-            requiredPermission: 'report-cards.read',
+            title: 'Penilaian',
+            url: '/academic/assessment/penilaian',
+            requiredPermission: 'student-scores.read',
           },
         ],
+      },
+      {
+        title: 'Rapor',
+        url: '/academic/report-card',
+        icon: BookText,
+        requiredPermission: 'report-cards.read',
       },
     ],
   },
@@ -225,10 +273,15 @@ export const menuSections: MenuSection[] = [
         requiredPermission: 'students.read',
       },
       {
+        // Accounts, not people: this screen is where a login is disabled or a
+        // password reset. `users.read` rather than `students.read`, so that
+        // being allowed to look a student up does not also hand over the
+        // register of their credentials — a teacher needs the first and has no
+        // business with the second.
         title: 'Akun Siswa',
         url: '/student/account',
         icon: UserRound,
-        requiredPermission: 'students.read',
+        requiredPermission: 'users.read',
       },
       {
         // The record of who has left. Graduating them is Kelulusan, under
@@ -251,14 +304,18 @@ export const menuSections: MenuSection[] = [
         requiredPermission: 'parents.read',
       },
       {
-        // `students.read`: the endpoint behind this screen is
-        // `student-parents`, guarded by `students.*`. The menu asked for
-        // `parents.read`, so someone holding one but not the other either saw
-        // a link that denied them or missed a screen they could use.
+        // `students.update`, though the list behind it reads with
+        // `students.read`. The screen exists to tie a guardian to a child and
+        // untie them again; somebody who cannot do either has nothing to do
+        // here, and gating on the read put it in front of every teacher.
+        //
+        // Not `parents.read`, which is what it used to ask for: the endpoint
+        // is `student-parents`, guarded by `students.*`, so that offered the
+        // screen to people the server would refuse.
         title: 'Relasi Orang Tua',
         url: '/data/parent-relation',
         icon: Link2,
-        requiredPermission: 'students.read',
+        requiredPermission: 'students.update',
       },
     ],
   },
@@ -276,10 +333,11 @@ export const menuSections: MenuSection[] = [
         requiredPermission: 'teachers.read',
       },
       {
+        // Accounts, not people — see Akun Siswa.
         title: 'Akun Guru',
         url: '/teacher/account',
         icon: UserRound,
-        requiredPermission: 'teachers.read',
+        requiredPermission: 'users.read',
       },
     ],
   },
@@ -442,8 +500,19 @@ export const menuSections: MenuSection[] = [
   // own record, not because their role is spelled STUDENT.
   {
     key: 'student-view',
-    label: 'Siswa',
-    allowedRoles: ['STUDENT'],
+    label: 'Milik Saya',
+    // `schedules.read-own` rather than the STUDENT role.
+    //
+    // A teacher holds it too, and had nowhere to see their own timetable: the
+    // section was addressed to a role name, so the one entry that applies to
+    // both was reachable by one of them. The role is also the wrong question —
+    // this school has a role called `Wali Kelas` whose holder is a teacher like
+    // any other, and it would have been shut out the same way.
+    //
+    // Each entry below still asks for its own `-own` code, so a teacher sees
+    // the timetable and nothing else: marks, attendance and rapor of one's own
+    // are a student's, and a teacher holds none of those three.
+    requiredPermission: 'schedules.read-own',
     items: [
       {
         key: 'student-view-academic',
@@ -455,6 +524,23 @@ export const menuSections: MenuSection[] = [
             title: 'Jadwal Pelajaran',
             url: '/academic/my/schedule',
             requiredPermission: 'schedules.read-own',
+          },
+          {
+            // A student's own classroom — who runs it, who teaches it, who
+            // else is in it. Daftar Kelas under Akademik is the register of
+            // every class the school runs, and asks for `classrooms.read`,
+            // which a student does not hold.
+            title: 'Kelas Saya',
+            url: '/academic/my/classroom',
+            requiredPermission: 'classrooms.read-own',
+          },
+          {
+            // The class's subjects come with the class, so this asks for the
+            // same code Kelas Saya does. `teaching-assignments.read-own` means
+            // "the classes I teach" — a teacher's code, which no student holds.
+            title: 'Mata Pelajaran Saya',
+            url: '/learning/my-subject',
+            requiredPermission: 'classrooms.read-own',
           },
           {
             title: 'Kehadiran',
@@ -473,15 +559,30 @@ export const menuSections: MenuSection[] = [
           },
         ],
       },
+      // Pengumuman and Kalender used to be repeated here, ungated, and both
+      // bounced: the router asks for `announcements.read` and
+      // `academic-calendars.read`, which the student role did not hold, so the
+      // two entries a student was most likely to open were the two that threw
+      // them back to the dashboard. Both codes are granted now, and both
+      // screens are reached where everyone else reaches them — Kalender under
+      // Akademik, Pengumuman under Utama.
+    ],
+  },
+
+  // ──────────────────── AKAN DATANG ────────────────────
+  //
+  // Built, reachable, and not part of what the school is being shown yet.
+  // Kept at the foot of the sidebar under a heading that says so, rather than
+  // sitting in Utama where they read as finished work.
+  {
+    key: 'coming-soon',
+    label: 'Akan Datang',
+    items: [
       {
-        key: 'student-view-info',
-        title: 'Informasi',
-        url: '#',
-        icon: Megaphone,
-        items: [
-          { title: 'Pengumuman', url: '/announcement' },
-          { title: 'Kalender', url: '/academic/education-calendar' },
-        ],
+        title: 'Berkas & Dokumen',
+        url: '/files',
+        icon: FolderOpen,
+        requiredPermission: 'files.read',
       },
     ],
   },

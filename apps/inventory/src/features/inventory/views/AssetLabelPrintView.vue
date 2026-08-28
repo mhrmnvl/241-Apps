@@ -22,6 +22,11 @@ import type {
   LabelUnit,
 } from '../types'
 import { createColumns } from '../components/columns'
+import {
+  DEFAULT_PAPER_ID,
+  PAPER_SIZES,
+  labelSheetLayout,
+} from '../logic/labelSheetLayout'
 import UnitLabelSheet from '../components/UnitLabelSheet.vue'
 import { inventoryReferenceService } from '../services/inventoryReferenceService'
 import { assetService } from '../services/assetService'
@@ -102,7 +107,18 @@ watchDebounced(
 
 // --- Batch label printing across selected assets ---
 const selectedAssets = ref<InventoryAsset[]>([])
-const labelColumns = ref(3)
+/**
+ * What it is being printed on, and nothing else.
+ *
+ * There is one label size. Paper only decides how many fit on a sheet, so the
+ * same asset comes off the guillotine the same size whether the tray held A4
+ * or A3.
+ */
+const paperSize = ref(DEFAULT_PAPER_ID)
+
+/** Said out loud: it is the number that decides how much paper to load. */
+const sheetPlan = computed(() => labelSheetLayout(paperSize.value))
+
 const labelSheetRef = ref<{ print: () => Promise<void> } | null>(null)
 const printUnits = ref<LabelUnit[]>([])
 
@@ -121,7 +137,6 @@ async function printSelectedLabels() {
       units.push({
         id: u.id,
         unitNumber: u.unitNumber,
-        barcode: u.barcode,
         assetName: a.name,
       })
     }
@@ -153,22 +168,39 @@ onMounted(async () => {
             Pilih satu atau beberapa aset untuk mencetak label seluruh unitnya
             sekaligus.
           </p>
+          <!-- The arithmetic said out loud, because it is what decides how much
+               paper to put in the tray. -->
+          <p
+            v-if="selectedUnitCount > 0"
+            class="text-xs text-muted-foreground mt-1.5"
+          >
+            {{ sheetPlan.paper.label.split(' (')[0] }} —
+            <strong class="text-foreground">
+              {{ sheetPlan.labelsPerPage }} label/halaman
+            </strong>
+            ({{ sheetPlan.columns }} × {{ sheetPlan.rowsPerPage }}), butuh
+            {{ Math.ceil(selectedUnitCount / sheetPlan.labelsPerPage) }} halaman
+          </p>
         </div>
         <div
           v-if="selectedAssets.length > 0"
           class="flex flex-col sm:flex-row w-full sm:w-auto gap-2"
         >
           <Select
-            :model-value="String(labelColumns)"
-            @update:model-value="labelColumns = Number($event)"
+            :model-value="paperSize"
+            @update:model-value="paperSize = String($event)"
           >
-            <SelectTrigger class="w-full sm:w-[120px]">
+            <SelectTrigger class="w-full sm:w-[190px]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="2">2 / baris</SelectItem>
-              <SelectItem value="3">3 / baris</SelectItem>
-              <SelectItem value="4">4 / baris</SelectItem>
+              <SelectItem
+                v-for="paper in PAPER_SIZES"
+                :key="paper.id"
+                :value="paper.id"
+              >
+                {{ paper.label }}
+              </SelectItem>
             </SelectContent>
           </Select>
           <Button
@@ -234,6 +266,6 @@ onMounted(async () => {
   <UnitLabelSheet
     ref="labelSheetRef"
     :units="printUnits"
-    :columns="labelColumns"
+    :paper-size="paperSize"
   />
 </template>

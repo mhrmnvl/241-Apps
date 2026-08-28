@@ -150,23 +150,96 @@ export async function seedIam(prisma: PrismaClient) {
   }
 
   // TEACHER permissions
+  //
+  // Teaching and marking, and the reference lists those screens read to fill
+  // their own pickers. Nothing else: this role had grown to 182 codes on the
+  // development box — four more than ADMIN — including `users.delete`,
+  // `roles.create`, `permissions.manage` and `teachers.delete`. Every
+  // management screen in the app was on a teacher's sidebar, and a teacher
+  // could remove a colleague.
+  //
+  // One code is deliberately absent that used to be here:
+  // `student-scores.manage` grades any class in the school.
+  // `manage-assigned` reaches the subjects they are assigned to teach and the
+  // classroom they supervise, resolved from those records rather than from
+  // what their role is called.
+  //
+  // Reading is wider than writing on purpose. A teacher may look up any
+  // student or colleague — knowing who is in the school is part of the job —
+  // but holds no `.create`, `.update` or `.delete` on either, so both screens
+  // open as lists and nothing more. What stays out of reach is account
+  // administration: Akun Siswa and Akun Guru are gated on `users.read`, which
+  // is about logins rather than people.
+  //
+  // The reference reads at the end unlock no menu of their own. The sections
+  // holding Daftar Kelas, Semester, Mata Pelajaran, Agama and Tingkat
+  // Pendidikan are gated on `academic-years.read` and `occupations.read`,
+  // which this role does not hold, and a section whose gate fails is dropped
+  // whole.
   const teacherPermissionCodes = [
     // Their own dashboard: today's lessons, the classes they hold, and the
     // marking still outstanding. Not `dashboards.read`, which is the school's
     // totals and belongs to whoever runs the school rather than to every teacher.
     'dashboards.read-own',
-    'students.read',
-    'parents.read',
+
+    // What they teach, and when.
+    'teaching-assignments.read-own',
+    'schedules.read-own',
+
+    // The register for their own lessons, and the recap behind it.
     'attendances.read',
     'attendances.manage',
-    'report-cards.read',
-    'report-cards.publish',
+
+    // The tasks they set.
     'assessment-items.read',
     'assessment-items.create',
     'assessment-items.update',
     'assessment-items.delete',
+
+    // The marks they give for them.
     'student-scores.read',
-    'student-scores.manage',
+    'student-scores.create',
+    'student-scores.update',
+    'student-scores.manage-assigned',
+
+    // The rapor those marks add up to.
+    'report-cards.read',
+    'report-cards.create',
+    'report-cards.publish',
+
+    // What the school tells everyone, and when it happens. Writing either is
+    // a `.create`, which this role does not hold, so both open read-only.
+    'announcements.read',
+    'academic-calendars.read',
+
+    // Who is in the school. Read-only: no create, update or delete on either,
+    // so these are lists to look someone up in, not registers to keep.
+    'students.read',
+    'teachers.read',
+
+    // Reference data their own screens read to fill a class or subject picker.
+    //
+    // `academic-years.read` is here because Daftar Kelas shows which year a
+    // class belongs to and filters by it — without it that screen opened on a
+    // refusal. Editing the years is `academic-years.update`, which this role
+    // does not hold, and which is what the menu entry and the route now ask
+    // for.
+    'academic-years.read',
+    'classrooms.read',
+    'subjects.read',
+    'semesters.read',
+    'enrollments.read',
+    // The bell times. Every timetable is drawn against them, their own
+    // included, so without this a teacher's schedule came up with no rows.
+    'time-slots.read',
+
+    // The lists their own profile page reads to render itself — religion,
+    // blood group, level of education, kind of employment, kind of
+    // achievement. Without these the page came up with five denials on it.
+    'religions.read',
+    'blood-types.read',
+    'educations.read',
+    'achievement-types.read',
   ];
   for (const perm of permissions) {
     if (teacherPermissionCodes.includes(perm.code)) {
@@ -194,6 +267,35 @@ export async function seedIam(prisma: PrismaClient) {
     'report-cards.read-own',
     'student-scores.read-own',
     'schedules.read-own',
+
+    // The school as a student may look at it: the announcements, the calendar,
+    // which classes exist and which subjects are taught. All read-only, and
+    // none of it names another student.
+    //
+    // The first two were already on the student's menu and had never worked:
+    // the entries carried no permission, so they showed, and the router asked
+    // for these two codes and threw them back to the dashboard. The two
+    // screens a student was most likely to open were the two that bounced.
+    // The noticeboard as it is addressed to them: school-wide notices plus
+    // their own class's. Not `announcements.read`, which is every notice the
+    // school has posted — a first-year would have read "Persiapan Ujian Akhir
+    // Kelas IX" under that one.
+    'announcements.read-own',
+    'academic-calendars.read',
+    'subjects.read',
+
+    // Their own classroom, and only that one.
+    //
+    // Not `classrooms.read`, which is the register of every class the school
+    // runs — a student was given it so that Daftar Kelas would open, and it
+    // opened onto all of them. `classrooms.read-own` reaches
+    // `GET /students/me/classroom`, which resolves the caller's enrolment and
+    // answers about that room alone: who runs it, who teaches it, who else is
+    // in it. There is no id to pass, so there is nothing to widen.
+    'classrooms.read-own',
+
+    // The bell times their own timetable is drawn against.
+    'time-slots.read',
   ];
   for (const perm of permissions) {
     if (studentPermissionCodes.includes(perm.code)) {

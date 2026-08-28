@@ -1,3 +1,6 @@
+import { CurrentUser } from '../../../core/decorators/current-user.decorator.js';
+import type { AuthenticatedUser } from '../../../core/types/authenticated-user.type.js';
+import { GetMyAnnouncementsUseCase } from '../use-cases/get-my-announcements.use-case.js';
 import { RequirePermissions } from '../../access-control/permission/decorators/require-permissions.decorator.js';
 import {
   Body,
@@ -42,6 +45,7 @@ import { UpdateAnnouncementUseCase } from '../use-cases/update-announcement.use-
 export class AnnouncementController {
   constructor(
     private readonly getAnnouncementsService: GetAnnouncementsUseCase,
+    private readonly getMyAnnouncementsService: GetMyAnnouncementsUseCase,
     private readonly getAnnouncementByIdService: GetAnnouncementByIdUseCase,
     private readonly createAnnouncementService: CreateAnnouncementUseCase,
     private readonly updateAnnouncementService: UpdateAnnouncementUseCase,
@@ -59,6 +63,28 @@ export class AnnouncementController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async findAll(@Query() query: AnnouncementQueryDto) {
     return this.getAnnouncementsService.execute(query);
+  }
+
+  /**
+   * The caller's own noticeboard — no classroom parameter is honoured.
+   *
+   * Declared before `:id`, or `me` is taken for an announcement id.
+   */
+  @Get('me')
+  @RequirePermissions('announcements.read-own')
+  @ApiOperation({
+    summary: 'Announcements addressed to you — school-wide plus your class',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Paginated list of announcements addressed to the caller',
+    type: AnnouncementListResponseDto,
+  })
+  async findMine(
+    @CurrentUser() user: AuthenticatedUser,
+    @Query() query: AnnouncementQueryDto,
+  ) {
+    return this.getMyAnnouncementsService.execute(user.id, query);
   }
 
   @Get(':id')

@@ -1,9 +1,17 @@
 export interface AnnouncementClassroomItem {
   id: string
   classroomId: string
+  /**
+   * The whole classroom row, as the endpoint includes it.
+   *
+   * `code` was missing from this declaration although the server has always
+   * sent it, so the target column fell back to `name` — which a class may not
+   * have — and printed a dash for a class the school calls VII-A.
+   */
   classroom?: {
     id: string
-    name: string
+    code?: string
+    name?: string | null
   }
 }
 
@@ -30,6 +38,8 @@ export interface AnnouncementQueryParams {
 }
 
 export interface AnnouncementColumnActions {
+  /** Opens the reading view. The table truncates; this is where it is read. */
+  onPreview?: (item: Announcement) => void
   onEdit?: (item: Announcement) => void
   onDelete?: (
     item: Announcement,

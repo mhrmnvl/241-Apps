@@ -7,7 +7,9 @@ export const studentParentRoutes: RouteRecordRaw[] = [
     component: () => import('./views/StudentParentView.vue'),
     meta: {
       requiresAuth: true,
-      requiredPermission: 'students.read',
+      // The screen exists to tie a guardian to a child and untie them again;
+      // somebody who cannot do either has nothing to do here.
+      requiredPermission: 'students.update',
       title: 'Relasi Siswa — Orang Tua',
       breadcrumbs: [
         { title: 'Data Master', href: '#' },

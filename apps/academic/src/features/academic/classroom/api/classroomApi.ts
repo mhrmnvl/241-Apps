@@ -14,11 +14,26 @@ import type {
   ClassroomStructure,
   ClassroomStructureQueryParams,
   ClassroomStructureSavePayload,
+  MyClassroom,
 } from '../types'
 
 export const classroomApi = {
   getClassrooms: (params?: ClassroomQueryParams) => {
     return api.get<ApiPaginatedResponse<Classroom>>('/classrooms', { params })
+  },
+
+  /**
+   * The signed-in student's own classroom.
+   *
+   * Unaddressed on purpose: the endpoint resolves the caller's enrolment, and
+   * there is deliberately no id to pass — see `classrooms.read-own`. It sits
+   * under `/students` because the question is about the student, not about the
+   * register of classrooms.
+   */
+  getMyClassroom: () => {
+    return api.get<ApiSingleResponse<MyClassroom | null>>(
+      '/students/me/classroom',
+    )
   },
 
   getClassroomById: (id: string) => {

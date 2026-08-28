@@ -1,4 +1,4 @@
-﻿<script setup lang="ts">
+<script setup lang="ts">
 import AppSidebar from '@/components/layout/AppSidebar.vue'
 import {
   Breadcrumb,
@@ -31,7 +31,7 @@ import { Separator } from '@/ui/separator'
 import { SidebarProvider, SidebarTrigger } from '@/ui/sidebar'
 import { TooltipProvider } from '@/ui/tooltip'
 import { useAuthSession } from '@/features/platform/auth'
-import { menuSections } from '@/config/menuConfig'
+import { useMenuVisibility } from '@/composables/useMenuVisibility'
 import { LogOut, Search, Settings, UserRound } from 'lucide-vue-next'
 import { useRoute, useRouter } from 'vue-router'
 import type { BreadcrumbItemType } from '@/shared/types/breadcrumb.types'
@@ -41,6 +41,7 @@ import { computed, ref } from 'vue'
 const { user, logoutUser } = useAuthSession()
 const router = useRouter()
 const openSearch = ref(false)
+const { filteredSections } = useMenuVisibility()
 
 const ROLE_LABELS: Record<string, string> = {
   SUPER_ADMIN: 'Super Admin',
@@ -51,9 +52,6 @@ const ROLE_LABELS: Record<string, string> = {
 
 const displayName = computed(() => {
   const currentUser = user.value
-  // The two removed fallbacks read `user.student.name` and `user.teacher.name`,
-  // which the session has never carried, so they could only return undefined
-  // and fall through. The two that remain are the ones that ever answered.
   return (
     currentUser?.profile?.name?.trim() ??
     currentUser?.name?.trim() ??
@@ -126,7 +124,7 @@ const resolvedBreadcrumbs = computed<BreadcrumbItemType[]>(() =>
 )
 
 const searchGroups = computed(() => {
-  return menuSections.flatMap((section) =>
+  return filteredSections.value.flatMap((section) =>
     section.items.map((group) => ({
       heading: group.title,
       items: group.items

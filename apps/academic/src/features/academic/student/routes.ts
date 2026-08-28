@@ -37,7 +37,8 @@ export const studentRoutes: RouteRecordRaw[] = [
     component: () => import('./views/StudentAccountsView.vue'),
     meta: {
       requiresAuth: true,
-      requiredPermission: 'students.read',
+      // Accounts rather than people — the menu entry is gated the same way.
+      requiredPermission: 'users.read',
       title: 'Akun Siswa',
       breadcrumbs: [
         { title: 'Siswa', href: '/student' },

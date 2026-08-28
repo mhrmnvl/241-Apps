@@ -34,7 +34,20 @@ export const STUDENT_SCORE_WITH_DETAILS_INCLUDE = {
       },
     },
   },
-  assessmentItem: true,
+  assessmentItem: {
+    include: {
+      teachingAssignment: {
+        include: {
+          subject: true,
+          teacher: {
+            include: {
+              user: USER_REF_SELECT,
+            },
+          },
+        },
+      },
+    },
+  },
 } satisfies Prisma.StudentScoreInclude;
 
 export type StudentScoreWithDetails = Prisma.StudentScoreGetPayload<{

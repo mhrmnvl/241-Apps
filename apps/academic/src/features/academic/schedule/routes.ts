@@ -9,7 +9,10 @@ export const scheduleRoutes: RouteRecordRaw[] = [
       requiresAuth: true,
       requiredPermission: 'schedules.read-own',
       title: 'Jadwal Saya',
-      breadcrumbs: [{ title: 'Akademik Saya', href: '#' }, { title: 'Jadwal' }],
+      breadcrumbs: [
+        { title: 'Akademik Saya', href: '#' },
+        { title: 'Jadwal Pelajaran' },
+      ],
     },
   },
   {

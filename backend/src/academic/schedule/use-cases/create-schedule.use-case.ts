@@ -6,6 +6,7 @@ import {
 import { CreateScheduleDto } from '../dto/request/create-schedule.dto.js';
 import { IScheduleRepository } from '../domain/interfaces/schedule-repository.interface.js';
 import { IScheduleLookupRepository } from '../domain/interfaces/schedule-lookup-repository.interface.js';
+import { assertSlotIsFree } from '../services/assert-slot-is-free.js';
 
 @Injectable()
 export class CreateScheduleUseCase {
@@ -30,6 +31,17 @@ export class CreateScheduleUseCase {
       throw new ConflictException(
         'Schedule already exists for this assignment, day and timeslot',
       );
+
+    // The check above only catches the same subject placed twice, which is the
+    // database's unique index restated. The two collisions a timetable is
+    // actually broken by are checked here.
+    await assertSlotIsFree(this.scheduleRepository, {
+      teacherId: ta.teacherId,
+      classroomId: ta.classroomId,
+      semesterId: ta.semesterId,
+      timeSlotId: dto.timeSlotId,
+      day: dto.day,
+    });
 
     const softDeleted = await this.scheduleRepository.findSoftDeleted(
       dto.teachingAssignmentId,

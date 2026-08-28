@@ -6,6 +6,7 @@ import {
 import { BatchUpsertScheduleDto } from '../dto/request/batch-upsert-schedule.dto.js';
 import { IScheduleRepository } from '../domain/interfaces/schedule-repository.interface.js';
 import { IScheduleLookupRepository } from '../domain/interfaces/schedule-lookup-repository.interface.js';
+import { assertSlotIsFree } from '../services/assert-slot-is-free.js';
 
 @Injectable()
 export class BatchUpsertScheduleUseCase {
@@ -61,6 +62,19 @@ export class BatchUpsertScheduleUseCase {
           semesterId: semester.id,
         });
       }
+
+      // Checked row by row as the day is rebuilt, so the row being placed is
+      // compared against the ones already placed by this same request. That
+      // catches two subjects sent for one period as well as a teacher who is
+      // busy in another class — the day was cleared first, so a clash within
+      // the class can only come from this payload.
+      await assertSlotIsFree(this.scheduleRepository, {
+        teacherId: ta.teacherId,
+        classroomId,
+        semesterId: semester.id,
+        timeSlotId: row.timeSlotId,
+        day: dto.day,
+      });
 
       const softDeleted = await this.scheduleRepository.findSoftDeleted(
         ta.id,

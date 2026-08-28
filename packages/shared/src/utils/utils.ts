@@ -48,3 +48,19 @@ export function formatEntityName(
 
   return cleanName
 }
+
+/**
+ * A `Date` as an `<input type="date">` value, in the reader's own timezone.
+ *
+ * `toISOString().split('T')[0]` is the obvious way and it is wrong east of
+ * Greenwich: it converts to UTC first, so in WIB every moment before 07.00
+ * belongs to the previous day. An attendance register opened at half past six
+ * offered yesterday, and the teacher had to notice.
+ *
+ * The offset is subtracted before formatting so the calendar day is the local
+ * one. Returns the same `YYYY-MM-DD` shape the input and the API expect.
+ */
+export function toDateInputValue(date: Date = new Date()): string {
+  const offsetMs = date.getTimezoneOffset() * 60 * 1000
+  return new Date(date.getTime() - offsetMs).toISOString().slice(0, 10)
+}

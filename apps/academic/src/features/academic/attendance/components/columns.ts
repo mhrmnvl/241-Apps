@@ -3,14 +3,18 @@ import { h } from 'vue'
 import { Progress } from '@/ui'
 import type { AttendanceRecapItem } from '../types'
 
+export * from './attendanceInputColumns'
+
 export const createRecapColumns = (): ColumnDef<AttendanceRecapItem>[] => [
   {
     accessorKey: 'nis',
     header: 'NIS',
+    meta: { align: 'center' },
   },
   {
     accessorKey: 'studentName',
     header: 'Nama Siswa',
+    meta: { align: 'left' },
   },
   {
     accessorKey: 'PRESENT',
@@ -29,7 +33,7 @@ export const createRecapColumns = (): ColumnDef<AttendanceRecapItem>[] => [
   },
   {
     accessorKey: 'ABSENT',
-    header: 'Alpha',
+    header: 'Alpa',
     meta: { align: 'center' },
   },
   {

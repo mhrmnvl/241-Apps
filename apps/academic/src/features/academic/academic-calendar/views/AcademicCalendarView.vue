@@ -5,6 +5,7 @@ import AcademicCalendarDetailDialog from '../components/AcademicCalendarDetailDi
 import AcademicCalendarGridView from '../components/AcademicCalendarGridView.vue'
 import AcademicCalendarSidebar from '../components/AcademicCalendarSidebar.vue'
 import { useAcademicCalendarView } from '../composables/useAcademicCalendarView'
+import { usePreservedScroll } from '../composables/usePreservedScroll'
 import { Card, CardHeader, CardTitle } from '@/ui/card'
 import '../styles/calendar.css'
 import type { CalendarEventData, DateClickInfo, EventClickInfo } from '../types'
@@ -14,6 +15,16 @@ const router = useRouter()
 
 const selectedEvent = ref<CalendarEventData | null>(null)
 const isDetailOpen = ref(false)
+
+/**
+ * Where the page was before the dialog opened.
+ *
+ * Opening one changes the viewport width — Reka removes the body scrollbar and
+ * pads for it — and FullCalendar re-lays the grid at the new width. The page
+ * shrinks for a frame and the scroll position is clamped away with it.
+ */
+const pageRoot = ref<HTMLElement | null>(null)
+usePreservedScroll(isDetailOpen, pageRoot)
 
 const {
   events,
@@ -79,7 +90,10 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="p-4 md:p-6 lg:p-8">
+  <div
+    ref="pageRoot"
+    class="p-4 md:p-6 lg:p-8"
+  >
     <Card
       class="overflow-hidden rounded-2xl shadow-sm shadow-black/5 ring-1 ring-black/4"
     >

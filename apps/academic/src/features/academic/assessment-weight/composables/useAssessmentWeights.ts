@@ -48,7 +48,8 @@ export function useAssessmentWeights() {
       const res = await assessmentWeightApi.getWeights(teachingAssignmentId)
       const next = emptyWeights()
       for (const row of res.data?.data ?? []) {
-        next[row.type] = row.weight
+        // Backend stores as decimal (0.4), UI works in percentage (40)
+        next[row.type] = Math.round(row.weight * 100)
       }
       weights.value = next
     } catch (error: unknown) {
@@ -68,7 +69,8 @@ export function useAssessmentWeights() {
     try {
       const payload: AssessmentWeight[] = ASSESSMENT_TYPE_ORDER.map((type) => ({
         type,
-        weight: weights.value[type],
+        // Convert percentage (40) back to decimal (0.4) for backend
+        weight: weights.value[type] / 100,
       }))
       await assessmentWeightApi.replaceWeights({
         teachingAssignmentId,

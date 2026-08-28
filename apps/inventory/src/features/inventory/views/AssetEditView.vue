@@ -13,6 +13,11 @@ import type {
 } from '../types'
 import AssetForm from '../components/AssetForm.vue'
 import UnitLabelSheet from '../components/UnitLabelSheet.vue'
+import {
+  DEFAULT_PAPER_ID,
+  PAPER_SIZES,
+  labelSheetLayout,
+} from '../logic/labelSheetLayout'
 import { createUnitColumns } from '../components/unitColumns'
 import { Button } from '@/ui'
 import { Input } from '@/ui/input'
@@ -159,14 +164,23 @@ async function saveUnit() {
 
 const labelSheetRef = ref<{ print: () => Promise<void> } | null>(null)
 const printUnits = ref<LabelUnit[]>([])
-const labelColumns = ref(3)
+/**
+ * What it is being printed on, and nothing else.
+ *
+ * There is one label size. Paper only decides how many fit on a sheet, so the
+ * same asset comes off the guillotine the same size whether the tray held A4
+ * or A3.
+ */
+const paperSize = ref(DEFAULT_PAPER_ID)
+
+/** Said out loud: it is the number that decides how much paper to load. */
+const sheetPlan = computed(() => labelSheetLayout(paperSize.value))
 
 async function printLabels(units: InventoryAssetUnit[]) {
   if (units.length === 0) return
   printUnits.value = units.map((u) => ({
     id: u.id,
     unitNumber: u.unitNumber,
-    barcode: u.barcode,
     assetName: asset.value?.name ?? '',
   }))
   await nextTick()
@@ -257,17 +271,26 @@ const unitColumns = computed(() =>
           </p>
         </div>
         <div class="flex flex-wrap items-center gap-2">
+          <!-- The arithmetic said out loud, because it is what decides how
+               much paper to put in the tray. -->
+          <span class="text-xs text-muted-foreground mr-1">
+            {{ sheetPlan.labelsPerPage }} label/halaman
+          </span>
           <Select
-            :model-value="String(labelColumns)"
-            @update:model-value="labelColumns = Number($event)"
+            :model-value="paperSize"
+            @update:model-value="paperSize = String($event)"
           >
-            <SelectTrigger class="w-[120px]">
+            <SelectTrigger class="w-[190px]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="2">2 / baris</SelectItem>
-              <SelectItem value="3">3 / baris</SelectItem>
-              <SelectItem value="4">4 / baris</SelectItem>
+              <SelectItem
+                v-for="paper in PAPER_SIZES"
+                :key="paper.id"
+                :value="paper.id"
+              >
+                {{ paper.label }}
+              </SelectItem>
             </SelectContent>
           </Select>
           <Button
@@ -413,6 +436,6 @@ const unitColumns = computed(() =>
   <UnitLabelSheet
     ref="labelSheetRef"
     :units="printUnits"
-    :columns="labelColumns"
+    :paper-size="paperSize"
   />
 </template>

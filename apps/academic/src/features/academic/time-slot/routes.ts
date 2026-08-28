@@ -7,7 +7,9 @@ export const timeSlotRoutes: RouteRecordRaw[] = [
     component: () => import('./views/TimeSlotView.vue'),
     meta: {
       requiresAuth: true,
-      requiredPermission: 'time-slots.read',
+      // The bell times. Every timetable renders against them, a teacher's own
+      // included, so the read is held widely and only the editing is here.
+      requiredPermission: 'time-slots.update',
       title: 'Jam Pelajaran',
       breadcrumbs: [
         { title: 'Pembelajaran', href: '#' },

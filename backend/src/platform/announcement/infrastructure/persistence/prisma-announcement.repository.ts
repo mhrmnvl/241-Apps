@@ -20,13 +20,44 @@ export class PrismaAnnouncementRepository extends IAnnouncementRepository {
   async findAll(
     query: AnnouncementQueryInput,
   ): Promise<PaginatedResult<AnnouncementWithDetails>> {
-    const { page = 1, limit = 10, classroomId, search } = query;
+    const {
+      page = 1,
+      limit = 10,
+      classroomId,
+      audienceClassroomId,
+      search,
+    } = query;
     const skip = (page - 1) * limit;
 
     const where: Prisma.AnnouncementWhereInput = {
       deletedAt: null,
       ...(classroomId && {
         classrooms: { some: { classroomId } },
+      }),
+      // In `AND` rather than a second top-level `OR`: the search below is
+      // already an `OR`, and two of them on one object means the later key
+      // silently replaces the earlier one.
+      ...(audienceClassroomId !== undefined && {
+        AND: [
+          {
+            OR: [
+              // Addressed to nobody in particular — the whole school.
+              { classrooms: { none: {} } },
+              // And their own class, where they have one. Without an
+              // enrolment the list stops at the school-wide notices rather
+              // than falling open.
+              ...(audienceClassroomId
+                ? [
+                    {
+                      classrooms: {
+                        some: { classroomId: audienceClassroomId },
+                      },
+                    },
+                  ]
+                : []),
+            ],
+          },
+        ],
       }),
       ...(search && {
         OR: [

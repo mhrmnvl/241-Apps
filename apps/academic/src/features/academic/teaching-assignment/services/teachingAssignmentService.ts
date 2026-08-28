@@ -1,5 +1,7 @@
 import { teachingAssignmentApi } from '../api/teachingAssignmentApi'
+import { loadAssignments } from './loadAssignments'
 import { useTeachingAssignmentStore } from '../stores/teachingAssignmentStore'
+import { isEveryClassroom } from '../constants/filters'
 import { getIndonesianErrorMessage } from '@/shared/utils/error-handler'
 import { PAGINATION } from '@/shared/constants/pagination'
 import { toast } from 'vue-sonner'
@@ -27,10 +29,15 @@ import type {
 async function fetchAssignableSubjects(): Promise<
   TeachingAssignmentSubjectOption[]
 > {
-  const curriculaRes = await curriculumApi.getCurricula({ isActive: true })
-  const activeCurriculum = (curriculaRes.data?.data ?? []).find(
-    (c) => c.isActive,
-  )
+  // A teacher may read this page but not the curriculum register, and a
+  // refusal here means the same thing to this function as no active curriculum
+  // does: there is nothing to narrow the subject list by. Letting it throw
+  // took the whole reference load down with it — the class filter came up
+  // empty and the screen said only that something had failed.
+  const activeCurriculum = await curriculumApi
+    .getCurricula({ isActive: true })
+    .then((res) => (res.data?.data ?? []).find((c) => c.isActive))
+    .catch(() => undefined)
 
   if (!activeCurriculum) {
     const subjectRes = await subjectApi.getSubjects({
@@ -94,14 +101,23 @@ export const teachingAssignmentService = {
       const params: TeachingAssignmentQueryParams = {
         page: store.currentPage,
         limit: store.pageSize,
-        ...(store.selectedClassroomId
-          ? { classroomId: store.selectedClassroomId }
-          : {}),
+        // "Semua Kelas" is a screen-level sentinel, not a classroom id. It
+        // used to be forwarded as one, and the server validates `classroomId`
+        // as a UUID — so the default view of this page asked for everything
+        // and got a 400.
+        ...(isEveryClassroom(store.selectedClassroomId)
+          ? {}
+          : { classroomId: store.selectedClassroomId }),
       }
 
-      const res = await teachingAssignmentApi.getTeachingAssignments(params)
-      store.items = res.data?.data ?? []
-      store.totalItems = res.data?.meta?.total ?? 0
+      // Their own teaching where that is all they may see, the school's
+      // where they assign it. A teacher opening this page used to be refused
+      // outright: the list asked the wide endpoint, which their role does not
+      // reach, so the screen that shows what they teach was the one screen
+      // they could not open.
+      const { rows, total } = await loadAssignments(params)
+      store.items = rows
+      store.totalItems = total
     } catch (error: unknown) {
       toast.error(
         getIndonesianErrorMessage(
