@@ -7,7 +7,7 @@
     "./*": "./src/*"
   },
   "dependencies": {
-    "axios": "^1.19.0",
+    "axios": "^1.20.0",
     "clsx": "^2.1.1",
     "tailwind-merge": "^3.6.0",
     "vue-sonner": "^2.0.9",
@@ -24,7 +24,7 @@
   },
   "devDependencies": {
     "vitest": "^4.1.11",
-    "happy-dom": "^20.11.6",
-    "@vue/test-utils": "^2.4.11"
+    "happy-dom": "^20.11.12",
+    "@vue/test-utils": "^2.5.0"
   }
 }
