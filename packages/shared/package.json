@@ -24,7 +24,7 @@
   },
   "devDependencies": {
     "vitest": "^4.1.11",
-    "happy-dom": "^20.11.6",
+    "happy-dom": "^21.0.4",
     "@vue/test-utils": "^2.4.11"
   }
 }
