@@ -14,7 +14,7 @@
   "dependencies": {
     "@241/ui": "workspace:*",
     "@241/shared": "workspace:*",
-    "zod": "^3.25.76",
+    "zod": "^4.6.6",
     "vee-validate": "^4.15.1",
     "@vee-validate/zod": "^4.15.1",
     "@tanstack/vue-table": "^8.21.3",

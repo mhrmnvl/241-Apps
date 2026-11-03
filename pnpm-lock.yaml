@@ -139,7 +139,7 @@ importers:
         version: 1.6.7(@unovis/ts@1.6.7)(vue@3.5.41(typescript@5.8.3))
       '@vee-validate/zod':
         specifier: ^4.15.1
-        version: 4.15.1(vue@3.5.41(typescript@5.8.3))(zod@3.25.76)
+        version: 4.15.1(vue@3.5.41(typescript@5.8.3))(zod@4.6.6)
       '@vueuse/core':
         specifier: ^14.4.0
         version: 14.4.0(vue@3.5.41(typescript@5.8.3))
@@ -186,8 +186,8 @@ importers:
         specifier: ^2.0.9
         version: 2.0.9
       zod:
-        specifier: ^3.25.76
-        version: 3.25.76
+        specifier: ^4.6.6
+        version: 4.6.6
     devDependencies:
       '@types/node':
         specifier: ^26.2.0
@@ -227,7 +227,7 @@ importers:
         version: 8.21.3(vue@3.5.41(typescript@5.8.3))
       '@vee-validate/zod':
         specifier: ^4.15.1
-        version: 4.15.1(vue@3.5.41(typescript@5.8.3))(zod@3.25.76)
+        version: 4.15.1(vue@3.5.41(typescript@5.8.3))(zod@4.6.6)
       '@vueuse/core':
         specifier: ^14.4.0
         version: 14.4.0(vue@3.5.41(typescript@5.8.3))
@@ -271,8 +271,8 @@ importers:
         specifier: ^2.0.9
         version: 2.0.9
       zod:
-        specifier: ^3.25.76
-        version: 3.25.76
+        specifier: ^4.6.6
+        version: 4.6.6
     devDependencies:
       '@vitejs/plugin-vue':
         specifier: ^6.0.7
@@ -321,7 +321,7 @@ importers:
         version: 1.5.6
       '@vee-validate/zod':
         specifier: ^4.15.1
-        version: 4.15.1(vue@3.5.41(typescript@5.8.3))(zod@3.25.76)
+        version: 4.15.1(vue@3.5.41(typescript@5.8.3))(zod@4.6.6)
       '@vueuse/core':
         specifier: ^14.4.0
         version: 14.4.0(vue@3.5.41(typescript@5.8.3))
@@ -368,8 +368,8 @@ importers:
         specifier: ^2.0.9
         version: 2.0.9
       zod:
-        specifier: ^3.25.76
-        version: 3.25.76
+        specifier: ^4.6.6
+        version: 4.6.6
     devDependencies:
       '@vitejs/plugin-vue':
         specifier: ^6.0.7
@@ -418,7 +418,7 @@ importers:
         version: 3.30.2(@floating-ui/dom@1.8.0)(@tiptap/core@3.30.2(@tiptap/pm@3.30.2))(@tiptap/pm@3.30.2)(vue@3.5.41(typescript@5.8.3))
       '@vee-validate/zod':
         specifier: ^4.15.1
-        version: 4.15.1(vue@3.5.41(typescript@5.8.3))(zod@3.25.76)
+        version: 4.15.1(vue@3.5.41(typescript@5.8.3))(zod@4.6.6)
       '@vueuse/core':
         specifier: ^14.4.0
         version: 14.4.0(vue@3.5.41(typescript@5.8.3))
@@ -462,8 +462,8 @@ importers:
         specifier: ^2.0.9
         version: 2.0.9
       zod:
-        specifier: ^3.25.76
-        version: 3.25.76
+        specifier: ^4.6.6
+        version: 4.6.6
     devDependencies:
       '@vitejs/plugin-vue':
         specifier: ^6.0.7
@@ -497,7 +497,7 @@ importers:
         version: 8.21.3(vue@3.5.41(typescript@5.8.3))
       '@vee-validate/zod':
         specifier: ^4.15.1
-        version: 4.15.1(vue@3.5.41(typescript@5.8.3))(zod@3.25.76)
+        version: 4.15.1(vue@3.5.41(typescript@5.8.3))(zod@4.6.6)
       '@vueuse/core':
         specifier: ^14.4.0
         version: 14.4.0(vue@3.5.41(typescript@5.8.3))
@@ -541,8 +541,8 @@ importers:
         specifier: ^2.0.9
         version: 2.0.9
       zod:
-        specifier: ^3.25.76
-        version: 3.25.76
+        specifier: ^4.6.6
+        version: 4.6.6
     devDependencies:
       '@types/qrcode':
         specifier: ^1.5.6
@@ -669,7 +669,7 @@ importers:
         version: 0.35.3(@types/node@26.2.0)
       zod:
         specifier: ^4.4.3
-        version: 4.4.3
+        version: 4.6.6
     devDependencies:
       '@eslint/js':
         specifier: ^10.0.1
@@ -724,7 +724,7 @@ importers:
         version: 9.1.7
       jest:
         specifier: ^30.4.2
-        version: 30.4.2(@types/node@26.2.0)(babel-plugin-macros@3.1.0)(supports-color@10.2.2)(ts-node@10.9.2(@types/node@26.2.0)(typescript@5.8.3))
+        version: 30.4.2(@types/node@26.2.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@26.2.0)(typescript@5.8.3))
       lint-staged:
         specifier: ^17.3.0
         version: 17.3.0
@@ -742,7 +742,7 @@ importers:
         version: 7.2.2(supports-color@10.2.2)
       ts-jest:
         specifier: ^29.4.12
-        version: 29.4.12(@babel/core@7.29.7)(@jest/transform@30.4.1)(@jest/types@30.4.1)(babel-jest@30.4.1(@babel/core@7.29.7))(jest-util@30.4.1)(jest@30.4.2(@types/node@26.2.0)(babel-plugin-macros@3.1.0)(supports-color@10.2.2)(ts-node@10.9.2(@types/node@26.2.0)(typescript@5.8.3)))(typescript@5.8.3)
+        version: 29.4.12(@babel/core@7.29.7)(@jest/transform@30.4.1)(@jest/types@30.4.1)(babel-jest@30.4.1(@babel/core@7.29.7))(jest-util@30.4.1)(jest@30.4.2(@types/node@26.2.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@26.2.0)(typescript@5.8.3)))(typescript@5.8.3)
       ts-loader:
         specifier: ^9.6.0
         version: 9.6.2(typescript@5.8.3)(webpack@5.106.2(lightningcss@1.32.0)(postcss@8.5.26))
@@ -772,7 +772,7 @@ importers:
         version: 8.21.3(vue@3.5.41(typescript@5.8.3))
       '@vee-validate/zod':
         specifier: ^4.15.1
-        version: 4.15.1(vue@3.5.41(typescript@5.8.3))(zod@3.25.76)
+        version: 4.15.1(vue@3.5.41(typescript@5.8.3))(zod@4.6.6)
       lucide-vue-next:
         specifier: ^0.577.0
         version: 0.577.0(vue@3.5.41(typescript@5.8.3))
@@ -789,8 +789,8 @@ importers:
         specifier: ^5.1.0
         version: 5.2.0(@vue/compiler-sfc@3.5.40)(esbuild@0.28.2)(pinia@3.0.4(typescript@5.8.3)(vue@3.5.41(typescript@5.8.3)))(rollup@4.62.2)(vite@7.3.6(@types/node@26.2.0)(jiti@2.7.0)(lightningcss@1.32.0)(stylus@0.57.0)(terser@5.49.0)(tsx@4.23.12)(yaml@2.9.0))(vue@3.5.41(typescript@5.8.3))(webpack@5.106.2(esbuild@0.28.2)(lightningcss@1.32.0)(postcss@8.5.26))
       zod:
-        specifier: ^3.25.76
-        version: 3.25.76
+        specifier: ^4.6.6
+        version: 4.6.6
     devDependencies:
       '@vitejs/plugin-vue':
         specifier: ^6.0.7
@@ -827,7 +827,7 @@ importers:
         version: 8.21.3(vue@3.5.41(typescript@5.8.3))
       '@vee-validate/zod':
         specifier: ^4.15.1
-        version: 4.15.1(vue@3.5.41(typescript@5.8.3))(zod@3.25.76)
+        version: 4.15.1(vue@3.5.41(typescript@5.8.3))(zod@4.6.6)
       '@vueuse/core':
         specifier: ^14.4.0
         version: 14.4.0(vue@3.5.41(typescript@5.8.3))
@@ -856,8 +856,8 @@ importers:
         specifier: ^2.0.9
         version: 2.0.9
       zod:
-        specifier: ^3.25.76
-        version: 3.25.76
+        specifier: ^4.6.6
+        version: 4.6.6
     devDependencies:
       '@types/leaflet':
         specifier: ^1.9.22
@@ -2864,6 +2864,7 @@ packages:
   '@smithy/core@3.33.3':
     resolution: {integrity: sha512-CsOeKq/9kA3y6VJHt+/+VTCtBaxJ4OTFpgrjIUhPpDIKxBci1k2bJaQASF2h/ELWrulGp+t97DZ0mevfAD8idg==}
     engines: {node: '>=18.0.0'}
+    deprecated: Deprecated due to a bug in custom logger data redaction. See https://github.com/aws/aws-sdk-js-v3/issues/8393.
 
   '@smithy/credential-provider-imds@4.5.2':
     resolution: {integrity: sha512-A9uSdn72ozbRUSit0eib0TW7nXuNPlaeM0zcGkJ+nE6tFcSDbnmtwoxbTCFBukVQcszDAyvsd7+rTduPTXpygg==}
@@ -8300,8 +8301,8 @@ packages:
   zod@3.25.76:
     resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
 
-  zod@4.4.3:
-    resolution: {integrity: sha512-ytENFjIJFl2UwYglde2jchW2Hwm4GJFLDiSXWdTrJQBIN9Fcyp7n4DhxJEiWNAJMV1/BqWfW/kkg71UDcHJyTQ==}
+  zod@4.6.6:
+    resolution: {integrity: sha512-4UmzQUF5fxvfcYHlbjBmejU+w+hbDnWFx4aS8kBx7nPBHcO2SqPbpAG8snbdg+Xse4pRefR98hgjFgIMCI/UhA==}
 
 snapshots:
 
@@ -9510,11 +9511,11 @@ snapshots:
       jest-util: 30.4.1
       slash: 3.0.0
 
-  '@jest/core@30.4.2(babel-plugin-macros@3.1.0)(supports-color@10.2.2)(ts-node@10.9.2(@types/node@26.2.0)(typescript@5.8.3))':
+  '@jest/core@30.4.2(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@26.2.0)(typescript@5.8.3))':
     dependencies:
       '@jest/console': 30.4.1
       '@jest/pattern': 30.4.0
-      '@jest/reporters': 30.4.1(supports-color@10.2.2)
+      '@jest/reporters': 30.4.1
       '@jest/test-result': 30.4.1
       '@jest/transform': 30.4.1
       '@jest/types': 30.4.1
@@ -9591,7 +9592,7 @@ snapshots:
       '@types/node': 26.2.0
       jest-regex-util: 30.4.0
 
-  '@jest/reporters@30.4.1(supports-color@10.2.2)':
+  '@jest/reporters@30.4.1':
     dependencies:
       '@bcoe/v8-coverage': 0.2.3
       '@jest/console': 30.4.1
@@ -9608,7 +9609,7 @@ snapshots:
       istanbul-lib-coverage: 3.2.2
       istanbul-lib-instrument: 6.0.3
       istanbul-lib-report: 3.0.1
-      istanbul-lib-source-maps: 5.0.6(supports-color@10.2.2)
+      istanbul-lib-source-maps: 5.0.6
       istanbul-reports: 3.2.0
       jest-message-util: 30.4.1
       jest-util: 30.4.1
@@ -11336,11 +11337,11 @@ snapshots:
   '@unrs/resolver-binding-win32-x64-msvc@1.12.2':
     optional: true
 
-  '@vee-validate/zod@4.15.1(vue@3.5.41(typescript@5.8.3))(zod@3.25.76)':
+  '@vee-validate/zod@4.15.1(vue@3.5.41(typescript@5.8.3))(zod@4.6.6)':
     dependencies:
       type-fest: 4.41.0
       vee-validate: 4.15.1(vue@3.5.41(typescript@5.8.3))
-      zod: 3.25.76
+      zod: 4.6.6
     transitivePeerDependencies:
       - vue
 
@@ -13621,7 +13622,7 @@ snapshots:
       make-dir: 4.0.0
       supports-color: 7.2.0
 
-  istanbul-lib-source-maps@5.0.6(supports-color@10.2.2):
+  istanbul-lib-source-maps@5.0.6:
     dependencies:
       '@jridgewell/trace-mapping': 0.3.31
       debug: 4.4.3(supports-color@10.2.2)
@@ -13680,7 +13681,7 @@ snapshots:
 
   jest-cli@30.4.2(@types/node@26.2.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@26.2.0)(typescript@5.8.3)):
     dependencies:
-      '@jest/core': 30.4.2(babel-plugin-macros@3.1.0)(supports-color@10.2.2)(ts-node@10.9.2(@types/node@26.2.0)(typescript@5.8.3))
+      '@jest/core': 30.4.2(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@26.2.0)(typescript@5.8.3))
       '@jest/test-result': 30.4.1
       '@jest/types': 30.4.1
       chalk: 4.1.2
@@ -13951,9 +13952,9 @@ snapshots:
       merge-stream: 2.0.0
       supports-color: 8.1.1
 
-  jest@30.4.2(@types/node@26.2.0)(babel-plugin-macros@3.1.0)(supports-color@10.2.2)(ts-node@10.9.2(@types/node@26.2.0)(typescript@5.8.3)):
+  jest@30.4.2(@types/node@26.2.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@26.2.0)(typescript@5.8.3)):
     dependencies:
-      '@jest/core': 30.4.2(babel-plugin-macros@3.1.0)(supports-color@10.2.2)(ts-node@10.9.2(@types/node@26.2.0)(typescript@5.8.3))
+      '@jest/core': 30.4.2(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@26.2.0)(typescript@5.8.3))
       '@jest/types': 30.4.1
       import-local: 3.2.0
       jest-cli: 30.4.2(@types/node@26.2.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@26.2.0)(typescript@5.8.3))
@@ -15760,12 +15761,12 @@ snapshots:
     dependencies:
       typescript: 5.8.3
 
-  ts-jest@29.4.12(@babel/core@7.29.7)(@jest/transform@30.4.1)(@jest/types@30.4.1)(babel-jest@30.4.1(@babel/core@7.29.7))(jest-util@30.4.1)(jest@30.4.2(@types/node@26.2.0)(babel-plugin-macros@3.1.0)(supports-color@10.2.2)(ts-node@10.9.2(@types/node@26.2.0)(typescript@5.8.3)))(typescript@5.8.3):
+  ts-jest@29.4.12(@babel/core@7.29.7)(@jest/transform@30.4.1)(@jest/types@30.4.1)(babel-jest@30.4.1(@babel/core@7.29.7))(jest-util@30.4.1)(jest@30.4.2(@types/node@26.2.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@26.2.0)(typescript@5.8.3)))(typescript@5.8.3):
     dependencies:
       bs-logger: 0.2.6
       fast-json-stable-stringify: 2.1.0
       handlebars: 4.7.9
-      jest: 30.4.2(@types/node@26.2.0)(babel-plugin-macros@3.1.0)(supports-color@10.2.2)(ts-node@10.9.2(@types/node@26.2.0)(typescript@5.8.3))
+      jest: 30.4.2(@types/node@26.2.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@26.2.0)(typescript@5.8.3))
       json5: 2.2.3
       lodash.memoize: 4.1.2
       make-error: 1.3.6
@@ -16438,4 +16439,4 @@ snapshots:
 
   zod@3.25.76: {}
 
-  zod@4.4.3: {}
+  zod@4.6.6: {}
